@@ -42,7 +42,7 @@ export default function AttractionsPage() {
     <div className="page attractions-page">
       <div className="page-header">
         <h1>Attractions</h1>
-        <p>Discover the amazing attractions of Zanzibar and Tanzania</p>
+        <p>Discover the amazing attractions of Zanzibar and Tanzania with Infaan tours and travel</p>
       </div>
 
       <div className="filters-bar">

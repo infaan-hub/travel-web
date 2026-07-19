@@ -30,7 +30,7 @@ export default function AdminAnalyticsPage() {
 
   const tourData = stats ? [
     { name: 'Zanzibar', tours: stats.zanzibar_tours || 0 },
-    { name: 'Tanzania', tours: stats.tanzania_tours || 0 },
+    { name: 'Infaan', tours: stats.tanzania_tours || 0 },
   ] : [];
 
   const bookingStatusData = stats ? [

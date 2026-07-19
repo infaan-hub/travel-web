@@ -157,7 +157,7 @@ export default function BookingPage() {
     <div className="page booking-page">
       <div className="page-header">
         <h1>{tour ? `Book: ${tour.title}` : 'Book a Tour'}</h1>
-        <p>Fill in your details below and we'll confirm your reservation</p>
+        <p>Fill in your details below and Infaan tours and travel will confirm your reservation with personalized care</p>
       </div>
 
       {success ? (
@@ -166,8 +166,8 @@ export default function BookingPage() {
           <h2>Booking Submitted Successfully!</h2>
           <p>
             {sendMethod === 'email'
-              ? 'Your booking details have been sent to your email and our team at infaanhameed@gmail.com. We will contact you within 24 hours.'
-              : 'WhatsApp chat has been opened with your booking details. Our team will respond shortly.'}
+              ? 'Your booking details with Infaan tours and travel have been sent to your email and to our team at infaanhameed@gmail.com. We will contact you within 24 hours with confirmation and further instructions for your tour.'
+              : 'WhatsApp chat has been opened with your booking details with Infaan tours and travel. Our team at +255711252758 will respond shortly to help plan your perfect experience.'}
           </p>
           <div className="success-actions">
             <button className="btn btn-primary" onClick={() => navigate('/bookings')}>
@@ -251,13 +251,13 @@ export default function BookingPage() {
                   <input type="radio" name="sendMethod" value="email" checked={sendMethod === 'email'} onChange={() => setSendMethod('email')} />
                   <span className="method-icon"><Mail size={24} /></span>
                   <span className="method-label">Send via Email</span>
-                  <span className="method-desc">Receive full details at your email and infaanhameed@gmail.com</span>
+                  <span className="method-desc">Receive your full booking confirmation from Infaan tours and travel at your email and infaanhameed@gmail.com</span>
                 </label>
                 <label className={`send-method-card ${sendMethod === 'whatsapp' ? 'selected' : ''}`}>
                   <input type="radio" name="sendMethod" value="whatsapp" checked={sendMethod === 'whatsapp'} onChange={() => setSendMethod('whatsapp')} />
                   <span className="method-icon"><MessageSquare size={24} /></span>
                   <span className="method-label">Send via WhatsApp</span>
-                  <span className="method-desc">Open WhatsApp chat with your booking details to +255711252758</span>
+                  <span className="method-desc">Open WhatsApp chat with Infaan tours and travel with your booking details to +255711252758 for quick confirmation</span>
                 </label>
               </div>
 

@@ -71,8 +71,8 @@ export default function LoginPage() {
 
         <div className="auth-banner">
           <div className="auth-banner-content">
-            <h2>Explore Tanzania</h2>
-            <p>From Zanzibar beaches to Serengeti safaris</p>
+            <h2>Explore with Infaan tours and travel</h2>
+            <p>From Zanzibar beaches to Serengeti safaris, discover Africa with expert guidance</p>
             <div className="auth-banner-features">
               <span><Palmtree size={18} /> Zanzibar Tours</span>
               <span><Compass size={18} /> Tanzania Safaris</span>

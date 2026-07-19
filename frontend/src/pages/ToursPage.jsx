@@ -26,10 +26,10 @@ export default function ToursPage() {
 
   const title = !category ? 'All Tours' : category === 'zanzibar' ? 'Zanzibar Tours' : 'Tanzania Safaris';
   const subtitle = !category
-    ? 'Explore all our amazing tour packages'
+    ? 'Explore all our amazing tour packages with Infaan tours and travel'
     : category === 'zanzibar'
       ? 'Discover the paradise islands of Zanzibar'
-      : 'Experience the wild beauty of Tanzania';
+      : 'Experience the wild beauty of Tanzania with Infaan tours and travel';
 
   return (
     <div className="page tours-page">

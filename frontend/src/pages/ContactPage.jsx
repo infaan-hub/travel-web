@@ -23,14 +23,14 @@ export default function ContactPage() {
     <div className="page contact-page">
       <div className="page-header">
         <h1>Contact Us</h1>
-        <p>We'd love to hear from you. Get in touch with our travel experts.</p>
+        <p>We'd love to hear from you. Get in touch with the travel experts at Infaan tours and travel and let us help plan your perfect journey.</p>
       </div>
 
       <div className="contact-content">
         <div className="contact-info">
           <div className="contact-info-card">
             <h3><MapPin size={18} /> Location</h3>
-            <p>Zanzibar, Tanzania<br/>East Africa</p>
+            <p>Infaan tours and travel<br/>Zanzibar, Tanzania<br/>East Africa</p>
           </div>
           <div className="contact-info-card">
             <h3><Phone size={18} /> Phone</h3>

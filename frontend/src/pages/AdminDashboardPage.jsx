@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
           <div className="dashboard-stat-card pending"><span className="stat-icon"><Hourglass size={24} /></span><span className="stat-value">{stats.pending_bookings}</span><span className="stat-label">Pending</span></div>
           <div className="dashboard-stat-card confirmed"><span className="stat-icon"><CheckCircle size={24} /></span><span className="stat-value">{stats.confirmed_bookings}</span><span className="stat-label">Confirmed</span></div>
           <div className="dashboard-stat-card" style={{borderLeft: '4px solid #3498db'}}><span className="stat-icon"><Palmtree size={24} /></span><span className="stat-value">{stats.zanzibar_tours}</span><span className="stat-label">Zanzibar Tours</span></div>
-          <div className="dashboard-stat-card" style={{borderLeft: '4px solid #e67e22'}}><span className="stat-icon"><Compass size={24} /></span><span className="stat-value">{stats.tanzania_tours}</span><span className="stat-label">Tanzania Tours</span></div>
+          <div className="dashboard-stat-card" style={{borderLeft: '4px solid #e67e22'}}><span className="stat-icon"><Compass size={24} /></span><span className="stat-value">{stats.tanzania_tours}</span><span className="stat-label">Infaan Tours</span></div>
         </div>
       )}
 
@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
         {activeTab === 'overview' && (
           <div className="overview-welcome">
             <h2>Welcome to Admin Panel</h2>
-            <p>From here you can manage all tours, bookings, users, and attractions for your Zanzibar & Tanzania travel system.</p>
+            <p>From here you can manage all tours, bookings, users, and attractions for your Infaan tours and travel system.</p>
             <div className="overview-links">
               <a href="http://localhost:8000/admin/" target="_blank" className="btn btn-primary" rel="noreferrer">
                 Django Admin Panel

@@ -14,7 +14,7 @@ export default function TourCard({ tour }) {
           loading="lazy"
         />
         <span className={`tour-category ${tour.category}`}>
-          {tour.category === 'zanzibar' ? 'Zanzibar' : tour.category === 'tanzania' ? 'Tanzania' : 'International'}
+          {tour.category === 'zanzibar' ? 'Zanzibar' : tour.category === 'tanzania' ? 'Tanzania Safari' : 'International'}
         </span>
         {tour.featured && <span className="tour-featured">Featured</span>}
       </div>

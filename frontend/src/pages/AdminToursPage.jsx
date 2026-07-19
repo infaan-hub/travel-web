@@ -282,7 +282,7 @@ export default function AdminToursPage() {
                   <label>Category</label>
                   <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
                     <option value="zanzibar">Zanzibar</option>
-                    <option value="tanzania">Tanzania</option>
+                    <option value="tanzania">Infaan</option>
                     <option value="international">International</option>
                   </select>
                 </div>

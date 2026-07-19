@@ -109,7 +109,7 @@ export default function TourDetailPage() {
         )}
         <div className="tour-detail-overlay">
           <span className={`tour-category ${tour.category}`}>
-            {tour.category === 'zanzibar' ? 'Zanzibar' : tour.category === 'tanzania' ? 'Tanzania' : 'International'}
+            {tour.category === 'zanzibar' ? 'Zanzibar' : tour.category === 'tanzania' ? 'Tanzania Safari' : 'International'}
           </span>
           <h1>{tour.title}</h1>
           <p><MapPin size={16} /> {tour.destination} | <Clock size={16} /> {tour.duration} | ${tour.price}/person</p>

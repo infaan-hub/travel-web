@@ -67,8 +67,8 @@ export default function HomePage() {
       } : {}}>
         <div className="hero-overlay"></div>
         <div className="hero-content">
-          <h1>Discover the Magic of Tanzania</h1>
-          <p>From the pristine beaches of Zanzibar to the wild savannahs of Serengeti</p>
+          <h1>Infaan tours and travel</h1>
+          <p>From the pristine beaches of Zanzibar to the wild savannahs of Serengeti, let us craft your perfect African adventure with expert guides, seamless planning, and personalized service every step of the way</p>
         </div>
       </section>
 
@@ -119,7 +119,7 @@ export default function HomePage() {
             </div>
             <div className="destination-info">
               <h3>Tanzania Safaris</h3>
-              <p>Serengeti, Kilimanjaro, Ngorongoro - Africa's greatest wildlife experiences.</p>
+              <p>Serengeti, Kilimanjaro, Ngorongoro - Africa's greatest wildlife experiences with expert-guided tours and premium service.</p>
               <span className="destination-link">Explore Tanzania Safaris <ArrowRight size={16} className="inline-icon" /></span>
             </div>
           </div>
@@ -170,8 +170,8 @@ export default function HomePage() {
       {reviews.length > 0 && (
         <section className="testimonials-section">
           <div className="section-header">
-            <h2>What Our Travelers Say</h2>
-            <p>Read reviews from our happy travelers</p>
+            <h2>What Our Travelers Say About Infaan tours and travel</h2>
+            <p>Read reviews from our happy travelers who experienced Africa with us</p>
           </div>
           <div className="testimonials-grid">
             {reviews.slice(0, 6).map(review => (
@@ -263,8 +263,8 @@ export default function HomePage() {
 
       <section className="cta-section">
         <div className="cta-content">
-          <h2>Ready for Your African Adventure?</h2>
-          <p>Book your dream tour today and create memories that last a lifetime</p>
+          <h2>Ready for Your African Adventure with Infaan tours and travel?</h2>
+          <p>Book your dream tour today and create memories that last a lifetime. Our travel experts are here to help you plan every detail.</p>
           <button className="btn btn-primary btn-large" onClick={() => navigate('/tours')}>
             Start Planning Your Trip
           </button>

@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { profileAPI } from '../api/axios';
 import {
   Home, Globe, Palmtree, Compass, Map, BarChart3, CalendarDays,
-  ClipboardList, Mail, Lock, Settings, Users, LogOut, Menu, X,
+  ClipboardList, Mail, Lock, Settings, Users, LogOut, Menu,
   UserPlus, BookOpen, TrendingUp, Eye, PlusCircle, LayoutDashboard,
-  Image, Star, MessageSquare
+  Image, Star, MessageSquare, ChevronLeft
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -82,7 +82,7 @@ export default function Sidebar() {
   return (
     <>
       <button className="mobile-menu-btn" onClick={() => { setExpanded(!expanded); setMobileOpen(!mobileOpen); }}>
-        {expanded || mobileOpen ? <X size={20} color="white" /> : <Menu size={20} color="white" />}
+        {expanded || mobileOpen ? <ChevronLeft size={20} color="white" /> : <Menu size={20} color="white" />}
       </button>
 
       <aside className={`sidebar ${expanded ? 'expanded' : ''} ${mobileOpen ? 'mobile-open' : ''}`}
@@ -91,12 +91,12 @@ export default function Sidebar() {
       >
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <Plane size={24} className="logo-plane" />
-            {expanded && <span className="logo-text">Tanzania Travel</span>}
+            <Palmtree size={24} className="logo-plane" />
+            {expanded && <span className="logo-text">Infaan tours and travel</span>}
           </div>
           {expanded && (
             <button className="collapse-btn" onClick={closeAll}>
-              <X size={16} />
+              <ChevronLeft size={16} />
             </button>
           )}
         </div>
@@ -175,10 +175,4 @@ export default function Sidebar() {
   );
 }
 
-function Plane({ size, className }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
-    </svg>
-  );
-}
+
