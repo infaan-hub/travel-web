@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { TrendingUp, Eye, Users, Globe, MousePointerClick } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 
-const COLORS = ['#00D4D8', '#4DEEEA', '#F59E0B', '#EF4444', '#10B981', '#8B5CF6'];
+const COLORS = ['#9D9679', '#B8B297', '#F59E0B', '#EF4444', '#10B981', '#8B5CF6'];
 
 export default function AdminAnalyticsPage() {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -84,8 +84,8 @@ export default function AdminAnalyticsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                 <XAxis dataKey="name" tick={{ fontSize: 13 }} />
                 <YAxis tick={{ fontSize: 13 }} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid rgba(0,212,216,0.2)', background: 'rgba(255,255,255,0.95)' }} />
-                <Bar dataKey="tours" fill="#00D4D8" radius={[6, 6, 0, 0]} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid rgba(157,150,121,0.2)', background: 'rgba(255,255,255,0.95)' }} />
+                <Bar dataKey="tours" fill="#9D9679" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -99,7 +99,7 @@ export default function AdminAnalyticsPage() {
                 <Pie data={bookingStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                   {bookingStatusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
-                <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid rgba(0,212,216,0.2)', background: 'rgba(255,255,255,0.95)' }} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid rgba(157,150,121,0.2)', background: 'rgba(255,255,255,0.95)' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -113,8 +113,8 @@ export default function AdminAnalyticsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                 <XAxis dataKey="page" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 13 }} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid rgba(0,212,216,0.2)', background: 'rgba(255,255,255,0.95)' }} />
-                <Line type="monotone" dataKey="visits" stroke="#00D4D8" strokeWidth={2} dot={{ fill: '#00D4D8', r: 4 }} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid rgba(157,150,121,0.2)', background: 'rgba(255,255,255,0.95)' }} />
+                <Line type="monotone" dataKey="visits" stroke="#9D9679" strokeWidth={2} dot={{ fill: '#9D9679', r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>

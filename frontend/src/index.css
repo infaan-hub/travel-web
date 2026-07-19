@@ -8,24 +8,33 @@
   box-sizing: border-box;
 }
 
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 :root {
   --glass-bg: rgba(255, 255, 255, 0.15);
   --glass-border: 1px solid rgba(255, 255, 255, 0.25);
   --glass-blur: blur(12px);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-  --glass-shadow-hover: 0 12px 40px rgba(0, 212, 216, 0.15);
+  --glass-shadow-hover: 0 12px 40px rgba(157, 150, 121, 0.25);
+
   --glass-radius-sm: 14px;
   --glass-radius: 18px;
   --glass-radius-lg: 24px;
 
-  --aqua: #00D4D8;
-  --aqua-dark: #00B8BC;
-  --aqua-light: #4DEEEA;
-  --aqua-glow: rgba(0, 212, 216, 0.35);
-  --aqua-subtle: rgba(0, 212, 216, 0.08);
-
-  --bg-gradient: linear-gradient(135deg, #EAFDFC 0%, #D8F8F7 50%, #F5FFFF 100%);
-  --bg-solid: #F4FEFE;
+  --aqua: #9D9679;
+  --aqua-dark: #857F66;
+  --aqua-light: #B8B297;
+  --aqua-glow: rgba(157, 150, 121, 0.35);
+  --aqua-subtle: rgba(157, 150, 121, 0.12);
+  --bg-gradient: #ECEBE4;
+  --bg-solid: #ECEBE4;
 
   --text-primary: #1F2937;
   --text-secondary: #6B7280;
@@ -90,17 +99,17 @@ body {
   top: 0;
   bottom: 0;
   width: var(--sidebar-collapsed);
-  background: var(--glass-bg);
+  background: rgba(255, 255, 255, 0.35);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border-right: var(--glass-border);
-  color: var(--text-primary);
+  border-right: 1px solid rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
   display: flex;
   flex-direction: column;
   z-index: 1000;
   transition: var(--transition);
   overflow: hidden;
-  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.04);
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.06);
 }
 
 .sidebar.expanded {
@@ -116,7 +125,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-logo {
@@ -142,9 +151,9 @@ body {
 }
 
 .collapse-btn {
-  background: var(--glass-bg);
-  border: var(--glass-border);
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
   font-size: 16px;
   padding: 6px 10px;
@@ -169,7 +178,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
   transition: var(--transition);
   font-size: 14px;
@@ -179,8 +188,8 @@ body {
 }
 
 .nav-item:hover {
-  background: var(--glass-bg);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--aqua);
   transform: translateX(4px);
 }
 
@@ -188,7 +197,7 @@ body {
   background: var(--aqua-subtle);
   color: var(--aqua);
   font-weight: 600;
-  border: 1px solid rgba(0, 212, 216, 0.15);
+  border: 1px solid rgba(157, 150, 121, 0.15);
 }
 
 .nav-icon {
@@ -203,7 +212,7 @@ body {
 
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-user {
@@ -217,7 +226,7 @@ body {
 }
 
 .sidebar-user:hover {
-  background: var(--glass-bg);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .user-avatar {
@@ -251,12 +260,12 @@ body {
 .user-name {
   font-weight: 600;
   font-size: 14px;
-  color: var(--text-primary);
+  color: #FFFFFF;
 }
 
 .user-email {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -345,7 +354,7 @@ body {
 .login-btn:hover {
   background: var(--aqua-subtle);
   color: var(--aqua);
-  border-color: rgba(0, 212, 216, 0.3);
+  border-color: rgba(157, 150, 121, 0.3);
 }
 
 .register-btn {
@@ -447,7 +456,7 @@ body {
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(0, 212, 216, 0.25) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(77, 238, 234, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(157, 150, 121, 0.25) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(184, 178, 151, 0.15) 100%);
 }
 
 .hero-content {
@@ -566,13 +575,13 @@ body {
   background: linear-gradient(180deg, var(--aqua) 0%, var(--aqua-dark) 100%);
   color: white;
   box-shadow:
-    0 4px 6px rgba(0, 212, 216, 0.25),
+    0 4px 6px rgba(157, 150, 121, 0.25),
     0 1px 3px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(180deg, #00E4E8 0%, var(--aqua) 100%);
+  background: linear-gradient(180deg, #9D9679 0%, var(--aqua) 100%);
   box-shadow:
     0 8px 15px var(--aqua-glow),
     0 3px 6px rgba(0, 0, 0, 0.08),
@@ -580,7 +589,7 @@ body {
 }
 
 .btn-primary:active {
-  background: linear-gradient(180deg, var(--aqua-dark) 0%, #009A9E 100%);
+  background: linear-gradient(180deg, var(--aqua-dark) 0%, #857F66 100%);
   box-shadow:
     0 2px 3px rgba(0, 0, 0, 0.1),
     inset 0 2px 4px rgba(0, 0, 0, 0.15);
@@ -610,7 +619,7 @@ body {
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   color: var(--aqua);
-  border: 2px solid rgba(0, 212, 216, 0.5);
+  border: 2px solid rgba(157, 150, 121, 0.5);
   box-shadow:
     0 4px 6px rgba(0, 0, 0, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -626,7 +635,7 @@ body {
 }
 
 .btn-outline:active {
-  background: linear-gradient(180deg, var(--aqua-dark) 0%, #009A9E 100%);
+  background: linear-gradient(180deg, var(--aqua-dark) 0%, #857F66 100%);
 }
 
 .btn-block {
@@ -693,7 +702,7 @@ body {
 .btn-back:hover {
   background: var(--aqua-subtle);
   color: var(--aqua);
-  border-color: rgba(0, 212, 216, 0.3);
+  border-color: rgba(157, 150, 121, 0.3);
 }
 
 .btn-success {
@@ -753,7 +762,7 @@ body {
 .stat-item:hover {
   transform: translateY(-6px);
   box-shadow: var(--glass-shadow-hover);
-  border-color: rgba(0, 212, 216, 0.3);
+  border-color: rgba(157, 150, 121, 0.3);
 }
 
 .stat-number {
@@ -816,7 +825,7 @@ body {
 .tour-card:hover {
   transform: translateY(-8px);
   box-shadow: var(--glass-shadow-hover);
-  border-color: rgba(0, 212, 216, 0.3);
+  border-color: rgba(157, 150, 121, 0.3);
 }
 
 .tour-card-image {
@@ -851,13 +860,13 @@ body {
 }
 
 .tour-category.zanzibar {
-  background: rgba(0, 212, 216, 0.8);
+  background: rgba(157, 150, 121, 0.8);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .tour-category.tanzania {
-  background: rgba(77, 238, 234, 0.8);
+  background: rgba(184, 178, 151, 0.8);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
@@ -919,6 +928,10 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.tour-destination {
+  color: #9D9679;
 }
 
 .tour-card-footer {
@@ -1049,7 +1062,7 @@ body {
 
 /* ========== CTA SECTION ========== */
 .cta-section {
-  background: linear-gradient(135deg, rgba(0, 212, 216, 0.1), rgba(77, 238, 234, 0.05));
+  background: linear-gradient(135deg, rgba(157, 150, 121, 0.1), rgba(184, 178, 151, 0.05));
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: var(--glass-border);
@@ -1181,7 +1194,7 @@ body {
 .attraction-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--glass-shadow-hover);
-  border-color: rgba(0, 212, 216, 0.3);
+  border-color: rgba(157, 150, 121, 0.3);
 }
 
 .attraction-card-image {
@@ -1561,7 +1574,7 @@ body {
   width: 100%;
   border-radius: var(--glass-radius-lg);
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 212, 216, 0.1);
+  box-shadow: 0 20px 60px rgba(157, 150, 121, 0.1);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -1775,7 +1788,7 @@ body {
 
 .booking-card-item:hover {
   box-shadow: var(--glass-shadow-hover);
-  border-color: rgba(0, 212, 216, 0.3);
+  border-color: rgba(157, 150, 121, 0.3);
 }
 
 .booking-card-image {
@@ -1967,7 +1980,7 @@ body {
   font-size: 1.3rem;
   margin: 24px 0 16px;
   padding-bottom: 8px;
-  border-bottom: 2px solid rgba(0, 212, 216, 0.15);
+  border-bottom: 2px solid rgba(157, 150, 121, 0.15);
 }
 
 .booking-form-detailed h2:first-child {
@@ -2320,7 +2333,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-secondary);
-  border-bottom: 2px solid rgba(0, 212, 216, 0.15);
+  border-bottom: 2px solid rgba(157, 150, 121, 0.15);
   font-weight: 700;
 }
 
@@ -2515,7 +2528,7 @@ body {
 }
 
 .tour-cat-badge.zanzibar {
-  background: rgba(0, 212, 216, 0.12);
+  background: rgba(157, 150, 121, 0.12);
   color: var(--aqua-dark);
 }
 
@@ -3404,7 +3417,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-secondary);
-  border-bottom: 2px solid rgba(0, 212, 216, 0.15);
+  border-bottom: 2px solid rgba(157, 150, 121, 0.15);
   font-weight: 700;
 }
 
@@ -3747,8 +3760,8 @@ body {
   align-items: center;
   gap: 6px;
   padding: 20px;
-  background: linear-gradient(135deg, var(--aqua-subtle), rgba(0, 212, 216, 0.04));
-  border: 1px solid rgba(0, 212, 216, 0.15);
+  background: linear-gradient(135deg, var(--aqua-subtle), rgba(157, 150, 121, 0.04));
+  border: 1px solid rgba(157, 150, 121, 0.15);
   border-radius: var(--glass-radius-sm);
   text-align: center;
 }
@@ -3905,7 +3918,7 @@ body {
   gap: 4px;
   padding: 4px 10px;
   background: var(--aqua-subtle);
-  border: 1px solid rgba(0, 212, 216, 0.2);
+  border: 1px solid rgba(157, 150, 121, 0.2);
   border-radius: 20px;
   font-size: 12px;
   color: var(--aqua-dark);
@@ -3962,8 +3975,8 @@ body {
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid rgba(0, 212, 216, 0.3);
-  box-shadow: 0 8px 25px rgba(0, 212, 216, 0.2);
+  border: 3px solid rgba(157, 150, 121, 0.3);
+  box-shadow: 0 8px 25px rgba(157, 150, 121, 0.2);
 }
 
 .profile-avatar-placeholder {
@@ -4068,6 +4081,33 @@ body {
   background: var(--danger-bg);
   color: var(--danger-text);
   border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* ========== PC SIDEBAR TEXT ========== */
+@media (min-width: 1025px) {
+  .nav-item {
+    color: var(--text-secondary);
+  }
+
+  .nav-item:hover {
+    color: var(--aqua);
+  }
+
+  .user-name {
+    color: var(--text-primary);
+  }
+
+  .user-email {
+    color: var(--text-secondary);
+  }
+
+  .collapse-btn {
+    color: var(--text-secondary);
+  }
+
+  .collapse-btn:hover {
+    color: var(--aqua);
+  }
 }
 
 /* ========== RESPONSIVE PROFILE ========== */
