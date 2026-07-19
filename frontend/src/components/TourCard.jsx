@@ -1,22 +1,41 @@
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 import { Star, Clock, MapPin } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUrl';
 
 export default function TourCard({ tour }) {
   const navigate = useNavigate();
+  const autoplay = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }));
+
+  const images = [
+    getImageUrl(tour.main_image_url || tour.image_url),
+    ...(tour.gallery_image_urls || []).map(url => getImageUrl(url)),
+    ...(tour.image2_url ? [getImageUrl(tour.image2_url)] : []),
+    ...(tour.image3_url ? [getImageUrl(tour.image3_url)] : []),
+  ].filter(Boolean);
+
+  const uniqueImages = [...new Set(images)];
+
+  const [emblaRef] = useEmblaCarousel({ loop: uniqueImages.length > 1 }, [autoplay.current]);
 
   return (
     <div className="tour-card" onClick={() => navigate(`/tour/${tour.id}`)}>
       <div className="tour-card-image">
-        <img
-          src={getImageUrl(tour.main_image_url || tour.image_url) || ''}
-          alt={tour.title}
-          loading="lazy"
-        />
+        <div className="embla" ref={emblaRef}>
+          <div className="embla__container">
+            {uniqueImages.map((img, i) => (
+              <div key={i} className="embla__slide">
+                <img src={img} alt={tour.title} loading="lazy" className="embla__slide__img" />
+              </div>
+            ))}
+          </div>
+        </div>
         <span className={`tour-category ${tour.category}`}>
           {tour.category === 'zanzibar' ? 'Zanzibar' : tour.category === 'tanzania' ? 'Tanzania Safari' : 'International'}
         </span>
-        {tour.featured && <span className="tour-featured">Featured</span>}
+
       </div>
       <div className="tour-card-body">
         <h3>{tour.title}</h3>

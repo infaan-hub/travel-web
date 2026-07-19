@@ -45,7 +45,7 @@ export default function AdminToursPage() {
   const [form, setForm] = useState({
     title: '', description: '', short_description: '',
     price: '', duration: '', location: '', category: 'zanzibar',
-    image: null,
+    image: null, image2: null, image3: null,
   });
   const [includedItems, setIncludedItems] = useState([]);
   const [excludedItems, setExcludedItems] = useState([]);
@@ -53,6 +53,8 @@ export default function AdminToursPage() {
   const [customExclude, setCustomExclude] = useState('');
   const [coords, setCoords] = useState({ lat: '', lng: '' });
   const [imagePreview, setImagePreview] = useState(null);
+  const [image2Preview, setImage2Preview] = useState(null);
+  const [image3Preview, setImage3Preview] = useState(null);
   const [saving, setSaving] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [geoError, setGeoError] = useState('');
@@ -74,13 +76,15 @@ export default function AdminToursPage() {
   };
 
   const resetForm = () => {
-    setForm({ title: '', description: '', short_description: '', price: '', duration: '', location: '', category: 'zanzibar', image: null });
+    setForm({ title: '', description: '', short_description: '', price: '', duration: '', location: '', category: 'zanzibar', image: null, image2: null, image3: null });
     setIncludedItems([]);
     setExcludedItems([]);
     setCustomInclude('');
     setCustomExclude('');
     setCoords({ lat: '', lng: '' });
     setImagePreview(null);
+    setImage2Preview(null);
+    setImage3Preview(null);
     setEditing(null);
     setShowForm(false);
     setGalleryImages([]);
@@ -99,12 +103,14 @@ export default function AdminToursPage() {
       title: tour.title, description: tour.description, short_description: tour.short_description || '',
       price: tour.price, duration: tour.duration,
       location: tour.destination || '', category: tour.category,
-      image: null,
+      image: null, image2: null, image3: null,
     });
     setIncludedItems(parseItems(tour.included_items || tour.includes));
     setExcludedItems(parseItems(tour.excluded_items || tour.excludes));
     setCoords({ lat: tour.destination_lat || '', lng: tour.destination_lng || '' });
     setImagePreview(getImageUrl(tour.image_url) || null);
+    setImage2Preview(getImageUrl(tour.image2_url) || null);
+    setImage3Preview(getImageUrl(tour.image3_url) || null);
     setEditing(tour.id);
     setShowForm(true);
     try {
@@ -137,12 +143,12 @@ export default function AdminToursPage() {
     if (val.length >= 3) debouncedGeo(val);
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = (e, field, setPreview) => {
     const file = e.target.files[0];
     if (!file) return;
-    setForm({ ...form, image: file });
+    setForm(f => ({ ...f, [field]: file }));
     const reader = new FileReader();
-    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.onload = (ev) => setPreview(ev.target.result);
     reader.readAsDataURL(file);
   };
 
@@ -190,6 +196,8 @@ export default function AdminToursPage() {
       if (includedItems.length) formData.append('includes', JSON.stringify(includedItems));
       if (excludedItems.length) formData.append('excludes', JSON.stringify(excludedItems));
       if (form.image instanceof File) formData.append('image', form.image);
+      if (form.image2 instanceof File) formData.append('image2', form.image2);
+      if (form.image3 instanceof File) formData.append('image3', form.image3);
 
       let tourId;
       if (editing) {
@@ -397,10 +405,22 @@ export default function AdminToursPage() {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label>Main Image (Cover)</label>
-                <input type="file" accept=".jpg,.jpeg,.png" onChange={handleImageChange} />
-                {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
+              <div className="form-image-row">
+                <div className="form-group">
+                  <label>Image 1 (Cover)</label>
+                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => handleImageChange(e, 'image', setImagePreview)} />
+                  {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
+                </div>
+                <div className="form-group">
+                  <label>Image 2</label>
+                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => handleImageChange(e, 'image2', setImage2Preview)} />
+                  {image2Preview && <img src={image2Preview} alt="Preview" className="image-preview" />}
+                </div>
+                <div className="form-group">
+                  <label>Image 3</label>
+                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => handleImageChange(e, 'image3', setImage3Preview)} />
+                  {image3Preview && <img src={image3Preview} alt="Preview" className="image-preview" />}
+                </div>
               </div>
 
               <div className="form-group">

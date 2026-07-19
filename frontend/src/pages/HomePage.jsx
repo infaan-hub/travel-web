@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI } from '../api/axios';
 import TourCard from '../components/TourCard';
-import { ArrowRight, Star, MapPin, Clock, User, Send, X } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Send, X } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
 
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
-  const [featuredTours, setFeaturedTours] = useState([]);
   const [allTours, setAllTours] = useState([]);
   const [stats, setStats] = useState({});
   const [homeSettings, setHomeSettings] = useState(null);
@@ -23,13 +22,11 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      toursAPI.getAll({ featured: true }),
       toursAPI.getAll({}),
       homeSettingsAPI.get(),
       reviewsAPI.getAll({ status: 'approved' }),
       attractionsAPI.getAll({}),
-    ]).then(([featuredRes, allRes, homeRes, reviewsRes, attractionsRes]) => {
-      setFeaturedTours(featuredRes.data.results || featuredRes.data);
+    ]).then(([allRes, homeRes, reviewsRes, attractionsRes]) => {
       const all = allRes.data.results || allRes.data;
       setAllTours(all);
       setHomeSettings(homeRes.data);
@@ -72,25 +69,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {!loading && featuredTours.length > 0 && (
-        <section className="featured-section">
-          <div className="section-header">
-            <h2>Featured Tours</h2>
-            <p>Hand-picked experiences for unforgettable memories</p>
-          </div>
-          <div className="tours-grid">
-            {featuredTours.map((tour) => (
-              <TourCard key={tour.id} tour={tour} />
-            ))}
-          </div>
-          <div className="section-footer">
-            <button className="btn btn-outline" onClick={() => navigate('/tours')}>
-              View All Tours
-            </button>
-          </div>
-        </section>
-      )}
-
       <section className="destinations-section">
         <div className="section-header">
           <h2>Choose Your Adventure</h2>
@@ -100,7 +78,7 @@ export default function HomePage() {
           <div className="destination-card zanzibar" onClick={() => navigate('/tours/zanzibar')}>
             <div className="destination-image">
               <img
-                src={getImageUrl(homeSettings?.zanzibar_image_url || featuredTours.find(t => t.category === 'zanzibar')?.image_url) || ''}
+                src={getImageUrl(homeSettings?.zanzibar_image_url || allTours.find(t => t.category === 'zanzibar')?.image_url) || ''}
                 alt="Zanzibar"
               />
             </div>
@@ -113,7 +91,7 @@ export default function HomePage() {
           <div className="destination-card tanzania" onClick={() => navigate('/tours/tanzania')}>
             <div className="destination-image">
               <img
-                src={getImageUrl(homeSettings?.tanzania_image_url || featuredTours.find(t => t.category === 'tanzania')?.image_url) || ''}
+                src={getImageUrl(homeSettings?.tanzania_image_url || allTours.find(t => t.category === 'tanzania')?.image_url) || ''}
                 alt="Tanzania Safari"
               />
             </div>

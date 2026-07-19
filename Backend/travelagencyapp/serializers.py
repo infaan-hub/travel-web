@@ -137,6 +137,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 class TourSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     main_image_url = serializers.SerializerMethodField()
+    image2_url = serializers.SerializerMethodField()
+    image3_url = serializers.SerializerMethodField()
     latitude = serializers.FloatField(source='destination_lat', read_only=True)
     longitude = serializers.FloatField(source='destination_lng', read_only=True)
     gallery_images = TourGalleryImageSerializer(many=True, read_only=True)
@@ -164,6 +166,22 @@ class TourSerializer(serializers.ModelSerializer):
 
     def get_main_image_url(self, obj):
         return self.get_image_url(obj)
+
+    def get_image2_url(self, obj):
+        if obj.image2:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image2.url)
+            return obj.image2.url
+        return None
+
+    def get_image3_url(self, obj):
+        if obj.image3:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image3.url)
+            return obj.image3.url
+        return None
 
     def get_gallery_image_urls(self, obj):
         request = self.context.get('request')
@@ -193,6 +211,8 @@ class TourSerializer(serializers.ModelSerializer):
 class TourListSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     main_image_url = serializers.SerializerMethodField()
+    image2_url = serializers.SerializerMethodField()
+    image3_url = serializers.SerializerMethodField()
     latitude = serializers.FloatField(source='destination_lat', read_only=True)
     longitude = serializers.FloatField(source='destination_lng', read_only=True)
     average_rating = serializers.SerializerMethodField()
@@ -205,7 +225,8 @@ class TourListSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'short_description', 'description', 'price',
                   'duration', 'destination', 'latitude', 'longitude',
                   'destination_lat', 'destination_lng',
-                  'category', 'image_url', 'main_image_url', 'available', 'featured',
+                  'category', 'image_url', 'main_image_url', 'image2_url', 'image3_url',
+                  'available', 'featured',
                   'average_rating', 'review_count', 'included_items', 'excluded_items', 'created_at',
                   'updated_at']
 
@@ -219,6 +240,22 @@ class TourListSerializer(serializers.ModelSerializer):
 
     def get_main_image_url(self, obj):
         return self.get_image_url(obj)
+
+    def get_image2_url(self, obj):
+        if obj.image2:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image2.url)
+            return obj.image2.url
+        return None
+
+    def get_image3_url(self, obj):
+        if obj.image3:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image3.url)
+            return obj.image3.url
+        return None
 
     def get_average_rating(self, obj):
         reviews = obj.reviews.filter(status='approved')
