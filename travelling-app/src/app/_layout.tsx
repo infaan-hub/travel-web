@@ -1,18 +1,38 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { useState } from 'react';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { AuthProvider } from '../store/AuthContext';
+import { FavoritesProvider } from '../store/FavoritesContext';
+import AnimatedSplash from '../components/AnimatedSplash';
+import { View, StyleSheet } from 'react-native';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+export default function RootLayout() {
+  const [showSplash, setShowSplash] = useState(true);
 
-SplashScreen.preventAutoHideAsync();
+  if (showSplash) {
+    return (
+      <View style={styles.splashContainer}>
+        <StatusBar style="light" />
+        <AnimatedSplash onFinish={() => setShowSplash(false)} />
+      </View>
+    );
+  }
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <AuthProvider>
+      <FavoritesProvider>
+        <StatusBar style="auto" />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="login" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="register" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+        </Stack>
+      </FavoritesProvider>
+    </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  splashContainer: { flex: 1 },
+});
