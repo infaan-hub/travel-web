@@ -6,7 +6,7 @@ import {
   Home, Globe, Palmtree, Compass, Map, BarChart3, CalendarDays,
   ClipboardList, Mail, Lock, Settings, Users, LogOut, Menu,
   UserPlus, BookOpen, TrendingUp, Eye, PlusCircle, LayoutDashboard,
-  Image, Star, MessageSquare, ChevronLeft
+  Image, Star, MessageSquare, ChevronLeft, Truck, Briefcase
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -53,6 +53,8 @@ export default function Sidebar() {
     { to: '/admin/reviews', label: 'Reviews', icon: Star },
     { to: '/admin/tips', label: 'Tips', icon: BookOpen },
     { to: '/admin/analytics', label: 'Analytics', icon: TrendingUp },
+    { to: '/admin/travel', label: 'Manage Travel', icon: Truck },
+    { to: '/admin/work-space', label: 'Workspace', icon: Briefcase },
     { to: '/admin/messages', label: 'Messages', icon: MessageSquare },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ];

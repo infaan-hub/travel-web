@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass } from 'lucide-react';
+import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass, Briefcase } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, isAuthenticated, isAdmin } = useAuth();
@@ -55,6 +55,11 @@ export default function AdminDashboardPage() {
           <div className="dashboard-stat-card confirmed"><span className="stat-icon"><CheckCircle size={24} /></span><span className="stat-value">{stats.confirmed_bookings}</span><span className="stat-label">Confirmed</span></div>
           <div className="dashboard-stat-card" style={{borderLeft: '4px solid #3498db'}}><span className="stat-icon"><Palmtree size={24} /></span><span className="stat-value">{stats.zanzibar_tours}</span><span className="stat-label">Zanzibar Tours</span></div>
           <div className="dashboard-stat-card" style={{borderLeft: '4px solid #e67e22'}}><span className="stat-icon"><Compass size={24} /></span><span className="stat-value">{stats.tanzania_tours}</span><span className="stat-label">Infaan Tours</span></div>
+          <div className="dashboard-stat-card action" onClick={() => navigate('/view-workspace')} style={{borderLeft: '4px solid #9D9679', cursor: 'pointer'}}>
+            <span className="stat-icon"><Briefcase size={24} /></span>
+            <span className="stat-value">{stats.total_workspaces || 0}</span>
+            <span className="stat-label">Workspaces <small style={{opacity:0.6}}>View all</small></span>
+          </div>
         </div>
       )}
 
@@ -78,6 +83,9 @@ export default function AdminDashboardPage() {
               </button>
               <button className="btn btn-outline" onClick={() => navigate('/attractions')}>
                 View Attractions
+              </button>
+              <button className="btn btn-primary" onClick={() => navigate('/view-workspace')}>
+                <Briefcase size={16} /> View Workspaces
               </button>
             </div>
           </div>

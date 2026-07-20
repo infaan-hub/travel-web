@@ -149,3 +149,60 @@ export const analyticsAPI = {
 export const routeAPI = {
   calculate: (data) => api.post('/route/calculate/', data),
 };
+
+export const travelDriversAPI = {
+  getAll: () => api.get('/travel-drivers/'),
+  getById: (id) => api.get(`/travel-drivers/${id}/`),
+  create: (data) => api.post('/travel-drivers/', data, formDataConfig(data)),
+  update: (id, data) => api.patch(`/travel-drivers/${id}/`, data, formDataConfig(data)),
+  delete: (id) => api.delete(`/travel-drivers/${id}/`),
+};
+
+export const travelVehiclesAPI = {
+  getAll: () => api.get('/travel-vehicles/'),
+  getById: (id) => api.get(`/travel-vehicles/${id}/`),
+  create: (data) => api.post('/travel-vehicles/', data, formDataConfig(data)),
+  update: (id, data) => api.patch(`/travel-vehicles/${id}/`, data, formDataConfig(data)),
+  delete: (id) => api.delete(`/travel-vehicles/${id}/`),
+};
+
+export const workspacesAPI = {
+  getAll: () => api.get('/workspaces/'),
+  getById: (id) => api.get(`/workspaces/${id}/`),
+  create: (data) => api.post('/workspaces/', data),
+  update: (id, data) => api.patch(`/workspaces/${id}/`, data),
+  delete: (id) => api.delete(`/workspaces/${id}/`),
+  addTour: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/tours/`, data),
+  removeTour: (workspaceId, tourId) => api.delete(`/workspaces/${workspaceId}/tours/${tourId}/`),
+  addTravel: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/travel/`, data),
+  removeTravel: (workspaceId, travelId) => api.delete(`/workspaces/${workspaceId}/travel/${travelId}/`),
+  addHotel: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/hotels/`, data),
+  removeHotel: (workspaceId, hotelId) => api.delete(`/workspaces/${workspaceId}/hotels/${hotelId}/`),
+  addRoom: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/rooms/`, data),
+  removeRoom: (workspaceId, roomId) => api.delete(`/workspaces/${workspaceId}/rooms/${roomId}/`),
+  completeTask: (workspaceId, taskId) => api.patch(`/workspaces/${workspaceId}/tasks/${taskId}/`, { completed: true }),
+  uncompleteTask: (workspaceId, taskId) => api.patch(`/workspaces/${workspaceId}/tasks/${taskId}/`, { completed: false }),
+  submitPricing: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/pricing/`, data),
+  approve: (workspaceId) => api.patch(`/workspaces/${workspaceId}/`, { status: 'approved' }),
+};
+
+export const roomsAPI = {
+  getAll: (params) => api.get('/rooms/', { params }),
+  getById: (id) => api.get(`/rooms/${id}/`),
+  create: (data) => api.post('/rooms/', data),
+  update: (id, data) => api.patch(`/rooms/${id}/`, data),
+  delete: (id) => api.delete(`/rooms/${id}/`),
+};
+
+export const hotelsAPI = {
+  getAll: (params) => api.get('/hotels/', { params }),
+  getById: (id) => api.get(`/hotels/${id}/`),
+  create: (data) => api.post('/hotels/', data, formDataConfig(data)),
+  update: (id, data) => api.patch(`/hotels/${id}/`, data, formDataConfig(data)),
+  delete: (id) => api.delete(`/hotels/${id}/`),
+};
+
+export const workspaceTasksAPI = {
+  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/tasks/`),
+  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/tasks/`, data),
+};

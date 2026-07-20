@@ -176,6 +176,88 @@ class HomeSetting(models.Model):
     def __str__(self):
         return "Home Page Settings"
 
+class TravelDriver(models.Model):
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=20)
+    image = models.ImageField(upload_to='drivers/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.phone}"
+
+
+class TravelVehicle(models.Model):
+    car_name = models.CharField(max_length=200)
+    plate_number = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.car_name} ({self.plate_number})"
+
+
+class Hotel(models.Model):
+    name = models.CharField(max_length=200)
+    location = models.CharField(max_length=300)
+    phone = models.CharField(max_length=20, blank=True, default='')
+    image = models.ImageField(upload_to='hotels/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Room(models.Model):
+    hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='rooms')
+    name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.hotel.name}"
+
+
+class Workspace(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('approved', 'Approved'),
+        ('completed', 'Completed'),
+    ]
+    tourist = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workspaces', null=True, blank=True)
+    tourist_name = models.CharField(max_length=200, blank=True, default='')
+    tourist_email = models.EmailField(blank=True, default='')
+    selected_tours = models.ManyToManyField(Tour, blank=True)
+    selected_hotel = models.ForeignKey(Hotel, on_delete=models.SET_NULL, null=True, blank=True)
+    selected_rooms = models.ManyToManyField(Room, blank=True)
+    selected_travel_driver = models.ForeignKey(TravelDriver, on_delete=models.SET_NULL, null=True, blank=True)
+    selected_travel_vehicle = models.ForeignKey(TravelVehicle, on_delete=models.SET_NULL, null=True, blank=True)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(blank=True, default='')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    message_sent = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Workspace - {self.tourist_name or self.tourist} ({self.status})"
+
+
+class WorkspaceTask(models.Model):
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='tasks')
+    day = models.IntegerField()
+    title = models.CharField(max_length=300)
+    description = models.TextField(blank=True, default='')
+    completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['day']
+
+    def __str__(self):
+        return f"Day {self.day}: {self.title}"
+
+
 class VisitorTracking(models.Model):
     session_id = models.CharField(max_length=100)
     page_url = models.CharField(max_length=500)

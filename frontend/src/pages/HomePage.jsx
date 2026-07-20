@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI } from '../api/axios';
 import TourCard from '../components/TourCard';
 import { ArrowRight, Star, MapPin, Send, X } from 'lucide-react';
+import CountUp from '../components/CountUp';
 import { getImageUrl } from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
 
@@ -188,19 +189,31 @@ export default function HomePage() {
 
       <section className="stats-section">
         <div className="stat-item">
-          <span className="stat-number">{stats.total || '50+'}</span>
+          {stats.total !== undefined ? (
+            <CountUp from={0} to={stats.total} separator="" duration={2} className="stat-number" />
+          ) : (
+            <span className="stat-number">50+</span>
+          )}
           <span className="stat-label">Amazing Tours</span>
         </div>
         <div className="stat-item">
-          <span className="stat-number">{stats.zanzibar || '15+'}</span>
+          {stats.zanzibar !== undefined ? (
+            <CountUp from={0} to={stats.zanzibar} separator="" duration={2} className="stat-number" />
+          ) : (
+            <span className="stat-number">15+</span>
+          )}
           <span className="stat-label">Zanzibar Tours</span>
         </div>
         <div className="stat-item">
-          <span className="stat-number">{stats.tanzania || '20+'}</span>
+          {stats.tanzania !== undefined ? (
+            <CountUp from={0} to={stats.tanzania} separator="" duration={2} className="stat-number" />
+          ) : (
+            <span className="stat-number">20+</span>
+          )}
           <span className="stat-label">Tanzania Safaris</span>
         </div>
         <div className="stat-item">
-          <span className="stat-number">1000+</span>
+          <CountUp from={0} to={1000} separator="" duration={2} className="stat-number" />
           <span className="stat-label">Happy Travelers</span>
         </div>
       </section>

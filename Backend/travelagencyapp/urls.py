@@ -41,4 +41,29 @@ urlpatterns = [
     path('analytics/', views.AnalyticsView.as_view(), name='analytics'),
     path('send-whatsapp/', views.SendBookingWhatsAppView.as_view(), name='send-whatsapp'),
     path('send-email/', views.SendBookingEmailView.as_view(), name='send-email'),
+    # ─── Travel ────────────────────────────────────────────────────────
+    path('travel-drivers/', views.TravelDriverListCreateView.as_view(), name='travel-driver-list'),
+    path('travel-drivers/<int:pk>/', views.TravelDriverDetailView.as_view(), name='travel-driver-detail'),
+    path('travel-vehicles/', views.TravelVehicleListCreateView.as_view(), name='travel-vehicle-list'),
+    path('travel-vehicles/<int:pk>/', views.TravelVehicleDetailView.as_view(), name='travel-vehicle-detail'),
+    # ─── Hotels ────────────────────────────────────────────────────────
+    path('hotels/', views.HotelListCreateView.as_view(), name='hotel-list'),
+    path('hotels/<int:pk>/', views.HotelDetailView.as_view(), name='hotel-detail'),
+    # ─── Rooms ─────────────────────────────────────────────────────────
+    path('rooms/', views.RoomListCreateView.as_view(), name='room-list'),
+    path('rooms/<int:pk>/', views.RoomDetailView.as_view(), name='room-detail'),
+    # ─── Workspaces ────────────────────────────────────────────────────
+    path('workspaces/', views.WorkspaceListCreateView.as_view(), name='workspace-list'),
+    path('workspaces/<int:pk>/', views.WorkspaceDetailView.as_view(), name='workspace-detail'),
+    path('workspaces/<int:pk>/tours/', views.WorkspaceAddTourView.as_view(), name='workspace-add-tour'),
+    path('workspaces/<int:pk>/tours/<int:tour_id>/', views.WorkspaceAddTourView.as_view(), name='workspace-remove-tour'),
+    path('workspaces/<int:pk>/hotels/', views.WorkspaceAddHotelView.as_view(), name='workspace-add-hotel'),
+    path('workspaces/<int:pk>/rooms/', views.WorkspaceAddRoomView.as_view(), name='workspace-add-room'),
+    path('workspaces/<int:pk>/rooms/<int:room_id>/', views.WorkspaceAddRoomView.as_view(), name='workspace-remove-room'),
+    path('workspaces/<int:pk>/travel/', views.WorkspaceAddTravelView.as_view(), name='workspace-add-travel'),
+    path('workspaces/<int:pk>/travel/<str:type>/', views.WorkspaceAddTravelView.as_view(), name='workspace-remove-travel'),
+    path('workspaces/<int:pk>/pricing/', views.WorkspacePricingView.as_view(), name='workspace-pricing'),
+    # ─── Workspace Tasks ───────────────────────────────────────────────
+    path('workspaces/<int:workspace_pk>/tasks/', views.WorkspaceTaskListCreateView.as_view(), name='workspace-task-list'),
+    path('workspaces/<int:workspace_pk>/tasks/<int:pk>/', views.WorkspaceTaskDetailView.as_view(), name='workspace-task-detail'),
 ]

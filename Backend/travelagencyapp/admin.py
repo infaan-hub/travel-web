@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (Tour, Booking, ContactMessage, Attraction, Review,
                      ItineraryItem, TravelTip, VisitorTracking, HomeSetting,
-                     TourGalleryImage)
+                     TourGalleryImage, TravelDriver, TravelVehicle, Hotel,
+                     Room, Workspace, WorkspaceTask)
 
 
 class ItineraryItemInline(admin.TabularInline):
@@ -75,3 +76,48 @@ class VisitorTrackingAdmin(admin.ModelAdmin):
     list_display = ['session_id', 'page_url', 'is_authenticated', 'created_at']
     list_filter = ['is_authenticated', 'created_at']
     search_fields = ['session_id', 'page_url']
+
+
+@admin.register(TravelDriver)
+class TravelDriverAdmin(admin.ModelAdmin):
+    list_display = ['name', 'phone', 'created_at']
+    search_fields = ['name', 'phone']
+
+
+@admin.register(TravelVehicle)
+class TravelVehicleAdmin(admin.ModelAdmin):
+    list_display = ['car_name', 'plate_number', 'created_at']
+    search_fields = ['car_name', 'plate_number']
+
+
+@admin.register(Hotel)
+class HotelAdmin(admin.ModelAdmin):
+    list_display = ['name', 'location', 'phone', 'created_at']
+    search_fields = ['name', 'location']
+
+
+@admin.register(Room)
+class RoomAdmin(admin.ModelAdmin):
+    list_display = ['name', 'hotel', 'price', 'created_at']
+    list_filter = ['hotel']
+    search_fields = ['name']
+
+
+class WorkspaceTaskInline(admin.TabularInline):
+    model = WorkspaceTask
+    extra = 1
+
+
+@admin.register(Workspace)
+class WorkspaceAdmin(admin.ModelAdmin):
+    list_display = ['tourist_name', 'tourist_email', 'status', 'total_price', 'message_sent', 'created_at']
+    list_filter = ['status', 'message_sent']
+    search_fields = ['tourist_name', 'tourist_email']
+    inlines = [WorkspaceTaskInline]
+
+
+@admin.register(WorkspaceTask)
+class WorkspaceTaskAdmin(admin.ModelAdmin):
+    list_display = ['workspace', 'day', 'title', 'completed', 'created_at']
+    list_filter = ['completed', 'day']
+    search_fields = ['title']

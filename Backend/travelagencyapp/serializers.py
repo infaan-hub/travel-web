@@ -4,7 +4,8 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (Tour, Booking, ContactMessage, Attraction, Review,
                      ItineraryItem, TravelTip, VisitorTracking, HomeSetting,
-                     TourGalleryImage, Profile)
+                     TourGalleryImage, Profile, TravelDriver, TravelVehicle,
+                     Hotel, Room, Workspace, WorkspaceTask)
 
 
 class ItemsListField(serializers.Field):
@@ -400,3 +401,94 @@ class VisitorTrackingSerializer(serializers.ModelSerializer):
         model = VisitorTracking
         fields = '__all__'
         read_only_fields = ['created_at']
+
+
+class TravelDriverSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TravelDriver
+        fields = '__all__'
+        read_only_fields = ['created_at']
+
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class TravelVehicleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TravelVehicle
+        fields = '__all__'
+        read_only_fields = ['created_at']
+
+
+class RoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = '__all__'
+        read_only_fields = ['created_at']
+
+
+class HotelSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    rooms = RoomSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Hotel
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class WorkspaceTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkspaceTask
+        fields = '__all__'
+        read_only_fields = ['created_at']
+
+
+class WorkspaceSerializer(serializers.ModelSerializer):
+    tourist_name_display = serializers.SerializerMethodField()
+    tourist_email_display = serializers.SerializerMethodField()
+    hotel_name = serializers.SerializerMethodField()
+    driver_name = serializers.SerializerMethodField()
+    vehicle_name = serializers.SerializerMethodField()
+    tasks = WorkspaceTaskSerializer(many=True, read_only=True)
+    selected_tours_details = serializers.SerializerMethodField()
+    selected_rooms_details = RoomSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Workspace
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+    def get_tourist_name_display(self, obj):
+        return obj.tourist_name or (obj.tourist.username if obj.tourist else '')
+
+    def get_tourist_email_display(self, obj):
+        return obj.tourist_email or (obj.tourist.email if obj.tourist else '')
+
+    def get_hotel_name(self, obj):
+        return obj.selected_hotel.name if obj.selected_hotel else None
+
+    def get_driver_name(self, obj):
+        return obj.selected_travel_driver.name if obj.selected_travel_driver else None
+
+    def get_vehicle_name(self, obj):
+        return f"{obj.selected_travel_vehicle.car_name} ({obj.selected_travel_vehicle.plate_number})" if obj.selected_travel_vehicle else None
+
+    def get_selected_tours_details(self, obj):
+        tours = obj.selected_tours.all()
+        return TourListSerializer(tours, many=True, context=self.context).data

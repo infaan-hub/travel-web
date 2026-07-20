@@ -40,6 +40,26 @@ type RootStackParamList = {
   Admin: undefined;
   TourDetail: { id: number };
   Booking: { tourId?: number };
+  Attractions: undefined;
+  Contact: undefined;
+  Trips: undefined;
+  AdminLogin: undefined;
+  AdminRegister: undefined;
+  AdminDashboard: undefined;
+  AdminCustomers: undefined;
+  AdminTours: undefined;
+  AdminTrips: undefined;
+  AdminBookings: undefined;
+  AdminAnalytics: undefined;
+  AdminSettings: undefined;
+  AdminHomeEditor: undefined;
+  AdminReviews: undefined;
+  AdminAttractions: undefined;
+  AdminTips: undefined;
+  AdminMessages: undefined;
+  Login: undefined;
+  Register: undefined;
+  Tours: { category?: string } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

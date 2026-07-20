@@ -73,12 +73,12 @@ export default function AdminReviewsPage() {
       </div>
 
       {stats && (
-        <div className="stats-grid reviews-stats">
-          <div className="stat-card"><span className="stat-number">{stats.total}</span><span className="stat-label">Total</span></div>
-          <div className="stat-card"><span className="stat-number">{stats.approved}</span><span className="stat-label">Approved</span></div>
-          <div className="stat-card"><span className="stat-number">{stats.pending}</span><span className="stat-label">Pending</span></div>
-          <div className="stat-card"><span className="stat-number">{stats.deleted}</span><span className="stat-label">Deleted</span></div>
-          <div className="stat-card"><span className="stat-number">{stats.average_rating?.toFixed(1) || 'N/A'}</span><span className="stat-label">Avg Rating</span></div>
+        <div className="admin-reviews-stats">
+          <div className="stat-card"><span className="stat-value">{stats.total}</span><span className="stat-label">Total</span></div>
+          <div className="stat-card"><span className="stat-value">{stats.approved}</span><span className="stat-label">Approved</span></div>
+          <div className="stat-card"><span className="stat-value">{stats.pending}</span><span className="stat-label">Pending</span></div>
+          <div className="stat-card"><span className="stat-value">{stats.deleted}</span><span className="stat-label">Deleted</span></div>
+          <div className="stat-card"><span className="stat-value">{stats.average_rating?.toFixed(1) || 'N/A'}</span><span className="stat-label">Avg Rating</span></div>
         </div>
       )}
 

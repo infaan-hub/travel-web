@@ -15,13 +15,17 @@ from django.utils import timezone
 from datetime import timedelta, datetime
 from .models import (Tour, Booking, ContactMessage, Attraction, Review,
                      TravelTip, VisitorTracking, HomeSetting, TourGalleryImage,
-                     Profile)
+                     Profile, TravelDriver, TravelVehicle, Hotel, Room,
+                     Workspace, WorkspaceTask)
 from .serializers import (
     UserSerializer, UserDetailSerializer, TourSerializer,
     TourListSerializer, BookingSerializer, ContactSerializer,
     AttractionSerializer, ReviewSerializer, TravelTipSerializer,
     VisitorTrackingSerializer, HomeSettingSerializer,
-    TourGalleryImageSerializer, ProfileSerializer
+    TourGalleryImageSerializer, ProfileSerializer,
+    TravelDriverSerializer, TravelVehicleSerializer,
+    HotelSerializer, RoomSerializer, WorkspaceSerializer,
+    WorkspaceTaskSerializer
 )
 
 
@@ -698,6 +702,221 @@ class SendBookingWhatsAppView(APIView):
         whatsapp_number = data.get('whatsapp_number', '255711252758')
         whatsapp_url = f"https://wa.me/{whatsapp_number}?text={message}"
         return Response({'whatsapp_url': whatsapp_url, 'message': 'WhatsApp link generated successfully'}, status=status.HTTP_200_OK)
+
+
+class SendBookingEmailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+# ─── TRAVEL DRIVERS ────────────────────────────────────────────────
+
+class TravelDriverListCreateView(generics.ListCreateAPIView):
+    queryset = TravelDriver.objects.all().order_by('-created_at')
+    serializer_class = TravelDriverSerializer
+    permission_classes = [permissions.IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+
+class TravelDriverDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TravelDriver.objects.all()
+    serializer_class = TravelDriverSerializer
+    permission_classes = [permissions.IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+
+# ─── TRAVEL VEHICLES ───────────────────────────────────────────────
+
+class TravelVehicleListCreateView(generics.ListCreateAPIView):
+    queryset = TravelVehicle.objects.all().order_by('-created_at')
+    serializer_class = TravelVehicleSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+
+class TravelVehicleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TravelVehicle.objects.all()
+    serializer_class = TravelVehicleSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+
+# ─── HOTELS ────────────────────────────────────────────────────────
+
+class HotelListCreateView(generics.ListCreateAPIView):
+    queryset = Hotel.objects.all().order_by('-created_at')
+    serializer_class = HotelSerializer
+    permission_classes = [permissions.IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+
+class HotelDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Hotel.objects.all()
+    serializer_class = HotelSerializer
+    permission_classes = [permissions.IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+
+# ─── ROOMS ─────────────────────────────────────────────────────────
+
+class RoomListCreateView(generics.ListCreateAPIView):
+    queryset = Room.objects.all().order_by('-created_at')
+    serializer_class = RoomSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+
+class RoomDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+
+# ─── WORKSPACES ────────────────────────────────────────────────────
+
+class WorkspaceListCreateView(generics.ListCreateAPIView):
+    queryset = Workspace.objects.all().order_by('-created_at')
+    serializer_class = WorkspaceSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def perform_create(self, serializer):
+        workspace = serializer.save()
+        selected_tour_ids = self.request.data.get('selected_tours', [])
+        if selected_tour_ids:
+            tours = Tour.objects.filter(id__in=selected_tour_ids)
+            workspace.selected_tours.set(tours)
+        selected_room_ids = self.request.data.get('selected_rooms', [])
+        if selected_room_ids:
+            room_ids = [r.get('id') if isinstance(r, dict) else r for r in selected_room_ids]
+            rooms = Room.objects.filter(id__in=room_ids)
+            workspace.selected_rooms.set(rooms)
+
+
+class WorkspaceDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Workspace.objects.all()
+    serializer_class = WorkspaceSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def perform_update(self, serializer):
+        workspace = serializer.save()
+        selected_tour_ids = self.request.data.get('selected_tours', [])
+        if selected_tour_ids is not None:
+            if isinstance(selected_tour_ids, list):
+                tours = Tour.objects.filter(id__in=selected_tour_ids)
+                workspace.selected_tours.set(tours)
+        selected_room_ids = self.request.data.get('selected_rooms', [])
+        if selected_room_ids is not None:
+            if isinstance(selected_room_ids, list):
+                room_ids = [r.get('id') if isinstance(r, dict) else r for r in selected_room_ids]
+                rooms = Room.objects.filter(id__in=room_ids)
+                workspace.selected_rooms.set(rooms)
+
+
+class WorkspaceAddTourView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        workspace = get_object_or_404(Workspace, pk=pk)
+        tour_id = request.data.get('tour_id')
+        if not tour_id:
+            return Response({'error': 'tour_id is required'}, status=400)
+        tour = get_object_or_404(Tour, pk=tour_id)
+        workspace.selected_tours.add(tour)
+        return Response(WorkspaceSerializer(workspace, context={'request': request}).data)
+
+    def delete(self, request, pk, tour_id):
+        workspace = get_object_or_404(Workspace, pk=pk)
+        tour = get_object_or_404(Tour, pk=tour_id)
+        workspace.selected_tours.remove(tour)
+        return Response(WorkspaceSerializer(workspace, context={'request': request}).data)
+
+
+class WorkspaceAddHotelView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        workspace = get_object_or_404(Workspace, pk=pk)
+        hotel_id = request.data.get('hotel_id')
+        if not hotel_id:
+            return Response({'error': 'hotel_id is required'}, status=400)
+        hotel = get_object_or_404(Hotel, pk=hotel_id)
+        workspace.selected_hotel = hotel
+        workspace.save()
+        return Response(WorkspaceSerializer(workspace, context={'request': request}).data)
+
+
+class WorkspaceAddRoomView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        workspace = get_object_or_404(Workspace, pk=pk)
+        room_id = request.data.get('room_id')
+        if not room_id:
+            return Response({'error': 'room_id is required'}, status=400)
+        room = get_object_or_404(Room, pk=room_id)
+        workspace.selected_rooms.add(room)
+        return Response(WorkspaceSerializer(workspace, context={'request': request}).data)
+
+    def delete(self, request, pk, room_id):
+        workspace = get_object_or_404(Workspace, pk=pk)
+        room = get_object_or_404(Room, pk=room_id)
+        workspace.selected_rooms.remove(room)
+        return Response(WorkspaceSerializer(workspace, context={'request': request}).data)
+
+
+class WorkspaceAddTravelView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        workspace = get_object_or_404(Workspace, pk=pk)
+        driver_id = request.data.get('driver_id')
+        vehicle_id = request.data.get('vehicle_id')
+        if driver_id:
+            workspace.selected_travel_driver = get_object_or_404(TravelDriver, pk=driver_id)
+        if vehicle_id:
+            workspace.selected_travel_vehicle = get_object_or_404(TravelVehicle, pk=vehicle_id)
+        workspace.save()
+        return Response(WorkspaceSerializer(workspace, context={'request': request}).data)
+
+    def delete(self, request, pk, type):
+        workspace = get_object_or_404(Workspace, pk=pk)
+        if type == 'driver':
+            workspace.selected_travel_driver = None
+        elif type == 'vehicle':
+            workspace.selected_travel_vehicle = None
+        workspace.save()
+        return Response(WorkspaceSerializer(workspace, context={'request': request}).data)
+
+
+class WorkspacePricingView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        workspace = get_object_or_404(Workspace, pk=pk)
+        total_price = request.data.get('total_price')
+        if total_price is not None:
+            workspace.total_price = total_price
+        workspace.message_sent = request.data.get('message_sent', workspace.message_sent)
+        workspace.status = request.data.get('status', workspace.status)
+        workspace.save()
+        return Response(WorkspaceSerializer(workspace, context={'request': request}).data)
+
+
+# ─── WORKSPACE TASKS ───────────────────────────────────────────────
+
+class WorkspaceTaskListCreateView(generics.ListCreateAPIView):
+    serializer_class = WorkspaceTaskSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        return WorkspaceTask.objects.filter(workspace_id=self.kwargs['workspace_pk'])
+
+    def perform_create(self, serializer):
+        workspace = get_object_or_404(Workspace, pk=self.kwargs['workspace_pk'])
+        serializer.save(workspace=workspace)
+
+
+class WorkspaceTaskDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = WorkspaceTaskSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        return WorkspaceTask.objects.filter(workspace_id=self.kwargs['workspace_pk'])
 
 
 class SendBookingEmailView(APIView):
