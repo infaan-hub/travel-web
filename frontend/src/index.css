@@ -8,6 +8,41 @@
   box-sizing: border-box;
 }
 
+/* ========== HIGH QUALITY IMAGES ========== */
+img {
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+  -ms-interpolation-mode: nearest-neighbor;
+  color: transparent;
+  max-width: 100%;
+  height: auto;
+}
+
+img[loading="lazy"] {
+  transition: opacity 0.3s ease;
+}
+
+img[src*="media/"],
+img[src*="http"],
+img[src*="https"] {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.hero-section {
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.nav-svg-icon {
+  flex-shrink: 0;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }
