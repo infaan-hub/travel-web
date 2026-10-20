@@ -16,7 +16,7 @@ type Attraction = {
 
 export default function AttractionCard({ attraction }: { attraction: Attraction }) {
   return (
-    <div className="attraction-card">
+    <div className="attraction-card glass-card">
       <div className="attraction-card-image">
         <Image
           src={getImageUrl(attraction.image_url) || ""}

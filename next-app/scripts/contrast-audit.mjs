@@ -1,9 +1,10 @@
 /**
  * Runtime WCAG 2.1 AA contrast audit.
  *
- * Walks the rendered pages, resolves the effective background of every text
- * node (compositing translucent layers and using the first gradient stop)
- * and reports pairs below 4.5:1 for normal text and 3:1 for large text.
+ * Builds the real paint stack for every text node: each ancestor contributes
+ * either a solid colour or a gradient layer, translucent layers are composited
+ * in paint order, and every gradient stop is evaluated so the worst case is
+ * reported.
  *
  * Usage: node scripts/contrast-audit.mjs
  */
@@ -43,12 +44,14 @@ const audit = () => {
     const parts = match[1].split(",").map((part) => parseFloat(part.trim()));
     return { r: parts[0], g: parts[1], b: parts[2], a: parts.length > 3 ? parts[3] : 1 };
   };
+
   const over = (fg, bg) => ({
     r: fg.r * fg.a + bg.r * (1 - fg.a),
     g: fg.g * fg.a + bg.g * (1 - fg.a),
     b: fg.b * fg.a + bg.b * (1 - fg.a),
     a: 1,
   });
+
   const luminance = ({ r, g, b }) => {
     const channel = (value) => {
       const scaled = value / 255;
@@ -56,61 +59,79 @@ const audit = () => {
     };
     return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
   };
+
   const ratio = (a, b) => {
     const l1 = luminance(a);
     const l2 = luminance(b);
     return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
   };
 
-  const gradientStops = (image) => {
-    const stops = image.match(/rgba?\([^)]+\)|#[0-9a-f]{3,6}/gi) || [];
-    return stops.map((stop) => parse(stop)).filter(Boolean);
+  const splitLayers = (image) => {
+    // Split on top level commas only (not inside parentheses).
+    const layers = [];
+    let depth = 0;
+    let current = "";
+    for (const character of image) {
+      if (character === "(") depth += 1;
+      if (character === ")") depth -= 1;
+      if (character === "," && depth === 0) {
+        layers.push(current);
+        current = "";
+      } else {
+        current += character;
+      }
+    }
+    if (current.trim()) layers.push(current);
+    return layers;
   };
 
-  const effectiveBackground = (element, skipOwnGradient = false) => {
+  const stopsOf = (layer) => {
+    const stops = layer.match(/rgba?\([^)]+\)|#[0-9a-f]{3,6}/gi) || [];
+    // Fully transparent stops do not paint anything.
+    return stops
+      .map((stop) => parse(stop))
+      .filter((colour) => colour && colour.a > 0);
+  };
+
+  const isTransparent = (colour) => !colour || colour.a === 0;
+
+  /**
+   * Collects the background layers behind an element, bottom (deepest
+   * ancestor) first.
+   */
+  const paintStack = (element) => {
+    const nodes = [];
     let node = element;
-    const layers = [];
-    let imageBackground = false;
-    let first = true;
     while (node && node.nodeType === 1) {
-      const style = getComputedStyle(node);
-      const image = style.backgroundImage;
-      if (image && image !== "none" && !(first && skipOwnGradient)) {
-        if (/url\(/.test(image)) {
-          imageBackground = true;
-          break;
-        }
-        const stops = image.match(/rgba?\([^)]+\)|#[0-9a-f]{3,6}/gi) || [];
-        // The darkest stop is the worst case for light text on a scrim.
-        const stop = stops[stops.length - 1];
-        if (stop) {
-          const colour = parse(stop);
-          if (colour) {
-            layers.push(colour);
-            if (colour.a === 1) break;
-          }
-        }
-      }
-      const background = parse(style.backgroundColor);
-      if (background && background.a > 0) {
-        layers.push(background);
-        if (background.a === 1) break;
-      }
+      nodes.push(node);
       node = node.parentElement;
-      first = false;
     }
-    let result = { r: 255, g: 255, b: 255, a: 1 };
-    for (const layer of layers.reverse()) {
-      result = over(layer, result);
+    const stack = [];
+    for (const candidate of nodes.reverse()) {
+      const style = getComputedStyle(candidate);
+      if (style.backgroundImage && style.backgroundImage !== "none") {
+        for (const layer of splitLayers(style.backgroundImage).reverse()) {
+          if (/url\(/.test(layer)) {
+            // Photography: the text must rely on its own scrim.
+            stack.push({ image: true });
+            continue;
+          }
+          const stops = stopsOf(layer);
+          if (stops.length) stack.push({ stops });
+        }
+      }
+      const colour = parse(style.backgroundColor);
+      if (!isTransparent(colour)) stack.push({ colour });
     }
-    return { colour: result, imageBackground };
+    return stack;
   };
 
   const results = [];
-  let imageBacked = 0;
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const seen = new Set();
   let node = walker.nextNode();
+  let imageBacked = 0;
+
   while (node) {
     const text = (node.textContent || "").trim();
     const parent = node.parentElement;
@@ -125,32 +146,44 @@ const audit = () => {
             /rgba\(0,\s*0,\s*0,\s*0\)/.test(fill) && style.backgroundImage.includes("gradient");
           let foreground = parse(style.color);
           if (gradientText) {
-            // The glyphs are painted with the gradient: use its lightest stop
-            // as the worst case and ignore the element's own background.
-            const stops = gradientStops(style.backgroundImage);
+            const stops = stopsOf(splitLayers(style.backgroundImage)[0] || "");
             if (stops.length) {
               foreground = stops.reduce((lightest, stop) =>
                 luminance(stop) > luminance(lightest) ? stop : lightest,
               );
             }
           }
+
           if (foreground && foreground.a > 0) {
-            const { colour: background, imageBackground } = effectiveBackground(
-              parent,
-              gradientText,
-            );
-            if (imageBackground) {
-              // Text sits on top of photography: the contrast depends on the
-              // scrim that covers the image, which the audit cannot sample.
+            const stack = paintStack(gradientText ? parent.parentElement ?? parent : parent);
+            if (stack.some((layer) => layer.image)) {
               imageBacked += 1;
-            }
-            if (!imageBackground) {
-              const composited = foreground.a < 1 ? over(foreground, background) : foreground;
+            } else {
+              // Composite the stack. Only the topmost layer sits directly
+              // behind the text, so its stops define the candidate
+              // backgrounds; deeper layers only shape the colour underneath.
+              let base = { r: 255, g: 255, b: 255, a: 1 };
+              let candidates = [base];
+              for (const layer of stack) {
+                if (layer.colour) {
+                  base = over(layer.colour, base);
+                  candidates = [base];
+                } else if (layer.stops) {
+                  const composited = layer.stops.map((stop) => over(stop, base));
+                  candidates = composited;
+                  const top = layer.stops[layer.stops.length - 1];
+                  base = over(top, base);
+                }
+              }
+              const composited =
+                foreground.a < 1 ? over(foreground, candidates[candidates.length - 1] ?? base) : foreground;
               const size = parseFloat(style.fontSize);
               const weight = Number(style.fontWeight) || 400;
               const large = size >= 24 || (size >= 18.66 && weight >= 700);
               const required = large ? 3 : 4.5;
-              const value = ratio(composited, background);
+              const value = candidates.length
+                ? Math.min(...candidates.map((candidate) => ratio(composited, candidate)))
+                : ratio(composited, base);
               if (value < required) {
                 results.push({
                   selector:
@@ -158,7 +191,9 @@ const audit = () => {
                     (parent.className ? `.${String(parent.className).split(" ").join(".")}` : ""),
                   text: text.slice(0, 40),
                   color: style.color,
-                  background: `rgb(${Math.round(background.r)}, ${Math.round(background.g)}, ${Math.round(background.b)})`,
+                  background: `rgb(${Math.round((candidates[candidates.length - 1] ?? base).r)}, ${Math.round(
+                    (candidates[candidates.length - 1] ?? base).g,
+                  )}, ${Math.round((candidates[candidates.length - 1] ?? base).b)})`,
                   ratio: Number(value.toFixed(2)),
                   required,
                   size: Math.round(size),
@@ -171,6 +206,7 @@ const audit = () => {
     }
     node = walker.nextNode();
   }
+
   return { results, imageBacked };
 };
 
@@ -183,29 +219,32 @@ const browser = await puppeteer.launch({
 const failures = [];
 let imageBackedCount = 0;
 const SCHEMES = ["light", "dark"];
+
 for (const scheme of SCHEMES) {
-for (const target of PAGES) {
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1440, height: 1000 });
-  await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: scheme }]);
-  try {
-    await page.goto(`${BASE}${target.path}`, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await page.waitForNetworkIdle({ idleTime: 400, timeout: 10000 }).catch(() => {});
-    const { results, imageBacked } = await page.evaluate(audit);
-    imageBackedCount += imageBacked;
-    for (const result of results) {
-      failures.push({ page: `${scheme}/${target.name}`, ...result });
+  for (const target of PAGES) {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1440, height: 1000 });
+    await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: scheme }]);
+    try {
+      await page.goto(`${BASE}${target.path}`, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await page.waitForNetworkIdle({ idleTime: 400, timeout: 10000 }).catch(() => {});
+      const { results, imageBacked } = await page.evaluate(audit);
+      imageBackedCount += imageBacked;
+      for (const result of results) {
+        failures.push({ page: `${scheme}/${target.name}`, ...result });
+      }
+    } catch (error) {
+      console.log(`skipped ${target.path}: ${error.message}`);
     }
-  } catch (error) {
-    console.log(`skipped ${target.path}: ${error.message}`);
+    await page.close();
   }
-  await page.close();
-}
 }
 
 await browser.close();
 
-console.log(`\n${failures.length} contrast failures`);
+console.log(
+  `\n${failures.length} contrast failures (${imageBackedCount} text nodes sit on photography and rely on the image scrim)`,
+);
 const grouped = new Map();
 for (const failure of failures) {
   const key = `${failure.selector}|${failure.color}|${failure.background}`;
@@ -216,7 +255,7 @@ for (const failure of failures) {
 }
 for (const entry of [...grouped.values()].sort((a, b) => a.ratio - b.ratio)) {
   console.log(
-    `${String(entry.ratio).padStart(5)}:1 (needs ${entry.required}) ${entry.selector.slice(0, 58)} | ${entry.color} on ${entry.background} | ${entry.count}x on ${[...entry.pages].join(",")}`,
+    `${String(entry.ratio).padStart(5)}:1 (needs ${entry.required}) ${entry.selector.slice(0, 54)} | ${entry.color} on ${entry.background} | ${entry.count}x on ${[...entry.pages].join(",")}`,
   );
 }
 if (failures.length) process.exitCode = 1;

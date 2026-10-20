@@ -142,7 +142,7 @@ export default function Sidebar() {
       </button>
 
       <aside
-        className={`sidebar ${expanded ? "expanded" : ""} ${mobileOpen ? "mobile-open" : ""}`}
+        className={`sidebar glass-sidebar ${expanded ? "expanded" : ""} ${mobileOpen ? "mobile-open" : ""}`}
         onMouseEnter={() => {
           if (!mobileOpen) setExpanded(true);
         }}

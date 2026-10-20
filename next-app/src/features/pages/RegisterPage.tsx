@@ -40,7 +40,7 @@ export default function RegisterPage() {
   return (
     <div className="page auth-page">
       <div className="auth-container">
-        <div className="auth-card">
+        <div className="auth-card glass-card">
           <div className="auth-header">
             <span className="auth-icon"><FileEdit size={24} /></span>
             <h1>Create Account</h1>

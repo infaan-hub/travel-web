@@ -397,7 +397,7 @@ export default function AdminToursPage() {
 
       {showForm && (
         <div className="admin-form-overlay">
-          <div className="admin-form-card admin-form-wide">
+          <div className="admin-form-card glass-card admin-form-wide">
             <h2>{editing ? 'Edit Tour' : 'Add New Tour'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-row">

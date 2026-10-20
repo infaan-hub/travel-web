@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="page auth-page">
       <div className="auth-container">
-        <div className="auth-card">
+        <div className="auth-card glass-card">
           <div className="auth-header">
             <span className="auth-icon"><KeyRound size={24} /></span>
             <h1>Welcome Back</h1>

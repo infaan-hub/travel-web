@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="page auth-page">
       <div className="auth-container">
-        <div className="auth-card">
+        <div className="auth-card glass-card">
           <div className="auth-header">
             <h1>Reset your password</h1>
             <p>We verify every reset in person before a code is issued</p>

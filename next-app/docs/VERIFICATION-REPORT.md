@@ -17,6 +17,13 @@ Date: 2026-10-20
 | `npm run test:onboarding` | 16/16 onboarding checks (mobile + desktop) |
 | `npm run audit:layout` | 0 layout problems (10 pages, mobile + desktop) |
 
+## Design system
+
+The whole interface was moved to the premium aqua glassmorphism system:
+translucent surfaces, frosted blur, hairline borders, three elevation levels and
+an automatic dark glass theme, all driven by CSS variables in
+`src/app/travel-theme.css`.
+
 ## Coverage of the verification
 
 - Record-level database migration, including byte-identical password hashes.

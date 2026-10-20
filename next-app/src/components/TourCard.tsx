@@ -41,7 +41,7 @@ export default function TourCard({ tour }: { tour: Tour }) {
   const [emblaRef] = useEmblaCarousel({ loop: uniqueImages.length > 1 }, [autoplay]);
 
   return (
-    <div className="tour-card" onClick={() => router.push(`/tour/${tour.id}`)}>
+    <div className="tour-card glass-card" onClick={() => router.push(`/tour/${tour.id}`)}>
       <div className="tour-card-image">
         <div className="embla" ref={emblaRef}>
           <div className="embla__container">

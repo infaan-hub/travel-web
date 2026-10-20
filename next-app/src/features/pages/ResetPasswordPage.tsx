@@ -39,7 +39,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="page auth-page">
       <div className="auth-container">
-        <div className="auth-card">
+        <div className="auth-card glass-card">
           <div className="auth-header">
             <h1>Choose a new password</h1>
             <p>Enter the code our team gave you</p>

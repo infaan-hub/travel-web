@@ -34,7 +34,7 @@ export default function VerifyEmailPage() {
   return (
     <div className="page auth-page">
       <div className="auth-container">
-        <div className="auth-card">
+        <div className="auth-card glass-card">
           <div className="auth-header">
             <h1>Verify your email</h1>
             <p>Our team gives you a code when you register</p>

@@ -35,7 +35,7 @@ export default function AdminRegisterPage() {
   return (
     <div className="page auth-page">
       <div className="auth-container">
-        <div className="auth-card">
+        <div className="auth-card glass-card">
           <div className="auth-header">
             <span className="auth-icon"><FileEdit size={24} /></span>
             <h1>Admin Registration</h1>

@@ -154,7 +154,7 @@ export default function AdminTripsPage() {
 
       {showForm && (
         <div className="admin-form-overlay">
-          <div className="admin-form-card">
+          <div className="admin-form-card glass-card">
             <h2>{editing ? 'Edit Trip' : 'Add New Trip'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group">

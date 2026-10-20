@@ -4,6 +4,20 @@ This directory is the production-oriented migration of the former Django REST
 backend + React/Vite frontend into a single Next.js App Router application.
 
 
+## Glass system
+
+The interface uses a premium aqua glassmorphism language: translucent layered
+surfaces, frosted `backdrop-filter` blur, hairline glass borders, soft inner
+highlights and three elevation levels. All of it lives in
+`src/app/travel-theme.css` as CSS variables, with a matching dark scheme that
+switches automatically through `prefers-color-scheme`.
+
+Shared classes: `glass-card`, `glass-card-elevated`, `glass-panel`,
+`glass-button`, `glass-button-primary`, `glass-button-secondary`, `glass-input`,
+`glass-sidebar`, `glass-popover`, `glass-modal`, `glass-chip`, `glass-header`.
+The atmospheric aqua background lives on `body`, and the page hero is provided
+by `src/components/PageHero.tsx`.
+
 ## Brand and design system
 
 The product is branded **Travel.** and uses the teal/aqua travel-booking theme:
