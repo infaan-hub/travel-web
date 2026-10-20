@@ -37,6 +37,7 @@ export function userSerializer(user: User): Json {
     username: user.username,
     email: user.email,
     is_staff: user.isStaff,
+    email_verified: user.emailVerified,
     date_joined: iso(user.dateJoined),
     profile_image_url: null,
   };

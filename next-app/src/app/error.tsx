@@ -26,6 +26,9 @@ export default function ErrorPage({
             Reference: {error.digest}
           </p>
         ) : null}
+        <p style={{ color: "var(--danger-text)", fontSize: "0.8rem", marginBottom: "16px" }}>
+          {error.message}
+        </p>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           <button type="button" className="btn btn-primary" onClick={reset}>
             Try again

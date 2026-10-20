@@ -4,6 +4,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Image from "next/image";
 import { toursAPI, geocodeAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Globe, Plus, Pencil, Trash2, Search, X, MapPin, Loader, Star, GripVertical, Check, CheckSquare, Square } from 'lucide-react';
@@ -72,6 +73,10 @@ export default function AdminToursPage() {
   const [galleryImages, setGalleryImages] = useState([]);
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
+  const [translationForm, setTranslationForm] = useState({ locale: 'sw', title: '', description: '', short_description: '' });
+  const [translations, setTranslations] = useState([]);
+  const [draggingGalleryId, setDraggingGalleryId] = useState(null);
+  const [galleryDropTargetId, setGalleryDropTargetId] = useState(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -118,6 +123,35 @@ export default function AdminToursPage() {
     setGeoError('');
   };
 
+  const loadTranslations = async (tourId) => {
+    try {
+      const res = await api.get(`/tours/${tourId}/translations/`);
+      setTranslations(res.data?.translations || []);
+    } catch {
+      setTranslations([]);
+    }
+  };
+
+  const saveTranslation = async () => {
+    try {
+      await api.put(`/tours/${editing}/translations/`, translationForm);
+      toast.success('Translation saved');
+      setTranslationForm({ locale: 'sw', title: '', description: '', short_description: '' });
+      loadTranslations(editing);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save the translation');
+    }
+  };
+
+  const loadGallery = async (tourId) => {
+    try {
+      const res = await toursAPI.getGallery(tourId);
+      setGalleryImages(res.data.gallery_images || res.data.results || res.data);
+    } catch {
+      setGalleryImages([]);
+    }
+  };
+
   const handleEdit = async (tour) => {
     const parseItems = (v) => {
       if (Array.isArray(v)) return v;
@@ -138,10 +172,8 @@ export default function AdminToursPage() {
     setImage3Preview(getImageUrl(tour.image3_url) || null);
     setEditing(tour.id);
     setShowForm(true);
-    try {
-      const res = await toursAPI.getGallery(tour.id);
-      setGalleryImages(res.data.gallery_images || res.data.results || res.data);
-    } catch { setGalleryImages([]); }
+    await loadGallery(tour.id);
+    await loadTranslations(tour.id);
   };
 
   const doGeocode = async (location) => {
@@ -175,6 +207,37 @@ export default function AdminToursPage() {
     const reader = new FileReader();
     reader.onload = (ev) => setPreview(ev.target.result);
     reader.readAsDataURL(file);
+  };
+
+  const handleGalleryDragStart = (event, imageId) => {
+    setDraggingGalleryId(imageId);
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', String(imageId));
+  };
+
+  const handleGalleryDrop = async (event, targetId) => {
+    event.preventDefault();
+    const sourceId = Number(event.dataTransfer.getData('text/plain')) || draggingGalleryId;
+    setDraggingGalleryId(null);
+    setGalleryDropTargetId(null);
+    if (!sourceId || sourceId === targetId) return;
+
+    const ordered = [...galleryImages];
+    const fromIndex = ordered.findIndex((image) => image.id === sourceId);
+    const toIndex = ordered.findIndex((image) => image.id === targetId);
+    if (fromIndex === -1 || toIndex === -1) return;
+
+    const [moved] = ordered.splice(fromIndex, 1);
+    ordered.splice(toIndex, 0, moved);
+    setGalleryImages(ordered);
+
+    try {
+      await toursAPI.reorderGallery(editing.id, ordered.map((image, index) => ({ id: image.id, order: index })));
+      toast.success('Gallery order saved');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save the new gallery order');
+      loadGallery(editing.id);
+    }
   };
 
   const handleGalleryAdd = (e) => {
@@ -474,8 +537,18 @@ export default function AdminToursPage() {
                 <label>Gallery Images (add as many as needed)</label>
                 <div className="gallery-upload-grid">
                   {galleryImages.map(img => (
-                    <div key={img.id} className="gallery-thumb-item">
-                      <img src={getImageUrl(img.image_url)} alt="" />
+                    <div
+                      key={img.id}
+                      className={`gallery-thumb-item gallery-drag-item${draggingGalleryId === img.id ? ' dragging' : ''}${galleryDropTargetId === img.id ? ' drop-target' : ''}`}
+                      draggable
+                      onDragStart={(event) => handleGalleryDragStart(event, img.id)}
+                      onDragOver={(event) => { event.preventDefault(); setGalleryDropTargetId(img.id); }}
+                      onDragLeave={() => setGalleryDropTargetId(null)}
+                      onDrop={(event) => handleGalleryDrop(event, img.id)}
+                      onDragEnd={() => { setDraggingGalleryId(null); setGalleryDropTargetId(null); }}
+                    >
+                      <Image src={getImageUrl(img.image_url)} alt="" width={120} height={90} />
+                      <span className="gallery-drag-hint">Drag to reorder</span>
                       <button type="button" className="gallery-remove-btn" onClick={() => removeGalleryImage(img.id)}><X size={12} /></button>
                     </div>
                   ))}
@@ -490,6 +563,58 @@ export default function AdminToursPage() {
                     <input type="file" accept="image/*" multiple hidden onChange={handleGalleryAdd} />
                   </label>
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>Translations</label>
+                <p className="form-hint">Add the tour in another language. Visitors can switch language on the tour page.</p>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="translation-locale">Language</label>
+                    <select
+                      id="translation-locale"
+                      value={translationForm.locale}
+                      onChange={(e) => setTranslationForm({ ...translationForm, locale: e.target.value })}
+                    >
+                      {['en', 'sw', 'fr', 'ar', 'de', 'es', 'zh'].map((locale) => (
+                        <option key={locale} value={locale}>{locale}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="translation-title">Translated title</label>
+                    <input
+                      id="translation-title"
+                      value={translationForm.title}
+                      onChange={(e) => setTranslationForm({ ...translationForm, title: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="translation-short">Short description</label>
+                  <input
+                    id="translation-short"
+                    value={translationForm.short_description}
+                    onChange={(e) => setTranslationForm({ ...translationForm, short_description: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="translation-description">Description</label>
+                  <textarea
+                    id="translation-description"
+                    rows="3"
+                    value={translationForm.description}
+                    onChange={(e) => setTranslationForm({ ...translationForm, description: e.target.value })}
+                  />
+                </div>
+                <button type="button" className="btn btn-outline" onClick={saveTranslation}>Save translation</button>
+                {translations.length > 0 && (
+                  <ul className="pending-list">
+                    {translations.map((translation) => (
+                      <li key={translation.locale}><strong>{translation.locale}</strong> {translation.title}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div className="form-actions">
@@ -522,7 +647,7 @@ export default function AdminToursPage() {
               ) : filtered.map(t => (
                 <tr key={t.id}>
                   <td>#{t.id}</td>
-                  <td>{t.image_url ? <img src={getImageUrl(t.image_url)} alt="" className="admin-thumb" /> : '-'}</td>
+                  <td>{t.image_url ? <Image src={getImageUrl(t.image_url)} alt="" width={60} height={40} className="admin-thumb" /> : '-'}</td>
                   <td><strong>{t.title}</strong></td>
                   <td><span className={`tour-cat-badge ${t.category}`}>{t.category}</span></td>
                   <td>${t.price}</td>

@@ -4,6 +4,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI, workspacesAPI } from '@/lib/api/client';
 import { Users, Search, X, ChevronRight, Plus, Briefcase } from 'lucide-react';
@@ -20,6 +21,7 @@ export default function AdminWorkSpacePage() {
   const [selectedTourist, setSelectedTourist] = useState(null);
   const [touristBookings, setTouristBookings] = useState([]);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [templates, setTemplates] = useState([]);
   const [registerForm, setRegisterForm] = useState({
     username: '', email: '', password: '', full_name: '', phone: '', arrival_date: '', departure_date: ''
   });
@@ -43,6 +45,7 @@ export default function AdminWorkSpacePage() {
       setTourists(filtered);
       setWorkspaces(Array.isArray(ws) ? ws : []);
     }).finally(() => setLoading(false));
+    loadTemplates();
   };
 
   const loadTouristBookings = async (userId) => {
@@ -101,12 +104,48 @@ export default function AdminWorkSpacePage() {
     t.email?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const loadTemplates = async () => {
+    try {
+      const response = await workspacesAPI.listTemplates();
+      setTemplates(response.data?.templates || []);
+    } catch {
+      setTemplates([]);
+    }
+  };
+
+  const useTemplate = async (templateId) => {
+    try {
+      const response = await workspacesAPI.createFromTemplate(templateId, {});
+      toast.success('Workspace created from the template');
+      router.push(`/admin/work-space/tour-plan/${response.data.id}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to use the template');
+    }
+  };
+
   return (
     <div className="page admin-page">
       <div className="page-header">
         <h1>Workspace</h1>
         <p>Select a tourist to plan their tour itinerary</p>
       </div>
+
+      {templates.length > 0 && (
+        <div className="admin-panel">
+          <h2>Saved templates</h2>
+          <ul className="pending-list">
+            {templates.map((template) => (
+              <li key={template.id}>
+                <strong>{template.notes || `Template #${template.id}`}</strong>
+                {template.tours?.length ? <span>{template.tours.map((t) => t.title).join(', ')}</span> : null}
+                <button className="btn btn-sm btn-outline" onClick={() => useTemplate(template.id)}>
+                  Use template
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="admin-toolbar">
         <div className="search-input-group">
@@ -134,7 +173,7 @@ export default function AdminWorkSpacePage() {
                 >
                   <div className="tourist-avatar">
                     {tourist.profile_image_url ? (
-                      <img src={tourist.profile_image_url} alt="" />
+                      <Image src={tourist.profile_image_url} alt="" width={56} height={56} />
                     ) : (
                       tourist.username?.[0]?.toUpperCase() || '?'
                     )}
@@ -156,7 +195,7 @@ export default function AdminWorkSpacePage() {
               <div className="tourist-profile-header">
                 <div className="tourist-avatar large">
                   {selectedTourist.profile_image_url ? (
-                    <img src={selectedTourist.profile_image_url} alt="" />
+                    <Image src={selectedTourist.profile_image_url} alt="" width={56} height={56} />
                   ) : (
                     selectedTourist.username?.[0]?.toUpperCase() || '?'
                   )}

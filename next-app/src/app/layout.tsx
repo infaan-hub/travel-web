@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import { ToastProvider } from "@/components/ToastProvider";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { PushPrompt } from "@/components/PushPrompt";
+import { ModalA11y } from "@/components/ModalA11y";
 import { VisitorTracker } from "@/components/VisitorTracker";
 import { Geist, Inter, Playfair_Display } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main className="main-content" id="main-content">{children}</main>
             </div>
             <PushPrompt />
+            <ModalA11y />
           </ToastProvider>
           </CurrencyProvider>
         </AuthProvider>

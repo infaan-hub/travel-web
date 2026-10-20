@@ -162,7 +162,7 @@ export default function AdminTourPlanPage() {
         await workspacesAPI.update(ws.id, { total_price: totalPrice, notes });
       }
 
-      sessionStorage.setItem(`pricing:${ws.id}`, JSON.stringify({
+      const draft = {
         tourist,
         selectedTours,
         selectedHotel,
@@ -171,7 +171,13 @@ export default function AdminTourPlanPage() {
         selectedTravelVehicle,
         totalPrice,
         notes,
-      }));
+      };
+      sessionStorage.setItem(`pricing:${ws.id}`, JSON.stringify(draft));
+      try {
+        await workspacesAPI.savePricingDraft(ws.id, draft);
+      } catch {
+        // The local copy is used as a fallback.
+      }
       router.push(`/admin/work-space/pricing/${ws.id}`);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to submit pricing');

@@ -4,6 +4,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import Image from "next/image";
 import { tripsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { BookOpen, Plus, Pencil, Trash2 } from 'lucide-react';
@@ -16,6 +17,8 @@ export default function AdminTripsPage() {
   const router = useRouter();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ title: '', content: '', category: '', image: null });
@@ -100,6 +103,16 @@ export default function AdminTripsPage() {
     } catch { toast.error('Failed to delete trip'); }
   };
 
+  const tipCategories = Array.from(new Set(trips.map((t) => t.category).filter(Boolean))).sort();
+  const filteredTrips = trips.filter((t) => {
+    const matchesSearch = search
+      ? (t.title || '').toLowerCase().includes(search.toLowerCase()) ||
+        (t.content || '').toLowerCase().includes(search.toLowerCase())
+      : true;
+    const matchesCategory = categoryFilter === 'all' || t.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
   if (!isAuthenticated || !isAdmin) return null;
   if (loading) return <div className="page"><div className="loading">Loading trips...</div></div>;
 
@@ -111,6 +124,28 @@ export default function AdminTripsPage() {
       </div>
 
       <div className="admin-toolbar">
+        <div className="search-input-group">
+          <input
+            type="text"
+            placeholder="Search trips..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search trips"
+          />
+        </div>
+        <div className="search-input-group">
+          <label className="sr-only" htmlFor="trip-category">Filter by category</label>
+          <select
+            id="trip-category"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
+            <option value="all">All categories</option>
+            {tipCategories.map((category) => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
         <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}><Plus size={16} /> Add Trip</button>
       </div>
 
@@ -161,13 +196,13 @@ export default function AdminTripsPage() {
             <tbody>
               {trips.length === 0 ? (
                 <tr><td colSpan="6" className="empty-cell">No trips yet</td></tr>
-              ) : trips.map(t => (
+              ) : filteredTrips.map(t => (
                 <tr key={t.id}>
                   <td>#{t.id}</td>
                   <td><strong>{t.title}</strong></td>
                   <td>{t.category || '-'}</td>
                   <td className="tip-cell">{t.content.substring(0, 100)}{t.content.length > 100 ? '...' : ''}</td>
-                  <td>{t.image_url ? <img src={getImageUrl(t.image_url)} alt={t.title} className="admin-thumb" /> : '-'}</td>
+                  <td>{t.image_url ? <Image src={getImageUrl(t.image_url)} alt={t.title} width={60} height={40} className="admin-thumb" /> : '-'}</td>
                   <td>
                     <div className="admin-actions">
                       <button className="btn btn-sm btn-outline" onClick={() => handleEdit(t)}><Pencil size={14} /></button>

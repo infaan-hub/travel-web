@@ -4,7 +4,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { toursAPI, reviewsAPI } from '@/lib/api/client';
+import { toursAPI, reviewsAPI, api } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { ArrowLeft, MapPin, Clock, Star, Check, XCircle, ChevronLeft, ChevronRight, X, Send, User } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
@@ -24,6 +24,8 @@ export default function TourDetailPage() {
   const [reviewError, setReviewError] = useState('');
   const [reviewSuccess, setReviewSuccess] = useState('');
   const [tourReviews, setTourReviews] = useState([]);
+  const [translations, setTranslations] = useState([]);
+  const [locale, setLocale] = useState('en');
 
   useEffect(() => {
     loadTour();
@@ -34,7 +36,9 @@ export default function TourDetailPage() {
     Promise.all([
       toursAPI.getById(id),
       reviewsAPI.getTourReviews(id),
-    ]).then(([tourRes, revRes]) => {
+      api.get(`/tours/${id}/translations/`).catch(() => ({ data: { translations: [] } })),
+    ]).then(([tourRes, revRes, translationRes]) => {
+      setTranslations(translationRes.data?.translations || []);
       const t = tourRes.data;
       setTour(t);
       setTourReviews(revRes.data.results || revRes.data);
@@ -47,6 +51,11 @@ export default function TourDetailPage() {
       setAllImages(images);
     }).catch(console.error).finally(() => setLoading(false));
   };
+
+  const activeTranslation = translations.find((item) => item.locale === locale);
+  const displayTitle = activeTranslation?.title || tour?.title;
+  const displayDescription = activeTranslation?.description || tour?.description;
+  const displayShortDescription = activeTranslation?.short_description || tour?.short_description;
 
   const handleBookNow = () => {
     if (isAuthenticated) {
@@ -101,7 +110,7 @@ export default function TourDetailPage() {
       <div className="tour-detail-hero">
         {allImages.length > 0 ? (
           <>
-            <img src={allImages[0]} alt={tour.title} onClick={() => openLightbox(0)} style={{ cursor: 'pointer' }} />
+            <img src={allImages[0]} alt={displayTitle} onClick={() => openLightbox(0)} style={{ cursor: 'pointer' }} />
             {allImages.length > 1 && (
               <div className="gallery-badge" onClick={() => openLightbox(0)}>
                 View {allImages.length} Photos
@@ -115,7 +124,28 @@ export default function TourDetailPage() {
           <span className={`tour-category ${tour.category}`}>
             {tour.category === 'zanzibar' ? 'Zanzibar' : tour.category === 'tanzania' ? 'Tanzania Safari' : 'International'}
           </span>
-          <h1>{tour.title}</h1>
+          <h1>{displayTitle}</h1>
+        {translations.length > 0 && (
+          <div className="language-switcher" role="group" aria-label="Language">
+            <button
+              type="button"
+              className={`btn btn-sm ${locale === 'en' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setLocale('en')}
+            >
+              English
+            </button>
+            {translations.map((translation) => (
+              <button
+                key={translation.locale}
+                type="button"
+                className={`btn btn-sm ${locale === translation.locale ? 'btn-primary' : 'btn-outline'}`}
+                onClick={() => setLocale(translation.locale)}
+              >
+                {translation.locale.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        )}
           <p><MapPin size={16} /> {tour.destination} | <Clock size={16} /> {tour.duration} | ${tour.price}/person</p>
         </div>
       </div>
@@ -144,7 +174,7 @@ export default function TourDetailPage() {
         <div className="tour-detail-main">
           <section className="tour-description">
             <h2>About This Tour</h2>
-            <p>{tour.description}</p>
+            <p>{displayDescription}</p>
           </section>
 
           {tour.itinerary && tour.itinerary.length > 0 && (

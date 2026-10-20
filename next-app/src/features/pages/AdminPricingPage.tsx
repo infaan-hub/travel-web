@@ -19,12 +19,31 @@ export default function AdminPricingPage() {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(`pricing:${id}`);
-      if (raw) setState(JSON.parse(raw));
-    } catch {
-      sessionStorage.removeItem(`pricing:${id}`);
-    }
+    let active = true;
+    // Prefer the server copy so the draft survives reloads and other devices.
+    workspacesAPI
+      .getPricingDraft(id)
+      .then((response) => {
+        if (!active) return;
+        const draft = response.data?.pricing_draft;
+        if (draft) {
+          setState(draft);
+        } else {
+          const raw = sessionStorage.getItem(`pricing:${id}`);
+          if (raw) setState(JSON.parse(raw));
+        }
+      })
+      .catch(() => {
+        try {
+          const raw = sessionStorage.getItem(`pricing:${id}`);
+          if (raw) setState(JSON.parse(raw));
+        } catch {
+          sessionStorage.removeItem(`pricing:${id}`);
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   if (!isAuthenticated || !isAdmin) return null;

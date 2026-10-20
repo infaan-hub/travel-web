@@ -5,6 +5,7 @@ import { enforceRateLimit, clientIp } from "@/lib/security/rate-limit";
 import { trackVisitSchema } from "@/lib/validation/schemas";
 import prisma from "@/lib/db/prisma";
 import { visitSerializer } from "@/lib/serializers";
+import { recordFunnelEvent } from "@/lib/services/funnel";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,6 +33,10 @@ export async function POST(request: NextRequest) {
         tourId,
       },
     });
+    if (tourId) {
+      await recordFunnelEvent("view", { sessionId, tourId });
+    }
+
     return ok(visitSerializer(visit), 201);
   } catch (error) {
     return handleApiError(error);

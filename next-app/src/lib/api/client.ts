@@ -37,6 +37,7 @@ api.interceptors.response.use(
 );
 
 export default api;
+export { api };
 
 const formDataConfig = (data: unknown) =>
   data instanceof FormData ? { headers: { "Content-Type": undefined } } : undefined;
@@ -221,6 +222,14 @@ export const workspacesAPI = {
     api.post(`/workspaces/${workspaceId}/pricing/`, data),
   approve: (workspaceId: string | number) =>
     api.patch(`/workspaces/${workspaceId}/`, { status: "approved" }),
+  getPricingDraft: (workspaceId: string | number) =>
+    api.get(`/workspaces/${workspaceId}/pricing-draft/`),
+  savePricingDraft: (workspaceId: string | number, draft: Record<string, unknown>) =>
+    api.put(`/workspaces/${workspaceId}/pricing-draft/`, draft),
+  listTemplates: () => api.get("/workspaces/templates/"),
+  createTemplate: (workspaceId: string | number) => api.post(`/workspaces/${workspaceId}/template/`, {}),
+  createFromTemplate: (templateId: string | number, data: Record<string, unknown>) =>
+    api.post(`/workspaces/from-template/${templateId}/`, data),
 };
 
 export const roomsAPI = {

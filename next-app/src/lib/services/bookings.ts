@@ -8,6 +8,7 @@ import type { BookingStatus } from "@prisma/client";
 import { recordAudit } from "@/lib/audit";
 import { featureEnabled } from "@/lib/env";
 import { notifyBookingCreated, notifyBookingStatusChanged } from "@/lib/services/notifications";
+import { recordFunnelEvent } from "@/lib/services/funnel";
 
 const BOOKING_INCLUDE = { tour: true, user: true } as const;
 
@@ -19,7 +20,7 @@ export async function listBookingsForUser(userId: number) {
   });
 }
 
-export async function createBooking(user: AuthUser, input: BookingCreateInput) {
+export async function createBooking(user: AuthUser | null, input: BookingCreateInput) {
   const tour = await prisma.tour.findFirst({
     where: { id: input.tour, deletedAt: null },
   });
@@ -56,7 +57,7 @@ export async function createBooking(user: AuthUser, input: BookingCreateInput) {
 
   const booking = await prisma.booking.create({
     data: {
-      userId: user.id,
+      userId: user?.id ?? null,
       tourId: tour.id,
       fullName: input.full_name,
       email: input.email,
@@ -75,11 +76,18 @@ export async function createBooking(user: AuthUser, input: BookingCreateInput) {
   });
 
   await recordAudit({
-    actorId: user.id,
+    actorId: user?.id ?? null,
     action: "booking.create",
     entity: "booking",
     entityId: booking.id,
     after: { reference: booking.reference, tourId: booking.tourId, status: booking.status },
+  });
+
+  await recordFunnelEvent("booking_created", {
+    sessionId: input.session_id,
+    tourId: tour.id,
+    bookingId: booking.id,
+    metadata: { travelers: booking.travelers, reference: booking.reference },
   });
 
   await notifyBookingCreated({
@@ -186,6 +194,10 @@ export async function updateBooking(
   });
 
   if (data.status !== undefined && data.status !== booking.status) {
+    await recordFunnelEvent(
+      data.status === "confirmed" ? "booking_confirmed" : "booking_cancelled",
+      { tourId: updated.tourId, bookingId: updated.id, metadata: { reference: updated.reference } },
+    );
     await notifyBookingStatusChanged(
       {
         id: updated.id,
@@ -202,7 +214,7 @@ export async function updateBooking(
   }
 
   await recordAudit({
-    actorId: user.id,
+    actorId: user?.id ?? null,
     action: "booking.update",
     entity: "booking",
     entityId: updated.id,
@@ -221,7 +233,7 @@ export async function deleteBooking(id: number, user: AuthUser) {
   }
   await prisma.booking.delete({ where: { id } });
   await recordAudit({
-    actorId: user.id,
+    actorId: user?.id ?? null,
     action: "booking.delete",
     entity: "booking",
     entityId: id,

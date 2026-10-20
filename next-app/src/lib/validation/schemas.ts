@@ -180,6 +180,7 @@ const bookingBaseSchema = z.object({
   distance_km: optionalNullableFloat,
   estimated_time_mins: optionalNullableInt,
   google_maps_url: z.string().trim().max(2000).optional(),
+  session_id: z.string().trim().max(100).optional(),
 });
 
 export const bookingCreateSchema = bookingBaseSchema.extend({

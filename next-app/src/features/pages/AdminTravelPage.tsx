@@ -4,6 +4,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { travelDriversAPI, travelVehiclesAPI } from '@/lib/api/client';
 import { Car, Plus, Pencil, Trash2, Search, X, User } from 'lucide-react';
@@ -177,7 +178,7 @@ export default function AdminTravelPage() {
                   <div className="travel-card-header">
                     <div className="travel-card-avatar">
                       {driver.image ? (
-                        <img src={driver.image} alt={driver.name} />
+                        <Image src={driver.image} alt={driver.name} width={120} height={90} />
                       ) : (
                         <User size={32} />
                       )}

@@ -84,6 +84,7 @@ async function run() {
   // Customer registration and login.
   const registerA = await request("/api/register/", json("POST", CUSTOMER_A));
   if (registerA.body?.id) created.userIds.push(registerA.body.id);
+  const createdCustomerId = registerA.body?.id;
   record("POST /api/register/ creates a customer", registerA.status === 201);
   const customerAToken = await login(CUSTOMER_A);
 
@@ -238,6 +239,54 @@ async function run() {
   record(
     "anonymous visitor is redirected from /admin/dashboard/",
     anonymousAdminPage.status === 307 && anonymousAdminPage.headers.get("location")?.includes("/admin/login"),
+  );
+
+  // Password reset verified in person: staff issues the code, the customer uses it.
+  const resetIssue = await request(
+    "/api/auth/password-reset/issue/",
+    json("POST", { user_id: createdCustomerId }, adminToken),
+  );
+  record("staff can issue a password reset code", resetIssue.status === 200 && Boolean(resetIssue.body?.code));
+
+  const resetConfirm = await request(
+    "/api/auth/password-reset/confirm/",
+    json("POST", {
+      email: CUSTOMER_A.email,
+      code: resetIssue.body?.code,
+      new_password: "ResetCustomer123!",
+    }),
+  );
+  record("the reset code sets a new password", resetConfirm.status === 200, `status=${resetConfirm.status}`);
+
+  const loginWithNewPassword = await request(
+    "/api/token/",
+    json("POST", { username: CUSTOMER_A.username, password: "ResetCustomer123!" }),
+  );
+  record("the customer can sign in with the new password", loginWithNewPassword.status === 200);
+
+  const reuseCode = await request(
+    "/api/auth/password-reset/confirm/",
+    json("POST", {
+      email: CUSTOMER_A.email,
+      code: resetIssue.body?.code,
+      new_password: "AnotherPass123!",
+    }),
+  );
+  record("a used reset code cannot be reused", reuseCode.status === 400, `status=${reuseCode.status}`);
+
+  // Email verification issued and confirmed in person.
+  const verificationIssue = await request(
+    "/api/auth/email-verification/issue/",
+    json("POST", { user_id: createdCustomerId }, adminToken),
+  );
+  const verificationConfirm = await request(
+    "/api/auth/email-verification/confirm/",
+    json("POST", { email: CUSTOMER_A.email, code: verificationIssue.body?.code }),
+  );
+  record(
+    "email verification works end to end",
+    verificationIssue.status === 200 && verificationConfirm.status === 200,
+    `issue=${verificationIssue.status} confirm=${verificationConfirm.status}`,
   );
 
   // Mobile compatibility: token pair and trailing slash.

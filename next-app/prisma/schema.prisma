@@ -45,6 +45,8 @@ model User {
   dateJoined  DateTime  @default(now()) @map("date_joined")
   lastLogin   DateTime? @map("last_login")
   sessionVersion Int     @default(1) @map("session_version")
+  emailVerified Boolean  @default(false) @map("email_verified")
+  resetRequestedAt DateTime? @map("reset_requested_at")
   deletedAt   DateTime? @map("deleted_at")
 
   profile          Profile?
@@ -56,6 +58,7 @@ model User {
   auditLogs        AuditLog[]
   pushSubscriptions PushSubscription[]
   notifications    Notification[]
+  verificationTokens VerificationToken[]
 
   @@index([email])
   @@index([isStaff])
@@ -106,6 +109,7 @@ model Tour {
   reviews       Review[]
   bookings      Booking[]
   workspaces    Workspace[]        @relation("WorkspaceTours")
+  translations TourTranslation[]
 
   @@index([category, available])
   @@index([featured])
@@ -327,6 +331,8 @@ model Workspace {
   notes                   String          @default("")
   status                  WorkspaceStatus @default(draft)
   messageSent             Boolean         @default(false) @map("message_sent")
+  isTemplate              Boolean         @default(false) @map("is_template")
+  pricingDraft            Json?           @map("pricing_draft")
   createdAt               DateTime        @default(now()) @map("created_at")
   updatedAt               DateTime        @updatedAt @map("updated_at")
 
@@ -428,4 +434,48 @@ model Notification {
   @@index([userId, read])
   @@index([createdAt])
   @@map("notifications")
+}
+
+model VerificationToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  purpose   String    @db.VarChar(32)
+  codeHash  String    @map("code_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@index([expiresAt])
+  @@map("verification_tokens")
+}
+
+model TourTranslation {
+  id               Int      @id @default(autoincrement())
+  tourId           Int      @map("tour_id")
+  locale           String   @db.VarChar(8)
+  title            String
+  description      String   @default("")
+  shortDescription String   @default("") @map("short_description")
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([tourId, locale])
+  @@map("tour_translations")
+}
+
+model FunnelEvent {
+  id        Int      @id @default(autoincrement())
+  sessionId String   @map("session_id")
+  stage     String   @db.VarChar(32)
+  tourId    Int?     @map("tour_id")
+  bookingId Int?     @map("booking_id")
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([stage, createdAt])
+  @@index([sessionId])
+  @@map("funnel_events")
 }

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import Image from "next/image";
 import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
 import { BookOpen, Lightbulb, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
@@ -231,7 +232,7 @@ export default function TripsPage() {
                   <Lightbulb size={20} className="tip-icon" />
                   <h3>{trip.title}</h3>
                 </div>
-                {trip.image_url && <img src={getImageUrl(trip.image_url)} alt={trip.title} className="trip-image" />}
+                {trip.image_url && <Image src={getImageUrl(trip.image_url)} alt={trip.title} width={640} height={360} className="trip-image" />}
                 <p className="tip-content">{trip.content}</p>
                 <div className="tip-meta">
                   {trip.category && <span className="tip-category">{trip.category}</span>}

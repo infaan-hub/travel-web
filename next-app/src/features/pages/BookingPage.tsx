@@ -4,6 +4,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import Image from "next/image";
 import api, { toursAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { MapPin, Clock, Mail, MessageSquare, CheckCircle, Navigation } from 'lucide-react';
@@ -48,10 +49,7 @@ export default function BookingPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated) {
-      router.replace(`/login?from=${encodeURIComponent(tourId ? `/booking/${tourId}` : '/booking')}`);
-      return;
-    }
+    // Guests can book without an account; signed-in customers are prefilled.
     if (user) {
       setForm(prev => ({
         ...prev,
@@ -101,6 +99,7 @@ export default function BookingPage() {
         distance_km: distance || null,
         estimated_time_mins: estimatedTime || null,
         google_maps_url: mapsUrl || '',
+        session_id: (typeof window !== 'undefined' && window.localStorage.getItem('session_id')) || undefined,
       };
       await api.post('/bookings/', bookingData);
     }
@@ -144,7 +143,6 @@ export default function BookingPage() {
     }
   };
 
-  if (!isAuthenticated) return null;
   if (loading) return <div className="page"><div className="loading">Loading tour details...</div></div>;
 
   return (
@@ -177,7 +175,7 @@ export default function BookingPage() {
           <div className="booking-form-container">
             {tour && (
               <div className="booking-tour-summary">
-                <img src={getImageUrl(tour.image_url) || ''} alt={tour.title} />
+                <Image src={getImageUrl(tour.image_url) || ''} alt={tour.title} width={480} height={320} />
                 <div className="booking-tour-info">
                   <h3>{tour.title}</h3>
                   <span className="tour-destination"><MapPin size={16} /> {tour.destination}</span>

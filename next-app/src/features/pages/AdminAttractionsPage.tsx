@@ -4,6 +4,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import Image from "next/image";
 import { attractionsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Map, Plus, Pencil, Trash2, Search, X } from 'lucide-react';
@@ -17,6 +18,7 @@ export default function AdminAttractionsPage() {
   const [attractions, setAttractions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -87,9 +89,18 @@ export default function AdminAttractionsPage() {
     } catch { toast.error('Failed to delete attraction'); }
   };
 
-  const filtered = attractions.filter(a =>
-    search ? a.name?.toLowerCase().includes(search.toLowerCase()) || a.location?.toLowerCase().includes(search.toLowerCase()) : true
-  );
+  const categories = Array.from(
+    new Set(attractions.map((a) => a.category).filter(Boolean)),
+  ).sort();
+  const filtered = attractions.filter(a => {
+    const matchesSearch = search
+      ? a.name?.toLowerCase().includes(search.toLowerCase()) ||
+        a.location?.toLowerCase().includes(search.toLowerCase()) ||
+        a.region?.toLowerCase().includes(search.toLowerCase())
+      : true;
+    const matchesCategory = categoryFilter === 'all' || a.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   if (!isAuthenticated || !isAdmin) return null;
   if (loading) return <div className="page"><div className="loading">Loading attractions...</div></div>;
@@ -104,7 +115,20 @@ export default function AdminAttractionsPage() {
       <div className="admin-toolbar">
         <div className="search-input-group">
           <Search size={16} />
-          <input type="text" placeholder="Search attractions..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input type="text" placeholder="Search attractions..." value={search} onChange={e => setSearch(e.target.value)} aria-label="Search attractions" />
+        </div>
+        <div className="search-input-group">
+          <label className="sr-only" htmlFor="attraction-category">Filter by category</label>
+          <select
+            id="attraction-category"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
+            <option value="all">All categories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
         </div>
         <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}>
           <Plus size={16} /> Add Attraction
@@ -161,7 +185,7 @@ export default function AdminAttractionsPage() {
                 {filtered.map(att => (
                   <tr key={att.id}>
                     <td>
-                      <img src={getImageUrl(att.image_url) || '/placeholder.jpg'} alt={att.name}
+                      <Image src={getImageUrl(att.image_url) || '/placeholder.jpg'} alt={att.name} width={320} height={200}
                         className="admin-attraction-image" />
                     </td>
                     <td><strong>{att.name}</strong></td>

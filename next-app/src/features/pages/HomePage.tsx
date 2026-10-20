@@ -4,6 +4,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import Image from "next/image";
 import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
 import { ArrowRight, Star, MapPin, Send, X } from 'lucide-react';
@@ -135,7 +136,7 @@ export default function HomePage() {
             {attractions.slice(0, 6).map(att => (
               <div key={att.id} className="home-attraction-card">
                 <div className="home-attraction-image">
-                  <img src={getImageUrl(att.image_url)} alt={att.name} />
+                  <Image src={getImageUrl(att.image_url)} alt={att.name} width={320} height={220} />
                 </div>
                 <div className="home-attraction-info">
                   <h3>{att.name}</h3>
