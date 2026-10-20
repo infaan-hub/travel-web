@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { MapPin, Calendar, DollarSign } from "lucide-react";
 import { getImageUrl } from "@/lib/utils/image-url";
 
@@ -17,7 +18,13 @@ export default function AttractionCard({ attraction }: { attraction: Attraction 
   return (
     <div className="attraction-card">
       <div className="attraction-card-image">
-        <img src={getImageUrl(attraction.image_url) || ""} alt={attraction.name} loading="lazy" />
+        <Image
+          src={getImageUrl(attraction.image_url) || ""}
+          alt={attraction.name}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          style={{ objectFit: "cover" }}
+        />
         <span className={`attraction-category ${attraction.category ?? ""}`}>
           {attraction.category?.replace("_", " ")}
         </span>

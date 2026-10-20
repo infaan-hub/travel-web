@@ -145,7 +145,7 @@ export default function AdminTripsPage() {
 
       <div className="admin-content">
         <div className="admin-bookings-table">
-          <table>
+          <div className="table-responsive"><table>
             <thead>
               <tr>
                 <th>ID</th>
@@ -175,7 +175,7 @@ export default function AdminTripsPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
     </div>

@@ -146,7 +146,7 @@ export default function AdminAttractionsPage() {
           <div className="empty-state"><p>No attractions found</p></div>
         ) : (
           <div className="admin-attractions-table">
-            <table>
+            <div className="table-responsive"><table>
               <thead>
                 <tr>
                   <th>Image</th>
@@ -177,7 +177,7 @@ export default function AdminAttractionsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           </div>
         )}
       </div>

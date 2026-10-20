@@ -31,6 +31,7 @@ import {
   Truck,
   Briefcase,
 } from "lucide-react";
+import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { profileAPI } from "@/lib/api/client";
 
@@ -203,7 +204,7 @@ export default function Sidebar() {
               <div className="sidebar-user">
                 <div className="user-avatar">
                   {profileImage ? (
-                    <img src={profileImage} alt="" className="avatar-img" />
+                    <NextImage src={profileImage} alt="" width={38} height={38} className="avatar-img" />
                   ) : (
                     user?.username?.[0]?.toUpperCase() || "U"
                   )}

@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
               <div className="empty-state"><p>No bookings found</p></div>
             ) : (
               <div className="admin-bookings-table">
-                <table>
+                <div className="table-responsive"><table>
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -143,7 +143,7 @@ export default function AdminDashboardPage() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             )}
           </div>
@@ -153,7 +153,7 @@ export default function AdminDashboardPage() {
           <div className="admin-users">
             <h2>Registered Users ({users.length})</h2>
             <div className="admin-bookings-table">
-              <table>
+              <div className="table-responsive"><table>
                 <thead>
                   <tr>
                     <th>ID</th>
@@ -174,7 +174,7 @@ export default function AdminDashboardPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         )}

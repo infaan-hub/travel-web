@@ -60,7 +60,7 @@ export default function AdminCustomersPage() {
 
       <div className="admin-content">
         <div className="admin-bookings-table">
-          <table>
+          <div className="table-responsive"><table>
             <thead>
               <tr>
                 <th>ID</th>
@@ -87,7 +87,7 @@ export default function AdminCustomersPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </div>
         {totalPages > 1 && (
           <div className="pagination">
