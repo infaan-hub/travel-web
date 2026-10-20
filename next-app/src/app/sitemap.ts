@@ -17,45 +17,54 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/register/", priority: 0.4 },
   ];
 
-  const [tours, attractions, tips] = await Promise.all([
-    prisma.tour.findMany({
-      where: { deletedAt: null, available: true },
-      select: { id: true, updatedAt: true },
-    }),
-    prisma.attraction.findMany({
-      where: { deletedAt: null },
-      select: { id: true, updatedAt: true },
-    }),
-    prisma.travelTip.findMany({
-      where: { deletedAt: null, published: true },
-      select: { id: true, updatedAt: true },
-    }),
-  ]);
+  const entries = staticRoutes.map((route) => ({
+    url: `${base}${route.path}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: route.priority,
+  }));
 
-  return [
-    ...staticRoutes.map((route) => ({
-      url: `${base}${route.path}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: route.priority,
-    })),
-    ...tours.map((tour) => ({
-      url: `${base}/tour/${tour.id}/`,
-      lastModified: tour.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    })),
-    ...attractions.map((attraction) => ({
-      url: `${base}/attractions/#${attraction.id}`,
-      lastModified: attraction.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    })),
-    ...tips.map((tip) => ({
-      url: `${base}/trips/#${tip.id}`,
-      lastModified: tip.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
-    })),
-  ];
+  // The database may be unavailable during a build; the sitemap must never
+  // break the production build.
+  try {
+    const [tours, attractions, tips] = await Promise.all([
+      prisma.tour.findMany({
+        where: { deletedAt: null, available: true },
+        select: { id: true, updatedAt: true },
+      }),
+      prisma.attraction.findMany({
+        where: { deletedAt: null },
+        select: { id: true, updatedAt: true },
+      }),
+      prisma.travelTip.findMany({
+        where: { deletedAt: null, published: true },
+        select: { id: true, updatedAt: true },
+      }),
+    ]);
+
+    return [
+      ...entries,
+      ...tours.map((tour) => ({
+        url: `${base}/tour/${tour.id}/`,
+        lastModified: tour.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      })),
+      ...attractions.map((attraction) => ({
+        url: `${base}/attractions/#${attraction.id}`,
+        lastModified: attraction.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      })),
+      ...tips.map((tip) => ({
+        url: `${base}/trips/#${tip.id}`,
+        lastModified: tip.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.5,
+      })),
+    ];
+  } catch (error) {
+    console.error("sitemap: database unavailable, serving static routes only", error);
+    return entries;
+  }
 }

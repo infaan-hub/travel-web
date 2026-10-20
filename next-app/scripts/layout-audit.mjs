@@ -51,7 +51,13 @@ const audit = () => {
       let parent = element.parentElement;
       while (parent && parent !== document.body) {
         const parentStyle = getComputedStyle(parent);
-        if (parentStyle.overflowX === "hidden" || parentStyle.overflow === "hidden") return true;
+        if (
+          parentStyle.overflowX === "hidden" ||
+          parentStyle.overflowX === "clip" ||
+          parentStyle.overflow === "hidden" ||
+          parentStyle.overflow === "clip"
+        )
+          return true;
         parent = parent.parentElement;
       }
       return false;

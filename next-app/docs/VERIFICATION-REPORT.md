@@ -24,6 +24,15 @@ translucent surfaces, frosted blur, hairline borders, three elevation levels and
 an automatic dark glass theme, all driven by CSS variables in
 `src/app/travel-theme.css`.
 
+## Layout system
+
+A shared shell now controls the whole application: `.page-container`
+(max-width 1440px, 24px desktop / 16px mobile padding, horizontal bleed
+clipped), `.page-section` (56px vertical rhythm) and `.content-grid`
+(12-column grid, 24px gap, single column below 768px). Controls are
+standardised to 50px inputs and buttons, 44px minimum tap targets, and cards
+share a 4:3 image ratio with equal heights inside a grid row.
+
 ## Coverage of the verification
 
 - Record-level database migration, including byte-identical password hashes.

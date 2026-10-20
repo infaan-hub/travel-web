@@ -455,7 +455,7 @@ body {
 }
 
 .register-btn:hover {
-  background: white;
+  background: var(--glass-bg-elevated);
   border-color: var(--aqua);
   color: var(--aqua-strong);
 }
@@ -502,7 +502,7 @@ body {
   display: block;
   width: 20px;
   height: 2.5px;
-  background: white;
+  background: var(--glass-bg-elevated);
   border-radius: 4px;
   transition: var(--transition);
 }
@@ -2634,7 +2634,7 @@ body {
 }
 
 .admin-form-card {
-  background: white;
+  background: var(--glass-bg-elevated);
   border-radius: var(--glass-radius);
   padding: 32px;
   width: 100%;
@@ -3665,7 +3665,7 @@ body {
 }
 
 .modal-content {
-  background: white;
+  background: var(--glass-bg-elevated);
   border-radius: var(--glass-radius);
   padding: 28px;
   width: 100%;
@@ -3875,7 +3875,7 @@ body {
   border: var(--glass-border);
   border-radius: var(--glass-radius-sm);
   font-size: 14px;
-  background: white;
+  background: var(--glass-bg-elevated);
   color: var(--text-primary);
   outline: none;
   transition: var(--transition);
@@ -3948,7 +3948,7 @@ body {
   left: 0;
   right: 0;
   z-index: 100;
-  background: white;
+  background: var(--glass-bg-elevated);
   border: var(--glass-border);
   border-radius: var(--glass-radius-sm);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -4054,7 +4054,7 @@ body {
   border: var(--glass-border);
   border-radius: var(--glass-radius-sm);
   font-size: 13px;
-  background: white;
+  background: var(--glass-bg-elevated);
   color: var(--text-primary);
   outline: none;
   transition: var(--transition);

@@ -13,43 +13,46 @@
   --brand-accent: #14A3A3;
   --brand-soft: #DCE9E5;
 
-  /* Surfaces */
+  /* Main surfaces */
   --page-bg: #D8E4E0;
   --surface: #FFFFFF;
   --surface-soft: #E9F0EE;
 
-  /* Text */
+  /* Typography */
   --text-primary: #0F2A2E;
   --text-secondary: #4A6469;
   --text-muted: #6B7D82;
 
+  /* Borders */
   --line: rgba(15, 107, 107, 0.14);
 
-  /* Glass */
+  /* Glass family */
   --glass-bg: rgba(240, 246, 244, 0.58);
   --glass-bg-elevated: rgba(247, 251, 250, 0.78);
-  --glass-bg-soft: rgba(216, 228, 224, 0.5);
+  --glass-bg-soft: rgba(216, 228, 224, 0.50);
   --glass-bg-aqua: rgba(216, 228, 224, 0.62);
   --glass-bg-strong: rgba(243, 248, 247, 0.88);
 
   --glass-border: rgba(255, 255, 255, 0.66);
   --glass-border-strong: rgba(15, 107, 107, 0.20);
-  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-highlight: rgba(255, 255, 255, 0.90);
 
+  /* Blur */
   --glass-blur-sm: 10px;
   --glass-blur-md: 16px;
   --glass-blur-lg: 24px;
 
+  /* Depth */
   --glass-shadow:
-    0 12px 32px rgba(9, 68, 68, 0.09),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    0 10px 28px rgba(15, 55, 55, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
   --glass-shadow-elevated:
-    0 18px 40px rgba(9, 68, 68, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.80);
+    0 16px 36px rgba(15, 55, 55, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
   --glass-shadow-floating:
-    0 24px 60px rgba(9, 68, 68, 0.18);
+    0 24px 52px rgba(15, 55, 55, 0.16);
 
-  /* Radii */
+  /* Geometry */
   --radius-button: 14px;
   --radius-card: 20px;
   --radius-hero: 36px;
@@ -57,11 +60,7 @@
   --glass-radius: var(--radius-card);
   --glass-radius-sm: 12px;
 
-  /* Accents */
-  --star: #F5A623;
-  --star-ink: #7A4A00;
-
-  /* Spacing */
+  /* Layout */
   --space-1: 6px;
   --space-2: 10px;
   --space-3: 14px;
@@ -70,8 +69,23 @@
   --space-6: 32px;
   --space-7: 44px;
   --space-8: 64px;
+  --page-padding-desktop: 24px;
+  --page-padding-mobile: 16px;
+  --section-gap: 56px;
+  --grid-gap: 24px;
+  --form-gap: 18px;
 
-  /* Legacy aliases mapped onto the glass system */
+  /* Interaction */
+  --focus-ring: #14A3A3;
+  --transition-fast: 150ms;
+  --transition-normal: 200ms;
+  --transition-slow: 250ms;
+
+  /* Rating */
+  --star: #F5A623;
+  --star-ink: #7A4A00;
+
+  /* Backward compatible aliases */
   --aqua: var(--brand);
   --aqua-dark: var(--brand-strong);
   --aqua-light: var(--brand-accent);
@@ -80,10 +94,11 @@
   --aqua-glow: rgba(20, 163, 163, 0.28);
   --bg-solid: var(--surface);
   --bg-gradient: var(--page-bg);
-  --text-light: #4A6469;
-  --border-color: var(--line);
+  --glass-bg-legacy: var(--glass-bg);
   --glass-blur: var(--glass-blur-md);
   --glass-border-legacy: var(--glass-border);
+  --text-light: var(--text-secondary);
+  --border-color: var(--line);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -137,10 +152,24 @@ body {
 body {
   background-color: var(--page-bg);
   background-image:
-    radial-gradient(1100px 620px at 12% -8%, rgba(255, 255, 255, 0.55), transparent 62%),
-    radial-gradient(900px 560px at 92% 4%, rgba(255, 255, 255, 0.3), transparent 60%),
-    radial-gradient(760px 520px at 68% 96%, rgba(255, 255, 255, 0.22), transparent 64%);
+    radial-gradient(
+      ellipse at 12% 8%,
+      rgba(255, 255, 255, 0.55),
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 88% 24%,
+      rgba(255, 255, 255, 0.30),
+      transparent 38%
+    ),
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(255, 255, 255, 0.22),
+      transparent 46%
+    );
   background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
   color: var(--text-primary);
   font-family: var(--font-inter), Lexend, Poppins, system-ui, -apple-system, sans-serif;
 }
@@ -282,15 +311,18 @@ body {
 }
 
 /* Fallback for browsers without backdrop-filter. */
-@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-card,
   .glass-panel,
   .glass-header,
   .glass-sidebar,
   .glass-popover,
-  .glass-modal,
   .glass-input {
-    background: var(--surface);
+    background: var(--glass-bg-elevated);
+  }
+
+  .glass-modal {
+    background: var(--glass-bg-strong);
   }
 
   .glass-card::before,
@@ -308,10 +340,12 @@ body {
    ========================================================================== */
 
 .page {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: var(--space-5);
-}
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-block: var(--space-5);
+  padding-inline: var(--page-padding-desktop);
+  overflow-x: clip;
+  }
 
 .page-header {
   text-align: center;
@@ -1023,7 +1057,7 @@ select:focus,
 
 .page-hero {
   position: relative;
-  margin: 0 -24px 0;
+  margin-inline: calc(-1 * var(--page-padding-desktop));
   padding: var(--space-6) var(--space-5) 46px;
   border-radius: 0 0 var(--radius-hero) var(--radius-hero);
   background: linear-gradient(135deg, #0f6b6b 0%, #0a5252 100%);
@@ -1442,8 +1476,11 @@ select:focus,
 
 @media (max-width: 768px) {
   .page {
-    padding: var(--space-4);
-    padding-top: 68px;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-block: var(--space-5);
+  padding-inline: var(--page-padding-desktop);
+  overflow-x: clip;
   }
 
   .page-hero {
@@ -1497,6 +1534,11 @@ select:focus,
     border-radius: 0;
     box-shadow: none;
     min-height: 100dvh;
+  }
+
+  .onboarding-collage,
+  .onboarding-hero {
+    margin-inline: calc(-1 * var(--space-5));
   }
 
   .onboarding-screen {
@@ -1576,5 +1618,163 @@ select:focus,
 
   .tour-rating {
     color: var(--star-ink);
+  }
+}
+
+/* ==========================================================================
+   13. SHARED LAYOUT PRIMITIVES
+   ========================================================================== */
+
+.page-container {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: var(--page-padding-desktop);
+  overflow-x: clip;
+}
+
+.page-container > .page {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-block: var(--space-5);
+  padding-inline: var(--page-padding-desktop);
+  overflow-x: clip;
+  }
+
+.page-section {
+  margin-block: 0 var(--section-gap);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+}
+
+.content-grid > * {
+  min-width: 0;
+}
+
+.page {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-block: var(--space-5);
+  padding-inline: var(--page-padding-desktop);
+  overflow-x: clip;
+  }
+
+input,
+textarea,
+select,
+.filter-select {
+  min-height: 50px;
+}
+
+.btn {
+  min-height: 50px;
+}
+
+.btn-sm {
+  min-height: 44px;
+}
+
+.icon-btn,
+.btn-lg-icon {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Cards keep an even height and a consistent image ratio. */
+.tours-grid > *,
+.attractions-grid > *,
+.home-attractions-grid > *,
+.destinations-grid > *,
+.quick-links-grid > * {
+  display: flex;
+  flex-direction: column;
+}
+
+.tour-card-body,
+.attraction-card-body,
+.home-attraction-info,
+.booking-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tour-card-image,
+.attraction-card-image,
+.home-attraction-image {
+  aspect-ratio: 4 / 3;
+  height: auto;
+}
+
+.tour-card-image img,
+.attraction-card-image img,
+.home-attraction-image img {
+  height: 100%;
+}
+
+.tour-card-footer {
+  margin-top: auto;
+}
+
+/* Transitions use the shared timing tokens. */
+.btn,
+.glass-button,
+.tour-card,
+.attraction-card,
+.booking-card,
+.hotel-card,
+.home-attraction-card,
+.quick-link-card,
+.workspace-list-card,
+.feature-card,
+.nav-item,
+.page-hero-chip {
+  transition:
+    transform var(--transition-normal) ease,
+    box-shadow var(--transition-normal) ease,
+    background var(--transition-normal) ease,
+    border-color var(--transition-normal) ease;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .page-container,
+  .page {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-block: var(--space-5);
+  padding-inline: var(--page-padding-desktop);
+  overflow-x: clip;
+  }
+
+  .content-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .page-section {
+    margin-block: 0 44px;
+  }
+}
+
+/* ---------- Mobile page shell (last rule wins) ---------------------------- */
+
+@media (max-width: 768px) {
+  .page,
+  .page-container {
+    padding-block: var(--space-4);
+    padding-inline: var(--page-padding-mobile);
+  }
+
+  .page {
+    padding-top: 68px;
   }
 }

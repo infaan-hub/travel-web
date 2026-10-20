@@ -29,6 +29,9 @@ secondary text and `#F5A623` rating stars. Buttons use a 14px radius, cards
   onboarding styles and the dark-mode overrides (CSS variables, no toggle).
 - `src/components/PageHero.tsx` is the aqua rounded hero used across the public
   pages (title/greeting, search field, category chips, overlapping cards).
+- Shared layout primitives live in the same file: `.page-container` (max width
+  1440px, 24px desktop / 16px mobile padding), `.page-section` (56px rhythm) and
+  `.content-grid` (12-column grid, 24px gap, single column below 768px).
 - `src/features/pages/OnboardingPage.tsx` + `/onboarding/` is the two screen
   onboarding flow: the collage welcome screen and the full-image "Explore The
   World" slides that end at sign up.
