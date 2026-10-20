@@ -9,8 +9,9 @@ backend + React/Vite frontend into a single Next.js App Router application.
 The interface uses a premium aqua glassmorphism language: translucent layered
 surfaces, frosted `backdrop-filter` blur, hairline glass borders, soft inner
 highlights and three elevation levels. All of it lives in
-`src/app/travel-theme.css` as CSS variables, with a matching dark scheme that
-switches automatically through `prefers-color-scheme`.
+`src/app/travel-theme.css` as CSS variables, with a matching dark scheme that is
+opt-in through the `.dark` theme class (the light scheme is the default and is
+never switched automatically by the operating system preference).
 
 Shared classes: `glass-card`, `glass-card-elevated`, `glass-panel`,
 `glass-button`, `glass-button-primary`, `glass-button-secondary`, `glass-input`,

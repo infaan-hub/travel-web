@@ -3,6 +3,7 @@
    Centralised tokens, themes, glass component library and responsive rules.
    Imported after the base stylesheet so it always wins.
    ========================================================================== */
+ /* CLINE_TEST_MARKER */
 
 :root {
   color-scheme: light;
@@ -101,55 +102,57 @@
   --border-color: var(--line);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
+/* Dark scheme is opt-in through the .dark theme class. It is never applied
+   automatically merely because the operating system prefers dark mode. */
+html.dark, body.dark, .dark {
+  color-scheme: dark;
 
-    --surface: #0E2226;
-    --surface-soft: #133036;
-    --page-bg: #0A1B1E;
+  --surface: #0E2226;
+  --surface-soft: #133036;
+  --page-bg: #0A1B1E;
 
-    --text-primary: #ECFDFD;
-    --text-secondary: #B4CBCE;
-    --text-muted: #9FB9BC;
+  --text-primary: #ECFDFD;
+  --text-secondary: #B4CBCE;
+  --text-muted: #9FB9BC;
 
-    --line: rgba(140, 220, 220, 0.18);
+  --line: rgba(140, 220, 220, 0.18);
 
-    --glass-bg: rgba(14, 34, 38, 0.64);
-    --glass-bg-elevated: rgba(19, 48, 54, 0.82);
-    --glass-bg-soft: rgba(19, 48, 54, 0.48);
-    --glass-bg-aqua: rgba(20, 163, 163, 0.18);
-    --glass-bg-strong: rgba(12, 30, 34, 0.9);
+  --glass-bg: rgba(14, 34, 38, 0.64);
+  --glass-bg-elevated: rgba(19, 48, 54, 0.82);
+  --glass-bg-soft: rgba(19, 48, 54, 0.48);
+  --glass-bg-aqua: rgba(20, 163, 163, 0.18);
+  --glass-bg-strong: rgba(12, 30, 34, 0.9);
 
-    --glass-border: rgba(180, 235, 235, 0.16);
-    --glass-border-strong: rgba(140, 220, 220, 0.28);
-    --glass-highlight: rgba(220, 255, 255, 0.12);
+  --glass-border: rgba(180, 235, 235, 0.16);
+  --glass-border-strong: rgba(140, 220, 220, 0.28);
+  --glass-highlight: rgba(220, 255, 255, 0.12);
 
-    --glass-shadow:
-      0 18px 40px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(220, 255, 255, 0.08);
-    --glass-shadow-elevated:
-      0 24px 52px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(220, 255, 255, 0.12);
-    --glass-shadow-floating:
-      0 28px 70px rgba(0, 0, 0, 0.58);
+  --glass-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(220, 255, 255, 0.08);
+  --glass-shadow-elevated:
+    0 24px 52px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(220, 255, 255, 0.12);
+  --glass-shadow-floating:
+    0 28px 70px rgba(0, 0, 0, 0.58);
 
-    --aqua-strong: #8FDCDC;
-    --text-light: #A9C3C6;
-    --star-ink: #F5A623;
-  }
+  --aqua-strong: #8FDCDC;
+  --text-light: #A9C3C6;
+  --star-ink: #F5A623;
 }
 
 /* ==========================================================================
    1. ATMOSPHERIC BACKGROUND
    ========================================================================== */
 
-html,
-body {
+html {
+  background: var(--page-bg);
+  color: var(--text-primary);
   min-height: 100%;
 }
 
 body {
+  min-height: 100vh;
   background-color: var(--page-bg);
   background-image:
     radial-gradient(
@@ -172,15 +175,6 @@ body {
   background-size: cover;
   color: var(--text-primary);
   font-family: var(--font-inter), Lexend, Poppins, system-ui, -apple-system, sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background-image:
-      radial-gradient(1100px 620px at 12% -8%, rgba(20, 163, 163, 0.18), transparent 62%),
-      radial-gradient(900px 560px at 92% 4%, rgba(15, 107, 107, 0.24), transparent 60%),
-      radial-gradient(760px 520px at 68% 96%, rgba(120, 220, 210, 0.10), transparent 64%);
-  }
 }
 
 .app-layout {
@@ -658,10 +652,13 @@ body {
   display: block;
 }
 
-.destination-info,
 .tour-detail-overlay,
 .gallery-badge {
   color: #ffffff;
+}
+
+.destination-info {
+  color: var(--text-primary);
 }
 
 /* Text that sits on photography keeps a readable scrim. */
@@ -684,9 +681,13 @@ body {
   background: rgba(21, 68, 140, 0.88);
 }
 
-.destination-info,
+.destination-info {
+  position: relative;
+  background: var(--glass-bg-elevated);
+}
+
 .tour-detail-overlay {
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.78) 55%, rgba(0, 0, 0, 0.9));
+  background: linear-gradient(transparent, rgba(10, 60, 60, 0.55));
 }
 
 .destination-link {
@@ -770,7 +771,10 @@ body {
 
 .nav-item {
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 11px 14px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   border: 1px solid transparent;
   transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
@@ -832,7 +836,7 @@ body {
 }
 
 .sidebar-overlay {
-  background: rgba(8, 42, 42, 0.34);
+  background: rgba(15, 107, 107, 0.10);
   -webkit-backdrop-filter: blur(var(--glass-blur-lg));
   backdrop-filter: blur(var(--glass-blur-lg));
 }
@@ -1071,7 +1075,7 @@ select:focus,
   position: absolute;
   inset: 0 0 auto;
   height: 110px;
-  background: linear-gradient(rgba(4, 40, 40, 0.28), transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent);
   pointer-events: none;
 }
 
@@ -1187,7 +1191,8 @@ select:focus,
 }
 
 .hero-content {
-  background: linear-gradient(180deg, rgba(10, 60, 60, 0.22), rgba(10, 60, 60, 0.62));
+  background: var(--glass-bg-soft);
+  color: var(--text-primary);
 }
 
 .cta-section {
