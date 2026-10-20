@@ -1,0 +1,355 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TourCategory {
+  zanzibar
+  tanzania
+  international
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  deleted
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum WorkspaceStatus {
+  draft
+  approved
+  completed
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  username    String    @unique
+  email       String    @default("")
+  password    String
+  firstName   String    @default("") @map("first_name")
+  lastName    String    @default("") @map("last_name")
+  isStaff     Boolean   @default(false) @map("is_staff")
+  isActive    Boolean   @default(true) @map("is_active")
+  isSuperuser Boolean   @default(false) @map("is_superuser")
+  dateJoined  DateTime  @default(now()) @map("date_joined")
+  lastLogin   DateTime? @map("last_login")
+
+  profile    Profile?
+  bookings   Booking[]
+  reviews    Review[]
+  workspaces Workspace[]       @relation("WorkspaceTourist")
+  travelTips TravelTip[]
+  visits     VisitorTracking[]
+
+  @@index([email])
+  @@index([isStaff])
+  @@map("users")
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique @map("user_id")
+  fullName  String   @default("") @map("full_name")
+  phone     String   @default("")
+  address   String   @default("")
+  image     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Tour {
+  id               Int          @id @default(autoincrement())
+  title            String
+  description      String
+  shortDescription String       @default("") @map("short_description")
+  price            Decimal      @db.Decimal(10, 2)
+  duration         String
+  destination      String
+  destinationLat   Float?       @map("destination_lat")
+  destinationLng   Float?       @map("destination_lng")
+  category         TourCategory @default(international)
+  image            String?
+  image2           String?
+  image3           String?
+  includes         Json         @default("[]")
+  excludes         Json         @default("[]")
+  available        Boolean      @default(true)
+  featured         Boolean      @default(false)
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  galleryImages TourGalleryImage[]
+  itinerary     ItineraryItem[]
+  reviews       Review[]
+  bookings      Booking[]
+  workspaces    Workspace[]        @relation("WorkspaceTours")
+
+  @@index([category, available])
+  @@index([featured])
+  @@index([price])
+  @@index([createdAt])
+  @@map("tours")
+}
+
+model TourGalleryImage {
+  id        Int      @id @default(autoincrement())
+  tourId    Int      @map("tour_id")
+  image     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId, order])
+  @@map("tour_gallery_images")
+}
+
+model ItineraryItem {
+  id          Int    @id @default(autoincrement())
+  tourId      Int    @map("tour_id")
+  day         Int
+  title       String
+  description String
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId, day])
+  @@map("itinerary_items")
+}
+
+model Attraction {
+  id              Int      @id @default(autoincrement())
+  name            String
+  description     String   @default("")
+  location        String
+  region          String   @default("")
+  category        String   @default("")
+  image           String?
+  bestTimeToVisit String   @default("") @map("best_time_to_visit")
+  entryFee        String   @default("") @map("entry_fee")
+  activities      String   @default("")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([region])
+  @@index([category])
+  @@map("attractions")
+}
+
+model Review {
+  id        Int          @id @default(autoincrement())
+  userId    Int?         @map("user_id")
+  tourId    Int?         @map("tour_id")
+  rating    Int
+  content   String
+  status    ReviewStatus @default(pending)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tour Tour? @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tourId])
+  @@index([tourId, status])
+  @@index([status, createdAt])
+  @@map("reviews")
+}
+
+model Booking {
+  id                Int           @id @default(autoincrement())
+  userId            Int?          @map("user_id")
+  tourId            Int           @map("tour_id")
+  fullName          String        @map("full_name")
+  email             String
+  phone             String
+  address           String        @default("")
+  travelers         Int
+  travelDate        DateTime      @map("travel_date") @db.Date
+  notes             String        @default("")
+  status            BookingStatus @default(pending)
+  userLat           Float?        @map("user_lat")
+  userLng           Float?        @map("user_lng")
+  distanceKm        Float?        @map("distance_km")
+  estimatedTimeMins Int?          @map("estimated_time_mins")
+  googleMapsUrl     String        @default("") @map("google_maps_url")
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tour Tour  @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([tourId])
+  @@map("bookings")
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String   @default("")
+  subject   String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([isRead, createdAt])
+  @@map("contact_messages")
+}
+
+model TravelTip {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  category  String   @default("")
+  image     String?
+  authorId  Int?     @map("author_id")
+  published Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([published, createdAt])
+  @@index([category])
+  @@map("travel_tips")
+}
+
+model HomeSetting {
+  id            Int      @id @default(1)
+  heroImage     String?  @map("hero_image")
+  zanzibarImage String?  @map("zanzibar_image")
+  tanzaniaImage String?  @map("tanzania_image")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("home_settings")
+}
+
+model TravelDriver {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  image     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  workspaces Workspace[] @relation("WorkspaceDriver")
+
+  @@map("travel_drivers")
+}
+
+model TravelVehicle {
+  id          Int      @id @default(autoincrement())
+  carName     String   @map("car_name")
+  plateNumber String   @map("plate_number")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  workspaces Workspace[] @relation("WorkspaceVehicle")
+
+  @@map("travel_vehicles")
+}
+
+model Hotel {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String
+  phone     String   @default("")
+  image     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  rooms      Room[]
+  workspaces Workspace[] @relation("WorkspaceHotel")
+
+  @@index([name])
+  @@map("hotels")
+}
+
+model Room {
+  id          Int      @id @default(autoincrement())
+  hotelId     Int      @map("hotel_id")
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  description String   @default("")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  hotel      Hotel       @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  workspaces Workspace[] @relation("WorkspaceRooms")
+
+  @@index([hotelId])
+  @@map("rooms")
+}
+
+model Workspace {
+  id                      Int             @id @default(autoincrement())
+  touristId               Int?            @map("tourist_id")
+  touristName             String          @default("") @map("tourist_name")
+  touristEmail            String          @default("") @map("tourist_email")
+  selectedHotelId         Int?            @map("selected_hotel_id")
+  selectedTravelDriverId  Int?            @map("selected_travel_driver_id")
+  selectedTravelVehicleId Int?            @map("selected_travel_vehicle_id")
+  totalPrice              Decimal?        @map("total_price") @db.Decimal(12, 2)
+  notes                   String          @default("")
+  status                  WorkspaceStatus @default(draft)
+  messageSent             Boolean         @default(false) @map("message_sent")
+  createdAt               DateTime        @default(now()) @map("created_at")
+  updatedAt               DateTime        @updatedAt @map("updated_at")
+
+  tourist               User?           @relation("WorkspaceTourist", fields: [touristId], references: [id], onDelete: SetNull)
+  selectedHotel         Hotel?          @relation("WorkspaceHotel", fields: [selectedHotelId], references: [id], onDelete: SetNull)
+  selectedTravelDriver  TravelDriver?   @relation("WorkspaceDriver", fields: [selectedTravelDriverId], references: [id], onDelete: SetNull)
+  selectedTravelVehicle TravelVehicle?  @relation("WorkspaceVehicle", fields: [selectedTravelVehicleId], references: [id], onDelete: SetNull)
+  selectedTours         Tour[]          @relation("WorkspaceTours")
+  selectedRooms         Room[]          @relation("WorkspaceRooms")
+  tasks                 WorkspaceTask[]
+
+  @@index([status, createdAt])
+  @@index([touristId])
+  @@map("workspaces")
+}
+
+model WorkspaceTask {
+  id          Int      @id @default(autoincrement())
+  workspaceId Int      @map("workspace_id")
+  day         Int
+  title       String
+  description String   @default("")
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, day])
+  @@map("workspace_tasks")
+}
+
+model VisitorTracking {
+  id              Int      @id @default(autoincrement())
+  sessionId       String   @map("session_id")
+  pageUrl         String   @map("page_url")
+  userId          Int?     @map("user_id")
+  ipAddress       String?  @map("ip_address")
+  userAgent       String   @default("") @map("user_agent")
+  isAuthenticated Boolean  @default(false) @map("is_authenticated")
+  tourId          Int?     @map("tour_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([tourId])
+  @@map("visitor_tracking")
+}

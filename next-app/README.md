@@ -1,0 +1,65 @@
+# Infaan Tours & Travel — unified Next.js application
+
+This directory is the production-oriented migration of the former Django REST
+backend + React/Vite frontend into a single Next.js App Router application.
+
+
+## Stack
+
+- Next.js 16.4.2 (App Router), React 19.3.1, TypeScript (strict)
+- Prisma 6.19.3 + PostgreSQL
+- Tailwind CSS 4.3.3 plus the preserved legacy design system in `src/app/globals.css`
+- Zod 4.6.7, `@node-rs/argon2` 2.2.2, `jose` 6.2.12, `nodemailer` 10.1.7
+
+## Getting started
+
+```bash
+cp .env.example .env
+# edit DATABASE_URL, AUTH_SECRET and the optional integration settings
+npm install
+npm run db:local      # starts the embedded PostgreSQL cluster on 127.0.0.1:55432
+npm run db:migrate    # applies prisma/migrations
+npm run db:import     # imports Backend/db.sqlite3 into PostgreSQL
+npm run db:verify     # record-level verification against the source export
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+## Scripts
+
+- `npm run dev` — development server
+- `npm run build` / `npm run start` — production build and server
+- `npm run typecheck` — `tsc --noEmit`
+- `npm run lint` — ESLint
+- `npm test` — Vitest unit tests
+- `npm run smoke` — API and security smoke test against a running server
+- `npm run smoke:browser` — Playwright-free Chrome smoke test
+- `npm run db:export` / `npm run db:import` / `npm run db:verify`
+- `npm run admin:create` — create an administrator explicitly
+
+## Environment
+
+See `.env.example`. Production requires a real PostgreSQL `DATABASE_URL`,
+a 32+ character `AUTH_SECRET`, and (for production media) Supabase Storage
+credentials. SMTP, WhatsApp and Nominatim settings are optional but enable the
+corresponding booking features.
+
+## Authentication
+
+- Browser sessions use HTTP-only `infaan_session` / `infaan_refresh` cookies.
+- Mobile applications continue to use `POST /api/token/` and
+  `POST /api/token/refresh/` with Bearer tokens.
+- Legacy Django `pbkdf2_sha256` password hashes are accepted and upgraded to
+  Argon2id on the next successful login.
+
+## Media
+
+Development stores uploads in `public/uploads`. Production uses Supabase Storage
+through its REST API and stores object keys (never image bytes) in PostgreSQL.
+
+## Documentation
+
+- `docs/DEPLOYMENT.md`
+- `docs/ROLLBACK.md`
+- `docs/VERIFICATION-REPORT.md`
