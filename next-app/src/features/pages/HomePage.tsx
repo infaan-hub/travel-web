@@ -12,6 +12,7 @@ import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
+import { PageHero } from "@/components/PageHero";
 
 import type {  Attraction, HomeSettings, Review, Tour  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
@@ -28,6 +29,7 @@ export default function HomePage() {
   const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
   const [reviewSaving, setReviewSaving] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState('');
+  const [search, setSearch] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -69,15 +71,12 @@ export default function HomePage() {
 
   return (
     <div className="page home-page">
-      <section className="hero-section" style={homeSettings?.hero_image_url ? {
-        backgroundImage: `url(${getImageUrl(homeSettings.hero_image_url)})`,
-      } : {}}>
-        <div className="hero-overlay"></div>
-        <div className="hero-content">
-          <h1>Infaan tours and travel</h1>
-          <p>From the pristine beaches of Zanzibar to the wild savannahs of Serengeti, let us craft your perfect African adventure with expert guides, seamless planning, and personalized service every step of the way</p>
-        </div>
-      </section>
+      <PageHero
+        title="Start Exploring The World"
+        subtitle="From the pristine beaches of Zanzibar to the wild savannahs of Serengeti, let us craft your perfect African adventure with expert guides, seamless planning and personalized service every step of the way."
+        search={{ value: search, onChange: setSearch, placeholder: "Search tours, places and tips" }}
+        chips={["Zanzibar", "Tanzania", "Safaris", "Beaches"]}
+      />
 
       <section className="destinations-section">
         <div className="section-header">
@@ -158,7 +157,7 @@ export default function HomePage() {
       {reviews.length > 0 && (
         <section className="testimonials-section">
           <div className="section-header">
-            <h2>What Our Travelers Say About Infaan tours and travel</h2>
+            <h2>What Our Travelers Say About Travel.</h2>
             <p>Read reviews from our happy travelers who experienced Africa with us</p>
           </div>
           <div className="testimonials-grid">
@@ -263,7 +262,7 @@ export default function HomePage() {
 
       <section className="cta-section">
         <div className="cta-content">
-          <h2>Ready for Your African Adventure with Infaan tours and travel?</h2>
+          <h2>Ready for Your African Adventure with Travel.?</h2>
           <p>Book your dream tour today and create memories that last a lifetime. Our travel experts are here to help you plan every detail.</p>
           <button className="btn btn-primary btn-large" onClick={() => router.push('/tours')}>
             Start Planning Your Trip

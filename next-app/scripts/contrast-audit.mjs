@@ -62,14 +62,20 @@ const audit = () => {
     return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
   };
 
-  const effectiveBackground = (element) => {
+  const gradientStops = (image) => {
+    const stops = image.match(/rgba?\([^)]+\)|#[0-9a-f]{3,6}/gi) || [];
+    return stops.map((stop) => parse(stop)).filter(Boolean);
+  };
+
+  const effectiveBackground = (element, skipOwnGradient = false) => {
     let node = element;
     const layers = [];
     let imageBackground = false;
+    let first = true;
     while (node && node.nodeType === 1) {
       const style = getComputedStyle(node);
       const image = style.backgroundImage;
-      if (image && image !== "none") {
+      if (image && image !== "none" && !(first && skipOwnGradient)) {
         if (/url\(/.test(image)) {
           imageBackground = true;
           break;
@@ -91,6 +97,7 @@ const audit = () => {
         if (background.a === 1) break;
       }
       node = node.parentElement;
+      first = false;
     }
     let result = { r: 255, g: 255, b: 255, a: 1 };
     for (const layer of layers.reverse()) {
@@ -113,9 +120,25 @@ const audit = () => {
         const key = `${parent.className}|${text.slice(0, 24)}`;
         if (!seen.has(key)) {
           seen.add(key);
-          const foreground = parse(style.color);
+          const fill = style.webkitTextFillColor || "";
+          const gradientText =
+            /rgba\(0,\s*0,\s*0,\s*0\)/.test(fill) && style.backgroundImage.includes("gradient");
+          let foreground = parse(style.color);
+          if (gradientText) {
+            // The glyphs are painted with the gradient: use its lightest stop
+            // as the worst case and ignore the element's own background.
+            const stops = gradientStops(style.backgroundImage);
+            if (stops.length) {
+              foreground = stops.reduce((lightest, stop) =>
+                luminance(stop) > luminance(lightest) ? stop : lightest,
+              );
+            }
+          }
           if (foreground && foreground.a > 0) {
-            const { colour: background, imageBackground } = effectiveBackground(parent);
+            const { colour: background, imageBackground } = effectiveBackground(
+              parent,
+              gradientText,
+            );
             if (imageBackground) {
               // Text sits on top of photography: the contrast depends on the
               // scrim that covers the image, which the audit cannot sample.
@@ -159,21 +182,25 @@ const browser = await puppeteer.launch({
 
 const failures = [];
 let imageBackedCount = 0;
+const SCHEMES = ["light", "dark"];
+for (const scheme of SCHEMES) {
 for (const target of PAGES) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 1000 });
+  await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: scheme }]);
   try {
     await page.goto(`${BASE}${target.path}`, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForNetworkIdle({ idleTime: 400, timeout: 10000 }).catch(() => {});
     const { results, imageBacked } = await page.evaluate(audit);
     imageBackedCount += imageBacked;
     for (const result of results) {
-      failures.push({ page: target.name, ...result });
+      failures.push({ page: `${scheme}/${target.name}`, ...result });
     }
   } catch (error) {
     console.log(`skipped ${target.path}: ${error.message}`);
   }
   await page.close();
+}
 }
 
 await browser.close();

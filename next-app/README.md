@@ -4,6 +4,21 @@ This directory is the production-oriented migration of the former Django REST
 backend + React/Vite frontend into a single Next.js App Router application.
 
 
+## Brand and design system
+
+The product is branded **Travel.** and uses the teal/aqua travel-booking theme:
+deep teal `#0F6B6B` primary, aqua `#14A3A3` accent, white surfaces, `#7B8A90`
+secondary text and `#F5A623` rating stars. Buttons use a 14px radius, cards
+20px and hero headers 32–40px.
+
+- `src/app/travel-theme.css` holds the design tokens, the aqua hero header, the
+  onboarding styles and the dark-mode overrides (CSS variables, no toggle).
+- `src/components/PageHero.tsx` is the aqua rounded hero used across the public
+  pages (title/greeting, search field, category chips, overlapping cards).
+- `src/features/pages/OnboardingPage.tsx` + `/onboarding/` is the two screen
+  onboarding flow: the collage welcome screen and the full-image "Explore The
+  World" slides that end at sign up.
+
 ## Stack
 
 - Next.js 16.4.2 (App Router), React 19.3.1, TypeScript (strict)
@@ -35,7 +50,8 @@ Open `http://localhost:3000`.
 - `npm test` — Vitest unit tests
 - `npm run smoke` — API and security smoke test against a running server
 - `npm run smoke:browser` — Playwright-free Chrome smoke test
-- `npm run audit:contrast` — runtime WCAG AA contrast audit
+- `npm run audit:contrast` — runtime WCAG AA contrast audit (light and dark)
+- `npm run test:onboarding` — onboarding flow checks on mobile and desktop
 - `npm run db:seed` — seed demo content and an administrator
 - `npm run admin:create` — create an administrator explicitly
 

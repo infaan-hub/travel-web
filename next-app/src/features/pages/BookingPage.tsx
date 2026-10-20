@@ -165,7 +165,7 @@ export default function BookingPage() {
     <div className="page booking-page">
       <div className="page-header">
         <h1>{tour ? `Book: ${tour.title}` : 'Book a Tour'}</h1>
-        <p>Fill in your details below and Infaan tours and travel will confirm your reservation with personalized care</p>
+        <p>Fill in your details below and Travel. will confirm your reservation with personalized care</p>
       </div>
 
       {success ? (
@@ -175,7 +175,7 @@ export default function BookingPage() {
           <p>
             {sendMethod === 'push'
               ? 'Your booking request has been received and our team has been notified. You will get an instant notification with your booking reference, and we will contact you within 24 hours with confirmation and further instructions for your tour.'
-              : 'WhatsApp chat has been opened with your booking details with Infaan tours and travel. Our team at +255711252758 will respond shortly to help plan your perfect experience.'}
+              : 'WhatsApp chat has been opened with your booking details with Travel.. Our team at +255711252758 will respond shortly to help plan your perfect experience.'}
           </p>
           <div className="success-actions">
             <button className="btn btn-primary" onClick={() => router.push('/bookings')}>
@@ -265,7 +265,7 @@ export default function BookingPage() {
                   <input type="radio" name="sendMethod" value="whatsapp" checked={sendMethod === 'whatsapp'} onChange={() => setSendMethod('whatsapp')} />
                   <span className="method-icon"><MessageSquare size={24} /></span>
                   <span className="method-label">Send via WhatsApp</span>
-                  <span className="method-desc">Open WhatsApp chat with Infaan tours and travel with your booking details to +255711252758 for quick confirmation</span>
+                  <span className="method-desc">Open WhatsApp chat with Travel. with your booking details to +255711252758 for quick confirmation</span>
                 </label>
               </div>
 

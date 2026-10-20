@@ -8,6 +8,7 @@ import TourCard from '@/components/TourCard';
 import { Search } from 'lucide-react';
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import type {  Tour  } from "@/features/pages/types";
+import { PageHero } from "@/components/PageHero";
 
 export default function ToursPage() {
   const { category } = useParams<Record<string, string>>();
@@ -30,13 +31,19 @@ export default function ToursPage() {
 
   const title = !category ? 'All Tours' : category === 'zanzibar' ? 'Zanzibar Tours' : 'Tanzania Safaris';
   const subtitle = !category
-    ? 'Explore all our amazing tour packages with Infaan tours and travel'
+    ? 'Explore all our amazing tour packages with Travel.'
     : category === 'zanzibar'
       ? 'Discover the paradise islands of Zanzibar'
-      : 'Experience the wild beauty of Tanzania with Infaan tours and travel';
+      : 'Experience the wild beauty of Tanzania with Travel.';
 
   return (
     <div className="page tours-page">
+      <PageHero
+        title="Explore The World"
+        subtitle="Curated day tours, overnight stays and safaris across Zanzibar and Tanzania."
+        search={{ value: search, onChange: (value: string) => setSearch(value), placeholder: "Search tours" }}
+        chips={["All", "Zanzibar", "Tanzania", "International"]}
+      />
       <div className="page-header">
         <h1>{title}</h1>
         <p>{subtitle}</p>

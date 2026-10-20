@@ -6,6 +6,7 @@ import AttractionCard from '@/components/AttractionCard';
 import { Map } from 'lucide-react';
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import type {  Attraction  } from "@/features/pages/types";
+import { PageHero } from "@/components/PageHero";
 
 export default function AttractionsPage() {
   const [attractions, setAttractions] = useState<Attraction[]>([]);
@@ -43,9 +44,15 @@ export default function AttractionsPage() {
 
   return (
     <div className="page attractions-page">
+      <PageHero
+        title="Explore The World"
+        subtitle="Beaches, caves, markets and wildlife — the places travellers keep coming back to."
+        chips={["All", "National Parks", "Beaches", "Mountains", "Cultural"]}
+        onChipClick={(chip: string) => setFilter(chip === "All" ? "all" : chip.toLowerCase())}
+      />
       <div className="page-header">
         <h1>Attractions</h1>
-        <p>Discover the amazing attractions of Zanzibar and Tanzania with Infaan tours and travel</p>
+        <p>Discover the amazing attractions of Zanzibar and Tanzania with Travel.</p>
       </div>
 
       <div className="filters-bar">

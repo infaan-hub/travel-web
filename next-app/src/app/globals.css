@@ -253,7 +253,7 @@ body {
   font-weight: 700;
   white-space: nowrap;
   color: var(--text-primary);
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -272,7 +272,7 @@ body {
 
 .collapse-btn:hover {
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   transform: scale(1.05);
 }
 
@@ -298,13 +298,13 @@ body {
 
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   transform: translateX(4px);
 }
 
 .nav-item.active {
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   font-weight: 600;
   border: 1px solid rgba(157, 150, 121, 0.15);
 }
@@ -342,7 +342,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -383,7 +383,7 @@ body {
 .user-badge {
   display: inline-block;
   font-size: 10px;
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   color: white;
   padding: 2px 10px;
   border-radius: 10px;
@@ -457,17 +457,17 @@ body {
 .register-btn:hover {
   background: white;
   border-color: var(--aqua);
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .login-btn:hover {
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   border-color: rgba(157, 150, 121, 0.3);
 }
 
 .register-btn {
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   color: white;
   border: none;
   box-shadow: 0 4px 15px var(--aqua-glow);
@@ -485,7 +485,7 @@ body {
   top: 16px;
   left: 16px;
   z-index: 1100;
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   border: none;
   width: 42px;
   height: 42px;
@@ -539,7 +539,7 @@ body {
   font-size: 2.5rem;
   color: var(--text-primary);
   margin-bottom: 8px;
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -810,7 +810,7 @@ body {
 
 .btn-back:hover {
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   border-color: rgba(157, 150, 121, 0.3);
 }
 
@@ -844,7 +844,7 @@ body {
 
 .btn-ghost:hover {
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   transform: translateY(-2px);
 }
 
@@ -1033,7 +1033,7 @@ body {
 }
 
 .tour-rating {
-  color: #9A3412;
+  color: var(--star-ink);
   font-weight: 600;
 }
 
@@ -1058,7 +1058,7 @@ body {
 .tour-price strong {
   font-family: var(--font-display);
   font-size: 1.4rem;
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .tour-per-person {
@@ -1168,7 +1168,7 @@ body {
 }
 
 .testimonial-author {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   font-weight: 600;
   font-size: 14px;
 }
@@ -1191,7 +1191,7 @@ body {
   font-family: var(--font-display);
   font-size: 2.2rem;
   margin-bottom: 12px;
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1454,7 +1454,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   color: white;
   font-weight: 700;
   border-radius: 12px;
@@ -1560,7 +1560,7 @@ body {
 .booking-price strong {
   font-family: var(--font-display);
   font-size: 2.2rem;
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .booking-price span {
@@ -1727,7 +1727,7 @@ body {
 .auth-header h1 {
   font-family: var(--font-display);
   font-size: 2rem;
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -2091,7 +2091,7 @@ body {
 .tour-price-tag {
   font-family: var(--font-display);
   font-size: 1.5rem;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   font-weight: 700;
 }
 
@@ -2418,18 +2418,18 @@ body {
 
 .admin-tab:hover svg {
   opacity: 1;
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .admin-tab.active {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   background: linear-gradient(135deg, var(--aqua-subtle), rgba(157, 150, 121, 0.2));
   box-shadow: 0 2px 8px var(--aqua-glow);
 }
 
 .admin-tab.active svg {
   opacity: 1;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   filter: drop-shadow(0 0 4px var(--aqua-glow));
 }
 
@@ -2547,7 +2547,7 @@ body {
 }
 
 .logo-plane {
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .nav-svg-icon {
@@ -2785,7 +2785,7 @@ body {
 }
 
 .tip-icon {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -3306,7 +3306,7 @@ body {
 
 .gallery-add-btn:hover {
   border-color: var(--aqua);
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 /* ========== REVIEWS MANAGEMENT ========== */
@@ -3485,7 +3485,7 @@ body {
 
 .geo-spinner {
   animation: spin 1s linear infinite;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
@@ -3927,7 +3927,7 @@ body {
 }
 
 .route-stat-box svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .stat-val {
@@ -3983,7 +3983,7 @@ body {
 
 .dropdown-item:hover {
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .route-estimator-field {
@@ -4039,7 +4039,7 @@ body {
 }
 
 .check-item.checked svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .custom-item-row {
@@ -4145,7 +4145,7 @@ body {
   justify-content: center;
   font-size: 48px;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-light));
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
   color: white;
 }
 
@@ -4250,7 +4250,7 @@ body {
   }
 
   .nav-item:hover {
-    color: var(--aqua);
+    color: var(--aqua-strong);
   }
 
   .user-name {
@@ -4266,7 +4266,7 @@ body {
   }
 
   .collapse-btn:hover {
-    color: var(--aqua);
+    color: var(--aqua-strong);
   }
 }
 
@@ -4309,7 +4309,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -4429,7 +4429,7 @@ body {
   height: 42px;
   border-radius: 50%;
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4484,7 +4484,7 @@ body {
 
 .tourist-card:hover .tourist-arrow {
   opacity: 1;
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .workspace-main {
@@ -4594,7 +4594,7 @@ body {
   height: 36px;
   border-radius: 50%;
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4682,7 +4682,7 @@ body {
 }
 
 .pricing-info-row svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
@@ -4709,7 +4709,7 @@ body {
 }
 
 .pricing-item svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
@@ -4721,7 +4721,7 @@ body {
 
 .pricing-item-price {
   font-weight: 700;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   white-space: nowrap;
 }
 
@@ -4742,7 +4742,7 @@ body {
 }
 
 .pricing-item.total span:last-child {
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .pricing-total-card {
@@ -4773,7 +4773,7 @@ body {
 }
 
 .pricing-total-row.grand-total span:last-child {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   font-size: 1.3rem;
 }
 
@@ -4874,7 +4874,7 @@ body {
   padding: 6px 14px;
   border-radius: 20px;
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   font-size: 13px;
   font-weight: 500;
 }
@@ -4930,7 +4930,7 @@ body {
 }
 
 .summary-card.highlight .summary-value {
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .tour-plan-content {
@@ -5042,7 +5042,7 @@ body {
 
 .selection-price {
   font-weight: 700;
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .selected-summary {
@@ -5069,7 +5069,7 @@ body {
   padding: 5px 12px;
   border-radius: 20px;
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   font-size: 13px;
   font-weight: 500;
 }
@@ -5077,7 +5077,7 @@ body {
 .selected-chip button {
   background: none;
   border: none;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -5143,7 +5143,7 @@ body {
 }
 
 .selected-badge {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
@@ -5163,7 +5163,7 @@ body {
 .room-count {
   font-size: 13px;
   font-weight: 500;
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .selected-hotel-section {
@@ -5210,13 +5210,13 @@ body {
 }
 
 .room-info svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
 .room-price {
   font-weight: 700;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   margin-left: auto;
 }
 
@@ -5256,7 +5256,7 @@ body {
 }
 
 .empty-state svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   margin-bottom: 12px;
   opacity: 0.5;
 }
@@ -5330,7 +5330,7 @@ body {
 }
 
 .ws-card svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
@@ -5359,7 +5359,7 @@ body {
 }
 
 .ws-card-value.status-completed {
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .workspace-tour-plan-detail {
@@ -5407,7 +5407,7 @@ body {
 }
 
 .ws-item-card svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
@@ -5440,7 +5440,7 @@ body {
 }
 
 .ws-tour-item svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
@@ -5471,7 +5471,7 @@ body {
 
 .ws-tour-price {
   font-weight: 700;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   font-size: 14px;
   white-space: nowrap;
 }
@@ -5542,7 +5542,7 @@ body {
 
 .day-btn:hover {
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   border-color: rgba(157, 150, 121, 0.3);
 }
 
@@ -5622,7 +5622,7 @@ body {
   padding: 4px 10px;
   border-radius: 20px;
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   flex-shrink: 0;
 }
 
@@ -5730,7 +5730,7 @@ body {
 
 .message-item .msg-date {
   font-size: 11px;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   margin-top: 6px;
   display: block;
 }
@@ -5825,7 +5825,7 @@ body {
   height: 46px;
   border-radius: 50%;
   background: var(--aqua-subtle);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5875,7 +5875,7 @@ body {
 
 .workspace-list-status.completed {
   background: rgba(157, 150, 121, 0.15);
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .workspace-list-meta {
@@ -5893,7 +5893,7 @@ body {
 }
 
 .workspace-list-meta svg {
-  color: var(--aqua);
+  color: var(--aqua-strong);
 }
 
 .workspace-list-footer {
@@ -6525,7 +6525,7 @@ select[aria-invalid="true"] {
   display: block;
   margin-top: 4px;
   font-size: 0.75rem;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   letter-spacing: 0.04em;
 }
 

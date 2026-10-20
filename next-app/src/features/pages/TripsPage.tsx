@@ -8,6 +8,7 @@ import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  Tour, TravelTip  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import { PageHero } from "@/components/PageHero";
 export default function TripsPage() {
   const [trips, setTrips] = useState<TravelTip[]>([]);
   const [tours, setTours] = useState<Tour[]>([]);
@@ -137,6 +138,11 @@ export default function TripsPage() {
 
   return (
     <div className="page trips-page">
+      <PageHero
+        title="Plan Your Route"
+        subtitle="Estimate distances, plan the day and pick up the tips locals actually use."
+        chips={["Route estimator", "Travel tips", "Getting around"]}
+      />
       <div className="page-header">
         <h1><Navigation size={22} /> Trip Route Estimator</h1>
         <p>Enter your origin and destination to estimate distance and travel time</p>

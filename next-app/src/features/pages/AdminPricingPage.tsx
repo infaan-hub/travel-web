@@ -82,7 +82,7 @@ export default function AdminPricingPage() {
     const tourList = selectedTours.map(t => `• ${t.title} - $${t.price}`).join('\n');
     const roomList = selectedRooms.map(r => `• ${r.name} - $${r.price}/night`).join('\n');
 
-    return `*Infaan Tours & Travel - Tour Plan*\n\n` +
+    return `*Travel. - Tour Plan*\n\n` +
       `Dear ${tourist?.username || 'Guest'},\n\n` +
       `Here is your personalized tour itinerary:\n\n` +
       `*Selected Tours:*\n${tourList || 'N/A'}\n\n` +
@@ -92,7 +92,7 @@ export default function AdminPricingPage() {
       `*Vehicle:* ${selectedTravelVehicle?.car_name || 'N/A'} - ${selectedTravelVehicle?.plate_number || ''}\n\n` +
       `*Total Package Price: $${finalTotal}*\n\n` +
       `${notes ? `*Notes:*\n${notes}\n\n` : ''}` +
-      `Thank you for choosing Infaan Tours & Travel!\n` +
+      `Thank you for choosing Travel.!\n` +
       `We look forward to making your trip unforgettable.`;
   };
 
@@ -113,7 +113,7 @@ export default function AdminPricingPage() {
   };
 
   const handleSendEmail = () => {
-    const subject = encodeURIComponent('Your Tour Plan - Infaan Tours & Travel');
+    const subject = encodeURIComponent('Your Tour Plan - Travel.');
     const body = encodeURIComponent(generateMessage());
     const email = tourist?.email;
     if (email) {

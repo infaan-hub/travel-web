@@ -5,6 +5,7 @@ import api from '@/lib/api/client';
 import { MapPin, Phone, Mail, Clock, CheckCircle } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+import { PageHero } from "@/components/PageHero";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function ContactPage() {
   const toast = useToast();
@@ -26,16 +27,21 @@ export default function ContactPage() {
 
   return (
     <div className="page contact-page">
+      <PageHero
+        title="Get In Touch"
+        subtitle="Tell us what you dream about and our team will build the trip around you."
+        chips={["Call", "WhatsApp", "Email"]}
+      />
       <div className="page-header">
         <h1>Contact Us</h1>
-        <p>We&apos;d love to hear from you. Get in touch with the travel experts at Infaan tours and travel and let us help plan your perfect journey.</p>
+        <p>We&apos;d love to hear from you. Get in touch with the travel experts at Travel. and let us help plan your perfect journey.</p>
       </div>
 
       <div className="contact-content">
         <div className="contact-info">
           <div className="contact-info-card">
             <h3><MapPin size={18} /> Location</h3>
-            <p>Infaan tours and travel<br/>Zanzibar, Tanzania<br/>East Africa</p>
+            <p>Travel.<br/>Zanzibar, Tanzania<br/>East Africa</p>
           </div>
           <div className="contact-info-card">
             <h3><Phone size={18} /> Phone</h3>

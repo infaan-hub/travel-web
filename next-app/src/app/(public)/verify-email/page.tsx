@@ -3,7 +3,7 @@ import VerifyEmailPage from "@/features/pages/VerifyEmailPage";
 
 export const metadata: Metadata = {
   title: "Verify your email",
-  description: "Confirm the email address on your Infaan Tours account.",
+  description: "Confirm the email address on your Travel. account.",
 };
 
 export default function Page() {

@@ -34,7 +34,7 @@ export function buildWhatsAppUrl(data: {
     data.travel_date ? `Travel date: ${data.travel_date}` : null,
     data.notes ? `Notes: ${data.notes}` : null,
     "",
-    "Sent from Infaan tours and travel.",
+    "Sent from Travel..",
   ].filter(Boolean);
 
   return `https://wa.me/${config.WHATSAPP_NUMBER.replace(/\D/g, "")}?text=${encodeURIComponent(

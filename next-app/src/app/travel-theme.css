@@ -1,0 +1,538 @@
+/* ==========================================================================
+   TRAVEL. DESIGN SYSTEM
+   Teal/aqua travel-booking theme: deep teal primary, aqua accent, rounded
+   geometry, light and dark colour schemes driven by CSS variables.
+   ========================================================================== */
+
+:root {
+  --brand: #0F6B6B;
+  --brand-strong: #0A5252;
+  --brand-accent: #14A3A3;
+  --brand-soft: #E6F4F4;
+  --star: #F5A623;
+  --star-ink: #7A4A00;
+
+  --surface: #ffffff;
+  --surface-soft: #F4FAFA;
+  --page-bg: #EAF6F6;
+  --text-primary: #0F2A2E;
+  --text-secondary: #557076;
+  --text-muted: #7B8A90;
+  --line: rgba(15, 107, 107, 0.14);
+
+  --radius-btn: 14px;
+  --radius-card: 20px;
+  --radius-hero: 40px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 18px 40px rgba(9, 68, 68, 0.12);
+  --shadow-soft: 0 8px 24px rgba(9, 68, 68, 0.08);
+
+  /* Existing design tokens are remapped onto the new palette. */
+  --aqua: #0F6B6B;
+  --aqua-dark: #0A5252;
+  --aqua-light: #14A3A3;
+  --aqua-subtle: rgba(20, 163, 163, 0.12);
+  --aqua-glow: rgba(20, 163, 163, 0.28);
+  --bg-solid: var(--surface);
+  --bg-gradient: var(--page-bg);
+  --glass-bg: rgba(255, 255, 255, 0.92);
+  --glass-border: 1px solid var(--line);
+  --text-light: #557076;
+  --border-color: var(--line);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #0E2226;
+    --surface-soft: #133036;
+    --page-bg: #0A1B1E;
+    --text-primary: #ECFDFD;
+    --text-secondary: #B4CBCE;
+    --text-muted: #9FB9BC;
+    --text-light: #A9C3C6;
+    --aqua-strong: #8FDCDC;
+    --star-ink: #F5A623;
+    --aqua-subtle: rgba(20, 163, 163, 0.2);
+    --line: rgba(140, 220, 220, 0.18);
+    --brand-soft: rgba(20, 163, 163, 0.16);
+    --glass-bg: rgba(14, 34, 38, 0.9);
+    --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.45);
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  body,
+  .page {
+    background: var(--page-bg);
+    color: var(--text-primary);
+  }
+
+  .glass-card,
+  .admin-form-card,
+  .modal-content,
+  .auth-card,
+  .tour-card,
+  .attraction-card,
+  .booking-card,
+  .admin-panel,
+  .toast-info {
+    background: var(--surface);
+    color: var(--text-primary);
+  }
+
+  .btn.btn-outline,
+  .btn-outline {
+    background: rgba(255, 255, 255, 0.06);
+    color: #7FDBDB;
+    border-color: rgba(127, 219, 219, 0.6);
+  }
+
+  .tour-destination,
+  .stat-number,
+  .destination-link,
+  strong,
+  a,
+  .tour-price {
+    color: var(--aqua-strong);
+  }
+
+  /* Gradient headings need a light gradient on dark surfaces. */
+  .logo-text,
+  .page-header h1,
+  .page-header h2 {
+    background-image: linear-gradient(135deg, #8fdcdc 0%, #14a3a3 100%);
+  }
+}
+
+/* ---------- App frame --------------------------------------------------- */
+
+body {
+  background: var(--page-bg);
+  color: var(--text-primary);
+  font-family: var(--font-inter), Lexend, Poppins, system-ui, -apple-system, sans-serif;
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.btn {
+  border-radius: var(--radius-btn);
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
+  color: #ffffff;
+  border: none;
+}
+
+.btn-outline {
+  border: 2px solid var(--brand-accent);
+  color: var(--brand);
+  background: transparent;
+}
+
+/* ---------- Page hero --------------------------------------------------- */
+
+.page-hero {
+  position: relative;
+  margin: 0 -24px 0;
+  padding: 28px 24px 44px;
+  border-radius: 0 0 var(--radius-hero) var(--radius-hero);
+  background: linear-gradient(135deg, var(--brand) 0%, #0A5252 100%);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.page-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 120px;
+  background: linear-gradient(rgba(4, 40, 40, 0.28), transparent);
+  pointer-events: none;
+}
+
+.page-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.page-hero h1,
+.page-hero h2,
+.page-hero h3,
+.page-hero p,
+.page-hero .page-hero-title,
+.page-hero .page-hero-subtitle,
+.page-hero .page-hero-eyebrow {
+  color: #ffffff;
+}
+
+.page-hero-eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.page-hero-title {
+  margin: 0;
+  font-family: var(--font-playfair), Lexend, Poppins, system-ui, sans-serif;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.page-hero-subtitle {
+  margin: 8px 0 0;
+  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.page-hero-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 10px 16px;
+  border-radius: var(--radius-btn);
+  background: rgba(255, 255, 255, 0.94);
+  color: #0F2A2E;
+}
+
+.page-hero-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: inherit;
+  outline: none;
+}
+
+.page-hero-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.page-hero-chip {
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Content cards overlap the hero slightly. */
+.page > .page-hero + * {
+  position: relative;
+  z-index: 2;
+  margin-top: -26px;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .page-hero {
+    margin: 0 -16px 0;
+    padding: 22px 16px 38px;
+    border-radius: 0 0 32px 32px;
+  }
+
+  .page > .page-hero + * {
+    margin-top: -20px;
+  }
+}
+
+/* ---------- Onboarding -------------------------------------------------- */
+
+.onboarding-shell {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--page-bg);
+  padding: 24px 16px;
+}
+
+.onboarding-frame {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border-radius: 32px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  position: relative;
+}
+
+.onboarding-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 640px;
+  padding: 0 24px 24px;
+  color: var(--text-primary);
+}
+
+.onboarding-collage {
+  position: relative;
+  height: 58%;
+  min-height: 330px;
+  margin: 0 -24px 18px;
+}
+
+.collage-item {
+  position: absolute;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  background: var(--surface-soft);
+}
+
+.collage-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.collage-circle {
+  top: 6%;
+  left: 4%;
+  width: 42%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.collage-pill {
+  top: 2%;
+  right: 8%;
+  width: 24%;
+  height: 46%;
+  border-radius: 999px;
+}
+
+.collage-pill-bottom {
+  bottom: 4%;
+  right: 4%;
+  width: 30%;
+  height: 40%;
+  border-radius: 999px 999px 28px 28px;
+}
+
+.collage-blob {
+  bottom: 2%;
+  left: 12%;
+  width: 46%;
+  height: 38%;
+  border-radius: 62% 38% 46% 54% / 48% 56% 44% 52%;
+}
+
+.onboarding-star {
+  position: absolute;
+  color: var(--brand-accent);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.onboarding-copy {
+  text-align: center;
+  margin-top: auto;
+}
+
+.onboarding-title {
+  margin: 0 0 8px;
+  font-family: var(--font-playfair), Lexend, Poppins, system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.onboarding-subtitle {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.onboarding-cta {
+  width: 100%;
+  height: 52px;
+  border-radius: var(--radius-btn);
+  border: none;
+  background: var(--brand);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.onboarding-cta:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.onboarding-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.onboarding-divider::before,
+.onboarding-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.onboarding-socials {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+.onboarding-social {
+  height: 48px;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--brand-accent);
+  background: transparent;
+  color: var(--brand);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.onboarding-hero {
+  position: relative;
+  height: 64%;
+  min-height: 380px;
+  margin: 0 -24px 0;
+  overflow: hidden;
+  border-radius: 0 0 var(--radius-hero) var(--radius-hero);
+}
+
+.onboarding-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.onboarding-dashes {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 18px 0 10px;
+}
+
+.onboarding-dash {
+  width: 28px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.onboarding-dash.active {
+  background: var(--text-primary);
+}
+
+@media (max-width: 420px) {
+  .onboarding-shell {
+    padding: 0;
+    background: var(--surface);
+  }
+
+  .onboarding-frame {
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 100dvh;
+  }
+
+  .onboarding-screen {
+    min-height: 100dvh;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 900px) {
+  .onboarding-shell {
+    gap: 40px;
+  }
+}
+
+/* ---------- Brand ------------------------------------------------------- */
+
+.brand-wordmark {
+  font-family: var(--font-playfair), Lexend, Poppins, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.onboarding-cta-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ---------- Section headers ---------------------------------------------- */
+
+.page-header {
+  background: linear-gradient(135deg, #ffffff 0%, #e6f4f4 100%);
+  border-radius: var(--radius-card);
+  padding: 22px 20px;
+}
+
+.auth-header,
+.cta-section,
+.cta-content,
+.auth-banner,
+.logo-text,
+.mobile-menu-btn {
+  color: #ffffff;
+}
+
+/* ---------- Dark mode overrides (kept last) ------------------------------ */
+
+@media (prefers-color-scheme: dark) {
+  .page-header {
+    background: linear-gradient(135deg, #133036 0%, #0e2226 100%);
+  }
+
+  .page-header h1,
+  .page-header h2,
+  .page-header p {
+    color: var(--text-primary);
+  }
+}
+
+
+/* ---------- Gradient text ------------------------------------------------- */
+
+/* Gradient headings need a light gradient on dark surfaces. */
+@media (prefers-color-scheme: dark) {
+  .logo-text,
+  .page-header h1,
+  .cta-content h2,
+  .auth-header h1 {
+    background-image: linear-gradient(135deg, #8fdcdc 0%, #14a3a3 100%);
+  }
+}

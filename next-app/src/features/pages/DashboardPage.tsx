@@ -30,7 +30,7 @@ export default function DashboardPage() {
     <div className="page dashboard-page">
       <div className="page-header">
         <h1>Welcome, {user?.username}!</h1>
-        <p>Your Infaan tours and travel dashboard - manage your bookings and explore more adventures</p>
+        <p>Your Travel. dashboard - manage your bookings and explore more adventures</p>
       </div>
 
       <div className="dashboard-stats-grid">

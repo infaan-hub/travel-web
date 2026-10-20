@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./travel-theme.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Sidebar from "@/components/Sidebar";
 import { ToastProvider } from "@/components/ToastProvider";
@@ -17,31 +18,39 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "http://localhost:3000"),
   title: {
-    default: "Infaan Tours & Travel | Zanzibar & Tanzania",
-    template: "%s | Infaan Tours & Travel",
+    default: "Travel. | Zanzibar & Tanzania trips",
+    template: "%s | Travel.",
   },
   description:
-    "Discover Zanzibar beaches, Tanzania safaris, curated tours, attractions and custom travel itineraries with Infaan Tours & Travel.",
+    "Travel. curates Zanzibar beaches, Tanzania safaris, attractions and custom itineraries in one warm, simple app.",
   keywords: [
     "Zanzibar tours",
     "Tanzania safari",
     "Zanzibar travel",
     "Tanzania holiday",
-    "Infaan Tours",
+    "Travel.",
   ],
+  applicationName: "Travel.",
   openGraph: {
-    title: "Infaan Tours & Travel",
+    title: "Travel.",
     description:
       "Curated Zanzibar and Tanzania tours, safaris, hotels and personalized itineraries.",
     type: "website",
-    siteName: "Infaan Tours & Travel",
+    siteName: "Travel.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Infaan Tours & Travel",
+    title: "Travel.",
     description: "Explore Zanzibar and Tanzania with local travel experts.",
   },
   icons: { icon: "/favicon.svg" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0F6B6B",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

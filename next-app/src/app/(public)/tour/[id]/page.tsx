@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: tour.title,
     description,
     openGraph: {
-      title: `${tour.title} | Infaan Tours & Travel`,
+      title: `${tour.title} | Travel.`,
       description,
       images: image ? [{ url: image }] : undefined,
       type: "website",

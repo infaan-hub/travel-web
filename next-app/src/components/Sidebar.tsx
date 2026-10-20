@@ -22,6 +22,7 @@ import {
   UserPlus,
   BookOpen,
   TrendingUp,
+  Sparkles,
   Eye,
   LayoutDashboard,
   Image,
@@ -100,6 +101,7 @@ export default function Sidebar() {
     { to: "/tours/tanzania", label: "Tanzania Safaris", icon: Compass },
     { to: "/attractions", label: "Attractions", icon: Map },
     { to: "/trips", label: "Trips", icon: BookOpen },
+    { to: "/onboarding/", label: "Get started", icon: Sparkles },
     ...(isAuthenticated
       ? [
           { to: "/dashboard", label: "Dashboard", icon: BarChart3 } as NavItem,
@@ -151,7 +153,7 @@ export default function Sidebar() {
         <div className="sidebar-header">
           <Link href="/" className="sidebar-logo" onClick={closeAll}>
             <Palmtree size={24} className="logo-plane" />
-            {expanded && <span className="logo-text">Infaan tours and travel</span>}
+            {expanded && <span className="logo-text brand-wordmark">Travel.</span>}
           </Link>
           {expanded && (
             <button type="button" className="collapse-btn" onClick={closeAll}>

@@ -4,7 +4,7 @@ import HomePage from "@/features/pages/HomePage";
 export const metadata: Metadata = {
   title: "Zanzibar & Tanzania Tours",
   description:
-    "Curated Zanzibar and Tanzania tours, safaris, attractions and personalised itineraries with Infaan Tours & Travel.",
+    "Curated Zanzibar and Tanzania tours, safaris, attractions and personalised itineraries with Travel..",
   alternates: { canonical: "/" },
 };
 
@@ -13,7 +13,7 @@ export default async function Page() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TravelAgency",
-    name: "Infaan Tours & Travel",
+    name: "Travel.",
     url: base,
     description:
       "Curated Zanzibar and Tanzania tours, safaris, hotels and personalised itineraries.",
