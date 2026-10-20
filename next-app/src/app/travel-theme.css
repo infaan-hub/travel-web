@@ -20,6 +20,16 @@
   --text-muted: #7B8A90;
   --line: rgba(15, 107, 107, 0.14);
 
+  /* Spacing scale */
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 44px;
+  --space-8: 64px;
+
   --radius-btn: 14px;
   --radius-card: 20px;
   --radius-hero: 40px;
@@ -534,5 +544,138 @@ body {
   .cta-content h2,
   .auth-header h1 {
     background-image: linear-gradient(135deg, #8fdcdc 0%, #14a3a3 100%);
+  }
+}
+
+/* ---------- Spacing rhythm ------------------------------------------------ */
+
+.page {
+  max-width: 1240px;
+  padding: var(--space-5);
+}
+
+.page-header {
+  margin-bottom: var(--space-6);
+}
+
+.page-header p {
+  margin: var(--space-1) 0 0;
+}
+
+.section-header {
+  margin-bottom: var(--space-6);
+}
+
+.page-hero {
+  padding: var(--space-6) var(--space-5) 46px;
+}
+
+.page-hero-search {
+  margin-top: var(--space-4);
+  padding: 12px 16px;
+}
+
+.page-hero-chips {
+  gap: 10px;
+  margin-top: var(--space-3);
+}
+
+.page > .page-hero + * {
+  margin-top: -28px;
+}
+
+.page > .page-hero + .page-header {
+  margin-top: var(--space-5);
+}
+
+.tours-grid,
+.attractions-grid,
+.destinations-grid,
+.testimonials-grid,
+.quick-links-grid {
+  gap: var(--space-5);
+}
+
+.stats-section {
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.destinations-section,
+.testimonials-section {
+  margin-bottom: var(--space-8);
+}
+
+.form-group {
+  margin-bottom: var(--space-4);
+}
+
+.form-row {
+  gap: var(--space-4);
+}
+
+.btn {
+  min-height: 46px;
+}
+
+.admin-toolbar {
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--space-4);
+    padding-top: 68px;
+  }
+
+  .page-hero {
+    margin: 0 -18px 0;
+    padding: 20px 18px 40px;
+  }
+
+  .page > .page-hero + * {
+    margin-top: -22px;
+  }
+
+  .page > .page-hero + .page-header {
+    margin-top: var(--space-4);
+  }
+
+  .stats-section,
+  .destinations-section,
+  .testimonials-section {
+    margin-bottom: var(--space-7);
+  }
+}
+
+/* ---------- Spacing fixes -------------------------------------------------- */
+
+/* Tap targets inside the collapsed sidebar stay reachable. */
+.sidebar-logo {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 4px;
+}
+
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 14px;
+}
+
+/* The route estimator stacks on small screens instead of overflowing. */
+@media (max-width: 768px) {
+  .route-input-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .route-input-row input,
+  .route-input-row button {
+    width: 100%;
   }
 }

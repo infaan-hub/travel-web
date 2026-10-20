@@ -15,6 +15,7 @@ Date: 2026-10-20
 | `npm run smoke:browser` | 33/33 checks passed |
 | `npm run audit:contrast` | 0 WCAG AA contrast failures (9 pages x light + dark) |
 | `npm run test:onboarding` | 16/16 onboarding checks (mobile + desktop) |
+| `npm run audit:layout` | 0 layout problems (10 pages, mobile + desktop) |
 
 ## Coverage of the verification
 

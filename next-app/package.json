@@ -24,7 +24,8 @@
     "smoke": "node --env-file=.env scripts/smoke-routes.mjs",
     "smoke:browser": "node --env-file=.env scripts/smoke-browser.mjs",
     "audit:contrast": "node scripts/contrast-audit.mjs",
-    "test:onboarding": "node scripts/onboarding-test.mjs"
+    "test:onboarding": "node scripts/onboarding-test.mjs",
+    "audit:layout": "node scripts/layout-audit.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

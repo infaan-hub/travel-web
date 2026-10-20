@@ -29,7 +29,6 @@ export default function HomePage() {
   const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
   const [reviewSaving, setReviewSaving] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState('');
-  const [search, setSearch] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -71,12 +70,7 @@ export default function HomePage() {
 
   return (
     <div className="page home-page">
-      <PageHero
-        title="Start Exploring The World"
-        subtitle="From the pristine beaches of Zanzibar to the wild savannahs of Serengeti, let us craft your perfect African adventure with expert guides, seamless planning and personalized service every step of the way."
-        search={{ value: search, onChange: setSearch, placeholder: "Search tours, places and tips" }}
-        chips={["Zanzibar", "Tanzania", "Safaris", "Beaches"]}
-      />
+      <PageHero title="Start Exploring The World" />
 
       <section className="destinations-section">
         <div className="section-header">

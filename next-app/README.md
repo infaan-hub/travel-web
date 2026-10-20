@@ -52,6 +52,7 @@ Open `http://localhost:3000`.
 - `npm run smoke:browser` — Playwright-free Chrome smoke test
 - `npm run audit:contrast` — runtime WCAG AA contrast audit (light and dark)
 - `npm run test:onboarding` — onboarding flow checks on mobile and desktop
+- `npm run audit:layout` — spacing audit (overflow, tap targets) on mobile and desktop
 - `npm run db:seed` — seed demo content and an administrator
 - `npm run admin:create` — create an administrator explicitly
 
