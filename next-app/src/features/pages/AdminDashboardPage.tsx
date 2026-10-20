@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,13 +8,15 @@ import { useAuth } from '@/context/AuthContext';
 import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass, Briefcase } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import type {  Booking, Customer, DashboardStats  } from "@/features/pages/types";
 export default function AdminDashboardPage() {
   const toast = useToast();
   const { user, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState(null);
-  const [bookings, setBookings] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -33,11 +34,11 @@ export default function AdminDashboardPage() {
     }).catch(console.error).finally(() => setLoading(false));
   }, [authLoading, isAuthenticated, isAdmin, router]);
 
-  const handleBookingStatus = async (id, status) => {
+  const handleBookingStatus = async (id: number, status: string) => {
     try {
       await api.patch(`/bookings/${id}/`, { status });
-      setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
-    } catch (err) {
+      setBookings(bookings.map(b => b.id === id ? { ...b, status: status as Booking['status'] } : b));
+    } catch (err: any) {
       toast.error('Failed to update booking status');
     }
   };
@@ -119,7 +120,7 @@ export default function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {bookings.map((b) => (
+                    {bookings.map((b: Booking) => (
                       <tr key={b.id}>
                         <td>#{b.id}</td>
                         <td>
@@ -166,7 +167,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => (
+                  {users.map((u: any) => (
                     <tr key={u.id}>
                       <td>#{u.id}</td>
                       <td><strong>{u.username}</strong></td>

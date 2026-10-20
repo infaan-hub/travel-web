@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,12 +8,14 @@ import { workspacesAPI } from '@/lib/api/client';
 import { ArrowLeft, Mail, Check, Globe, Hotel, Truck, BedDouble, User, Smartphone, Copy } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import type {  PricingDraft, Room, Tour, Hotel as HotelType  } from "@/features/pages/types";
 export default function AdminPricingPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const { id } = useParams();
-  const [state, setState] = useState(null);
+  const { id } = useParams<Record<string, string>>();
+  const [state, setState] = useState<PricingDraft | null>(null);
 
   const [sending, setSending] = useState(false);
 
@@ -23,7 +24,7 @@ export default function AdminPricingPage() {
     // Prefer the server copy so the draft survives reloads and other devices.
     workspacesAPI
       .getPricingDraft(id)
-      .then((response) => {
+      .then((response: any) => {
         if (!active) return;
         const draft = response.data?.pricing_draft;
         if (draft) {
@@ -63,10 +64,18 @@ export default function AdminPricingPage() {
     );
   }
 
-  const { tourist, selectedTours, selectedHotel, selectedRooms, selectedTravelDriver, selectedTravelVehicle, notes } = state;
+  const {
+    tourist,
+    selectedTours = [],
+    selectedHotel,
+    selectedRooms = [],
+    selectedTravelDriver,
+    selectedTravelVehicle,
+    notes,
+  } = state;
 
-  const toursPrice = selectedTours.reduce((sum, t) => sum + (parseFloat(t.price) || 0), 0);
-  const roomsPrice = selectedRooms.reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
+  const toursPrice = selectedTours.reduce((sum: any, t: Tour) => sum + (parseFloat(String(t.price)) || 0), 0);
+  const roomsPrice = selectedRooms.reduce((sum: any, r: any) => sum + (parseFloat(String(r.price)) || 0), 0);
   const finalTotal = toursPrice + roomsPrice;
 
   const generateMessage = () => {
@@ -77,7 +86,7 @@ export default function AdminPricingPage() {
       `Dear ${tourist?.username || 'Guest'},\n\n` +
       `Here is your personalized tour itinerary:\n\n` +
       `*Selected Tours:*\n${tourList || 'N/A'}\n\n` +
-      `*Hotel:* ${selectedHotel?.name || 'N/A'} (${selectedHotel?.location || ''})\n` +
+      `*HotelType:* ${selectedHotel?.name || 'N/A'} (${selectedHotel?.location || ''})\n` +
       `*Rooms:*\n${roomList || 'N/A'}\n\n` +
       `*Travel Driver:* ${selectedTravelDriver?.name || 'N/A'} (${selectedTravelDriver?.phone || ''})\n` +
       `*Vehicle:* ${selectedTravelVehicle?.car_name || 'N/A'} - ${selectedTravelVehicle?.plate_number || ''}\n\n` +
@@ -129,7 +138,7 @@ export default function AdminPricingPage() {
         });
       }
       router.push(`/view-workspace/${id}`);
-    } catch (err) {
+    } catch (err: any) {
       toast.error('Failed to approve workspace');
     }
   };
@@ -167,7 +176,7 @@ export default function AdminPricingPage() {
             <p className="empty-text">No tours selected</p>
           ) : (
             <div className="pricing-items">
-              {selectedTours.map((tour, i) => (
+              {selectedTours.map((tour: Tour, i: number) => (
                 <div key={i} className="pricing-item">
                   <Globe size={16} />
                   <span className="pricing-item-name">{tour.title || `Tour #${tour.id || tour}`}</span>
@@ -183,7 +192,7 @@ export default function AdminPricingPage() {
         </div>
 
         <div className="pricing-details-card">
-          <h3>Hotel & Rooms</h3>
+          <h3>HotelType & Rooms</h3>
           {selectedHotel ? (
             <>
               <div className="pricing-item">
@@ -191,7 +200,7 @@ export default function AdminPricingPage() {
                 <span className="pricing-item-name">{selectedHotel.name}</span>
                 <span className="pricing-item-location">{selectedHotel.location}</span>
               </div>
-              {selectedRooms.map((room, i) => (
+              {selectedRooms.map((room: Room, i: number) => (
                 <div key={i} className="pricing-item">
                   <BedDouble size={16} />
                   <span className="pricing-item-name">{room.name}</span>

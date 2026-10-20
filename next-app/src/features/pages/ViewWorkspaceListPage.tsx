@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -8,10 +7,11 @@ import { useAuth } from '@/context/AuthContext';
 import { workspacesAPI } from '@/lib/api/client';
 import { Briefcase, Eye, User, DollarSign, Calendar, ArrowRight, CheckCircle, Clock } from 'lucide-react';
 
+import type {  Workspace  } from "@/features/pages/types";
 export default function ViewWorkspaceListPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [workspaces, setWorkspaces] = useState([]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function ViewWorkspaceListPage() {
               </div>
               <div className="workspace-list-meta">
                 <span><DollarSign size={14} /> ${ws.total_price || 0}</span>
-                <span><Calendar size={14} /> {new Date(ws.created_at).toLocaleDateString()}</span>
+                <span><Calendar size={14} /> {new Date(ws.created_at ?? 0).toLocaleDateString()}</span>
                 <span><Briefcase size={14} /> {(ws.selected_tours || []).length} tours</span>
               </div>
               <div className="workspace-list-footer">

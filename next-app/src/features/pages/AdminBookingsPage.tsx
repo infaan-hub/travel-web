@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,11 +8,14 @@ import { useAuth } from '@/context/AuthContext';
 import { ClipboardList, Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import type {  Booking  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminBookingsPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -24,19 +26,19 @@ export default function AdminBookingsPage() {
     if (authLoading) return;
     if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
     adminAPI.getAllBookings()
-      .then(res => setBookings(res.data.results || res.data))
+      .then(res => setBookings((res.data.results || res.data) as Booking[]))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [authLoading, isAuthenticated, isAdmin, router]);
 
-  const handleStatus = async (id, status) => {
+  const handleStatus = async (id: number, status: string) => {
     try {
       await adminAPI.updateBookingStatus(id, status);
-      setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
+      setBookings(bookings.map(b => b.id === id ? { ...b, status: status as Booking['status'] } : b));
     } catch { toast.error('Failed to update booking'); }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this booking?')) return;
     try {
       await adminAPI.deleteBooking(id);
@@ -65,11 +67,11 @@ export default function AdminBookingsPage() {
       <div className="admin-toolbar">
         <div className="search-input-group">
           <Search size={16} />
-          <input type="text" placeholder="Search by name, email, or tour..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />
+          <input type="text" placeholder="Search by name, email, or tour..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setSearch(e.target.value); setPage(1); }} />
         </div>
         <div className="filter-select-group">
           <Filter size={16} />
-          <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
+          <select value={statusFilter} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setStatusFilter(e.target.value); setPage(1); }}>
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
@@ -95,7 +97,7 @@ export default function AdminBookingsPage() {
             </thead>
             <tbody>
               {paged.length === 0 ? (
-                <tr><td colSpan="8" className="empty-cell">No bookings found</td></tr>
+                <tr><td colSpan={8} className="empty-cell">No bookings found</td></tr>
               ) : paged.map(b => (
                 <tr key={b.id}>
                   <td>#{b.id}</td>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,23 +8,26 @@ import { useAuth } from '@/context/AuthContext';
 import { Users, UserX, Shield, User, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import type {  Customer  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminCustomersPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [codes, setCodes] = useState({});
-  const [pendingResets, setPendingResets] = useState([]);
+  const [codes, setCodes] = useState<Record<string, string>>({});
+  const [pendingResets, setPendingResets] = useState<Customer[]>([]);
   const perPage = 10;
 
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
     adminAPI.getAllUsers()
-      .then(res => setUsers(res.data.results || res.data))
+      .then(res => setUsers((res.data.results || res.data) as Customer[]))
       .catch(console.error)
       .finally(() => setLoading(false));
     loadPendingResets();
@@ -41,7 +43,7 @@ export default function AdminCustomersPage() {
     }
   };
 
-  const issueCode = async (user, purpose) => {
+  const issueCode = async (user: Customer, purpose: any) => {
     try {
       const endpoint = purpose === 'reset'
         ? '/api/auth/password-reset/issue/'
@@ -55,14 +57,14 @@ export default function AdminCustomersPage() {
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload?.message || 'Failed to create the code');
-      setCodes((current) => ({ ...current, [`${purpose}-${user.id}`]: payload.code }));
+      setCodes((current: any) => ({ ...current, [`${purpose}-${user.id}`]: payload.code }));
       toast.success(`Code for ${user.username}: ${payload.code}`);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Failed to create the code');
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this user? This action cannot be undone.')) return;
     try {
       await adminAPI.deleteUser(id);
@@ -90,7 +92,7 @@ export default function AdminCustomersPage() {
       <div className="admin-toolbar">
         <div className="search-input-group">
           <Search size={16} />
-          <input type="text" placeholder="Search by name or email..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />
+          <input type="text" placeholder="Search by name or email..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setSearch(e.target.value); setPage(1); }} />
         </div>
       </div>
 
@@ -109,7 +111,7 @@ export default function AdminCustomersPage() {
             </thead>
             <tbody>
               {paged.length === 0 ? (
-                <tr><td colSpan="6" className="empty-cell">No customers found</td></tr>
+                <tr><td colSpan={6} className="empty-cell">No customers found</td></tr>
               ) : paged.map(u => (
                 <tr key={u.id}>
                   <td>#{u.id}</td>
@@ -143,11 +145,11 @@ export default function AdminCustomersPage() {
           <div className="admin-panel">
             <h2>Pending password resets</h2>
             <ul className="pending-list">
-              {pendingResets.map((item) => (
+              {pendingResets.map((item: Customer) => (
                 <li key={item.id}>
                   <strong>{item.username}</strong> · {item.email} · requested{' '}
                   {item.reset_requested_at ? new Date(item.reset_requested_at).toLocaleString() : ''}
-                  <button className="btn btn-sm btn-outline" onClick={() => issueCode({ id: item.id }, 'reset')}>
+                  <button className="btn btn-sm btn-outline" onClick={() => issueCode(item, 'reset')}>
                     Issue code
                   </button>
                 </li>

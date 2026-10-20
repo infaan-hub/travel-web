@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -8,12 +7,13 @@ import { contactAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { MessageSquare, Mail, Phone, User, CheckCircle, Trash2, Eye, EyeOff } from 'lucide-react';
 
+import type {  ContactMessage  } from "@/features/pages/types";
 export default function AdminMessagesPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState<ContactMessage | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -32,7 +32,7 @@ export default function AdminMessagesPage() {
     }
   };
 
-  const toggleRead = async (msg) => {
+  const toggleRead = async (msg: any) => {
     try {
       await contactAPI.update(msg.id, { is_read: !msg.is_read });
       loadMessages();
@@ -41,7 +41,7 @@ export default function AdminMessagesPage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!confirm('Delete this message?')) return;
     try {
       await contactAPI.delete(id);
@@ -79,7 +79,7 @@ export default function AdminMessagesPage() {
                 >
                   <h4>{msg.name}</h4>
                   <p>{msg.subject}</p>
-                  <span className="msg-date">{new Date(msg.created_at).toLocaleDateString()}</span>
+                  <span className="msg-date">{new Date(msg.created_at ?? 0).toLocaleDateString()}</span>
                 </div>
               ))}
             </div>
@@ -92,7 +92,7 @@ export default function AdminMessagesPage() {
                   <Mail size={14} /> {selected.email}
                   {selected.phone && <><Phone size={14} /> {selected.phone}</>}
                   <br />
-                  {new Date(selected.created_at).toLocaleString()}
+                  {new Date(selected.created_at ?? 0).toLocaleString()}
                 </p>
                 <div className="msg-body">{selected.message}</div>
                 <div className="msg-actions">

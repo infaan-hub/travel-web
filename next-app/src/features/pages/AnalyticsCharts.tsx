@@ -26,9 +26,9 @@ const TOOLTIP = {
 };
 
 type ChartProps = {
-  tourData: { name: string; tours: number }[];
-  bookingStatusData: { name: string; value: number }[];
-  visitData: { page: string; visits: number }[];
+  tourData: any[];
+  bookingStatusData: any[];
+  visitData: any[];
 };
 
 /**
@@ -69,7 +69,7 @@ export default function AnalyticsCharts({ tourData, bookingStatusData, visitData
                   `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`
                 }
               >
-                {bookingStatusData.map((_, i) => (
+                {bookingStatusData.map((_: any, i: number) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>

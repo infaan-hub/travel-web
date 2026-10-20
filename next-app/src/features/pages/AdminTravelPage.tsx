@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -10,24 +9,28 @@ import { travelDriversAPI, travelVehiclesAPI } from '@/lib/api/client';
 import { Car, Plus, Pencil, Trash2, Search, X, User } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import { isFile } from "@/features/pages/types";
+import type {  TravelDriver, TravelVehicle  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminTravelPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('drivers');
-  const [drivers, setDrivers] = useState([]);
-  const [vehicles, setVehicles] = useState([]);
+  const [drivers, setDrivers] = useState<TravelDriver[]>([]);
+  const [vehicles, setVehicles] = useState<TravelVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
   const [showDriverForm, setShowDriverForm] = useState(false);
-  const [editingDriver, setEditingDriver] = useState(null);
-  const [driverForm, setDriverForm] = useState({ name: '', phone: '', image: null });
+  const [editingDriver, setEditingDriver] = useState<TravelDriver | null>(null);
+  const [driverForm, setDriverForm] = useState<{ name: string; phone: string; image: File | null }>({ name: '', phone: '', image: null });
   const [savingDriver, setSavingDriver] = useState(false);
 
   const [showVehicleForm, setShowVehicleForm] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState(null);
-  const [vehicleForm, setVehicleForm] = useState({ car_name: '', plate_number: '' });
+  const [editingVehicle, setEditingVehicle] = useState<TravelVehicle | null>(null);
+  const [vehicleForm, setVehicleForm] = useState<{ car_name: string; plate_number: string }>({ car_name: '', plate_number: '' });
   const [savingVehicle, setSavingVehicle] = useState(false);
 
   useEffect(() => {
@@ -61,14 +64,14 @@ export default function AdminTravelPage() {
     setShowVehicleForm(false);
   };
 
-  const handleDriverSubmit = async (e) => {
+  const handleDriverSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSavingDriver(true);
     try {
       const formData = new FormData();
       formData.append('name', driverForm.name);
       formData.append('phone', driverForm.phone);
-      if (driverForm.image instanceof File) formData.append('image', driverForm.image);
+      if (isFile(driverForm.image)) formData.append('image', driverForm.image);
       if (editingDriver) {
         await travelDriversAPI.update(editingDriver.id, formData);
       } else {
@@ -76,14 +79,14 @@ export default function AdminTravelPage() {
       }
       resetDriverForm();
       loadData();
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to save driver');
     } finally {
       setSavingDriver(false);
     }
   };
 
-  const handleVehicleSubmit = async (e) => {
+  const handleVehicleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSavingVehicle(true);
     try {
@@ -94,14 +97,14 @@ export default function AdminTravelPage() {
       }
       resetVehicleForm();
       loadData();
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to save vehicle');
     } finally {
       setSavingVehicle(false);
     }
   };
 
-  const handleDeleteDriver = async (id) => {
+  const handleDeleteDriver = async (id: number) => {
     if (!window.confirm('Delete this driver?')) return;
     try {
       await travelDriversAPI.delete(id);
@@ -109,7 +112,7 @@ export default function AdminTravelPage() {
     } catch { toast.error('Failed to delete driver'); }
   };
 
-  const handleDeleteVehicle = async (id) => {
+  const handleDeleteVehicle = async (id: number) => {
     if (!window.confirm('Delete this vehicle?')) return;
     try {
       await travelVehiclesAPI.delete(id);
@@ -117,13 +120,13 @@ export default function AdminTravelPage() {
     } catch { toast.error('Failed to delete vehicle'); }
   };
 
-  const editDriver = (driver) => {
+  const editDriver = (driver: TravelDriver) => {
     setEditingDriver(driver);
     setDriverForm({ name: driver.name, phone: driver.phone, image: null });
     setShowDriverForm(true);
   };
 
-  const editVehicle = (vehicle) => {
+  const editVehicle = (vehicle: TravelVehicle) => {
     setEditingVehicle(vehicle);
     setVehicleForm({ car_name: vehicle.car_name, plate_number: vehicle.plate_number });
     setShowVehicleForm(true);
@@ -159,7 +162,7 @@ export default function AdminTravelPage() {
       <div className="admin-toolbar">
         <div className="search-input-group">
           <Search size={16} />
-          <input type="text" placeholder={`Search ${activeTab}...`} value={search} onChange={e => setSearch(e.target.value)} />
+          <input type="text" placeholder={`Search ${activeTab}...`} value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)} />
           {search && <button className="search-clear" onClick={() => setSearch('')}><X size={14} /></button>}
         </div>
         <button className="btn btn-primary" onClick={() => activeTab === 'drivers' ? setShowDriverForm(true) : setShowVehicleForm(true)}>
@@ -228,7 +231,7 @@ export default function AdminTravelPage() {
       )}
 
       {showDriverForm && (
-        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) resetDriverForm(); }}>
+        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) resetDriverForm(); }}>
           <div className="modal-content">
             <div className="modal-header">
               <h3>{editingDriver ? 'Edit Driver' : 'Add Driver'}</h3>
@@ -237,15 +240,15 @@ export default function AdminTravelPage() {
             <form onSubmit={handleDriverSubmit}>
               <div className="form-group">
                 <label>Driver Name</label>
-                <input type="text" required value={driverForm.name} onChange={e => setDriverForm({ ...driverForm, name: e.target.value })} placeholder="Enter driver name" />
+                <input type="text" required value={driverForm.name} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setDriverForm({ ...driverForm, name: e.target.value })} placeholder="Enter driver name" />
               </div>
               <div className="form-group">
                 <label>Phone Number</label>
-                <input type="text" required value={driverForm.phone} onChange={e => setDriverForm({ ...driverForm, phone: e.target.value })} placeholder="Enter phone number" />
+                <input type="text" required value={driverForm.phone} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setDriverForm({ ...driverForm, phone: e.target.value })} placeholder="Enter phone number" />
               </div>
               <div className="form-group">
                 <label>Driver Image</label>
-                <input type="file" accept="image/*" onChange={e => setDriverForm({ ...driverForm, image: e.target.files[0] })} />
+                <input type="file" accept="image/*" onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setDriverForm({ ...driverForm, image: (e.currentTarget as HTMLInputElement).files?.[0] ?? null })} />
               </div>
               <button type="submit" className="btn btn-primary btn-block" disabled={savingDriver}>
                 {savingDriver ? 'Saving...' : editingDriver ? 'Update Driver' : 'Add Driver'}
@@ -256,7 +259,7 @@ export default function AdminTravelPage() {
       )}
 
       {showVehicleForm && (
-        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) resetVehicleForm(); }}>
+        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) resetVehicleForm(); }}>
           <div className="modal-content">
             <div className="modal-header">
               <h3>{editingVehicle ? 'Edit Vehicle' : 'Add Vehicle'}</h3>
@@ -265,11 +268,11 @@ export default function AdminTravelPage() {
             <form onSubmit={handleVehicleSubmit}>
               <div className="form-group">
                 <label>Car Name</label>
-                <input type="text" required value={vehicleForm.car_name} onChange={e => setVehicleForm({ ...vehicleForm, car_name: e.target.value })} placeholder="Enter car name/model" />
+                <input type="text" required value={vehicleForm.car_name} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setVehicleForm({ ...vehicleForm, car_name: e.target.value })} placeholder="Enter car name/model" />
               </div>
               <div className="form-group">
                 <label>Plate Number</label>
-                <input type="text" required value={vehicleForm.plate_number} onChange={e => setVehicleForm({ ...vehicleForm, plate_number: e.target.value })} placeholder="Enter plate number" />
+                <input type="text" required value={vehicleForm.plate_number} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setVehicleForm({ ...vehicleForm, plate_number: e.target.value })} placeholder="Enter plate number" />
               </div>
               <button type="submit" className="btn btn-primary btn-block" disabled={savingVehicle}>
                 {savingVehicle ? 'Saving...' : editingVehicle ? 'Update Vehicle' : 'Add Vehicle'}

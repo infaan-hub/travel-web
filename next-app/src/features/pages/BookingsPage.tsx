@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -10,8 +9,11 @@ import { ClipboardList, MapPin, Users, DollarSign, CalendarDays, CheckCircle, Na
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
-function BookingGallery({ tourId, mainImage }) {
-  const [galleryUrls, setGalleryUrls] = useState([]);
+
+import type {  Booking  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+function BookingGallery({ tourId, mainImage }: { tourId: number; mainImage: string | null }) {
+  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
   const [current, setCurrent] = useState(0);
   const [open, setOpen] = useState(false);
 
@@ -21,7 +23,7 @@ function BookingGallery({ tourId, mainImage }) {
         const imgs = res.data.gallery_images || res.data.results || res.data;
         const urls = [];
         if (mainImage) urls.push(mainImage);
-        imgs.forEach(img => { if (img.image_url) urls.push(getImageUrl(img.image_url)); });
+        imgs.forEach((img: { image_url?: string | null }) => { if (img.image_url) urls.push(getImageUrl(img.image_url)); });
         setGalleryUrls(urls);
       }).catch(() => {});
     }
@@ -32,7 +34,7 @@ function BookingGallery({ tourId, mainImage }) {
   return (
     <div className="booking-gallery">
       <div className="gallery-thumbs">
-        {galleryUrls.map((url, i) => (
+        {galleryUrls.map((url: string, i: number) => (
           <img key={i} src={url} alt="" className={i === current ? 'active' : ''}
             onClick={() => { setCurrent(i); setOpen(true); }} />
         ))}
@@ -40,9 +42,9 @@ function BookingGallery({ tourId, mainImage }) {
       {open && (
         <div className="gallery-modal" onClick={() => setOpen(false)}>
           <span className="gallery-close-btn" onClick={() => setOpen(false)}><X size={24} /></span>
-          <button className="gallery-nav gallery-prev" onClick={(e) => { e.stopPropagation(); setCurrent(c => (c - 1 + galleryUrls.length) % galleryUrls.length); }}><ChevronLeft size={24} /></button>
-          <img src={galleryUrls[current]} alt="" onClick={(e) => e.stopPropagation()} />
-          <button className="gallery-nav gallery-next" onClick={(e) => { e.stopPropagation(); setCurrent(c => (c + 1) % galleryUrls.length); }}><ChevronRight size={24} /></button>
+          <button className="gallery-nav gallery-prev" onClick={(e: MouseEvent<HTMLElement>) => { e.stopPropagation(); setCurrent(c => (c - 1 + galleryUrls.length) % galleryUrls.length); }}><ChevronLeft size={24} /></button>
+          <img src={galleryUrls[current]} alt="" onClick={(e: MouseEvent<HTMLElement>) => e.stopPropagation()} />
+          <button className="gallery-nav gallery-next" onClick={(e: MouseEvent<HTMLElement>) => { e.stopPropagation(); setCurrent(c => (c + 1) % galleryUrls.length); }}><ChevronRight size={24} /></button>
           <div className="gallery-counter">{current + 1} / {galleryUrls.length}</div>
         </div>
       )}
@@ -54,9 +56,9 @@ export default function BookingsPage() {
   const toast = useToast();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState(null);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -65,12 +67,12 @@ export default function BookingsPage() {
       return;
     }
     api.get('/bookings/')
-      .then((res) => setBookings(res.data.results || res.data))
+      .then((res: any) => setBookings((res.data.results || res.data) as Booking[]))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [authLoading, isAuthenticated, router]);
 
-  const handleCancel = async (id) => {
+  const handleCancel = async (id: number) => {
     if (window.confirm('Are you sure you want to cancel this booking?')) {
       try {
         await api.patch(`/bookings/${id}/`, { status: 'cancelled' });
@@ -79,7 +81,7 @@ export default function BookingsPage() {
     }
   };
 
-  const openGoogleMaps = (booking) => {
+  const openGoogleMaps = (booking: Booking) => {
     if (booking.google_maps_url) {
       window.open(booking.google_maps_url, '_blank');
     } else if (booking.user_lat && booking.user_lng && booking.tour_destination_lat && booking.tour_destination_lng) {
@@ -90,7 +92,7 @@ export default function BookingsPage() {
     }
   };
 
-  const statusClass = (status) => {
+  const statusClass = (status: string) => {
     switch (status) {
       case 'confirmed': return 'status-confirmed';
       case 'cancelled': return 'status-cancelled';
@@ -111,14 +113,14 @@ export default function BookingsPage() {
         <div className="empty-state">
           <span className="empty-icon"><ClipboardList size={24} /></span>
           <h3>No Bookings Yet</h3>
-          <p>You haven't made any bookings yet. Start exploring our tours!</p>
+          <p>You haven&apos;t made any bookings yet. Start exploring our tours!</p>
           <button className="btn btn-primary" onClick={() => router.push('/tours')}>
             Browse Tours
           </button>
         </div>
       ) : (
         <div className="bookings-list">
-          {bookings.map((booking) => (
+          {bookings.map((booking: Booking) => (
             <div key={booking.id} className="booking-card-item" onClick={() => setExpandedId(expandedId === booking.id ? null : booking.id)}>
               <div className="booking-card-image">
                 <img
@@ -134,7 +136,7 @@ export default function BookingsPage() {
                   </span>
                 </div>
                 <div className="booking-card-details">
-                  <span><CalendarDays size={14} /> Booked: {new Date(booking.created_at).toLocaleDateString()}</span>
+                  <span><CalendarDays size={14} /> Booked: {new Date(booking.created_at ?? 0).toLocaleDateString()}</span>
                   <span><MapPin size={14} /> Travel: {new Date(booking.travel_date).toLocaleDateString()}</span>
                   <span><MapPin size={14} /> {booking.tour_destination}</span>
                   <span><Users size={14} /> Travelers: {booking.travelers}</span>
@@ -148,11 +150,11 @@ export default function BookingsPage() {
                 {expandedId === booking.id && (
                   <div className="booking-expanded">
                     <div className="booking-actions">
-                      <button className="btn btn-sm btn-outline" onClick={(e) => { e.stopPropagation(); openGoogleMaps(booking); }}>
+                      <button className="btn btn-sm btn-outline" onClick={(e: MouseEvent<HTMLElement>) => { e.stopPropagation(); openGoogleMaps(booking); }}>
                         <Navigation size={14} /> View Route
                       </button>
                       {booking.status === 'pending' && (
-                        <button className="btn btn-sm btn-danger" onClick={(e) => { e.stopPropagation(); handleCancel(booking.id); }}>
+                        <button className="btn btn-sm btn-danger" onClick={(e: MouseEvent<HTMLElement>) => { e.stopPropagation(); handleCancel(booking.id); }}>
                           Cancel Booking
                         </button>
                       )}

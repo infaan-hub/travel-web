@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -11,19 +10,23 @@ import { Map, Plus, Pencil, Trash2, Search, X } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
+
+import { isFile } from "@/features/pages/types";
+import type {  Attraction  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminAttractionsPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [attractions, setAttractions] = useState([]);
+  const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', location: '', image: null });
-  const [imagePreview, setImagePreview] = useState(null);
+  const [form, setForm] = useState<{ name: string; location: string; image: File | null }>({ name: '', location: '', image: null });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -33,7 +36,7 @@ export default function AdminAttractionsPage() {
 
   const loadAttractions = () => {
     attractionsAPI.getAll()
-      .then(res => setAttractions(res.data.results || res.data))
+      .then(res => setAttractions((res.data.results || res.data) as Attraction[]))
       .catch(console.error)
       .finally(() => setLoading(false));
   };
@@ -45,22 +48,22 @@ export default function AdminAttractionsPage() {
     setShowForm(false);
   };
 
-  const handleEdit = (att) => {
+  const handleEdit = (att: Attraction) => {
     setForm({ name: att.name, location: att.location, image: null });
     setImagePreview(getImageUrl(att.image_url) || null);
     setEditing(att.id);
     setShowForm(true);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const file = (e.currentTarget as HTMLInputElement).files?.[0];
     if (file) {
       setForm({ ...form, image: file });
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     if (!form.name.trim() || !form.location.trim()) { toast.error('Name and location are required'); return; }
     setSaving(true);
@@ -68,7 +71,7 @@ export default function AdminAttractionsPage() {
       const fd = new FormData();
       fd.append('name', form.name.trim());
       fd.append('location', form.location.trim());
-      if (form.image instanceof File) fd.append('image', form.image);
+      if (isFile(form.image)) fd.append('image', form.image);
       if (editing) {
         const res = await attractionsAPI.update(editing, fd);
         setAttractions(attractions.map(a => a.id === editing ? res.data : a));
@@ -81,7 +84,7 @@ export default function AdminAttractionsPage() {
     finally { setSaving(false); }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this attraction permanently?')) return;
     try {
       await attractionsAPI.delete(id);
@@ -90,7 +93,7 @@ export default function AdminAttractionsPage() {
   };
 
   const categories = Array.from(
-    new Set(attractions.map((a) => a.category).filter(Boolean)),
+    new Set(attractions.map((a: any) => a.category).filter(Boolean)),
   ).sort();
   const filtered = attractions.filter(a => {
     const matchesSearch = search
@@ -115,17 +118,17 @@ export default function AdminAttractionsPage() {
       <div className="admin-toolbar">
         <div className="search-input-group">
           <Search size={16} />
-          <input type="text" placeholder="Search attractions..." value={search} onChange={e => setSearch(e.target.value)} aria-label="Search attractions" />
+          <input type="text" placeholder="Search attractions..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)} aria-label="Search attractions" />
         </div>
         <div className="search-input-group">
           <label className="sr-only" htmlFor="attraction-category">Filter by category</label>
           <select
             id="attraction-category"
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setCategoryFilter(e.target.value)}
           >
             <option value="all">All categories</option>
-            {categories.map((category) => (
+            {categories.map((category: string) => (
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
@@ -136,7 +139,7 @@ export default function AdminAttractionsPage() {
       </div>
 
       {showForm && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }}>
+        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) resetForm(); }}>
           <div className="modal-content">
             <div className="modal-header">
               <h3>{editing ? 'Edit Attraction' : 'Add Attraction'}</h3>
@@ -145,11 +148,11 @@ export default function AdminAttractionsPage() {
             <form onSubmit={handleSubmit} className="admin-form">
               <div className="form-group">
                 <label>Name</label>
-                <input type="text" placeholder="Attraction name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
+                <input type="text" placeholder="Attraction name" value={form.name} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div className="form-group">
                 <label>Location</label>
-                <input type="text" placeholder="e.g. Zanzibar, Serengeti" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} required />
+                <input type="text" placeholder="e.g. Zanzibar, Serengeti" value={form.location} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, location: e.target.value })} required />
               </div>
               <div className="form-group">
                 <label>Image</label>

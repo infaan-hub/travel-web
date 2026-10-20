@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -13,14 +12,17 @@ import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
+
+import type {  Attraction, HomeSettings, Review, Tour  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function HomePage() {
   const toast = useToast();
   const { isAuthenticated, loading: authLoading } = useAuth();
-  const [allTours, setAllTours] = useState([]);
-  const [stats, setStats] = useState({});
-  const [homeSettings, setHomeSettings] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [attractions, setAttractions] = useState([]);
+  const [allTours, setAllTours] = useState<Tour[]>([]);
+  const [stats, setStats] = useState<Record<string, number>>({});
+  const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
@@ -41,14 +43,14 @@ export default function HomePage() {
       setReviews(reviewsRes.data.results || reviewsRes.data);
       setAttractions(attractionsRes.data.results || attractionsRes.data);
       setStats({
-        zanzibar: all.filter(t => t.category === 'zanzibar').length,
-        tanzania: all.filter(t => t.category === 'tanzania').length,
+        zanzibar: all.filter((t: Tour) => t.category === 'zanzibar').length,
+        tanzania: all.filter((t: Tour) => t.category === 'tanzania').length,
         total: all.length,
       });
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  const handleReviewSubmit = async (e) => {
+  const handleReviewSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     if (!reviewForm.content.trim()) { toast.error('Review message is required'); return; }
     setReviewSaving(true);
@@ -105,7 +107,7 @@ export default function HomePage() {
             </div>
             <div className="destination-info">
               <h3>Tanzania Safaris</h3>
-              <p>Serengeti, Kilimanjaro, Ngorongoro - Africa's greatest wildlife experiences with expert-guided tours and premium service.</p>
+              <p>Serengeti, Kilimanjaro, Ngorongoro - Africa&apos;s greatest wildlife experiences with expert-guided tours and premium service.</p>
               <span className="destination-link">Explore Tanzania Safaris <ArrowRight size={16} className="inline-icon" /></span>
             </div>
           </div>
@@ -119,7 +121,7 @@ export default function HomePage() {
             <p>Discover every tour we offer</p>
           </div>
           <div className="tours-grid">
-            {allTours.map((tour) => (
+            {allTours.map((tour: Tour) => (
               <TourCard key={tour.id} tour={tour} />
             ))}
           </div>
@@ -163,18 +165,18 @@ export default function HomePage() {
             {reviews.slice(0, 6).map(review => (
               <div key={review.id} className="testimonial-card">
                 <div className="testimonial-stars">
-                  {Array.from({ length: 5 }, (_, i) => (
+                  {Array.from({ length: 5 }, (_: any, i: number) => (
                     <Star key={i} size={16} fill={i < review.rating ? '#f59e0b' : 'none'} color={i < review.rating ? '#f59e0b' : '#d1d5db'} />
                   ))}
                 </div>
-                <p>"{review.content}"</p>
+                <p>&quot;{review.content}&quot;</p>
                 <div className="testimonial-author-row">
                   <div className="testimonial-avatar">
                     {review.user_name?.charAt(0).toUpperCase() || '?'}
                   </div>
                   <div>
                     <span className="testimonial-author">{review.user_name}</span>
-                    <span className="testimonial-date">{new Date(review.created_at).toLocaleDateString()}</span>
+                    <span className="testimonial-date">{new Date(review.created_at ?? 0).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -226,7 +228,7 @@ export default function HomePage() {
       </section>
 
       {showReviewForm && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
+        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
           <div className="modal-content review-form-modal">
             <div className="modal-header">
               <h3>Share Your Experience</h3>
@@ -249,7 +251,7 @@ export default function HomePage() {
               <div className="form-group">
                 <label>Your Review</label>
                 <textarea placeholder="Share your experience..." rows={4} value={reviewForm.content}
-                  onChange={e => setReviewForm({ ...reviewForm, content: e.target.value })} required />
+                  onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setReviewForm({ ...reviewForm, content: e.target.value })} required />
               </div>
               <button type="submit" className="btn btn-primary btn-block" disabled={reviewSaving}>
                 <Send size={16} /> {reviewSaving ? 'Submitting...' : 'Submit Review'}

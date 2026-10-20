@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,13 +8,15 @@ import { useAuth } from '@/context/AuthContext';
 import { ArrowLeft, MapPin, Clock, Star, Check, XCircle, ChevronLeft, ChevronRight, X, Send, User } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
+import type {  Review, Tour, TourTranslation  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function TourDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<Record<string, string>>();
   const router = useRouter();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
-  const [tour, setTour] = useState(null);
+  const [tour, setTour] = useState<Tour | null>(null);
   const [loading, setLoading] = useState(true);
-  const [allImages, setAllImages] = useState([]);
+  const [allImages, setAllImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -23,8 +24,8 @@ export default function TourDetailPage() {
   const [reviewSaving, setReviewSaving] = useState(false);
   const [reviewError, setReviewError] = useState('');
   const [reviewSuccess, setReviewSuccess] = useState('');
-  const [tourReviews, setTourReviews] = useState([]);
-  const [translations, setTranslations] = useState([]);
+  const [tourReviews, setTourReviews] = useState<Review[]>([]);
+  const [translations, setTranslations] = useState<TourTranslation[]>([]);
   const [locale, setLocale] = useState('en');
 
   useEffect(() => {
@@ -42,9 +43,9 @@ export default function TourDetailPage() {
       const t = tourRes.data;
       setTour(t);
       setTourReviews(revRes.data.results || revRes.data);
-      const images = [];
+      const images: string[] = [];
       if (t.main_image_url) images.push(getImageUrl(t.main_image_url));
-      (t.gallery_image_urls || []).forEach(url => {
+      (t.gallery_image_urls || []).forEach((url: string) => {
         const fullUrl = getImageUrl(url);
         if (!images.includes(fullUrl)) images.push(fullUrl);
       });
@@ -52,12 +53,13 @@ export default function TourDetailPage() {
     }).catch(console.error).finally(() => setLoading(false));
   };
 
-  const activeTranslation = translations.find((item) => item.locale === locale);
+  const activeTranslation = translations.find((item: TourTranslation) => item.locale === locale);
   const displayTitle = activeTranslation?.title || tour?.title;
   const displayDescription = activeTranslation?.description || tour?.description;
   const displayShortDescription = activeTranslation?.short_description || tour?.short_description;
 
   const handleBookNow = () => {
+    if (!tour) return;
     if (isAuthenticated) {
       router.push(`/booking/${tour.id}`);
     } else {
@@ -65,7 +67,7 @@ export default function TourDetailPage() {
     }
   };
 
-  const handleReviewSubmit = async (e) => {
+  const handleReviewSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setReviewSaving(true);
     setReviewError('');
@@ -79,7 +81,7 @@ export default function TourDetailPage() {
       setReviewForm({ rating: 5, content: '' });
       setShowReviewForm(false);
       setTimeout(() => setReviewSuccess(''), 4000);
-    } catch (err) {
+    } catch (err: any) {
       const msg = err.response?.data?.error || 'Failed to submit review';
       setReviewError(msg);
       if (msg.includes('already reviewed')) {
@@ -93,9 +95,9 @@ export default function TourDetailPage() {
   if (loading) return <div className="page"><div className="loading">Loading tour details...</div></div>;
   if (!tour) return <div className="page"><div className="empty-state"><p>Tour not found</p></div></div>;
 
-  const openLightbox = (index) => { setCurrentImageIndex(index); setShowLightbox(true); };
+  const openLightbox = (index: number) => { setCurrentImageIndex(index); setShowLightbox(true); };
 
-  const renderStars = (rating, size = 14) => (
+  const renderStars = (rating: number, size = 14) => (
     <span className="review-rating">
       {[1, 2, 3, 4, 5].map(s => (
         <Star key={s} size={size} fill={s <= rating ? '#f59e0b' : 'none'} color={s <= rating ? '#f59e0b' : '#d1d5db'} />
@@ -134,7 +136,7 @@ export default function TourDetailPage() {
             >
               English
             </button>
-            {translations.map((translation) => (
+            {translations.map((translation: TourTranslation) => (
               <button
                 key={translation.locale}
                 type="button"
@@ -152,7 +154,7 @@ export default function TourDetailPage() {
 
       {allImages.length > 1 && (
         <div className="tour-gallery-thumbs">
-          {allImages.map((img, i) => (
+          {allImages.map((img: any, i: number) => (
             <img key={i} src={img} alt=""
               className={i === currentImageIndex ? 'active' : ''}
               onClick={() => openLightbox(i)} />
@@ -163,9 +165,9 @@ export default function TourDetailPage() {
       {showLightbox && (
         <div className="gallery-modal" onClick={() => setShowLightbox(false)}>
           <button className="gallery-close-btn" onClick={() => setShowLightbox(false)}><X size={24} /></button>
-          <button className="gallery-nav gallery-prev" onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => (i - 1 + allImages.length) % allImages.length); }}><ChevronLeft size={24} /></button>
-          <img src={allImages[currentImageIndex]} alt="" onClick={(e) => e.stopPropagation()} />
-          <button className="gallery-nav gallery-next" onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => (i + 1) % allImages.length); }}><ChevronRight size={24} /></button>
+          <button className="gallery-nav gallery-prev" onClick={(e: MouseEvent<HTMLElement>) => { e.stopPropagation(); setCurrentImageIndex(i => (i - 1 + allImages.length) % allImages.length); }}><ChevronLeft size={24} /></button>
+          <img src={allImages[currentImageIndex]} alt="" onClick={(e: MouseEvent<HTMLElement>) => e.stopPropagation()} />
+          <button className="gallery-nav gallery-next" onClick={(e: MouseEvent<HTMLElement>) => { e.stopPropagation(); setCurrentImageIndex(i => (i + 1) % allImages.length); }}><ChevronRight size={24} /></button>
           <div className="gallery-counter">{currentImageIndex + 1} / {allImages.length}</div>
         </div>
       )}
@@ -181,7 +183,7 @@ export default function TourDetailPage() {
             <section className="tour-itinerary">
               <h2>Itinerary</h2>
               <div className="itinerary-list">
-                {tour.itinerary.map((item) => (
+                {tour.itinerary.map((item: { id: number; day: number; title: string; description: string }) => (
                   <div key={item.id} className="itinerary-item">
                     <div className="itinerary-day">Day {item.day}</div>
                     <div className="itinerary-details">
@@ -202,9 +204,9 @@ export default function TourDetailPage() {
                 : [];
             return items.length > 0 ? (
               <section className="tour-includes">
-                <h2>What's Included</h2>
+                <h2>What&apos;s Included</h2>
                 <div className="includes-list">
-                  {items.map((item, i) => (
+                  {items.map((item: string, i: number) => (
                     <span key={i} className="include-item"><Check size={16} /> {item}</span>
                   ))}
                 </div>
@@ -220,9 +222,9 @@ export default function TourDetailPage() {
                 : [];
             return items.length > 0 ? (
               <section className="tour-excludes">
-                <h2>What's Excluded</h2>
+                <h2>What&apos;s Excluded</h2>
                 <div className="excludes-list">
-                  {items.map((item, i) => (
+                  {items.map((item: string, i: number) => (
                     <span key={i} className="exclude-item"><XCircle size={16} /> {item}</span>
                   ))}
                 </div>
@@ -244,7 +246,7 @@ export default function TourDetailPage() {
             {reviewError && <div className="alert alert-error">{reviewError}</div>}
 
             {showReviewForm && (
-              <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
+              <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
                 <div className="modal-content review-form-modal">
                   <div className="modal-header">
                     <h3>Rate This Tour</h3>
@@ -266,7 +268,7 @@ export default function TourDetailPage() {
                     <div className="form-group">
                       <label>Your Review</label>
                       <textarea placeholder="Share your experience..." rows={4} value={reviewForm.content}
-                        onChange={e => setReviewForm({ ...reviewForm, content: e.target.value })} required />
+                        onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setReviewForm({ ...reviewForm, content: e.target.value })} required />
                     </div>
                     <button type="submit" className="btn btn-primary btn-block" disabled={reviewSaving}>
                       <Send size={16} /> {reviewSaving ? 'Submitting...' : 'Submit Review'}
@@ -278,7 +280,7 @@ export default function TourDetailPage() {
 
             {tourReviews.length > 0 ? (
               <div className="reviews-list">
-                {tourReviews.map((review) => (
+                {tourReviews.map((review: Review) => (
                   <div key={review.id} className="review-card">
                     <div className="review-header">
                       <div className="review-user-avatar">
@@ -290,7 +292,7 @@ export default function TourDetailPage() {
                       </div>
                     </div>
                     <p>{review.content}</p>
-                    <span className="review-date">{new Date(review.created_at).toLocaleDateString()}</span>
+                    <span className="review-date">{new Date(review.created_at ?? 0).toLocaleDateString()}</span>
                   </div>
                 ))}
               </div>

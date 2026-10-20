@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/components/ToastProvider";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 
 export default function VerifyEmailPage() {
   const toast = useToast();
@@ -50,7 +51,7 @@ export default function VerifyEmailPage() {
                   type="email"
                   name="email"
                   value={form.email}
-                  onChange={(event) => setForm({ ...form, email: event.target.value })}
+                  onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, email: event.target.value })}
                   required
                   autoComplete="email"
                 />
@@ -63,7 +64,7 @@ export default function VerifyEmailPage() {
                   name="code"
                   inputMode="numeric"
                   value={form.code}
-                  onChange={(event) => setForm({ ...form, code: event.target.value })}
+                  onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, code: event.target.value })}
                   required
                 />
               </div>

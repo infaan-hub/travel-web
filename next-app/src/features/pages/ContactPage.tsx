@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState } from 'react';
@@ -6,14 +5,15 @@ import api from '@/lib/api/client';
 import { MapPin, Phone, Mail, Clock, CheckCircle } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function ContactPage() {
   const toast = useToast();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [form, setForm] = useState<{ name: string; email: string; phone: string; subject: string; message: string }>({ name: '', email: '', phone: '', subject: '', message: '' });
   const [sent, setSent] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     try {
       await api.post('/contact/', form);
@@ -28,7 +28,7 @@ export default function ContactPage() {
     <div className="page contact-page">
       <div className="page-header">
         <h1>Contact Us</h1>
-        <p>We'd love to hear from you. Get in touch with the travel experts at Infaan tours and travel and let us help plan your perfect journey.</p>
+        <p>We&apos;d love to hear from you. Get in touch with the travel experts at Infaan tours and travel and let us help plan your perfect journey.</p>
       </div>
 
       <div className="contact-content">
@@ -56,7 +56,7 @@ export default function ContactPage() {
             <div className="success-message">
               <span className="success-icon"><CheckCircle size={32} /></span>
               <h3>Message Sent Successfully!</h3>
-              <p>We'll get back to you within 24 hours.</p>
+              <p>We&apos;ll get back to you within 24 hours.</p>
               <button className="btn btn-primary" onClick={() => setSent(false)}>
                 Send Another Message
               </button>
@@ -83,7 +83,7 @@ export default function ContactPage() {
               </div>
               <div className="form-group">
                 <label>Message *</label>
-                <textarea name="message" value={form.message} onChange={handleChange} required placeholder="Tell us about your travel plans..." rows="5" />
+                <textarea name="message" value={form.message} onChange={handleChange} required placeholder="Tell us about your travel plans..." rows={5} />
               </div>
               <button type="submit" className="btn btn-primary btn-block">
                 Send Message

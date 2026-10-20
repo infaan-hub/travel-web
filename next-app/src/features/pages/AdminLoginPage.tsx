@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -6,18 +5,19 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Lock, BarChart3, ClipboardList, Globe, Users } from 'lucide-react';
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 
 export default function AdminLoginPage() {
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState<{ username: string; password: string }>({ username: '', password: '' });
   const [error, setError] = useState('');
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setError('');
     try {
@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
       } else {
         setError('This area is for administrators only. Please use the customer login.');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.response?.data?.detail || 'Invalid credentials');
     }
   };

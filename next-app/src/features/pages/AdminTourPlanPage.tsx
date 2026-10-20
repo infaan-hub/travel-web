@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import {
@@ -13,38 +12,42 @@ import {
 } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import { isFile } from "@/features/pages/types";
+import type {  Booking, Customer, Hotel as HotelType, Room, Tour, TravelDriver, TravelVehicle, Workspace  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminTourPlanPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const { id } = useParams();
-  const [searchParams] = useSearchParams();
+  const { id } = useParams<Record<string, string>>();
+  const searchParams = useSearchParams();
   const isNew = id === 'new';
 
-  const [workspace, setWorkspace] = useState(null);
-  const [tourist, setTourist] = useState(null);
-  const [touristBookings, setTouristBookings] = useState([]);
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [tourist, setTourist] = useState<Customer | null>(null);
+  const [touristBookings, setTouristBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [activeSubTab, setActiveSubTab] = useState('tours');
 
-  const [allTours, setAllTours] = useState([]);
-  const [allDrivers, setAllDrivers] = useState([]);
-  const [allVehicles, setAllVehicles] = useState([]);
-  const [allHotels, setAllHotels] = useState([]);
+  const [allTours, setAllTours] = useState<Tour[]>([]);
+  const [allDrivers, setAllDrivers] = useState<TravelDriver[]>([]);
+  const [allVehicles, setAllVehicles] = useState<TravelVehicle[]>([]);
+  const [allHotels, setAllHotels] = useState<HotelType[]>([]);
   const [searchHotel, setSearchHotel] = useState('');
   const [searchTour, setSearchTour] = useState('');
 
-  const [selectedTours, setSelectedTours] = useState([]);
-  const [selectedHotel, setSelectedHotel] = useState(null);
-  const [selectedRooms, setSelectedRooms] = useState([]);
-  const [selectedTravelDriver, setSelectedTravelDriver] = useState(null);
-  const [selectedTravelVehicle, setSelectedTravelVehicle] = useState(null);
+  const [selectedTours, setSelectedTours] = useState<Tour[]>([]);
+  const [selectedHotel, setSelectedHotel] = useState<HotelType | null>(null);
+  const [selectedRooms, setSelectedRooms] = useState<Room[]>([]);
+  const [selectedTravelDriver, setSelectedTravelDriver] = useState<TravelDriver | null>(null);
+  const [selectedTravelVehicle, setSelectedTravelVehicle] = useState<TravelVehicle | null>(null);
 
   const [showHotelForm, setShowHotelForm] = useState(false);
   const [showRoomForm, setShowRoomForm] = useState(false);
-  const [roomForm, setRoomForm] = useState({ name: '', price: '', description: '' });
-  const [hotelForm, setHotelForm] = useState({ name: '', location: '', phone: '', image: null });
+  const [roomForm, setRoomForm] = useState<{ name: string; price: string; description: string }>({ name: '', price: '', description: '' });
+  const [hotelForm, setHotelForm] = useState<{ name: string; location: string; phone: string; image: File | null }>({ name: '', location: '', phone: '', image: null });
   const [savingHotel, setSavingHotel] = useState(false);
   const [savingRoom, setSavingRoom] = useState(false);
 
@@ -74,7 +77,7 @@ export default function AdminTourPlanPage() {
           const userBookings = Array.isArray(bookings) ? bookings.filter(b => b.user === found.id || b.email === found.email) : [];
           setTouristBookings(userBookings);
         } else {
-          setTourist({ id: touristId, username: touristName, email: touristEmail });
+          setTourist({ id: Number(touristId), username: touristName ?? '', email: touristEmail ?? '', is_staff: false } as Customer);
         }
       } else if (id && !isNew) {
         const wsRes = await workspacesAPI.getById(id);
@@ -98,7 +101,7 @@ export default function AdminTourPlanPage() {
       setAllDrivers(driversRes.data?.results || driversRes.data || []);
       setAllVehicles(vehiclesRes.data?.results || vehiclesRes.data || []);
       setAllHotels(hotelsRes.data?.results || hotelsRes.data || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load data:', err);
     } finally {
       setLoading(false);
@@ -127,7 +130,7 @@ export default function AdminTourPlanPage() {
         await workspacesAPI.update(workspace.id, payload);
       }
       toast.success('Workspace saved!');
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to save workspace');
     }
   };
@@ -135,8 +138,8 @@ export default function AdminTourPlanPage() {
   const handleSubmitPricing = async () => {
     if (!workspace && !isNew) return;
 
-    const toursPrice = selectedTours.reduce((sum, t) => sum + (parseFloat(t.price) || 0), 0);
-    const roomsPrice = selectedRooms.reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
+    const toursPrice = selectedTours.reduce((sum: any, t: Tour) => sum + (parseFloat(String(t.price)) || 0), 0);
+    const roomsPrice = selectedRooms.reduce((sum: any, r: any) => sum + (parseFloat(String(r.price)) || 0), 0);
     const totalPrice = toursPrice + roomsPrice;
 
     try {
@@ -159,6 +162,7 @@ export default function AdminTourPlanPage() {
         ws = res.data;
         setWorkspace(ws);
       } else {
+        if (!ws) return;
         await workspacesAPI.update(ws.id, { total_price: totalPrice, notes });
       }
 
@@ -172,6 +176,7 @@ export default function AdminTourPlanPage() {
         totalPrice,
         notes,
       };
+      if (!ws) return;
       sessionStorage.setItem(`pricing:${ws.id}`, JSON.stringify(draft));
       try {
         await workspacesAPI.savePricingDraft(ws.id, draft);
@@ -179,12 +184,12 @@ export default function AdminTourPlanPage() {
         // The local copy is used as a fallback.
       }
       router.push(`/admin/work-space/pricing/${ws.id}`);
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to submit pricing');
     }
   };
 
-  const toggleTour = (tour) => {
+  const toggleTour = (tour: Tour) => {
     setSelectedTours(prev => {
       const exists = prev.find(t => (t.id || t) === (tour.id || tour));
       if (exists) return prev.filter(t => (t.id || t) !== (tour.id || tour));
@@ -192,7 +197,7 @@ export default function AdminTourPlanPage() {
     });
   };
 
-  const handleAddHotel = async (e) => {
+  const handleAddHotel = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSavingHotel(true);
     try {
@@ -200,19 +205,19 @@ export default function AdminTourPlanPage() {
       formData.append('name', hotelForm.name);
       formData.append('location', hotelForm.location);
       formData.append('phone', hotelForm.phone);
-      if (hotelForm.image instanceof File) formData.append('image', hotelForm.image);
+      if (isFile(hotelForm.image)) formData.append('image', hotelForm.image);
       const res = await hotelsAPI.create(formData);
       setAllHotels(prev => [...prev, res.data]);
       setShowHotelForm(false);
       setHotelForm({ name: '', location: '', phone: '', image: null });
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to add hotel');
     } finally {
       setSavingHotel(false);
     }
   };
 
-  const handleAddRoom = async (e) => {
+  const handleAddRoom = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSavingRoom(true);
     try {
@@ -225,7 +230,7 @@ export default function AdminTourPlanPage() {
       setSelectedRooms(prev => [...prev, res.data]);
       setShowRoomForm(false);
       setRoomForm({ name: '', price: '', description: '' });
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to add room');
     } finally {
       setSavingRoom(false);
@@ -233,8 +238,8 @@ export default function AdminTourPlanPage() {
   };
 
   const getTotalPrice = () => {
-    const toursPrice = selectedTours.reduce((sum, t) => sum + (parseFloat(t.price) || 0), 0);
-    const roomsPrice = selectedRooms.reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
+    const toursPrice = selectedTours.reduce((sum: any, t: Tour) => sum + (parseFloat(String(t.price)) || 0), 0);
+    const roomsPrice = selectedRooms.reduce((sum: any, r: any) => sum + (parseFloat(String(r.price)) || 0), 0);
     return toursPrice + roomsPrice;
   };
 
@@ -283,7 +288,7 @@ export default function AdminTourPlanPage() {
           <span className="summary-value">{selectedTours.length}</span>
         </div>
         <div className="summary-card">
-          <span className="summary-label">Hotel</span>
+          <span className="summary-label">HotelType</span>
           <span className="summary-value">{selectedHotel ? '✓' : '—'}</span>
         </div>
         <div className="summary-card">
@@ -309,7 +314,7 @@ export default function AdminTourPlanPage() {
           <Globe size={16} /> Tours
         </button>
         <button className={`admin-tab ${activeSubTab === 'hotel' ? 'active' : ''}`} onClick={() => setActiveSubTab('hotel')}>
-          <Hotel size={16} /> Hotel
+          <Hotel size={16} /> HotelType
         </button>
         <button className={`admin-tab ${activeSubTab === 'travel' ? 'active' : ''}`} onClick={() => setActiveSubTab('travel')}>
           <Truck size={16} /> Travel
@@ -326,7 +331,7 @@ export default function AdminTourPlanPage() {
               <h3>Select Tours</h3>
               <div className="search-input-group small">
                 <Search size={14} />
-                <input type="text" placeholder="Search tours..." value={searchTour} onChange={e => setSearchTour(e.target.value)} />
+                <input type="text" placeholder="Search tours..." value={searchTour} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearchTour(e.target.value)} />
               </div>
             </div>
             {filteredTours.length === 0 ? (
@@ -358,7 +363,7 @@ export default function AdminTourPlanPage() {
               <div className="selected-summary">
                 <h4>Selected Tours ({selectedTours.length})</h4>
                 <div className="selected-list">
-                  {selectedTours.map((tour, i) => (
+                  {selectedTours.map((tour: Tour, i: number) => (
                     <span key={i} className="selected-chip">
                       {tour.title || `Tour #${tour.id || tour}`}
                       <button onClick={() => toggleTour(tour)}><X size={12} /></button>
@@ -373,14 +378,14 @@ export default function AdminTourPlanPage() {
         {activeSubTab === 'hotel' && (
           <div className="sub-panel">
             <div className="panel-header">
-              <h3>Select Hotel</h3>
+              <h3>Select HotelType</h3>
               <button className="btn btn-primary btn-sm" onClick={() => setShowHotelForm(true)}>
-                <Plus size={14} /> Add Hotel
+                <Plus size={14} /> Add HotelType
               </button>
             </div>
             <div className="search-input-group small" style={{ marginBottom: '1rem' }}>
               <Search size={14} />
-              <input type="text" placeholder="Search hotels in Zanzibar..." value={searchHotel} onChange={e => setSearchHotel(e.target.value)} />
+              <input type="text" placeholder="Search hotels in Zanzibar..." value={searchHotel} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearchHotel(e.target.value)} />
             </div>
             {filteredHotels.length === 0 ? (
               <div className="empty-state">
@@ -420,14 +425,14 @@ export default function AdminTourPlanPage() {
                 </button>
                 {selectedRooms.length > 0 && (
                   <div className="room-list">
-                    {selectedRooms.map((room, i) => (
+                    {selectedRooms.map((room: Room, i: number) => (
                       <div key={i} className="room-card">
                         <div className="room-info">
                           <span><BedDouble size={14} /> {room.name}</span>
                           <span className="room-price">${room.price}</span>
                         </div>
                         {room.description && <p className="room-desc">{room.description}</p>}
-                        <button className="btn-icon danger" onClick={() => setSelectedRooms(prev => prev.filter((_, idx) => idx !== i))}>
+                        <button className="btn-icon danger" onClick={() => setSelectedRooms(prev => prev.filter((_: any, idx: any) => idx !== i))}>
                           <X size={14} />
                         </button>
                       </div>
@@ -500,7 +505,7 @@ export default function AdminTourPlanPage() {
               <textarea
                 rows={8}
                 value={notes}
-                onChange={e => setNotes(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setNotes(e.target.value)}
                 placeholder="Add notes about the tour plan, special requirements, pickup details, etc..."
                 style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)', resize: 'vertical' }}
               />
@@ -519,31 +524,31 @@ export default function AdminTourPlanPage() {
       </div>
 
       {showHotelForm && (
-        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowHotelForm(false); }}>
+        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowHotelForm(false); }}>
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Add Hotel</h3>
+              <h3>Add HotelType</h3>
               <button className="modal-close" onClick={() => setShowHotelForm(false)}><X size={18} /></button>
             </div>
             <form onSubmit={handleAddHotel}>
               <div className="form-group">
-                <label>Hotel Name</label>
-                <input type="text" required value={hotelForm.name} onChange={e => setHotelForm({ ...hotelForm, name: e.target.value })} placeholder="Hotel name" />
+                <label>HotelType Name</label>
+                <input type="text" required value={hotelForm.name} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setHotelForm({ ...hotelForm, name: e.target.value })} placeholder="HotelType name" />
               </div>
               <div className="form-group">
                 <label>Location</label>
-                <input type="text" required value={hotelForm.location} onChange={e => setHotelForm({ ...hotelForm, location: e.target.value })} placeholder="Location in Zanzibar" />
+                <input type="text" required value={hotelForm.location} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setHotelForm({ ...hotelForm, location: e.target.value })} placeholder="Location in Zanzibar" />
               </div>
               <div className="form-group">
                 <label>Phone</label>
-                <input type="text" value={hotelForm.phone} onChange={e => setHotelForm({ ...hotelForm, phone: e.target.value })} placeholder="Phone number" />
+                <input type="text" value={hotelForm.phone} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setHotelForm({ ...hotelForm, phone: e.target.value })} placeholder="Phone number" />
               </div>
               <div className="form-group">
                 <label>Image</label>
-                <input type="file" accept="image/*" onChange={e => setHotelForm({ ...hotelForm, image: e.target.files[0] })} />
+                <input type="file" accept="image/*" onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setHotelForm({ ...hotelForm, image: (e.currentTarget as HTMLInputElement).files?.[0] ?? null })} />
               </div>
               <button type="submit" className="btn btn-primary btn-block" disabled={savingHotel}>
-                {savingHotel ? 'Saving...' : 'Add Hotel'}
+                {savingHotel ? 'Saving...' : 'Add HotelType'}
               </button>
             </form>
           </div>
@@ -551,7 +556,7 @@ export default function AdminTourPlanPage() {
       )}
 
       {showRoomForm && (
-        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowRoomForm(false); }}>
+        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowRoomForm(false); }}>
           <div className="modal-content">
             <div className="modal-header">
               <h3>Add Room to {selectedHotel?.name}</h3>
@@ -560,15 +565,15 @@ export default function AdminTourPlanPage() {
             <form onSubmit={handleAddRoom}>
               <div className="form-group">
                 <label>Room Name/Type</label>
-                <input type="text" required value={roomForm.name} onChange={e => setRoomForm({ ...roomForm, name: e.target.value })} placeholder="e.g. Deluxe Ocean View" />
+                <input type="text" required value={roomForm.name} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRoomForm({ ...roomForm, name: e.target.value })} placeholder="e.g. Deluxe Ocean View" />
               </div>
               <div className="form-group">
                 <label>Price per Night ($)</label>
-                <input type="number" required min="0" step="0.01" value={roomForm.price} onChange={e => setRoomForm({ ...roomForm, price: e.target.value })} placeholder="0.00" />
+                <input type="number" required min="0" step="0.01" value={roomForm.price} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRoomForm({ ...roomForm, price: e.target.value })} placeholder="0.00" />
               </div>
               <div className="form-group">
                 <label>Description</label>
-                <textarea value={roomForm.description} onChange={e => setRoomForm({ ...roomForm, description: e.target.value })} placeholder="Room description" rows={3} />
+                <textarea value={roomForm.description} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRoomForm({ ...roomForm, description: e.target.value })} placeholder="Room description" rows={3} />
               </div>
               <button type="submit" className="btn btn-primary btn-block" disabled={savingRoom}>
                 {savingRoom ? 'Saving...' : 'Add Room'}

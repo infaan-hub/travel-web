@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 
 export default function ResetPasswordPage() {
   const toast = useToast();
@@ -52,7 +53,7 @@ export default function ResetPasswordPage() {
                 type="email"
                 name="email"
                 value={form.email}
-                onChange={(event) => setForm({ ...form, email: event.target.value })}
+                onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, email: event.target.value })}
                 required
                 autoComplete="email"
               />
@@ -65,7 +66,7 @@ export default function ResetPasswordPage() {
                 name="code"
                 inputMode="numeric"
                 value={form.code}
-                onChange={(event) => setForm({ ...form, code: event.target.value })}
+                onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, code: event.target.value })}
                 required
               />
             </div>
@@ -76,7 +77,7 @@ export default function ResetPasswordPage() {
                 type="password"
                 name="new_password"
                 value={form.new_password}
-                onChange={(event) => setForm({ ...form, new_password: event.target.value })}
+                onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, new_password: event.target.value })}
                 required
                 minLength={8}
                 autoComplete="new-password"
@@ -89,7 +90,7 @@ export default function ResetPasswordPage() {
                 type="password"
                 name="confirm"
                 value={form.confirm}
-                onChange={(event) => setForm({ ...form, confirm: event.target.value })}
+                onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, confirm: event.target.value })}
                 required
                 minLength={8}
                 autoComplete="new-password"

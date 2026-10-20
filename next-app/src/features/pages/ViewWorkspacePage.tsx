@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -7,21 +6,23 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { workspacesAPI, toursAPI, hotelsAPI } from '@/lib/api/client';
 import {
+
   ArrowLeft, CheckCircle, Circle, Globe, Hotel, Truck, BedDouble,
   User, DollarSign, Phone, Mail, MapPin
 } from 'lucide-react';
 
+import type {  Hotel as HotelType, Tour, Workspace, WorkspaceTask  } from "@/features/pages/types";
 export default function ViewWorkspacePage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams<Record<string, string>>();
 
-  const [workspace, setWorkspace] = useState(null);
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<WorkspaceTask[]>([]);
   const [activeDay, setActiveDay] = useState(1);
-  const [allTours, setAllTours] = useState([]);
-  const [allHotels, setAllHotels] = useState([]);
+  const [allTours, setAllTours] = useState<Tour[]>([]);
+  const [allHotels, setAllHotels] = useState<HotelType[]>([]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -46,14 +47,14 @@ export default function ViewWorkspacePage() {
           generateTasks(wsRes.data);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load workspace:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateTasks = (ws) => {
+  const generateTasks = (ws: any) => {
     const selectedTourIds = ws.selected_tours || [];
     const selectedToursData = Array.isArray(allTours) ? allTours.filter(t => selectedTourIds.includes(t.id)) : [];
 
@@ -86,7 +87,7 @@ export default function ViewWorkspacePage() {
       generatedTasks.push({
         id: 'hotel-checkin',
         day: 1,
-        title: `Hotel Check-in: ${ws.selected_hotel_name || 'Hotel'}`,
+        title: `HotelType Check-in: ${ws.selected_hotel_name || 'HotelType'}`,
         description: 'Check into accommodation',
         completed: false,
         icon: 'hotel'
@@ -103,19 +104,19 @@ export default function ViewWorkspacePage() {
       icon: 'departure'
     });
 
-    setTasks(generatedTasks);
+    setTasks(generatedTasks as unknown as WorkspaceTask[]);
   };
 
-  const toggleTask = (taskId) => {
+  const toggleTask = (taskId: number) => {
     setTasks(prev => prev.map(t =>
       t.id === taskId ? { ...t, completed: !t.completed } : t
     ));
   };
 
-  const getDayTasks = (day) => tasks.filter(t => t.day === day);
+  const getDayTasks = (day: number) => tasks.filter(t => t.day === day);
   const allDays = [...new Set(tasks.map(t => t.day))].sort();
 
-  const getTourById = (tourId) => allTours.find(t => t.id === tourId);
+  const getTourById = (tourId: number) => allTours.find(t => t.id === tourId);
   const hotelData = workspace?.selected_hotel
     ? allHotels.find(h => h.id === workspace.selected_hotel)
     : null;
@@ -197,7 +198,7 @@ export default function ViewWorkspacePage() {
           </div>
           <div className="ws-item-card">
             <Hotel size={18} />
-            <span>Hotel: {hotelData?.name || workspace.selected_hotel_name || 'N/A'}</span>
+            <span>HotelType: {hotelData?.name || workspace.selected_hotel_name || 'N/A'}</span>
           </div>
           <div className="ws-item-card">
             <BedDouble size={18} />
@@ -212,16 +213,16 @@ export default function ViewWorkspacePage() {
         {workspace.selected_tours && workspace.selected_tours.length > 0 && (
           <div className="ws-tour-detail-list">
             <h4>Selected Tours</h4>
-            {workspace.selected_tours.map((tourId, i) => {
+            {workspace.selected_tours.map((tourId: number, i: number) => {
               const tour = getTourById(tourId) || { id: tourId, title: `Tour #${tourId}` };
               return (
                 <div key={i} className="ws-tour-item">
                   <Globe size={16} />
                   <div className="ws-tour-info">
                     <span>{tour.title}</span>
-                    {tour.destination && <span className="ws-tour-meta"><MapPin size={12} /> {tour.destination}</span>}
+                    {(tour as Tour).destination && <span className="ws-tour-meta"><MapPin size={12} /> {(tour as Tour).destination}</span>}
                   </div>
-                  <span className="ws-tour-price">${tour.price || 0}</span>
+                  <span className="ws-tour-price">${(tour as Tour).price || 0}</span>
                 </div>
               );
             })}
@@ -230,7 +231,7 @@ export default function ViewWorkspacePage() {
 
         {hotelData && (
           <div className="ws-tour-detail-list">
-            <h4>Hotel Details</h4>
+            <h4>HotelType Details</h4>
             <div className="ws-tour-item">
               <Hotel size={16} />
               <div className="ws-tour-info">

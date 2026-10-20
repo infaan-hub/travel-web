@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -11,18 +10,22 @@ import { BookOpen, Plus, Pencil, Trash2 } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
+
+import { isFile } from "@/features/pages/types";
+import type {  TravelTip, Tour  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminTripsPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [trips, setTrips] = useState([]);
+  const [trips, setTrips] = useState<TravelTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ title: '', content: '', category: '', image: null });
-  const [imagePreview, setImagePreview] = useState(null);
+  const [editing, setEditing] = useState<number | null>(null);
+  const [form, setForm] = useState<{ title: string; content: string; category: string; image: File | null }>({ title: '', content: '', category: '', image: null });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -45,15 +48,15 @@ export default function AdminTripsPage() {
     setShowForm(false);
   };
 
-  const handleEdit = (trip) => {
+  const handleEdit = (trip: any) => {
     setForm({ title: trip.title, content: trip.content, category: trip.category || '', image: null });
     setImagePreview(getImageUrl(trip.image_url) || null);
     setEditing(trip.id);
     setShowForm(true);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const file = (e.currentTarget as HTMLInputElement).files?.[0];
     if (!file) return;
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
       toast.error('Only .jpg and .png images are allowed');
@@ -67,11 +70,11 @@ export default function AdminTripsPage() {
     }
     setForm({ ...form, image: file });
     const reader = new FileReader();
-    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.onload = (ev: ProgressEvent<FileReader>) => setImagePreview(String(ev.target?.result ?? ''));
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSaving(true);
     try {
@@ -79,7 +82,7 @@ export default function AdminTripsPage() {
       formData.append('title', form.title);
       formData.append('content', form.content);
       if (form.category) formData.append('category', form.category);
-      if (form.image instanceof File) formData.append('image', form.image);
+      if (isFile(form.image)) formData.append('image', form.image);
 
       if (editing) {
         await tripsAPI.update(editing, formData);
@@ -95,7 +98,7 @@ export default function AdminTripsPage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this trip?')) return;
     try {
       await tripsAPI.delete(id);
@@ -103,8 +106,8 @@ export default function AdminTripsPage() {
     } catch { toast.error('Failed to delete trip'); }
   };
 
-  const tipCategories = Array.from(new Set(trips.map((t) => t.category).filter(Boolean))).sort();
-  const filteredTrips = trips.filter((t) => {
+  const tipCategories = Array.from(new Set(trips.map((t: TravelTip) => t.category).filter(Boolean))).sort();
+  const filteredTrips = trips.filter((t: TravelTip) => {
     const matchesSearch = search
       ? (t.title || '').toLowerCase().includes(search.toLowerCase()) ||
         (t.content || '').toLowerCase().includes(search.toLowerCase())
@@ -129,7 +132,7 @@ export default function AdminTripsPage() {
             type="text"
             placeholder="Search trips..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)}
             aria-label="Search trips"
           />
         </div>
@@ -138,10 +141,10 @@ export default function AdminTripsPage() {
           <select
             id="trip-category"
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setCategoryFilter(e.target.value)}
           >
             <option value="all">All categories</option>
-            {tipCategories.map((category) => (
+            {tipCategories.map((category: string) => (
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
@@ -156,15 +159,15 @@ export default function AdminTripsPage() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Title</label>
-                <input type="text" required value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                <input type="text" required value={form.title} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, title: e.target.value})} />
               </div>
               <div className="form-group">
                 <label>Content</label>
-                <textarea rows="5" required value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
+                <textarea rows={5} required value={form.content} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, content: e.target.value})} />
               </div>
               <div className="form-group">
                 <label>Category</label>
-                <input type="text" value={form.category} placeholder="e.g. Packing, Safety, Culture" onChange={e => setForm({...form, category: e.target.value})} />
+                <input type="text" value={form.category} placeholder="e.g. Packing, Safety, Culture" onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, category: e.target.value})} />
               </div>
               <div className="form-group">
                 <label>Image (.jpg or .png, max 1MB)</label>
@@ -195,7 +198,7 @@ export default function AdminTripsPage() {
             </thead>
             <tbody>
               {trips.length === 0 ? (
-                <tr><td colSpan="6" className="empty-cell">No trips yet</td></tr>
+                <tr><td colSpan={6} className="empty-cell">No trips yet</td></tr>
               ) : filteredTrips.map(t => (
                 <tr key={t.id}>
                   <td>#{t.id}</td>

@@ -1,16 +1,19 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from "next/image";
-import { toursAPI, geocodeAPI } from '@/lib/api/client';
+import { api, toursAPI, geocodeAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Globe, Plus, Pencil, Trash2, Search, X, MapPin, Loader, Star, GripVertical, Check, CheckSquare, Square } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
+
+import { isFile } from "@/features/pages/types";
+import type {  GalleryImage, Tour, TourTranslation  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 const PREDEFINED_INCLUDES = [
   'Hotel Pickup & Drop-off', 'Airport Transfer (if available)', 'Private Transportation',
   'Professional Tour Guide', 'Safari Driver Guide', 'Entrance Fees to Attractions',
@@ -32,19 +35,22 @@ const PREDEFINED_EXCLUDES = [
   'Any Service Not Mentioned in "What\'s Included"',
 ];
 
-function useDebounce(fn, delay) {
-  const timer = useRef(null);
-  return useCallback((...args) => {
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => fn(...args), delay);
-  }, [fn, delay]);
+function useDebounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  return useCallback(
+    (...args: Parameters<T>) => {
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => fn(...args), delay);
+    },
+    [fn, delay],
+  );
 }
 
 export default function AdminToursPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [tours, setTours] = useState([]);
+  const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [ordering, setOrdering] = useState('-created_at');
@@ -52,31 +58,31 @@ export default function AdminToursPage() {
   const [pageSize] = useState(15);
   const [total, setTotal] = useState(0);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState<number | null>(null);
   const [form, setForm] = useState({
     title: '', description: '', short_description: '',
     price: '', duration: '', location: '', category: 'zanzibar',
     image: null, image2: null, image3: null,
   });
-  const [includedItems, setIncludedItems] = useState([]);
-  const [excludedItems, setExcludedItems] = useState([]);
+  const [includedItems, setIncludedItems] = useState<string[]>([]);
+  const [excludedItems, setExcludedItems] = useState<string[]>([]);
   const [customInclude, setCustomInclude] = useState('');
   const [customExclude, setCustomExclude] = useState('');
-  const [coords, setCoords] = useState({ lat: '', lng: '' });
-  const [imagePreview, setImagePreview] = useState(null);
-  const [image2Preview, setImage2Preview] = useState(null);
-  const [image3Preview, setImage3Preview] = useState(null);
+  const [coords, setCoords] = useState<{ lat: string | number; lng: string | number }>({ lat: '', lng: '' });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [image2Preview, setImage2Preview] = useState<string | null>(null);
+  const [image3Preview, setImage3Preview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [geoError, setGeoError] = useState('');
 
-  const [galleryImages, setGalleryImages] = useState([]);
-  const [galleryFiles, setGalleryFiles] = useState([]);
-  const [galleryPreviews, setGalleryPreviews] = useState([]);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [translationForm, setTranslationForm] = useState({ locale: 'sw', title: '', description: '', short_description: '' });
-  const [translations, setTranslations] = useState([]);
-  const [draggingGalleryId, setDraggingGalleryId] = useState(null);
-  const [galleryDropTargetId, setGalleryDropTargetId] = useState(null);
+  const [translations, setTranslations] = useState<TourTranslation[]>([]);
+  const [draggingGalleryId, setDraggingGalleryId] = useState<number | null>(null);
+  const [galleryDropTargetId, setGalleryDropTargetId] = useState<number | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -97,11 +103,11 @@ export default function AdminToursPage() {
   const loadTours = () => {
     toursAPI
       .getAll({ search: search || undefined, ordering, page, page_size: pageSize })
-      .then((res) => {
+      .then((res: any) => {
         setTours(res.data.results || res.data);
         setTotal(res.data.count ?? (res.data.results || res.data).length);
       })
-      .catch((error) => toast.error(error.response?.data?.message || 'Failed to load tours'))
+      .catch((error: any) => toast.error(error.response?.data?.message || 'Failed to load tours'))
       .finally(() => setLoading(false));
   };
 
@@ -123,7 +129,7 @@ export default function AdminToursPage() {
     setGeoError('');
   };
 
-  const loadTranslations = async (tourId) => {
+  const loadTranslations = async (tourId: number) => {
     try {
       const res = await api.get(`/tours/${tourId}/translations/`);
       setTranslations(res.data?.translations || []);
@@ -134,16 +140,17 @@ export default function AdminToursPage() {
 
   const saveTranslation = async () => {
     try {
+      if (!editing) return;
       await api.put(`/tours/${editing}/translations/`, translationForm);
       toast.success('Translation saved');
       setTranslationForm({ locale: 'sw', title: '', description: '', short_description: '' });
       loadTranslations(editing);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to save the translation');
     }
   };
 
-  const loadGallery = async (tourId) => {
+  const loadGallery = async (tourId: number) => {
     try {
       const res = await toursAPI.getGallery(tourId);
       setGalleryImages(res.data.gallery_images || res.data.results || res.data);
@@ -152,21 +159,21 @@ export default function AdminToursPage() {
     }
   };
 
-  const handleEdit = async (tour) => {
-    const parseItems = (v) => {
+  const handleEdit = async (tour: Tour) => {
+    const parseItems = (v: any) => {
       if (Array.isArray(v)) return v;
       if (typeof v === 'string') { try { const p = JSON.parse(v); return Array.isArray(p) ? p : []; } catch { return []; } }
       return [];
     };
     setForm({
       title: tour.title, description: tour.description, short_description: tour.short_description || '',
-      price: tour.price, duration: tour.duration,
+      price: String(tour.price), duration: String(tour.duration),
       location: tour.destination || '', category: tour.category,
       image: null, image2: null, image3: null,
     });
     setIncludedItems(parseItems(tour.included_items || tour.includes));
     setExcludedItems(parseItems(tour.excluded_items || tour.excludes));
-    setCoords({ lat: tour.destination_lat || '', lng: tour.destination_lng || '' });
+    setCoords({ lat: tour.destination_lat ?? '', lng: tour.destination_lng ?? '' });
     setImagePreview(getImageUrl(tour.image_url) || null);
     setImage2Preview(getImageUrl(tour.image2_url) || null);
     setImage3Preview(getImageUrl(tour.image3_url) || null);
@@ -176,7 +183,7 @@ export default function AdminToursPage() {
     await loadTranslations(tour.id);
   };
 
-  const doGeocode = async (location) => {
+  const doGeocode = async (location: any) => {
     if (!location || location.length < 3) return;
     setGeocoding(true);
     setGeoError('');
@@ -194,37 +201,38 @@ export default function AdminToursPage() {
 
   const debouncedGeo = useDebounce(doGeocode, 800);
 
-  const handleLocationChange = (e) => {
+  const handleLocationChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const val = e.target.value;
     setForm(f => ({ ...f, location: val }));
     if (val.length >= 3) debouncedGeo(val);
   };
 
-  const handleImageChange = (e, field, setPreview) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, field: string, setPreview: any) => {
+    const file = (e.currentTarget as HTMLInputElement).files?.[0];
     if (!file) return;
     setForm(f => ({ ...f, [field]: file }));
     const reader = new FileReader();
-    reader.onload = (ev) => setPreview(ev.target.result);
+    reader.onload = (ev: ProgressEvent<FileReader>) => setPreview(String(ev.target?.result ?? ''));
     reader.readAsDataURL(file);
   };
 
-  const handleGalleryDragStart = (event, imageId) => {
+  const handleGalleryDragStart = (event: DragEvent<HTMLElement>, imageId: number) => {
     setDraggingGalleryId(imageId);
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', String(imageId));
   };
 
-  const handleGalleryDrop = async (event, targetId) => {
+  const handleGalleryDrop = async (event: DragEvent<HTMLElement>, targetId: number) => {
     event.preventDefault();
     const sourceId = Number(event.dataTransfer.getData('text/plain')) || draggingGalleryId;
     setDraggingGalleryId(null);
     setGalleryDropTargetId(null);
     if (!sourceId || sourceId === targetId) return;
 
+    if (!editing) return;
     const ordered = [...galleryImages];
-    const fromIndex = ordered.findIndex((image) => image.id === sourceId);
-    const toIndex = ordered.findIndex((image) => image.id === targetId);
+    const fromIndex = ordered.findIndex((image: GalleryImage) => image.id === sourceId);
+    const toIndex = ordered.findIndex((image: GalleryImage) => image.id === targetId);
     if (fromIndex === -1 || toIndex === -1) return;
 
     const [moved] = ordered.splice(fromIndex, 1);
@@ -232,42 +240,43 @@ export default function AdminToursPage() {
     setGalleryImages(ordered);
 
     try {
-      await toursAPI.reorderGallery(editing.id, ordered.map((image, index) => ({ id: image.id, order: index })));
+      await toursAPI.reorderGallery(editing, ordered.map((image: GalleryImage, index: number) => ({ id: image.id, order: index })));
       toast.success('Gallery order saved');
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to save the new gallery order');
-      loadGallery(editing.id);
+      loadGallery(editing);
     }
   };
 
-  const handleGalleryAdd = (e) => {
-    const files = Array.from(e.target.files);
+  const handleGalleryAdd = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const files = Array.from((e.currentTarget as HTMLInputElement).files ?? []);
     const pending = files.map(file => new Promise(resolve => {
       const reader = new FileReader();
-      reader.onload = (ev) => resolve(ev.target.result);
+      reader.onload = (ev: ProgressEvent<FileReader>) => resolve(String(ev.target?.result ?? ''));
       reader.readAsDataURL(file);
     }));
     Promise.all(pending).then(previews => {
       setGalleryFiles(prev => [...prev, ...files]);
-      setGalleryPreviews(prev => [...prev, ...previews]);
+      setGalleryPreviews(prev => [...prev, ...(previews as string[])]);
     });
-    e.target.value = '';
+    (e.currentTarget as HTMLInputElement).value = '';
   };
 
-  const removeGalleryFile = (index) => {
-    setGalleryFiles(prev => prev.filter((_, i) => i !== index));
-    setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+  const removeGalleryFile = (index: number) => {
+    setGalleryFiles(prev => prev.filter((_: any, i: number) => i !== index));
+    setGalleryPreviews(prev => prev.filter((_: any, i: number) => i !== index));
   };
 
-  const removeGalleryImage = async (imageId) => {
+  const removeGalleryImage = async (imageId: number) => {
     if (!window.confirm('Delete this image?')) return;
     try {
+      if (!editing) return;
       await toursAPI.deleteGalleryImage(editing, imageId);
       setGalleryImages(prev => prev.filter(img => img.id !== imageId));
     } catch { toast.error('Failed to delete'); }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSaving(true);
     try {
@@ -279,13 +288,13 @@ export default function AdminToursPage() {
       formData.append('duration', form.duration);
       formData.append('category', form.category);
       if (form.location) formData.append('destination', form.location);
-      if (coords.lat) formData.append('destination_lat', coords.lat);
-      if (coords.lng) formData.append('destination_lng', coords.lng);
+      if (coords.lat) formData.append('destination_lat', String(coords.lat));
+      if (coords.lng) formData.append('destination_lng', String(coords.lng));
       if (includedItems.length) formData.append('includes', JSON.stringify(includedItems));
       if (excludedItems.length) formData.append('excludes', JSON.stringify(excludedItems));
-      if (form.image instanceof File) formData.append('image', form.image);
-      if (form.image2 instanceof File) formData.append('image2', form.image2);
-      if (form.image3 instanceof File) formData.append('image3', form.image3);
+      if (isFile(form.image)) formData.append('image', form.image);
+      if (isFile(form.image2)) formData.append('image2', form.image2);
+      if (isFile(form.image3)) formData.append('image3', form.image3);
 
       let tourId;
       if (editing) {
@@ -304,18 +313,18 @@ export default function AdminToursPage() {
 
       resetForm();
       loadTours();
-    } catch (err) {
+    } catch (err: any) {
       toast.error('Failed to save tour');
     } finally {
       setSaving(false);
     }
   };
 
-  const toggleInclude = (item) => {
+  const toggleInclude = (item: string) => {
     setIncludedItems(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]);
   };
 
-  const toggleExclude = (item) => {
+  const toggleExclude = (item: string) => {
     setExcludedItems(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]);
   };
 
@@ -333,10 +342,10 @@ export default function AdminToursPage() {
     setCustomExclude('');
   };
 
-  const removeInclude = (item) => setIncludedItems(prev => prev.filter(i => i !== item));
-  const removeExclude = (item) => setExcludedItems(prev => prev.filter(i => i !== item));
+  const removeInclude = (item: string) => setIncludedItems(prev => prev.filter(i => i !== item));
+  const removeExclude = (item: string) => setExcludedItems(prev => prev.filter(i => i !== item));
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this tour?')) return;
     try {
       await toursAPI.delete(id);
@@ -364,7 +373,7 @@ export default function AdminToursPage() {
             type="text"
             placeholder="Search tours..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)}
             aria-label="Search tours"
           />
         </div>
@@ -373,7 +382,7 @@ export default function AdminToursPage() {
           <select
             id="tour-ordering"
             value={ordering}
-            onChange={(e) => { setOrdering(e.target.value); setPage(1); }}
+            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setOrdering(e.target.value); setPage(1); }}
           >
             <option value="-created_at">Newest first</option>
             <option value="created_at">Oldest first</option>
@@ -394,11 +403,11 @@ export default function AdminToursPage() {
               <div className="form-row">
                 <div className="form-group">
                   <label>Title</label>
-                  <input type="text" required value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                  <input type="text" required value={form.title} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, title: e.target.value})} />
                 </div>
                 <div className="form-group">
                   <label>Category</label>
-                  <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
+                  <select value={form.category} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, category: e.target.value})}>
                     <option value="zanzibar">Zanzibar</option>
                     <option value="tanzania">Infaan</option>
                     <option value="international">International</option>
@@ -407,20 +416,20 @@ export default function AdminToursPage() {
               </div>
               <div className="form-group">
                 <label>Description</label>
-                <textarea rows="4" required value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+                <textarea rows={4} required value={form.description} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, description: e.target.value})} />
               </div>
               <div className="form-group">
                 <label>Short Description</label>
-                <input type="text" value={form.short_description} onChange={e => setForm({...form, short_description: e.target.value})} />
+                <input type="text" value={form.short_description} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, short_description: e.target.value})} />
               </div>
               <div className="form-row">
                 <div className="form-group">
                   <label>Price ($)</label>
-                  <input type="number" step="0.01" required value={form.price} onChange={e => setForm({...form, price: e.target.value})} />
+                  <input type="number" step="0.01" required value={form.price} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, price: e.target.value})} />
                 </div>
                 <div className="form-group">
                   <label>Duration</label>
-                  <input type="text" required value={form.duration} onChange={e => setForm({...form, duration: e.target.value})} />
+                  <input type="text" required value={form.duration} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, duration: e.target.value})} />
                 </div>
               </div>
 
@@ -444,17 +453,17 @@ export default function AdminToursPage() {
               <div className="form-row">
                 <div className="form-group">
                   <label>Latitude (auto-filled, editable)</label>
-                  <input type="number" step="any" value={coords.lat} onChange={e => setCoords(c => ({ ...c, lat: e.target.value }))} />
+                  <input type="number" step="any" value={coords.lat} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setCoords(c => ({ ...c, lat: e.target.value }))} />
                 </div>
                 <div className="form-group">
                   <label>Longitude (auto-filled, editable)</label>
-                  <input type="number" step="any" value={coords.lng} onChange={e => setCoords(c => ({ ...c, lng: e.target.value }))} />
+                  <input type="number" step="any" value={coords.lng} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setCoords(c => ({ ...c, lng: e.target.value }))} />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>What's Included</label>
+                  <label>What&apos;s Included</label>
                   <div className="items-checklist">
                     {PREDEFINED_INCLUDES.map(item => (
                       <label key={item} className={`check-item ${includedItems.includes(item) ? 'checked' : ''}`}
@@ -466,8 +475,8 @@ export default function AdminToursPage() {
                   </div>
                   <div className="custom-item-row">
                     <input type="text" placeholder="Add custom item..." value={customInclude}
-                      onChange={e => setCustomInclude(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') addCustomInclude(); }} />
+                      onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setCustomInclude(e.target.value)}
+                      onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') addCustomInclude(); }} />
                     <button type="button" className="btn btn-sm btn-outline" onClick={addCustomInclude}>
                       <Plus size={14} /> Add
                     </button>
@@ -484,7 +493,7 @@ export default function AdminToursPage() {
                   )}
                 </div>
                 <div className="form-group">
-                  <label>What's Excluded</label>
+                  <label>What&apos;s Excluded</label>
                   <div className="items-checklist">
                     {PREDEFINED_EXCLUDES.map(item => (
                       <label key={item} className={`check-item ${excludedItems.includes(item) ? 'checked' : ''}`}
@@ -496,8 +505,8 @@ export default function AdminToursPage() {
                   </div>
                   <div className="custom-item-row">
                     <input type="text" placeholder="Add custom item..." value={customExclude}
-                      onChange={e => setCustomExclude(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') addCustomExclude(); }} />
+                      onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setCustomExclude(e.target.value)}
+                      onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') addCustomExclude(); }} />
                     <button type="button" className="btn btn-sm btn-outline" onClick={addCustomExclude}>
                       <Plus size={14} /> Add
                     </button>
@@ -518,17 +527,17 @@ export default function AdminToursPage() {
               <div className="form-image-row">
                 <div className="form-group">
                   <label>Image 1 (Cover)</label>
-                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => handleImageChange(e, 'image', setImagePreview)} />
+                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleImageChange(e, 'image', setImagePreview)} />
                   {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
                 </div>
                 <div className="form-group">
                   <label>Image 2</label>
-                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => handleImageChange(e, 'image2', setImage2Preview)} />
+                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleImageChange(e, 'image2', setImage2Preview)} />
                   {image2Preview && <img src={image2Preview} alt="Preview" className="image-preview" />}
                 </div>
                 <div className="form-group">
                   <label>Image 3</label>
-                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => handleImageChange(e, 'image3', setImage3Preview)} />
+                  <input type="file" accept=".jpg,.jpeg,.png" onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleImageChange(e, 'image3', setImage3Preview)} />
                   {image3Preview && <img src={image3Preview} alt="Preview" className="image-preview" />}
                 </div>
               </div>
@@ -541,10 +550,10 @@ export default function AdminToursPage() {
                       key={img.id}
                       className={`gallery-thumb-item gallery-drag-item${draggingGalleryId === img.id ? ' dragging' : ''}${galleryDropTargetId === img.id ? ' drop-target' : ''}`}
                       draggable
-                      onDragStart={(event) => handleGalleryDragStart(event, img.id)}
-                      onDragOver={(event) => { event.preventDefault(); setGalleryDropTargetId(img.id); }}
+                      onDragStart={(event: DragEvent<HTMLElement>) => handleGalleryDragStart(event, img.id)}
+                      onDragOver={(event: DragEvent<HTMLElement>) => { event.preventDefault(); setGalleryDropTargetId(img.id); }}
                       onDragLeave={() => setGalleryDropTargetId(null)}
-                      onDrop={(event) => handleGalleryDrop(event, img.id)}
+                      onDrop={(event: DragEvent<HTMLElement>) => handleGalleryDrop(event, img.id)}
                       onDragEnd={() => { setDraggingGalleryId(null); setGalleryDropTargetId(null); }}
                     >
                       <Image src={getImageUrl(img.image_url)} alt="" width={120} height={90} />
@@ -552,7 +561,7 @@ export default function AdminToursPage() {
                       <button type="button" className="gallery-remove-btn" onClick={() => removeGalleryImage(img.id)}><X size={12} /></button>
                     </div>
                   ))}
-                  {galleryPreviews.map((preview, i) => (
+                  {galleryPreviews.map((preview: any, i: number) => (
                     <div key={`new-${i}`} className="gallery-thumb-item">
                       <img src={preview} alt="" />
                       <button type="button" className="gallery-remove-btn" onClick={() => removeGalleryFile(i)}><X size={12} /></button>
@@ -574,9 +583,9 @@ export default function AdminToursPage() {
                     <select
                       id="translation-locale"
                       value={translationForm.locale}
-                      onChange={(e) => setTranslationForm({ ...translationForm, locale: e.target.value })}
+                      onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setTranslationForm({ ...translationForm, locale: e.target.value })}
                     >
-                      {['en', 'sw', 'fr', 'ar', 'de', 'es', 'zh'].map((locale) => (
+                      {['en', 'sw', 'fr', 'ar', 'de', 'es', 'zh'].map((locale: string) => (
                         <option key={locale} value={locale}>{locale}</option>
                       ))}
                     </select>
@@ -586,7 +595,7 @@ export default function AdminToursPage() {
                     <input
                       id="translation-title"
                       value={translationForm.title}
-                      onChange={(e) => setTranslationForm({ ...translationForm, title: e.target.value })}
+                      onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setTranslationForm({ ...translationForm, title: e.target.value })}
                     />
                   </div>
                 </div>
@@ -595,22 +604,22 @@ export default function AdminToursPage() {
                   <input
                     id="translation-short"
                     value={translationForm.short_description}
-                    onChange={(e) => setTranslationForm({ ...translationForm, short_description: e.target.value })}
+                    onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setTranslationForm({ ...translationForm, short_description: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
                   <label htmlFor="translation-description">Description</label>
                   <textarea
                     id="translation-description"
-                    rows="3"
+                    rows={3}
                     value={translationForm.description}
-                    onChange={(e) => setTranslationForm({ ...translationForm, description: e.target.value })}
+                    onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setTranslationForm({ ...translationForm, description: e.target.value })}
                   />
                 </div>
                 <button type="button" className="btn btn-outline" onClick={saveTranslation}>Save translation</button>
                 {translations.length > 0 && (
                   <ul className="pending-list">
-                    {translations.map((translation) => (
+                    {translations.map((translation: TourTranslation) => (
                       <li key={translation.locale}><strong>{translation.locale}</strong> {translation.title}</li>
                     ))}
                   </ul>
@@ -643,7 +652,7 @@ export default function AdminToursPage() {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan="8" className="empty-cell">No tours found</td></tr>
+                <tr><td colSpan={8} className="empty-cell">No tours found</td></tr>
               ) : filtered.map(t => (
                 <tr key={t.id}>
                   <td>#{t.id}</td>
@@ -671,7 +680,7 @@ export default function AdminToursPage() {
               <button
                 type="button"
                 className="btn btn-sm btn-outline"
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => setPage((current: any) => Math.max(1, current - 1))}
                 disabled={page <= 1}
               >
                 Previous
@@ -679,7 +688,7 @@ export default function AdminToursPage() {
               <button
                 type="button"
                 className="btn btn-sm btn-outline"
-                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                onClick={() => setPage((current: any) => Math.min(totalPages, current + 1))}
                 disabled={page >= totalPages}
               >
                 Next

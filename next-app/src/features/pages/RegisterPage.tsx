@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -6,17 +5,18 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { FileEdit, ClipboardList, Gem, RefreshCw, MessageSquare } from 'lucide-react';
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '' });
+  const [form, setForm] = useState<{ username: string; email: string; password: string; confirmPassword: string }>({ username: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const { register } = useAuth();
   const router = useRouter();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setError('');
 
@@ -28,7 +28,7 @@ export default function RegisterPage() {
     try {
       await register(form.username, form.email, form.password);
       router.push('/login?registered=1');
-    } catch (err) {
+    } catch (err: any) {
       setFieldErrors(err.fieldErrors || {});
       const detail = err.response?.data;
       if (detail?.username) setError('Username already exists');
@@ -84,7 +84,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 placeholder="Create a strong password"
-                minLength="6"
+                minLength={6}
               />
             </div>
             <div className="form-group">

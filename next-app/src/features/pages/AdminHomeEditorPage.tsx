@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,18 +8,20 @@ import { useAuth } from '@/context/AuthContext';
 import { Save, Upload, Trash2, Eye, Image as ImageIcon } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
+import type {  HomeSettings  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminHomeEditorPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState<HomeSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [heroFile, setHeroFile] = useState(null);
-  const [heroPreview, setHeroPreview] = useState(null);
-  const [zanzibarFile, setZanzibarFile] = useState(null);
-  const [zanzibarPreview, setZanzibarPreview] = useState(null);
-  const [tanzaniaFile, setTanzaniaFile] = useState(null);
-  const [tanzaniaPreview, setTanzaniaPreview] = useState(null);
+  const [heroFile, setHeroFile] = useState<File | null>(null);
+  const [heroPreview, setHeroPreview] = useState<string | null>(null);
+  const [zanzibarFile, setZanzibarFile] = useState<File | null>(null);
+  const [zanzibarPreview, setZanzibarPreview] = useState<string | null>(null);
+  const [tanzaniaFile, setTanzaniaFile] = useState<File | null>(null);
+  const [tanzaniaPreview, setTanzaniaPreview] = useState<string | null>(null);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -37,16 +38,16 @@ export default function AdminHomeEditorPage() {
     finally { setLoading(false); }
   };
 
-  const handleFileChange = (e, setFile, setPreview) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, setFile: any, setPreview: any) => {
+    const file = (e.currentTarget as HTMLInputElement).files?.[0];
     if (!file) return;
     setFile(file);
     const reader = new FileReader();
-    reader.onload = (ev) => setPreview(ev.target.result);
+    reader.onload = (ev: ProgressEvent<FileReader>) => setPreview(String(ev.target?.result ?? ''));
     reader.readAsDataURL(file);
   };
 
-  const clearField = (field) => {
+  const clearField = (field: string) => {
     if (field === 'hero') { setHeroFile(null); setHeroPreview(null); }
     else if (field === 'zanzibar') { setZanzibarFile(null); setZanzibarPreview(null); }
     else if (field === 'tanzania') { setTanzaniaFile(null); setTanzaniaPreview(null); }
@@ -71,7 +72,7 @@ export default function AdminHomeEditorPage() {
     finally { setSaving(false); }
   };
 
-  const handleDelete = async (field) => {
+  const handleDelete = async (field: string) => {
     if (!window.confirm(`Delete ${field} image?`)) return;
     setSaving(true);
     try {
@@ -89,7 +90,7 @@ export default function AdminHomeEditorPage() {
   if (!isAuthenticated || !isAdmin) return null;
   if (loading) return <div className="page"><div className="loading">Loading editor...</div></div>;
 
-  const previewUrl = (field) => {
+  const previewUrl = (field: string) => {
     if (field === 'hero') return heroPreview || settings?.hero_image_url || null;
     if (field === 'zanzibar') return zanzibarPreview || settings?.zanzibar_image_url || null;
     return tanzaniaPreview || settings?.tanzania_image_url || null;
@@ -117,7 +118,7 @@ export default function AdminHomeEditorPage() {
           <div className="editor-actions">
             <label className="btn btn-sm btn-outline">
               <Upload size={14} /> Upload
-              <input type="file" accept="image/*" hidden onChange={(e) => handleFileChange(e, setHeroFile, setHeroPreview)} />
+              <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleFileChange(e, setHeroFile, setHeroPreview)} />
             </label>
             {(heroPreview || settings?.hero_image_url) && (
               <button className="btn btn-sm btn-danger" onClick={() => handleDelete('hero')}>
@@ -140,7 +141,7 @@ export default function AdminHomeEditorPage() {
           <div className="editor-actions">
             <label className="btn btn-sm btn-outline">
               <Upload size={14} /> Upload
-              <input type="file" accept="image/*" hidden onChange={(e) => handleFileChange(e, setZanzibarFile, setZanzibarPreview)} />
+              <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleFileChange(e, setZanzibarFile, setZanzibarPreview)} />
             </label>
             {(zanzibarPreview || settings?.zanzibar_image_url) && (
               <button className="btn btn-sm btn-danger" onClick={() => handleDelete('zanzibar')}>
@@ -163,7 +164,7 @@ export default function AdminHomeEditorPage() {
           <div className="editor-actions">
             <label className="btn btn-sm btn-outline">
               <Upload size={14} /> Upload
-              <input type="file" accept="image/*" hidden onChange={(e) => handleFileChange(e, setTanzaniaFile, setTanzaniaPreview)} />
+              <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleFileChange(e, setTanzaniaFile, setTanzaniaPreview)} />
             </label>
             {(tanzaniaPreview || settings?.tanzania_image_url) && (
               <button className="btn btn-sm btn-danger" onClick={() => handleDelete('tanzania')}>

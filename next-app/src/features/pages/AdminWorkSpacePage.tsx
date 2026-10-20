@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -10,18 +9,21 @@ import { adminAPI, workspacesAPI } from '@/lib/api/client';
 import { Users, Search, X, ChevronRight, Plus, Briefcase } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import type {  Booking, Customer, TemplateSummary, Workspace, Tour  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminWorkSpacePage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [tourists, setTourists] = useState([]);
-  const [workspaces, setWorkspaces] = useState([]);
+  const [tourists, setTourists] = useState<Customer[]>([]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selectedTourist, setSelectedTourist] = useState(null);
-  const [touristBookings, setTouristBookings] = useState([]);
+  const [selectedTourist, setSelectedTourist] = useState<Customer | null>(null);
+  const [touristBookings, setTouristBookings] = useState<Booking[]>([]);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
-  const [templates, setTemplates] = useState([]);
+  const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [registerForm, setRegisterForm] = useState({
     username: '', email: '', password: '', full_name: '', phone: '', arrival_date: '', departure_date: ''
   });
@@ -48,7 +50,7 @@ export default function AdminWorkSpacePage() {
     loadTemplates();
   };
 
-  const loadTouristBookings = async (userId) => {
+  const loadTouristBookings = async (userId: number) => {
     try {
       const res = await adminAPI.getAllBookings();
       const bookings = res.data?.results || res.data || [];
@@ -59,7 +61,7 @@ export default function AdminWorkSpacePage() {
     }
   };
 
-  const selectTourist = (tourist) => {
+  const selectTourist = (tourist: any) => {
     setSelectedTourist(tourist);
     loadTouristBookings(tourist.id);
     setSearch('');
@@ -75,7 +77,7 @@ export default function AdminWorkSpacePage() {
     }
   };
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSaving(true);
     try {
@@ -90,7 +92,7 @@ export default function AdminWorkSpacePage() {
       toast.success('Tourist registered successfully! Please add the corresponding backend endpoint or use the existing user registration.');
       setShowRegisterForm(false);
       loadData();
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
       setSaving(false);
@@ -113,12 +115,12 @@ export default function AdminWorkSpacePage() {
     }
   };
 
-  const useTemplate = async (templateId) => {
+  const handleUseTemplate = async (templateId: number) => {
     try {
       const response = await workspacesAPI.createFromTemplate(templateId, {});
       toast.success('Workspace created from the template');
       router.push(`/admin/work-space/tour-plan/${response.data.id}`);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to use the template');
     }
   };
@@ -134,11 +136,11 @@ export default function AdminWorkSpacePage() {
         <div className="admin-panel">
           <h2>Saved templates</h2>
           <ul className="pending-list">
-            {templates.map((template) => (
+            {templates.map((template: TemplateSummary) => (
               <li key={template.id}>
                 <strong>{template.notes || `Template #${template.id}`}</strong>
                 {template.tours?.length ? <span>{template.tours.map((t) => t.title).join(', ')}</span> : null}
-                <button className="btn btn-sm btn-outline" onClick={() => useTemplate(template.id)}>
+                <button className="btn btn-sm btn-outline" onClick={() => handleUseTemplate(template.id)}>
                   Use template
                 </button>
               </li>
@@ -150,7 +152,7 @@ export default function AdminWorkSpacePage() {
       <div className="admin-toolbar">
         <div className="search-input-group">
           <Search size={16} />
-          <input type="text" placeholder="Search tourists by name or email..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input type="text" placeholder="Search tourists by name or email..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)} />
           {search && <button className="search-clear" onClick={() => setSearch('')}><X size={14} /></button>}
         </div>
         <button className="btn btn-primary" onClick={() => setShowRegisterForm(true)}>
@@ -203,7 +205,7 @@ export default function AdminWorkSpacePage() {
                 <div className="tourist-meta">
                   <h2>{selectedTourist.username}</h2>
                   <p><span className="meta-label">Email:</span> {selectedTourist.email}</p>
-                  <p><span className="meta-label">Joined:</span> {new Date(selectedTourist.date_joined).toLocaleDateString()}</p>
+                  <p><span className="meta-label">Joined:</span> {new Date(selectedTourist.date_joined ?? 0).toLocaleDateString()}</p>
                 </div>
               </div>
 
@@ -242,7 +244,7 @@ export default function AdminWorkSpacePage() {
       </div>
 
       {showRegisterForm && (
-        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowRegisterForm(false); }}>
+        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowRegisterForm(false); }}>
           <div className="modal-content">
             <div className="modal-header">
               <h3>Register New Tourist</h3>
@@ -251,32 +253,32 @@ export default function AdminWorkSpacePage() {
             <form onSubmit={handleRegister}>
               <div className="form-group">
                 <label>Username</label>
-                <input type="text" required value={registerForm.username} onChange={e => setRegisterForm({ ...registerForm, username: e.target.value })} placeholder="Username" />
+                <input type="text" required value={registerForm.username} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRegisterForm({ ...registerForm, username: e.target.value })} placeholder="Username" />
               </div>
               <div className="form-group">
                 <label>Email</label>
-                <input type="email" required value={registerForm.email} onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })} placeholder="Email address" />
+                <input type="email" required value={registerForm.email} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRegisterForm({ ...registerForm, email: e.target.value })} placeholder="Email address" />
               </div>
               <div className="form-group">
                 <label>Password</label>
-                <input type="password" required value={registerForm.password} onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })} placeholder="Password" />
+                <input type="password" required value={registerForm.password} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRegisterForm({ ...registerForm, password: e.target.value })} placeholder="Password" />
               </div>
               <div className="form-group">
                 <label>Full Name</label>
-                <input type="text" value={registerForm.full_name} onChange={e => setRegisterForm({ ...registerForm, full_name: e.target.value })} placeholder="Full name" />
+                <input type="text" value={registerForm.full_name} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRegisterForm({ ...registerForm, full_name: e.target.value })} placeholder="Full name" />
               </div>
               <div className="form-group">
                 <label>Phone</label>
-                <input type="text" value={registerForm.phone} onChange={e => setRegisterForm({ ...registerForm, phone: e.target.value })} placeholder="Phone number" />
+                <input type="text" value={registerForm.phone} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRegisterForm({ ...registerForm, phone: e.target.value })} placeholder="Phone number" />
               </div>
               <div className="form-row">
                 <div className="form-group">
                   <label>Arrival Date</label>
-                  <input type="date" value={registerForm.arrival_date} onChange={e => setRegisterForm({ ...registerForm, arrival_date: e.target.value })} />
+                  <input type="date" value={registerForm.arrival_date} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRegisterForm({ ...registerForm, arrival_date: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Departure Date</label>
-                  <input type="date" value={registerForm.departure_date} onChange={e => setRegisterForm({ ...registerForm, departure_date: e.target.value })} />
+                  <input type="date" value={registerForm.departure_date} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setRegisterForm({ ...registerForm, departure_date: e.target.value })} />
                 </div>
               </div>
               <button type="submit" className="btn btn-primary btn-block" disabled={saving}>

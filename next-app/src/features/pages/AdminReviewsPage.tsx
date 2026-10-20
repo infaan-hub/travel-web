@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,12 +8,15 @@ import { useAuth } from '@/context/AuthContext';
 import { Star, Search, Trash2, Check, X, BarChart3 } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import type {  Review  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminReviewsPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [reviews, setReviews] = useState([]);
-  const [stats, setStats] = useState(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [stats, setStats] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
@@ -38,7 +40,7 @@ export default function AdminReviewsPage() {
     finally { setLoading(false); }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this review permanently?')) return;
     try {
       await reviewsAPI.delete(id);
@@ -46,14 +48,14 @@ export default function AdminReviewsPage() {
     } catch { toast.error('Failed to delete review'); }
   };
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (id: number) => {
     try {
       const res = await reviewsAPI.approve(id, { status: 'approved' });
       setReviews(reviews.map(r => r.id === id ? res.data : r));
     } catch { toast.error('Failed to approve review'); }
   };
 
-  const handleReject = async (id) => {
+  const handleReject = async (id: number) => {
     try {
       const res = await reviewsAPI.approve(id, { status: 'deleted' });
       setReviews(reviews.map(r => r.id === id ? res.data : r));
@@ -92,9 +94,9 @@ export default function AdminReviewsPage() {
       <div className="admin-toolbar">
         <div className="search-input-group">
           <Search size={16} />
-          <input type="text" placeholder="Search reviews..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input type="text" placeholder="Search reviews..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)} />
         </div>
-        <select value={filter} onChange={e => setFilter(e.target.value)} className="filter-select">
+        <select value={filter} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setFilter(e.target.value)} className="filter-select">
           <option value="all">All Reviews</option>
           <option value="approved">Approved</option>
           <option value="pending">Pending</option>
@@ -119,19 +121,19 @@ export default function AdminReviewsPage() {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan="8" className="empty-cell">No reviews found</td></tr>
+                <tr><td colSpan={8} className="empty-cell">No reviews found</td></tr>
               ) : filtered.map(r => (
                 <tr key={r.id}>
                   <td>#{r.id}</td>
                   <td><strong>{r.user_name}</strong></td>
                   <td>
                     <span className="review-stars">
-                      {Array.from({ length: r.rating }, (_, i) => <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />)}
+                      {Array.from({ length: r.rating }, (_: any, i: number) => <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />)}
                     </span>
                   </td>
                   <td className="tip-cell">{r.content?.substring(0, 80)}{r.content?.length > 80 ? '...' : ''}</td>
                   <td>{r.tour_title || '-'}</td>
-                  <td>{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td>{new Date(r.created_at ?? 0).toLocaleDateString()}</td>
                   <td>
                     {r.status === 'approved' ? <span className="status-badge status-confirmed">Approved</span> :
                      r.status === 'deleted' ? <span className="status-badge status-cancelled">Deleted</span> :

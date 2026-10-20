@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -6,16 +5,17 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { FileEdit, Settings, BarChart3, ClipboardList, Users } from 'lucide-react';
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 
 export default function AdminRegisterPage() {
-  const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '', setupToken: '' });
+  const [form, setForm] = useState<{ username: string; email: string; password: string; confirmPassword: string; setupToken: string }>({ username: '', email: '', password: '', confirmPassword: '', setupToken: '' });
   const [error, setError] = useState('');
   const { adminRegister } = useAuth();
   const router = useRouter();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setError('');
     if (form.password !== form.confirmPassword) {
@@ -25,7 +25,7 @@ export default function AdminRegisterPage() {
     try {
       await adminRegister(form.username, form.email, form.password, form.setupToken || undefined);
       router.push('/admin/login?registered=1');
-    } catch (err) {
+    } catch (err: any) {
       const detail = err.response?.data;
       if (detail?.username) setError('Username already exists');
       else setError('Registration failed. Please try again.');
@@ -55,7 +55,7 @@ export default function AdminRegisterPage() {
             </div>
             <div className="form-group">
               <label>Password *</label>
-              <input type="password" name="password" value={form.password} onChange={handleChange} required placeholder="Strong password" minLength="6" />
+              <input type="password" name="password" value={form.password} onChange={handleChange} required placeholder="Strong password" minLength={6} />
             </div>
             <div className="form-group">
               <label>Confirm Password *</label>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -7,21 +6,28 @@ import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
 import { BookOpen, Lightbulb, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
+import type {  Tour, TravelTip  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function TripsPage() {
-  const [trips, setTrips] = useState([]);
-  const [tours, setTours] = useState([]);
+  const [trips, setTrips] = useState<TravelTip[]>([]);
+  const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [originInput, setOriginInput] = useState('');
-  const [originCoords, setOriginCoords] = useState(null);
+  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [originGeocoding, setOriginGeocoding] = useState(false);
 
   const [destInput, setDestInput] = useState('');
-  const [destCoords, setDestCoords] = useState(null);
+  const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [destGeocoding, setDestGeocoding] = useState(false);
   const [showTourDropdown, setShowTourDropdown] = useState(false);
 
-  const [route, setRoute] = useState(null);
+  const [route, setRoute] = useState<{
+    distance_km: number;
+    estimated_time_mins: number;
+    distance?: number;
+    duration?: string;
+  } | null>(null);
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState('');
 
@@ -46,7 +52,7 @@ export default function TripsPage() {
     }
     setOriginInput('Detecting your location...');
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      (pos: any) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setOriginCoords(coords);
         setOriginInput(`📍 ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
@@ -90,7 +96,7 @@ export default function TripsPage() {
     finally { setDestGeocoding(false); }
   };
 
-  const selectTourDestination = (tour) => {
+  const selectTourDestination = (tour: Tour) => {
     const dest = tour.destination || tour.title;
     setDestInput(dest);
     if (tour.destination_lat && tour.destination_lng) {
@@ -120,6 +126,7 @@ export default function TripsPage() {
   };
 
   const openInGoogleMaps = () => {
+    if (!originCoords || !destCoords) return;
     const origin = `${originCoords.lat},${originCoords.lng}`;
     const dest = `${destCoords.lat},${destCoords.lng}`;
     window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`, '_blank');
@@ -143,8 +150,8 @@ export default function TripsPage() {
               <input
                 type="text" placeholder="e.g. Dar es Salaam, Arusha..."
                 value={originInput}
-                onChange={e => { setOriginInput(e.target.value); setOriginCoords(null); setRoute(null); }}
-                onKeyDown={e => { if (e.key === 'Enter') geocodeOrigin(); }}
+                onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setOriginInput(e.target.value); setOriginCoords(null); setRoute(null); }}
+                onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') geocodeOrigin(); }}
               />
               <button className="btn btn-sm btn-outline" onClick={handleUseMyLocation} title="Use my location">
                 <Locate size={16} />
@@ -162,9 +169,9 @@ export default function TripsPage() {
               <input
                 type="text" placeholder="e.g. Zanzibar, Serengeti..."
                 value={destInput}
-                onChange={e => { setDestInput(e.target.value); setDestCoords(null); setRoute(null); setShowTourDropdown(false); }}
+                onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setDestInput(e.target.value); setDestCoords(null); setRoute(null); setShowTourDropdown(false); }}
                 onFocus={() => setShowTourDropdown(true)}
-                onKeyDown={e => { if (e.key === 'Enter') { geocodeDestination(); setShowTourDropdown(false); } }}
+                onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') { geocodeDestination(); setShowTourDropdown(false); } }}
               />
               <button className="btn btn-sm btn-primary" onClick={() => { geocodeDestination(); setShowTourDropdown(false); }} disabled={destGeocoding || !destInput.trim()}>
                 {destGeocoding ? <Loader size={14} className="spin" /> : <MapPin size={14} />}

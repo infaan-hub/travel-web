@@ -35,6 +35,7 @@ Open `http://localhost:3000`.
 - `npm test` — Vitest unit tests
 - `npm run smoke` — API and security smoke test against a running server
 - `npm run smoke:browser` — Playwright-free Chrome smoke test
+- `npm run audit:contrast` — runtime WCAG AA contrast audit
 - `npm run db:seed` — seed demo content and an administrator
 - `npm run admin:create` — create an administrator explicitly
 

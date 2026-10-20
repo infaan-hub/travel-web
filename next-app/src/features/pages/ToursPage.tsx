@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -7,19 +6,20 @@ import { useState, useEffect } from 'react';
 import { toursAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
 import { Search } from 'lucide-react';
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import type {  Tour  } from "@/features/pages/types";
 
 export default function ToursPage() {
-  const { category } = useParams();
-  const [tours, setTours] = useState([]);
+  const { category } = useParams<Record<string, string>>();
+  const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    setLoading(true);
-    const params = {};
+    const params: Record<string, string> = {};
     if (category) params.category = category;
     toursAPI.getAll(params)
-      .then((res) => setTours(res.data.results || res.data))
+      .then((res: any) => setTours(res.data.results || res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [category]);
@@ -45,7 +45,7 @@ export default function ToursPage() {
             type="text"
             placeholder="Search tours..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)}
           />
           <span className="search-icon"><Search size={18} /></span>
         </div>
@@ -60,7 +60,7 @@ export default function ToursPage() {
         </div>
       ) : (
         <div className="tours-grid">
-          {filtered.map((tour) => (
+          {filtered.map((tour: Tour) => (
             <TourCard key={tour.id} tour={tour} />
           ))}
         </div>

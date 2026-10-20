@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -8,19 +7,26 @@ import { profileAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Settings, Save, User, Mail, Phone, MapPin, Camera, Trash2, X, AlertCircle } from 'lucide-react';
 
+import type {  Customer  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function ProfilePage() {
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    full_name: string;
+    email: string;
+    phone: string;
+    address: string;
+  }>({
     full_name: '',
     email: '',
     phone: '',
@@ -51,19 +57,19 @@ export default function ProfilePage() {
     }
   };
 
-  const showMessage = (text, type = 'success') => {
+  const showMessage = (text: string, type = 'success') => {
     setMessage(text);
     setMessageType(type);
     setTimeout(() => setMessage(''), 4000);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setDirty(true);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const file = (e.currentTarget as HTMLInputElement).files?.[0];
     if (!file) return;
     const allowed = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowed.includes(file.type)) {
@@ -100,7 +106,7 @@ export default function ProfilePage() {
       setDirty(false);
       window.dispatchEvent(new Event('profile-updated'));
       showMessage('Profile updated successfully');
-    } catch (err) {
+    } catch (err: any) {
       const msg = err.response?.data?.error || err.response?.data?.message || 'Failed to save profile';
       showMessage(msg, 'error');
     } finally {
@@ -154,7 +160,7 @@ export default function ProfilePage() {
             <p className="profile-image-hint">JPG, PNG or WEBP. Max 5MB.</p>
           </div>
 
-          <form className="profile-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+          <form className="profile-form" onSubmit={(e: FormEvent<HTMLElement>) => { e.preventDefault(); handleSave(); }}>
             <div className="form-group">
               <label><User size={14} /> Full Name</label>
               <input type="text" name="full_name" value={form.full_name} onChange={handleChange} placeholder="Enter your full name" />

@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -8,14 +7,15 @@ import { authAPI, profileAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Settings, Save, User, Mail, Camera, Trash2 } from 'lucide-react';
 
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminSettingsPage() {
   const { isAuthenticated, isAdmin, user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [form, setForm] = useState({ username: user?.username || '', email: user?.email || '' });
+  const [form, setForm] = useState<{ username: string; email: string }>({ username: user?.username || '', email: user?.email || '' });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [profileImage, setProfileImage] = useState(null);
-  const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function AdminSettingsPage() {
 
   if (!isAuthenticated || !isAdmin) return null;
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSaving(true);
     setMessage('');
@@ -42,8 +42,8 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const file = (e.currentTarget as HTMLInputElement).files?.[0];
     if (file) {
       setProfileImage(file);
       setProfileImageUrl(URL.createObjectURL(file));
@@ -121,11 +121,11 @@ export default function AdminSettingsPage() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label><User size={14} /> Username</label>
-            <input type="text" value={form.username} onChange={e => setForm({...form, username: e.target.value})} />
+            <input type="text" value={form.username} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, username: e.target.value})} />
           </div>
           <div className="form-group">
             <label><Mail size={14} /> Email</label>
-            <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+            <input type="email" value={form.email} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, email: e.target.value})} />
           </div>
           <div className="form-actions">
             <button type="submit" className="btn btn-primary" disabled={saving}><Save size={16} /> {saving ? 'Saving...' : 'Save Settings'}</button>

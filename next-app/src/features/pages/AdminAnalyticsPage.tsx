@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,6 +8,7 @@ import { adminAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { TrendingUp, Eye, Users, Globe, MousePointerClick } from 'lucide-react';
 
+import type {  Analytics, DashboardStats  } from "@/features/pages/types";
 const AnalyticsCharts = dynamic(() => import('./AnalyticsCharts'), {
   ssr: false,
   loading: () => <div className="loading">Loading charts...</div>,
@@ -17,8 +17,8 @@ const AnalyticsCharts = dynamic(() => import('./AnalyticsCharts'), {
 export default function AdminAnalyticsPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

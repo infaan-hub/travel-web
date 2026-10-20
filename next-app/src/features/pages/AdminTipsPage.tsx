@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -9,15 +8,18 @@ import { useAuth } from '@/context/AuthContext';
 import { BookOpen, Plus, Pencil, Trash2 } from 'lucide-react';
 
 import { useToast } from "@/components/ToastProvider";
+
+import type {  TravelTip  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminTipsPage() {
   const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [tips, setTips] = useState([]);
+  const [tips, setTips] = useState<TravelTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ title: '', content: '', category: '' });
+  const [editing, setEditing] = useState<number | null>(null);
+  const [form, setForm] = useState<{ title: string; content: string; category: string }>({ title: '', content: '', category: '' });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function AdminTipsPage() {
 
   const loadTips = () => {
     tripsAPI.getAll()
-      .then(res => setTips(res.data.results || res.data))
+      .then(res => setTips((res.data.results || res.data) as TravelTip[]))
       .catch(console.error)
       .finally(() => setLoading(false));
   };
@@ -39,13 +41,13 @@ export default function AdminTipsPage() {
     setShowForm(false);
   };
 
-  const handleEdit = (tip) => {
+  const handleEdit = (tip: TravelTip) => {
     setForm({ title: tip.title, content: tip.content, category: tip.category || '' });
     setEditing(tip.id);
     setShowForm(true);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSaving(true);
     try {
@@ -63,7 +65,7 @@ export default function AdminTipsPage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this tip?')) return;
     try {
       await tripsAPI.delete(id);
@@ -92,15 +94,15 @@ export default function AdminTipsPage() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Title</label>
-                <input type="text" required value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                <input type="text" required value={form.title} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, title: e.target.value})} />
               </div>
               <div className="form-group">
                 <label>Content</label>
-                <textarea rows="5" required value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
+                <textarea rows={5} required value={form.content} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, content: e.target.value})} />
               </div>
               <div className="form-group">
                 <label>Category</label>
-                <input type="text" value={form.category} placeholder="e.g. Packing, Safety, Culture" onChange={e => setForm({...form, category: e.target.value})} />
+                <input type="text" value={form.category} placeholder="e.g. Packing, Safety, Culture" onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, category: e.target.value})} />
               </div>
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : (editing ? 'Update Tip' : 'Create Tip')}</button>
@@ -125,7 +127,7 @@ export default function AdminTipsPage() {
             </thead>
             <tbody>
               {tips.length === 0 ? (
-                <tr><td colSpan="5" className="empty-cell">No tips yet</td></tr>
+                <tr><td colSpan={5} className="empty-cell">No tips yet</td></tr>
               ) : tips.map(t => (
                 <tr key={t.id}>
                   <td>#{t.id}</td>

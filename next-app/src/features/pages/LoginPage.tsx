@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -6,11 +5,12 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { KeyRound, Palmtree, Compass, Map, Star } from 'lucide-react';
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState<{ username: string; password: string }>({ username: '', password: '' });
   const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,15 +18,15 @@ export default function LoginPage() {
   const requested = searchParams.get('from');
   const from = requested && requested.startsWith('/') && !requested.startsWith('//') ? requested : '/';
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setError('');
     try {
       await login(form.username, form.password);
       router.replace(from);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.response?.data?.detail || err.response?.data?.message || 'Invalid username or password');
       setFieldErrors(err.fieldErrors || {});
     }
@@ -86,7 +86,7 @@ export default function LoginPage() {
           <div className="auth-footer">
             <Link href="/forgot-password/">Forgot your password?</Link>
             <Link href="/verify-email/">Verify your email</Link>
-            <p>Don't have an account? <Link href="/register">Create one</Link></p>
+            <p>Don&apos;t have an account? <Link href="/register">Create one</Link></p>
           </div>
         </div>
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -8,17 +7,18 @@ import api from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { ClipboardList, Hourglass, CheckCircle, CalendarDays, MapPin, Users, DollarSign, Palmtree, Compass, Map, Mail, ArrowRight } from 'lucide-react';
 
+import type {  CustomerDashboard, Booking  } from "@/features/pages/types";
 export default function DashboardPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<CustomerDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated) { router.push('/login'); return; }
     api.get('/dashboard/')
-      .then((res) => setData(res.data))
+      .then((res: any) => setData(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [authLoading, isAuthenticated, router]);
@@ -61,9 +61,9 @@ export default function DashboardPage() {
           <div className="section-header">
             <h2>Recent Bookings</h2>
           </div>
-          {data?.recent_bookings?.length > 0 ? (
+          {data?.recent_bookings && data.recent_bookings.length > 0 ? (
             <div className="recent-bookings">
-              {data.recent_bookings.map((booking) => (
+              {(data.recent_bookings ?? []).map((booking: Booking) => (
                 <div key={booking.id} className="recent-booking-item">
                   <div className="recent-booking-info">
                     <h3>{booking.tour_title}</h3>

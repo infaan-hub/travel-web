@@ -69,10 +69,14 @@ img[src*="https"] {
   --glass-radius: 18px;
   --glass-radius-lg: 24px;
 
-  --aqua: #9D9679;
-  --aqua-dark: #857F66;
-  --aqua-light: #B8B297;
+  --aqua: #6B6550;
+  --aqua-dark: #4A4739;
+  --aqua-light: #857F66;
   --aqua-glow: rgba(157, 150, 121, 0.35);
+  /* Text-safe accent for light surfaces (WCAG AA) */
+  --aqua-strong: #5C5843;
+  /* Dark accent for surfaces that carry white text (WCAG AA) */
+  --aqua-deep: #4A4739;
   --aqua-subtle: rgba(157, 150, 121, 0.12);
   --bg-gradient: #ECEBE4;
   --bg-solid: #ECEBE4;
@@ -561,7 +565,7 @@ body {
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(157, 150, 121, 0.25) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(184, 178, 151, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.58) 50%, rgba(0, 0, 0, 0.52) 100%);
 }
 
 .hero-content {
@@ -677,7 +681,7 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, var(--aqua) 0%, var(--aqua-dark) 100%);
+  background: linear-gradient(180deg, var(--aqua-deep) 0%, #6B6550 100%);
   color: white;
   box-shadow:
     0 4px 6px rgba(157, 150, 121, 0.25),
@@ -723,7 +727,7 @@ body {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  color: var(--aqua);
+  color: var(--aqua-strong);
   border: 2px solid rgba(157, 150, 121, 0.5);
   box-shadow:
     0 4px 6px rgba(0, 0, 0, 0.05),
@@ -875,7 +879,7 @@ body {
   font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 700;
-  color: var(--aqua);
+  color: var(--aqua-strong);
   margin-bottom: 4px;
 }
 
@@ -984,19 +988,19 @@ body {
 }
 
 .tour-category.zanzibar {
-  background: rgba(157, 150, 121, 0.8);
+  background: rgba(74, 71, 57, 0.9);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .tour-category.tanzania {
-  background: rgba(184, 178, 151, 0.8);
+  background: rgba(92, 88, 67, 0.9);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .tour-category.international {
-  background: rgba(59, 130, 246, 0.8);
+  background: rgba(30, 64, 175, 0.9);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
@@ -1029,7 +1033,7 @@ body {
 }
 
 .tour-rating {
-  color: #F59E0B;
+  color: #9A3412;
   font-weight: 600;
 }
 
@@ -1040,7 +1044,7 @@ body {
 }
 
 .tour-destination {
-  color: #9D9679;
+  color: var(--aqua-strong);
 }
 
 .tour-card-footer {
@@ -1099,7 +1103,7 @@ body {
   left: 0;
   right: 0;
   padding: 32px;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6) 45%, rgba(0, 0, 0, 0.88) 100%);
   color: white;
 }
 
@@ -1117,7 +1121,7 @@ body {
 
 .destination-link {
   display: inline-block;
-  color: var(--aqua-light);
+  color: #E7E3D5;
   font-weight: 600;
   font-size: 15px;
 }
@@ -1385,7 +1389,7 @@ body {
   left: 0;
   right: 0;
   padding: 32px;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6) 45%, rgba(0, 0, 0, 0.88) 100%);
   color: white;
 }
 
@@ -1778,7 +1782,7 @@ body {
 }
 
 .auth-footer a {
-  color: var(--aqua);
+  color: var(--aqua-strong);
   text-decoration: none;
   font-weight: 600;
 }
@@ -1788,7 +1792,7 @@ body {
 }
 
 .auth-banner {
-  background: linear-gradient(135deg, var(--aqua), var(--aqua-dark));
+  background: linear-gradient(135deg, var(--aqua-deep), #575340);
   padding: 48px;
   display: flex;
   align-items: center;
@@ -1820,7 +1824,7 @@ body {
 .auth-banner-features span {
   font-size: 16px;
   padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(8px);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.15);

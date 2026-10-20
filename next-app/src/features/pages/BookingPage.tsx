@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
@@ -11,7 +10,10 @@ import { MapPin, Clock, Mail, MessageSquare, CheckCircle, Navigation } from 'luc
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
-function haversineDistance(lat1, lon1, lat2, lon2) {
+
+import type {  Tour  } from "@/features/pages/types";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -24,19 +26,28 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 
 export default function BookingPage() {
   const toast = useToast();
-  const { tourId } = useParams();
+  const { tourId } = useParams<Record<string, string>>();
   const router = useRouter();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
-  const [tour, setTour] = useState(null);
+  const [tour, setTour] = useState<Tour | null>(null);
   const [loading, setLoading] = useState(!!tourId);
   const [sendMethod, setSendMethod] = useState('push');
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
-  const [distance, setDistance] = useState(null);
-  const [estimatedTime, setEstimatedTime] = useState(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
   const [mapsUrl, setMapsUrl] = useState('');
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    full_name: string;
+    email: string;
+    phone: string;
+    address: string;
+    travelers: number;
+    children: number;
+    travel_date: string;
+    notes: string;
+  }>({
     full_name: '',
     email: '',
     phone: '',
@@ -51,22 +62,25 @@ export default function BookingPage() {
     if (authLoading) return;
     // Guests can book without an account; signed-in customers are prefilled.
     if (user) {
-      setForm(prev => ({
-        ...prev,
-        full_name: user.username || '',
-        email: user.email || '',
-      }));
+      // Prefill the form for signed-in customers.
+      queueMicrotask(() =>
+        setForm(prev => ({
+          ...prev,
+          full_name: user.username || '',
+          email: user.email || '',
+        })),
+      );
     }
     if (tourId) {
       toursAPI.getById(tourId)
-        .then((res) => setTour(res.data))
+        .then((res: any) => setTour(res.data))
         .catch(console.error)
         .finally(() => setLoading(false));
     }
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        (pos: any) => {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setUserLocation(loc);
         },
@@ -79,15 +93,17 @@ export default function BookingPage() {
   useEffect(() => {
     if (userLocation && tour?.destination_lat && tour?.destination_lng) {
       const dist = haversineDistance(userLocation.lat, userLocation.lng, tour.destination_lat, tour.destination_lng);
-      setDistance(Math.round(dist * 10) / 10);
       const time = Math.round(dist / 50 * 60);
-      setEstimatedTime(time);
       const url = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${tour.destination_lat},${tour.destination_lng}`;
-      setMapsUrl(url);
+      queueMicrotask(() => {
+        setDistance(Math.round(dist * 10) / 10);
+        setEstimatedTime(time);
+        setMapsUrl(url);
+      });
     }
   }, [userLocation, tour]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const createBooking = async () => {
     if (tour) {
@@ -114,7 +130,7 @@ export default function BookingPage() {
     return res.data;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSending(true);
     let bookingCreated = false;
@@ -127,7 +143,7 @@ export default function BookingPage() {
       }
       setSuccess(true);
       setTimeout(() => router.push('/bookings'), 3000);
-    } catch (err) {
+    } catch (err: any) {
       const msg = err.response?.data?.message || err.message || '';
       if (bookingCreated) {
         const userMsg = msg
@@ -233,7 +249,7 @@ export default function BookingPage() {
               </div>
               <div className="form-group">
                 <label>Special Requests / Notes</label>
-                <textarea name="notes" value={form.notes} onChange={handleChange} rows="4" placeholder="Hotel preferences, dietary requirements, special occasions..." />
+                <textarea name="notes" value={form.notes} onChange={handleChange} rows={4} placeholder="Hotel preferences, dietary requirements, special occasions..." />
               </div>
 
               <h2>Confirmation Method</h2>
