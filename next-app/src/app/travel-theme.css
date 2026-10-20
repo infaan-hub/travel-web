@@ -26,15 +26,15 @@
   --line: rgba(15, 107, 107, 0.14);
 
   /* Glass */
-  --glass-bg: rgba(255, 255, 255, 0.62);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.78);
+  --glass-bg: rgba(240, 246, 244, 0.58);
+  --glass-bg-elevated: rgba(247, 251, 250, 0.78);
   --glass-bg-soft: rgba(216, 228, 224, 0.5);
-  --glass-bg-aqua: rgba(20, 163, 163, 0.14);
-  --glass-bg-strong: rgba(255, 255, 255, 0.86);
+  --glass-bg-aqua: rgba(216, 228, 224, 0.62);
+  --glass-bg-strong: rgba(243, 248, 247, 0.88);
 
-  --glass-border: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.66);
   --glass-border-strong: rgba(15, 107, 107, 0.20);
-  --glass-highlight: rgba(255, 255, 255, 0.82);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
 
   --glass-blur-sm: 10px;
   --glass-blur-md: 16px;
@@ -137,9 +137,9 @@ body {
 body {
   background-color: var(--page-bg);
   background-image:
-    radial-gradient(1100px 620px at 12% -8%, rgba(255, 255, 255, 0.38), transparent 62%),
-    radial-gradient(900px 560px at 92% 4%, rgba(20, 163, 163, 0.08), transparent 60%),
-    radial-gradient(760px 520px at 68% 96%, rgba(140, 170, 170, 0.12), transparent 64%);
+    radial-gradient(1100px 620px at 12% -8%, rgba(255, 255, 255, 0.55), transparent 62%),
+    radial-gradient(900px 560px at 92% 4%, rgba(255, 255, 255, 0.3), transparent 60%),
+    radial-gradient(760px 520px at 68% 96%, rgba(255, 255, 255, 0.22), transparent 64%);
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-inter), Lexend, Poppins, system-ui, -apple-system, sans-serif;
@@ -852,7 +852,7 @@ input,
 textarea,
 select,
 .filter-select {
-  background: var(--glass-bg-elevated);
+  background: rgba(248, 251, 250, 0.86);
   border: 1px solid var(--glass-border-strong);
   border-radius: var(--radius-button);
   color: var(--text-primary);
@@ -1183,8 +1183,8 @@ select:focus,
   justify-content: center;
   background-color: var(--page-bg);
   background-image:
-    radial-gradient(900px 520px at 20% 0%, rgba(255, 255, 255, 0.42), transparent 62%),
-    radial-gradient(760px 520px at 90% 90%, rgba(20, 163, 163, 0.12), transparent 64%);
+    radial-gradient(900px 520px at 20% 0%, rgba(255, 255, 255, 0.6), transparent 62%),
+    radial-gradient(760px 520px at 90% 90%, rgba(255, 255, 255, 0.28), transparent 64%);
   padding: 24px 16px;
 }
 
