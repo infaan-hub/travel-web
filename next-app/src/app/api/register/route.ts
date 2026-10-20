@@ -7,7 +7,7 @@ import { userSerializer } from "@/lib/serializers";
 
 export async function POST(request: NextRequest) {
   try {
-    enforceRateLimit(request, "register", 10, 60 * 60 * 1000);
+    await enforceRateLimit(request, "register", 10, 60 * 60 * 1000);
     const body = registerSchema.parse(await readJson(request));
     const user = await registerUser(body);
     return ok(userSerializer(user), 201);

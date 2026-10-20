@@ -8,7 +8,7 @@ import { setSessionCookies } from "@/lib/auth/session";
 
 export async function POST(request: NextRequest) {
   try {
-    enforceRateLimit(request, "login", 10, 15 * 60 * 1000);
+    await enforceRateLimit(request, "login", 10, 15 * 60 * 1000);
     const body = loginSchema.parse(await readJson(request));
     const user = await authenticateUser(body.username, body.password);
 

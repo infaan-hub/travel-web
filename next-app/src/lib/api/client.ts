@@ -11,6 +11,10 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Surface field-level validation errors so forms can render them inline.
+    if (error.response?.data?.errors && typeof error.response.data.errors === "object") {
+      error.fieldErrors = error.response.data.errors;
+    }
     const originalRequest = error.config;
     if (
       error.response?.status === 401 &&

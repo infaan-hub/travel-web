@@ -70,7 +70,10 @@ export async function DELETE(request: NextRequest, context: Context) {
     const id = parseId((await context.params).id);
     const attraction = await prisma.attraction.findUnique({ where: { id } });
     if (!attraction) throw new ApiError(404, "Attraction not found.");
-    await prisma.attraction.delete({ where: { id } });
+    await prisma.attraction.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
     await deleteImage(attraction.image);
     return new Response(null, { status: 204 });
   } catch (error) {

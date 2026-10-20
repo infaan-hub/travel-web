@@ -35,7 +35,7 @@ Open `http://localhost:3000`.
 - `npm test` — Vitest unit tests
 - `npm run smoke` — API and security smoke test against a running server
 - `npm run smoke:browser` — Playwright-free Chrome smoke test
-- `npm run db:export` / `npm run db:import` / `npm run db:verify`
+- `npm run db:seed` — seed demo content and an administrator
 - `npm run admin:create` — create an administrator explicitly
 
 ## Environment
@@ -55,11 +55,19 @@ corresponding booking features.
 
 ## Media
 
-Development stores uploads in `public/uploads`. Production uses Supabase Storage
-through its REST API and stores object keys (never image bytes) in PostgreSQL.
+Uploads are stored on the local filesystem under `public/uploads` and only the
+object key is persisted in PostgreSQL. Set `NEXT_PUBLIC_MEDIA_BASE_URL` to serve
+the same files from an external host or CDN.
+
+## Notifications
+
+All customer and staff notifications are delivered through Web Push (VAPID) plus
+in-app notifications — no SMTP involved. See `docs/NOTIFICATIONS.md` for the
+required environment variables and the API surface.
 
 ## Documentation
 
+- `docs/NOTIFICATIONS.md`
 - `docs/DEPLOYMENT.md`
 - `docs/ROLLBACK.md`
 - `docs/VERIFICATION-REPORT.md`

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useEmblaCarousel from "embla-carousel-react";
@@ -46,7 +47,14 @@ export default function TourCard({ tour }: { tour: Tour }) {
           <div className="embla__container">
             {uniqueImages.map((img, i) => (
               <div key={i} className="embla__slide">
-                <img src={img} alt={tour.title} loading="lazy" className="embla__slide__img" />
+                <Image
+                  src={img}
+                  alt={tour.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="embla__slide__img"
+                  style={{ objectFit: "cover" }}
+                />
               </div>
             ))}
           </div>

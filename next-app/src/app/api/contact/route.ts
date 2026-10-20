@@ -7,7 +7,7 @@ import { contactSerializer } from "@/lib/serializers";
 
 export async function POST(request: NextRequest) {
   try {
-    enforceRateLimit(request, "contact", 5, 60 * 60 * 1000);
+    await enforceRateLimit(request, "contact", 5, 60 * 60 * 1000);
     const body = contactSchema.parse(await readJson(request));
     const message = await prisma.contactMessage.create({ data: body });
     return ok(contactSerializer(message), 201);

@@ -8,7 +8,9 @@ import api from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass, Briefcase } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminDashboardPage() {
+  const toast = useToast();
   const { user, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState(null);
@@ -36,7 +38,7 @@ export default function AdminDashboardPage() {
       await api.patch(`/bookings/${id}/`, { status });
       setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
     } catch (err) {
-      alert('Failed to update booking status');
+      toast.error('Failed to update booking status');
     }
   };
 

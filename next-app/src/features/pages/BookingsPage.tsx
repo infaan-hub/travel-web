@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { ClipboardList, MapPin, Users, DollarSign, CalendarDays, CheckCircle, Navigation, Clock, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
+import { useToast } from "@/components/ToastProvider";
 function BookingGallery({ tourId, mainImage }) {
   const [galleryUrls, setGalleryUrls] = useState([]);
   const [current, setCurrent] = useState(0);
@@ -50,6 +51,7 @@ function BookingGallery({ tourId, mainImage }) {
 }
 
 export default function BookingsPage() {
+  const toast = useToast();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
   const [bookings, setBookings] = useState([]);
@@ -73,7 +75,7 @@ export default function BookingsPage() {
       try {
         await api.patch(`/bookings/${id}/`, { status: 'cancelled' });
         setBookings(bookings.map(b => b.id === id ? { ...b, status: 'cancelled' } : b));
-      } catch { alert('Failed to cancel booking'); }
+      } catch { toast.error('Failed to cancel booking'); }
     }
   };
 
@@ -84,7 +86,7 @@ export default function BookingsPage() {
       const url = `https://www.google.com/maps/dir/${booking.user_lat},${booking.user_lng}/${booking.tour_destination_lat},${booking.tour_destination_lng}`;
       window.open(url, '_blank');
     } else {
-      alert('Location data not available for this booking');
+      toast.error('Location data not available for this booking');
     }
   };
 

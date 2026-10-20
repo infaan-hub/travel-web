@@ -9,7 +9,9 @@ import { useAuth } from '@/context/AuthContext';
 import { BookOpen, Plus, Pencil, Trash2 } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminTripsPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [trips, setTrips] = useState([]);
@@ -51,12 +53,12 @@ export default function AdminTripsPage() {
     const file = e.target.files[0];
     if (!file) return;
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      alert('Only .jpg and .png images are allowed');
+      toast.error('Only .jpg and .png images are allowed');
       e.target.value = '';
       return;
     }
     if (file.size > 1048576) {
-      alert('Image must be less than 1MB');
+      toast.error('Image must be less than 1MB');
       e.target.value = '';
       return;
     }
@@ -84,7 +86,7 @@ export default function AdminTripsPage() {
       resetForm();
       loadTrips();
     } catch {
-      alert('Failed to save trip');
+      toast.error('Failed to save trip');
     } finally {
       setSaving(false);
     }
@@ -95,7 +97,7 @@ export default function AdminTripsPage() {
     try {
       await tripsAPI.delete(id);
       setTrips(trips.filter(t => t.id !== id));
-    } catch { alert('Failed to delete trip'); }
+    } catch { toast.error('Failed to delete trip'); }
   };
 
   if (!isAuthenticated || !isAdmin) return null;

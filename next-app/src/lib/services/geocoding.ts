@@ -1,6 +1,8 @@
 import "server-only";
 import { ApiError } from "@/lib/api/http";
+import { cacheGet, cacheSet } from "@/lib/cache";
 import { env } from "@/lib/env";
+import { reportError } from "@/lib/logging";
 
 type GeocodeResult = {
   lat: number;
@@ -10,7 +12,6 @@ type GeocodeResult = {
 };
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
-const cache = new Map<string, GeocodeResult>();
 
 /**
  * Tanzania-aware forward geocoding through Nominatim.
@@ -21,8 +22,8 @@ export async function geocodeLocation(rawLocation: string): Promise<GeocodeResul
   const location = rawLocation.trim();
   if (!location) throw new ApiError(400, "Location parameter required");
 
-  const key = `${location.toLowerCase()}, tanzania`;
-  const cached = cache.get(key);
+  const key = `geocode:${location.toLowerCase()}, tanzania`;
+  const cached = await cacheGet<GeocodeResult>(key);
   if (cached && Date.now() - (cached.cached_at ?? 0) < CACHE_TTL_MS) {
     return cached;
   }
@@ -43,7 +44,7 @@ export async function geocodeLocation(rawLocation: string): Promise<GeocodeResul
       signal: AbortSignal.timeout(10_000),
     });
   } catch (error) {
-    console.error("Nominatim request failed", error);
+    reportError(error, { operation: "nominatim_request", location });
     throw new ApiError(502, "Geocoding service is temporarily unavailable.");
   }
 
@@ -65,7 +66,7 @@ export async function geocodeLocation(rawLocation: string): Promise<GeocodeResul
     display_name: data[0].display_name ?? location,
     cached_at: Date.now(),
   };
-  cache.set(key, result);
+  await cacheSet(key, result, CACHE_TTL_MS);
   return result;
 }
 

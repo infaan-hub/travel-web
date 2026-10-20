@@ -9,7 +9,9 @@ import { useAuth } from '@/context/AuthContext';
 import { Map, Plus, Pencil, Trash2, Search, X } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminAttractionsPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [attractions, setAttractions] = useState([]);
@@ -58,7 +60,7 @@ export default function AdminAttractionsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.location.trim()) { alert('Name and location are required'); return; }
+    if (!form.name.trim() || !form.location.trim()) { toast.error('Name and location are required'); return; }
     setSaving(true);
     try {
       const fd = new FormData();
@@ -73,7 +75,7 @@ export default function AdminAttractionsPage() {
         setAttractions([...attractions, res.data]);
       }
       resetForm();
-    } catch { alert('Failed to save attraction'); }
+    } catch { toast.error('Failed to save attraction'); }
     finally { setSaving(false); }
   };
 
@@ -82,7 +84,7 @@ export default function AdminAttractionsPage() {
     try {
       await attractionsAPI.delete(id);
       setAttractions(attractions.filter(a => a.id !== id));
-    } catch { alert('Failed to delete attraction'); }
+    } catch { toast.error('Failed to delete attraction'); }
   };
 
   const filtered = attractions.filter(a =>

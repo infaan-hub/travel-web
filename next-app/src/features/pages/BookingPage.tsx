@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { MapPin, Clock, Mail, MessageSquare, CheckCircle, Navigation } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
+import { useToast } from "@/components/ToastProvider";
 function haversineDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -21,12 +22,13 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 }
 
 export default function BookingPage() {
+  const toast = useToast();
   const { tourId } = useParams();
   const router = useRouter();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(!!tourId);
-  const [sendMethod, setSendMethod] = useState('email');
+  const [sendMethod, setSendMethod] = useState('push');
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
@@ -104,17 +106,6 @@ export default function BookingPage() {
     }
   };
 
-  const sendEmail = async () => {
-    const res = await api.post('/send-email/', {
-      ...form,
-      tour: tour ? tour.title : 'Custom Tour Inquiry',
-      destination: tour ? tour.destination : '',
-      children: Number(form.children) || 0,
-      recipient_email: 'infaanhameed@gmail.com',
-    });
-    return res.data;
-  };
-
   const sendWhatsApp = async () => {
     const res = await api.post('/send-whatsapp/', {
       ...form,
@@ -131,9 +122,7 @@ export default function BookingPage() {
     try {
       await createBooking();
       bookingCreated = true;
-      if (sendMethod === 'email') {
-        await sendEmail();
-      } else {
+      if (sendMethod === 'whatsapp') {
         const waRes = await sendWhatsApp();
         window.open(waRes.whatsapp_url, '_blank');
       }
@@ -144,11 +133,11 @@ export default function BookingPage() {
       if (bookingCreated) {
         const userMsg = msg
           ? `Booking saved! But ${msg.toLowerCase()}. We will contact you soon.`
-          : 'Booking saved! Email notification failed. We will contact you soon.';
-        alert(userMsg);
+          : 'Booking saved! The notification could not be sent. We will contact you soon.';
+        toast.error(userMsg);
         router.push('/bookings');
       } else {
-        alert(msg || 'Failed to process booking. Please try again.');
+        toast.error(msg || 'Failed to process booking. Please try again.');
       }
     } finally {
       setSending(false);
@@ -170,8 +159,8 @@ export default function BookingPage() {
           <span className="success-icon"><CheckCircle size={32} /></span>
           <h2>Booking Submitted Successfully!</h2>
           <p>
-            {sendMethod === 'email'
-              ? 'Your booking details with Infaan tours and travel have been sent to your email and to our team at infaanhameed@gmail.com. We will contact you within 24 hours with confirmation and further instructions for your tour.'
+            {sendMethod === 'push'
+              ? 'Your booking request has been received and our team has been notified. You will get an instant notification with your booking reference, and we will contact you within 24 hours with confirmation and further instructions for your tour.'
               : 'WhatsApp chat has been opened with your booking details with Infaan tours and travel. Our team at +255711252758 will respond shortly to help plan your perfect experience.'}
           </p>
           <div className="success-actions">
@@ -252,11 +241,11 @@ export default function BookingPage() {
               <h2>Confirmation Method</h2>
               <p className="send-method-label">How would you like to receive your booking confirmation?</p>
               <div className="send-method-options">
-                <label className={`send-method-card ${sendMethod === 'email' ? 'selected' : ''}`}>
-                  <input type="radio" name="sendMethod" value="email" checked={sendMethod === 'email'} onChange={() => setSendMethod('email')} />
+                <label className={`send-method-card ${sendMethod === 'push' ? 'selected' : ''}`}>
+                  <input type="radio" name="sendMethod" value="push" checked={sendMethod === 'push'} onChange={() => setSendMethod('push')} />
                   <span className="method-icon"><Mail size={24} /></span>
-                  <span className="method-label">Send via Email</span>
-                  <span className="method-desc">Receive your full booking confirmation from Infaan tours and travel at your email and infaanhameed@gmail.com</span>
+                  <span className="method-label">Send via Notification</span>
+                  <span className="method-desc">Get an instant booking notification with your reference number on this device and in your account</span>
                 </label>
                 <label className={`send-method-card ${sendMethod === 'whatsapp' ? 'selected' : ''}`}>
                   <input type="radio" name="sendMethod" value="whatsapp" checked={sendMethod === 'whatsapp'} onChange={() => setSendMethod('whatsapp')} />
@@ -267,7 +256,7 @@ export default function BookingPage() {
               </div>
 
               <button type="submit" className="btn btn-primary btn-block btn-large" disabled={sending}>
-                {sending ? 'Processing...' : `Submit Booking via ${sendMethod === 'email' ? 'Email' : 'WhatsApp'}`}
+                {sending ? 'Processing...' : `Submit Booking via ${sendMethod === 'push' ? 'Notification' : 'WhatsApp'}`}
               </button>
             </form>
           </div>

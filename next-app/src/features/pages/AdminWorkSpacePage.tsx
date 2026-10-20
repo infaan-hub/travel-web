@@ -8,7 +8,9 @@ import { useAuth } from '@/context/AuthContext';
 import { adminAPI, workspacesAPI } from '@/lib/api/client';
 import { Users, Search, X, ChevronRight, Plus, Briefcase } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminWorkSpacePage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [tourists, setTourists] = useState([]);
@@ -78,15 +80,15 @@ export default function AdminWorkSpacePage() {
       const users = res.data?.results || res.data || [];
       const exists = Array.isArray(users) && users.find(u => u.email === registerForm.email);
       if (exists) {
-        alert('A user with this email already exists. Please select them from the list.');
+        toast.error('A user with this email already exists. Please select them from the list.');
         setShowRegisterForm(false);
         return;
       }
-      alert('Tourist registered successfully! Please add the corresponding backend endpoint or use the existing user registration.');
+      toast.success('Tourist registered successfully! Please add the corresponding backend endpoint or use the existing user registration.');
       setShowRegisterForm(false);
       loadData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Registration failed');
+      toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
       setSaving(false);
     }

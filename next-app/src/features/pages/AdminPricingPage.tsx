@@ -8,7 +8,9 @@ import { useAuth } from '@/context/AuthContext';
 import { workspacesAPI } from '@/lib/api/client';
 import { ArrowLeft, Mail, Check, Globe, Hotel, Truck, BedDouble, User, Smartphone, Copy } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminPricingPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const { id } = useParams();
@@ -75,7 +77,7 @@ export default function AdminPricingPage() {
         const cleanPhone = phone.replace(/[^0-9]/g, '');
         window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
       } else {
-        alert('No phone number available for this tourist.');
+        toast.error('No phone number available for this tourist.');
       }
     } finally {
       setSending(false);
@@ -89,13 +91,13 @@ export default function AdminPricingPage() {
     if (email) {
       window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
     } else {
-      alert('No email available for this tourist.');
+      toast.error('No email available for this tourist.');
     }
   };
 
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(generateMessage());
-    alert('Message copied to clipboard!');
+    toast.success('Message copied to clipboard!');
   };
 
   const handleApproveAndFinish = async () => {
@@ -109,7 +111,7 @@ export default function AdminPricingPage() {
       }
       router.push(`/view-workspace/${id}`);
     } catch (err) {
-      alert('Failed to approve workspace');
+      toast.error('Failed to approve workspace');
     }
   };
 

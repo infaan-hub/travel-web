@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     const canReadUnpublished = all && context?.user.isStaff === true;
     const tips = await prisma.travelTip.findMany({
       where: {
+        deletedAt: null,
         ...(canReadUnpublished ? {} : { published: true }),
         ...(category ? { category } : {}),
       },

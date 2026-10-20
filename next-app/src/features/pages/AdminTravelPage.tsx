@@ -8,7 +8,9 @@ import { useAuth } from '@/context/AuthContext';
 import { travelDriversAPI, travelVehiclesAPI } from '@/lib/api/client';
 import { Car, Plus, Pencil, Trash2, Search, X, User } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminTravelPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('drivers');
@@ -74,7 +76,7 @@ export default function AdminTravelPage() {
       resetDriverForm();
       loadData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to save driver');
+      toast.error(err.response?.data?.message || 'Failed to save driver');
     } finally {
       setSavingDriver(false);
     }
@@ -92,7 +94,7 @@ export default function AdminTravelPage() {
       resetVehicleForm();
       loadData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to save vehicle');
+      toast.error(err.response?.data?.message || 'Failed to save vehicle');
     } finally {
       setSavingVehicle(false);
     }
@@ -103,7 +105,7 @@ export default function AdminTravelPage() {
     try {
       await travelDriversAPI.delete(id);
       loadData();
-    } catch { alert('Failed to delete driver'); }
+    } catch { toast.error('Failed to delete driver'); }
   };
 
   const handleDeleteVehicle = async (id) => {
@@ -111,7 +113,7 @@ export default function AdminTravelPage() {
     try {
       await travelVehiclesAPI.delete(id);
       loadData();
-    } catch { alert('Failed to delete vehicle'); }
+    } catch { toast.error('Failed to delete vehicle'); }
   };
 
   const editDriver = (driver) => {

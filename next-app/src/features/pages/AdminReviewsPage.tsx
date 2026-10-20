@@ -8,7 +8,9 @@ import { reviewsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Star, Search, Trash2, Check, X, BarChart3 } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminReviewsPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [reviews, setReviews] = useState([]);
@@ -41,21 +43,21 @@ export default function AdminReviewsPage() {
     try {
       await reviewsAPI.delete(id);
       setReviews(reviews.filter(r => r.id !== id));
-    } catch { alert('Failed to delete review'); }
+    } catch { toast.error('Failed to delete review'); }
   };
 
   const handleApprove = async (id) => {
     try {
       const res = await reviewsAPI.approve(id, { status: 'approved' });
       setReviews(reviews.map(r => r.id === id ? res.data : r));
-    } catch { alert('Failed to approve review'); }
+    } catch { toast.error('Failed to approve review'); }
   };
 
   const handleReject = async (id) => {
     try {
       const res = await reviewsAPI.approve(id, { status: 'deleted' });
       setReviews(reviews.map(r => r.id === id ? res.data : r));
-    } catch { alert('Failed to reject review'); }
+    } catch { toast.error('Failed to reject review'); }
   };
 
   const filtered = reviews.filter(r => {

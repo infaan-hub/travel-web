@@ -63,7 +63,10 @@ export async function DELETE(request: NextRequest, context: Context) {
     const id = parseId((await context.params).id);
     const tip = await prisma.travelTip.findUnique({ where: { id } });
     if (!tip) throw new ApiError(404, "Travel tip not found.");
-    await prisma.travelTip.delete({ where: { id } });
+    await prisma.travelTip.update({
+      where: { id },
+      data: { deletedAt: new Date(), published: false },
+    });
     await deleteImage(tip.image);
     return new Response(null, { status: 204 });
   } catch (error) {

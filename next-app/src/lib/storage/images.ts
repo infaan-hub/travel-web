@@ -4,7 +4,6 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { fileTypeFromBuffer } from "file-type";
 import { ApiError } from "@/lib/api/http";
-import { env } from "@/lib/env";
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -36,8 +35,8 @@ function uploadsRoot(): string {
 }
 
 /**
- * Validates the bytes (not the browser-provided MIME type), stores the object
- * and returns its storage key. Keys are relative and provider independent.
+ * Validates the bytes (not the browser-provided MIME type), stores the file
+ * and returns its storage key. Keys are relative to the uploads root.
  */
 export async function saveImage(file: File, folder: UploadFolder): Promise<string> {
   const safeFolder = assertAllowedFolder(folder);
@@ -59,30 +58,6 @@ export async function saveImage(file: File, folder: UploadFolder): Promise<strin
   }
 
   const key = `${safeFolder}/${randomUUID()}.${extension}`;
-  const config = env();
-
-  if (config.STORAGE_PROVIDER === "supabase") {
-    if (!config.STORAGE_URL || !config.STORAGE_SERVICE_KEY) {
-      throw new ApiError(503, "Object storage is not configured.");
-    }
-    const objectUrl = `${config.STORAGE_URL.replace(/\/$/, "")}/storage/v1/object/${config.STORAGE_BUCKET}/${key}`;
-    const response = await fetch(objectUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.STORAGE_SERVICE_KEY}`,
-        "Content-Type": detected!.mime,
-        "x-upsert": "true",
-        "cache-control": "public, max-age=31536000, immutable",
-      },
-      body: buffer,
-    });
-    if (!response.ok) {
-      console.error("Supabase storage upload failed", response.status, await response.text());
-      throw new ApiError(502, "Image storage is temporarily unavailable.");
-    }
-    return key;
-  }
-
   const target = path.join(uploadsRoot(), key);
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, buffer);
@@ -91,28 +66,13 @@ export async function saveImage(file: File, folder: UploadFolder): Promise<strin
 
 export async function deleteImage(key: string | null | undefined): Promise<void> {
   if (!key) return;
-  const config = env();
   const safe = key.replace(/^\/?(uploads|media)\//, "");
   if (!/^[a-z0-9/_.-]+$/i.test(safe) || safe.includes("..")) return;
-
-  if (config.STORAGE_PROVIDER === "supabase") {
-    if (!config.STORAGE_URL || !config.STORAGE_SERVICE_KEY) return;
-    const objectUrl = `${config.STORAGE_URL.replace(/\/$/, "")}/storage/v1/object/${config.STORAGE_BUCKET}/${safe}`;
-    try {
-      await fetch(objectUrl, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${config.STORAGE_SERVICE_KEY}` },
-      });
-    } catch (error) {
-      console.error("Failed to delete storage object", safe, error);
-    }
-    return;
-  }
 
   try {
     await unlink(path.join(uploadsRoot(), safe));
   } catch {
-    // Already removed or never existed locally.
+    // Already removed or never existed.
   }
 }
 
@@ -120,11 +80,7 @@ export async function deleteImage(key: string | null | undefined): Promise<void>
 export function publicImageUrl(key: string | null | undefined): string | null {
   if (!key) return null;
   if (key.startsWith("http://") || key.startsWith("https://")) return key;
-  const config = env();
   const safe = key.replace(/^\/?(uploads|media)\//, "");
-  if (config.STORAGE_PROVIDER === "supabase" && config.STORAGE_URL) {
-    return `${config.STORAGE_URL.replace(/\/$/, "")}/storage/v1/object/public/${config.STORAGE_BUCKET}/${safe}`;
-  }
   const base = process.env.NEXT_PUBLIC_MEDIA_BASE_URL;
   if (base) return `${base.replace(/\/$/, "")}/uploads/${safe}`;
   return `/uploads/${safe}`;

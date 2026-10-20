@@ -11,6 +11,8 @@ export type AuthTokenPayload = JWTPayload & {
   username: string;
   staff: boolean;
   type: TokenType;
+  /** Session version; a mismatch invalidates the token. */
+  ver?: number;
 };
 
 function secretKey(): Uint8Array {
@@ -18,13 +20,20 @@ function secretKey(): Uint8Array {
 }
 
 export async function signToken(
-  payload: { id: number; username: string; staff: boolean; type: TokenType },
+  payload: {
+    id: number;
+    username: string;
+    staff: boolean;
+    type: TokenType;
+    version?: number;
+  },
   ttlSeconds: number,
 ): Promise<string> {
   return new SignJWT({
     username: payload.username,
     staff: payload.staff,
     type: payload.type,
+    ver: payload.version ?? 1,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(String(payload.id))
@@ -37,9 +46,16 @@ export async function signAccessToken(user: {
   id: number;
   username: string;
   isStaff: boolean;
+  sessionVersion?: number;
 }): Promise<string> {
   return signToken(
-    { id: user.id, username: user.username, staff: user.isStaff, type: "access" },
+    {
+      id: user.id,
+      username: user.username,
+      staff: user.isStaff,
+      type: "access",
+      version: user.sessionVersion ?? 1,
+    },
     ACCESS_TOKEN_TTL_SECONDS,
   );
 }
@@ -48,9 +64,16 @@ export async function signRefreshToken(user: {
   id: number;
   username: string;
   isStaff: boolean;
+  sessionVersion?: number;
 }): Promise<string> {
   return signToken(
-    { id: user.id, username: user.username, staff: user.isStaff, type: "refresh" },
+    {
+      id: user.id,
+      username: user.username,
+      staff: user.isStaff,
+      type: "refresh",
+      version: user.sessionVersion ?? 1,
+    },
     REFRESH_TOKEN_TTL_SECONDS,
   );
 }

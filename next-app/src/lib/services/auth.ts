@@ -41,6 +41,7 @@ export type AuthenticatedUser = {
   isStaff: boolean;
   isSuperuser: boolean;
   isActive: boolean;
+  sessionVersion: number;
 };
 
 export async function authenticateUser(
@@ -48,7 +49,7 @@ export async function authenticateUser(
   password: string,
 ): Promise<AuthenticatedUser> {
   const user = await prisma.user.findUnique({ where: { username: username.trim() } });
-  if (!user || !user.isActive) {
+  if (!user || !user.isActive || user.deletedAt) {
     throw new ApiError(401, "Invalid username or password.");
   }
 
@@ -70,6 +71,7 @@ export async function authenticateUser(
     isStaff: updated.isStaff,
     isSuperuser: updated.isSuperuser,
     isActive: updated.isActive,
+    sessionVersion: updated.sessionVersion,
   };
 }
 

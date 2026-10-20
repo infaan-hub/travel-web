@@ -4,7 +4,7 @@
 
 - Node.js 22+
 - PostgreSQL 15+ (managed provider recommended)
-- SMTP credentials for booking emails (optional)
+- VAPID keys for Web Push notifications (optional)
 - Supabase Storage credentials for production media
 
 ## Steps
@@ -23,7 +23,11 @@
 - `AUTH_COOKIE_SECURE=true`.
 - `ADMIN_SETUP_TOKEN` is either unset or removed after the first administrator is
   created.
-- `STORAGE_PROVIDER=supabase` with valid service credentials.
+- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+  are set so booking notifications can be delivered.
+- `RATE_LIMIT_URL` / `RATE_LIMIT_TOKEN` and `CACHE_URL` / `CACHE_TOKEN` point at
+  a shared Redis store so rate limits and caches are consistent across instances.
+- `CRON_SECRET` protects `/api/cron/cleanup`, which runs daily via `vercel.json`.
 - Rate limiting is understood to be process-local; use a shared store if running
   multiple instances.
 - `/api/health` is not implemented; use a lightweight authenticated or public

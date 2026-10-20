@@ -219,6 +219,7 @@ export function bookingSerializer(
   const total = tour ? Number(tour.price) * booking.travelers : null;
   return {
     id: booking.id,
+    reference: booking.reference,
     user: booking.userId,
     tour: booking.tourId,
     full_name: booking.fullName,

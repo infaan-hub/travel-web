@@ -6,7 +6,7 @@ import { buildWhatsAppUrl } from "@/lib/services/notifications";
 
 export async function POST(request: NextRequest) {
   try {
-    enforceRateLimit(request, "send-whatsapp", 10, 60 * 60 * 1000);
+    await enforceRateLimit(request, "send-whatsapp", 10, 60 * 60 * 1000);
     const body = sendWhatsappSchema.parse(await readJson(request));
     return ok({ whatsapp_url: buildWhatsAppUrl(body), success: true });
   } catch (error) {

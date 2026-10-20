@@ -10,6 +10,7 @@ import { FileEdit, ClipboardList, Gem, RefreshCw, MessageSquare } from 'lucide-r
 export default function RegisterPage() {
   const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const { register } = useAuth();
   const router = useRouter();
 
@@ -28,6 +29,7 @@ export default function RegisterPage() {
       await register(form.username, form.email, form.password);
       router.push('/login?registered=1');
     } catch (err) {
+      setFieldErrors(err.fieldErrors || {});
       const detail = err.response?.data;
       if (detail?.username) setError('Username already exists');
       else if (detail?.email) setError('Email already exists');
@@ -54,6 +56,7 @@ export default function RegisterPage() {
                 type="text"
                 name="username"
                 value={form.username}
+                aria-invalid={Boolean(fieldErrors.username)}
                 onChange={handleChange}
                 required
                 placeholder="Choose a username"
@@ -65,6 +68,7 @@ export default function RegisterPage() {
                 type="email"
                 name="email"
                 value={form.email}
+                aria-invalid={Boolean(fieldErrors.email)}
                 onChange={handleChange}
                 required
                 placeholder="your@email.com"
@@ -76,6 +80,7 @@ export default function RegisterPage() {
                 type="password"
                 name="password"
                 value={form.password}
+                aria-invalid={Boolean(fieldErrors.password)}
                 onChange={handleChange}
                 required
                 placeholder="Create a strong password"
@@ -88,6 +93,7 @@ export default function RegisterPage() {
                 type="password"
                 name="confirmPassword"
                 value={form.confirmPassword}
+                aria-invalid={Boolean(fieldErrors.confirmPassword)}
                 onChange={handleChange}
                 required
                 placeholder="Confirm your password"

@@ -1,7 +1,8 @@
 // @ts-nocheck
 "use client";
 
-import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
+import {
+ useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -11,7 +12,9 @@ import {
   Check, Save, Search, Building2, MapPin, Phone, User, Calendar
 } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminTourPlanPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const { id } = useParams();
@@ -123,9 +126,9 @@ export default function AdminTourPlanPage() {
       } else {
         await workspacesAPI.update(workspace.id, payload);
       }
-      alert('Workspace saved!');
+      toast.success('Workspace saved!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to save workspace');
+      toast.error(err.response?.data?.message || 'Failed to save workspace');
     }
   };
 
@@ -171,7 +174,7 @@ export default function AdminTourPlanPage() {
       }));
       router.push(`/admin/work-space/pricing/${ws.id}`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit pricing');
+      toast.error(err.response?.data?.message || 'Failed to submit pricing');
     }
   };
 
@@ -197,7 +200,7 @@ export default function AdminTourPlanPage() {
       setShowHotelForm(false);
       setHotelForm({ name: '', location: '', phone: '', image: null });
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to add hotel');
+      toast.error(err.response?.data?.message || 'Failed to add hotel');
     } finally {
       setSavingHotel(false);
     }
@@ -217,7 +220,7 @@ export default function AdminTourPlanPage() {
       setShowRoomForm(false);
       setRoomForm({ name: '', price: '', description: '' });
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to add room');
+      toast.error(err.response?.data?.message || 'Failed to add room');
     } finally {
       setSavingRoom(false);
     }

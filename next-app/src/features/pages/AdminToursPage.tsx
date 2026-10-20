@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Globe, Plus, Pencil, Trash2, Search, X, MapPin, Loader, Star, GripVertical, Check, CheckSquare, Square } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 
+import { useToast } from "@/components/ToastProvider";
 const PREDEFINED_INCLUDES = [
   'Hotel Pickup & Drop-off', 'Airport Transfer (if available)', 'Private Transportation',
   'Professional Tour Guide', 'Safari Driver Guide', 'Entrance Fees to Attractions',
@@ -39,11 +40,16 @@ function useDebounce(fn, delay) {
 }
 
 export default function AdminToursPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [ordering, setOrdering] = useState('-created_at');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(15);
+  const [total, setTotal] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({
@@ -71,12 +77,26 @@ export default function AdminToursPage() {
     if (authLoading) return;
     if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
     loadTours();
-  }, [authLoading, isAuthenticated, isAdmin, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, isAuthenticated, isAdmin, router, ordering, page]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+      loadTours();
+    }, 350);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const loadTours = () => {
-    toursAPI.getAll()
-      .then(res => setTours(res.data.results || res.data))
-      .catch(console.error)
+    toursAPI
+      .getAll({ search: search || undefined, ordering, page, page_size: pageSize })
+      .then((res) => {
+        setTours(res.data.results || res.data);
+        setTotal(res.data.count ?? (res.data.results || res.data).length);
+      })
+      .catch((error) => toast.error(error.response?.data?.message || 'Failed to load tours'))
       .finally(() => setLoading(false));
   };
 
@@ -181,7 +201,7 @@ export default function AdminToursPage() {
     try {
       await toursAPI.deleteGalleryImage(editing, imageId);
       setGalleryImages(prev => prev.filter(img => img.id !== imageId));
-    } catch { alert('Failed to delete'); }
+    } catch { toast.error('Failed to delete'); }
   };
 
   const handleSubmit = async (e) => {
@@ -222,7 +242,7 @@ export default function AdminToursPage() {
       resetForm();
       loadTours();
     } catch (err) {
-      alert('Failed to save tour');
+      toast.error('Failed to save tour');
     } finally {
       setSaving(false);
     }
@@ -258,13 +278,14 @@ export default function AdminToursPage() {
     try {
       await toursAPI.delete(id);
       setTours(tours.filter(t => t.id !== id));
-    } catch { alert('Failed to delete tour'); }
+    } catch { toast.error('Failed to delete tour'); }
   };
 
   if (!isAuthenticated || !isAdmin) return null;
   if (loading) return <div className="page"><div className="loading">Loading tours...</div></div>;
 
-  const filtered = tours.filter(t => t.title.toLowerCase().includes(search.toLowerCase()));
+  const filtered = tours;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="page admin-page">
@@ -276,7 +297,28 @@ export default function AdminToursPage() {
       <div className="admin-toolbar">
         <div className="search-input-group">
           <Search size={16} />
-          <input type="text" placeholder="Search tours..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input
+            type="text"
+            placeholder="Search tours..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            aria-label="Search tours"
+          />
+        </div>
+        <div className="search-input-group">
+          <label className="sr-only" htmlFor="tour-ordering">Sort tours</label>
+          <select
+            id="tour-ordering"
+            value={ordering}
+            onChange={(e) => { setOrdering(e.target.value); setPage(1); }}
+          >
+            <option value="-created_at">Newest first</option>
+            <option value="created_at">Oldest first</option>
+            <option value="price">Price: low to high</option>
+            <option value="-price">Price: high to low</option>
+            <option value="duration">Duration</option>
+            <option value="-duration">Longest duration</option>
+          </select>
         </div>
         <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}><Plus size={16} /> Add Tour</button>
       </div>
@@ -496,6 +538,29 @@ export default function AdminToursPage() {
               ))}
             </tbody>
           </table></div>
+          <div className="table-pagination" role="navigation" aria-label="Tours pagination">
+            <span>
+              Page {page} of {totalPages} ({total} tours)
+            </span>
+            <div className="table-pagination-actions">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={page <= 1}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline"
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                disabled={page >= totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

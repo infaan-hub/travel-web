@@ -11,7 +11,9 @@ import CountUp from '@/components/CountUp';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';
 
+import { useToast } from "@/components/ToastProvider";
 export default function HomePage() {
+  const toast = useToast();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [allTours, setAllTours] = useState([]);
   const [stats, setStats] = useState({});
@@ -47,7 +49,7 @@ export default function HomePage() {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!reviewForm.content.trim()) { alert('Review message is required'); return; }
+    if (!reviewForm.content.trim()) { toast.error('Review message is required'); return; }
     setReviewSaving(true);
     try {
       await reviewsAPI.create({
@@ -58,7 +60,7 @@ export default function HomePage() {
       setReviewForm({ rating: 5, content: '' });
       setTimeout(() => setReviewSuccess(''), 5000);
       setShowReviewForm(false);
-    } catch { alert('Failed to submit review. Please try again.'); }
+    } catch { toast.error('Failed to submit review. Please try again.'); }
     finally { setReviewSaving(false); }
   };
 

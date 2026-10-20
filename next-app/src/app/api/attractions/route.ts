@@ -11,7 +11,7 @@ import type { Prisma } from "@prisma/client";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const where: Prisma.AttractionWhereInput = {};
+    const where: Prisma.AttractionWhereInput = { deletedAt: null };
     const region = searchParams.get("region");
     const category = searchParams.get("category");
     const search = searchParams.get("search");

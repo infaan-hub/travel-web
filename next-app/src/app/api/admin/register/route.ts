@@ -13,7 +13,7 @@ import { env } from "@/lib/env";
  */
 export async function POST(request: NextRequest) {
   try {
-    enforceRateLimit(request, "admin-register", 5, 60 * 60 * 1000);
+    await enforceRateLimit(request, "admin-register", 5, 60 * 60 * 1000);
     const body = adminRegisterSchema.parse(await readJson(request));
 
     const context = await optionalAuth(request);

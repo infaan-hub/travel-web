@@ -21,9 +21,12 @@ export async function getServerUser(): Promise<AuthUser | null> {
       isStaff: true,
       isSuperuser: true,
       isActive: true,
+      sessionVersion: true,
+      deletedAt: true,
     },
   });
-  if (!user || !user.isActive) return null;
+  if (!user || !user.isActive || user.deletedAt) return null;
+  if (payload.ver !== undefined && payload.ver !== user.sessionVersion) return null;
   return user;
 }
 

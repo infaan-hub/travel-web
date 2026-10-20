@@ -8,7 +8,9 @@ import { tripsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { BookOpen, Plus, Pencil, Trash2 } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminTipsPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [tips, setTips] = useState([]);
@@ -55,7 +57,7 @@ export default function AdminTipsPage() {
       resetForm();
       loadTips();
     } catch {
-      alert('Failed to save tip');
+      toast.error('Failed to save tip');
     } finally {
       setSaving(false);
     }
@@ -66,7 +68,7 @@ export default function AdminTipsPage() {
     try {
       await tripsAPI.delete(id);
       setTips(tips.filter(t => t.id !== id));
-    } catch { alert('Failed to delete tip'); }
+    } catch { toast.error('Failed to delete tip'); }
   };
 
   if (!isAuthenticated || !isAdmin) return null;

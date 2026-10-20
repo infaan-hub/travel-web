@@ -8,7 +8,9 @@ import { adminAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { ClipboardList, Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminBookingsPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [bookings, setBookings] = useState([]);
@@ -31,7 +33,7 @@ export default function AdminBookingsPage() {
     try {
       await adminAPI.updateBookingStatus(id, status);
       setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
-    } catch { alert('Failed to update booking'); }
+    } catch { toast.error('Failed to update booking'); }
   };
 
   const handleDelete = async (id) => {
@@ -39,7 +41,7 @@ export default function AdminBookingsPage() {
     try {
       await adminAPI.deleteBooking(id);
       setBookings(bookings.filter(b => b.id !== id));
-    } catch { alert('Failed to delete booking'); }
+    } catch { toast.error('Failed to delete booking'); }
   };
 
   if (!isAuthenticated || !isAdmin) return null;

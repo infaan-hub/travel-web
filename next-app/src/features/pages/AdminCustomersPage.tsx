@@ -8,7 +8,9 @@ import { adminAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Users, UserX, Shield, User, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function AdminCustomersPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState([]);
@@ -31,7 +33,7 @@ export default function AdminCustomersPage() {
     try {
       await adminAPI.deleteUser(id);
       setUsers(users.filter(u => u.id !== id));
-    } catch { alert('Failed to delete user'); }
+    } catch { toast.error('Failed to delete user'); }
   };
 
   if (!isAuthenticated || !isAdmin) return null;

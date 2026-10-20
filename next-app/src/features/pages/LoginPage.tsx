@@ -10,6 +10,7 @@ import { KeyRound, Palmtree, Compass, Map, Star } from 'lucide-react';
 export default function LoginPage() {
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,7 +27,8 @@ export default function LoginPage() {
       await login(form.username, form.password);
       router.replace(from);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Invalid username or password');
+      setError(err.response?.data?.detail || err.response?.data?.message || 'Invalid username or password');
+      setFieldErrors(err.fieldErrors || {});
     }
   };
 
@@ -52,8 +54,13 @@ export default function LoginPage() {
                 value={form.username}
                 onChange={handleChange}
                 required
+                aria-invalid={Boolean(fieldErrors.username)}
+                aria-describedby={fieldErrors.username ? 'username-error' : undefined}
                 placeholder="Enter your username"
               />
+              {fieldErrors.username ? (
+                <span className="field-error" id="username-error">{fieldErrors.username[0]}</span>
+              ) : null}
             </div>
             <div className="form-group">
               <label>Password</label>
@@ -63,8 +70,13 @@ export default function LoginPage() {
                 value={form.password}
                 onChange={handleChange}
                 required
+                aria-invalid={Boolean(fieldErrors.password)}
+                aria-describedby={fieldErrors.password ? 'password-error' : undefined}
                 placeholder="Enter your password"
               />
+              {fieldErrors.password ? (
+                <span className="field-error" id="password-error">{fieldErrors.password[0]}</span>
+              ) : null}
             </div>
             <button type="submit" className="btn btn-primary btn-block">
               Sign In

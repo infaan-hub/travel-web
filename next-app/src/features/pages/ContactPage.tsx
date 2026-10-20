@@ -5,7 +5,9 @@ import { useState } from 'react';
 import api from '@/lib/api/client';
 import { MapPin, Phone, Mail, Clock, CheckCircle } from 'lucide-react';
 
+import { useToast } from "@/components/ToastProvider";
 export default function ContactPage() {
+  const toast = useToast();
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [sent, setSent] = useState(false);
 
@@ -18,7 +20,7 @@ export default function ContactPage() {
       setSent(true);
       setForm({ name: '', email: '', phone: '', subject: '', message: '' });
     } catch (err) {
-      alert('Failed to send message. Please try again.');
+      toast.error('Failed to send message. Please try again.');
     }
   };
 

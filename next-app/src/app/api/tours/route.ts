@@ -11,7 +11,7 @@ import type { Prisma, TourCategory } from "@prisma/client";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const where: Prisma.TourWhereInput = {};
+    const where: Prisma.TourWhereInput = { deletedAt: null };
 
     const category = searchParams.get("category");
     if (category && ["zanzibar", "tanzania", "international"].includes(category)) {

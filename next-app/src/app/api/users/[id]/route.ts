@@ -59,7 +59,10 @@ export async function DELETE(request: NextRequest, context: Context) {
     if (id === staffUser.id) {
       throw new ApiError(400, "You cannot delete your own administrator account.");
     }
-    await prisma.user.delete({ where: { id } });
+    await prisma.user.update({
+      where: { id },
+      data: { isActive: false, deletedAt: new Date(), sessionVersion: { increment: 1 } },
+    });
     return new Response(null, { status: 204 });
   } catch (error) {
     return handleApiError(error);

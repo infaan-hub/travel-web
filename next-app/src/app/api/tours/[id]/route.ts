@@ -96,7 +96,10 @@ export async function DELETE(request: NextRequest, context: Context) {
     });
     if (!tour) throw new ApiError(404, "Tour not found.");
 
-    await prisma.tour.delete({ where: { id } });
+    await prisma.tour.update({
+      where: { id },
+      data: { deletedAt: new Date(), available: false },
+    });
     await Promise.all([
       deleteImage(tour.image),
       deleteImage(tour.image2),

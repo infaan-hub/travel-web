@@ -8,7 +8,7 @@ import { visitSerializer } from "@/lib/serializers";
 
 export async function POST(request: NextRequest) {
   try {
-    enforceRateLimit(request, "track-visit", 120, 60 * 1000);
+    await enforceRateLimit(request, "track-visit", 120, 60 * 1000);
     const body = trackVisitSchema.parse(await readJson(request));
     const context = await optionalAuth(request);
     const sessionId =

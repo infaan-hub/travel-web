@@ -6,7 +6,7 @@ import { geocodeLocation } from "@/lib/services/geocoding";
 
 export async function GET(request: NextRequest) {
   try {
-    enforceRateLimit(request, "geocode", 30, 60 * 60 * 1000);
+    await enforceRateLimit(request, "geocode", 30, 60 * 60 * 1000);
     const { searchParams } = new URL(request.url);
     const query = geocodeQuerySchema.parse({
       location: searchParams.get("location") ?? "",

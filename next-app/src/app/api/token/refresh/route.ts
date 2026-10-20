@@ -7,7 +7,7 @@ import prisma from "@/lib/db/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    enforceRateLimit(request, "token-refresh", 60, 15 * 60 * 1000);
+    await enforceRateLimit(request, "token-refresh", 60, 15 * 60 * 1000);
     const token = await refreshTokenFromRequest(request);
     if (!token) {
       throw new ApiError(401, "Refresh token was not provided.");

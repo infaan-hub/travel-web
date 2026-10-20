@@ -44,16 +44,22 @@ model User {
   isSuperuser Boolean   @default(false) @map("is_superuser")
   dateJoined  DateTime  @default(now()) @map("date_joined")
   lastLogin   DateTime? @map("last_login")
+  sessionVersion Int     @default(1) @map("session_version")
+  deletedAt   DateTime? @map("deleted_at")
 
-  profile    Profile?
-  bookings   Booking[]
-  reviews    Review[]
-  workspaces Workspace[]       @relation("WorkspaceTourist")
-  travelTips TravelTip[]
-  visits     VisitorTracking[]
+  profile          Profile?
+  bookings         Booking[]
+  reviews          Review[]
+  workspaces       Workspace[]       @relation("WorkspaceTourist")
+  travelTips       TravelTip[]
+  visits           VisitorTracking[]
+  auditLogs        AuditLog[]
+  pushSubscriptions PushSubscription[]
+  notifications    Notification[]
 
   @@index([email])
   @@index([isStaff])
+  @@index([deletedAt])
   @@map("users")
 }
 
@@ -89,6 +95,9 @@ model Tour {
   excludes         Json         @default("[]")
   available        Boolean      @default(true)
   featured         Boolean      @default(false)
+  maxTravelers     Int          @default(10) @map("max_travelers")
+  deletedAt        DateTime?    @map("deleted_at")
+  searchVector     Unsupported("tsvector")?
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
 
@@ -102,6 +111,9 @@ model Tour {
   @@index([featured])
   @@index([price])
   @@index([createdAt])
+  @@index([deletedAt])
+  @@index([destination])
+  @@index([searchVector], type: Gin)
   @@map("tours")
 }
 
@@ -142,11 +154,15 @@ model Attraction {
   bestTimeToVisit String   @default("") @map("best_time_to_visit")
   entryFee        String   @default("") @map("entry_fee")
   activities      String   @default("")
+  deletedAt       DateTime? @map("deleted_at")
+  searchVector    Unsupported("tsvector")?
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@index([region])
   @@index([category])
+  @@index([deletedAt])
+  @@index([searchVector], type: Gin)
   @@map("attractions")
 }
 
@@ -171,6 +187,7 @@ model Review {
 
 model Booking {
   id                Int           @id @default(autoincrement())
+  reference         String?       @unique
   userId            Int?          @map("user_id")
   tourId            Int           @map("tour_id")
   fullName          String        @map("full_name")
@@ -194,6 +211,7 @@ model Booking {
   @@index([userId, createdAt])
   @@index([status, createdAt])
   @@index([tourId])
+  @@index([tourId, travelDate])
   @@map("bookings")
 }
 
@@ -219,6 +237,8 @@ model TravelTip {
   image     String?
   authorId  Int?     @map("author_id")
   published Boolean  @default(true)
+  deletedAt DateTime? @map("deleted_at")
+  searchVector Unsupported("tsvector")?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -226,6 +246,8 @@ model TravelTip {
 
   @@index([published, createdAt])
   @@index([category])
+  @@index([deletedAt])
+  @@index([searchVector], type: Gin)
   @@map("travel_tips")
 }
 
@@ -353,4 +375,57 @@ model VisitorTracking {
   @@index([createdAt])
   @@index([tourId])
   @@map("visitor_tracking")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  actorId   Int?     @map("actor_id")
+  action    String   @db.VarChar(80)
+  entity    String   @db.VarChar(80)
+  entityId  String?  @map("entity_id") @db.VarChar(64)
+  before    Json?
+  after     Json?
+  ipAddress String?  @map("ip_address") @db.VarChar(64)
+  userAgent String?  @map("user_agent") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  endpoint  String   @unique @db.Text
+  p256dh    String   @map("p256dh") @db.VarChar(255)
+  auth      String   @db.VarChar(255)
+  userAgent String?  @map("user_agent") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  title     String   @db.VarChar(160)
+  body      String   @db.Text
+  url       String?  @db.VarChar(500)
+  tag       String?  @db.VarChar(80)
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
 }
