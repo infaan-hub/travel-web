@@ -3,7 +3,6 @@
    Centralised tokens, themes, glass component library and responsive rules.
    Imported after the base stylesheet so it always wins.
    ========================================================================== */
- /* CLINE_TEST_MARKER */
 
 :root {
   color-scheme: light;
@@ -22,7 +21,7 @@
   /* Typography */
   --text-primary: #0F2A2E;
   --text-secondary: #4A6469;
-  --text-muted: #6B7D82;
+  --text-muted: #4F6166;
 
   /* Borders */
   --line: rgba(15, 107, 107, 0.14);
@@ -686,12 +685,18 @@ body {
   background: var(--glass-bg-elevated);
 }
 
+/* The caption panel over the tour photo must be dark enough for white text
+   to clear WCAG AA, so the scrim never starts fully transparent. */
 .tour-detail-overlay {
-  background: linear-gradient(transparent, rgba(10, 60, 60, 0.55));
+  background: linear-gradient(
+    180deg,
+    rgba(10, 60, 60, 0.82) 0%,
+    rgba(10, 60, 60, 0.94) 100%
+  );
 }
 
 .destination-link {
-  color: #E7E3D5;
+  color: var(--aqua-strong);
 }
 
 .tour-rating {
@@ -876,10 +881,8 @@ body {
   color: var(--aqua-strong);
 }
 
-@media (prefers-color-scheme: dark) {
-  .admin-role {
-    color: #c4b5fd;
-  }
+.dark .admin-role {
+  color: #c4b5fd;
 }
 
 /* ==========================================================================
@@ -945,10 +948,8 @@ select:focus,
   color: #b91c1c;
 }
 
-@media (prefers-color-scheme: dark) {
-  .field-error {
-    color: #fca5a5;
-  }
+.dark .field-error {
+  color: #fca5a5;
 }
 
 .auth-error,
@@ -966,17 +967,15 @@ select:focus,
   color: #047857;
 }
 
-@media (prefers-color-scheme: dark) {
-  .auth-error,
-  .alert-error {
-    color: #fca5a5;
-  }
+.dark .auth-error,
+.dark .alert-error {
+  color: #fca5a5;
+}
 
-  .auth-success,
-  .alert-success,
-  .booking-success {
-    color: #6ee7b7;
-  }
+.dark .auth-success,
+.dark .alert-success,
+.dark .booking-success {
+  color: #6ee7b7;
 }
 
 /* ==========================================================================
@@ -1176,7 +1175,7 @@ select:focus,
 .page > .page-hero + * {
   position: relative;
   z-index: 2;
-  margin-top: -28px;
+  margin-top: var(--space-6);
 }
 
 .page > .page-hero + .page-header {
@@ -1499,7 +1498,7 @@ select:focus,
   }
 
   .page > .page-hero + * {
-    margin-top: -22px;
+    margin-top: var(--space-5);
   }
 
   .page > .page-hero + .page-header {
@@ -1588,42 +1587,41 @@ select:focus,
   left: 0;
 }
 
-/* Dark mode overrides that must win over the base stylesheet. */
-@media (prefers-color-scheme: dark) {
-  .page-header {
-    background: var(--glass-bg-soft);
-  }
+/* Dark mode overrides that must win over the base stylesheet.
+   They are scoped to the opt-in `.dark` theme class. */
+.dark .page-header {
+  background: var(--glass-bg-soft);
+}
 
-  .page-header h1,
-  .page-header h2,
-  .page-header p {
-    color: var(--text-primary);
-  }
+.dark .page-header h1,
+.dark .page-header h2,
+.dark .page-header p {
+  color: var(--text-primary);
+}
 
-  .logo-text,
-  .logo-plane,
-  .page-header h1,
-  .page-header h2,
-  .auth-header h1,
-  .cta-content h2 {
-    background-image: linear-gradient(135deg, #8fdcdc 0%, #14a3a3 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+.dark .logo-text,
+.dark .logo-plane,
+.dark .page-header h1,
+.dark .page-header h2,
+.dark .auth-header h1,
+.dark .cta-content h2 {
+  background-image: linear-gradient(135deg, #8fdcdc 0%, #14a3a3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-  .tour-destination,
-  .stat-number,
-  .destination-link,
-  strong,
-  a,
-  .tour-price {
-    color: var(--aqua-strong);
-  }
+.dark .tour-destination,
+.dark .stat-number,
+.dark .destination-link,
+.dark strong,
+.dark a,
+.dark .tour-price {
+  color: var(--aqua-strong);
+}
 
-  .tour-rating {
-    color: var(--star-ink);
-  }
+.dark .tour-rating {
+  color: var(--star-ink);
 }
 
 /* ==========================================================================

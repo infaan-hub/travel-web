@@ -19,6 +19,15 @@ Shared classes: `glass-card`, `glass-card-elevated`, `glass-panel`,
 The atmospheric aqua background lives on `body`, and the page hero is provided
 by `src/components/PageHero.tsx`.
 
+The light aqua theme is the only theme the application renders. The dark
+palette is retained as an opt-in `.dark` class, but nothing in the codebase
+applies that class, so an operating system in dark mode still gets the light
+scheme. `prefers-color-scheme` is no longer used anywhere in the stylesheets.
+
+Destination cards on the home page use a 4:3 image with the copy in a separate
+in-flow light glass panel underneath it, instead of an absolutely positioned
+panel over a black scrim.
+
 ## Brand and design system
 
 The product is branded **Travel.** and uses the teal/aqua travel-booking theme:
@@ -71,6 +80,9 @@ Open `http://localhost:3000`.
 - `npm run audit:contrast` — runtime WCAG AA contrast audit (light and dark)
 - `npm run test:onboarding` — onboarding flow checks on mobile and desktop
 - `npm run audit:layout` — spacing audit (overflow, tap targets) on mobile and desktop
+- `npm run audit:theme` — Chrome audit that emulates an OS dark colour scheme and
+  asserts every page still renders the light aqua theme, and that the home page
+  destination cards use a 4:3 image with an in-flow light panel
 - `npm run db:seed` — seed demo content and an administrator
 - `npm run admin:create` — create an administrator explicitly
 
