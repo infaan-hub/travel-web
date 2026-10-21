@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { KeyRound, Palmtree, Compass, Map, Star } from 'lucide-react';
-import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 
 export default function LoginPage() {
   const [form, setForm] = useState<{ username: string; password: string }>({ username: '', password: '' });
@@ -33,13 +33,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="page auth-page">
-      <div className="auth-container">
-        <div className="auth-card glass-card">
+    <div className="page auth-page auth-page-redesign">
+      <div className="auth-container auth-layout-redesign">
+        <div className="auth-card glass-card auth-card-redesign">
           <div className="auth-header">
-            <span className="auth-icon"><KeyRound size={24} /></span>
-            <h1>Welcome Back</h1>
-            <p>Sign in to manage your bookings</p>
+            <Link href="/" className="auth-brand"><span><Palmtree size={19} /></span> Travel.</Link>
+            <span className="auth-kicker">YOUR NEXT JOURNEY STARTS HERE</span>
+            <h1>Welcome back</h1>
+            <p>Sign in to pick up where your travels left off.</p>
           </div>
 
           {registered && <div className="auth-success">Account created successfully. Please sign in.</div>}
@@ -47,13 +48,15 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label>Username</label>
+              <label htmlFor="login-username">Username</label>
               <input
+                id="login-username"
                 type="text"
                 name="username"
                 value={form.username}
                 onChange={handleChange}
                 required
+                autoComplete="username"
                 aria-invalid={Boolean(fieldErrors.username)}
                 aria-describedby={fieldErrors.username ? 'username-error' : undefined}
                 placeholder="Enter your username"
@@ -63,13 +66,15 @@ export default function LoginPage() {
               ) : null}
             </div>
             <div className="form-group">
-              <label>Password</label>
+              <label htmlFor="login-password">Password</label>
               <input
+                id="login-password"
                 type="password"
                 name="password"
                 value={form.password}
                 onChange={handleChange}
                 required
+                autoComplete="current-password"
                 aria-invalid={Boolean(fieldErrors.password)}
                 aria-describedby={fieldErrors.password ? 'password-error' : undefined}
                 placeholder="Enter your password"
@@ -79,7 +84,7 @@ export default function LoginPage() {
               ) : null}
             </div>
             <button type="submit" className="btn btn-primary btn-block">
-              Sign In
+              Sign in <span aria-hidden="true">→</span>
             </button>
           </form>
 
@@ -90,10 +95,11 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="auth-banner">
+        <div className="auth-banner auth-banner-redesign">
           <div className="auth-banner-content">
-            <h2>Explore with Travel.</h2>
-            <p>From Zanzibar beaches to Serengeti safaris, discover Africa with expert guidance</p>
+            <span className="auth-visual-label">ZANZIBAR · TANZANIA · BEYOND</span>
+            <h2>Make room for<br />the remarkable.</h2>
+            <p>Thoughtfully planned escapes, local expertise, and memories that stay with you.</p>
             <div className="auth-banner-features">
               <span><Palmtree size={18} /> Zanzibar Tours</span>
               <span><Compass size={18} /> Tanzania Safaris</span>

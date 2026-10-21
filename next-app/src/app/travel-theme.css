@@ -4306,6 +4306,163 @@ label { color: #344256; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
 
+/* Sign in and account creation: a dedicated, calm glass composition. */
+.auth-page-redesign {
+  width: 100%;
+  max-width: 1280px;
+  min-height: calc(100vh - 96px);
+  display: grid;
+  align-items: center;
+  margin-inline: auto;
+}
+.auth-layout-redesign {
+  width: 100%;
+  max-width: 1120px;
+  min-height: 620px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(350px, .9fr) minmax(400px, 1.1fr);
+  align-items: stretch;
+  gap: 18px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.74);
+  border-radius: 32px;
+  background: rgba(255,255,255,.24);
+  box-shadow: 0 24px 72px rgba(31,41,55,.10), inset 0 1px rgba(255,255,255,.8);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+}
+.auth-card-redesign {
+  width: 100%;
+  max-width: none;
+  padding: clamp(34px, 5vw, 64px) clamp(28px, 4vw, 54px) !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 24px !important;
+  background: rgba(255,255,255,.57) !important;
+  box-shadow: 0 10px 34px rgba(31,41,55,.07), inset 0 1px rgba(255,255,255,.9) !important;
+}
+.auth-card-redesign .auth-header { text-align: left; margin: 0 0 30px; }
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 42px;
+  color: #243247;
+  text-decoration: none;
+  font-weight: 750;
+  font-size: 1.08rem;
+  letter-spacing: -.03em;
+}
+.auth-brand > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #344256;
+  background: rgba(255,255,255,.8);
+  border: 1px solid white;
+  box-shadow: 0 5px 14px rgba(31,41,55,.08);
+}
+.auth-kicker, .auth-visual-label {
+  display: block;
+  color: #64748b;
+  font-size: .68rem;
+  font-weight: 750;
+  letter-spacing: .15em;
+}
+.auth-card-redesign .auth-header h1 {
+  margin: 10px 0 8px;
+  color: #172033;
+  font: 600 clamp(2rem, 3.5vw, 2.65rem)/1.1 var(--font-display);
+  letter-spacing: -.035em;
+}
+.auth-card-redesign .auth-header p { margin: 0; color: #637084; font-size: .96rem; }
+.auth-card-redesign .auth-form { display: grid; gap: 18px; }
+.auth-card-redesign .form-group { display: grid; gap: 8px; }
+.auth-card-redesign .form-group label { color: #334155; font-size: .84rem; font-weight: 650; }
+.auth-card-redesign .form-group input {
+  width: 100%;
+  height: 50px;
+  padding: 0 15px;
+  background: rgba(255,255,255,.55) !important;
+  border: 1px solid rgba(148,163,184,.27) !important;
+  border-radius: 13px !important;
+  box-shadow: inset 0 1px 2px rgba(31,41,55,.025) !important;
+  font-size: .92rem;
+}
+.auth-card-redesign .form-group input::placeholder { color: #96a1b1; }
+.auth-card-redesign .btn { min-height: 50px; margin-top: 4px; justify-content: space-between; padding-inline: 18px; }
+.auth-card-redesign .auth-footer { display: grid; gap: 13px; margin-top: 24px; text-align: left; color: #64748b; font-size: .86rem; }
+.auth-card-redesign .auth-footer p { margin: 6px 0 0; }
+.auth-card-redesign .auth-footer a { color: #334155; font-weight: 650; text-decoration: none; }
+.auth-card-redesign .auth-footer a:hover { text-decoration: underline; }
+.auth-card-redesign .auth-error, .auth-card-redesign .auth-success { margin-bottom: 18px; border-radius: 12px; }
+.auth-banner-redesign {
+  position: relative;
+  min-height: 590px;
+  display: flex;
+  align-items: flex-end;
+  padding: clamp(32px, 5vw, 64px);
+  overflow: hidden;
+  border-radius: 24px;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(18,29,44,.05) 12%, rgba(18,29,44,.80) 100%),
+    url('/media/hero-bg.jpg') center 48% / cover,
+    linear-gradient(145deg, #64748b, #26354b) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.48), 0 14px 36px rgba(31,41,55,.12);
+}
+.auth-banner-redesign::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 12px;
+  border: 1px solid rgba(255,255,255,.38);
+  border-radius: 17px;
+  background: linear-gradient(130deg, rgba(255,255,255,.12), transparent 54%);
+  backdrop-filter: blur(1px);
+}
+.auth-banner-redesign .auth-banner-content { max-width: 480px; color: white; }
+.auth-banner-redesign .auth-visual-label { color: rgba(255,255,255,.74); }
+.auth-banner-redesign h2 { margin: 14px 0; color: white; font: 500 clamp(2.4rem, 4.6vw, 4rem)/1.02 var(--font-display); letter-spacing: -.035em; }
+.auth-banner-redesign p { max-width: 400px; color: rgba(255,255,255,.83); font-size: 1rem; line-height: 1.7; }
+.auth-banner-redesign .auth-banner-features { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 26px; }
+.auth-banner-redesign .auth-banner-features span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 999px;
+  background: rgba(255,255,255,.13);
+  color: rgba(255,255,255,.94);
+  font-size: .78rem;
+  backdrop-filter: blur(12px);
+}
+.auth-register-layout .auth-card-redesign { padding-top: 34px !important; padding-bottom: 34px !important; }
+.auth-register-layout .auth-brand { margin-bottom: 23px; }
+.auth-register-layout .auth-card-redesign .auth-header { margin-bottom: 20px; }
+.auth-register-layout .auth-card-redesign .auth-form { gap: 12px; }
+.auth-register-layout .auth-card-redesign .form-group input { height: 46px; }
+.auth-register-layout .auth-banner-redesign { min-height: 640px; }
+@media (max-width: 820px) {
+  .auth-page-redesign { min-height: auto; padding: 24px 14px 40px; }
+  .auth-layout-redesign { max-width: 560px; min-height: auto; grid-template-columns: 1fr; padding: 9px; border-radius: 25px; }
+  .auth-card-redesign { padding: 32px 24px !important; }
+  .auth-brand { margin-bottom: 28px; }
+  .auth-banner-redesign { min-height: 310px; padding: 34px 28px; }
+  .auth-register-layout .auth-banner-redesign { min-height: 300px; }
+}
+@media (max-width: 480px) {
+  .auth-card-redesign { padding: 27px 19px !important; }
+  .auth-card-redesign .auth-header h1 { font-size: 2rem; }
+  .auth-banner-redesign { min-height: 280px; padding: 28px 24px; }
+  .auth-banner-redesign h2 { font-size: 2.45rem; }
+}
+
 /* Feature panels always fill the phone width. */
 @media (max-width: 640px) {
   .destinations-grid {
@@ -4595,6 +4752,113 @@ input[type="radio"] {
 .sidebar .login-btn:hover {
   background: var(--glass-bg-aqua);
   color: var(--aqua-strong);
+}
+
+/* App wide polish: consistent rhythm, glass surfaces, and clearer states. */
+:root {
+  --ui-space-1: 6px; --ui-space-2: 10px; --ui-space-3: 14px;
+  --ui-space-4: 18px; --ui-space-5: 24px; --ui-space-6: 32px;
+  --ui-line: rgba(100,116,139,.16);
+  --ui-glass: rgba(255,255,255,.58);
+}
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid rgba(71,85,105,.45) !important;
+  outline-offset: 3px;
+}
+:where(button, input, select, textarea) { font: inherit; }
+:where(button, a) { -webkit-tap-highlight-color: transparent; }
+::selection { color: #172033; background: rgba(148,163,184,.38); }
+.page { padding-top: clamp(22px, 3.4vw, 46px); }
+.page > :where(section, article, .section-header) + :where(section, article) { margin-top: clamp(24px, 4vw, 48px); }
+.page-header h1 { line-height: 1.08; letter-spacing: -.035em; }
+.page-header p { max-width: 66ch; line-height: 1.7; }
+.section-header { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.section-header h2 { line-height: 1.15; letter-spacing: -.025em; }
+.section-header p { max-width: 68ch; line-height: 1.65; }
+.page :where(h1,h2,h3,h4) { text-wrap: balance; }
+.page :where(p, li) { text-wrap: pretty; }
+.page :where(.card, .panel, .surface, .glass-card, .filter-panel, .form-card, .booking-card, .dashboard-card, .workspace-card) {
+  border: 1px solid rgba(255,255,255,.72);
+  background: var(--ui-glass);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+.page :where(.card, .panel, .surface) { border-radius: 18px; }
+.page :where(.card, .panel, .surface):hover { border-color: rgba(255,255,255,.92); }
+.page :where(.form-group, .field, .input-group) { min-width: 0; }
+.page :where(input, select, textarea) { min-height: 44px; }
+.page textarea { min-height: 120px; padding: 12px 14px; resize: vertical; }
+.page input[type="checkbox"], .page input[type="radio"] { accent-color: #334155; }
+.page :where(input, select, textarea):disabled { opacity: .58; cursor: not-allowed; }
+.page :where(input, select, textarea)[aria-invalid="true"] { border-color: rgba(220,38,38,.52) !important; }
+.page :where(.field-error, .error-text) { color: #b42318; font-size: .82rem; }
+.page :where(.form-hint, .helper-text, .muted) { color: #718096; font-size: .84rem; }
+.page :where(button, .btn) { min-height: 42px; font-weight: 650; }
+.page :where(.btn-sm, .btn-compact) { min-height: 34px; }
+.page :where(button:disabled, .btn:disabled) { filter: saturate(.5); }
+.page :where(.btn-ghost, .btn-secondary, .btn-outline):hover { background-color: rgba(255,255,255,.74) !important; }
+.page :where(.btn-danger) { border: 1px solid rgba(255,255,255,.36); }
+.page :where(.badge, .chip, .tag, .status-badge) { border-radius: 999px; }
+.page :where(.alert, .auth-error, .auth-success) { padding: 12px 15px; border: 1px solid rgba(255,255,255,.6); backdrop-filter: blur(12px); }
+.page :where(.alert, .notice) { border-radius: 14px; }
+.page :where(.tabs, [role="tablist"]) { gap: 6px; padding: 5px; border-radius: 14px; background: rgba(255,255,255,.34); }
+.page :where([role="tab"]) { border-radius: 10px; }
+.page :where([aria-current="page"], [aria-selected="true"]) { font-weight: 700; }
+.page :where(.pagination, .pagination-controls) { display: flex; align-items: center; justify-content: center; gap: 7px; flex-wrap: wrap; }
+.page :where(table) { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: 16px; background: rgba(255,255,255,.4); }
+.page :where(th) { color: #475569; background: rgba(255,255,255,.46); font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; }
+.page :where(th, td) { padding: 13px 15px; border-bottom: 1px solid var(--ui-line); text-align: left; }
+.page :where(tbody tr:hover) { background: rgba(255,255,255,.42); }
+.page :where(tbody tr:last-child td) { border-bottom: 0; }
+.page :where(.table-wrap, .table-container) { overflow-x: auto; border-radius: 16px; }
+.page :where(.empty-state, .no-results) { padding: clamp(28px, 5vw, 56px); text-align: center; border-radius: 20px; background: rgba(255,255,255,.4); border: 1px dashed rgba(100,116,139,.25); }
+.page :where(.empty-state p, .no-results p) { color: #64748b; }
+.page :where(.skeleton, [data-loading="true"]) { border-radius: 12px; }
+.page :where(.loading-spinner) { color: #475569; }
+.page :where(.filter-bar, .toolbar, .search-toolbar) { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.page :where(.filter-bar input, .toolbar input, .search-toolbar input) { flex: 1 1 200px; }
+.page :where(.search-input-group) { border-radius: 14px; }
+.page :where(.dropdown-menu, .popover, [role="menu"]) { border: 1px solid rgba(255,255,255,.82); border-radius: 16px; background: rgba(248,250,252,.82); box-shadow: 0 18px 48px rgba(31,41,55,.16); backdrop-filter: blur(22px); }
+.page :where(.dropdown-menu a, [role="menuitem"]) { border-radius: 9px; }
+.page :where(.modal-backdrop, .dialog-overlay) { background: rgba(15,23,42,.36); backdrop-filter: blur(7px); }
+.page :where(.modal-content, [role="dialog"]) { border-radius: 22px; border: 1px solid rgba(255,255,255,.78); }
+.page :where(.modal-close, .icon-btn) { border-radius: 11px; background: rgba(255,255,255,.48); }
+.page :where(.tour-card, .attraction-card) { transform: translateZ(0); }
+.page :where(.tour-card-image, .attraction-card-image, .booking-card-image) { background: #dbe2ea; }
+.page :where(.tour-card img, .attraction-card img) { transition: transform .45s ease; }
+.page :where(.tour-card:hover img, .attraction-card:hover img) { transform: scale(1.035); }
+.page :where(.tour-card-footer, .card-footer) { border-top: 1px solid rgba(100,116,139,.13); }
+.page :where(.tour-price, .price) { color: #1e293b; font-variant-numeric: tabular-nums; }
+.page :where(.stars-display) { color: #b7791f; }
+.page :where(.stats-section) { margin-block: clamp(24px, 4vw, 52px); }
+.page :where(.stat-number) { color: #334155; font-variant-numeric: tabular-nums; }
+.page :where(.profile-avatar, .profile-avatar-placeholder) { box-shadow: 0 8px 22px rgba(31,41,55,.14); border: 2px solid rgba(255,255,255,.82); }
+.page :where(.auth-footer) { line-height: 1.65; }
+.page :where(.auth-brand:hover) { opacity: .78; }
+.page :where(.page-hero) { isolation: isolate; }
+.page :where(.page-hero-media) { filter: saturate(.82) contrast(1.03); }
+.page :where(.page-hero-cta) { gap: 12px; }
+.page :where(.page-hero-search) { border-radius: 16px; }
+.page :where(.page-hero-chip) { border-radius: 999px; }
+.page :where(.breadcrumbs, .breadcrumb) { color: #718096; font-size: .83rem; }
+.page :where(.breadcrumbs a, .breadcrumb a) { color: #475569; text-decoration: none; }
+.page :where(.breadcrumbs a:hover, .breadcrumb a:hover) { text-decoration: underline; }
+.page :where(hr, .divider) { border: 0; border-top: 1px solid var(--ui-line); }
+.page :where(.sidebar, .top-header) { transition: background-color .2s ease, box-shadow .2s ease; }
+.page :where(.nav-item) { min-height: 42px; }
+.page :where(.nav-icon svg, button svg) { flex: 0 0 auto; }
+.page :where(.toast, [role="status"], [role="alert"]) { border-radius: 14px; backdrop-filter: blur(18px); }
+:where(.skip-link):focus { z-index: 10000; }
+@media (max-width: 700px) {
+  .page :where(table) { min-width: 600px; }
+  .page :where(.section-header) { margin-bottom: 20px; }
+  .page :where(.filter-bar, .toolbar, .search-toolbar) { align-items: stretch; }
+  .page :where(.page-hero-cta) { width: 100%; }
+  .page :where(.page-hero-cta .btn) { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page :where(.tour-card img, .attraction-card img) { transition: none !important; }
 }
 
 /* ---------- 18.3 Phone card density ------------------------------------- */
