@@ -169,7 +169,6 @@ export default function Sidebar() {
         <div className="sidebar-header">
           <Link href="/" className="sidebar-logo" onClick={closeAll}>
             <Palmtree size={24} className="logo-plane" />
-            {showLabels && <span className="logo-text brand-wordmark">Travel.</span>}
           </Link>
           <button
             type="button"

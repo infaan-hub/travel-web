@@ -71,7 +71,7 @@
   --space-8: 64px;
   --page-padding-desktop: 24px;
   --page-padding-mobile: 16px;
-  --section-gap: 44px;
+  --section-gap: 40px;
   --grid-gap: 20px;
   --form-gap: 16px;
 
@@ -2167,31 +2167,31 @@ select,
   --control-h: 50px;
   --control-h-sm: 44px;
   --control-radius: 12px;
-  --card-pad: 18px;
-  --card-pad-sm: 13px;
-  --stack-gap: 20px;
+  --card-pad: 16px;
+  --card-pad-sm: 12px;
+  --stack-gap: 16px;
 }
 
 @media (max-width: 1024px) {
   :root {
-    --section-gap: 40px;
+    --section-gap: 36px;
   }
 }
 
 @media (max-width: 768px) {
   :root {
-    --card-pad: 15px;
-    --card-pad-sm: 12px;
-    --stack-gap: 14px;
-    --section-gap: 32px;
+    --card-pad: 13px;
+    --card-pad-sm: 11px;
+    --stack-gap: 12px;
+    --section-gap: 28px;
     --grid-gap: 16px;
-    --form-gap: 14px;
+    --form-gap: 12px;
   }
 }
 
 @media (max-width: 360px) {
   :root {
-    --card-pad: 13px;
+    --card-pad: 12px;
   }
 }
 
@@ -2999,11 +2999,11 @@ svg {
 /* ---------- 15.12 Hero --------------------------------------------------- */
 
 .page-hero {
-  padding: clamp(20px, 3.2vw, 36px) clamp(16px, 2.8vw, 32px);
+  padding: clamp(16px, 2.6vw, 28px) clamp(14px, 2.4vw, 26px);
 }
 
 .page-hero-inner {
-  padding: clamp(14px, 2vw, 20px);
+  padding: clamp(12px, 1.8vw, 18px);
 }
 
 .page-hero-eyebrow {
@@ -3199,7 +3199,7 @@ svg {
   }
 
   .page-hero {
-    padding: 16px 14px 22px;
+    padding: 12px 10px 16px;
     border-radius: 32px;
   }
 
@@ -3321,7 +3321,7 @@ svg {
 
 @media (max-width: 480px) {
   .page-hero {
-    padding: 14px 12px 18px;
+    padding: 12px 10px 16px;
     border-radius: 32px;
   }
 

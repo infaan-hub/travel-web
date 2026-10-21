@@ -40,9 +40,6 @@ export default function TopHeader() {
     window.dispatchEvent(new Event("travel:close-nav"));
   }, [pathname]);
 
-  const isActive = (to: string) =>
-    to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
-
   return (
     <header className="top-header glass-header">
       <div className="top-header-inner">
@@ -65,18 +62,6 @@ export default function TopHeader() {
           </span>
           <span className="top-header-wordmark brand-wordmark">Travel.</span>
         </Link>
-
-        <nav className="top-header-nav" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.to}
-              href={link.to}
-              className={`top-header-link ${isActive(link.to) ? "active" : ""}`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
 
         <div className="top-header-actions">
           {isAuthenticated ? (
