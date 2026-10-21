@@ -24,7 +24,10 @@ async function shot(page, name, path, viewport, fullPage = false) {
 }
 
 const phone = { width: 390, height: 844, isMobile: true, hasTouch: true };
+const small = { width: 320, height: 640, isMobile: true, hasTouch: true };
+const tablet = { width: 768, height: 1024, isMobile: true, hasTouch: true };
 const desktop = { width: 1440, height: 900, isMobile: false };
+const wide = { width: 1920, height: 1080, isMobile: false };
 
 const page = await browser.newPage();
 await shot(page, "home-mobile", "/", phone, true);
@@ -43,6 +46,10 @@ await page.screenshot({ path: `${OUT}/onboarding-2-mobile.png` });
 console.log("onboarding-2-mobile.png");
 await shot(page, "home-desktop", "/", desktop, false);
 await shot(page, "tours-desktop", "/tours/", desktop, false);
+await shot(page, "home-small-320", "/", small, false);
+await shot(page, "home-tablet-768", "/", tablet, false);
+await shot(page, "home-wide-1920", "/", wide, false);
+await shot(page, "tours-tablet-768", "/tours/", tablet, false);
 
 // Admin views.
 await page.setViewport(desktop);

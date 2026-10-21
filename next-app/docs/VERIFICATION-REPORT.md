@@ -79,3 +79,24 @@ share a 4:3 image ratio with equal heights inside a grid row.
 - `npm run typecheck`: 0 errors.
 - `npm run build`: compiled successfully.
 
+
+## Master responsive sizing standards (2026-10-21)
+
+Section 17 of `travel-theme.css` standardises page containers, card tracks, media
+ratios, type steps, control heights, hero bands, sidebar metrics, dialogs and
+toasts against the shared token set (`--content-max-width`,`--card-padding-*`,
+`--grid-gap-*`, `--button-height`, `--input-height`, `--icon-button-size`,
+`--destination-image-ratio`/`--featured-image-ratio`).
+
+- `npm run audit:spacing`: 0 problems (6 viewports, public + admin + customer pages).
+- `npm run audit:layout`: 0 layout problems.
+- `npm run audit:contrast`: 0 WCAG AA contrast failures (light + dark).
+- `npm run test:onboarding`: 16/16 passed.
+- `npm run smoke`: 38/38 passed.
+- `npm run smoke:browser`: 33/33 passed.
+- `npm test`: 26/26 passed.
+- `npm run lint`: 0 errors (28 warnings).
+- `npm run typecheck`: 0 errors.
+- `npm run build`: compiled successfully.
+- Screenshots reviewed at 320, 390, 768, 1440 and 1920px.
+

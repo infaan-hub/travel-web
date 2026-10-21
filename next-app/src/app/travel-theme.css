@@ -61,19 +61,43 @@
   --glass-radius-sm: 12px;
 
   /* Layout */
-  --space-1: 6px;
-  --space-2: 10px;
-  --space-3: 14px;
-  --space-4: 18px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 44px;
-  --space-8: 64px;
-  --page-padding-desktop: 24px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+  --page-padding-desktop: 28px;
+  --page-padding-tablet: 22px;
   --page-padding-mobile: 16px;
+  --content-max-width: 1440px;
+  --content-max-width-reading: 760px;
   --section-gap: 40px;
   --grid-gap: 20px;
+  --grid-gap-desktop: 24px;
+  --grid-gap-tablet: 18px;
+  --grid-gap-mobile: 16px;
   --form-gap: 16px;
+
+  /* Card geometry */
+  --card-radius: 20px;
+  --card-radius-compact: 16px;
+  --card-radius-large: 24px;
+
+  /* Controls */
+  --button-height: 48px;
+  --button-height-compact: 44px;
+  --input-height: 50px;
+  --icon-button-size: 44px;
+
+  /* Image ratios */
+  --destination-image-ratio: 4 / 3;
+  --featured-image-ratio: 16 / 9;
+  --thumbnail-image-ratio: 4 / 3;
 
   /* Interaction */
   --focus-ring: #14A3A3;
@@ -2164,8 +2188,8 @@ select,
    ========================================================================== */
 
 :root {
-  --control-h: 50px;
-  --control-h-sm: 44px;
+  --control-h: var(--button-height);
+  --control-h-sm: var(--button-height-compact);
   --control-radius: 12px;
   --card-pad: 16px;
   --card-pad-sm: 12px;
@@ -2785,12 +2809,8 @@ svg {
   }
 }
 
-/* The sidebar already carries the wordmark on desktop. */
+/* The brand lives in the top header on every breakpoint. */
 @media (min-width: 1025px) {
-  .top-header-brand {
-    display: none;
-  }
-
   .sidebar .auth-buttons {
     display: none;
   }
@@ -3521,7 +3541,7 @@ svg {
 
 @media (min-width: 769px) {
   .destination-image {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
   }
 
   .page .destination-info {
@@ -3756,3 +3776,612 @@ svg {
     min-height: 180px;
   }
 }
+
+/* ==========================================================================
+   16. STANDARD RESPONSIVE CARD SIZING
+   One measured card scale for phones (Android / iOS), tablets and desktop.
+   Media ratio, interior padding and type steps are fixed per breakpoint so
+   every card in a grid renders at the same size.
+   ========================================================================== */
+
+:root {
+  /* Media ratios: 4:3 editorial cards, 16:10 compact home tiles. */
+  --card-media-ratio: 4 / 3;
+  --card-tile-ratio: 16 / 10;
+
+  /* Type steps. */
+  --card-title-size: 0.95rem;
+  --card-text-size: 0.78rem;
+  --card-meta-size: 0.72rem;
+
+  /* Grid tracks and gaps. */
+  --card-track: 260px;
+  --card-track-wide: 280px;
+  --card-grid-gap: 20px;
+}
+
+/* ---------- 16.1 Media ratios (every breakpoint) ------------------------ */
+/* Tour and attraction photography is 4:3, home tiles are 16:10 and the
+   feature destination panels are 4:3 on phones, tablets and desktop alike. */
+.tour-card-image,
+.attraction-card-image {
+  height: auto;
+  aspect-ratio: var(--card-media-ratio);
+}
+
+.home-attraction-image {
+  height: auto;
+  aspect-ratio: var(--card-tile-ratio);
+}
+
+.destination-image {
+  height: auto;
+  aspect-ratio: var(--card-media-ratio);
+}
+
+/* ---------- 16.2 Grid gaps ---------------------------------------------- */
+/* One shared gap for every card grid: 20px on desktop, 16px on phones. */
+:is(
+    .tours-grid,
+    .attractions-grid,
+    .destinations-grid,
+    .testimonials-grid,
+    .tips-grid,
+    .home-attractions-grid
+  ) {
+  gap: var(--card-grid-gap);
+}
+
+/* ---------- 16.3 Phones (Android + iOS) --------------------------------- */
+/* One column, compact padding and type so a card fits a thumb scroll
+   instead of filling an entire screen. */
+@media (max-width: 768px) {
+  :root {
+    --card-title-size: 0.95rem;
+    --card-text-size: 0.78rem;
+    --card-meta-size: 0.72rem;
+    --card-track: 260px;
+    --card-track-wide: 280px;
+    --card-grid-gap: 16px;
+  }
+
+  .tours-grid,
+  .attractions-grid,
+  .destinations-grid,
+  .home-attractions-grid,
+  .testimonials-grid,
+  .tips-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Interior padding follows the phone scale. */
+  :is(.tour-card-body, .attraction-card-body, .home-attraction-info) {
+    padding: var(--card-pad-sm);
+  }
+
+  .page .destination-info {
+    padding: var(--card-pad-sm);
+  }
+
+  /* Titles and copy shrink one step on phones. */
+  :is(.tour-card-body, .attraction-card-body, .home-attraction-info, .destination-info) h3 {
+    font-size: var(--card-title-size);
+    line-height: 1.25;
+    margin-bottom: 4px;
+  }
+
+  :is(.tour-card-body, .attraction-card-body, .home-attraction-info, .destination-info) p {
+    font-size: var(--card-text-size);
+    line-height: 1.45;
+    margin-bottom: 8px;
+  }
+
+  /* Descriptions collapse to two lines so cards stay the same height. */
+  .tour-card-body > p,
+  .attraction-card-body .attraction-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .attraction-card-body .attraction-location,
+  .home-attraction-location {
+    font-size: var(--card-meta-size);
+  }
+
+  .attraction-info {
+    gap: 2px;
+    margin-top: 8px;
+    font-size: var(--card-meta-size);
+  }
+
+  /* Meta row and footer stay compact. */
+  .tour-card-meta {
+    gap: 4px 10px;
+    margin-bottom: 8px;
+    font-size: var(--card-meta-size);
+  }
+
+  .tour-card-footer {
+    padding-top: 8px;
+    gap: 6px;
+  }
+
+  .tour-price strong {
+    font-size: 1.15rem;
+  }
+
+  .tour-per-person {
+    font-size: var(--card-meta-size);
+  }
+
+  .page .destination-info p {
+    margin-bottom: 8px;
+  }
+
+  .page .destination-link {
+    font-size: 0.82rem;
+  }
+}
+
+/* Smallest common phones (360px and below) drop one more step. */
+@media (max-width: 380px) {
+  :root {
+    --card-title-size: 0.9rem;
+    --card-text-size: 0.75rem;
+    --card-meta-size: 0.7rem;
+  }
+}
+
+/* ---------- 16.4 Tablets (769px - 1024px) ------------------------------- */
+/* Two comfortable columns: the media ratio never changes, only the track
+   width does, so a card looks the same on a tablet as it does on desktop. */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root {
+    --card-grid-gap: 20px;
+    --card-track: 280px;
+    --card-track-wide: 300px;
+  }
+
+  .tours-grid,
+  .attractions-grid,
+  .tips-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-track)), 1fr));
+  }
+
+  .home-attractions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-track-wide)), 1fr));
+  }
+}
+
+/* ---------- 16.5 Desktop (1025px and up) -------------------------------- */
+/* Desktop keeps the 20px gap and the same media ratios as every other
+   breakpoint, so cards stay identical in shape across devices. */
+@media (min-width: 1025px) {
+  :root {
+    --card-grid-gap: 20px;
+  }
+}
+
+/* ==========================================================================
+   17. MASTER RESPONSIVE SIZING & SPACING STANDARDS
+   One measured scale for phones (Android / iOS), tablets and desktop.
+   Page containers, card tracks, media ratios, type steps, control heights
+   and safe areas all resolve from the shared tokens declared in :root, so
+   every surface in the product measures the same at a given breakpoint.
+   ========================================================================== */
+
+:root {
+  /* Page containers */
+  --page-padding-desktop: 28px;
+  --page-padding-tablet: 22px;
+  --page-padding-mobile: 16px;
+  --content-max-width: 1440px;
+  --content-max-width-reading: 760px;
+
+  /* Card geometry */
+  --card-radius: 20px;
+  --card-radius-compact: 16px;
+  --card-radius-large: 24px;
+  --card-padding-desktop: 24px;
+  --card-padding-tablet: 20px;
+  --card-padding-mobile: 16px;
+
+  /* Grid spacing */
+  --grid-gap-desktop: 24px;
+  --grid-gap-tablet: 18px;
+  --grid-gap-mobile: 16px;
+
+  /* Controls */
+  --button-height: 48px;
+  --button-height-compact: 44px;
+  --input-height: 50px;
+  --icon-button-size: 44px;
+
+  /* Image ratios */
+  --destination-image-ratio: 4 / 3;
+  --featured-image-ratio: 16 / 9;
+  --thumbnail-image-ratio: 4 / 3;
+
+  /* Rhythm */
+  --section-gap: 48px;
+  --grid-gap: var(--grid-gap-desktop);
+  --form-gap: 18px;
+  --card-pad: var(--card-padding-desktop);
+  --card-pad-sm: 16px;
+  --stack-gap: 24px;
+  --card-grid-gap: var(--grid-gap);
+  --card-track: 280px;
+  --card-track-wide: 340px;
+  --card-track-compact: 220px;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --section-gap: 40px;
+    --grid-gap: var(--grid-gap-tablet);
+    --card-pad: var(--card-padding-tablet);
+    --card-pad-sm: 14px;
+    --stack-gap: 20px;
+    --form-gap: 16px;
+    --card-track: 260px;
+    --card-track-wide: 300px;
+    --card-track-compact: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-gap: 32px;
+    --grid-gap: var(--grid-gap-mobile);
+    --card-pad: var(--card-padding-mobile);
+    --card-pad-sm: 12px;
+    --stack-gap: 16px;
+    --form-gap: 16px;
+    --card-track: 260px;
+    --card-track-wide: 280px;
+    --card-track-compact: 160px;
+    --card-title-size: 1.05rem;
+    --card-text-size: 0.875rem;
+    --card-meta-size: 0.78rem;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --card-title-size: 1rem;
+    --card-text-size: 0.82rem;
+    --card-meta-size: 0.75rem;
+    --card-pad: 14px;
+  }
+}
+
+/* ---------- 17.1 Page containers ---------------------------------------- */
+/* The content never exceeds the container, and the gutters follow the
+   breakpoint: 28px desktop, 22px tablet, 16px phone. */
+.page,
+.top-header-inner {
+  max-width: var(--content-max-width);
+}
+
+.page {
+  padding-inline: var(--page-padding-desktop);
+}
+
+.top-header-inner {
+  padding-inline: var(--page-padding-desktop);
+}
+
+@media (max-width: 1024px) {
+  .page,
+  .top-header-inner {
+    padding-inline: var(--page-padding-tablet);
+  }
+}
+
+@media (max-width: 768px) {
+  .page,
+  .top-header-inner {
+    padding-inline: var(--page-padding-mobile);
+  }
+}
+
+/* Reading-heavy blocks (form cards, empty states) never stretch wider than
+   a comfortable measure. */
+.auth-container,
+.booking-form-wrapper,
+.contact-form-container,
+.form-card {
+  max-width: 520px;
+}
+
+@media (max-width: 1024px) {
+  .auth-container,
+  .booking-form-wrapper,
+  .contact-form-container,
+  .form-card {
+    max-width: 480px;
+  }
+}
+
+/* ---------- 17.2 Card tracks and grid columns -------------------------- */
+/* Track widths follow the standards: 320-440px tour cards, 260-360px
+   destination and attraction cards, 180-260px compact tiles. */
+.tours-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.attractions-grid,
+.tips-grid,
+.travel-cards-grid,
+.workspace-list-grid,
+.hotel-list,
+.selection-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-track)), 1fr));
+}
+
+.destinations-grid {
+  grid-template-columns: repeat(2, minmax(min(100%, 320px), 440px));
+  justify-content: center;
+  justify-items: stretch;
+}
+
+.home-attractions-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-track-compact)), 1fr));
+}
+
+.testimonials-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .destinations-grid {
+    grid-template-columns: repeat(2, minmax(min(100%, 280px), 380px));
+  }
+}
+
+/* Compact tiles sit two-up on phones as soon as the title stays readable. */
+@media (min-width: 360px) and (max-width: 768px) {
+  .home-attractions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Feature panels always fill the phone width. */
+@media (max-width: 640px) {
+  .destinations-grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }
+}
+
+/* ---------- 17.3 Card interior geometry --------------------------------- */
+/* One padding step for every card body; compact tiles use the small step. */
+:is(
+    .tour-card-body,
+    .attraction-card-body,
+    .destination-info,
+    .booking-card-content,
+    .tip-card,
+    .testimonial-card,
+    .feature-card
+  ) {
+  padding: var(--card-pad);
+}
+
+:is(.home-attraction-info, .quick-link-card) {
+  padding: var(--card-pad-sm);
+}
+
+/* Title to description gap: 6-10px. */
+:is(.tour-card-body, .attraction-card-body, .home-attraction-info, .destination-info) h3 {
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+
+/* Description to metadata gap: 12-16px. */
+.tour-card-meta {
+  margin-bottom: 12px;
+}
+
+/* ---------- 17.4 Typography scale --------------------------------------- */
+/* Desktop page title 32-40px, mobile 25-32px, section heading 22-28px. */
+.page .page-header h1,
+.page.page-header h1 {
+  font-size: clamp(1.6rem, 1.3rem + 1.3vw, 2.4rem);
+  line-height: 1.2;
+}
+
+/* Large hero title 32-44px on desktop, 25-32px on phones. */
+.page-hero-title {
+  font-size: clamp(1.75rem, 1.35rem + 1.9vw, 2.75rem);
+  line-height: 1.15;
+}
+
+/* Supporting text 15-18px desktop, 14-16px on phones. */
+.page-hero-subtitle {
+  font-size: clamp(0.9rem, 0.85rem + 0.3vw, 1.05rem);
+  line-height: 1.6;
+}
+
+/* Eyebrow / overline 11-13px. */
+.page-hero-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+}
+
+/* Section heading 22-28px. */
+.page .section-header h2,
+.page .section-title {
+  font-size: clamp(1.35rem, 1.15rem + 0.8vw, 1.75rem);
+  line-height: 1.25;
+}
+
+/* Card heading 17-22px on desktop; the compact step is applied on phones. */
+.page .tour-card-body h3,
+.page .attraction-card-body h3 {
+  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem);
+}
+
+/* Button text 14-16px. */
+.btn {
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+/* ---------- 17.5 Controls ----------------------------------------------- */
+/* Primary 48px, compact 44px, icon 44x44, inputs 50px. */
+.btn {
+  min-height: var(--button-height);
+}
+
+.btn-sm,
+.btn-compact {
+  min-height: var(--button-height-compact);
+}
+
+.top-header-avatar,
+.modal-close,
+.icon-btn,
+.sidebar .collapse-btn {
+  min-width: var(--icon-button-size);
+  min-height: var(--icon-button-size);
+}
+
+.form-group input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.form-group select,
+.form-group input[type="file"],
+.search-input-group,
+.page-hero-search {
+  min-height: var(--input-height);
+}
+
+/* Filter chips stay 32-40px tall and keep a 44px touch target. */
+.page-hero-chip {
+  min-height: 40px;
+  padding: 8px 16px;
+}
+
+/* Checkboxes and radios own a 44x44px clickable area. */
+input[type="checkbox"],
+input[type="radio"] {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* ---------- 17.6 Hero and page headers --------------------------------- */
+/* Desktop 32-48px horizontal and 36-48px vertical, tablet 24-32 / 28-36,
+   phone 16-20 / 24-32. */
+.page-hero {
+  padding: clamp(36px, 4vw, 48px) clamp(32px, 3.4vw, 44px);
+}
+
+@media (max-width: 1024px) {
+  .page-hero {
+    padding: 30px 26px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-hero {
+    padding: 28px 18px;
+  }
+}
+
+/* Compact page headers for task-oriented screens. */
+.page-header {
+  padding: var(--card-pad);
+}
+
+.page-header h1 {
+  margin-bottom: 8px;
+}
+
+.page-header p {
+  line-height: 1.6;
+}
+
+/* ---------- 17.7 Sidebar and mobile navigation ------------------------- */
+/* Expanded 240-280px, collapsed 72-88px, items 44-52px tall. */
+:root {
+  --sidebar-collapsed: 76px;
+}
+
+.nav-item {
+  min-height: 48px;
+  padding: 12px 14px;
+  gap: 12px;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 1024px) {
+  .sidebar,
+  .sidebar.mobile-open {
+    width: min(320px, calc(100vw - 48px)) !important;
+  }
+}
+
+/* ---------- 17.8 Dialogs, sheets and toasts ---------------------------- */
+/* Standard dialog 480-640px wide, 24px padding, 20-24px radius. */
+.modal-content {
+  width: min(560px, calc(100vw - 32px));
+  max-width: 560px;
+  max-height: calc(100dvh - 48px);
+  padding: 24px;
+  border-radius: var(--card-radius-large);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: calc(100vw - 32px);
+    max-width: none;
+    max-height: 88dvh;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Notifications 320-420px wide, full width minus 32px on phones. */
+.toast {
+  width: min(400px, calc(100vw - 32px));
+}
+
+/* ---------- 17.9 Media ratios and profile pictures --------------------- */
+/* Featured panels 16:9 on desktop, 4:3 on phones. */
+@media (min-width: 769px) {
+  .destination-image {
+    aspect-ratio: var(--featured-image-ratio);
+  }
+}
+
+.tour-card-image,
+.attraction-card-image,
+.booking-card-image {
+  aspect-ratio: var(--destination-image-ratio);
+}
+
+.home-attraction-image {
+  aspect-ratio: 16 / 10;
+}
+
+/* Profile pictures: 40-48px in navigation, 72-96px on profile cards. */
+.top-header-avatar,
+.user-avatar {
+  width: 44px;
+  height: 44px;
+}
+
+.profile-avatar,
+.profile-avatar-placeholder {
+  width: 88px;
+  height: 88px;
+}
+
