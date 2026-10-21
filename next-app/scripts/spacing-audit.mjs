@@ -154,7 +154,7 @@ const audit = () => {
       const style = getComputedStyle(grid);
       const columnGap = parseFloat(style.columnGap);
       if (Number.isFinite(columnGap) && !selector.includes("stats") && !selector.includes("quick")) {
-        const expected = viewportWidth <= 768 ? 16 : 24;
+        const expected = viewportWidth <= 768 ? 16 : 20;
         if (Math.abs(columnGap - expected) > 0.6) {
           add("grid-gap", `${selector} column-gap ${columnGap}px, expected ${expected}px`);
         }
