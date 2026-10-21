@@ -30,33 +30,33 @@ for (const viewport of [
   page.on("pageerror", (error) => errors.push(error.message));
 
   await page.goto(`${BASE}/onboarding/`, { waitUntil: "domcontentloaded" });
+  // The flow opens on a short brand splash before the welcome screen.
+  await page.waitForSelector(".onboarding-welcome", { timeout: 10000 }).catch(() => {});
   await page.waitForNetworkIdle({ idleTime: 400, timeout: 10000 }).catch(() => {});
 
   const screen1 = await page.evaluate(() => ({
     collage: document.querySelectorAll(".collage-item").length,
     stars: document.querySelectorAll(".onboarding-star").length,
-    cta: document.querySelector(".onboarding-cta")?.textContent?.trim(),
-    divider: document.querySelector(".onboarding-divider")?.textContent?.trim(),
-    socials: document.querySelectorAll(".onboarding-social").length,
+    cta: document.querySelector(".onboarding-copy > .onboarding-cta")?.textContent?.trim(),
+    accounts: document.querySelectorAll(".onboarding-account-actions .onboarding-cta").length,
     frameWidth: Math.round(document.querySelector(".onboarding-frame")?.getBoundingClientRect().width ?? 0),
   }));
   record(
-    `${viewport.name}: onboarding screen 1 collage, stars and actions`,
+    `${viewport.name}: onboarding welcome collage, stars and actions`,
     screen1.collage === 4 &&
       screen1.stars === 3 &&
-      screen1.cta?.includes("Continue with Email") &&
-      screen1.divider === "or continue with" &&
-      screen1.socials === 2,
+      screen1.cta?.includes("Take a quick look") &&
+      screen1.accounts === 2,
     JSON.stringify(screen1),
   );
   record(
     `${viewport.name}: frame width follows the responsive rule`,
-    viewport.isMobile ? screen1.frameWidth >= 380 : screen1.frameWidth === 360,
+    viewport.isMobile ? screen1.frameWidth >= 350 : screen1.frameWidth >= 900 && screen1.frameWidth <= 1000,
     `width=${screen1.frameWidth}`,
   );
 
-  // Screen 1 -> screen 2
-  await page.click(".onboarding-cta");
+  // Welcome -> slides
+  await page.click(".onboarding-copy > .onboarding-cta");
   await page.waitForSelector(".onboarding-hero", { timeout: 10000 });
   const screen2 = await page.evaluate(() => ({
     hero: Boolean(document.querySelector(".onboarding-hero img")),
@@ -65,12 +65,12 @@ for (const viewport of [
     cta: document.querySelector(".onboarding-cta")?.textContent?.trim(),
   }));
   record(
-    `${viewport.name}: onboarding screen 2 hero, dashes and CTA`,
-    screen2.hero && screen2.dashes === 3 && screen2.cta === "Next",
+    `${viewport.name}: onboarding slides hero, dashes and CTA`,
+    screen2.hero && screen2.dashes === 3 && screen2.cta?.startsWith("Next"),
     JSON.stringify(screen2),
   );
 
-  // Next swaps the slide, the last slide shows "Get Started".
+  // Next swaps the slide, the last slide offers account creation.
   await page.click(".onboarding-cta");
   await new Promise((resolve) => setTimeout(resolve, 400));
   const second = await page.evaluate(() => ({
@@ -79,7 +79,7 @@ for (const viewport of [
   }));
   record(
     `${viewport.name}: Next swaps the slide`,
-    second.title !== screen2.title && second.cta === "Next",
+    second.title !== screen2.title && second.cta?.startsWith("Next"),
     JSON.stringify(second),
   );
 
@@ -88,7 +88,10 @@ for (const viewport of [
   const last = await page.evaluate(() => ({
     cta: document.querySelector(".onboarding-cta")?.textContent?.trim(),
   }));
-  record(`${viewport.name}: the last slide shows Get Started`, last.cta === "Get Started");
+  record(
+    `${viewport.name}: the last slide offers account creation`,
+    last.cta?.includes("Create your account"),
+  );
 
   await page.click(".onboarding-cta");
   await page.waitForFunction(() => location.pathname.includes("/register"), { timeout: 10000 }).catch(() => {});

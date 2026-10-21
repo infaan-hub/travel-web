@@ -131,3 +131,31 @@ teal gradient. The home hero uses the configured `hero_image_url` with
 - `npm run lint`: 0 errors (28 warnings). `npm run typecheck`: 0 errors.
 - `npm run build`: compiled successfully.
 
+
+## Token alignment after the crystal-glass polish (2026-10-21)
+
+The app-wide polish layer had started overriding the Section 16/17 master tokens
+(14px phone gutters, 42px buttons, vw-based grid gaps) and lightened muted text
+below WCAG AA. The hero scrim was also weak enough that white hero copy failed
+contrast over bright photography.
+
+- Page gutters are back on the tokens (28/22/16) at every breakpoint.
+- Buttons and compact buttons now honour the 44px minimum tap target.
+- Grid gaps come from the grid tokens again (24/18/16).
+- Muted text moved from #718096 to #536174/#5B6779 (AA on the light base).
+- Hero overlays were strengthened to 0.88/0.66 plus a 0.72/0.52/0.32 gradient,
+  and hero search/chips use a dark glass fill so white copy clears AA.
+- The auth brand link is a 44px tap target; auth page gutters use the mobile token.
+
+The onboarding test and capture helper now follow the shipped flow: brand splash,
+anchored welcome screen with account actions, then the three photo slides. The
+assertions keep the same structure (4 collage tiles, 3 stars, 3 dashes, register
+destination) and the frame-width rule follows the 1000px stage.
+
+- `npm run audit:spacing`: 0 problems. `npm run audit:layout`: 0 problems.
+- `npm run audit:contrast`: 0 failures (32 nodes rely on the image scrim).
+- `npm run test:onboarding`: 16/16. `npm run smoke`: 38/38.
+- `npm run smoke:browser`: 33/33. `npm test`: 26/26.
+- `npm run typecheck`: 0 errors. `npm run lint`: 0 errors (28 warnings).
+- `npm run build`: compiled successfully.
+

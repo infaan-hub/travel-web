@@ -4164,7 +4164,7 @@ svg {
   --glass-radius-lg: 26px;
   --text-primary: #172033;
   --text-secondary: #536174;
-  --text-light: #718096;
+  --text-light: var(--text-secondary);
   --border: rgba(100, 116, 139, .18);
   --input: rgba(255, 255, 255, .54);
 }
@@ -4184,8 +4184,9 @@ body {
 .app-shell { background: transparent !important; }
 .main-content { min-width: 0; }
 .page {
-  width: min(100%, 1480px);
-  padding: clamp(20px, 3vw, 44px) clamp(16px, 3.4vw, 52px) 56px;
+  width: min(100%, var(--content-max-width));
+  /* Horizontal padding stays owned by the Section 17 tokens (28/22/16). */
+  padding-block: clamp(20px, 3vw, 44px) 56px;
 }
 
 .glass, .glass-header, .glass-card, .tour-card, .attraction-card,
@@ -4236,18 +4237,18 @@ body {
   margin: 8px 0 clamp(30px, 5vw, 58px);
   border: 1px solid rgba(255,255,255,.65) !important;
   border-radius: 30px !important;
-  background: linear-gradient(125deg, rgba(25,38,57,.76), rgba(44,58,78,.48)) !important;
+  background: linear-gradient(125deg, rgba(15,23,42,.88), rgba(15,23,42,.66)) !important;
   box-shadow: 0 24px 64px rgba(31,41,55,.16), inset 0 1px rgba(255,255,255,.35) !important;
   overflow: hidden;
 }
-.page-hero::before { background: linear-gradient(115deg, rgba(15,23,42,.60), rgba(30,41,59,.26) 62%, rgba(255,255,255,.08)) !important; }
+.page-hero::before { background: linear-gradient(115deg, rgba(15,23,42,.72), rgba(15,23,42,.52) 62%, rgba(15,23,42,.32)) !important; }
 .page-hero-inner { padding: clamp(32px, 6vw, 72px) !important; max-width: 980px !important; }
 .page-hero-title, .page-hero h1 { color: #fff !important; -webkit-text-fill-color: #fff !important; text-shadow: 0 3px 22px rgba(15,23,42,.24); }
-.page-hero-subtitle, .page-hero-eyebrow { color: rgba(255,255,255,.88) !important; }
-.page-hero-search, .page-hero-chip { background: rgba(255,255,255,.20) !important; border: 1px solid rgba(255,255,255,.42) !important; color: white !important; backdrop-filter: blur(18px); }
+.page-hero-subtitle, .page-hero-eyebrow { color: #fff !important; }
+.page-hero-search, .page-hero-chip { background: rgba(15,23,42,.46) !important; border: 1px solid rgba(255,255,255,.42) !important; color: white !important; backdrop-filter: blur(18px); }
 .page-hero-search input { color: white !important; background: transparent !important; }
-.page-hero-search input::placeholder { color: rgba(255,255,255,.76) !important; }
-.page-hero-chip:hover { background: rgba(255,255,255,.38) !important; }
+.page-hero-search input::placeholder { color: rgba(255,255,255,.88) !important; }
+.page-hero-chip:hover { background: rgba(15,23,42,.62) !important; }
 
 .btn-primary, .login-btn, .register-btn {
   background: linear-gradient(135deg, #334155, #1e293b) !important;
@@ -4291,12 +4292,11 @@ label { color: #344256; }
 }
 .tour-card-body, .attraction-card-body { background: rgba(255,255,255,.24) !important; }
 .tour-card h3, .attraction-card h3, .page h2, .page h3 { color: #1d293b; }
-.stats-section, .tours-grid, .attractions-grid { gap: clamp(14px, 2vw, 24px); }
 .section-header { text-align: left; }
 
 .sidebar-overlay { background: rgba(15,23,42,.24) !important; backdrop-filter: blur(8px); }
 @media (max-width: 768px) {
-  .page { padding: 18px 14px 40px; }
+  .page { padding: 18px var(--page-padding-mobile) 40px; }
   .page-header { margin-bottom: 24px; }
   .page-hero { min-height: 310px; border-radius: 22px !important; }
   .page-hero-inner { padding: 30px 22px !important; }
@@ -4347,6 +4347,7 @@ label { color: #344256; }
 .auth-brand {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: 9px;
   margin-bottom: 42px;
   color: #243247;
@@ -4449,7 +4450,7 @@ label { color: #344256; }
 .auth-register-layout .auth-card-redesign .form-group input { height: 46px; }
 .auth-register-layout .auth-banner-redesign { min-height: 640px; }
 @media (max-width: 820px) {
-  .auth-page-redesign { min-height: auto; padding: 24px 14px 40px; }
+  .auth-page-redesign { min-height: auto; padding: 24px var(--page-padding-mobile) 40px; }
   .auth-layout-redesign { max-width: 560px; min-height: auto; grid-template-columns: 1fr; padding: 9px; border-radius: 25px; }
   .auth-card-redesign { padding: 32px 24px !important; }
   .auth-brand { margin-bottom: 28px; }
@@ -4793,9 +4794,9 @@ input[type="radio"] {
 .page :where(input, select, textarea):disabled { opacity: .58; cursor: not-allowed; }
 .page :where(input, select, textarea)[aria-invalid="true"] { border-color: rgba(220,38,38,.52) !important; }
 .page :where(.field-error, .error-text) { color: #b42318; font-size: .82rem; }
-.page :where(.form-hint, .helper-text, .muted) { color: #718096; font-size: .84rem; }
-.page :where(button, .btn) { min-height: 42px; font-weight: 650; }
-.page :where(.btn-sm, .btn-compact) { min-height: 34px; }
+.page :where(.form-hint, .helper-text, .muted) { color: #5b6779; font-size: .84rem; }
+.page :where(button, .btn) { min-height: var(--button-height-compact); font-weight: 650; }
+.page :where(.btn-sm, .btn-compact) { min-height: var(--button-height-compact); }
 .page :where(button:disabled, .btn:disabled) { filter: saturate(.5); }
 .page :where(.btn-ghost, .btn-secondary, .btn-outline):hover { background-color: rgba(255,255,255,.74) !important; }
 .page :where(.btn-danger) { border: 1px solid rgba(255,255,255,.36); }
@@ -4841,7 +4842,7 @@ input[type="radio"] {
 .page :where(.page-hero-cta) { gap: 12px; }
 .page :where(.page-hero-search) { border-radius: 16px; }
 .page :where(.page-hero-chip) { border-radius: 999px; }
-.page :where(.breadcrumbs, .breadcrumb) { color: #718096; font-size: .83rem; }
+.page :where(.breadcrumbs, .breadcrumb) { color: #5b6779; font-size: .83rem; }
 .page :where(.breadcrumbs a, .breadcrumb a) { color: #475569; text-decoration: none; }
 .page :where(.breadcrumbs a:hover, .breadcrumb a:hover) { text-decoration: underline; }
 .page :where(hr, .divider) { border: 0; border-top: 1px solid var(--ui-line); }
@@ -4956,7 +4957,7 @@ input[type="radio"] {
 .splash-glass-mark span { font: 700 2.2rem/1 var(--font-display); letter-spacing: -.08em; }
 .splash-wordmark { z-index: 1; margin: 22px 0 5px; font: 650 1.4rem/1 var(--font-body); letter-spacing: -.04em; }
 .splash-wordmark span { color: #8995a5; }
-.splash-caption { z-index: 1; margin: 8px 0 26px; color: #718096; font-size: .85rem; }
+.splash-caption { z-index: 1; margin: 8px 0 26px; color: #5b6779; font-size: .85rem; }
 .splash-progress { z-index: 1; width: 128px; height: 3px; overflow: hidden; border-radius: 9px; background: rgba(100,116,139,.15); }
 .splash-progress span { display: block; width: 100%; height: 100%; border-radius: inherit; background: #64748b; transform-origin: left; animation: splash-progress 3s linear both; }
 .splash-orbit { position: absolute; width: 420px; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.48); border-radius: 50%; }
@@ -4997,6 +4998,10 @@ input[type="radio"] {
   .admin-auth-page { min-height: auto; }
   .admin-auth-layout { grid-template-columns: 1fr; }
   .admin-auth-banner { min-height: 300px; }
+}
+@media (max-width: 600px) {
+  .auth-page-redesign .auth-banner-redesign { display: none !important; }
+  .auth-page-redesign .auth-layout-redesign { min-height: 0; }
 }
 
 
