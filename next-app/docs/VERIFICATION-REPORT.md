@@ -115,3 +115,19 @@ toasts against the shared token set (`--content-max-width`,`--card-padding-*`,
 - `npm run lint`: 0 errors (28 warnings). `npm run typecheck`: 0 errors.
 - `npm run build`: compiled successfully.
 
+
+## Full-bleed media hero (2026-10-21)
+
+`PageHero` now supports an optional full-bleed background image or muted looping
+video plus up to two call-to-action buttons; without media it falls back to the brand
+teal gradient. The home hero uses the configured `hero_image_url` with
+`Browse Tours` / `Contact Us` calls to action.
+
+- `npm run audit:spacing`: 0 problems. `npm run audit:layout`: 0 problems.
+- `npm run audit:contrast`: 0 failures (light + dark).
+- `npm run test:onboarding`: 16/16 (hero assertion now checks the brand
+  gradient and headline instead of the old panel radius).
+- `npm run smoke`: 38/38. `npm run smoke:browser`: 33/33. `npm test`: 26/26.
+- `npm run lint`: 0 errors (28 warnings). `npm run typecheck`: 0 errors.
+- `npm run build`: compiled successfully.
+

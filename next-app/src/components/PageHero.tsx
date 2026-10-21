@@ -1,6 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { Search } from "lucide-react";
+
+type HeroMedia = {
+  /** Image or video source URL. */
+  src: string;
+  /** Alt text (required for images, used as aria-label for video). */
+  alt: string;
+  /** Force a type; otherwise inferred from the file extension. */
+  type?: "image" | "video";
+};
+
+type HeroCta = {
+  label: string;
+  href?: string;
+  onClick?: () => void;
+};
 
 type PageHeroProps = {
   eyebrow?: string;
@@ -13,13 +29,43 @@ type PageHeroProps = {
   };
   chips?: string[];
   onChipClick?: (chip: string) => void;
+  /** Optional full-bleed background media (image or auto-playing muted loop video). */
+  media?: HeroMedia;
+  /** Up to two primary call-to-action buttons rendered under the subtitle. */
+  ctaPrimary?: HeroCta;
+  ctaSecondary?: HeroCta;
   children?: React.ReactNode;
 };
 
+function isVideo(src: string, type?: "image" | "video"): boolean {
+  if (type === "video") return true;
+  if (type === "image") return false;
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(src);
+}
+
+function renderCta(cta: HeroCta, variant: "primary" | "secondary") {
+  const className =
+    variant === "primary" ? "btn btn-primary" : "btn btn-secondary";
+  const content = <>{cta.label}</>;
+  if (cta.href) {
+    return (
+      <Link key={cta.href} href={cta.href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  return (
+    <button key={cta.label} type="button" className={className} onClick={cta.onClick}>
+      {content}
+    </button>
+  );
+}
+
 /**
- * Aqua rounded hero header used across the public pages: the title or greeting,
- * an optional search field and quick category chips. Content cards overlap the
- * hero slightly (see `.page > .page-hero + *` in travel-theme.css).
+ * Full-width, media-backed hero used across the public pages. Renders a
+ * centered headline with an optional background image/video, up to two CTA
+ * buttons, and the legacy search + chip bar. When no `media` is supplied it
+ * falls back to the brand dark-teal gradient so it is always presentable.
  */
 export function PageHero({
   eyebrow = "Travel.",
@@ -28,14 +74,47 @@ export function PageHero({
   search,
   chips,
   onChipClick,
+  media,
+  ctaPrimary,
+  ctaSecondary,
   children,
 }: PageHeroProps) {
   return (
     <header className="page-hero">
+      {media ? (
+        isVideo(media.src, media.type) ? (
+          <video
+            className="page-hero-media"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+          >
+            <source src={media.src} type="video/mp4" />
+          </video>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="page-hero-media"
+            src={media.src}
+            alt={media.alt}
+            aria-hidden="true"
+          />
+        )
+      ) : null}
+
       <div className="page-hero-inner">
         <p className="page-hero-eyebrow">{eyebrow}</p>
         <h1 className="page-hero-title">{title}</h1>
         {subtitle ? <p className="page-hero-subtitle">{subtitle}</p> : null}
+
+        {(ctaPrimary || ctaSecondary) && (
+          <div className="page-hero-cta">
+            {ctaPrimary ? renderCta(ctaPrimary, "primary") : null}
+            {ctaSecondary ? renderCta(ctaSecondary, "secondary") : null}
+          </div>
+        )}
 
         {search ? (
           <div className="page-hero-search">

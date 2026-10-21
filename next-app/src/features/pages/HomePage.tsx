@@ -70,7 +70,13 @@ export default function HomePage() {
 
   return (
     <div className="page home-page">
-      <PageHero title="Start Exploring The World" />
+      <PageHero
+        title="Start Exploring The World"
+        subtitle="Handcrafted tours across Tanzania and Zanzibar — from Serengeti safaris to pristine Zanzibar beaches."
+        media={homeSettings?.hero_image_url ? { src: getImageUrl(homeSettings.hero_image_url), alt: "Tanzania landscape" } : undefined}
+        ctaPrimary={{ label: "Browse Tours", href: "/tours" }}
+        ctaSecondary={{ label: "Contact Us", href: "/contact" }}
+      />
 
       <section className="destinations-section">
         <div className="section-header">

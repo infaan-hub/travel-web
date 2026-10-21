@@ -113,8 +113,8 @@ for (const viewport of [
     };
   });
   record(
-    `${viewport.name}: public pages use the aqua rounded hero`,
-    Boolean(hero?.title) && Number.parseFloat(hero?.radius ?? "0") >= 32,
+    `${viewport.name}: public pages use the aqua hero`,
+    Boolean(hero?.title) && /linear-gradient/.test(hero?.background ?? ""),
     JSON.stringify(hero),
   );
 
