@@ -1,0 +1,10 @@
+﻿import puppeteer from "puppeteer-core";
+const b = await puppeteer.launch({executablePath:"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",headless:true,args:["--no-sandbox"]});
+const p = await b.newPage();
+p.on("request",r=>{const u=r.url();if(!u.includes("_next"))console.log("REQ",r.resourceType(),u.slice(0,90));});
+p.on("console",m=>{if(m.type()==="error")console.log("CERR",m.text().slice(0,300));});
+await p.setViewport({width:1440,height:900});
+await p.goto("http://localhost:3100/tours/",{waitUntil:"domcontentloaded"});
+await new Promise(r=>setTimeout(r,10000));
+console.log("cards:",await p.evaluate(()=>document.querySelector(".tours-grid")?.children.length||0));
+await b.close();
