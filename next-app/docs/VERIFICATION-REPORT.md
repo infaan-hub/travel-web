@@ -100,3 +100,18 @@ toasts against the shared token set (`--content-max-width`,`--card-padding-*`,
 - `npm run build`: compiled successfully.
 - Screenshots reviewed at 320, 390, 768, 1440 and 1920px.
 
+
+## Header, sidebar account and phone card density (2026-10-21)
+
+- The `Travel.` wordmark and logo are centred in the top header on every
+  breakpoint (three-track header grid).
+- `Login` / `Register` moved into the sidebar footer; the header only
+  carries the account chip of a signed-in traveller.
+- Phone layouts (Android / iOS) run two cards per row with a reduced type
+  and padding step; copy that cannot read at tile width is dropped.
+- `npm run audit:spacing`: 0 problems. `npm run audit:layout`: 0 problems.
+- `npm run audit:contrast`: 0 failures. `npm run test:onboarding`: 16/16.
+- `npm run smoke`: 38/38. `npm run smoke:browser`: 33/33. `npm test`: 26/26.
+- `npm run lint`: 0 errors (28 warnings). `npm run typecheck`: 0 errors.
+- `npm run build`: compiled successfully.
+

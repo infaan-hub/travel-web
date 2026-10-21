@@ -68,16 +68,7 @@ export default function TopHeader() {
             <Link href="/dashboard" className="top-header-avatar" title={user?.username ?? "Account"}>
               {(user?.username?.[0] ?? "T").toUpperCase()}
             </Link>
-          ) : (
-            <>
-              <Link href="/login" className="top-header-link top-header-link-ghost">
-                Login
-              </Link>
-              <Link href="/register" className="glass-button-primary top-header-cta">
-                Register
-              </Link>
-            </>
-          )}
+          ) : null}
         </div>
       </div>
     </header>

@@ -2811,7 +2811,7 @@ svg {
 
 /* The brand lives in the top header on every breakpoint. */
 @media (min-width: 1025px) {
-  .sidebar .auth-buttons {
+  .top-header-nav {
     display: none;
   }
 }
@@ -4383,5 +4383,126 @@ input[type="radio"] {
 .profile-avatar-placeholder {
   width: 88px;
   height: 88px;
+}
+
+/* ==========================================================================
+   18. HEADER BRAND, SIDEBAR ACCOUNT AND PHONE CARD DENSITY
+   The Travel. wordmark is centred in the top header, the account actions
+   live in the sidebar, and phone layouts run two cards per row.
+   ========================================================================== */
+
+/* ---------- 18.1 Centred brand ----------------------------------------- */
+/* Three equal tracks keep the wordmark optically centred at every width:
+   menu button on the left, brand in the middle, account on the right. */
+.top-header-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-header-menu-btn {
+  justify-self: start;
+}
+
+.top-header-brand {
+  justify-self: center;
+}
+
+.top-header-actions {
+  justify-self: end;
+  margin-left: 0;
+}
+
+/* ---------- 18.2 Account actions in the sidebar ------------------------- */
+/* Login and Register are sidebar items, so the header only carries the
+   account chip of a signed-in traveller. */
+.sidebar .auth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.sidebar .auth-btn {
+  justify-content: center;
+  min-height: var(--button-height-compact);
+}
+
+/* Register is the primary action, Login stays secondary glass. */
+.sidebar .login-btn {
+  background: var(--glass-bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--glass-border-strong);
+}
+
+.sidebar .login-btn:hover {
+  background: var(--glass-bg-aqua);
+  color: var(--aqua-strong);
+}
+
+/* ---------- 18.3 Phone card density ------------------------------------- */
+/* Two cards per row on Android and iOS: the tracks, the type and the
+   padding all step down so a row stays readable at 160-180px. */
+@media (min-width: 360px) and (max-width: 768px) {
+  .tours-grid,
+  .attractions-grid,
+  .destinations-grid,
+  .tips-grid,
+  .home-attractions-grid,
+  .travel-cards-grid,
+  .workspace-list-grid,
+  .hotel-list,
+  .selection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--grid-gap-mobile);
+  }
+
+  :is(.tour-card-body, .attraction-card-body, .home-attraction-info, .destination-info) {
+    padding: 10px;
+  }
+
+  /* Copy that cannot be read at tile width is dropped on phones. */
+  .tour-card-body > p,
+  .attraction-card-body .attraction-desc,
+  .page .destination-info p {
+    display: none;
+  }
+
+  :is(.tour-card-body, .attraction-card-body, .home-attraction-info, .destination-info) h3 {
+    font-size: 0.9rem;
+    line-height: 1.25;
+    margin-bottom: 4px;
+  }
+
+  .tour-card-meta {
+    gap: 2px 8px;
+    margin-bottom: 6px;
+  }
+
+  .tour-destination {
+    display: none;
+  }
+
+  .stars-display svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .tour-card-footer {
+    padding-top: 6px;
+  }
+
+  .tour-price strong {
+    font-size: 1rem;
+  }
+
+  .tour-per-person {
+    font-size: 0.7rem;
+  }
+
+  .page .destination-link {
+    font-size: 0.78rem;
+  }
 }
 
