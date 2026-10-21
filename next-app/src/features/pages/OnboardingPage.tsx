@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Mail, Star } from "lucide-react";
 
 const COLLAGE = [
@@ -51,11 +52,13 @@ const SLIDES = [
 
 export function OnboardingFlow() {
   const router = useRouter();
-  const [screen, setScreen] = useState<1 | 2>(1);
+  const [screen, setScreen] = useState<"splash" | "welcome" | "slides">("splash");
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
     window.localStorage.setItem("travel_onboarding_seen", "true");
+    const timer = window.setTimeout(() => setScreen("welcome"), 3000);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const finish = useCallback(() => {
@@ -65,8 +68,7 @@ export function OnboardingFlow() {
   const continueWith = useCallback(
     (provider: "email" | "google" | "apple") => {
       if (provider === "email") {
-        // The email action continues through the onboarding.
-        setScreen(2);
+        setScreen("slides");
         return;
       }
       router.push(`/login/?provider=${provider}`);
@@ -74,9 +76,22 @@ export function OnboardingFlow() {
     [router],
   );
 
-  if (screen === 1) {
+  if (screen === "splash") {
     return (
-      <section className="onboarding-screen onboarding-welcome" aria-label="Welcome to Travel">
+      <section className="onboarding-splash" aria-label="Travel is getting ready" role="status">
+        <div className="splash-orbit splash-orbit-one" />
+        <div className="splash-orbit splash-orbit-two" />
+        <div className="splash-glass-mark"><span aria-hidden="true">T.</span></div>
+        <p className="splash-wordmark">Travel<span>.</span></p>
+        <p className="splash-caption">A little closer to somewhere wonderful</p>
+        <div className="splash-progress" aria-hidden="true"><span /></div>
+      </section>
+    );
+  }
+
+  if (screen === "welcome") {
+    return (
+      <section className="onboarding-screen onboarding-welcome onboarding-welcome-redesign" aria-label="Welcome to Travel">
         <div className="onboarding-collage">
           {COLLAGE.map((item) => (
             <div key={item.className} className={`collage-item ${item.className}`}>
@@ -94,28 +109,21 @@ export function OnboardingFlow() {
           ))}
         </div>
 
-        <button type="button" className="onboarding-skip" onClick={() => router.push("/")}>
-          Skip
-        </button>
+        <Link className="onboarding-skip" href="/">Explore as guest</Link>
 
         <div className="onboarding-copy">
-          <h1 className="onboarding-title">Start Exploring The World</h1>
+          <p className="onboarding-welcome-kicker">ZANZIBAR · TANZANIA · BEYOND</p>
+          <h1 className="onboarding-title">Somewhere new<br />is calling.</h1>
+          <p className="onboarding-subtitle">Find your kind of escape, with local experts by your side.</p>
+          <div className="onboarding-account-actions">
+            <Link className="onboarding-cta onboarding-account-primary" href="/register">Create account <span aria-hidden="true">→</span></Link>
+            <Link className="onboarding-cta onboarding-account-secondary" href="/login">Sign in</Link>
+          </div>
           <button type="button" className="onboarding-cta" onClick={() => continueWith("email")}>
             <span className="onboarding-cta-label">
-              <Mail size={18} aria-hidden="true" /> Continue with Email
+              <Mail size={18} aria-hidden="true" /> Take a quick look
             </span>
           </button>
-
-          <div className="onboarding-divider">or continue with</div>
-
-          <div className="onboarding-socials">
-            <button type="button" className="onboarding-social" onClick={() => continueWith("google")}>
-              Google
-            </button>
-            <button type="button" className="onboarding-social" onClick={() => continueWith("apple")}>
-              Apple
-            </button>
-          </div>
         </div>
       </section>
     );
@@ -125,18 +133,20 @@ export function OnboardingFlow() {
   const isLast = slide === SLIDES.length - 1;
 
   return (
-    <section className="onboarding-screen onboarding-slides" aria-label="Explore the world">
+    <section className="onboarding-screen onboarding-slides onboarding-slides-redesign" aria-label={`Explore the world, slide ${slide + 1} of ${SLIDES.length}`}>
       <div className="onboarding-hero">
         <img src={current.src} alt={current.alt} />
       </div>
 
-      <div className="onboarding-dashes" role="tablist" aria-label="Slides">
+      <div className="onboarding-dashes" role="group" aria-label={`Slide ${slide + 1} of ${SLIDES.length}`}>
         {SLIDES.map((item, index) => (
-          <span
+          <button
             key={item.title}
+            type="button"
             className={`onboarding-dash${index === slide ? " active" : ""}`}
-            role="tab"
-            aria-selected={index === slide}
+            aria-label={`Go to slide ${index + 1}: ${item.title}`}
+            aria-current={index === slide ? "step" : undefined}
+            onClick={() => setSlide(index)}
           />
         ))}
       </div>
@@ -149,7 +159,7 @@ export function OnboardingFlow() {
           className="onboarding-cta"
           onClick={() => (isLast ? finish() : setSlide((index) => index + 1))}
         >
-          {isLast ? "Get Started" : "Next"}
+          {isLast ? "Create your account →" : "Next →"}
         </button>
       </div>
     </section>

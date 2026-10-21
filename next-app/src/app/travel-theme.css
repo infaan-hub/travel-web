@@ -4926,6 +4926,56 @@ input[type="radio"] {
   }
 }
 
+/* Welcome, three-slide onboarding, and the 3 second branded splash. */
+.onboarding-shell { min-height: 100dvh; padding: 20px; background: radial-gradient(ellipse at 20% 8%, #fff 0, transparent 42%), linear-gradient(145deg,#edf1f6,#dfe6ef 58%,#f4f6f9); }
+.onboarding-frame { width: min(100%, 1000px); max-width: 1000px; min-height: min(760px, calc(100dvh - 40px)); border: 1px solid rgba(255,255,255,.82); border-radius: 32px; background: rgba(255,255,255,.34); box-shadow: 0 28px 90px rgba(31,41,55,.16), inset 0 1px white; backdrop-filter: blur(26px) saturate(150%); }
+.onboarding-screen { min-height: min(760px, calc(100dvh - 40px)); padding: 24px; }
+.onboarding-welcome-redesign { display: grid; grid-template-columns: 1fr .92fr; align-items: center; gap: 20px; }
+.onboarding-welcome-redesign .onboarding-collage { width: 100%; height: 100%; min-height: 500px; margin: 0; border-radius: 24px; overflow: hidden; background: rgba(255,255,255,.3); }
+.onboarding-welcome-redesign .collage-item { border: 3px solid rgba(255,255,255,.8); box-shadow: 0 18px 44px rgba(31,41,55,.18); }
+.onboarding-welcome-redesign .onboarding-copy { margin: 0; padding: clamp(24px,4vw,46px); border: 1px solid rgba(255,255,255,.82); border-radius: 24px; background: rgba(255,255,255,.58); box-shadow: 0 18px 46px rgba(31,41,55,.10), inset 0 1px white; }
+.onboarding-welcome-kicker { margin: 0 0 12px; color: #64748b; font-size: .68rem; font-weight: 750; letter-spacing: .14em; }
+.onboarding-welcome-redesign .onboarding-title { color: #172033; font: 600 clamp(2rem,4vw,3.2rem)/1.05 var(--font-display); letter-spacing: -.04em; }
+.onboarding-welcome-redesign .onboarding-subtitle { margin: 0 0 24px; color: #637084; text-align: left; }
+.onboarding-account-actions { display: grid; gap: 10px; margin-bottom: 16px; }
+.onboarding-account-actions .onboarding-cta { display: flex; align-items: center; justify-content: space-between; padding: 0 18px; text-decoration: none; }
+.onboarding-account-primary { background: linear-gradient(135deg,#334155,#1e293b); border-color: rgba(255,255,255,.36); color: white; }
+.onboarding-account-secondary { min-height: 48px; border: 1px solid rgba(148,163,184,.28); background: rgba(255,255,255,.66); color: #253247; }
+.onboarding-welcome-redesign .onboarding-copy > .onboarding-cta { min-height: 44px; border: 0; background: transparent; box-shadow: none; color: #64748b; font-size: .86rem; }
+.onboarding-welcome-redesign .onboarding-skip { top: 22px; right: 26px; z-index: 3; padding: 9px 14px; border: 1px solid rgba(255,255,255,.74); border-radius: 999px; background: rgba(255,255,255,.65); color: #334155; text-decoration: none; backdrop-filter: blur(16px); }
+.onboarding-slides-redesign { display: grid; grid-template-rows: minmax(0,1fr) auto auto; gap: 4px; }
+.onboarding-slides-redesign .onboarding-hero { height: auto; min-height: 0; margin: -24px -24px 0; border-radius: 24px; }
+.onboarding-slides-redesign .onboarding-hero::after { content: ''; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent,rgba(15,23,42,.22)); pointer-events: none; }
+.onboarding-slides-redesign .onboarding-copy { width: min(100%,680px); margin: 8px auto 0; padding: 22px 26px; background: rgba(255,255,255,.56); border: 1px solid rgba(255,255,255,.82); border-radius: 22px; }
+.onboarding-slides-redesign .onboarding-title { font-size: clamp(1.8rem,4vw,2.6rem); }
+.onboarding-slides-redesign .onboarding-dash { padding: 0; border: 0; cursor: pointer; transition: width .22s ease, background .22s ease; }
+.onboarding-slides-redesign .onboarding-dash.active { width: 48px; background: #334155; }
+.onboarding-slides-redesign .onboarding-cta { display: block; width: min(100%,680px); margin: 8px auto 0; padding-inline: 20px; background: linear-gradient(135deg,#334155,#1e293b); }
+.onboarding-splash { position: relative; min-height: min(760px, calc(100dvh - 40px)); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; color: #26354b; background: radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.9),rgba(255,255,255,.26) 42%,transparent 68%); }
+.splash-glass-mark { z-index: 1; width: 92px; height: 92px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.94); border-radius: 30px; background: rgba(255,255,255,.62); box-shadow: 0 20px 56px rgba(31,41,55,.12), inset 0 1px white; backdrop-filter: blur(22px); animation: splash-float 1.8s ease-in-out infinite; }
+.splash-glass-mark span { font: 700 2.2rem/1 var(--font-display); letter-spacing: -.08em; }
+.splash-wordmark { z-index: 1; margin: 22px 0 5px; font: 650 1.4rem/1 var(--font-body); letter-spacing: -.04em; }
+.splash-wordmark span { color: #8995a5; }
+.splash-caption { z-index: 1; margin: 8px 0 26px; color: #718096; font-size: .85rem; }
+.splash-progress { z-index: 1; width: 128px; height: 3px; overflow: hidden; border-radius: 9px; background: rgba(100,116,139,.15); }
+.splash-progress span { display: block; width: 100%; height: 100%; border-radius: inherit; background: #64748b; transform-origin: left; animation: splash-progress 3s linear both; }
+.splash-orbit { position: absolute; width: 420px; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.48); border-radius: 50%; }
+.splash-orbit-one { transform: translate(-28%,-16%) scale(.7); }
+.splash-orbit-two { transform: translate(26%,18%) scale(.85); }
+@keyframes splash-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes splash-float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
+@media (max-width: 700px) {
+  .onboarding-shell { padding: 12px; }
+  .onboarding-frame, .onboarding-screen, .onboarding-splash { min-height: calc(100dvh - 24px); }
+  .onboarding-welcome-redesign { grid-template-columns: 1fr; align-content: start; padding: 12px; }
+  .onboarding-welcome-redesign .onboarding-collage { min-height: 40dvh; max-height: 380px; }
+  .onboarding-welcome-redesign .onboarding-copy { padding: 24px; }
+  .onboarding-slides-redesign .onboarding-hero { margin: -24px -24px 0; min-height: 46dvh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-glass-mark, .splash-progress span { animation: none !important; }
+}
+
 
 
 
