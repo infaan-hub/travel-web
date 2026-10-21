@@ -1,0 +1,89 @@
+import type { ComponentType, SVGProps } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import * as H from "@hugeicons/core-free-icons";
+
+export type AppIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number | string; strokeWidth?: number }>;
+
+function iconComponent(icon: (typeof H)[keyof typeof H]): AppIcon {
+  const Icon = ({ size = 24, strokeWidth = 1.8, ...props }: SVGProps<SVGSVGElement> & { size?: number | string; strokeWidth?: number }) => (
+    <HugeiconsIcon icon={icon as never} size={size} strokeWidth={strokeWidth} {...props} />
+  );
+  Icon.displayName = "HugeiconsAppIcon";
+  return Icon;
+}
+
+// Familiar component names keep page markup readable while every glyph is rendered by Hugeicons.
+export const Activity = iconComponent(H.Activity);
+export const AlertCircle = iconComponent(H.AlertCircle);
+export const ArrowLeft = iconComponent(H.ArrowLeft);
+export const ArrowRight = iconComponent(H.ArrowRight);
+export const BarChart3 = iconComponent(H.BarChart);
+export const BedDouble = iconComponent(H.BedDouble);
+export const BookOpen = iconComponent(H.BookOpen);
+export const Briefcase = iconComponent(H.Briefcase);
+export const Building2 = iconComponent(H.Building2);
+export const Calendar = iconComponent(H.Calendar);
+export const CalendarDays = iconComponent(H.CalendarDays);
+export const Camera = iconComponent(H.Camera);
+export const Car = iconComponent(H.Car);
+export const Check = iconComponent(H.Check);
+export const CheckCircle = iconComponent(H.CheckCircle);
+export const CheckSquare = iconComponent(H.CheckSquare);
+export const ChevronLeft = iconComponent(H.ChevronLeft);
+export const ChevronRight = iconComponent(H.ChevronRight);
+export const Circle = iconComponent(H.Circle);
+export const ClipboardList = iconComponent(H.ClipboardList);
+export const Clock = iconComponent(H.Clock);
+export const Compass = iconComponent(H.Compass);
+export const Copy = iconComponent(H.Copy);
+export const DollarSign = iconComponent(H.DollarSign);
+export const ExternalLink = iconComponent(H.ExternalLink);
+export const Eye = iconComponent(H.Eye);
+export const EyeOff = iconComponent(H.EyeOff);
+export const FileEdit = iconComponent(H.FileEditIcon);
+export const Filter = iconComponent(H.Filter);
+export const Gem = iconComponent(H.Gem);
+export const Globe = iconComponent(H.Globe);
+export const GripVertical = iconComponent(H.GripVertical);
+export const Home = iconComponent(H.Home);
+export const Hotel = iconComponent(H.Hotel);
+export const Hourglass = iconComponent(H.Hourglass);
+export const Image = iconComponent(H.Image);
+export const KeyRound = iconComponent(H.KeyRound);
+export const LayoutDashboard = iconComponent(H.LayoutDashboard);
+export const Lightbulb = iconComponent(H.Lightbulb);
+export const Loader = iconComponent(H.Loader);
+export const Locate = iconComponent(H.Locate);
+export const Lock = iconComponent(H.Lock);
+export const LogOut = iconComponent(H.LogOut);
+export const Mail = iconComponent(H.Mail);
+export const Map = iconComponent(H.Map);
+export const MapPin = iconComponent(H.MapPin);
+export const Menu = iconComponent(H.Menu);
+export const MessageSquare = iconComponent(H.MessageSquare);
+export const MousePointerClick = iconComponent(H.MousePointerClick);
+export const Navigation = iconComponent(H.Navigation);
+export const Palmtree = iconComponent(H.TreePalmIcon);
+export const Pencil = iconComponent(H.Pencil);
+export const Phone = iconComponent(H.Phone);
+export const Plus = iconComponent(H.Plus);
+export const RefreshCw = iconComponent(H.RefreshCw);
+export const Save = iconComponent(H.Save);
+export const Search = iconComponent(H.Search);
+export const Send = iconComponent(H.Send);
+export const Settings = iconComponent(H.Settings);
+export const Shield = iconComponent(H.Shield);
+export const Smartphone = iconComponent(H.Smartphone);
+export const Sparkles = iconComponent(H.Sparkles);
+export const Square = iconComponent(H.Square);
+export const Star = iconComponent(H.Star);
+export const Trash2 = iconComponent(H.Trash2);
+export const TrendingUp = iconComponent(H.TrendingUp);
+export const Truck = iconComponent(H.Truck);
+export const Upload = iconComponent(H.Upload);
+export const User = iconComponent(H.User);
+export const UserPlus = iconComponent(H.UserPlus);
+export const Users = iconComponent(H.Users);
+export const UserX = iconComponent(H.UserX);
+export const X = iconComponent(H.X);
+export const XCircle = iconComponent(H.XCircle);

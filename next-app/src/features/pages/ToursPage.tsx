@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { toursAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
-import { Search } from 'lucide-react';
+import { Search } from '@/components/icons';
 import type { DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import type {  Tour  } from "@/features/pages/types";
 import { PageHero } from "@/components/PageHero";

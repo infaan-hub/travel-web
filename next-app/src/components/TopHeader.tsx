@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, Palmtree, X } from "lucide-react";
+import { Menu, Palmtree, X } from "@/components/icons";
 import { useAuth } from "@/context/AuthContext";
 
 const NAV_LINKS = [

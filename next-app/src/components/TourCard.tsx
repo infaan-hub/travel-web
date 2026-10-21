@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { Star, Clock, MapPin } from "lucide-react";
+import { Star, Clock, MapPin } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
 
 type Tour = {

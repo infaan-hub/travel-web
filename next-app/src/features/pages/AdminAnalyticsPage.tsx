@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { adminAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { TrendingUp, Eye, Users, Globe, MousePointerClick } from 'lucide-react';
+import { TrendingUp, Eye, Users, Globe, MousePointerClick } from '@/components/icons';
 
 import type {  Analytics, DashboardStats  } from "@/features/pages/types";
 const AnalyticsCharts = dynamic(() => import('./AnalyticsCharts'), {

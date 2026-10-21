@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
+import type { AppIcon } from "@/components/icons";
 import {
   Home,
   Globe,
@@ -30,7 +30,7 @@ import {
   ChevronLeft,
   Truck,
   Briefcase,
-} from "lucide-react";
+} from "@/components/icons";
 import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { profileAPI } from "@/lib/api/client";
@@ -38,7 +38,7 @@ import { profileAPI } from "@/lib/api/client";
 type NavItem = {
   to: string;
   label: string;
-  icon: LucideIcon;
+  icon: AppIcon;
   exact?: boolean;
 };
 
@@ -157,7 +157,7 @@ export default function Sidebar() {
     return pathname === item.to || pathname.startsWith(item.to + "/");
   };
 
-  const NavIcon = ({ icon: Icon }: { icon: LucideIcon }) => (
+  const NavIcon = ({ icon: Icon }: { icon: AppIcon }) => (
     <Icon size={20} className="nav-svg-icon" />
   );
 

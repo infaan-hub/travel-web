@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { profileAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Settings, Save, User, Mail, Phone, MapPin, Camera, Trash2, X, AlertCircle } from 'lucide-react';
+import { Settings, Save, User, Mail, Phone, MapPin, Camera, Trash2, X, AlertCircle } from '@/components/icons';
 
 import type {  Customer  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";

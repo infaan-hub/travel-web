@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { workspacesAPI } from '@/lib/api/client';
-import { ArrowLeft, Mail, Check, Globe, Hotel, Truck, BedDouble, User, Smartphone, Copy } from 'lucide-react';
+import { ArrowLeft, Mail, Check, Globe, Hotel, Truck, BedDouble, User, Smartphone, Copy } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 

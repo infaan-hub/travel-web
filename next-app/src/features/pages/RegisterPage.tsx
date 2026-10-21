@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { FileEdit, ClipboardList, Gem, RefreshCw, MessageSquare } from 'lucide-react';
+import { FileEdit, ClipboardList, Gem, RefreshCw, MessageSquare } from '@/components/icons';
 import type { ChangeEvent, FormEvent } from "react";
 
 export default function RegisterPage() {

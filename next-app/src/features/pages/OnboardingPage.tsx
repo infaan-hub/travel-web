@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, Star } from "lucide-react";
+import { Mail, Star } from "@/components/icons";
 
 const COLLAGE = [
   { className: "collage-circle", src: "/uploads/tours/tour1.jpg", alt: "Travellers planning a route" },

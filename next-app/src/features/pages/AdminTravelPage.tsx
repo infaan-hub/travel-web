@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { travelDriversAPI, travelVehiclesAPI } from '@/lib/api/client';
-import { Car, Plus, Pencil, Trash2, Search, X, User } from 'lucide-react';
+import { Car, Plus, Pencil, Trash2, Search, X, User } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 

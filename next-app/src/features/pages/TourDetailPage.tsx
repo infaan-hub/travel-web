@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { toursAPI, reviewsAPI, api } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { ArrowLeft, MapPin, Clock, Star, Check, XCircle, ChevronLeft, ChevronRight, X, Send, User } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Star, Check, XCircle, ChevronLeft, ChevronRight, X, Send, User } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  Review, Tour, TourTranslation  } from "@/features/pages/types";

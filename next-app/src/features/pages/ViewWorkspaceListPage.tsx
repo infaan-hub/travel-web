@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { workspacesAPI } from '@/lib/api/client';
-import { Briefcase, Eye, User, DollarSign, Calendar, ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import { Briefcase, Eye, User, DollarSign, Calendar, ArrowRight, CheckCircle, Clock } from '@/components/icons';
 
 import type {  Workspace  } from "@/features/pages/types";
 export default function ViewWorkspaceListPage() {

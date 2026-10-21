@@ -4,7 +4,7 @@ import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigat
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { FileEdit, Settings, BarChart3, ClipboardList, Users } from 'lucide-react';
+import { FileEdit, Settings, BarChart3, ClipboardList, Users } from '@/components/icons';
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 
 export default function AdminRegisterPage() {

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { KeyRound, Palmtree, Compass, Map, Star } from 'lucide-react';
+import { KeyRound, Palmtree, Compass, Map, Star } from '@/components/icons';
 import type { ChangeEvent, FormEvent } from "react";
 
 export default function LoginPage() {

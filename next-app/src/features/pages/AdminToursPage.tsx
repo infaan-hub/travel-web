@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from "next/image";
 import { api, toursAPI, geocodeAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Globe, Plus, Pencil, Trash2, Search, X, MapPin, Loader, Star, GripVertical, Check, CheckSquare, Square } from 'lucide-react';
+import { Globe, Plus, Pencil, Trash2, Search, X, MapPin, Loader, Star, GripVertical, Check, CheckSquare, Square } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";

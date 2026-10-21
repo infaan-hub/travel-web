@@ -9,7 +9,7 @@ import {
 
   ArrowLeft, CheckCircle, Circle, Globe, Hotel, Truck, BedDouble,
   User, DollarSign, Phone, Mail, MapPin
-} from 'lucide-react';
+} from '@/components/icons';
 
 import type {  Hotel as HotelType, Tour, Workspace, WorkspaceTask  } from "@/features/pages/types";
 export default function ViewWorkspacePage() {

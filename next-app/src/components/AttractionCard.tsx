@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { MapPin, Calendar, DollarSign } from "lucide-react";
+import { MapPin, Calendar, DollarSign } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
 
 type Attraction = {

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI, workspacesAPI } from '@/lib/api/client';
-import { Users, Search, X, ChevronRight, Plus, Briefcase } from 'lucide-react';
+import { Users, Search, X, ChevronRight, Plus, Briefcase } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 

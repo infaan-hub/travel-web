@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
-import { ArrowRight, Star, MapPin, Send, X } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
 import CountUp from '@/components/CountUp';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';

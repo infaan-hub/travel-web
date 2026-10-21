@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { contactAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { MessageSquare, Mail, Phone, User, CheckCircle, Trash2, Eye, EyeOff } from 'lucide-react';
+import { MessageSquare, Mail, Phone, User, CheckCircle, Trash2, Eye, EyeOff } from '@/components/icons';
 
 import type {  ContactMessage  } from "@/features/pages/types";
 export default function AdminMessagesPage() {

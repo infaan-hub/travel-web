@@ -9,7 +9,7 @@ import { workspacesAPI, toursAPI, travelDriversAPI, travelVehiclesAPI, hotelsAPI
 import {
   ArrowLeft, Plus, X, Hotel, Globe, Truck, BedDouble, DollarSign,
   Check, Save, Search, Building2, MapPin, Phone, User, Calendar
-} from 'lucide-react';
+} from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 

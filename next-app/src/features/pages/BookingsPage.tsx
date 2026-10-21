@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import api, { toursAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { ClipboardList, MapPin, Users, DollarSign, CalendarDays, CheckCircle, Navigation, Clock, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ClipboardList, MapPin, Users, DollarSign, CalendarDays, CheckCircle, Navigation, Clock, X, ChevronLeft, ChevronRight, Star } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";

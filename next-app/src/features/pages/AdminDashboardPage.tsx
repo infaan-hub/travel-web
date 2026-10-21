@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass, Briefcase } from 'lucide-react';
+import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass, Briefcase } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 

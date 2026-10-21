@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search } from "@/components/icons";
 
 type HeroMedia = {
   /** Image or video source URL. */

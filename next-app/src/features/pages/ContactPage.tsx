@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import api from '@/lib/api/client';
-import { MapPin, Phone, Mail, Clock, CheckCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, CheckCircle } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 import { PageHero } from "@/components/PageHero";

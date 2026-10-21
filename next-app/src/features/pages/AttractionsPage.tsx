@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { attractionsAPI } from '@/lib/api/client';
 import AttractionCard from '@/components/AttractionCard';
-import { Map } from 'lucide-react';
+import { Map } from '@/components/icons';
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import type {  Attraction  } from "@/features/pages/types";
 import { PageHero } from "@/components/PageHero";

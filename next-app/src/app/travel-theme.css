@@ -4976,6 +4976,29 @@ input[type="radio"] {
   .splash-glass-mark, .splash-progress span { animation: none !important; }
 }
 
+.admin-auth-page { min-height: calc(100vh - 80px); }
+.admin-auth-layout { max-width: 1060px; min-height: 590px; grid-template-columns: minmax(340px,.88fr) minmax(420px,1.12fr); }
+.admin-auth-card { position: relative; }
+.admin-auth-card .auth-brand b { margin-left: 3px; padding: 5px 9px; border: 1px solid rgba(148,163,184,.2); border-radius: 999px; background: rgba(148,163,184,.12); color: #536174; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; }
+.admin-auth-card .auth-header { margin-bottom: 28px; }
+.admin-auth-card .auth-form { gap: 17px; }
+.admin-auth-card .btn { margin-top: 6px; }
+.admin-auth-card .auth-footer { margin-top: 25px; padding-top: 19px; border-top: 1px solid rgba(100,116,139,.14); }
+.admin-auth-card .auth-footer p { margin: 0; }
+.admin-auth-banner {
+  background:
+    linear-gradient(180deg,rgba(20,32,49,.08) 8%,rgba(20,32,49,.84) 100%),
+    url('/media/hero-bg.jpg') center 42% / cover,
+    linear-gradient(145deg,#64748b,#26354b) !important;
+}
+.admin-auth-banner h2 { font-size: clamp(2.5rem,4.4vw,3.8rem); }
+.admin-auth-banner .auth-banner-features span { background: rgba(255,255,255,.15); }
+@media (max-width: 820px) {
+  .admin-auth-page { min-height: auto; }
+  .admin-auth-layout { grid-template-columns: 1fr; }
+  .admin-auth-banner { min-height: 300px; }
+}
+
 
 
 

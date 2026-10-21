@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { ClipboardList, Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { ClipboardList, Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Filter } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 

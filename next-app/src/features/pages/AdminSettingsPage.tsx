@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { authAPI, profileAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Settings, Save, User, Mail, Camera, Trash2 } from 'lucide-react';
+import { Settings, Save, User, Mail, Camera, Trash2 } from '@/components/icons';
 
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminSettingsPage() {

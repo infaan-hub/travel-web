@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
-import { BookOpen, Lightbulb, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from 'lucide-react';
+import { BookOpen, Lightbulb, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  Tour, TravelTip  } from "@/features/pages/types";

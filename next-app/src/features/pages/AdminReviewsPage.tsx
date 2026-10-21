@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { reviewsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Star, Search, Trash2, Check, X, BarChart3 } from 'lucide-react';
+import { Star, Search, Trash2, Check, X, BarChart3 } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 

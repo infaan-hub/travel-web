@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { homeSettingsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Save, Upload, Trash2, Eye, Image as ImageIcon } from 'lucide-react';
+import { Save, Upload, Trash2, Eye, Image as ImageIcon } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  HomeSettings  } from "@/features/pages/types";

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { ClipboardList, Hourglass, CheckCircle, CalendarDays, MapPin, Users, DollarSign, Palmtree, Compass, Map, Mail, ArrowRight } from 'lucide-react';
+import { ClipboardList, Hourglass, CheckCircle, CalendarDays, MapPin, Users, DollarSign, Palmtree, Compass, Map, Mail, ArrowRight } from '@/components/icons';
 
 import type {  CustomerDashboard, Booking  } from "@/features/pages/types";
 export default function DashboardPage() {

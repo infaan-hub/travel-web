@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Lock, BarChart3, ClipboardList, Globe, Users } from 'lucide-react';
-import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import { Lock, BarChart3, ClipboardList, Globe, Users } from '@/components/icons';
+import type { ChangeEvent, FormEvent } from "react";
 
 export default function AdminLoginPage() {
   const [form, setForm] = useState<{ username: string; password: string }>({ username: '', password: '' });
@@ -33,13 +33,14 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="page auth-page">
-      <div className="auth-container">
-        <div className="auth-card glass-card">
+    <div className="page auth-page auth-page-redesign admin-auth-page">
+      <div className="auth-container auth-layout-redesign admin-auth-layout">
+        <div className="auth-card glass-card auth-card-redesign admin-auth-card">
           <div className="auth-header">
-            <span className="auth-icon"><Lock size={24} /></span>
-            <h1>Admin Login</h1>
-            <p>Sign in to manage your travel system</p>
+            <Link href="/" className="auth-brand"><span><Lock size={19} /></span> Travel <b>Admin</b></Link>
+            <span className="auth-kicker">SECURE ADMINISTRATION</span>
+            <h1>Welcome back</h1>
+            <p>Sign in to manage tours, bookings, and travellers.</p>
           </div>
 
           {registered && <div className="auth-success">Administrator account created. Please sign in.</div>}
@@ -47,14 +48,14 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label>Admin Username</label>
-              <input type="text" name="username" value={form.username} onChange={handleChange} required placeholder="Admin username" />
+              <label htmlFor="admin-username">Username</label>
+              <input id="admin-username" type="text" name="username" value={form.username} onChange={handleChange} autoComplete="username" required placeholder="Enter your admin username" />
             </div>
             <div className="form-group">
-              <label>Password</label>
-              <input type="password" name="password" value={form.password} onChange={handleChange} required placeholder="Admin password" />
+              <label htmlFor="admin-password">Password</label>
+              <input id="admin-password" type="password" name="password" value={form.password} onChange={handleChange} autoComplete="current-password" required placeholder="Enter your password" />
             </div>
-            <button type="submit" className="btn btn-primary btn-block">Sign In as Admin</button>
+            <button type="submit" className="btn btn-primary btn-block">Sign in to dashboard <span aria-hidden="true">→</span></button>
           </form>
 
           <div className="auth-footer">
@@ -63,10 +64,11 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
-        <div className="auth-banner">
+        <div className="auth-banner auth-banner-redesign admin-auth-banner">
           <div className="auth-banner-content">
-            <h2>Admin Panel</h2>
-            <p>Manage tours, bookings, and customers</p>
+            <span className="auth-visual-label">TRAVEL OPERATIONS</span>
+            <h2>Every detail,<br />in one place.</h2>
+            <p>A clear view of the trips, guests, and day-to-day operations that make every journey memorable.</p>
             <div className="auth-banner-features">
               <span><BarChart3 size={18} /> System Overview</span>
               <span><ClipboardList size={18} /> Manage Bookings</span>
