@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
@@ -18,7 +18,6 @@ import {
   Settings,
   Users,
   LogOut,
-  Menu,
   UserPlus,
   BookOpen,
   TrendingUp,
@@ -44,12 +43,28 @@ type NavItem = {
 };
 
 export default function Sidebar() {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileOpenRef = useRef(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  // On phones the rail is an off-canvas drawer, so it always shows its labels;
+  // on desktop the labels follow the expanded/collapsed rail state.
+  const showLabels = expanded || mobileOpen;
+
+  // The mobile menu state is owned here, but the toggle button lives in the top
+  // header. Both components stay in sync through a pair of window events:
+  // `travel:toggle-nav` asks the sidebar to flip the menu, and
+  // `travel:nav-state` broadcasts the resulting state back to the header.
+  const applyMobileOpen = useCallback((next: boolean) => {
+    mobileOpenRef.current = next;
+    setMobileOpen(next);
+    window.dispatchEvent(
+      new CustomEvent("travel:nav-state", { detail: { open: next } }),
+    );
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -67,14 +82,37 @@ export default function Sidebar() {
   const handleLogout = async () => {
     await logout();
     setProfileImage(null);
-    setExpanded(false);
-    setMobileOpen(false);
+    applyMobileOpen(false);
     router.push("/login");
   };
 
+  // The top header owns the mobile menu button, so the sidebar listens for it
+  // and publishes its own state back so the header icon stays in sync.
+  useEffect(() => {
+    const toggle = () => {
+      applyMobileOpen(!mobileOpenRef.current);
+    };
+    const close = () => {
+      applyMobileOpen(false);
+    };
+    window.addEventListener("travel:toggle-nav", toggle);
+    window.addEventListener("travel:close-nav", close);
+    return () => {
+      window.removeEventListener("travel:toggle-nav", toggle);
+      window.removeEventListener("travel:close-nav", close);
+    };
+  }, [applyMobileOpen]);
+
   const closeAll = () => {
-    setExpanded(false);
-    setMobileOpen(false);
+    applyMobileOpen(false);
+  };
+
+  const toggleRail = () => {
+    if (mobileOpenRef.current) {
+      closeAll();
+      return;
+    }
+    setExpanded((value) => !value);
   };
 
   const adminNavItems: NavItem[] = [
@@ -125,41 +163,26 @@ export default function Sidebar() {
 
   return (
     <>
-      <button
-        type="button"
-        className="mobile-menu-btn"
-        aria-label="Toggle navigation"
-        onClick={() => {
-          setExpanded(!expanded);
-          setMobileOpen(!mobileOpen);
-        }}
-      >
-        {expanded || mobileOpen ? (
-          <ChevronLeft size={20} color="white" />
-        ) : (
-          <Menu size={20} color="white" />
-        )}
-      </button>
-
       <aside
         className={`sidebar glass-sidebar ${expanded ? "expanded" : ""} ${mobileOpen ? "mobile-open" : ""}`}
-        onMouseEnter={() => {
-          if (!mobileOpen) setExpanded(true);
-        }}
-        onMouseLeave={() => {
-          if (!mobileOpen) setExpanded(false);
-        }}
       >
         <div className="sidebar-header">
           <Link href="/" className="sidebar-logo" onClick={closeAll}>
             <Palmtree size={24} className="logo-plane" />
-            {expanded && <span className="logo-text brand-wordmark">Travel.</span>}
+            {showLabels && <span className="logo-text brand-wordmark">Travel.</span>}
           </Link>
-          {expanded && (
-            <button type="button" className="collapse-btn" onClick={closeAll}>
-              <ChevronLeft size={16} />
-            </button>
-          )}
+          <button
+            type="button"
+            className="collapse-btn"
+            onClick={toggleRail}
+            aria-label={expanded ? "Collapse navigation" : "Expand navigation"}
+            title={expanded ? "Collapse navigation" : "Expand navigation"}
+          >
+            <ChevronLeft
+              size={16}
+              style={{ transform: expanded ? undefined : "rotate(180deg)" }}
+            />
+          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -173,11 +196,11 @@ export default function Sidebar() {
               <span className="nav-icon">
                 <NavIcon icon={item.icon} />
               </span>
-              {expanded && <span className="nav-label">{item.label}</span>}
+              {showLabels && <span className="nav-label">{item.label}</span>}
             </Link>
           ))}
 
-          {isAdmin && expanded && (
+          {isAdmin && showLabels && (
             <>
               <div className="nav-section-title">Customer</div>
               {[
@@ -211,7 +234,7 @@ export default function Sidebar() {
                     user?.username?.[0]?.toUpperCase() || "U"
                   )}
                 </div>
-                {expanded && (
+                {showLabels && (
                   <div className="user-info">
                     <span className="user-name">{user?.username}</span>
                     <span className="user-email">{user?.email}</span>
@@ -221,18 +244,18 @@ export default function Sidebar() {
               </div>
               <button type="button" className="logout-btn" onClick={handleLogout} title="Logout">
                 <LogOut size={16} />
-                {expanded && <span>Logout</span>}
+                {showLabels && <span>Logout</span>}
               </button>
             </>
           ) : (
             <div className="auth-buttons">
               <Link href="/login" className="auth-btn login-btn" onClick={closeAll}>
                 <Lock size={14} />
-                {expanded && <span>Login</span>}
+                {showLabels && <span>Login</span>}
               </Link>
               <Link href="/register" className="auth-btn register-btn" onClick={closeAll}>
                 <UserPlus size={14} />
-                {expanded && <span>Register</span>}
+                {showLabels && <span>Register</span>}
               </Link>
             </div>
           )}

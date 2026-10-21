@@ -26,6 +26,7 @@
     "audit:contrast": "node scripts/contrast-audit.mjs",
     "test:onboarding": "node scripts/onboarding-test.mjs",
     "audit:layout": "node scripts/layout-audit.mjs",
+    "audit:spacing": "node scripts/spacing-audit.mjs",
     "audit:theme": "node scripts/theme-audit.mjs"
   },
   "dependencies": {

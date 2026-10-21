@@ -45,15 +45,11 @@ export default function AttractionsPage() {
   return (
     <div className="page attractions-page">
       <PageHero
-        title="Explore The World"
+        title="Attractions"
         subtitle="Beaches, caves, markets and wildlife — the places travellers keep coming back to."
         chips={["All", "National Parks", "Beaches", "Mountains", "Cultural"]}
         onChipClick={(chip: string) => setFilter(chip === "All" ? "all" : chip.toLowerCase())}
       />
-      <div className="page-header">
-        <h1>Attractions</h1>
-        <p>Discover the amazing attractions of Zanzibar and Tanzania with Travel.</p>
-      </div>
 
       <div className="filters-bar">
         <div className="filter-group">

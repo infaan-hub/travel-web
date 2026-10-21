@@ -65,3 +65,17 @@ share a 4:3 image ratio with equal heights inside a grid row.
 - Production PostgreSQL, SMTP and Supabase credentials were not available in this
   environment; those paths were validated through configuration and code paths
   rather than live services.
+
+## Spacing pass (2026-10-21)
+
+- `npm run audit:spacing`: 0 sizing/spacing problems (6 viewports, public + admin + customer pages).
+- `npm run audit:layout`: 0 layout problems.
+- `npm run audit:contrast`: 0 WCAG AA contrast failures.
+- `npm run test:onboarding`: 16/16 passed.
+- `npm run smoke`: 38/38 passed.
+- `npm run smoke:browser`: 33/33 passed.
+- `npm test`: 26/26 passed.
+- `npm run lint`: 0 errors (28 warnings).
+- `npm run typecheck`: 0 errors.
+- `npm run build`: compiled successfully.
+

@@ -25,18 +25,22 @@ export default function AttractionCard({ attraction }: { attraction: Attraction 
           sizes="(max-width: 768px) 100vw, 33vw"
           style={{ objectFit: "cover" }}
         />
-        <span className={`attraction-category ${attraction.category ?? ""}`}>
-          {attraction.category?.replace("_", " ")}
-        </span>
+        {attraction.category ? (
+          <span className={`attraction-category ${attraction.category}`}>
+            {attraction.category.replace("_", " ")}
+          </span>
+        ) : null}
       </div>
       <div className="attraction-card-body">
         <h3>{attraction.name}</h3>
-        <p>
+        <p className="attraction-location">
           <MapPin size={14} /> {attraction.location}
         </p>
-        <p className="attraction-desc">
-          {attraction.description ? attraction.description.slice(0, 150) + "..." : ""}
-        </p>
+        {attraction.description ? (
+          <p className="attraction-desc">
+            {attraction.description.slice(0, 150)}...
+          </p>
+        ) : null}
         <div className="attraction-info">
           <span>
             <Calendar size={14} /> {attraction.best_time_to_visit || "All year"}

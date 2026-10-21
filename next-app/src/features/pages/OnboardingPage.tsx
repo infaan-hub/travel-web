@@ -76,7 +76,7 @@ export function OnboardingFlow() {
 
   if (screen === 1) {
     return (
-      <section className="onboarding-screen" aria-label="Welcome to Travel">
+      <section className="onboarding-screen onboarding-welcome" aria-label="Welcome to Travel">
         <div className="onboarding-collage">
           {COLLAGE.map((item) => (
             <div key={item.className} className={`collage-item ${item.className}`}>
@@ -93,6 +93,10 @@ export function OnboardingFlow() {
             />
           ))}
         </div>
+
+        <button type="button" className="onboarding-skip" onClick={() => router.push("/")}>
+          Skip
+        </button>
 
         <div className="onboarding-copy">
           <h1 className="onboarding-title">Start Exploring The World</h1>
@@ -121,7 +125,7 @@ export function OnboardingFlow() {
   const isLast = slide === SLIDES.length - 1;
 
   return (
-    <section className="onboarding-screen" aria-label="Explore the world">
+    <section className="onboarding-screen onboarding-slides" aria-label="Explore the world">
       <div className="onboarding-hero">
         <img src={current.src} alt={current.alt} />
       </div>

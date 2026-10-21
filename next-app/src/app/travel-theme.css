@@ -148,6 +148,9 @@ html {
   background: var(--page-bg);
   color: var(--text-primary);
   min-height: 100%;
+  /* `clip` keeps the sticky header working while still preventing sideways
+     scrolling on phones. */
+  overflow-x: clip;
 }
 
 body {
@@ -180,9 +183,28 @@ body {
   min-height: 100dvh;
 }
 
+/* The shell holds the sticky header and the page content. */
+.app-shell {
+  flex: 1;
+  min-width: 0;
+  margin-left: var(--sidebar-collapsed);
+  transition: margin-left var(--transition);
+}
+
+.sidebar.expanded ~ .app-shell {
+  margin-left: var(--sidebar-width);
+}
+
 .main-content {
   position: relative;
   z-index: 1;
+  margin-left: 0;
+}
+
+/* The legacy shell offset now lives on .app-shell, so the sidebar no longer
+   pushes the page content around on its own. */
+.sidebar.expanded ~ .main-content {
+  margin-left: 0;
 }
 
 /* ==========================================================================
@@ -747,7 +769,150 @@ body {
    6. NAVIGATION
    ========================================================================== */
 
+/* ---------- Top header (Travel. wordmark + primary navigation) ---------- */
+
+.top-header {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  box-shadow: 0 8px 24px rgba(15, 55, 55, 0.10);
+}
+
+.top-header::before {
+  border-radius: 0;
+}
+
+.top-header-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: 10px var(--page-padding-desktop);
+}
+
+.top-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.top-header-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--brand) 0%, #0a5252 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px var(--aqua-glow);
+}
+
+.top-header-wordmark {
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--brand) 0%, #0a5252 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.top-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline: auto;
+}
+
+.top-header-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.top-header-link:hover {
+  background: var(--glass-bg-soft);
+  color: var(--aqua-strong);
+}
+
+.top-header-link.active {
+  background: var(--glass-bg-aqua);
+  color: var(--aqua-strong);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+
+.top-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.top-header-link-ghost {
+  padding-inline: 12px;
+}
+
+.top-header-cta {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.top-header-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--glass-bg-aqua);
+  border: 1px solid var(--glass-border-strong);
+  color: var(--aqua-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* The menu button only appears on small screens. */
+.top-header-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: var(--glass-bg-elevated);
+  border: 1px solid var(--glass-border-strong);
+  color: var(--text-primary);
+  cursor: pointer;
+  box-shadow: var(--glass-shadow);
+}
+
 .sidebar {
+  /* The sidebar is a fixed rail. The generic `.glass-sidebar { position: relative }`
+     rule above would otherwise pull it back into the flow and push the sticky
+     header down the page, so the fixed positioning is restored here. */
+  position: fixed;
   background: var(--glass-bg);
   border-right: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
@@ -1055,41 +1220,86 @@ select:focus,
 }
 
 /* ==========================================================================
-   9. HERO
+   9. HERO — floating rounded glass hero (responsive: iOS / Android / desktop)
    ========================================================================== */
 
 .page-hero {
   position: relative;
-  margin-inline: calc(-1 * var(--page-padding-desktop));
-  padding: var(--space-6) var(--space-5) 46px;
-  border-radius: 0 0 var(--radius-hero) var(--radius-hero);
-  background: linear-gradient(135deg, #0f6b6b 0%, #0a5252 100%);
+  isolation: isolate;
+  /* The hero stays inside the page gutter so all four rounded corners are
+     visible on every screen size. */
+  margin-inline: 0;
+  margin-top: var(--space-2);
+  padding: clamp(28px, 5vw, 56px) clamp(18px, 4vw, 56px);
+  border-radius: var(--radius-hero);
+  background:
+    radial-gradient(
+      ellipse 80% 70% at 12% 8%,
+      rgba(120, 224, 214, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 70% 80% at 92% 18%,
+      rgba(20, 163, 163, 0.38),
+      transparent 62%
+    ),
+    linear-gradient(135deg, #0f6b6b 0%, #0a5252 55%, #073f45 100%);
   color: #ffffff;
   overflow: hidden;
-  box-shadow: var(--glass-shadow-elevated);
+  box-shadow:
+    0 28px 60px rgba(7, 63, 69, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(160%);
+  backdrop-filter: blur(var(--glass-blur-lg)) saturate(160%);
 }
 
+/* Soft light sweep across the top of the panel. */
 .page-hero::after {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 110px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent);
+  height: 140px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Decorative blurred orbs, hidden from assistive tech. */
+.page-hero::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: -80px;
+  bottom: -110px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0) 68%
+  );
   pointer-events: none;
 }
 
 .page-hero-inner {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  width: 100%;
+  max-width: 760px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: var(--radius-card);
-  padding: var(--space-5);
+  /* A deep teal tint (rather than a white wash) keeps the glass look while
+     guaranteeing the white hero copy clears WCAG AA at 4.5:1. */
+  background: rgba(3, 38, 44, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: calc(var(--radius-hero) - 8px);
+  padding: clamp(20px, 3.4vw, var(--space-5));
   -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(150%);
   backdrop-filter: blur(var(--glass-blur-md)) saturate(150%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 12px 28px rgba(7, 63, 69, 0.18);
+  text-align: center;
 }
 
 .page-hero h1,
@@ -1103,24 +1313,27 @@ select:focus,
 }
 
 .page-hero-eyebrow {
-  margin: 0 0 4px;
-  font-size: 0.8rem;
-  letter-spacing: 0.18em;
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .page-hero-title {
   margin: 0;
   font-family: var(--font-playfair), Lexend, Poppins, system-ui, sans-serif;
-  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-size: clamp(1.6rem, 4.6vw, 2.5rem);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.12;
+  text-wrap: balance;
 }
 
 .page-hero-subtitle {
-  margin: var(--space-2) 0 0;
-  font-size: 0.98rem;
+  margin: var(--space-2) auto 0;
+  max-width: 56ch;
+  font-size: clamp(0.92rem, 2.4vw, 1rem);
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
 }
@@ -1129,17 +1342,19 @@ select:focus,
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-top: var(--space-4);
+  margin: var(--space-4) auto 0;
+  max-width: 460px;
   padding: 12px 16px;
-  border-radius: var(--radius-button);
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   color: #0F2A2E;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .page-hero-search input {
   flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   box-shadow: none;
@@ -1149,15 +1364,17 @@ select:focus,
 
 .page-hero-chips {
   display: flex;
+  justify-content: center;
   gap: 10px;
-  margin-top: var(--space-3);
+  margin-top: var(--space-4);
   flex-wrap: wrap;
 }
 
 .page-hero-chip {
-  padding: 7px 14px;
+  padding: 9px 16px;
+  min-height: 40px;
   border-radius: var(--radius-pill);
-  background: rgba(15, 107, 107, 0.55);
+  background: rgba(3, 38, 44, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.34);
   color: #ffffff;
   font-size: 0.82rem;
@@ -1168,10 +1385,11 @@ select:focus,
 }
 
 .page-hero-chip:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(3, 38, 44, 0.16);
   transform: translateY(-1px);
 }
 
+/* Content cards sit just below the rounded hero. */
 .page > .page-hero + * {
   position: relative;
   z-index: 2;
@@ -1480,21 +1698,39 @@ select:focus,
 
 @media (max-width: 768px) {
   .page {
-  max-width: 1440px;
-  margin-inline: auto;
-  padding-block: var(--space-5);
-  padding-inline: var(--page-padding-desktop);
-  overflow-x: clip;
+    padding-inline: var(--page-padding-mobile);
   }
 
   .page-hero {
-    margin: 0 -18px 0;
-    padding: 20px 18px 40px;
-    border-radius: 0 0 32px 32px;
+    margin: 0;
+    padding: 18px 12px 22px;
+    border-radius: 28px;
   }
 
   .page-hero-inner {
-    padding: var(--space-4);
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
+
+  .page-hero-title {
+    font-size: clamp(1.5rem, 7.4vw, 1.95rem);
+  }
+
+  .page-hero-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .page-hero-search {
+    padding: 10px 14px;
+  }
+
+  .page-hero-chips {
+    gap: 8px;
+  }
+
+  .page-hero-chip {
+    padding: 8px 14px;
+    font-size: 0.78rem;
   }
 
   .page > .page-hero + * {
@@ -1542,7 +1778,7 @@ select:focus,
 
   .onboarding-collage,
   .onboarding-hero {
-    margin-inline: calc(-1 * var(--space-5));
+    margin-inline: -16px;
   }
 
   .onboarding-screen {
@@ -1751,11 +1987,7 @@ select,
 @media (max-width: 768px) {
   .page-container,
   .page {
-  max-width: 1440px;
-  margin-inline: auto;
-  padding-block: var(--space-5);
-  padding-inline: var(--page-padding-desktop);
-  overflow-x: clip;
+    padding-inline: var(--page-padding-mobile);
   }
 
   .content-grid {
@@ -1778,6 +2010,1749 @@ select,
   }
 
   .page {
-    padding-top: 68px;
+    padding-top: var(--space-4);
+  }
+}
+
+/* ==========================================================================
+   14. TOP HEADER + HERO RESPONSIVE RULES
+   iOS / Android phones, tablets and desktop.
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  /* The sidebar becomes an overlay, so the shell no longer offsets for it. */
+  .app-shell {
+    margin-left: 0;
+  }
+
+  /* The rail slides fully out of the way and only appears as a drawer. */
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0) !important;
+    width: var(--sidebar-width) !important;
+  }
+
+  /* An expanded drawer must not push the page content sideways. */
+  .sidebar.expanded ~ .app-shell {
+    margin-left: 0;
+  }
+
+  /* The overlay is only rendered while the drawer is open, so it can simply
+     stay visible for every width where the drawer exists. */
+  .sidebar-overlay {
+    display: block;
+  }
+
+  /* The drawer replaces the rail, so the header must offer a way to open it.
+     Without this button the drawer-only links would be unreachable between
+     901px and 1024px, where the primary navigation is still visible. */
+  .top-header-menu-btn {
+    display: inline-flex;
+  }
+
+  /* Keep the primary navigation compact so it still fits next to the menu
+     button and the account actions down to 901px. */
+  .top-header-link {
+    padding-inline: 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  /* Collapse the primary navigation into the menu button. */
+  .top-header-nav {
+    display: none;
+  }
+
+  .top-header-menu-btn {
+    display: inline-flex;
+  }
+
+  .top-header-inner {
+    gap: var(--space-2);
+  }
+}
+
+@media (max-width: 768px) {
+  .top-header-inner {
+    padding: 8px var(--page-padding-mobile);
+  }
+
+  .top-header-wordmark {
+    font-size: 1.15rem;
+  }
+
+  .top-header-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+  }
+
+  .top-header-link-ghost {
+    display: none;
+  }
+
+  .top-header-cta {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-header-cta {
+    display: none;
+  }
+
+  .top-header-wordmark {
+    font-size: 1.05rem;
+  }
+}
+
+/* Phones: the hero becomes a compact, fully rounded panel. */
+@media (max-width: 480px) {
+  .page-hero {
+    padding: 16px 10px 18px;
+    border-radius: 32px;
+  }
+
+  .page-hero-inner {
+    padding: 16px 14px;
+    border-radius: 22px;
+  }
+
+  .page-hero-title {
+    font-size: clamp(1.35rem, 7.2vw, 1.7rem);
+  }
+}
+
+/* iOS safe areas: keep the sticky header clear of the notch and the
+   home indicator, and respect the landscape side insets. */
+@supports (padding: env(safe-area-inset-top)) {
+  .top-header-inner {
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-left: max(var(--page-padding-mobile), env(safe-area-inset-left));
+    padding-right: max(var(--page-padding-mobile), env(safe-area-inset-right));
+  }
+}
+
+/* Android / iOS: avoid unwanted tap highlight and text selection glitches. */
+.top-header,
+.page-hero {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none) {
+  .page-hero-chip:hover,
+  .top-header-link:hover {
+    background: var(--glass-bg-soft);
+    transform: none;
+  }
+
+  .page-hero-chip:hover {
+    background: rgba(3, 38, 44, 0.3);
+  }
+}
+
+/* ==========================================================================
+   15. RESPONSIVE SIZING & SPACING SYSTEM
+   One measured rhythm for phones (iOS / Android), tablets and desktop.
+   Every shared surface, control and grid resolves to the same scale.
+   ========================================================================== */
+
+:root {
+  --control-h: 50px;
+  --control-h-sm: 44px;
+  --control-radius: 12px;
+  --card-pad: 22px;
+  --card-pad-sm: 16px;
+  --stack-gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --section-gap: 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --card-pad: 18px;
+    --card-pad-sm: 14px;
+    --stack-gap: 18px;
+    --section-gap: 40px;
+    --grid-gap: 16px;
+    --form-gap: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --card-pad: 16px;
+  }
+}
+
+/* ---------- 15.1 Platform basics ----------------------------------------- */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 84px;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+button,
+a,
+[role="button"],
+input,
+select,
+textarea,
+label,
+summary {
+  touch-action: manipulation;
+}
+
+button,
+[role="button"],
+.btn,
+.nav-item,
+.top-header-link,
+.page-hero-chip {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+/* Long words and URLs never widen a card or a grid track. */
+:is(
+    .tour-card,
+    .attraction-card,
+    .destination-card,
+    .home-attraction-card,
+    .travel-card,
+    .tip-card,
+    .glass-card,
+    .summary-card,
+    .pricing-details-card,
+    .workspace-list-card,
+    .booking-card,
+    .admin-content,
+    .admin-panel
+  ) {
+  overflow-wrap: anywhere;
+}
+
+/* iOS home-indicator clearance for the scrolling shell. */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .main-content {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ---------- 15.2 Type scale and vertical rhythm --------------------------- */
+
+.page :where(h1, h2, h3, h4):not(.page-hero-title):not(.onboarding-title) {
+  margin-block: 0 0.45em;
+  letter-spacing: -0.012em;
+  line-height: 1.22;
+}
+
+.page :where(h1):not(.page-hero-title) {
+  font-size: clamp(1.65rem, 1.2rem + 1.7vw, 2.35rem);
+  line-height: 1.15;
+}
+
+.page :where(h2) {
+  font-size: clamp(1.32rem, 1.08rem + 0.95vw, 1.8rem);
+  line-height: 1.2;
+}
+
+.page :where(h3) {
+  font-size: clamp(1.08rem, 0.99rem + 0.4vw, 1.28rem);
+  line-height: 1.3;
+}
+
+.page :where(h4) {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.page :where(p) {
+  line-height: 1.65;
+}
+
+.page :where(p + p) {
+  margin-top: 0.65em;
+}
+
+/* These headings own their hierarchy; keep their tuned sizes authoritative. */
+.page .page-header h1 {
+  font-size: clamp(1.6rem, 1.15rem + 1.6vw, 2.3rem);
+  line-height: 1.15;
+}
+
+.page .page-header p {
+  margin-top: 6px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.page .section-header h2 {
+  font-size: clamp(1.3rem, 1.05rem + 0.95vw, 1.75rem);
+  line-height: 1.2;
+}
+
+.page .section-header {
+  margin-bottom: 24px;
+}
+
+.page .section-header h2 {
+  margin-bottom: 6px;
+}
+
+.page .section-header p {
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+/* Card titles and body copy share one rhythm across every card type. */
+:is(
+    .tour-card-body,
+    .attraction-card-body,
+    .home-attraction-info,
+    .tip-card,
+    .travel-card,
+    .workspace-list-card,
+    .contact-info-card,
+    .review-card
+  )
+  h3 {
+  margin: 0 0 6px;
+  font-size: clamp(1.1rem, 1rem + 0.4vw, 1.28rem);
+  line-height: 1.3;
+}
+
+:is(
+    .tour-card-body,
+    .attraction-card-body,
+    .home-attraction-info,
+    .tip-card,
+    .travel-card,
+    .workspace-list-card,
+    .contact-info-card,
+    .review-card
+  )
+  p {
+  margin: 0 0 12px;
+  line-height: 1.55;
+}
+
+:is(
+    .tour-card-body,
+    .attraction-card-body,
+    .home-attraction-info,
+    .tip-card,
+    .travel-card,
+    .workspace-list-card,
+    .contact-info-card,
+    .review-card
+  )
+  p:last-child {
+  margin-bottom: 0;
+}
+
+/* Page-level headers keep a predictable distance from the content below. */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page > .page-hero + .page-header {
+  margin-top: 20px;
+}
+
+/* ---------- 15.3 Cards --------------------------------------------------- */
+
+/* Content cards share one interior padding scale. */
+:is(
+    .glass-card,
+    .summary-card,
+    .pricing-details-card,
+    .sub-panel,
+    .contact-info-card,
+    .quick-link-card,
+    .ws-card,
+    .ws-item-card,
+    .home-editor-card,
+    .admin-form-card,
+    .chart-card,
+    .admin-panel,
+    .pricing-total-card,
+    .pricing-message-card,
+    .booking-mini-card,
+    .testimonial-card,
+    .profile-card,
+    .review-card,
+    .booking-card,
+    .route-estimator-card,
+    .route-result-card,
+    .tip-card,
+    .travel-card,
+    .admin-bookings,
+    .admin-users
+  ) {
+  padding: var(--card-pad);
+}
+
+/* Small, dense cards use the compact step. */
+:is(.summary-card, .ws-card, .room-card, .pricing-item, .booking-mini-card) {
+  padding: var(--card-pad-sm);
+}
+
+.auth-card {
+  padding: clamp(24px, 3.2vw, 36px);
+}
+
+/* Photography stays sharp; equivalent cards share one ratio. */
+.tour-card-image,
+.attraction-card-image,
+.home-attraction-image,
+.travel-card-image {
+  height: auto;
+  aspect-ratio: 4 / 3;
+}
+
+.tour-card-image img,
+.attraction-card-image img,
+.home-attraction-image img,
+.travel-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tour-card-body,
+.attraction-card-body,
+.booking-card-content,
+.home-attraction-info {
+  padding: var(--card-pad);
+}
+
+/* Media cards fill the grid row and align their footers. */
+:is(.tour-card, .attraction-card, .home-attraction-card, .travel-card, .tip-card) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+:is(.tour-card-body, .attraction-card-body, .home-attraction-info) {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.tour-card-meta {
+  gap: 8px 12px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.tour-card-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  gap: 6px;
+  align-items: baseline;
+}
+
+/* ---------- 15.4 Grids --------------------------------------------------- */
+
+/* Card grids can never overflow: the minimum track is capped by the container. */
+:is(
+    .tours-grid,
+    .attractions-grid,
+    .tips-grid,
+    .travel-cards-grid,
+    .workspace-list-grid,
+    .hotel-list,
+    .selection-grid
+  ) {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--grid-gap);
+  align-items: stretch;
+}
+
+.tours-grid,
+.attractions-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.destinations-grid {
+  gap: var(--grid-gap);
+}
+
+.testimonials-grid {
+  gap: var(--grid-gap);
+}
+
+.stats-section,
+.dashboard-stats-grid {
+  gap: 16px;
+  align-items: stretch;
+}
+
+.dashboard-sections,
+.charts-grid {
+  gap: var(--grid-gap);
+  align-items: start;
+}
+
+.form-row {
+  gap: var(--form-gap);
+}
+
+.form-image-row {
+  gap: 16px;
+}
+
+.quick-links-grid {
+  gap: 12px;
+}
+
+.admin-reviews-stats {
+  gap: 14px;
+}
+
+/* ---------- 15.5 Forms --------------------------------------------------- */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: var(--form-gap);
+}
+
+.form-group label {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea,
+.search-input-group input,
+.page-hero-search input {
+  font-size: 16px;
+}
+
+.form-group input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.form-group select {
+  min-height: var(--control-h);
+  padding: 12px 14px;
+  border-radius: var(--control-radius);
+}
+
+.form-group textarea {
+  min-height: 120px;
+  padding: 12px 14px;
+  line-height: 1.55;
+  border-radius: var(--control-radius);
+}
+
+.form-group input[type="file"] {
+  min-height: var(--control-h);
+  padding: 12px 14px;
+}
+
+.form-hint,
+.form-group small,
+.form-help {
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.form-actions .btn {
+  min-width: 132px;
+}
+
+.search-input-group {
+  min-height: var(--control-h);
+  padding: 0 14px;
+  gap: 10px;
+  border-radius: var(--control-radius);
+}
+
+.search-input-group input {
+  min-height: calc(var(--control-h) - 2px);
+  padding: 0;
+}
+
+.filters-bar,
+.filter-group,
+.filter-select-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.filter-select-group select {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+/* The filters are one glass panel; the individual groups are its fields. */
+.filters-bar {
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-card);
+}
+
+.filters-bar .filter-group {
+  flex: 0 1 280px;
+  align-items: stretch;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.filters-bar .filter-group select {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+  }
+
+  .filters-bar .filter-group {
+    flex: 0 0 auto;
+  }
+}
+
+.filter-select,
+.filter-select-group select {
+  min-height: var(--control-h-sm);
+  padding: 0 12px;
+  border-radius: var(--control-radius);
+}
+
+/* ---------- 15.6 Buttons and tap targets --------------------------------- */
+
+.btn {
+  min-height: var(--control-h);
+  padding-inline: 20px;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.btn-sm {
+  min-height: var(--control-h-sm);
+  padding-inline: 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.btn-lg,
+.btn-large {
+  min-height: 54px;
+  padding-inline: 26px;
+  font-size: 1rem;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* Icon-only controls keep a square, thumb-friendly hit area. */
+:is(
+    .icon-btn,
+    .modal-close,
+    .collapse-btn,
+    .top-header-menu-btn,
+    .logout-btn,
+    .search-clear,
+    .gallery-nav
+  ) {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ---------- 15.7 Navigation and shell ------------------------------------ */
+
+.sidebar-nav {
+  padding: 12px 10px;
+  scrollbar-width: thin;
+}
+
+.nav-item {
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
+  margin-bottom: 2px;
+  font-size: 0.9rem;
+}
+
+.nav-icon {
+  width: 24px;
+  min-width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-section-title {
+  padding: 14px 12px 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.sidebar-footer {
+  padding: 14px 12px;
+}
+
+.top-header-inner {
+  gap: 12px;
+  min-height: 64px;
+  padding-block: 10px;
+}
+
+.top-header-link {
+  min-height: 44px;
+}
+
+.top-header-avatar {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-header-cta {
+  min-height: 44px;
+}
+
+@media (max-width: 768px) {
+  .top-header-inner {
+    min-height: 60px;
+    padding-block: 8px;
+  }
+
+  .top-header-link {
+    padding-inline: 10px;
+  }
+}
+
+/* The sidebar already carries the wordmark on desktop. */
+@media (min-width: 1025px) {
+  .top-header-brand {
+    display: none;
+  }
+
+  .sidebar .auth-buttons {
+    display: none;
+  }
+}
+
+/* ---------- 15.8 Tables -------------------------------------------------- */
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.table-responsive > table,
+.admin-table-container > table {
+  min-width: 720px;
+}
+
+.table-responsive th,
+.table-responsive td,
+.admin-table-container th,
+.admin-table-container td {
+  padding: 12px 14px;
+  vertical-align: middle;
+  line-height: 1.45;
+}
+
+.admin-bookings-table th,
+.admin-bookings-table td,
+.admin-attractions-table th,
+.admin-attractions-table td {
+  padding: 12px 14px;
+}
+
+.table-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.table-pagination-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- 15.9 Admin surfaces ------------------------------------------ */
+
+.admin-page > * + * {
+  margin-top: var(--stack-gap);
+}
+
+.admin-content {
+  padding: var(--card-pad);
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px;
+}
+
+.admin-toolbar > * {
+  min-width: 0;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-tab {
+  flex: 1 0 auto;
+  min-height: 44px;
+  padding: 10px 14px;
+}
+
+@media (max-width: 640px) {
+  .admin-tabs {
+    flex-direction: row;
+  }
+
+  .admin-tabs .btn,
+  .admin-tabs button {
+    width: auto;
+  }
+
+  .admin-tab {
+    flex: 1 1 0;
+    width: auto;
+    padding: 10px 8px;
+    font-size: 0.82rem;
+  }
+
+  .overview-welcome {
+    padding: 8px 4px;
+  }
+}
+
+/* ---------- 15.10 Auth --------------------------------------------------- */
+
+.auth-page {
+  min-height: calc(100dvh - 64px);
+  padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 24px);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+}
+
+.auth-header h1 {
+  font-size: clamp(1.55rem, 1.2rem + 1.1vw, 2rem);
+  line-height: 1.2;
+}
+
+.auth-form .form-row {
+  gap: var(--form-gap);
+}
+
+/* ---------- 15.11 Overlays, toasts and empty states ---------------------- */
+
+.modal-overlay {
+  padding: 24px;
+}
+
+.modal-content {
+  width: min(560px, 100%);
+  max-height: min(88dvh, 900px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--card-pad);
+}
+
+.modal-header {
+  margin-bottom: 18px;
+}
+
+.toast-stack {
+  gap: 10px;
+}
+
+.toast {
+  padding: 12px 14px;
+  line-height: 1.45;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: clamp(32px, 6vw, 56px) 20px;
+  text-align: center;
+}
+
+.empty-state h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.empty-state p {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.empty-state .btn {
+  margin-top: 6px;
+}
+
+.empty-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.empty-cell {
+  padding: 24px 14px;
+  text-align: center;
+}
+
+/* ---------- 15.12 Hero --------------------------------------------------- */
+
+.page-hero {
+  padding: clamp(24px, 4vw, 48px) clamp(18px, 3.4vw, 44px);
+}
+
+.page-hero-inner {
+  padding: clamp(18px, 2.6vw, 24px);
+}
+
+.page-hero-eyebrow {
+  margin: 0 0 8px;
+}
+
+.page-hero-title {
+  margin: 0 0 10px;
+  line-height: 1.12;
+}
+
+.page-hero-subtitle {
+  margin: 0;
+  max-width: 58ch;
+  line-height: 1.6;
+}
+
+.page-hero-search {
+  margin-top: 16px;
+  min-height: var(--control-h);
+}
+
+.page-hero-chips {
+  margin-top: 14px;
+  gap: 8px;
+}
+
+.page-hero-chip {
+  min-height: 40px;
+  padding: 8px 14px;
+}
+
+@media (max-width: 900px) {
+  .page-hero-chip {
+    min-height: 44px;
+    padding: 8px 16px;
+  }
+}
+
+/* ---------- 15.13 Onboarding -------------------------------------------- */
+
+.onboarding-screen {
+  position: relative;
+  padding-inline: 20px;
+}
+
+.onboarding-skip {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: 12px;
+  z-index: 5;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: var(--radius-pill);
+  background: rgba(3, 30, 34, 0.74);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(var(--glass-blur-md));
+  backdrop-filter: blur(var(--glass-blur-md));
+  transition: background 180ms ease;
+}
+
+.onboarding-skip:hover {
+  background: rgba(3, 30, 34, 0.88);
+}
+
+@media (max-width: 420px) {
+  .onboarding-shell {
+    padding: 0;
+  }
+
+  .onboarding-screen {
+    min-height: 100dvh;
+    padding: max(16px, env(safe-area-inset-top)) 16px
+      calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .onboarding-welcome {
+    justify-content: center;
+    gap: 22px;
+  }
+
+  .onboarding-slides {
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .onboarding-slides .onboarding-copy {
+    margin-top: auto;
+  }
+
+  .onboarding-slides .onboarding-hero {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 320px;
+  }
+
+  .onboarding-slides .onboarding-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .onboarding-copy {
+    margin-top: 0;
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .onboarding-collage {
+    height: clamp(300px, 44dvh, 380px);
+    min-height: 300px;
+  }
+
+  .onboarding-title {
+    font-size: clamp(1.25rem, 5.6vw, 1.5rem);
+    line-height: 1.28;
+  }
+
+  .onboarding-subtitle {
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+  }
+
+  .onboarding-socials {
+    gap: 8px;
+  }
+
+  .onboarding-social {
+    min-height: 46px;
+  }
+}
+
+/* ---------- 15.14 Tablet and phone layout corrections -------------------- */
+
+@media (max-width: 1024px) {
+  .tour-detail-content,
+  .workspace-layout,
+  .messages-layout,
+  .contact-content,
+  .dashboard-sections,
+  .charts-grid,
+  .route-estimator-grid,
+  .auth-container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tour-detail-content {
+    gap: 24px;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stats-section,
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .form-image-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .stats-section,
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .destinations-grid,
+  .dashboard-sections,
+  .charts-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container,
+  .page {
+    padding-inline: var(--page-padding-mobile);
+  }
+
+  .page {
+    padding-block: var(--space-4);
+    overflow-x: clip;
+  }
+
+  .page-hero {
+    padding: 20px 16px 26px;
+    border-radius: 32px;
+  }
+
+  .page-hero-inner {
+    padding: 18px 16px;
+    border-radius: 20px;
+  }
+
+  .page-hero-title {
+    font-size: clamp(1.45rem, 6.6vw, 1.95rem);
+  }
+
+  .page-hero-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .page-hero-search {
+    margin-top: 14px;
+  }
+
+  .page > .page-hero + * {
+    margin-top: 20px;
+  }
+
+  .section-header {
+    margin-bottom: 18px;
+  }
+
+  .admin-content {
+    padding: 18px;
+  }
+
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-height: 90dvh;
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
+  }
+
+  .toast-stack {
+    inset-inline: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .btn {
+    min-height: 48px;
+  }
+
+  .table-responsive th,
+  .table-responsive td,
+  .admin-table-container th,
+  .admin-table-container td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-row,
+  .form-image-row,
+  .send-method-options,
+  .booking-card-details,
+  .contact-info,
+  .quick-links-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .testimonials-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-header-row > div:last-child {
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-toolbar > * {
+    width: 100%;
+  }
+
+  .admin-toolbar select {
+    width: 100%;
+  }
+
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-content {
+    border-radius: 20px 20px 0 0;
+    max-height: 92dvh;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-hero {
+    padding: 18px 14px 22px;
+    border-radius: 32px;
+  }
+
+  .page-hero-inner {
+    padding: 16px 14px;
+    border-radius: 18px;
+  }
+
+  .page-hero-title {
+    font-size: clamp(1.35rem, 7vw, 1.7rem);
+  }
+
+  .page-hero-chip {
+    font-size: 0.8rem;
+    padding: 8px 14px;
+  }
+
+  .tour-card-body,
+  .attraction-card-body,
+  .booking-card-content,
+  .home-attraction-info {
+    padding: 16px;
+  }
+
+  .auth-page {
+    padding: 18px 16px 24px;
+  }
+
+  .auth-card {
+    padding: 22px 18px;
+  }
+
+  .stat-value,
+  .stat-card .stat-value,
+  .dashboard-stat-card .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label,
+  .stat-card .stat-label,
+  .dashboard-stat-card .stat-label {
+    font-size: 0.74rem;
+  }
+
+  .dashboard-stat-card,
+  .stat-card {
+    padding: 14px;
+    min-height: 96px;
+  }
+
+  .dashboard-stats-grid,
+  .stats-section {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .dashboard-stats-grid,
+  .stats-section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .top-header-wordmark {
+    font-size: 1rem;
+  }
+
+  .page-hero-title {
+    font-size: 1.3rem;
+  }
+}
+
+/* ---------- 15.15 Safe areas (iOS notch / home indicator) ---------------- */
+
+@supports (padding: env(safe-area-inset-top)) {
+  .top-header-inner {
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-left: max(var(--page-padding-desktop), env(safe-area-inset-left));
+    padding-right: max(var(--page-padding-desktop), env(safe-area-inset-right));
+  }
+
+  .sidebar {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .sidebar-footer {
+    padding-bottom: max(14px, calc(10px + env(safe-area-inset-bottom)));
+  }
+
+  .page {
+    padding-left: max(var(--page-padding-desktop), env(safe-area-inset-left));
+    padding-right: max(var(--page-padding-desktop), env(safe-area-inset-right));
+  }
+
+  .onboarding-shell {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  @media (max-width: 768px) {
+    .top-header-inner {
+      padding-left: max(var(--page-padding-mobile), env(safe-area-inset-left));
+      padding-right: max(var(--page-padding-mobile), env(safe-area-inset-right));
+    }
+
+    .page {
+      padding-left: max(var(--page-padding-mobile), env(safe-area-inset-left));
+      padding-right: max(var(--page-padding-mobile), env(safe-area-inset-right));
+    }
+  }
+}
+
+/* ---------- 15.16 Corrections found in the visual review ----------------- */
+
+/* The tour gallery keeps the photograph visible: the scrim only deepens at
+   the bottom where the meta text sits. */
+.tour-detail-overlay {
+  padding: 24px;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 42, 46, 0.72) 0%,
+    rgba(7, 42, 46, 0.84) 45%,
+    rgba(7, 42, 46, 0.94) 100%
+  );
+}
+
+.tour-detail-overlay p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.tour-detail-overlay p svg {
+  display: inline-block;
+  vertical-align: -2px;
+}
+
+.tour-detail-overlay .tour-category {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Attraction meta lines keep icon and label on one line. */
+.attraction-card-body .attraction-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.attraction-card-body .attraction-desc {
+  margin: 0 0 8px;
+}
+
+.tour-detail-overlay .language-switcher {
+  margin: 10px 0;
+}
+
+/* Media cards are frameless: the photograph runs to the card edge. */
+:is(.tour-card, .attraction-card, .home-attraction-card, .destination-card) {
+  padding: 0;
+}
+
+/* Feature destinations: tall portrait media on phones, cinematic on desktop. */
+.destination-image {
+  aspect-ratio: 4 / 3;
+}
+
+.page .destination-info {
+  padding: var(--card-pad);
+}
+
+.page .destination-info h3 {
+  margin-bottom: 6px;
+  font-size: clamp(1.2rem, 1.05rem + 0.5vw, 1.45rem);
+  line-height: 1.25;
+}
+
+.page .destination-info p {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.page .destination-link {
+  font-size: 0.88rem;
+}
+
+.page .home-attraction-image {
+  aspect-ratio: 16 / 10;
+}
+
+.page .home-attraction-info {
+  padding: var(--card-pad);
+}
+
+@media (min-width: 769px) {
+  .destination-image {
+    aspect-ratio: 16 / 9;
+  }
+
+  .page .destination-info {
+    padding: 24px 26px 26px;
+  }
+
+  .page-hero {
+    padding-block: 24px;
+  }
+}
+
+/* Tour card meta reads as tidy rows instead of stacked fragments. */
+.tour-card-meta {
+  align-items: center;
+}
+
+.stars-display {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+}
+
+.tour-rating {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.tour-duration,
+.tour-destination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* Marketing statistics use the same card padding as every other card. */
+.page .stat-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--card-pad);
+}
+
+/* Admin statistic cards align icon, number and label on one left edge. */
+.page .dashboard-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  min-height: 126px;
+  padding: var(--card-pad);
+  text-align: left;
+}
+
+.page .dashboard-stat-card .stat-icon {
+  margin-bottom: 2px;
+}
+
+.page .dashboard-stat-card .stat-value {
+  text-align: left;
+}
+
+.page .dashboard-stat-card .stat-label {
+  text-align: left;
+}
+
+/* Route fields keep their 44px action buttons beside the input on phones. */
+.route-input-row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.route-input-row input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.route-input-row .btn {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+}
+
+.coords-confirmed {
+  color: #047857;
+}
+
+@media (max-width: 480px) {
+  .page .dashboard-stat-card {
+    min-height: 108px;
+    padding: 14px;
+    gap: 4px;
+  }
+}
+
+.page .stat-number {
+  margin: 0;
+  font-size: clamp(1.9rem, 1.5rem + 1vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.page .stat-label {
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+/* Home sections share one vertical rhythm and one content width. */
+.home-page > section {
+  margin-bottom: var(--section-gap);
+}
+
+.home-page > section:last-of-type {
+  margin-bottom: 0;
+}
+
+.page .all-tours-section {
+  max-width: none;
+  margin-inline: 0;
+  padding: 0;
+}
+
+.page .section-footer {
+  margin-top: 20px;
+}
+
+/* Auth footer links stack cleanly instead of reading as one sentence. */
+.auth-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.auth-footer p {
+  margin: 0;
+}
+
+.auth-footer a {
+  display: inline;
+  min-height: 0;
+}
+
+.auth-footer > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+}
+
+/* The collapsed rail keeps its footer controls inside the 70px column. */
+.sidebar:not(.expanded) .sidebar-header {
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 8px;
+}
+
+.sidebar:not(.expanded) .sidebar-logo {
+  justify-content: center;
+}
+
+.sidebar:not(.expanded) .collapse-btn {
+  width: 44px;
+  height: 44px;
+}
+
+.sidebar:not(.expanded) .sidebar-footer {
+  padding: 12px 8px;
+}
+
+.sidebar:not(.expanded) .sidebar-user {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar:not(.expanded) .user-info,
+.sidebar:not(.expanded) .user-badge {
+  display: none;
+}
+
+.sidebar:not(.expanded) .logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+/* iOS and Android zoom the whole page when a focused control is under 16px.
+   The rule is intentionally strong: several legacy scopes still force 14–15px. */
+@media (max-width: 900px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Landscape phones: keep overlays inside the short viewport. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .modal-overlay {
+    align-items: center;
+    padding: 8px;
+  }
+
+  .modal-content {
+    max-height: 94dvh;
+    border-radius: 16px;
+  }
+
+  .onboarding-screen {
+    min-height: 0;
+  }
+
+  .onboarding-collage {
+    min-height: 220px;
+  }
+
+  .onboarding-slides .onboarding-hero {
+    min-height: 180px;
   }
 }

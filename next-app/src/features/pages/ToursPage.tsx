@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { toursAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
 import { Search } from 'lucide-react';
-import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import type { DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import type {  Tour  } from "@/features/pages/types";
 import { PageHero } from "@/components/PageHero";
 
@@ -39,24 +39,11 @@ export default function ToursPage() {
   return (
     <div className="page tours-page">
       <PageHero
-        title="Explore The World"
-        subtitle="Curated day tours, overnight stays and safaris across Zanzibar and Tanzania."
+        title={title}
+        subtitle={subtitle}
         search={{ value: search, onChange: (value: string) => setSearch(value), placeholder: "Search tours" }}
         chips={["All", "Zanzibar", "Tanzania", "International"]}
       />
-      <div className="page-header">
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search tours..."
-            value={search}
-            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)}
-          />
-          <span className="search-icon"><Search size={18} /></span>
-        </div>
-      </div>
 
       {loading ? (
         <div className="loading">Loading amazing tours...</div>

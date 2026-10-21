@@ -142,13 +142,13 @@ export default function TripsPage() {
         title="Plan Your Route"
         subtitle="Estimate distances, plan the day and pick up the tips locals actually use."
         chips={["Route estimator", "Travel tips", "Getting around"]}
+        onChipClick={(chip) => {
+          const target = chip === "Route estimator" ? "route-estimator" : "travel-tips";
+          document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }}
       />
-      <div className="page-header">
-        <h1><Navigation size={22} /> Trip Route Estimator</h1>
-        <p>Enter your origin and destination to estimate distance and travel time</p>
-      </div>
 
-      <div className="route-estimator-card">
+      <div className="route-estimator-card" id="route-estimator">
         <div className="route-estimator-grid">
           <div className="route-estimator-field">
             <label>Origin</label>
@@ -224,7 +224,7 @@ export default function TripsPage() {
         )}
       </div>
 
-      <div className="trips-tips-section">
+      <div className="trips-tips-section" id="travel-tips">
         <div className="section-header">
           <h2>Travel Tips</h2>
           <p>Helpful information for your trip</p>

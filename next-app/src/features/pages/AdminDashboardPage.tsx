@@ -83,9 +83,6 @@ export default function AdminDashboardPage() {
             <h2>Welcome to Admin Panel</h2>
             <p>From here you can manage all tours, bookings, users, and attractions for your Travel. system.</p>
             <div className="overview-links">
-              <a href="http://localhost:8000/admin/" target="_blank" className="btn btn-primary" rel="noreferrer">
-                Admin Panel
-              </a>
               <button className="btn btn-outline" onClick={() => router.push('/tours')}>
                 View Tours
               </button>
@@ -173,7 +170,7 @@ export default function AdminDashboardPage() {
                       <td><strong>{u.username}</strong></td>
                       <td>{u.email}</td>
                       <td>{u.is_staff ? <span><CheckCircle size={14} /> Admin</span> : <span><Users size={14} /> Customer</span>}</td>
-                      <td><a href={`http://localhost:8000/admin/auth/user/${u.id}/change/`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline">Manage</a></td>
+                      <td><button type="button" onClick={() => router.push('/admin/customers')} className="btn btn-sm btn-outline">Manage</button></td>
                     </tr>
                   ))}
                 </tbody>

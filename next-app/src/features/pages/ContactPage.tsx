@@ -28,14 +28,19 @@ export default function ContactPage() {
   return (
     <div className="page contact-page">
       <PageHero
-        title="Get In Touch"
+        title="Contact Us"
         subtitle="Tell us what you dream about and our team will build the trip around you."
         chips={["Call", "WhatsApp", "Email"]}
+        onChipClick={(chip) => {
+          if (chip === "Call") {
+            window.location.href = "tel:+255711252758";
+          } else if (chip === "WhatsApp") {
+            window.open("https://wa.me/255711252758", "_blank", "noopener,noreferrer");
+          } else {
+            window.location.href = "mailto:infaanhameed@gmail.com";
+          }
+        }}
       />
-      <div className="page-header">
-        <h1>Contact Us</h1>
-        <p>We&apos;d love to hear from you. Get in touch with the travel experts at Travel. and let us help plan your perfect journey.</p>
-      </div>
 
       <div className="contact-content">
         <div className="contact-info">

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./travel-theme.css";
 import { AuthProvider } from "@/context/AuthContext";
-import Sidebar from "@/components/Sidebar";
+import AppFrame from "@/components/AppFrame";
 import { ToastProvider } from "@/components/ToastProvider";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { PushPrompt } from "@/components/PushPrompt";
@@ -64,10 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CurrencyProvider>
           <ToastProvider>
             <VisitorTracker />
-            <div className="app-layout">
-              <Sidebar />
-              <main className="main-content" id="main-content">{children}</main>
-            </div>
+            <AppFrame>{children}</AppFrame>
             <PushPrompt />
             <ModalA11y />
           </ToastProvider>

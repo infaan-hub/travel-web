@@ -9,3 +9,5 @@ coverage
 .vercel
 .data
 tsconfig.tsbuildinfo
+
+scripts/.shots/

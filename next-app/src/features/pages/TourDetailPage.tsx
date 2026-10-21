@@ -132,7 +132,6 @@ export default function TourDetailPage() {
           <span className={`tour-category ${tour.category}`}>
             {tour.category === 'zanzibar' ? 'Zanzibar' : tour.category === 'tanzania' ? 'Tanzania Safari' : 'International'}
           </span>
-          <h1>{displayTitle}</h1>
         {translations.length > 0 && (
           <div className="language-switcher" role="group" aria-label="Language">
             <button
