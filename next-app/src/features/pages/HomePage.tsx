@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
 import { PageHero } from "@/components/PageHero";
+import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 
 import type {  Attraction, HomeSettings, Review, Tour  } from "@/features/pages/types";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
@@ -244,12 +245,7 @@ export default function HomePage() {
       )}
 
       {!loading && allTours.length === 0 && !tourLoadError && (
-        <section className="home-discovery-empty glass-card">
-          <span className="section-kicker">More experiences are on the way</span>
-          <h2>Browse companies to plan your next trip</h2>
-          <p>Tour listings appear here when a provider publishes an experience.</p>
-          <Link href="/companies/" className="btn btn-primary">Explore companies</Link>
-        </section>
+        <MoreExperiencesEmptyState onBrowse={() => router.push("/companies/")} />
       )}
       {!loading && tourLoadError && (
         <section className="home-discovery-empty glass-card" role="status">
