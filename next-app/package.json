@@ -20,6 +20,7 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "admin:create": "tsx scripts/create-admin.ts",
+    "admin:set": "tsx scripts/set-admin.ts",
     "db:local": "tsx scripts/local-postgres.ts",
     "smoke": "node --env-file=.env scripts/smoke-routes.mjs",
     "smoke:browser": "node --env-file=.env scripts/smoke-browser.mjs",

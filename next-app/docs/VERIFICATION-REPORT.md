@@ -159,3 +159,20 @@ destination) and the frame-width rule follows the 1000px stage.
 - `npm run typecheck`: 0 errors. `npm run lint`: 0 errors (28 warnings).
 - `npm run build`: compiled successfully.
 
+
+## Admin access tooling and login hardening (2026-10-22)
+
+- `scripts/set-admin.ts` (`npm run admin:set`) creates an administrator or resets
+  an existing one's password, email, staff flag and active state. This is the
+  supported path for restoring access on a deployed database.
+- The admin login form trims the username, blocks double submits, shows a
+  disabled/signing-in state, exposes a 44px password visibility toggle, and
+  signs out a non-staff account instead of leaving a customer session behind.
+- `AGENTS.md` is the Next.js-generated agent guidance file.
+
+- `npm run typecheck`: 0 errors. `npm run build`: compiled successfully.
+- `npm run audit:spacing` / `audit:layout`: 0 problems; `audit:contrast`: 0
+  failures. `npm run test:onboarding`: 16/16. `npm run smoke`: 38/38.
+- `npm run smoke:browser`: 33/33 (includes the admin login redirect).
+- `npm test`: 26/26. `npm run lint`: 0 errors (28 warnings).
+

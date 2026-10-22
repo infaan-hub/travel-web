@@ -4,13 +4,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Lock, BarChart3, ClipboardList, Globe, Users } from '@/components/icons';
+import { Lock, BarChart3, ClipboardList, Globe, Users, Eye, EyeOff } from '@/components/icons';
 import type { ChangeEvent, FormEvent } from "react";
 
 export default function AdminLoginPage() {
   const [form, setForm] = useState<{ username: string; password: string }>({ username: '', password: '' });
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const { login, logout } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
@@ -19,16 +21,22 @@ export default function AdminLoginPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
+    if (submitting) return;
     setError('');
+    setSubmitting(true);
     try {
-      const user = await login(form.username, form.password);
+      const user = await login(form.username.trim(), form.password);
       if (user.is_staff) {
-        router.push('/admin/dashboard');
+        router.replace('/admin/dashboard');
       } else {
+        await logout();
         setError('This area is for administrators only. Please use the customer login.');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid credentials');
+      const detail = err.response?.data?.detail;
+      setError(detail || 'Sign-in failed. Check the admin username and password, then try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -49,13 +57,20 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
               <label htmlFor="admin-username">Username</label>
-              <input id="admin-username" type="text" name="username" value={form.username} onChange={handleChange} autoComplete="username" required placeholder="Enter your admin username" />
+              <input id="admin-username" type="text" name="username" value={form.username} onChange={handleChange} autoComplete="username" autoCapitalize="none" spellCheck={false} required placeholder="Enter your admin username" />
             </div>
             <div className="form-group">
               <label htmlFor="admin-password">Password</label>
-              <input id="admin-password" type="password" name="password" value={form.password} onChange={handleChange} autoComplete="current-password" required placeholder="Enter your password" />
+              <div className="admin-password-control">
+                <input id="admin-password" type={showPassword ? 'text' : 'password'} name="password" value={form.password} onChange={handleChange} autoComplete="current-password" required placeholder="Enter your password" />
+                <button type="button" className="admin-password-toggle" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword((value) => !value)}>
+                  {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+                </button>
+              </div>
             </div>
-            <button type="submit" className="btn btn-primary btn-block">Sign in to dashboard <span aria-hidden="true">→</span></button>
+            <button type="submit" className="btn btn-primary btn-block" disabled={submitting} aria-busy={submitting}>
+              {submitting ? 'Signing in…' : 'Sign in to dashboard'} <span aria-hidden="true">→</span>
+            </button>
           </form>
 
           <div className="auth-footer">
