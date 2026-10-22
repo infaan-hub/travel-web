@@ -1,4 +1,4 @@
-# Infaan Tours & Travel — unified Next.js application
+# Travel. — tours, travel & safari marketplace
 
 This directory contains the unified Next.js App Router application migrated
 from the former Django REST API and React/Vite client.

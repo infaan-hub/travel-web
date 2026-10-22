@@ -2,18 +2,13 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 /**
- * A company-owned tour only has public presence while its company is active
- * and the tour itself is published. Legacy unowned tours (companyId = null)
- * remain visible as before.
+ * A tour is public only when its owning company is active and the tour has
+ * been explicitly published. Unassigned legacy tours remain private until an
+ * administrator assigns them to a company and approves publication.
  */
 export const PUBLIC_TOUR_VISIBILITY = {
-  OR: [
-    { companyId: null },
-    {
-      company: { is: { status: "ACTIVE" } },
-      publicationStatus: "PUBLISHED",
-    },
-  ],
+  company: { is: { status: "ACTIVE" } },
+  publicationStatus: "PUBLISHED",
 } satisfies Prisma.TourWhereInput;
 
 export const PUBLIC_TOUR_WHERE = {

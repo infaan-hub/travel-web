@@ -9,21 +9,22 @@
  * Usage: node scripts/contrast-audit.mjs
  */
 import puppeteer from "puppeteer-core";
+import { getPublicTourPaths } from "./public-audit-pages.mjs";
 
 const BASE = process.env.AUDIT_BASE_URL || "http://127.0.0.1:3000";
 const CHROME = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
+const TOUR_PATHS = await getPublicTourPaths(BASE);
 const PAGES = [
   { path: "/", name: "home" },
   { path: "/tours/", name: "tours" },
-  { path: "/tour/46/", name: "tour detail" },
   { path: "/attractions/", name: "attractions" },
   { path: "/trips/", name: "trips" },
   { path: "/contact/", name: "contact" },
   { path: "/login/", name: "login" },
   { path: "/register/", name: "register" },
-  { path: "/booking/46/", name: "booking" },
   { path: "/companies/", name: "companies" },
+  ...TOUR_PATHS.map((path) => ({ path, name: path.includes("/booking/") ? "booking request" : "tour detail" })),
 ];
 
 const audit = () => {

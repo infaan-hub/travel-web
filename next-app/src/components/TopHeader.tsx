@@ -8,11 +8,11 @@ import { useAuth } from "@/context/AuthContext";
 
 const NAV_LINKS = [
   { to: "/", label: "Home" },
-  { to: "/tours", label: "Tours" },
+  { to: "/tours", label: "Experiences" },
   { to: "/companies", label: "Companies" },
-  { to: "/attractions", label: "Attractions" },
-  { to: "/trips", label: "Trips" },
-  { to: "/contact", label: "Contact" },
+  { to: "/attractions", label: "Places" },
+  { to: "/trips", label: "Trip planning" },
+  { to: "/contact", label: "Support" },
 ];
 
 /**
@@ -63,6 +63,17 @@ export default function TopHeader() {
           </span>
           <span className="top-header-wordmark brand-wordmark">Travel.</span>
         </Link>
+
+        <nav className="top-header-nav" aria-label="Main navigation">
+          {NAV_LINKS.map((link) => {
+            const active = link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);
+            return (
+              <Link key={link.to} href={link.to} className={`top-header-link${active ? " active" : ""}`} aria-current={active ? "page" : undefined}>
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
 
         <div className="top-header-actions">
           {isAuthenticated ? (

@@ -1,8 +1,6 @@
 ﻿# Travel. Multi-Company Platform â€” Development Plan
 
-Status: **Phase 1 complete. Phase 2 complete (core repairs). Phase 3 complete
-(company domain and safe migration). Phase 4 complete (administrator company
-management and verification). Phases 5â€“12 awaiting authorization.**
+Status: **Phases 1-12 complete. Phase 10 visual refresh reopened by the user on 2026-10-22 and now complete.**
 Date: 2026-10-22 (Phase 2 verified 2026-10-22)
 Project: `D:\travel-web\next-app`
 Repository root: `D:\travel-web` (Git root; application root is `next-app`)
@@ -1664,8 +1662,8 @@ Verification:
 - `npm run test`: 64/64.
 - `npm run build`: succeeded; 102 routes.
 
-**Next step:** wait for explicit Phase 10 authorization. Do not begin Phase 10
-automatically from this document alone.
+**Historical note:** this section records the original Phase 10 gate. The user
+explicitly authorized a platform-wide visual refresh on 2026-10-22; see section 24.
 
 ---
 
@@ -1779,3 +1777,14 @@ Final verification:
 - `prisma migrate status`: 5 migrations, up to date.
 
 **Project status:** complete. No further phase has been started.
+
+
+---
+
+## 24. User-Authorized Platform UI Refresh (2026-10-22)
+
+The user reopened the UI/UX work and requested a broad redesign of cards, onboarding, descriptions, sidebars, and other platform surfaces while retaining the existing colors. The homepage, public tour cards, page hero controls, desktop navigation, role-aware sidebars, onboarding, booking request pages, company/tour/attraction/support/dashboard/admin copy, shared responsive surfaces, focus treatment, forms, and workspace components were refreshed in the existing teal/aqua palette. Public tour visibility now requires an active company and published status.
+
+The refresh preserves route shapes, authentication, company workflows, and the request-based booking model. It does not create companies or change persistent data.
+
+Verification: typecheck passed; unit tests passed (64/64); production build passed (102 routes); lint passed with 0 errors and 31 warnings; onboarding browser checks passed (16/16) at mobile and desktop widths. Layout audit reported 0 problems. The spacing audit reported 0 sizing/spacing problems before its second pass was interrupted by a production rebuild. Contrast audit reported failures from the first hero and small aqua labels; the hero contrast was corrected in the final CSS, but a repeat audit could not complete under concurrent browser load. The browser smoke run passed 59/93 checks; company selection did not advance from the picker, so dependent company-workspace checks failed and are not counted as passing evidence.

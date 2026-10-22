@@ -68,14 +68,15 @@ export default function CompaniesPage() {
   }, [load]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const hasFilters = Boolean(search.trim() || businessType || region.trim());
 
   return (
     <div className={`page ${styles.page}`}>
       <section className={styles.hero}>
-        <p className={styles.eyebrow}>Travel companies</p>
-        <h1 className={styles.title}>Discover companies operating tours</h1>
+        <p className={styles.eyebrow}>Tourism providers</p>
+        <h1 className={styles.title}>Meet the companies behind the experiences</h1>
         <p className={styles.lead}>
-          Browse active, public travel companies, their tours and service areas.
+          Compare public company profiles, service areas and published tours, safaris and local experiences.
         </p>
         <div className={styles.filters}>
           <label className={styles.searchField}>
@@ -100,7 +101,7 @@ export default function CompaniesPage() {
             <option value="">All business types</option>
             {BUSINESS_TYPES.map((type) => (
               <option key={type} value={type}>
-                {type.replace(/_/g, " ")}
+                {type.toLowerCase().replace(/_/g, " ").replace(/(^|\s)\S/g, (letter) => letter.toUpperCase())}
               </option>
             ))}
           </select>
@@ -121,7 +122,13 @@ export default function CompaniesPage() {
       ) : companies.length === 0 ? (
         <div className={styles.empty}>
           <Building2 size={28} />
-          <p>No companies match your search.</p>
+          <h2>{hasFilters ? "No companies match these filters" : "No companies are listed yet"}</h2>
+          <p>{hasFilters ? "Try a broader search or clear the filters to see all listed providers." : "Published company profiles will appear here when providers join the marketplace."}</p>
+          {hasFilters ? (
+            <button className="btn btn-secondary" type="button" onClick={() => { setSearch(""); setBusinessType(""); setRegion(""); setPage(1); }}>
+              Clear filters
+            </button>
+          ) : null}
         </div>
       ) : (
         <>
@@ -171,7 +178,7 @@ export default function CompaniesPage() {
                   ) : null}
                   <div className={styles.stats}>
                     <span>
-                      <Globe size={14} /> {company.tours_count} published tours
+                      <Globe size={14} /> {company.tours_count} published experiences
                     </span>
                     {company.website ? (
                       <a href={company.website} target="_blank" rel="noreferrer">

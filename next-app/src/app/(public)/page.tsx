@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import HomePage from "@/features/pages/HomePage";
 
 export const metadata: Metadata = {
-  title: "Zanzibar & Tanzania Tours",
+  title: "Tours, Safaris & Local Experiences",
   description:
-    "Curated Zanzibar and Tanzania tours, safaris, attractions and personalised itineraries with Travel..",
+    "Discover tours, safaris and local experiences from independent tourism companies. Compare providers and send booking requests through Travel.",
   alternates: { canonical: "/" },
 };
 
@@ -12,19 +12,11 @@ export default async function Page() {
   const base = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "TravelAgency",
+    "@type": "WebSite",
     name: "Travel.",
     url: base,
     description:
-      "Curated Zanzibar and Tanzania tours, safaris, hotels and personalised itineraries.",
-    address: {
-      "@type": "PostalAddress",
-      addressCountry: "TZ",
-      addressLocality: "Zanzibar",
-    },
-    areaServed: ["Zanzibar", "Tanzania"],
-    telephone: `+${process.env.WHATSAPP_NUMBER ?? "255711252758"}`,
-    aggregateRating: undefined,
+      "Discover tours, safaris and local experiences from independent tourism companies.",
   };
 
   return (

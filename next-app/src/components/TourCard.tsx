@@ -2,10 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import useEmblaCarousel from "embla-carousel-react";
-import Autoplay from "embla-carousel-autoplay";
 import { Building2, Star, Clock, MapPin } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
 
@@ -30,9 +26,6 @@ type Tour = {
 };
 
 export default function TourCard({ tour }: { tour: Tour }) {
-  const router = useRouter();
-  const [autoplay] = useState(() => Autoplay({ delay: 5000, stopOnInteraction: false }));
-
   const images = [
     getImageUrl(tour.main_image_url || tour.image_url),
     ...(tour.gallery_image_urls || []).map((url) => getImageUrl(url)),
@@ -41,27 +34,22 @@ export default function TourCard({ tour }: { tour: Tour }) {
   ].filter(Boolean);
 
   const uniqueImages = [...new Set(images)];
-  const [emblaRef] = useEmblaCarousel({ loop: uniqueImages.length > 1 }, [autoplay]);
+
+  const detailHref = `/tour/${tour.id}/`;
 
   return (
-    <div className="tour-card glass-card" onClick={() => router.push(`/tour/${tour.id}`)}>
+    <article className="tour-card glass-card">
       <div className="tour-card-image">
-        <div className="embla" ref={emblaRef}>
-          <div className="embla__container">
-            {uniqueImages.map((img, i) => (
-              <div key={i} className="embla__slide">
-                <Image
-                  src={img}
-                  alt={tour.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="embla__slide__img"
-                  style={{ objectFit: "cover" }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        {uniqueImages[0] ? (
+          <Image
+            src={uniqueImages[0]}
+            alt={tour.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="tour-card-cover"
+            style={{ objectFit: "cover" }}
+          />
+        ) : <div className="tour-card-image-fallback"><MapPin size={28} /><span>Experience</span></div>}
         <span className={`tour-category ${tour.category}`}>
           {tour.category === "zanzibar"
             ? "Zanzibar"
@@ -71,16 +59,20 @@ export default function TourCard({ tour }: { tour: Tour }) {
         </span>
       </div>
       <div className="tour-card-body">
-        <h3>{tour.title}</h3>
-        <p>
+        <div className="tour-card-heading">
+          <div>
+            <h3><Link href={detailHref}>{tour.title}</Link></h3>
+            <span className="tour-destination"><MapPin size={14} /> {tour.destination}</span>
+          </div>
+        </div>
+        <p className="tour-card-description">
           {tour.short_description ||
-            (tour.description ? tour.description.slice(0, 120) + "..." : "")}
+            (tour.description ? `${tour.description.slice(0, 112).trim()}${tour.description.length > 112 ? "…" : ""}` : "Explore this experience and send a booking request to its provider.")}
         </p>
         {tour.company_name && tour.company_public_path ? (
           <Link
             href={tour.company_public_path}
             className="tour-company-link"
-            onClick={(event) => event.stopPropagation()}
             aria-label={`View ${tour.company_name}`}
           >
             <Building2 size={14} />
@@ -115,17 +107,17 @@ export default function TourCard({ tour }: { tour: Tour }) {
           <span className="tour-duration">
             <Clock size={14} /> {tour.duration}
           </span>
-          <span className="tour-destination">
-            <MapPin size={14} /> {tour.destination}
-          </span>
         </div>
         <div className="tour-card-footer">
           <span className="tour-price">
             From <strong>${tour.price}</strong>
+            <span className="tour-per-person"> / person</span>
           </span>
-          <span className="tour-per-person">per person</span>
+          <Link className="tour-card-action" href={detailHref} aria-label={`View ${tour.title}`}>
+            View experience <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

@@ -5,6 +5,7 @@
  * Usage: npm run audit:theme   (server must already be running)
  */
 import puppeteer from "puppeteer-core";
+import { getPublicTourPaths } from "./public-audit-pages.mjs";
 
 const BASE = process.env.THEME_BASE_URL || "http://127.0.0.1:3100";
 const CHROME =
@@ -18,6 +19,7 @@ const ROUTES = [
   "/onboarding/",
   "/login",
   "/register",
+  ...await getPublicTourPaths(BASE),
 ];
 
 const results = [];

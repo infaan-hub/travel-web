@@ -14,6 +14,7 @@
  * Usage: node scripts/spacing-audit.mjs
  */
 import puppeteer from "puppeteer-core";
+import { getPublicTourPaths } from "./public-audit-pages.mjs";
 
 const BASE = process.env.BASE || "http://127.0.0.1:3000";
 const CHROME =
@@ -22,19 +23,18 @@ const CHROME =
 const PUBLIC_PAGES = [
   "/",
   "/tours/",
-  "/tour/46/",
   "/attractions/",
   "/trips/",
   "/contact/",
   "/login/",
   "/register/",
   "/onboarding/",
-  "/booking/46/",
   "/companies/",
+  ...await getPublicTourPaths(BASE),
 ];
 
 const ADMIN_PAGES = ["/admin/dashboard", "/admin/bookings", "/admin/customers", "/admin/tours"];
-const MEMBER_PAGES = ["/dashboard/", "/bookings/", "/settings/", "/booking/46/"];
+const MEMBER_PAGES = ["/dashboard/", "/bookings/", "/settings/"];
 
 const VIEWPORTS = [
   { name: "android-360", width: 360, height: 740, isMobile: true },

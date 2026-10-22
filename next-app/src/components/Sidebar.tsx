@@ -21,7 +21,6 @@ import {
   UserPlus,
   BookOpen,
   TrendingUp,
-  Sparkles,
   Eye,
   LayoutDashboard,
   Image,
@@ -123,36 +122,36 @@ export default function Sidebar() {
   };
 
   const adminNavItems: NavItem[] = [
-    { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { to: "/admin/dashboard", label: "Platform overview", icon: LayoutDashboard, exact: true },
     { to: "/admin/home-editor", label: "Home Editor", icon: Image },
     { to: "/admin/customers", label: "Customers", icon: Users },
     { to: "/admin/companies", label: "Companies", icon: Building2 },
-    { to: "/admin/tours", label: "Manage Tours", icon: Globe },
+    { to: "/admin/tours", label: "Experiences", icon: Globe },
     { to: "/admin/trips", label: "Trips", icon: BookOpen },
     { to: "/admin/bookings", label: "Bookings", icon: ClipboardList },
     { to: "/admin/attractions", label: "Attractions", icon: Map },
     { to: "/admin/reviews", label: "Reviews", icon: Star },
     { to: "/admin/tips", label: "Tips", icon: BookOpen },
     { to: "/admin/analytics", label: "Analytics", icon: TrendingUp },
-    { to: "/admin/travel", label: "Manage Travel", icon: Truck },
+    { to: "/admin/travel", label: "Travel operations", icon: Truck },
     { to: "/admin/work-space", label: "Workspace", icon: Briefcase },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare },
     { to: "/admin/settings", label: "Settings", icon: Settings },
   ];
 
   const customerNavItems: NavItem[] = [
-    { to: "/", label: "Home", icon: Home, exact: true },
-    { to: "/tours", label: "Browse Tours", icon: Globe, exact: true },
-    { to: "/tours/zanzibar", label: "Zanzibar Tours", icon: Palmtree },
-    { to: "/tours/tanzania", label: "Tanzania Safaris", icon: Compass },
-    { to: "/attractions", label: "Attractions", icon: Map },
-    { to: "/trips", label: "Trips", icon: BookOpen },
-    { to: "/onboarding/", label: "Get started", icon: Sparkles },
+    { to: "/", label: "Discover", icon: Home, exact: true },
+    { to: "/tours", label: "Explore experiences", icon: Globe, exact: true },
+    { to: "/companies", label: "Tourism companies", icon: Building2 },
+    { to: "/tours/zanzibar", label: "Zanzibar", icon: Palmtree },
+    { to: "/tours/tanzania", label: "Tanzania", icon: Compass },
+    { to: "/attractions", label: "Places", icon: Map },
+    { to: "/trips", label: "Trip planning", icon: BookOpen },
     ...(isAuthenticated
       ? [
-          { to: "/dashboard", label: "Dashboard", icon: BarChart3 } as NavItem,
-          { to: "/booking", label: "Book a Tour", icon: CalendarDays } as NavItem,
-          { to: "/bookings", label: "My Bookings", icon: ClipboardList } as NavItem,
+          { to: "/dashboard", label: "My Travel", icon: BarChart3 } as NavItem,
+          { to: "/booking", label: "New request", icon: CalendarDays } as NavItem,
+          { to: "/bookings", label: "My requests", icon: ClipboardList } as NavItem,
           { to: "/settings", label: "Settings", icon: Settings } as NavItem,
         ]
       : []),
@@ -167,32 +166,32 @@ export default function Sidebar() {
     ? [
         {
           to: "/company/dashboard/",
-          label: "Company Dashboard",
+          label: "Company overview",
           icon: LayoutDashboard,
           exact: true,
           permission: "dashboard:read",
         },
         {
           to: "/company/tours/",
-          label: "Company Tours",
+          label: "Experiences",
           icon: Globe,
           permission: "tours:read",
         },
         {
           to: "/company/bookings/",
-          label: "Company Bookings",
+          label: "Booking requests",
           icon: ClipboardList,
           permission: "bookings:read",
         },
         {
           to: "/company/profile/",
-          label: "Company Profile",
+          label: "Company profile",
           icon: Building2,
           permission: "profile:read",
         },
         {
           to: "/company/analytics/",
-          label: "Company Analytics",
+          label: "Insights",
           icon: TrendingUp,
           permission: "analytics:read",
         },
@@ -244,6 +243,7 @@ export default function Sidebar() {
         <div className="sidebar-header">
           <Link href="/" className="sidebar-logo" onClick={closeAll}>
             <Palmtree size={24} className="logo-plane" />
+            {showLabels && <span className="sidebar-wordmark">Travel<span>.</span></span>}
           </Link>
           <button
             type="button"
@@ -260,6 +260,7 @@ export default function Sidebar() {
         </div>
 
         <nav className="sidebar-nav">
+          {showLabels && <div className="nav-section-title">{isAdmin ? "Platform workspace" : "Discover"}</div>}
           {!isAdmin && companySection}
           {navItems.map((item) => (
             <Link

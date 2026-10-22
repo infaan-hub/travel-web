@@ -279,7 +279,7 @@ try {
   await anon.setViewport({ width: 1440, height: 1000 });
   attachDiagnostics(anon);
 
-  await visit(anon, "/", "Stone town");
+  await visit(anon, "/", workspaceTour.title);
   const imageState = await anon.evaluate(() => {
     const images = Array.from(document.images);
     return {
@@ -294,7 +294,6 @@ try {
     JSON.stringify(imageState),
   );
 
-  await visit(anon, "/tours/", "Stone town");
   await visit(anon, "/tours/", workspaceTour.title);
   const cardCompanyLink = await anon.evaluate((slug) => {
     const link = document.querySelector(`a.tour-company-link[href="/company/${slug}/"]`);
@@ -311,8 +310,8 @@ try {
       cardCompanyLink?.text === accessCompanyA.name,
     JSON.stringify(cardCompanyLink),
   );
-  await visit(anon, "/tours/zanzibar/", "Stone town");
-  await visit(anon, "/tour/46/", "Test Safari");
+  await visit(anon, "/tours/zanzibar/", workspaceTour.title);
+  await visit(anon, `/tour/${workspaceTour.id}/`, workspaceTour.title);
   await visit(anon, `/tour/${workspaceTour.id}/`, "Operated by");
   const detailCompanyLink = await anon.evaluate((slug) => {
     const link = document.querySelector(
@@ -336,7 +335,7 @@ try {
       )),
     JSON.stringify(detailCompanyLink),
   );
-  await visit(anon, "/companies/", "Discover companies");
+  await visit(anon, "/companies/", "companies");
   const directoryCompanyLink = await anon.evaluate((slug) => {
     const link = document.querySelector(`a[href="/company/${slug}/"]`);
     return link ? link.getAttribute("href") : null;
@@ -358,7 +357,7 @@ try {
   );
   await visit(anon, "/attractions/", "stone town");
   await visit(anon, "/trips/", "Travel Tips");
-  await visit(anon, "/contact/", "Contact Us");
+  await visit(anon, "/contact/", "How can we help?");
   await visit(anon, "/login/", "Welcome Back");
   await visit(anon, "/register/", "Create Account");
 
@@ -425,9 +424,9 @@ try {
   const client = await browser.newPage();
   await client.setViewport({ width: 1440, height: 1000 });
   attachDiagnostics(client);
-  await uiLogin(client, "/login/", customer, "/", "Stone town");
+  await uiLogin(client, "/login/", customer, "/", workspaceTour.title);
   await visit(client, "/dashboard/", `Welcome, ${customer.username}`);
-  await visit(client, "/bookings/", "My Booked Trips");
+  await visit(client, "/bookings/", "My booking requests");
   await visit(client, "/settings/", "Settings");
 
   const companyDashboardAttempt = await client.goto(
@@ -483,10 +482,10 @@ try {
   }));
   record(
     "the sidebar exposes company navigation and the active role badge",
-    sidebarState.links.includes("Company Tours") &&
-      sidebarState.links.includes("Company Bookings") &&
-      sidebarState.links.includes("Company Profile") &&
-      sidebarState.links.includes("Company Analytics") &&
+    sidebarState.links.includes("Experiences") &&
+      sidebarState.links.includes("Booking requests") &&
+      sidebarState.links.includes("Company profile") &&
+      sidebarState.links.includes("Insights") &&
       sidebarState.badges.includes("Owner"),
     `links=${sidebarState.links.length} badges=${sidebarState.badges.join(",")}`,
   );

@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import Image from "next/image";
-import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI } from '@/lib/api/client';
+import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI, publicCompaniesAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
-import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
-import CountUp from '@/components/CountUp';
+import { ArrowRight, Star, MapPin, Send, X, Building2 } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';
 
@@ -15,16 +14,29 @@ import { useToast } from "@/components/ToastProvider";
 import { PageHero } from "@/components/PageHero";
 
 import type {  Attraction, HomeSettings, Review, Tour  } from "@/features/pages/types";
-import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import type { ChangeEvent, FormEvent, MouseEvent } from "react";
+
+type FeaturedCompany = {
+  id: number;
+  name: string;
+  description: string | null;
+  logo_image_url: string | null;
+  locality: string | null;
+  region: string | null;
+  public_path: string;
+  tours_count: number;
+};
+
 export default function HomePage() {
   const toast = useToast();
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [allTours, setAllTours] = useState<Tour[]>([]);
-  const [stats, setStats] = useState<Record<string, number>>({});
   const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [attractions, setAttractions] = useState<Attraction[]>([]);
+  const [companies, setCompanies] = useState<FeaturedCompany[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tourLoadError, setTourLoadError] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
   const [reviewSaving, setReviewSaving] = useState(false);
@@ -32,23 +44,29 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    Promise.all([
+    void Promise.allSettled([
       toursAPI.getAll({}),
       homeSettingsAPI.get(),
       reviewsAPI.getAll({ status: 'approved' }),
       attractionsAPI.getAll({}),
-    ]).then(([allRes, homeRes, reviewsRes, attractionsRes]) => {
-      const all = allRes.data.results || allRes.data;
-      setAllTours(all);
-      setHomeSettings(homeRes.data);
-      setReviews(reviewsRes.data.results || reviewsRes.data);
-      setAttractions(attractionsRes.data.results || attractionsRes.data);
-      setStats({
-        zanzibar: all.filter((t: Tour) => t.category === 'zanzibar').length,
-        tanzania: all.filter((t: Tour) => t.category === 'tanzania').length,
-        total: all.length,
-      });
-    }).catch(console.error).finally(() => setLoading(false));
+      publicCompaniesAPI.getAll({ page: 1, page_size: 4 }),
+    ]).then(([toursRes, homeRes, reviewsRes, attractionsRes, companiesRes]) => {
+      const readList = (value: unknown) => {
+        if (Array.isArray(value)) return value;
+        if (value && typeof value === "object" && "results" in value && Array.isArray(value.results)) return value.results;
+        return [];
+      };
+      if (toursRes.status === "fulfilled") setAllTours(readList(toursRes.value.data) as Tour[]);
+      else { setTourLoadError(true); console.error(toursRes.reason); }
+      if (homeRes.status === "fulfilled") setHomeSettings(homeRes.value.data);
+      else console.error(homeRes.reason);
+      if (reviewsRes.status === "fulfilled") setReviews(readList(reviewsRes.value.data) as Review[]);
+      else console.error(reviewsRes.reason);
+      if (attractionsRes.status === "fulfilled") setAttractions(readList(attractionsRes.value.data) as Attraction[]);
+      else console.error(attractionsRes.reason);
+      if (companiesRes.status === "fulfilled") setCompanies(readList(companiesRes.value.data).slice(0, 4) as FeaturedCompany[]);
+      else console.error(companiesRes.reason);
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleReviewSubmit = async (e: FormEvent<HTMLElement>) => {
@@ -71,23 +89,24 @@ export default function HomePage() {
   return (
     <div className="page home-page">
       <PageHero
-        title="Start Exploring The World"
-        subtitle="Handcrafted tours across Tanzania and Zanzibar — from Serengeti safaris to pristine Zanzibar beaches."
+        eyebrow="A marketplace for meaningful travel"
+        title="Find the experience that feels like yours."
+        subtitle="Explore tours, safaris and local experiences from independent tourism companies. Compare what fits, meet the people behind it, and send a booking request directly."
         media={homeSettings?.hero_image_url ? { src: getImageUrl(homeSettings.hero_image_url), alt: "Tanzania landscape" } : undefined}
-        ctaPrimary={{ label: "Browse Tours", href: "/tours" }}
-        ctaSecondary={{ label: "Contact Us", href: "/contact" }}
+        ctaPrimary={{ label: "Explore experiences", href: "/tours/" }}
+        ctaSecondary={{ label: "Discover companies", href: "/companies/" }}
       />
 
       <section className="destinations-section">
         <div className="section-header">
-          <h2>Choose Your Adventure</h2>
-          <p>Two incredible destinations, one unforgettable country</p>
+          <h2>Start with a place</h2>
+          <p>Explore by destination, then find the local company and experience that suit your plans.</p>
         </div>
         <div className="destinations-grid">
-          <div className="destination-card zanzibar" onClick={() => router.push('/tours/zanzibar')}>
+          <Link className="destination-card zanzibar" href="/tours/zanzibar/">
             <div className="destination-image">
               <img
-                src={getImageUrl(homeSettings?.zanzibar_image_url || allTours.find(t => t.category === 'zanzibar')?.image_url) || ''}
+                src={getImageUrl(homeSettings?.zanzibar_image_url || allTours.find(t => t.category === 'zanzibar')?.image_url || '/uploads/home/Zanzibar_trip.jpg') || '/uploads/home/Zanzibar_trip.jpg'}
                 alt="Zanzibar"
               />
             </div>
@@ -96,11 +115,11 @@ export default function HomePage() {
               <p>Pristine beaches, spice farms, and rich Swahili culture. Paradise on Earth.</p>
               <span className="destination-link">Explore Zanzibar Tours <ArrowRight size={16} className="inline-icon" /></span>
             </div>
-          </div>
-          <div className="destination-card tanzania" onClick={() => router.push('/tours/tanzania')}>
+          </Link>
+          <Link className="destination-card tanzania" href="/tours/tanzania/">
             <div className="destination-image">
               <img
-                src={getImageUrl(homeSettings?.tanzania_image_url || allTours.find(t => t.category === 'tanzania')?.image_url) || ''}
+                src={getImageUrl(homeSettings?.tanzania_image_url || allTours.find(t => t.category === 'tanzania')?.image_url || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg') || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg'}
                 alt="Tanzania Safari"
               />
             </div>
@@ -109,15 +128,45 @@ export default function HomePage() {
               <p>Serengeti, Kilimanjaro, Ngorongoro - Africa&apos;s greatest wildlife experiences with expert-guided tours and premium service.</p>
               <span className="destination-link">Explore Tanzania Safaris <ArrowRight size={16} className="inline-icon" /></span>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
+
+      {!loading && companies.length > 0 && (
+        <section className="home-companies-section">
+          <div className="section-header">
+            <div>
+              <span className="section-kicker">Meet the providers</span>
+              <h2>Travel with people who know the place</h2>
+              <p>Independent companies share their published experiences on Travel.</p>
+            </div>
+            <Link href="/companies/" className="section-text-link">All companies <ArrowRight size={16} /></Link>
+          </div>
+          <div className="home-companies-grid">
+            {companies.map((company) => (
+              <Link className="home-company-card glass-card" href={company.public_path} key={company.id}>
+                {company.logo_image_url ? (
+                  <Image src={getImageUrl(company.logo_image_url)} alt="" width={52} height={52} className="home-company-logo" />
+                ) : (
+                  <span className="home-company-logo home-company-logo-fallback"><Building2 size={22} /></span>
+                )}
+                <span className="home-company-copy">
+                  <strong>{company.name}</strong>
+                  <span>{[company.locality, company.region].filter(Boolean).join(", ") || "Tourism company"} · {company.tours_count} experiences</span>
+                  {company.description ? <span className="home-company-description">{company.description}</span> : null}
+                </span>
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {!loading && allTours.length > 0 && (
         <section className="all-tours-section">
           <div className="section-header">
-            <h2>Explore All Tours</h2>
-            <p>Discover every tour we offer</p>
+            <h2>Explore experiences</h2>
+            <p>Compare published tours and safaris from participating companies.</p>
           </div>
           <div className="tours-grid">
             {allTours.map((tour: Tour) => (
@@ -130,8 +179,8 @@ export default function HomePage() {
       {!loading && attractions.length > 0 && (
         <section className="attractions-section">
           <div className="section-header">
-            <h2>Top Attractions</h2>
-            <p>Discover the most amazing places to visit</p>
+            <h2>Places worth exploring</h2>
+            <p>Discover notable places across the destinations represented on Travel.</p>
           </div>
           <div className="home-attractions-grid">
             {attractions.slice(0, 6).map(att => (
@@ -157,8 +206,8 @@ export default function HomePage() {
       {reviews.length > 0 && (
         <section className="testimonials-section">
           <div className="section-header">
-            <h2>What Our Travelers Say About Travel.</h2>
-            <p>Read reviews from our happy travelers who experienced Africa with us</p>
+            <h2>Notes from other travelers</h2>
+            <p>Read feedback shared after real experiences.</p>
           </div>
           <div className="testimonials-grid">
             {reviews.slice(0, 6).map(review => (
@@ -195,36 +244,22 @@ export default function HomePage() {
         </section>
       )}
 
-      <section className="stats-section">
-        <div className="stat-item">
-          {stats.total !== undefined ? (
-            <CountUp from={0} to={stats.total} separator="" duration={2} className="stat-number" />
-          ) : (
-            <span className="stat-number">50+</span>
-          )}
-          <span className="stat-label">Amazing Tours</span>
-        </div>
-        <div className="stat-item">
-          {stats.zanzibar !== undefined ? (
-            <CountUp from={0} to={stats.zanzibar} separator="" duration={2} className="stat-number" />
-          ) : (
-            <span className="stat-number">15+</span>
-          )}
-          <span className="stat-label">Zanzibar Tours</span>
-        </div>
-        <div className="stat-item">
-          {stats.tanzania !== undefined ? (
-            <CountUp from={0} to={stats.tanzania} separator="" duration={2} className="stat-number" />
-          ) : (
-            <span className="stat-number">20+</span>
-          )}
-          <span className="stat-label">Tanzania Safaris</span>
-        </div>
-        <div className="stat-item">
-          <CountUp from={0} to={1000} separator="" duration={2} className="stat-number" />
-          <span className="stat-label">Happy Travelers</span>
-        </div>
-      </section>
+      {!loading && allTours.length === 0 && !tourLoadError && (
+        <section className="home-discovery-empty glass-card">
+          <span className="section-kicker">More experiences are on the way</span>
+          <h2>Browse companies to plan your next trip</h2>
+          <p>Tour listings appear here when a provider publishes an experience.</p>
+          <Link href="/companies/" className="btn btn-primary">Explore companies</Link>
+        </section>
+      )}
+      {!loading && tourLoadError && (
+        <section className="home-discovery-empty glass-card" role="status">
+          <span className="section-kicker">Catalogue temporarily unavailable</span>
+          <h2>We could not load experiences right now.</h2>
+          <p>Browse company profiles in the meantime, or refresh this page to try again.</p>
+          <Link href="/companies/" className="btn btn-primary">Explore companies</Link>
+        </section>
+      )}
 
       {showReviewForm && (
         <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
@@ -262,10 +297,10 @@ export default function HomePage() {
 
       <section className="cta-section">
         <div className="cta-content">
-          <h2>Ready for Your African Adventure with Travel.?</h2>
-          <p>Book your dream tour today and create memories that last a lifetime. Our travel experts are here to help you plan every detail.</p>
-          <button className="btn btn-primary btn-large" onClick={() => router.push('/tours')}>
-            Start Planning Your Trip
+          <h2>Your next trip begins with a good match.</h2>
+          <p>Explore providers, compare the details that matter, and contact the company behind an experience when you are ready.</p>
+          <button className="btn btn-primary btn-large" onClick={() => router.push('/companies/')}>
+            Meet the companies
           </button>
         </div>
       </section>

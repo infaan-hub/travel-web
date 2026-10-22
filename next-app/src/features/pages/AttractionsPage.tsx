@@ -48,7 +48,16 @@ export default function AttractionsPage() {
         title="Attractions"
         subtitle="Beaches, caves, markets and wildlife — the places travellers keep coming back to."
         chips={["All", "National Parks", "Beaches", "Mountains", "Cultural"]}
-        onChipClick={(chip: string) => setFilter(chip === "All" ? "all" : chip.toLowerCase())}
+        onChipClick={(chip: string) => {
+          const values: Record<string, string> = {
+            All: "all",
+            "National Parks": "national_park",
+            Beaches: "beach",
+            Mountains: "mountain",
+            Cultural: "cultural",
+          };
+          setFilter(values[chip] ?? "all");
+        }}
       />
 
       <div className="filters-bar">

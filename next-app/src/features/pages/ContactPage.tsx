@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from 'react';
+import Link from "next/link";
 import api from '@/lib/api/client';
-import { MapPin, Phone, Mail, Clock, CheckCircle } from '@/components/icons';
+import { Building2, ClipboardList, CheckCircle } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 import { PageHero } from "@/components/PageHero";
-import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 export default function ContactPage() {
   const toast = useToast();
   const [form, setForm] = useState<{ name: string; email: string; phone: string; subject: string; message: string }>({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -28,37 +29,24 @@ export default function ContactPage() {
   return (
     <div className="page contact-page">
       <PageHero
-        title="Contact Us"
-        subtitle="Tell us what you dream about and our team will build the trip around you."
-        chips={["Call", "WhatsApp", "Email"]}
-        onChipClick={(chip) => {
-          if (chip === "Call") {
-            window.location.href = "tel:+255711252758";
-          } else if (chip === "WhatsApp") {
-            window.open("https://wa.me/255711252758", "_blank", "noopener,noreferrer");
-          } else {
-            window.location.href = "mailto:infaanhameed@gmail.com";
-          }
-        }}
+        eyebrow="Travel. platform support"
+        title="How can we help?"
+        subtitle="Send a question about using the platform, finding a provider, or managing a booking request."
+        ctaPrimary={{ label: "Browse companies", href: "/companies/" }}
+        ctaSecondary={{ label: "View experiences", href: "/tours/" }}
       />
 
       <div className="contact-content">
         <div className="contact-info">
           <div className="contact-info-card">
-            <h3><MapPin size={18} /> Location</h3>
-            <p>Travel.<br/>Zanzibar, Tanzania<br/>East Africa</p>
+            <h3><Building2 size={18} /> Looking for a tour provider?</h3>
+            <p>Browse company profiles to find their published services and public contact details.</p>
+            <Link href="/companies/" className="btn btn-secondary">Find a company</Link>
           </div>
           <div className="contact-info-card">
-            <h3><Phone size={18} /> Phone</h3>
-            <p>+255711252758</p>
-          </div>
-          <div className="contact-info-card">
-            <h3><Mail size={18} /> Email</h3>
-            <p>infaanhameed@gmail.com</p>
-          </div>
-          <div className="contact-info-card">
-            <h3><Clock size={18} /> Working Hours</h3>
-            <p>Mon - Sat: 8:00 AM - 6:00 PM<br/>Sun: 9:00 AM - 2:00 PM</p>
+            <h3><ClipboardList size={18} /> About booking requests</h3>
+            <p>Requests are sent to the company that publishes the selected experience. The provider follows up with availability and next steps.</p>
+            <Link href="/bookings/" className="btn btn-secondary">My booking requests</Link>
           </div>
         </div>
 
@@ -67,7 +55,7 @@ export default function ContactPage() {
             <div className="success-message">
               <span className="success-icon"><CheckCircle size={32} /></span>
               <h3>Message Sent Successfully!</h3>
-              <p>We&apos;ll get back to you within 24 hours.</p>
+              <p>Your message has been sent to the Travel. support inbox.</p>
               <button className="btn btn-primary" onClick={() => setSent(false)}>
                 Send Another Message
               </button>
@@ -86,7 +74,7 @@ export default function ContactPage() {
               </div>
                 <div className="form-group">
                   <label>Phone</label>
-                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+255711252758" />
+                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Country code and phone number" />
                 </div>
                 <div className="form-group">
                   <label>Subject *</label>

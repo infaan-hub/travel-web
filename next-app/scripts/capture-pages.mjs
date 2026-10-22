@@ -1,11 +1,14 @@
 /** Capture review screenshots at phone and desktop widths. */
 import { mkdir } from "node:fs/promises";
 import puppeteer from "puppeteer-core";
+import { getPublicTourPaths } from "./public-audit-pages.mjs";
 
 const BASE = process.env.BASE || "http://127.0.0.1:3000";
 const CHROME =
   process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const OUT = "scripts/.shots";
+const TOUR_PATH = (await getPublicTourPaths(BASE)).find((path) => path.startsWith("/tour/"));
+const BOOKING_PATH = (await getPublicTourPaths(BASE)).find((path) => path.startsWith("/booking/"));
 
 await mkdir(OUT, { recursive: true });
 
@@ -32,7 +35,7 @@ const wide = { width: 1920, height: 1080, isMobile: false };
 const page = await browser.newPage();
 await shot(page, "home-mobile", "/", phone, true);
 await shot(page, "tours-mobile", "/tours/", phone, true);
-await shot(page, "tour-mobile", "/tour/46/", phone);
+if (TOUR_PATH) await shot(page, "tour-mobile", TOUR_PATH, phone);
 await shot(page, "attractions-mobile", "/attractions/", phone, true);
 await shot(page, "contact-mobile", "/contact/", phone, true);
 await shot(page, "trips-mobile", "/trips/", phone, true);
@@ -76,6 +79,6 @@ await shot(page, "admin-desktop", "/admin/dashboard", desktop, false);
 await shot(page, "dashboard-mobile", "/dashboard/", phone, true);
 await shot(page, "bookings-mobile", "/bookings/", phone, true);
 await shot(page, "settings-mobile", "/settings/", phone, true);
-await shot(page, "booking-mobile", "/booking/46/", phone, true);
+if (BOOKING_PATH) await shot(page, "booking-mobile", BOOKING_PATH, phone, true);
 
 await browser.close();

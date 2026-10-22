@@ -45,7 +45,7 @@ for (const viewport of [
     `${viewport.name}: onboarding welcome collage, stars and actions`,
     screen1.collage === 4 &&
       screen1.stars === 3 &&
-      screen1.cta?.includes("Take a quick look") &&
+      screen1.cta?.includes("See how it works") &&
       screen1.accounts === 2,
     JSON.stringify(screen1),
   );
@@ -66,7 +66,7 @@ for (const viewport of [
   }));
   record(
     `${viewport.name}: onboarding slides hero, dashes and CTA`,
-    screen2.hero && screen2.dashes === 3 && screen2.cta?.startsWith("Next"),
+    screen2.hero && screen2.dashes === 3 && screen2.cta?.startsWith("Continue"),
     JSON.stringify(screen2),
   );
 
@@ -79,7 +79,7 @@ for (const viewport of [
   }));
   record(
     `${viewport.name}: Next swaps the slide`,
-    second.title !== screen2.title && second.cta?.startsWith("Next"),
+    second.title !== screen2.title && second.cta?.startsWith("Continue"),
     JSON.stringify(second),
   );
 
@@ -90,7 +90,7 @@ for (const viewport of [
   }));
   record(
     `${viewport.name}: the last slide offers account creation`,
-    last.cta?.includes("Create your account"),
+    last.cta?.includes("Create an account"),
   );
 
   await page.click(".onboarding-cta");

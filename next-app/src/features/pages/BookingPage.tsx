@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import api, { toursAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { MapPin, Clock, Mail, MessageSquare, CheckCircle, Navigation } from '@/components/icons';
+import { MapPin, Clock, Mail, CheckCircle, Navigation, Building2 } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
@@ -31,7 +31,6 @@ export default function BookingPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [tour, setTour] = useState<Tour | null>(null);
   const [loading, setLoading] = useState(!!tourId);
-  const [sendMethod, setSendMethod] = useState('push');
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -121,15 +120,6 @@ export default function BookingPage() {
     }
   };
 
-  const sendWhatsApp = async () => {
-    const res = await api.post('/send-whatsapp/', {
-      ...form,
-      tour: tour ? tour.title : 'Custom Tour Inquiry',
-      whatsapp_number: '255711252758',
-    });
-    return res.data;
-  };
-
   const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setSending(true);
@@ -137,12 +127,7 @@ export default function BookingPage() {
     try {
       await createBooking();
       bookingCreated = true;
-      if (sendMethod === 'whatsapp') {
-        const waRes = await sendWhatsApp();
-        window.open(waRes.whatsapp_url, '_blank');
-      }
       setSuccess(true);
-      setTimeout(() => router.push('/bookings'), 3000);
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || '';
       if (bookingCreated) {
@@ -165,7 +150,7 @@ export default function BookingPage() {
     <div className="page booking-page">
       <div className="page-header">
         <h1>{tour ? `Book: ${tour.title}` : 'Book a Tour'}</h1>
-        <p>Fill in your details below and Travel. will confirm your reservation with personalized care</p>
+          <p>Send a booking request to the company that offers this experience. They will follow up about availability and next steps.</p>
       </div>
 
       {success ? (
@@ -173,9 +158,9 @@ export default function BookingPage() {
           <span className="success-icon"><CheckCircle size={32} /></span>
           <h2>Booking Submitted Successfully!</h2>
           <p>
-            {sendMethod === 'push'
-              ? 'Your booking request has been received and our team has been notified. You will get an instant notification with your booking reference, and we will contact you within 24 hours with confirmation and further instructions for your tour.'
-              : 'WhatsApp chat has been opened with your booking details with Travel.. Our team at +255711252758 will respond shortly to help plan your perfect experience.'}
+            {tour?.company_name
+              ? `Your request has been recorded for ${tour.company_name}. The provider will follow up about availability and next steps.`
+              : 'Your request has been recorded. The provider will follow up about availability and next steps.'}
           </p>
           <div className="success-actions">
             <button className="btn btn-primary" onClick={() => router.push('/bookings')}>
@@ -196,7 +181,12 @@ export default function BookingPage() {
                   <h3>{tour.title}</h3>
                   <span className="tour-destination"><MapPin size={16} /> {tour.destination}</span>
                   <span className="tour-duration"><Clock size={16} /> {tour.duration}</span>
-                  <span className="tour-price-tag">${tour.price} <small>/ person</small></span>
+                  <span className="tour-price-tag">From ${tour.price} <small>/ person</small></span>
+                  {tour.company_name && tour.company_public_path ? (
+                    <Link className="tour-company-link" href={tour.company_public_path}>
+                      <Building2 size={14} /> {tour.company_name}
+                    </Link>
+                  ) : null}
                   {distance && (
                     <div className="booking-distance-info">
                       <span><Navigation size={14} /> Distance: ~{distance} km</span>
@@ -208,7 +198,7 @@ export default function BookingPage() {
             )}
 
             <form onSubmit={handleSubmit} className="booking-form-detailed">
-              <h2>Personal Information</h2>
+              <h2>Your details</h2>
               <div className="form-row">
                 <div className="form-group">
                   <label>Full Name *</label>
@@ -230,7 +220,7 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              <h2>Trip Details</h2>
+              <h2>Group and travel date</h2>
               <div className="form-row">
                 <div className="form-group">
                   <label>Number of Adults *</label>
@@ -252,25 +242,13 @@ export default function BookingPage() {
                 <textarea name="notes" value={form.notes} onChange={handleChange} rows={4} placeholder="Hotel preferences, dietary requirements, special occasions..." />
               </div>
 
-              <h2>Confirmation Method</h2>
-              <p className="send-method-label">How would you like to receive your booking confirmation?</p>
-              <div className="send-method-options">
-                <label className={`send-method-card ${sendMethod === 'push' ? 'selected' : ''}`}>
-                  <input type="radio" name="sendMethod" value="push" checked={sendMethod === 'push'} onChange={() => setSendMethod('push')} />
-                  <span className="method-icon"><Mail size={24} /></span>
-                  <span className="method-label">Send via Notification</span>
-                  <span className="method-desc">Get an instant booking notification with your reference number on this device and in your account</span>
-                </label>
-                <label className={`send-method-card ${sendMethod === 'whatsapp' ? 'selected' : ''}`}>
-                  <input type="radio" name="sendMethod" value="whatsapp" checked={sendMethod === 'whatsapp'} onChange={() => setSendMethod('whatsapp')} />
-                  <span className="method-icon"><MessageSquare size={24} /></span>
-                  <span className="method-label">Send via WhatsApp</span>
-                  <span className="method-desc">Open WhatsApp chat with Travel. with your booking details to +255711252758 for quick confirmation</span>
-                </label>
+              <div className="booking-request-note">
+                <Mail size={18} />
+                <span>This is a request, not a confirmed booking. The selected company will contact you to discuss availability.</span>
               </div>
 
               <button type="submit" className="btn btn-primary btn-block btn-large" disabled={sending}>
-                {sending ? 'Processing...' : `Submit Booking via ${sendMethod === 'push' ? 'Notification' : 'WhatsApp'}`}
+                {sending ? 'Sending request…' : 'Send booking request'}
               </button>
             </form>
           </div>

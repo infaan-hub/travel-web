@@ -5,6 +5,7 @@
  * Usage: node scripts/layout-audit.mjs
  */
 import puppeteer from "puppeteer-core";
+import { getPublicTourPaths } from "./public-audit-pages.mjs";
 
 const BASE = process.env.BASE || "http://127.0.0.1:3000";
 const CHROME = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
@@ -12,15 +13,14 @@ const CHROME = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Ap
 const PAGES = [
   "/",
   "/tours/",
-  "/tour/46/",
   "/attractions/",
   "/trips/",
   "/contact/",
   "/login/",
   "/register/",
   "/onboarding/",
-  "/booking/46/",
   "/companies/",
+  ...await getPublicTourPaths(BASE),
 ];
 
 const audit = () => {

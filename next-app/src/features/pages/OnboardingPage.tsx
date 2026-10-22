@@ -32,21 +32,21 @@ const SLIDES = [
     alt: "Traveller looking at the sea",
     title: "Explore The World",
     subtitle:
-      "Find trips that match your pace, from quiet island mornings to wide-open safari evenings.",
+      "Browse tours, safaris and local activities published by independent tourism companies.",
   },
   {
     src: "/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg",
     alt: "Sunset over the Serengeti",
-    title: "Travel At Your Own Pace",
+    title: "Compare providers with confidence",
     subtitle:
-      "Hand-picked stays, guides and experiences for every kind of traveller and every budget.",
+      "See who runs each experience, what is included, and where it takes place before you reach out.",
   },
   {
     src: "/uploads/home/Zanzibar_trip.jpg",
     alt: "Zanzibar coastline",
-    title: "Your Next Story Starts Here",
+    title: "Send a request to the right company",
     subtitle:
-      "Save favourites, plan with friends and confirm your booking in just a few taps.",
+      "Choose an experience and request a booking from its provider. The company follows up with the details.",
   },
 ];
 
@@ -83,7 +83,7 @@ export function OnboardingFlow() {
         <div className="splash-orbit splash-orbit-two" />
         <div className="splash-glass-mark"><span aria-hidden="true">T.</span></div>
         <p className="splash-wordmark">Travel<span>.</span></p>
-        <p className="splash-caption">A little closer to somewhere wonderful</p>
+        <p className="splash-caption">Discover places. Meet local providers.</p>
         <div className="splash-progress" aria-hidden="true"><span /></div>
       </section>
     );
@@ -112,16 +112,16 @@ export function OnboardingFlow() {
         <Link className="onboarding-skip" href="/">Explore as guest</Link>
 
         <div className="onboarding-copy">
-          <p className="onboarding-welcome-kicker">ZANZIBAR · TANZANIA · BEYOND</p>
-          <h1 className="onboarding-title">Somewhere new<br />is calling.</h1>
-          <p className="onboarding-subtitle">Find your kind of escape, with local experts by your side.</p>
+          <p className="onboarding-welcome-kicker">TOURS · SAFARIS · LOCAL EXPERIENCES</p>
+          <h1 className="onboarding-title">A world of local experiences.</h1>
+          <p className="onboarding-subtitle">Discover independent tourism companies, compare their experiences, and send your booking request in one place.</p>
           <div className="onboarding-account-actions">
-            <Link className="onboarding-cta onboarding-account-primary" href="/register">Create account <span aria-hidden="true">→</span></Link>
+            <Link className="onboarding-cta onboarding-account-primary" href="/register">Create an account <span aria-hidden="true">→</span></Link>
             <Link className="onboarding-cta onboarding-account-secondary" href="/login">Sign in</Link>
           </div>
           <button type="button" className="onboarding-cta" onClick={() => continueWith("email")}>
             <span className="onboarding-cta-label">
-              <Mail size={18} aria-hidden="true" /> Take a quick look
+              <Mail size={18} aria-hidden="true" /> See how it works
             </span>
           </button>
         </div>
@@ -134,6 +134,7 @@ export function OnboardingFlow() {
 
   return (
     <section className="onboarding-screen onboarding-slides onboarding-slides-redesign" aria-label={`Explore the world, slide ${slide + 1} of ${SLIDES.length}`}>
+      <Link className="onboarding-slide-skip" href="/">Browse as guest</Link>
       <div className="onboarding-hero">
         <img src={current.src} alt={current.alt} />
       </div>
@@ -152,15 +153,23 @@ export function OnboardingFlow() {
       </div>
 
       <div className="onboarding-copy">
+        <p className="onboarding-step-label">STEP {slide + 1} OF {SLIDES.length}</p>
         <h1 className="onboarding-title">{current.title}</h1>
         <p className="onboarding-subtitle">{current.subtitle}</p>
-        <button
-          type="button"
-          className="onboarding-cta"
-          onClick={() => (isLast ? finish() : setSlide((index) => index + 1))}
-        >
-          {isLast ? "Create your account →" : "Next →"}
-        </button>
+        <div className="onboarding-slide-actions">
+          {slide > 0 ? (
+            <button type="button" className="onboarding-back" onClick={() => setSlide((index) => index - 1)}>
+              Back
+            </button>
+          ) : <span />}
+          <button
+            type="button"
+            className="onboarding-cta"
+            onClick={() => (isLast ? finish() : setSlide((index) => index + 1))}
+          >
+            {isLast ? "Create an account →" : "Continue →"}
+          </button>
+        </div>
       </div>
     </section>
   );

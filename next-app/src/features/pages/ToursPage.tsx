@@ -11,6 +11,7 @@ import type {  Tour  } from "@/features/pages/types";
 import { PageHero } from "@/components/PageHero";
 
 export default function ToursPage() {
+  const router = useRouter();
   const { category } = useParams<Record<string, string>>();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,23 +27,32 @@ export default function ToursPage() {
   }, [category]);
 
   const filtered = tours.filter(t =>
-    search ? t.title.toLowerCase().includes(search.toLowerCase()) || t.destination?.toLowerCase().includes(search.toLowerCase()) : true
+    search ? [t.title, t.destination, t.company_name, t.category].some((value) => value?.toLowerCase().includes(search.toLowerCase())) : true
   );
 
-  const title = !category ? 'All Tours' : category === 'zanzibar' ? 'Zanzibar Tours' : 'Tanzania Safaris';
-  const subtitle = !category
-    ? 'Explore all our amazing tour packages with Travel.'
+  const title = !category
+    ? 'Tours, safaris & experiences'
     : category === 'zanzibar'
-      ? 'Discover the paradise islands of Zanzibar'
-      : 'Experience the wild beauty of Tanzania with Travel.';
+      ? 'Zanzibar experiences'
+      : category === 'tanzania'
+        ? 'Tanzania safaris'
+        : 'International experiences';
+  const subtitle = !category
+    ? 'Browse published experiences from independent tourism companies and choose what suits your trip.'
+    : category === 'zanzibar'
+      ? 'Find island tours and cultural experiences offered by local providers.'
+      : category === 'tanzania'
+        ? 'Compare safaris and guided experiences from participating Tanzanian companies.'
+        : 'Browse international trips and services published by participating providers.';
 
   return (
     <div className="page tours-page">
       <PageHero
         title={title}
         subtitle={subtitle}
-        search={{ value: search, onChange: (value: string) => setSearch(value), placeholder: "Search tours" }}
+        search={{ value: search, onChange: (value: string) => setSearch(value), placeholder: "Search experiences or providers" }}
         chips={["All", "Zanzibar", "Tanzania", "International"]}
+        onChipClick={(chip) => router.push(chip === "All" ? "/tours/" : `/tours/${chip.toLowerCase()}/`)}
       />
 
       {loading ? (
@@ -50,7 +60,8 @@ export default function ToursPage() {
       ) : filtered.length === 0 ? (
         <div className="empty-state">
           <span className="empty-icon"><Search size={24} /></span>
-          <p>No tours found matching your search</p>
+          <p>No published experiences match these filters yet. Try another destination or browse companies.</p>
+          <Link className="btn btn-secondary" href="/companies/">Browse companies</Link>
         </div>
       ) : (
         <div className="tours-grid">

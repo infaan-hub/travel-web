@@ -103,8 +103,8 @@ export default function BookingsPage() {
   return (
     <div className="page bookings-page">
       <div className="page-header">
-        <h1>My Booked Trips</h1>
-        <p>Manage your tour bookings</p>
+        <h1>My booking requests</h1>
+        <p>Track requests sent to tourism companies and review their current status.</p>
       </div>
 
       {loading ? (
@@ -112,10 +112,10 @@ export default function BookingsPage() {
       ) : bookings.length === 0 ? (
         <div className="empty-state">
           <span className="empty-icon"><ClipboardList size={24} /></span>
-          <h3>No Bookings Yet</h3>
-          <p>You haven&apos;t made any bookings yet. Start exploring our tours!</p>
-          <button className="btn btn-primary" onClick={() => router.push('/tours')}>
-            Browse Tours
+          <h3>No requests yet</h3>
+          <p>Your booking requests will appear here after you send one to an experience provider.</p>
+          <button className="btn btn-primary" onClick={() => router.push('/tours/')}>
+            Explore experiences
           </button>
         </div>
       ) : (

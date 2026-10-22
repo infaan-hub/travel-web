@@ -132,14 +132,18 @@ export function PageHero({
         {chips && chips.length > 0 ? (
           <div className="page-hero-chips">
             {chips.map((chip) => (
-              <button
-                key={chip}
-                type="button"
-                className="page-hero-chip"
-                onClick={onChipClick ? () => onChipClick(chip) : undefined}
-              >
-                {chip}
-              </button>
+              onChipClick ? (
+                <button
+                  key={chip}
+                  type="button"
+                  className="page-hero-chip"
+                  onClick={() => onChipClick(chip)}
+                >
+                  {chip}
+                </button>
+              ) : (
+                <span key={chip} className="page-hero-chip">{chip}</span>
+              )
             ))}
           </div>
         ) : null}

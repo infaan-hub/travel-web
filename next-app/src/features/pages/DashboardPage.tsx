@@ -30,7 +30,7 @@ export default function DashboardPage() {
     <div className="page dashboard-page">
       <div className="page-header">
         <h1>Welcome, {user?.username}!</h1>
-        <p>Your Travel. dashboard - manage your bookings and explore more adventures</p>
+        <p>Track your booking requests and explore experiences from participating companies.</p>
       </div>
 
       <div className="dashboard-stats-grid">
@@ -79,8 +79,8 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="empty-state small">
-              <p>No bookings yet. Start planning your adventure!</p>
-              <button className="btn btn-primary" onClick={() => router.push('/tours')}>Browse Tours</button>
+              <p>Your booking requests will appear here. Explore experiences when you are ready to plan.</p>
+              <button className="btn btn-primary" onClick={() => router.push('/tours/')}>Explore experiences</button>
             </div>
           )}
         </div>
@@ -90,22 +90,26 @@ export default function DashboardPage() {
             <h2>Quick Actions</h2>
           </div>
           <div className="quick-links-grid">
-            <div className="quick-link-card" onClick={() => router.push('/tours/zanzibar')}>
+            <Link className="quick-link-card" href="/tours/zanzibar/">
               <span className="ql-icon"><Palmtree size={24} /></span>
-              <span>Zanzibar Tours</span>
-            </div>
-            <div className="quick-link-card" onClick={() => router.push('/tours/tanzania')}>
+              <span>Zanzibar experiences</span>
+            </Link>
+            <Link className="quick-link-card" href="/tours/tanzania/">
               <span className="ql-icon"><Compass size={24} /></span>
-              <span>Tanzania Safaris</span>
-            </div>
-            <div className="quick-link-card" onClick={() => router.push('/attractions')}>
+              <span>Tanzania safaris</span>
+            </Link>
+            <Link className="quick-link-card" href="/companies/">
+              <span className="ql-icon"><Users size={24} /></span>
+              <span>Tourism companies</span>
+            </Link>
+            <Link className="quick-link-card" href="/attractions/">
               <span className="ql-icon"><Map size={24} /></span>
-              <span>Attractions</span>
-            </div>
-            <div className="quick-link-card" onClick={() => router.push('/contact')}>
+              <span>Places</span>
+            </Link>
+            <Link className="quick-link-card" href="/contact/">
               <span className="ql-icon"><Mail size={24} /></span>
-              <span>Contact Us</span>
-            </div>
+              <span>Contact Travel.</span>
+            </Link>
           </div>
         </div>
       </div>

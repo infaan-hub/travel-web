@@ -97,14 +97,14 @@ export default function LoginPage() {
 
         <div className="auth-banner auth-banner-redesign">
           <div className="auth-banner-content">
-            <span className="auth-visual-label">ZANZIBAR · TANZANIA · BEYOND</span>
-            <h2>Make room for<br />the remarkable.</h2>
-            <p>Thoughtfully planned escapes, local expertise, and memories that stay with you.</p>
+            <span className="auth-visual-label">A MARKETPLACE FOR MEANINGFUL TRAVEL</span>
+            <h2>Meet the people<br />behind the place.</h2>
+            <p>Explore experiences from independent tourism companies, compare the details, and send a request directly to the provider.</p>
             <div className="auth-banner-features">
-              <span><Palmtree size={18} /> Zanzibar Tours</span>
-              <span><Compass size={18} /> Tanzania Safaris</span>
-              <span><Map size={18} /> Expert Guides</span>
-              <span><Star size={18} fill="currentColor" className="text-yellow-500" /> Best Prices</span>
+              <span><Palmtree size={18} /> Local experiences</span>
+              <span><Compass size={18} /> Tours & safaris</span>
+              <span><Map size={18} /> Provider profiles</span>
+              <span><Star size={18} fill="currentColor" className="text-yellow-500" /> Request-based bookings</span>
             </div>
           </div>
         </div>

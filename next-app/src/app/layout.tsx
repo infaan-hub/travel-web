@@ -18,11 +18,11 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "http://localhost:3000"),
   title: {
-    default: "Travel. | Zanzibar & Tanzania trips",
+    default: "Travel. | Tours, safaris & local experiences",
     template: "%s | Travel.",
   },
   description:
-    "Travel. curates Zanzibar beaches, Tanzania safaris, attractions and custom itineraries in one warm, simple app.",
+    "Discover tours, safaris and local experiences from independent tourism companies. Compare providers and send booking requests through Travel.",
   keywords: [
     "Zanzibar tours",
     "Tanzania safari",
@@ -34,14 +34,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Travel.",
     description:
-      "Curated Zanzibar and Tanzania tours, safaris, hotels and personalized itineraries.",
+      "Discover tours, safaris and local experiences from independent tourism companies.",
     type: "website",
     siteName: "Travel.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Travel.",
-    description: "Explore Zanzibar and Tanzania with local travel experts.",
+    description: "Explore experiences from tourism companies across multiple destinations.",
   },
   icons: { icon: "/favicon.svg" },
 };
