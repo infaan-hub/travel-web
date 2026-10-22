@@ -98,7 +98,7 @@ export default function HomePage() {
       />
 
       <section className="destinations-section">
-        <div className="section-header" style={{ textAlign: "center" }}>
+        <div className="section-header" style={{ textAlign: "center", alignItems: "center" }}>
           <h2>Start with a place</h2>
         </div>
         <div className="destinations-grid">
