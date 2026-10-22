@@ -400,9 +400,11 @@ export function homeSettingSerializer(setting: HomeSetting): Json {
     hero_image: setting.heroImage,
     zanzibar_image: setting.zanzibarImage,
     tanzania_image: setting.tanzaniaImage,
+    more_experiences_image: setting.moreExperiencesImage,
     hero_image_url: publicImageUrl(setting.heroImage),
     zanzibar_image_url: publicImageUrl(setting.zanzibarImage),
     tanzania_image_url: publicImageUrl(setting.tanzaniaImage),
+    more_experiences_image_url: publicImageUrl(setting.moreExperiencesImage),
     updated_at: iso(setting.updatedAt),
   };
 }

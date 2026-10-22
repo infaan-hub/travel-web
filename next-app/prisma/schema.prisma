@@ -382,6 +382,7 @@ model HomeSetting {
   heroImage     String?  @map("hero_image")
   zanzibarImage String?  @map("zanzibar_image")
   tanzaniaImage String?  @map("tanzania_image")
+  moreExperiencesImage String? @map("more_experiences_image")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("home_settings")

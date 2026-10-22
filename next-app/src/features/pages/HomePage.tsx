@@ -245,7 +245,10 @@ export default function HomePage() {
       )}
 
       {!loading && allTours.length === 0 && !tourLoadError && (
-        <MoreExperiencesEmptyState onBrowse={() => router.push("/companies/")} />
+        <MoreExperiencesEmptyState
+          onBrowse={() => router.push("/companies/")}
+          imageUrl={homeSettings?.more_experiences_image_url ? getImageUrl(homeSettings.more_experiences_image_url) : null}
+        />
       )}
       {!loading && tourLoadError && (
         <section className="home-discovery-empty glass-card" role="status">
