@@ -41,7 +41,6 @@ async function updateSettings(request: NextRequest, requireAdmin: boolean) {
     ["more_experiences_image_3", "moreExperiencesImage3", "home"],
     ["more_experiences_image_4", "moreExperiencesImage4", "home"],
     ["more_experiences_image_5", "moreExperiencesImage5", "home"],
-    ["more_experiences_image_6", "moreExperiencesImage6", "home"],
   ] as const;
 
   for (const [inputKey, dbKey, folder] of fields) {

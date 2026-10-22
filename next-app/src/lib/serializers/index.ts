@@ -411,7 +411,6 @@ export function homeSettingSerializer(setting: HomeSetting): Json {
       setting.moreExperiencesImage3,
       setting.moreExperiencesImage4,
       setting.moreExperiencesImage5,
-      setting.moreExperiencesImage6,
     ].map(publicImageUrl),
     updated_at: iso(setting.updatedAt),
   };

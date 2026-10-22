@@ -9,10 +9,8 @@ const cards = [
   { color: "#FFC8D6", className: styles.cardPink, imageIndex: 0 },
   { color: "#FDEBA8", className: styles.cardYellow, imageIndex: 1 },
   { color: "#CFC3F5", className: styles.cardLavender, imageIndex: 2 },
-  { color: "#B5D8FA", className: styles.cardBlue, imageIndex: null },
   { color: "#B9F0D0", className: styles.cardMint, imageIndex: 3 },
   { color: "#FFD3B0", className: styles.cardPeach, imageIndex: 4 },
-  { color: "#F7C4F5", className: styles.cardMagenta, imageIndex: 5 },
 ];
 
 function PhotoGlyph() {
@@ -42,23 +40,18 @@ export default function MoreExperiencesEmptyState({
     <section className={styles.emptyState}>
       <div className={styles.stage} aria-hidden="true">
         {cards.map((card, index) => {
-          const image = card.imageIndex === null ? null : imageUrls[card.imageIndex];
+          const image = imageUrls[card.imageIndex];
           return (
             <div
               key={card.className}
               className={`${styles.card} ${card.className}`}
               style={{
-                backgroundColor: card.color,
+                backgroundColor: image ? "transparent" : card.color,
                 animationDelay: `${index * 70}ms, ${index * 70 + 420}ms`,
               }}
             >
-              {card.imageIndex === null ? (
-                <div className={styles.skeleton}>
-                  <span className={styles.brandTitle}>Travel.</span>
-                  <span className={styles.skeletonLine} />
-                </div>
-              ) : image ? (
-                <img className={styles.cardImage} src={image} alt="" />
+              {image ? (
+                <img className={styles.cardImage} src={image} alt="" loading="lazy" />
               ) : (
                 <PhotoGlyph />
               )}

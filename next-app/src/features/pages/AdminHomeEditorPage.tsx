@@ -22,8 +22,8 @@ export default function AdminHomeEditorPage() {
   const [zanzibarPreview, setZanzibarPreview] = useState<string | null>(null);
   const [tanzaniaFile, setTanzaniaFile] = useState<File | null>(null);
   const [tanzaniaPreview, setTanzaniaPreview] = useState<string | null>(null);
-  const [moreExperiencesFiles, setMoreExperiencesFiles] = useState<(File | null)[]>(Array(6).fill(null));
-  const [moreExperiencesPreviews, setMoreExperiencesPreviews] = useState<(string | null)[]>(Array(6).fill(null));
+  const [moreExperiencesFiles, setMoreExperiencesFiles] = useState<(File | null)[]>(Array(5).fill(null));
+  const [moreExperiencesPreviews, setMoreExperiencesPreviews] = useState<(string | null)[]>(Array(5).fill(null));
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function AdminHomeEditorPage() {
       setHeroFile(null); setHeroPreview(null);
       setZanzibarFile(null); setZanzibarPreview(null);
       setTanzaniaFile(null); setTanzaniaPreview(null);
-      setMoreExperiencesFiles(Array(6).fill(null)); setMoreExperiencesPreviews(Array(6).fill(null));
+      setMoreExperiencesFiles(Array(5).fill(null)); setMoreExperiencesPreviews(Array(5).fill(null));
       setMessage('Home page settings saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch { setMessage('Failed to save settings'); }
@@ -202,9 +202,9 @@ export default function AdminHomeEditorPage() {
 
         <div className="home-editor-card home-editor-portfolio">
           <h3>More Experiences Empty State Images</h3>
-          <p>Choose, replace or remove each of the six images around the Travel. card.</p>
+          <p>Choose, replace or remove each of the five images around the Travel. card.</p>
           <div className="home-editor-portfolio-grid">
-            {Array.from({ length: 6 }, (_, index) => (
+            {Array.from({ length: 5 }, (_, index) => (
               <div className="home-editor-portfolio-item" key={index}>
                 <div className="home-editor-portfolio-preview">
                   {portfolioPreview(index) ? (

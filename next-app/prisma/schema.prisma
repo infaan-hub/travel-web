@@ -388,7 +388,6 @@ model HomeSetting {
   moreExperiencesImage3 String? @map("more_experiences_image_3")
   moreExperiencesImage4 String? @map("more_experiences_image_4")
   moreExperiencesImage5 String? @map("more_experiences_image_5")
-  moreExperiencesImage6 String? @map("more_experiences_image_6")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("home_settings")
