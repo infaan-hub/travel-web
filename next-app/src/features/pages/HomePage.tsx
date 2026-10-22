@@ -247,7 +247,7 @@ export default function HomePage() {
       {!loading && allTours.length === 0 && !tourLoadError && (
         <MoreExperiencesEmptyState
           onBrowse={() => router.push("/companies/")}
-          imageUrl={homeSettings?.more_experiences_image_url ? getImageUrl(homeSettings.more_experiences_image_url) : null}
+          imageUrls={homeSettings?.more_experiences_image_urls?.map((image) => image ? getImageUrl(image) : null)}
         />
       )}
       {!loading && tourLoadError && (

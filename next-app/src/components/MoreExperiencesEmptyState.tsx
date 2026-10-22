@@ -2,17 +2,17 @@ import styles from "./MoreExperiencesEmptyState.module.css";
 
 type MoreExperiencesEmptyStateProps = {
   onBrowse?: () => void;
-  imageUrl?: string | null;
+  imageUrls?: (string | null | undefined)[];
 };
 
 const cards = [
-  { color: "#FFC8D6", className: styles.cardPink, image: true },
-  { color: "#FDEBA8", className: styles.cardYellow, image: true },
-  { color: "#CFC3F5", className: styles.cardLavender, image: true },
-  { color: "#B5D8FA", className: styles.cardBlue, image: false },
-  { color: "#B9F0D0", className: styles.cardMint, image: true },
-  { color: "#FFD3B0", className: styles.cardPeach, image: true },
-  { color: "#F7C4F5", className: styles.cardMagenta, image: true },
+  { color: "#FFC8D6", className: styles.cardPink, imageIndex: 0 },
+  { color: "#FDEBA8", className: styles.cardYellow, imageIndex: 1 },
+  { color: "#CFC3F5", className: styles.cardLavender, imageIndex: 2 },
+  { color: "#B5D8FA", className: styles.cardBlue, imageIndex: null },
+  { color: "#B9F0D0", className: styles.cardMint, imageIndex: 3 },
+  { color: "#FFD3B0", className: styles.cardPeach, imageIndex: 4 },
+  { color: "#F7C4F5", className: styles.cardMagenta, imageIndex: 5 },
 ];
 
 function PhotoGlyph() {
@@ -36,15 +36,14 @@ function PhotoGlyph() {
 
 export default function MoreExperiencesEmptyState({
   onBrowse,
-  imageUrl,
+  imageUrls = [],
 }: MoreExperiencesEmptyStateProps) {
   return (
     <section className={styles.emptyState}>
       <div className={styles.stage} aria-hidden="true">
-        {imageUrl ? (
-          <img className={styles.stageImage} src={imageUrl} alt="" />
-        ) : (
-          cards.map((card, index) => (
+        {cards.map((card, index) => {
+          const image = card.imageIndex === null ? null : imageUrls[card.imageIndex];
+          return (
             <div
               key={card.className}
               className={`${styles.card} ${card.className}`}
@@ -53,17 +52,19 @@ export default function MoreExperiencesEmptyState({
                 animationDelay: `${index * 70}ms, ${index * 70 + 420}ms`,
               }}
             >
-              {card.image ? (
-                <PhotoGlyph />
-              ) : (
+              {card.imageIndex === null ? (
                 <div className={styles.skeleton}>
-                  <span className={styles.skeletonTitle} />
+                  <span className={styles.brandTitle}>Travel.</span>
                   <span className={styles.skeletonLine} />
                 </div>
+              ) : image ? (
+                <img className={styles.cardImage} src={image} alt="" />
+              ) : (
+                <PhotoGlyph />
               )}
             </div>
-          ))
-        )}
+          );
+        })}
       </div>
 
       {onBrowse ? (

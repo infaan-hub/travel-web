@@ -200,6 +200,7 @@ export type HomeSettings = {
   hero_image_url?: ImageUrl;
   zanzibar_image_url?: ImageUrl;
   more_experiences_image_url?: ImageUrl;
+  more_experiences_image_urls?: (ImageUrl | null)[];
   tanzibar_image_url?: ImageUrl;
   hero_image?: ImageUrl;
   zanzibar_image?: ImageUrl;

@@ -36,6 +36,12 @@ async function updateSettings(request: NextRequest, requireAdmin: boolean) {
     ["zanzibar_image", "zanzibarImage", "home"],
     ["tanzania_image", "tanzaniaImage", "home"],
     ["more_experiences_image", "moreExperiencesImage", "home"],
+    ["more_experiences_image_1", "moreExperiencesImage1", "home"],
+    ["more_experiences_image_2", "moreExperiencesImage2", "home"],
+    ["more_experiences_image_3", "moreExperiencesImage3", "home"],
+    ["more_experiences_image_4", "moreExperiencesImage4", "home"],
+    ["more_experiences_image_5", "moreExperiencesImage5", "home"],
+    ["more_experiences_image_6", "moreExperiencesImage6", "home"],
   ] as const;
 
   for (const [inputKey, dbKey, folder] of fields) {

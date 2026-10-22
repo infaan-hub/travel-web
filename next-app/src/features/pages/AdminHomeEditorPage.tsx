@@ -22,8 +22,8 @@ export default function AdminHomeEditorPage() {
   const [zanzibarPreview, setZanzibarPreview] = useState<string | null>(null);
   const [tanzaniaFile, setTanzaniaFile] = useState<File | null>(null);
   const [tanzaniaPreview, setTanzaniaPreview] = useState<string | null>(null);
-  const [moreExperiencesFile, setMoreExperiencesFile] = useState<File | null>(null);
-  const [moreExperiencesPreview, setMoreExperiencesPreview] = useState<string | null>(null);
+  const [moreExperiencesFiles, setMoreExperiencesFiles] = useState<(File | null)[]>(Array(6).fill(null));
+  const [moreExperiencesPreviews, setMoreExperiencesPreviews] = useState<(string | null)[]>(Array(6).fill(null));
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -53,7 +53,11 @@ export default function AdminHomeEditorPage() {
     if (field === 'hero') { setHeroFile(null); setHeroPreview(null); }
     else if (field === 'zanzibar') { setZanzibarFile(null); setZanzibarPreview(null); }
     else if (field === 'tanzania') { setTanzaniaFile(null); setTanzaniaPreview(null); }
-    else if (field === 'more-experiences') { setMoreExperiencesFile(null); setMoreExperiencesPreview(null); }
+    else if (field.startsWith('more-experiences-')) {
+      const index = Number(field.slice('more-experiences-'.length)) - 1;
+      setMoreExperiencesFiles((files) => files.map((file, i) => i === index ? null : file));
+      setMoreExperiencesPreviews((previews) => previews.map((preview, i) => i === index ? null : preview));
+    }
   };
 
   const handleSave = async () => {
@@ -64,13 +68,15 @@ export default function AdminHomeEditorPage() {
       if (heroFile) formData.append('hero_image', heroFile);
       if (zanzibarFile) formData.append('zanzibar_image', zanzibarFile);
       if (tanzaniaFile) formData.append('tanzania_image', tanzaniaFile);
-      if (moreExperiencesFile) formData.append('more_experiences_image', moreExperiencesFile);
+      moreExperiencesFiles.forEach((file, index) => {
+        if (file) formData.append(`more_experiences_image_${index + 1}`, file);
+      });
       const res = await homeSettingsAPI.update(formData);
       setSettings(res.data);
       setHeroFile(null); setHeroPreview(null);
       setZanzibarFile(null); setZanzibarPreview(null);
       setTanzaniaFile(null); setTanzaniaPreview(null);
-      setMoreExperiencesFile(null); setMoreExperiencesPreview(null);
+      setMoreExperiencesFiles(Array(6).fill(null)); setMoreExperiencesPreviews(Array(6).fill(null));
       setMessage('Home page settings saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch { setMessage('Failed to save settings'); }
@@ -82,7 +88,8 @@ export default function AdminHomeEditorPage() {
     setSaving(true);
     try {
       const formData = new FormData();
-      const inputName = field === 'hero' ? 'hero' : field === 'zanzibar' ? 'zanzibar' : field === 'tanzania' ? 'tanzania' : 'more_experiences';
+      const portfolioIndex = field.startsWith('more-experiences-') ? Number(field.slice('more-experiences-'.length)) : null;
+      const inputName = field === 'hero' ? 'hero' : field === 'zanzibar' ? 'zanzibar' : field === 'tanzania' ? 'tanzania' : `more_experiences_image_${portfolioIndex}`;
       formData.append(`clear_${inputName}`, 'true');
       const res = await homeSettingsAPI.update(formData);
       setSettings(res.data);
@@ -100,7 +107,18 @@ export default function AdminHomeEditorPage() {
     if (field === 'hero') return heroPreview || settings?.hero_image_url || null;
     if (field === 'zanzibar') return zanzibarPreview || settings?.zanzibar_image_url || null;
     if (field === 'tanzania') return tanzaniaPreview || settings?.tanzania_image_url || null;
-    return moreExperiencesPreview || settings?.more_experiences_image_url || null;
+    return settings?.more_experiences_image_url || null;
+  };
+
+  const portfolioPreview = (index: number) => moreExperiencesPreviews[index] || settings?.more_experiences_image_urls?.[index] || null;
+
+  const choosePortfolioImage = (index: number, event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    setMoreExperiencesFiles((files) => files.map((value, i) => i === index ? file : value));
+    const reader = new FileReader();
+    reader.onload = (result) => setMoreExperiencesPreviews((previews) => previews.map((value, i) => i === index ? String(result.target?.result ?? '') : value));
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -182,33 +200,41 @@ export default function AdminHomeEditorPage() {
           </div>
         </div>
 
-        <div className="home-editor-card">
-          <h3>More Experiences Empty State Image</h3>
-          <p>Optional image shown in place of the pastel card illustration when no tours are published.</p>
-          <div className="editor-preview">
-            {previewUrl('more-experiences') ? (
-              <img src={getImageUrl(previewUrl('more-experiences')) ?? undefined} alt="More experiences empty state preview" />
-            ) : (
-              <div className="editor-placeholder"><ImageIcon size={32} /><p>Using the pastel card illustration</p></div>
-            )}
-          </div>
-          <div className="editor-actions">
-            <label className="btn btn-sm btn-outline">
-              <Upload size={14} /> {previewUrl('more-experiences') ? 'Replace image' : 'Upload image'}
-              <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement>) => handleFileChange(e, setMoreExperiencesFile, setMoreExperiencesPreview)} />
-            </label>
-            {(moreExperiencesPreview || settings?.more_experiences_image_url) && (
-              <button className="btn btn-sm btn-danger" onClick={() => handleDelete('more-experiences')}>
-                <Trash2 size={14} /> Remove image
-              </button>
-            )}
-            {moreExperiencesFile && <button className="btn btn-sm btn-ghost" onClick={() => clearField('more-experiences')}>Cancel</button>}
+        <div className="home-editor-card home-editor-portfolio">
+          <h3>More Experiences Empty State Images</h3>
+          <p>Choose, replace or remove each of the six images around the Travel. card.</p>
+          <div className="home-editor-portfolio-grid">
+            {Array.from({ length: 6 }, (_, index) => (
+              <div className="home-editor-portfolio-item" key={index}>
+                <div className="home-editor-portfolio-preview">
+                  {portfolioPreview(index) ? (
+                    <img src={getImageUrl(portfolioPreview(index))} alt={`Travel. empty state card ${index + 1}`} />
+                  ) : (
+                    <div className="editor-placeholder"><ImageIcon size={24} /><span>Pastel card {index + 1}</span></div>
+                  )}
+                </div>
+                <div className="editor-actions">
+                  <label className="btn btn-sm btn-outline">
+                    <Upload size={14} /> {portfolioPreview(index) ? 'Replace' : 'Upload'}
+                    <input type="file" accept="image/*" hidden onChange={(event: ChangeEvent<HTMLInputElement>) => choosePortfolioImage(index, event)} />
+                  </label>
+                  {portfolioPreview(index) && (
+                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(`more-experiences-${index + 1}`)}>
+                      <Trash2 size={14} /> Remove
+                    </button>
+                  )}
+                  {moreExperiencesFiles[index] && (
+                    <button className="btn btn-sm btn-ghost" onClick={() => clearField(`more-experiences-${index + 1}`)}>Cancel</button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       <div className="home-editor-save">
-        <button className="btn btn-primary" onClick={handleSave} disabled={saving || (!heroFile && !zanzibarFile && !tanzaniaFile && !moreExperiencesFile)}>
+        <button className="btn btn-primary" onClick={handleSave} disabled={saving || (!heroFile && !zanzibarFile && !tanzaniaFile && !moreExperiencesFiles.some(Boolean))}>
           <Save size={16} /> {saving ? 'Saving...' : 'Save All Changes'}
         </button>
       </div>
