@@ -30,17 +30,24 @@ import {
   ChevronLeft,
   Truck,
   Briefcase,
+  Building2,
 } from "@/components/icons";
 import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { profileAPI } from "@/lib/api/client";
+import { COMPANY_ROLE_LABELS } from "@/lib/company-access";
 
 type NavItem = {
   to: string;
   label: string;
   icon: AppIcon;
   exact?: boolean;
+  permission?: string;
 };
+
+function NavIcon({ icon: Icon }: { icon: AppIcon }) {
+  return <Icon size={20} className="nav-svg-icon" />;
+}
 
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
@@ -119,6 +126,7 @@ export default function Sidebar() {
     { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/home-editor", label: "Home Editor", icon: Image },
     { to: "/admin/customers", label: "Customers", icon: Users },
+    { to: "/admin/companies", label: "Companies", icon: Building2 },
     { to: "/admin/tours", label: "Manage Tours", icon: Globe },
     { to: "/admin/trips", label: "Trips", icon: BookOpen },
     { to: "/admin/bookings", label: "Bookings", icon: ClipboardList },
@@ -151,15 +159,82 @@ export default function Sidebar() {
     { to: "/contact", label: "Contact", icon: Mail },
   ];
 
+  const activeCompany = user?.companies?.find(
+    (company) => company.id === user.active_company_id,
+  ) ?? (user?.companies?.length === 1 ? user.companies[0] : null);
+  const companyPermissions = new Set(activeCompany?.permissions ?? []);
+  const companyNavItems: NavItem[] = activeCompany
+    ? [
+        {
+          to: "/company/dashboard/",
+          label: "Company Dashboard",
+          icon: LayoutDashboard,
+          exact: true,
+          permission: "dashboard:read",
+        },
+        {
+          to: "/company/tours/",
+          label: "Company Tours",
+          icon: Globe,
+          permission: "tours:read",
+        },
+        {
+          to: "/company/bookings/",
+          label: "Company Bookings",
+          icon: ClipboardList,
+          permission: "bookings:read",
+        },
+        {
+          to: "/company/profile/",
+          label: "Company Profile",
+          icon: Building2,
+          permission: "profile:read",
+        },
+        {
+          to: "/company/analytics/",
+          label: "Company Analytics",
+          icon: TrendingUp,
+          permission: "analytics:read",
+        },
+      ].filter((item) => !item.permission || companyPermissions.has(item.permission))
+    : [];
+
   const navItems = isAdmin ? adminNavItems : customerNavItems;
   const isActive = (item: NavItem) => {
     if (item.exact) return pathname === item.to;
     return pathname === item.to || pathname.startsWith(item.to + "/");
   };
 
-  const NavIcon = ({ icon: Icon }: { icon: AppIcon }) => (
-    <Icon size={20} className="nav-svg-icon" />
-  );
+  const companySection = activeCompany ? (
+    <>
+      {showLabels && (
+        <div className="nav-section-title">
+          Company ({COMPANY_ROLE_LABELS[activeCompany.role]})
+        </div>
+      )}
+      {companyNavItems.map((item) => (
+        <Link
+          key={item.to}
+          href={item.to}
+          className={`nav-item ${isActive(item) ? "active" : ""}`}
+          onClick={closeAll}
+        >
+          <span className="nav-icon">
+            <NavIcon icon={item.icon} />
+          </span>
+          {showLabels && <span className="nav-label">{item.label}</span>}
+        </Link>
+      ))}
+      {showLabels && (user?.companies?.length ?? 0) > 1 && (
+        <Link href="/company/select/" className="nav-item" onClick={closeAll}>
+          <span className="nav-icon">
+            <NavIcon icon={Users} />
+          </span>
+          <span className="nav-label">Switch company</span>
+        </Link>
+      )}
+    </>
+  ) : null;
 
   return (
     <>
@@ -185,6 +260,7 @@ export default function Sidebar() {
         </div>
 
         <nav className="sidebar-nav">
+          {!isAdmin && companySection}
           {navItems.map((item) => (
             <Link
               key={item.to}
@@ -199,6 +275,7 @@ export default function Sidebar() {
             </Link>
           ))}
 
+          {isAdmin && companySection}
           {isAdmin && showLabels && (
             <>
               <div className="nav-section-title">Customer</div>
@@ -237,7 +314,14 @@ export default function Sidebar() {
                   <div className="user-info">
                     <span className="user-name">{user?.username}</span>
                     <span className="user-email">{user?.email}</span>
-                    {isAdmin && <span className="user-badge">Admin</span>}
+                    <span className="user-badges">
+                      {isAdmin && <span className="user-badge">Admin</span>}
+                      {activeCompany && (
+                        <span className="user-badge">
+                          {COMPANY_ROLE_LABELS[activeCompany.role]}
+                        </span>
+                      )}
+                    </span>
                   </div>
                 )}
               </div>

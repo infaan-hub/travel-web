@@ -161,6 +161,47 @@ export const customerAPI = {
 
 export const geocodeAPI = {
   search: (location: string) => api.get("/geocode/", { params: { location } }),
+  reverse: (lat: number, lng: number) =>
+    api.get("/geocode/reverse/", { params: { lat, lng } }),
+};
+
+export const companiesAPI = {
+  list: (params?: Params) => api.get("/admin/companies/", { params }),
+  get: (id: string | number) => api.get(`/admin/companies/${id}/`),
+  create: (data: FormData | Record<string, unknown>) =>
+    api.post("/admin/companies/", data, formDataConfig(data)),
+  update: (id: string | number, data: FormData | Record<string, unknown>) =>
+    api.patch(`/admin/companies/${id}/`, data, formDataConfig(data)),
+  transition: (id: string | number, action: string) =>
+    api.post(`/admin/companies/${id}/lifecycle/`, { action }),
+  addMember: (id: string | number, data: { user_id: number; role: string }) =>
+    api.post(`/admin/companies/${id}/members/`, data),
+  updateMember: (id: string | number, membershipId: string | number, role: string) =>
+    api.patch(`/admin/companies/${id}/members/${membershipId}/`, { role }),
+  revokeMember: (id: string | number, membershipId: string | number) =>
+    api.delete(`/admin/companies/${id}/members/${membershipId}/`),
+};
+
+export const companyAPI = {
+  context: () => api.get("/company/context/"),
+  switchCompany: (companyId: number) =>
+    api.post("/company/switch/", { company_id: companyId }),
+  dashboard: () => api.get("/company/dashboard/"),
+  analytics: () => api.get("/company/analytics/"),
+  profile: () => api.get("/company/profile/"),
+  updateProfile: (data: FormData | Record<string, unknown>) =>
+    api.patch("/company/profile/", data, formDataConfig(data)),
+  tours: (params?: Params) => api.get("/company/tours/", { params }),
+  tour: (id: string | number) => api.get(`/company/tours/${id}/`),
+  createTour: (data: FormData | Record<string, unknown>) =>
+    api.post("/company/tours/", data, formDataConfig(data)),
+  updateTour: (id: string | number, data: FormData | Record<string, unknown>) =>
+    api.patch(`/company/tours/${id}/`, data, formDataConfig(data)),
+  deleteTour: (id: string | number) => api.delete(`/company/tours/${id}/`),
+  bookings: (params?: Params) => api.get("/company/bookings/", { params }),
+  booking: (id: string | number) => api.get(`/company/bookings/${id}/`),
+  updateBookingStatus: (id: string | number, status: string) =>
+    api.patch(`/company/bookings/${id}/`, { status }),
 };
 
 export const analyticsAPI = {
@@ -191,6 +232,10 @@ export const travelVehiclesAPI = {
   delete: (id: string | number) => api.delete(`/travel-vehicles/${id}/`),
 };
 
+export const publicCompaniesAPI = {
+  getAll: (params?: Params) => api.get("/companies/", { params }),
+  getBySlug: (slug: string) => api.get(`/companies/${slug}/`),
+};
 export const workspacesAPI = {
   getAll: (params?: Params) => api.get("/workspaces/", { params }),
   getById: (id: string | number) => api.get(`/workspaces/${id}/`),

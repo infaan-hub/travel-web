@@ -5,6 +5,7 @@ import { logger } from "@/lib/logging";
 
 export type AuditInput = {
   actorId?: number | null;
+  companyId?: number | null;
   action: string;
   entity: string;
   entityId?: string | number | null;
@@ -24,6 +25,7 @@ export async function recordAudit(input: AuditInput): Promise<void> {
     await prisma.auditLog.create({
       data: {
         actorId: input.actorId ?? null,
+        companyId: input.companyId ?? null,
         action: input.action,
         entity: input.entity,
         entityId: input.entityId === null || input.entityId === undefined ? null : String(input.entityId),

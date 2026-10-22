@@ -5,13 +5,17 @@ import { readPayload, storeUpload } from "@/lib/api/body";
 import { galleryImageSchema } from "@/lib/validation/gallery";
 import prisma from "@/lib/db/prisma";
 import { galleryImageSerializer } from "@/lib/serializers";
+import { PUBLIC_TOUR_VISIBILITY } from "@/lib/public-tours";
 
 type Context = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, context: Context) {
   try {
     const tourId = parseId((await context.params).id);
-    const tour = await prisma.tour.findUnique({ where: { id: tourId }, select: { id: true } });
+    const tour = await prisma.tour.findFirst({
+      where: { id: tourId, deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] },
+      select: { id: true },
+    });
     if (!tour) throw new ApiError(404, "Tour not found.");
     const images = await prisma.tourGalleryImage.findMany({
       where: { tourId },

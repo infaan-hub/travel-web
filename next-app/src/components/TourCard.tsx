@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { Star, Clock, MapPin } from "@/components/icons";
+import { Building2, Star, Clock, MapPin } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
 
 type Tour = {
@@ -24,6 +25,8 @@ type Tour = {
   image2_url?: string | null;
   image3_url?: string | null;
   gallery_image_urls?: string[];
+  company_name?: string | null;
+  company_public_path?: string | null;
 };
 
 export default function TourCard({ tour }: { tour: Tour }) {
@@ -73,6 +76,17 @@ export default function TourCard({ tour }: { tour: Tour }) {
           {tour.short_description ||
             (tour.description ? tour.description.slice(0, 120) + "..." : "")}
         </p>
+        {tour.company_name && tour.company_public_path ? (
+          <Link
+            href={tour.company_public_path}
+            className="tour-company-link"
+            onClick={(event) => event.stopPropagation()}
+            aria-label={`View ${tour.company_name}`}
+          >
+            <Building2 size={14} />
+            <span>{tour.company_name}</span>
+          </Link>
+        ) : null}
         <div className="tour-card-meta">
           {tour.average_rating ? (
             <span className="tour-rating">

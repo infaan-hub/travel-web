@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { toursAPI, reviewsAPI, api } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { ArrowLeft, MapPin, Clock, Star, Check, XCircle, ChevronLeft, ChevronRight, X, Send, User } from '@/components/icons';
+import { ArrowLeft, Building2, MapPin, Clock, Star, Check, XCircle, ChevronLeft, ChevronRight, X, Send, User } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  Review, Tour, TourTranslation  } from "@/features/pages/types";
@@ -329,6 +329,16 @@ export default function TourDetailPage() {
               <span><Clock size={16} /> {tour.duration}</span>
               <span><MapPin size={16} /> {tour.destination}</span>
             </div>
+
+            {tour.company_name && tour.company_public_path ? (
+              <Link
+                href={tour.company_public_path}
+                className="tour-company-link tour-company-link-detail"
+              >
+                <Building2 size={15} />
+                <span>Operated by {tour.company_name}</span>
+              </Link>
+            ) : null}
 
             <button className="btn btn-primary btn-block btn-large" onClick={handleBookNow}>
               {isAuthenticated ? 'Book This Tour Now' : 'Login to Book'}

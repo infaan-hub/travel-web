@@ -1,5 +1,6 @@
 import "server-only";
 import { env } from "@/lib/env";
+import prisma from "@/lib/db/prisma";
 import { createInAppNotification, sendPushToStaff, sendPushToUsers } from "@/lib/push";
 import type { BookingStatus } from "@prisma/client";
 
@@ -12,6 +13,7 @@ export type BookingNotificationInput = {
   travelDate: Date;
   travelers: number;
   userId: number | null;
+  companyId?: number | null;
 };
 
 export function buildWhatsAppUrl(data: {
@@ -42,21 +44,58 @@ export function buildWhatsAppUrl(data: {
   )}`;
 }
 
-/** Notifies staff and the customer that a booking request was created. */
+export async function notifyCompanyMembersByRole(
+  companyId: number | null | undefined,
+  roles: string[] | undefined,
+  payload: { title: string; body: string; url: string; tag: string },
+): Promise<void> {
+  if (!companyId) return;
+  const memberships = await prisma.companyMembership.findMany({
+    where: {
+      companyId,
+      status: "ACTIVE",
+      ...(roles?.length ? { role: { in: roles as any } } : {}),
+    },
+    select: { userId: true },
+  });
+  const userIds = [...new Set(memberships.map((membership) => membership.userId))];
+  if (userIds.length === 0) return;
+
+  await Promise.all(
+    userIds.map(async (userId) => {
+      const existing = await prisma.notification.findFirst({
+        where: { userId, tag: payload.tag, title: payload.title },
+        select: { id: true },
+      });
+      if (!existing) {
+        await createInAppNotification(userId, payload);
+      }
+    }),
+  );
+  await sendPushToUsers(userIds, payload);
+}
+
 export async function notifyBookingCreated(booking: BookingNotificationInput): Promise<void> {
   const reference = booking.reference ?? `#${booking.id}`;
   const summary = `${booking.tourTitle} on ${booking.travelDate.toISOString().slice(0, 10)} for ${booking.travelers} traveler(s)`;
 
   await sendPushToStaff({
     title: "New booking request",
-    body: `${booking.fullName} — ${summary}`,
-    url: `/admin/bookings/`,
+    body: `${booking.fullName} - ${summary}`,
+    url: "/admin/bookings/",
     tag: `booking-${booking.id}`,
   });
   await createInAppNotification(null, {
     title: "New booking request",
-    body: `${booking.fullName} — ${summary}`,
+    body: `${booking.fullName} - ${summary}`,
     url: "/admin/bookings/",
+    tag: `booking-${booking.id}`,
+  });
+
+  await notifyCompanyMembersByRole(booking.companyId, undefined, {
+    title: "New booking request",
+    body: `${booking.fullName} - ${summary}`,
+    url: "/company/bookings/",
     tag: `booking-${booking.id}`,
   });
 
@@ -76,7 +115,6 @@ export async function notifyBookingCreated(booking: BookingNotificationInput): P
   }
 }
 
-/** Notifies the customer (and staff) about a booking status change. */
 export async function notifyBookingStatusChanged(
   booking: BookingNotificationInput,
   status: BookingStatus,
@@ -100,9 +138,16 @@ export async function notifyBookingStatusChanged(
     });
   }
 
+  await notifyCompanyMembersByRole(booking.companyId, undefined, {
+    title: `Booking ${label.toLowerCase()}`,
+    body: `${booking.fullName} - ${body}`,
+    url: "/company/bookings/",
+    tag: `booking-${booking.id}`,
+  });
+
   await sendPushToStaff({
     title: `Booking ${label.toLowerCase()}`,
-    body: `${booking.fullName} — ${body}`,
+    body: `${booking.fullName} - ${body}`,
     url: "/admin/bookings/",
     tag: `booking-${booking.id}`,
   });

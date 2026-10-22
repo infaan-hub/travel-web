@@ -20,6 +20,7 @@ const PAGES = [
   "/register/",
   "/onboarding/",
   "/booking/46/",
+  "/companies/",
 ];
 
 const audit = () => {

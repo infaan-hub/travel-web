@@ -3,6 +3,7 @@ import { ApiError, handleApiError, ok, parseId, readJson } from "@/lib/api/http"
 import { requireStaff } from "@/lib/auth/session";
 import prisma from "@/lib/db/prisma";
 import { recordAudit } from "@/lib/audit";
+import { PUBLIC_TOUR_VISIBILITY } from "@/lib/public-tours";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -12,6 +13,11 @@ const SUPPORTED_LOCALES = ["en", "sw", "fr", "ar", "de", "es", "zh"];
 export async function GET(_request: NextRequest, context: Context) {
   try {
     const tourId = parseId((await context.params).id);
+    const tour = await prisma.tour.findFirst({
+      where: { id: tourId, deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] },
+      select: { id: true },
+    });
+    if (!tour) throw new ApiError(404, "Tour not found.");
     const translations = await prisma.tourTranslation.findMany({
       where: { tourId },
       orderBy: { locale: "asc" },

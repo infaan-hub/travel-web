@@ -346,6 +346,11 @@ export const geocodeQuerySchema = z.object({
   location: z.string().trim().min(2, "Location is required.").max(200),
 });
 
+export const reverseGeocodeQuerySchema = z.object({
+  lat: z.coerce.number().finite().min(-90).max(90),
+  lng: z.coerce.number().finite().min(-180).max(180),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type TourInput = z.infer<typeof tourSchema>;

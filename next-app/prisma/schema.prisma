@@ -32,33 +32,71 @@ enum WorkspaceStatus {
   completed
 }
 
-model User {
-  id          Int       @id @default(autoincrement())
-  username    String    @unique
-  email       String    @default("")
-  password    String
-  firstName   String    @default("") @map("first_name")
-  lastName    String    @default("") @map("last_name")
-  isStaff     Boolean   @default(false) @map("is_staff")
-  isActive    Boolean   @default(true) @map("is_active")
-  isSuperuser Boolean   @default(false) @map("is_superuser")
-  dateJoined  DateTime  @default(now()) @map("date_joined")
-  lastLogin   DateTime? @map("last_login")
-  sessionVersion Int     @default(1) @map("session_version")
-  emailVerified Boolean  @default(false) @map("email_verified")
-  resetRequestedAt DateTime? @map("reset_requested_at")
-  deletedAt   DateTime? @map("deleted_at")
+enum CompanyStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
 
-  profile          Profile?
-  bookings         Booking[]
-  reviews          Review[]
-  workspaces       Workspace[]       @relation("WorkspaceTourist")
-  travelTips       TravelTip[]
-  visits           VisitorTracking[]
-  auditLogs        AuditLog[]
-  pushSubscriptions PushSubscription[]
-  notifications    Notification[]
-  verificationTokens VerificationToken[]
+enum CompanyBusinessType {
+  TOUR_OPERATOR
+  SAFARI_OPERATOR
+  EXCURSION_PROVIDER
+  OTHER
+}
+
+enum CompanyRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum CompanyMembershipStatus {
+  INVITED
+  ACTIVE
+  REVOKED
+}
+
+enum TourPublicationStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+}
+
+model User {
+  id               Int       @id @default(autoincrement())
+  username         String    @unique
+  email            String    @default("")
+  password         String
+  firstName        String    @default("") @map("first_name")
+  lastName         String    @default("") @map("last_name")
+  isStaff          Boolean   @default(false) @map("is_staff")
+  isActive         Boolean   @default(true) @map("is_active")
+  isSuperuser      Boolean   @default(false) @map("is_superuser")
+  dateJoined       DateTime  @default(now()) @map("date_joined")
+  lastLogin        DateTime? @map("last_login")
+  sessionVersion   Int       @default(1) @map("session_version")
+  emailVerified    Boolean   @default(false) @map("email_verified")
+  resetRequestedAt DateTime? @map("reset_requested_at")
+  deletedAt        DateTime? @map("deleted_at")
+
+  profile                    Profile?
+  bookings                   Booking[]
+  reviews                    Review[]
+  workspaces                 Workspace[]         @relation("WorkspaceTourist")
+  travelTips                 TravelTip[]
+  visits                     VisitorTracking[]
+  auditLogs                  AuditLog[]
+  pushSubscriptions          PushSubscription[]
+  notifications              Notification[]
+  verificationTokens         VerificationToken[]
+  companiesCreated           Company[]           @relation("CompanyCreatedBy")
+  companyMemberships         CompanyMembership[] @relation("CompanyMembershipUser")
+  companyMembershipsAssigned CompanyMembership[] @relation("CompanyMembershipAssignedBy")
+  toursPublished             Tour[]              @relation("TourPublishedBy")
 
   @@index([email])
   @@index([isStaff])
@@ -80,37 +118,115 @@ model Profile {
   @@map("profiles")
 }
 
-model Tour {
-  id               Int          @id @default(autoincrement())
-  title            String
-  description      String
-  shortDescription String       @default("") @map("short_description")
-  price            Decimal      @db.Decimal(10, 2)
-  duration         String
-  destination      String
-  destinationLat   Float?       @map("destination_lat")
-  destinationLng   Float?       @map("destination_lng")
-  category         TourCategory @default(international)
-  image            String?
-  image2           String?
-  image3           String?
-  includes         Json         @default("[]")
-  excludes         Json         @default("[]")
-  available        Boolean      @default(true)
-  featured         Boolean      @default(false)
-  maxTravelers     Int          @default(10) @map("max_travelers")
-  deletedAt        DateTime?    @map("deleted_at")
-  searchVector     Unsupported("tsvector")?
-  createdAt        DateTime     @default(now()) @map("created_at")
-  updatedAt        DateTime     @updatedAt @map("updated_at")
+model Company {
+  id                    Int                      @id @default(autoincrement())
+  name                  String
+  slug                  String                   @unique
+  description           String                   @default("")
+  registrationReference String?                  @map("registration_reference")
+  businessType          CompanyBusinessType      @default(TOUR_OPERATOR) @map("business_type")
+  logoImageKey          String?                  @map("logo_image_key")
+  coverImageKey         String?                  @map("cover_image_key")
+  contactEmail          String                   @default("") @map("contact_email")
+  contactPhone          String                   @default("") @map("contact_phone")
+  alternativePhone      String?                  @map("alternative_phone")
+  whatsappNumber        String?                  @map("whatsapp_number")
+  address               String                   @default("")
+  locality              String?
+  district              String?
+  region                String?
+  country               String                   @default("Tanzania")
+  latitude              Float?
+  longitude             Float?
+  website               String?
+  socialLinks           Json?                    @map("social_links")
+  openingHours          String?                  @map("opening_hours")
+  status                CompanyStatus            @default(PENDING)
+  isPublic              Boolean                  @default(false) @map("is_public")
+  createdByUserId       Int?                     @map("created_by_user_id")
+  createdAt             DateTime                 @default(now()) @map("created_at")
+  updatedAt             DateTime                 @updatedAt @map("updated_at")
+  suspendedAt           DateTime?                @map("suspended_at")
+  archivedAt            DateTime?                @map("archived_at")
+  searchVector          Unsupported("tsvector")? @map("search_vector")
 
+  createdBy     User?               @relation("CompanyCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  memberships   CompanyMembership[]
+  tours         Tour[]
+  bookings      Booking[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+
+  @@index([status, isPublic])
+  @@index([businessType])
+  @@index([region])
+  @@index([locality])
+  @@index([createdAt])
+  @@index([searchVector], type: Gin)
+  @@map("companies")
+}
+
+model CompanyMembership {
+  id               Int                     @id @default(autoincrement())
+  companyId        Int                     @map("company_id")
+  userId           Int                     @map("user_id")
+  role             CompanyRole
+  status           CompanyMembershipStatus @default(INVITED)
+  assignedByUserId Int?                    @map("assigned_by_user_id")
+  createdAt        DateTime                @default(now()) @map("created_at")
+  updatedAt        DateTime                @updatedAt @map("updated_at")
+  revokedAt        DateTime?               @map("revoked_at")
+
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user       User    @relation("CompanyMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy User?   @relation("CompanyMembershipAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([companyId, role, status])
+  @@map("company_memberships")
+}
+
+model Tour {
+  id                Int                      @id @default(autoincrement())
+  title             String
+  description       String
+  shortDescription  String                   @default("") @map("short_description")
+  price             Decimal                  @db.Decimal(10, 2)
+  duration          String
+  destination       String
+  destinationLat    Float?                   @map("destination_lat")
+  destinationLng    Float?                   @map("destination_lng")
+  category          TourCategory             @default(international)
+  image             String?
+  image2            String?
+  image3            String?
+  includes          Json                     @default("[]")
+  excludes          Json                     @default("[]")
+  available         Boolean                  @default(true)
+  featured          Boolean                  @default(false)
+  maxTravelers      Int                      @default(10) @map("max_travelers")
+  companyId         Int?                     @map("company_id")
+  publicationStatus TourPublicationStatus    @default(DRAFT) @map("publication_status")
+  publishedAt       DateTime?                @map("published_at")
+  publishedByUserId Int?                     @map("published_by_user_id")
+  moderationNote    String?                  @map("moderation_note")
+  deletedAt         DateTime?                @map("deleted_at")
+  searchVector      Unsupported("tsvector")? @map("search_vector")
+  createdAt         DateTime                 @default(now()) @map("created_at")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
+
+  company       Company?           @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  publishedBy   User?              @relation("TourPublishedBy", fields: [publishedByUserId], references: [id], onDelete: SetNull)
   galleryImages TourGalleryImage[]
   itinerary     ItineraryItem[]
   reviews       Review[]
   bookings      Booking[]
   workspaces    Workspace[]        @relation("WorkspaceTours")
-  translations TourTranslation[]
+  translations  TourTranslation[]
 
+  @@index([companyId, publicationStatus, deletedAt])
+  @@index([companyId, createdAt])
+  @@index([publicationStatus, deletedAt])
   @@index([category, available])
   @@index([featured])
   @@index([price])
@@ -148,20 +264,20 @@ model ItineraryItem {
 }
 
 model Attraction {
-  id              Int      @id @default(autoincrement())
+  id              Int                      @id @default(autoincrement())
   name            String
-  description     String   @default("")
+  description     String                   @default("")
   location        String
-  region          String   @default("")
-  category        String   @default("")
+  region          String                   @default("")
+  category        String                   @default("")
   image           String?
-  bestTimeToVisit String   @default("") @map("best_time_to_visit")
-  entryFee        String   @default("") @map("entry_fee")
-  activities      String   @default("")
-  deletedAt       DateTime? @map("deleted_at")
-  searchVector    Unsupported("tsvector")?
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  bestTimeToVisit String                   @default("") @map("best_time_to_visit")
+  entryFee        String                   @default("") @map("entry_fee")
+  activities      String                   @default("")
+  deletedAt       DateTime?                @map("deleted_at")
+  searchVector    Unsupported("tsvector")? @map("search_vector")
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  updatedAt       DateTime                 @updatedAt @map("updated_at")
 
   @@index([region])
   @@index([category])
@@ -190,32 +306,38 @@ model Review {
 }
 
 model Booking {
-  id                Int           @id @default(autoincrement())
-  reference         String?       @unique
-  userId            Int?          @map("user_id")
-  tourId            Int           @map("tour_id")
-  fullName          String        @map("full_name")
-  email             String
-  phone             String
-  address           String        @default("")
-  travelers         Int
-  travelDate        DateTime      @map("travel_date") @db.Date
-  notes             String        @default("")
-  status            BookingStatus @default(pending)
-  userLat           Float?        @map("user_lat")
-  userLng           Float?        @map("user_lng")
-  distanceKm        Float?        @map("distance_km")
-  estimatedTimeMins Int?          @map("estimated_time_mins")
-  googleMapsUrl     String        @default("") @map("google_maps_url")
-  createdAt         DateTime      @default(now()) @map("created_at")
+  id                  Int           @id @default(autoincrement())
+  reference           String?       @unique
+  userId              Int?          @map("user_id")
+  tourId              Int           @map("tour_id")
+  companyId           Int?          @map("company_id")
+  companyNameSnapshot String?       @map("company_name_snapshot")
+  tourTitleSnapshot   String?       @map("tour_title_snapshot")
+  fullName            String        @map("full_name")
+  email               String
+  phone               String
+  address             String        @default("")
+  travelers           Int
+  travelDate          DateTime      @map("travel_date") @db.Date
+  notes               String        @default("")
+  status              BookingStatus @default(pending)
+  userLat             Float?        @map("user_lat")
+  userLng             Float?        @map("user_lng")
+  distanceKm          Float?        @map("distance_km")
+  estimatedTimeMins   Int?          @map("estimated_time_mins")
+  googleMapsUrl       String        @default("") @map("google_maps_url")
+  createdAt           DateTime      @default(now()) @map("created_at")
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tour Tour  @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tour    Tour     @relation(fields: [tourId], references: [id], onDelete: Restrict)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Restrict)
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
   @@index([tourId])
   @@index([tourId, travelDate])
+  @@index([companyId, status, travelDate])
+  @@index([companyId, createdAt])
   @@map("bookings")
 }
 
@@ -234,17 +356,17 @@ model ContactMessage {
 }
 
 model TravelTip {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  category  String   @default("")
-  image     String?
-  authorId  Int?     @map("author_id")
-  published Boolean  @default(true)
-  deletedAt DateTime? @map("deleted_at")
-  searchVector Unsupported("tsvector")?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id           Int                      @id @default(autoincrement())
+  title        String
+  content      String
+  category     String                   @default("")
+  image        String?
+  authorId     Int?                     @map("author_id")
+  published    Boolean                  @default(true)
+  deletedAt    DateTime?                @map("deleted_at")
+  searchVector Unsupported("tsvector")? @map("search_vector")
+  createdAt    DateTime                 @default(now()) @map("created_at")
+  updatedAt    DateTime                 @updatedAt @map("updated_at")
 
   author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
@@ -386,6 +508,7 @@ model VisitorTracking {
 model AuditLog {
   id        Int      @id @default(autoincrement())
   actorId   Int?     @map("actor_id")
+  companyId Int?     @map("company_id")
   action    String   @db.VarChar(80)
   entity    String   @db.VarChar(80)
   entityId  String?  @map("entity_id") @db.VarChar(64)
@@ -395,10 +518,12 @@ model AuditLog {
   userAgent String?  @map("user_agent") @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
 
-  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actor   User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
   @@index([actorId])
   @@index([entity, entityId])
+  @@index([companyId, createdAt])
   @@index([createdAt])
   @@map("audit_logs")
 }
@@ -411,7 +536,7 @@ model PushSubscription {
   auth      String   @db.VarChar(255)
   userAgent String?  @map("user_agent") @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -422,6 +547,7 @@ model PushSubscription {
 model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int?     @map("user_id")
+  companyId Int?     @map("company_id")
   title     String   @db.VarChar(160)
   body      String   @db.Text
   url       String?  @db.VarChar(500)
@@ -429,9 +555,11 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
   @@index([userId, read])
+  @@index([companyId, createdAt])
   @@index([createdAt])
   @@map("notifications")
 }
@@ -453,12 +581,12 @@ model VerificationToken {
 }
 
 model TourTranslation {
-  id               Int      @id @default(autoincrement())
-  tourId           Int      @map("tour_id")
-  locale           String   @db.VarChar(8)
+  id               Int    @id @default(autoincrement())
+  tourId           Int    @map("tour_id")
+  locale           String @db.VarChar(8)
   title            String
-  description      String   @default("")
-  shortDescription String   @default("") @map("short_description")
+  description      String @default("")
+  shortDescription String @default("") @map("short_description")
 
   tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
 
@@ -468,7 +596,7 @@ model TourTranslation {
 
 model FunnelEvent {
   id        Int      @id @default(autoincrement())
-  sessionId String   @map("session_id")
+  sessionId String   @map("session_id") @db.VarChar(100)
   stage     String   @db.VarChar(32)
   tourId    Int?     @map("tour_id")
   bookingId Int?     @map("booking_id")

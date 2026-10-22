@@ -16,8 +16,23 @@ export async function POST(request: NextRequest) {
     if (!payload) {
       throw new ApiError(401, "Refresh token is invalid or expired.");
     }
-    const user = await prisma.user.findUnique({ where: { id: Number(payload.sub) } });
-    if (!user || !user.isActive) {
+    const user = await prisma.user.findUnique({
+      where: { id: Number(payload.sub) },
+      select: {
+        id: true,
+        username: true,
+        isStaff: true,
+        isActive: true,
+        sessionVersion: true,
+        deletedAt: true,
+      },
+    });
+    if (!user || !user.isActive || user.deletedAt) {
+      throw new ApiError(401, "Refresh token is invalid or expired.");
+    }
+    // A revoked session (for example after logout) must not be able to mint a
+    // fresh access token from an older refresh token.
+    if (payload.ver !== undefined && payload.ver !== user.sessionVersion) {
       throw new ApiError(401, "Refresh token is invalid or expired.");
     }
 

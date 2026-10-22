@@ -10,7 +10,10 @@
 
 1. Restore the PostgreSQL database from the pre-migration backup.
 2. Restore `public/uploads` or the storage bucket prefix from backup.
-3. Re-run `npm run db:verify` against the restored database.
+3. Run the available verification suite against the restored database. The
+   legacy `npm run db:verify` script is not present in `package.json`; use
+   `npm run smoke`, `npm run db:verify:companies`, and, on a seeded
+   environment, `npm run db:seed:check`.
 
 ## Safety notes
 

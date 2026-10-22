@@ -5,6 +5,7 @@ import { readPayload, storeUpload } from "@/lib/api/body";
 import { galleryImageSchema } from "@/lib/validation/gallery";
 import prisma from "@/lib/db/prisma";
 import { galleryImageSerializer } from "@/lib/serializers";
+import { PUBLIC_TOUR_VISIBILITY } from "@/lib/public-tours";
 import { deleteImage } from "@/lib/storage/images";
 
 type Context = { params: Promise<{ id: string }> };
@@ -18,7 +19,13 @@ async function load(id: number) {
 export async function GET(_request: NextRequest, context: Context) {
   try {
     const id = parseId((await context.params).id);
-    return ok(galleryImageSerializer(await load(id)));
+    const image = await load(id);
+    const tour = await prisma.tour.findFirst({
+      where: { id: image.tourId, deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] },
+      select: { id: true },
+    });
+    if (!tour) throw new ApiError(404, "Gallery image not found.");
+    return ok(galleryImageSerializer(image));
   } catch (error) {
     return handleApiError(error);
   }

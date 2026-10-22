@@ -29,6 +29,10 @@ export type Tour = {
   included_items?: string[];
   excluded_items?: string[];
   max_travelers?: number;
+  company_id?: number | null;
+  company_name?: string | null;
+  company_slug?: string | null;
+  company_public_path?: string | null;
   [key: string]: any;
 };
 
@@ -68,6 +72,8 @@ export type GalleryImage = {
 export type Booking = {
   id: number;
   reference?: string | null;
+  company?: number | null;
+  company_name?: string | null;
   tour_title: string;
   tour_image?: ImageUrl;
   full_name: string;
@@ -198,6 +204,121 @@ export type HomeSettings = {
   zanzibar_image?: ImageUrl;
   tanzibar_image?: ImageUrl;
   [key: string]: any;
+};
+
+export type CompanyStatus = "PENDING" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+export type CompanyRole = "OWNER" | "MANAGER" | "STAFF";
+export type CompanyBusinessType =
+  | "TOUR_OPERATOR"
+  | "SAFARI_OPERATOR"
+  | "EXCURSION_PROVIDER"
+  | "OTHER";
+
+export type CompanyMembership = {
+  id: number;
+  company: number;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    full_name: string;
+    profile_image_url?: ImageUrl;
+  };
+  role: CompanyRole;
+  status: "INVITED" | "ACTIVE" | "REVOKED";
+  assigned_by?: { id: number; username: string } | null;
+  created_at?: string;
+  updated_at?: string;
+  revoked_at?: string | null;
+};
+
+export type Company = {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  registration_reference?: string | null;
+  business_type: CompanyBusinessType;
+  logo_image_key?: string | null;
+  logo_image_url?: ImageUrl;
+  cover_image_key?: string | null;
+  cover_image_url?: ImageUrl;
+  contact_email: string;
+  contact_phone: string;
+  alternative_phone?: string | null;
+  whatsapp_number?: string | null;
+  address: string;
+  locality?: string | null;
+  district?: string | null;
+  region?: string | null;
+  country: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  website?: string | null;
+  social_links?: Record<string, string> | null;
+  opening_hours?: string | null;
+  status: CompanyStatus;
+  is_public: boolean;
+  public_path: string;
+  created_by?: { id: number; username: string } | null;
+  members_count: number;
+  tours_count: number;
+  bookings_count: number;
+  created_at?: string;
+  updated_at?: string;
+  suspended_at?: string | null;
+  archived_at?: string | null;
+  members?: CompanyMembership[];
+  tours?: CompanyTourSummary[];
+  bookings?: CompanyBookingSummary[];
+  stats?: CompanyStats;
+  recent_audit?: CompanyAuditEntry[];
+  [key: string]: any;
+};
+
+export type CompanyStats = {
+  members_active: number;
+  tours_total: number;
+  tours_published: number;
+  bookings_total: number;
+  bookings_pending: number;
+  bookings_confirmed: number;
+  bookings_cancelled: number;
+  travelers_total: number;
+};
+
+export type CompanyTourSummary = {
+  id: number;
+  title: string;
+  price: string | null;
+  duration: string;
+  destination: string;
+  publication_status: string;
+  available: boolean;
+  bookings_count: number;
+  updated_at?: string;
+};
+
+export type CompanyBookingSummary = {
+  id: number;
+  reference: string | null;
+  full_name: string;
+  travelers: number;
+  travel_date: string | null;
+  status: "pending" | "confirmed" | "cancelled";
+  tour_title: string | null;
+  created_at?: string;
+};
+
+export type CompanyAuditEntry = {
+  id: number;
+  action: string;
+  entity: string;
+  entity_id: string | null;
+  actor?: { id: number; username: string } | null;
+  before?: unknown;
+  after?: unknown;
+  created_at?: string;
 };
 
 export type DashboardStats = {

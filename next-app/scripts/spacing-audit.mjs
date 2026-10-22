@@ -30,6 +30,7 @@ const PUBLIC_PAGES = [
   "/register/",
   "/onboarding/",
   "/booking/46/",
+  "/companies/",
 ];
 
 const ADMIN_PAGES = ["/admin/dashboard", "/admin/bookings", "/admin/customers", "/admin/tours"];
@@ -107,10 +108,13 @@ const audit = () => {
 
   for (const control of controls) {
     const rect = control.getBoundingClientRect();
+    const height = Math.round(rect.height);
     const type = control.getAttribute("type");
     if (type === "submit" || type === "button") continue;
-    if (rect.height < 44) {
-      add("control-too-short", `${label(control)} ${Math.round(rect.height)}px`);
+    // A 44px token can measure 43.99px at fractional device scales; compare
+    // the same whole-pixel height that the report prints.
+    if (height < 44) {
+      add("control-too-short", `${label(control)} ${height}px`);
     }
     if (rect.height > 64 && control.tagName !== "TEXTAREA") {
       add("control-too-tall", `${label(control)} ${Math.round(rect.height)}px`);
@@ -132,7 +136,7 @@ const audit = () => {
     const style = getComputedStyle(element);
     if (style.display === "inline") continue;
     if (rect.width > 320) continue;
-    if (rect.height < 44) {
+    if (Math.round(rect.height) < 44) {
       add("tap-target-height", `${label(element)} ${Math.round(rect.width)}x${Math.round(rect.height)}`);
     }
   }

@@ -54,12 +54,14 @@ for (const scheme of ["dark", "light"]) {
 
       const data = await page.evaluate(() => {
         const cs = getComputedStyle(document.documentElement);
+        const htmlBg = getComputedStyle(document.documentElement).backgroundColor;
         const bodyBg = getComputedStyle(document.body).backgroundColor;
         const bodyColor = getComputedStyle(document.body).color;
         return {
           pageBgVar: cs.getPropertyValue("--page-bg").trim(),
           surfaceVar: cs.getPropertyValue("--surface").trim(),
           textPrimary: cs.getPropertyValue("--text-primary").trim(),
+          htmlBg,
           bodyBg,
           bodyColor,
           hasDarkClass: document.documentElement.classList.contains("dark"),
@@ -75,12 +77,17 @@ for (const scheme of ["dark", "light"]) {
         data.pageBgVar,
       );
 
-      // The body must not be painted with a near-black background.
-      const m = data.bodyBg.match(/\d+/g)?.map(Number) ?? [255, 255, 255];
+      // The body must not be painted with a near-black background. The body
+      // may intentionally use only gradients with a transparent
+      // background-color, in which case the html surface is the painted base.
+      const bodyParts = data.bodyBg.match(/[\d.]+/g)?.map(Number) ?? [];
+      const bodyAlpha = bodyParts.length === 4 ? bodyParts[3] : 1;
+      const effectiveBodyBg = bodyAlpha === 0 ? data.htmlBg : data.bodyBg;
+      const m = effectiveBodyBg.match(/[\d.]+/g)?.map(Number) ?? [255, 255, 255];
       record(
         `${scheme}: ${route} body background is not dark`,
         !isDark(m),
-        data.bodyBg,
+        `body=${data.bodyBg} effective=${effectiveBodyBg}`,
       );
 
       // Body text must be the dark ink colour on a light surface.
@@ -144,9 +151,11 @@ for (const scheme of ["dark", "light"]) {
   record("dark: destination cards are rendered", cards.length > 0, `${cards.length} cards`);
 
   for (const [index, card] of cards.entries()) {
+    // The current design uses cinematic 16:9 feature media on desktop and
+    // 4:3 media on phones. This audit runs at a 1440px viewport.
     record(
-      `dark: destination card ${index} image is 4:3`,
-      Math.abs(card.imageAspect - 4 / 3) < 0.02,
+      `dark: destination card ${index} image uses the desktop 16:9 ratio`,
+      Math.abs(card.imageAspect - 16 / 9) < 0.02,
       `aspect=${card.imageAspect}`,
     );
     record(

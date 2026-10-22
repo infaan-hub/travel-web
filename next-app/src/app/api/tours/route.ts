@@ -6,12 +6,16 @@ import { listResponse, paginatedResponse, paginationFrom } from "@/lib/api/pagin
 import { tourSchema } from "@/lib/validation/schemas";
 import prisma from "@/lib/db/prisma";
 import { tourListSerializer } from "@/lib/serializers";
+import { PUBLIC_TOUR_VISIBILITY } from "@/lib/public-tours";
 import type { Prisma, TourCategory } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const where: Prisma.TourWhereInput = { deletedAt: null };
+    const where: Prisma.TourWhereInput = {
+      deletedAt: null,
+      AND: [PUBLIC_TOUR_VISIBILITY],
+    };
 
     const category = searchParams.get("category");
     if (category && ["zanzibar", "tanzania", "international"].includes(category)) {
@@ -53,7 +57,10 @@ export async function GET(request: NextRequest) {
       prisma.tour.findMany({
         where,
         orderBy,
-        include: { reviews: true },
+        include: {
+          reviews: true,
+          company: { select: { name: true, slug: true } },
+        },
         skip: pagination?.skip ?? 0,
         take: pagination?.take ?? 500,
       }),

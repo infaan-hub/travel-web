@@ -23,6 +23,7 @@ const PAGES = [
   { path: "/login/", name: "login" },
   { path: "/register/", name: "register" },
   { path: "/booking/46/", name: "booking" },
+  { path: "/companies/", name: "companies" },
 ];
 
 const audit = () => {

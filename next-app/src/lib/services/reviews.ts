@@ -2,6 +2,7 @@ import "server-only";
 import { ApiError } from "@/lib/api/http";
 import prisma from "@/lib/db/prisma";
 import type { AuthUser } from "@/lib/auth/session";
+import { PUBLIC_TOUR_VISIBILITY, PUBLIC_TOUR_WHERE } from "@/lib/public-tours";
 
 const REVIEW_INCLUDE = { user: true, tour: true } as const;
 
@@ -22,6 +23,9 @@ export async function listReviews(options: {
     return [];
   } else {
     where.status = "approved";
+    // Approved reviews for a soft-deleted or unavailable company tour are not
+    // public. General reviews without a tour remain visible.
+    where.OR = [{ tourId: null }, { tour: { is: PUBLIC_TOUR_WHERE } }];
   }
 
   return prisma.review.findMany({
@@ -37,7 +41,9 @@ export async function createReview(
 ) {
   let tourId: number | null = null;
   if (input.tour) {
-    const tour = await prisma.tour.findUnique({ where: { id: input.tour } });
+    const tour = await prisma.tour.findFirst({
+      where: { id: input.tour, deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] },
+    });
     if (!tour) throw new ApiError(404, "Tour not found.");
     tourId = tour.id;
   }

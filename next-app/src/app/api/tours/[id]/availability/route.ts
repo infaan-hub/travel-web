@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok, parseId } from "@/lib/api/http";
 import prisma from "@/lib/db/prisma";
+import { PUBLIC_TOUR_VISIBILITY } from "@/lib/public-tours";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -9,7 +10,7 @@ export async function GET(_request: NextRequest, context: Context) {
   try {
     const tourId = parseId((await context.params).id);
     const tour = await prisma.tour.findFirst({
-      where: { id: tourId, deletedAt: null },
+      where: { id: tourId, deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] },
       select: { id: true, maxTravelers: true, available: true, title: true },
     });
     if (!tour) throw new ApiError(404, "Tour not found.");

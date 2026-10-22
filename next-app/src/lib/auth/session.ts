@@ -12,6 +12,8 @@ import { cookieSecure, env } from "@/lib/env";
 
 export const SESSION_COOKIE = "infaan_session";
 export const REFRESH_COOKIE = "infaan_refresh";
+/** Selects the active company workspace; it is never an authorization source. */
+export const ACTIVE_COMPANY_COOKIE = "active_company";
 
 export type AuthUser = {
   id: number;
@@ -146,6 +148,7 @@ export async function clearSessionCookies(): Promise<void> {
   const jar = await cookies();
   jar.delete(SESSION_COOKIE);
   jar.delete(REFRESH_COOKIE);
+  jar.delete(ACTIVE_COMPANY_COOKIE);
 }
 
 export async function refreshTokenFromRequest(request: NextRequest | Request): Promise<string | null> {

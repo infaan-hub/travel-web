@@ -5,6 +5,7 @@ import { readPayload, storeUpload, stripFiles } from "@/lib/api/body";
 import { tourUpdateSchema } from "@/lib/validation/schemas";
 import prisma from "@/lib/db/prisma";
 import { tourDetailSerializer } from "@/lib/serializers";
+import { PUBLIC_TOUR_VISIBILITY } from "@/lib/public-tours";
 import { deleteImage } from "@/lib/storage/images";
 
 type Context = { params: Promise<{ id: string }> };
@@ -12,13 +13,17 @@ type Context = { params: Promise<{ id: string }> };
 const TOUR_INCLUDE = {
   galleryImages: { orderBy: { order: "asc" as const } },
   itinerary: { orderBy: { day: "asc" as const } },
+  company: { select: { name: true, slug: true } },
   reviews: { where: { status: "approved" as const }, include: { user: true } },
 };
 
 export async function GET(_request: NextRequest, context: Context) {
   try {
     const id = parseId((await context.params).id);
-    const tour = await prisma.tour.findUnique({ where: { id }, include: TOUR_INCLUDE });
+    const tour = await prisma.tour.findFirst({
+      where: { id, deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] },
+      include: TOUR_INCLUDE,
+    });
     if (!tour) throw new ApiError(404, "Tour not found.");
     return ok(tourDetailSerializer(tour));
   } catch (error) {

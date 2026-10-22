@@ -10,6 +10,14 @@ import {
 } from "react";
 import api, { authAPI } from "@/lib/api/client";
 
+export type AuthCompanyMembership = {
+  id: number;
+  name: string;
+  slug: string;
+  role: "OWNER" | "MANAGER" | "STAFF";
+  permissions: string[];
+};
+
 export type AuthUser = {
   id: number;
   username: string;
@@ -17,6 +25,8 @@ export type AuthUser = {
   is_staff: boolean;
   date_joined: string;
   profile_image_url?: string | null;
+  companies?: AuthCompanyMembership[];
+  active_company_id?: number | null;
 };
 
 type AuthContextValue = {

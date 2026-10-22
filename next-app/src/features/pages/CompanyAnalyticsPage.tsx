@@ -1,0 +1,119 @@
+import Link from "next/link";
+import {
+  BarChart3,
+  CheckCircle,
+  ClipboardList,
+  Globe,
+  Hourglass,
+  Users,
+  XCircle,
+} from "@/components/icons";
+import type { CompanyAnalyticsData } from "@/lib/services/company-workspace";
+import type { CompanyContext } from "@/lib/auth/company";
+import CompanyAnalyticsCharts from "@/features/pages/CompanyAnalyticsClient";
+import styles from "@/features/pages/company-operations.module.css";
+
+export default function CompanyAnalyticsPage({
+  context,
+  data,
+}: {
+  context: CompanyContext;
+  data: CompanyAnalyticsData;
+}) {
+  const pending =
+    data.booking_status.find((item) => item.name === "Pending")?.value ?? 0;
+  const confirmed =
+    data.booking_status.find((item) => item.name === "Confirmed")?.value ?? 0;
+  const cancelled =
+    data.booking_status.find((item) => item.name === "Cancelled")?.value ?? 0;
+
+  const stats = [
+    {
+      label: "Total bookings",
+      value: data.totals.bookings,
+      hint: "All company bookings",
+      icon: ClipboardList,
+    },
+    {
+      label: "Travelers",
+      value: data.totals.travelers,
+      hint: "Cancelled bookings excluded",
+      icon: Users,
+    },
+    {
+      label: "Tours",
+      value: data.totals.tours,
+      hint: "Active company catalogue",
+      icon: Globe,
+    },
+    {
+      label: "Pending",
+      value: pending,
+      hint: "Awaiting confirmation",
+      icon: Hourglass,
+    },
+    {
+      label: "Confirmed",
+      value: confirmed,
+      hint: "Ready to operate",
+      icon: CheckCircle,
+    },
+    {
+      label: "Cancelled",
+      value: cancelled,
+      hint: "Retained for history",
+      icon: XCircle,
+    },
+  ];
+
+  return (
+    <div className={`page ${styles.pageStack}`}>
+      <div className={styles.pageHead}>
+        <div className={styles.pageTitleWrap}>
+          <p className={styles.eyebrow}>Company workspace</p>
+          <h1 className={styles.pageTitle}>Analytics</h1>
+          <p className={styles.pageLead}>
+            Booking and tour performance for {context.company.name}. Platform
+            traffic and other companies&apos; data are never included.
+          </p>
+        </div>
+        <div className={styles.pageActions}>
+          <Link className="btn btn-outline" href="/company/dashboard/">
+            <BarChart3 size={16} /> Dashboard
+          </Link>
+        </div>
+      </div>
+
+      <section className={styles.analyticsStats} aria-label="Company totals">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <article className={styles.statCard} key={stat.label}>
+              <div className={styles.statTop}>
+                <span className={styles.statIcon}>
+                  <Icon size={17} />
+                </span>
+              </div>
+              <span className={styles.statValue}>{stat.value}</span>
+              <span className={styles.statLabel}>{stat.label}</span>
+              <span className={styles.statHint}>{stat.hint}</span>
+            </article>
+          );
+        })}
+      </section>
+
+      {data.totals.bookings === 0 && data.totals.tours === 0 ? (
+        <p className={styles.note}>
+          This company has no tours or bookings yet. The charts below will
+          populate as the team adds tours and customers book them.
+        </p>
+      ) : null}
+
+      <CompanyAnalyticsCharts
+        bookingStatus={data.booking_status}
+        monthlyBookings={data.monthly_bookings}
+        tourPerformance={data.tour_performance}
+      />
+    </div>
+  );
+}

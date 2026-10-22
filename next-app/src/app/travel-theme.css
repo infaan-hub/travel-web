@@ -3712,7 +3712,8 @@ svg {
 }
 
 .sidebar:not(.expanded) .user-info,
-.sidebar:not(.expanded) .user-badge {
+.sidebar:not(.expanded) .user-badge,
+.sidebar:not(.expanded) .user-badges {
   display: none;
 }
 
@@ -4347,7 +4348,7 @@ label { color: #344256; }
 .auth-brand {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 46px;
   gap: 9px;
   margin-bottom: 42px;
   color: #243247;
@@ -5013,3 +5014,45 @@ input[type="radio"] {
 
 
 
+
+/* ==========================================================================
+   Public company attribution (Phase 6)
+   ========================================================================== */
+
+.tour-company-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 44px;
+  color: var(--aqua-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.tour-company-link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tour-company-link svg {
+  flex: 0 0 auto;
+}
+
+.tour-company-link:hover {
+  color: var(--aqua-deep);
+  text-decoration: underline;
+}
+
+.tour-company-link:focus-visible {
+  outline: 3px solid rgba(20, 163, 163, 0.36);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.tour-company-link-detail {
+  margin: 2px 0 12px;
+}

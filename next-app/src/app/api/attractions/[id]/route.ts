@@ -12,7 +12,9 @@ type Context = { params: Promise<{ id: string }> };
 export async function GET(_request: NextRequest, context: Context) {
   try {
     const id = parseId((await context.params).id);
-    const attraction = await prisma.attraction.findUnique({ where: { id } });
+    const attraction = await prisma.attraction.findFirst({
+      where: { id, deletedAt: null },
+    });
     if (!attraction) throw new ApiError(404, "Attraction not found.");
     return ok(attractionSerializer(attraction));
   } catch (error) {

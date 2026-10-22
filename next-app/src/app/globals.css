@@ -394,6 +394,17 @@ body {
   width: fit-content;
 }
 
+.user-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.user-badges .user-badge {
+  margin-top: 0;
+}
+
 .logout-btn {
   width: 100%;
   background: rgba(239, 68, 68, 0.15);
