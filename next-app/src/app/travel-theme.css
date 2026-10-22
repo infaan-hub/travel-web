@@ -810,14 +810,16 @@ body {
   border-radius: 0;
 }
 
-.top-header-inner {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  max-width: 1440px;
-  margin-inline: auto;
-  padding: 10px var(--page-padding-desktop);
+@media (min-width: 769px) {
+  .top-header-inner {
+    position: relative;
+  }
+
+  .top-header-brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 .top-header-brand {
@@ -3490,7 +3492,7 @@ svg {
 
 /* Feature destinations: tall portrait media on phones, cinematic on desktop. */
 .destination-image {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
 }
 
 .page .destination-info {
