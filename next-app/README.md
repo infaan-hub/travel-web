@@ -1,7 +1,19 @@
 # Infaan Tours & Travel — unified Next.js application
 
-This directory is the production-oriented migration of the former Django REST
-backend + React/Vite frontend into a single Next.js App Router application.
+This directory contains the unified Next.js App Router application migrated
+from the former Django REST API and React/Vite client.
+
+## Vercel project root
+
+The Vercel project root directory is `next-app` (this directory), not a
+`frontend` subdirectory. In Vercel project settings, set **Root Directory** to
+`next-app` so the deployment reads this directory's `package.json`, `vercel.json`,
+Prisma schema and `src` tree. Run project commands from `next-app`.
+
+To reset the production administrator, link the Vercel project from this
+directory and run `vercel env run -e production -- npm run admin:set`. The
+command supplies the linked project's Production environment to the existing
+interactive reset script.
 
 
 ## Glass system

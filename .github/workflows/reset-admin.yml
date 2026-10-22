@@ -1,0 +1,45 @@
+name: Reset production administrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: Administrator username
+        required: true
+        default: admin
+      email:
+        description: Administrator email
+        required: true
+        default: admin@travel.com
+      password:
+        description: Administrator password
+        required: true
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: next-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next-app/package-lock.json
+      - run: npm ci
+      - name: Resolve production database
+        id: db
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: npx tsx scripts/neon-default-url.ts >> "$GITHUB_OUTPUT"
+      - name: Set administrator
+        env:
+          DATABASE_URL: ${{ steps.db.outputs.DATABASE_URL }}
+          DIRECT_URL: ${{ steps.db.outputs.DATABASE_URL }}
+          ADMIN_USERNAME: ${{ inputs.username }}
+          ADMIN_EMAIL: ${{ inputs.email }}
+          ADMIN_PASSWORD: ${{ inputs.password }}
+        run: npm run admin:set
