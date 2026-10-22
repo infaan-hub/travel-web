@@ -36,6 +36,7 @@ async function main() {
         isStaff: true,
         isActive: true,
         deletedAt: null,
+        sessionVersion: { increment: 1 },
       },
     });
     console.log(`Updated administrator "${parsed.username}" (id ${existing.id}).`);

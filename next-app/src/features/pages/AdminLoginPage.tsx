@@ -33,8 +33,15 @@ export default function AdminLoginPage() {
         setError('This area is for administrators only. Please use the customer login.');
       }
     } catch (err: any) {
+      const status = err.response?.status;
       const detail = err.response?.data?.detail;
-      setError(detail || 'Sign-in failed. Check the admin username and password, then try again.');
+      if (status === 401) {
+        setError("These credentials don't match an active admin account in this site's database. Local and Vercel Production use separate databases, so a reset in one does not update the other.");
+      } else if (status === 503) {
+        setError("Admin sign-in is temporarily unavailable because the database could not be reached.");
+      } else {
+        setError(detail || "Couldn't connect to the sign-in service. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }

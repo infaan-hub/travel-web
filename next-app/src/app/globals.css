@@ -559,7 +559,7 @@ body {
   border-radius: var(--glass-radius-lg);
   overflow: hidden;
   margin-bottom: 40px;
-  background: url('/media/hero-bg.jpg') center/cover;
+  background: url('/uploads/home/Zanzibar_trip.jpg') center/cover;
 }
 
 .hero-overlay {
