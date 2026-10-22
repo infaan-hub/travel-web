@@ -66,18 +66,11 @@ export default function MoreExperiencesEmptyState({
         )}
       </div>
 
-      <div className={styles.copy}>
-        <h2 className={styles.heading}>More experiences are on the way</h2>
-        <p className={styles.subheading}>Browse companies to plan your next trip</p>
-        <p className={styles.muted}>
-          Tour listings appear here when a provider publishes an experience.
-        </p>
-        {onBrowse ? (
-          <button type="button" className={styles.pill} onClick={onBrowse}>
-            Browse companies
-          </button>
-        ) : null}
-      </div>
+      {onBrowse ? (
+        <button type="button" className={styles.pill} onClick={onBrowse}>
+          Browse companies
+        </button>
+      ) : null}
     </section>
   );
 }
