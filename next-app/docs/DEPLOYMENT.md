@@ -6,7 +6,7 @@
 - PostgreSQL 15+ (managed provider recommended)
 - VAPID keys for Web Push notifications (optional)
 - A durable object-storage integration for production media (not yet
-  implemented for general uploads; the five More Experiences portfolio images
+  implemented for general uploads; homepage hero and More Experiences images
   are stored in PostgreSQL)
 
 ## Steps
@@ -24,7 +24,8 @@
 7. Before enabling general uploads in production, integrate durable external
    media storage. Uploading `public/uploads` manually is not a supported
    production storage strategy because the Vercel filesystem is ephemeral. The
-   five More Experiences portfolio image slots are stored in PostgreSQL.
+   homepage hero photos and five More Experiences portfolio slots are stored
+   in PostgreSQL.
 8. Start with `npm run start` or the platform's Next.js adapter.
 
 Do not run the demo seed against production. It creates demo tours, an

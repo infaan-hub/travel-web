@@ -395,6 +395,10 @@ export function tipSerializer(tip: TravelTip & { author?: User | null }): Json {
 }
 
 export function homeSettingSerializer(setting: HomeSetting): Json {
+  const heroImage = (data: Uint8Array | null, legacyPath: string | null, slot: string) => {
+    if (data) return `/api/home-settings/images/${slot}?v=${setting.updatedAt.getTime()}`;
+    return publicImageUrl(legacyPath);
+  };
   const portfolioImage = (
     data: Uint8Array | null,
     storedPath: string | null,
@@ -412,7 +416,8 @@ export function homeSettingSerializer(setting: HomeSetting): Json {
     zanzibar_image: setting.zanzibarImage,
     tanzania_image: setting.tanzaniaImage,
     more_experiences_image: setting.moreExperiencesImage,
-    hero_image_url: publicImageUrl(setting.heroImage),
+    hero_image_url: heroImage(setting.heroImageData, setting.heroImage, "hero"),
+    hero_secondary_image_url: heroImage(setting.heroSecondaryImageData, setting.heroSecondaryImage, "secondary"),
     zanzibar_image_url: publicImageUrl(setting.zanzibarImage),
     tanzania_image_url: publicImageUrl(setting.tanzaniaImage),
     more_experiences_image_url: publicImageUrl(setting.moreExperiencesImage),

@@ -3,7 +3,7 @@ import { readStoredImage } from "@/lib/storage/images";
 
 export const dynamic = "force-dynamic";
 
-const imageFields = [
+const portfolioImageFields = [
   ["moreExperiencesImageData1", "moreExperiencesImageMime1", "moreExperiencesImage1"],
   ["moreExperiencesImageData2", "moreExperiencesImageMime2", "moreExperiencesImage2"],
   ["moreExperiencesImageData3", "moreExperiencesImageMime3", "moreExperiencesImage3"],
@@ -11,13 +11,20 @@ const imageFields = [
   ["moreExperiencesImageData5", "moreExperiencesImageMime5", "moreExperiencesImage5"],
 ] as const;
 
+const heroImageFields = {
+  hero: ["heroImageData", "heroImageMime", "heroImage"] as const,
+  secondary: ["heroSecondaryImageData", "heroSecondaryImageMime", "heroSecondaryImage"] as const,
+} as const;
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ slot: string }> },
 ) {
   const { slot } = await params;
-  const field = imageFields[Number(slot) - 1];
-  if (!field || !/^\d+$/.test(slot)) return new Response(null, { status: 404 });
+  const field = Object.hasOwn(heroImageFields, slot)
+    ? heroImageFields[slot as keyof typeof heroImageFields]
+    : /^\d+$/.test(slot) ? portfolioImageFields[Number(slot) - 1] : undefined;
+  if (!field) return new Response(null, { status: 404 });
 
   try {
     const setting = await prisma.homeSetting.findUnique({ where: { id: 1 } });

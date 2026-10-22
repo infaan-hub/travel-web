@@ -18,6 +18,8 @@ export default function AdminHomeEditorPage() {
   const [saving, setSaving] = useState(false);
   const [heroFile, setHeroFile] = useState<File | null>(null);
   const [heroPreview, setHeroPreview] = useState<string | null>(null);
+  const [heroSecondaryFile, setHeroSecondaryFile] = useState<File | null>(null);
+  const [heroSecondaryPreview, setHeroSecondaryPreview] = useState<string | null>(null);
   const [zanzibarFile, setZanzibarFile] = useState<File | null>(null);
   const [zanzibarPreview, setZanzibarPreview] = useState<string | null>(null);
   const [tanzaniaFile, setTanzaniaFile] = useState<File | null>(null);
@@ -51,6 +53,7 @@ export default function AdminHomeEditorPage() {
 
   const clearField = (field: string) => {
     if (field === 'hero') { setHeroFile(null); setHeroPreview(null); }
+    else if (field === 'hero-secondary') { setHeroSecondaryFile(null); setHeroSecondaryPreview(null); }
     else if (field === 'zanzibar') { setZanzibarFile(null); setZanzibarPreview(null); }
     else if (field === 'tanzania') { setTanzaniaFile(null); setTanzaniaPreview(null); }
     else if (field.startsWith('more-experiences-')) {
@@ -65,9 +68,10 @@ export default function AdminHomeEditorPage() {
     setMessage('');
     try {
       let updatedSettings = settings;
-      if (heroFile || zanzibarFile || tanzaniaFile) {
+      if (heroFile || heroSecondaryFile || zanzibarFile || tanzaniaFile) {
         const formData = new FormData();
         if (heroFile) formData.append('hero_image', heroFile);
+        if (heroSecondaryFile) formData.append('hero_secondary_image', heroSecondaryFile);
         if (zanzibarFile) formData.append('zanzibar_image', zanzibarFile);
         if (tanzaniaFile) formData.append('tanzania_image', tanzaniaFile);
         const res = await homeSettingsAPI.update(formData);
@@ -82,6 +86,7 @@ export default function AdminHomeEditorPage() {
       }
       if (updatedSettings) setSettings(updatedSettings);
       setHeroFile(null); setHeroPreview(null);
+      setHeroSecondaryFile(null); setHeroSecondaryPreview(null);
       setZanzibarFile(null); setZanzibarPreview(null);
       setTanzaniaFile(null); setTanzaniaPreview(null);
       setMoreExperiencesFiles(Array(5).fill(null)); setMoreExperiencesPreviews(Array(5).fill(null));
@@ -97,7 +102,7 @@ export default function AdminHomeEditorPage() {
     try {
       const formData = new FormData();
       const portfolioIndex = field.startsWith('more-experiences-') ? Number(field.slice('more-experiences-'.length)) : null;
-      const inputName = field === 'hero' ? 'hero' : field === 'zanzibar' ? 'zanzibar' : field === 'tanzania' ? 'tanzania' : `more_experiences_image_${portfolioIndex}`;
+      const inputName = field === 'hero' ? 'hero_image' : field === 'hero-secondary' ? 'hero_secondary_image' : field === 'zanzibar' ? 'zanzibar_image' : field === 'tanzania' ? 'tanzania_image' : `more_experiences_image_${portfolioIndex}`;
       formData.append(`clear_${inputName}`, 'true');
       const res = await homeSettingsAPI.update(formData);
       setSettings(res.data);
@@ -113,6 +118,7 @@ export default function AdminHomeEditorPage() {
 
   const previewUrl = (field: string) => {
     if (field === 'hero') return heroPreview || settings?.hero_image_url || null;
+    if (field === 'hero-secondary') return heroSecondaryPreview || settings?.hero_secondary_image_url || null;
     if (field === 'zanzibar') return zanzibarPreview || settings?.zanzibar_image_url || null;
     if (field === 'tanzania') return tanzaniaPreview || settings?.tanzania_image_url || null;
     return settings?.more_experiences_image_url || null;
@@ -140,7 +146,7 @@ export default function AdminHomeEditorPage() {
 
       <div className="home-editor-grid">
         <div className="home-editor-card">
-          <h3>Hero Background</h3>
+          <h3>Hero Main Photo</h3>
           <div className="editor-preview">
             {previewUrl('hero') ? (
               <img src={previewUrl('hero')} alt="Hero" />
@@ -159,6 +165,21 @@ export default function AdminHomeEditorPage() {
               </button>
             )}
             {heroFile && <button className="btn btn-sm btn-ghost" onClick={() => clearField('hero')}>Cancel</button>}
+          </div>
+        </div>
+
+        <div className="home-editor-card">
+          <h3>Hero Second Photo</h3>
+          <div className="editor-preview">
+            {previewUrl('hero-secondary') ? <img src={previewUrl('hero-secondary')} alt="Hero second photo" /> : <div className="editor-placeholder"><ImageIcon size={32} /><p>No second hero photo</p></div>}
+          </div>
+          <div className="editor-actions">
+            <label className="btn btn-sm btn-outline">
+              <Upload size={14} /> Upload
+              <input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e: ChangeEvent<HTMLInputElement>) => handleFileChange(e, setHeroSecondaryFile, setHeroSecondaryPreview)} />
+            </label>
+            {(heroSecondaryPreview || settings?.hero_secondary_image_url) && <button className="btn btn-sm btn-danger" onClick={() => handleDelete('hero-secondary')}><Trash2 size={14} /> Delete</button>}
+            {heroSecondaryFile && <button className="btn btn-sm btn-ghost" onClick={() => clearField('hero-secondary')}>Cancel</button>}
           </div>
         </div>
 

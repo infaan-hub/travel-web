@@ -198,6 +198,7 @@ export type WorkspaceTask = {
 export type HomeSettings = {
   id?: number;
   hero_image_url?: ImageUrl;
+  hero_secondary_image_url?: ImageUrl;
   zanzibar_image_url?: ImageUrl;
   more_experiences_image_url?: ImageUrl;
   more_experiences_image_urls?: (ImageUrl | null)[];

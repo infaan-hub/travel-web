@@ -11,7 +11,7 @@ import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
-import { PageHero } from "@/components/PageHero";
+import BentoHero from "@/components/BentoHero";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 
 import type {  Attraction, HomeSettings, Review, Tour  } from "@/features/pages/types";
@@ -89,13 +89,10 @@ export default function HomePage() {
 
   return (
     <div className="page home-page">
-      <PageHero
-        eyebrow="A marketplace for meaningful travel"
-        title="Find the experience that feels like yours."
-        subtitle="Explore tours, safaris and local experiences from independent tourism companies. Compare what fits, meet the people behind it, and send a booking request directly."
-        media={homeSettings?.hero_image_url ? { src: getImageUrl(homeSettings.hero_image_url), alt: "Tanzania landscape" } : undefined}
-        ctaPrimary={{ label: "Explore experiences", href: "/tours/" }}
-        ctaSecondary={{ label: "Discover companies", href: "/companies/" }}
+      <BentoHero
+        mainImage={homeSettings?.hero_image_url}
+        secondImage={homeSettings?.hero_secondary_image_url || homeSettings?.zanzibar_image_url}
+        featuredTour={allTours.find((tour) => tour.featured) || allTours[0] || null}
       />
 
       <section className="destinations-section">

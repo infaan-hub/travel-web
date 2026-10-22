@@ -32,7 +32,6 @@ async function updateSettings(request: NextRequest, requireAdmin: boolean) {
 
   const data: Record<string, unknown> = {};
   const fields = [
-    ["hero_image", "heroImage", "home"],
     ["zanzibar_image", "zanzibarImage", "home"],
     ["tanzania_image", "tanzaniaImage", "home"],
   ] as const;
@@ -46,6 +45,28 @@ async function updateSettings(request: NextRequest, requireAdmin: boolean) {
     if (payload[`clear_${inputKey}`] === "true") {
       data[dbKey] = null;
       await deleteImage(setting[dbKey]);
+    }
+  }
+
+  const oldHeroFiles: (string | null)[] = [];
+  const heroFields = [
+    ["hero_image", "heroImage", "heroImageData", "heroImageMime"],
+    ["hero_secondary_image", "heroSecondaryImage", "heroSecondaryImageData", "heroSecondaryImageMime"],
+  ] as const;
+  for (const [inputKey, pathKey, dataKey, mimeKey] of heroFields) {
+    const file = fileFrom(payload, inputKey);
+    if (file) {
+      const validated = await validatedImage(file);
+      data[pathKey] = null;
+      data[dataKey] = new Uint8Array(validated.buffer);
+      data[mimeKey] = validated.mimeType;
+      if (setting[pathKey]) oldHeroFiles.push(setting[pathKey]);
+    }
+    if (payload[`clear_${inputKey}`] === "true") {
+      data[pathKey] = null;
+      data[dataKey] = null;
+      data[mimeKey] = null;
+      if (setting[pathKey]) oldHeroFiles.push(setting[pathKey]);
     }
   }
 
@@ -80,6 +101,7 @@ async function updateSettings(request: NextRequest, requireAdmin: boolean) {
   }
 
   const updated = await prisma.homeSetting.update({ where: { id: setting.id }, data });
+  await Promise.all(oldHeroFiles.map(deleteImage));
   await Promise.all(oldPortfolioFiles.map(deleteImage));
   return ok(homeSettingSerializer(updated));
 }

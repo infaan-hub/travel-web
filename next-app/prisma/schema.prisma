@@ -382,6 +382,11 @@ model HomeSetting {
   heroImage     String?  @map("hero_image")
   zanzibarImage String?  @map("zanzibar_image")
   tanzaniaImage String?  @map("tanzania_image")
+  heroImageData Bytes?   @map("hero_image_data") @db.ByteA
+  heroImageMime String?  @map("hero_image_mime")
+  heroSecondaryImageData Bytes? @map("hero_secondary_image_data") @db.ByteA
+  heroSecondaryImageMime String? @map("hero_secondary_image_mime")
+  heroSecondaryImage String? @map("hero_secondary_image")
   moreExperiencesImage String? @map("more_experiences_image")
   moreExperiencesImage1 String? @map("more_experiences_image_1")
   moreExperiencesImage2 String? @map("more_experiences_image_2")
