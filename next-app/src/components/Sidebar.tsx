@@ -140,22 +140,12 @@ export default function Sidebar() {
   ];
 
   const customerNavItems: NavItem[] = [
-    { to: "/", label: "Discover", icon: Home, exact: true },
-    { to: "/tours", label: "Explore experiences", icon: Globe, exact: true },
-    { to: "/companies", label: "Tourism companies", icon: Building2 },
-    { to: "/tours/zanzibar", label: "Zanzibar", icon: Palmtree },
-    { to: "/tours/tanzania", label: "Tanzania", icon: Compass },
+    { to: "/", label: "Home", icon: Home, exact: true },
+    { to: "/tours", label: "Experiences", icon: Globe, exact: true },
+    { to: "/companies", label: "Companies", icon: Building2 },
     { to: "/attractions", label: "Places", icon: Map },
     { to: "/trips", label: "Trip planning", icon: BookOpen },
-    ...(isAuthenticated
-      ? [
-          { to: "/dashboard", label: "My Travel", icon: BarChart3 } as NavItem,
-          { to: "/booking", label: "New request", icon: CalendarDays } as NavItem,
-          { to: "/bookings", label: "My requests", icon: ClipboardList } as NavItem,
-          { to: "/settings", label: "Settings", icon: Settings } as NavItem,
-        ]
-      : []),
-    { to: "/contact", label: "Contact", icon: Mail },
+    { to: "/contact", label: "Support", icon: Mail },
   ];
 
   const activeCompany = user?.companies?.find(
