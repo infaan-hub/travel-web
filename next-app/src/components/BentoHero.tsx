@@ -28,7 +28,15 @@ export default function BentoHero({ mainImage, secondImage, featuredImage, thumb
         </div>
 
         <div className={`${styles.photo} ${styles.mainPhoto}`}>
-          {mainImage ? <img src={getImageUrl(mainImage)} alt="Explore Tanzania" fetchPriority="high" /> : <span className={styles.placeholder}>Your next view starts here</span>}
+          {mainImage ? (
+            <img
+              src={getImageUrl(mainImage)}
+              alt="Explore Tanzania"
+              fetchPriority="high"
+            />
+          ) : (
+            <span className={styles.placeholder}>Your next view starts here</span>
+          )}
         </div>
 
         <div className={`${styles.photo} ${styles.secondPhoto}`}>

@@ -65,12 +65,6 @@ export default function MoreExperiencesEmptyState({
           );
         })}
       </div>
-
-      {onBrowse ? (
-        <button type="button" className={styles.pill} onClick={onBrowse}>
-          Browse companies
-        </button>
-      ) : null}
     </section>
   );
 }
