@@ -387,6 +387,12 @@ model HomeSetting {
   heroSecondaryImageData Bytes? @map("hero_secondary_image_data") @db.ByteA
   heroSecondaryImageMime String? @map("hero_secondary_image_mime")
   heroSecondaryImage String? @map("hero_secondary_image")
+  heroFeatureImage String? @map("hero_feature_image")
+  heroFeatureImageData Bytes? @map("hero_feature_image_data") @db.ByteA
+  heroFeatureImageMime String? @map("hero_feature_image_mime")
+  heroThumbImage String? @map("hero_thumb_image")
+  heroThumbImageData Bytes? @map("hero_thumb_image_data") @db.ByteA
+  heroThumbImageMime String? @map("hero_thumb_image_mime")
   moreExperiencesImage String? @map("more_experiences_image")
   moreExperiencesImage1 String? @map("more_experiences_image_1")
   moreExperiencesImage2 String? @map("more_experiences_image_2")

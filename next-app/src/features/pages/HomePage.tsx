@@ -92,6 +92,8 @@ export default function HomePage() {
       <BentoHero
         mainImage={homeSettings?.hero_image_url}
         secondImage={homeSettings?.hero_secondary_image_url || homeSettings?.zanzibar_image_url}
+        featuredImage={homeSettings?.hero_feature_image_url}
+        thumbImage={homeSettings?.hero_thumb_image_url}
         featuredTour={allTours.find((tour) => tour.featured) || allTours[0] || null}
       />
 

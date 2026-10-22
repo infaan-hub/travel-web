@@ -8,24 +8,17 @@ import styles from "./BentoHero.module.css";
 type BentoHeroProps = {
   mainImage?: string | null;
   secondImage?: string | null;
+  featuredImage?: string | null;
+  thumbImage?: string | null;
   featuredTour?: Tour | null;
 };
 
-export default function BentoHero({ mainImage, secondImage, featuredTour }: BentoHeroProps) {
+export default function BentoHero({ mainImage, secondImage, featuredImage, thumbImage, featuredTour }: BentoHeroProps) {
   return (
     <section className={styles.frame} aria-labelledby="bento-hero-title">
-      <div className={styles.topbar}>
-        <Link className={styles.logo} href="/" aria-label="Travel home">Travel.</Link>
-        <nav className={styles.nav} aria-label="Main navigation">
-          <Link href="/">Explore</Link><Link href="/tours/">Tours</Link>
-          <Link href="/companies/">Companies</Link><Link href="/stays/">Stays</Link>
-        </nav>
-        <Link className={styles.book} href="/tours/">Book now</Link>
-      </div>
-
       <div className={styles.panels}>
         <div className={styles.copy}>
-          <span className={styles.thumb}>✦</span>
+          <span className={styles.thumb}>{thumbImage ? <img src={getImageUrl(thumbImage)} alt="" /> : "✦"}</span>
           <h1 id="bento-hero-title">Find your<br />next trip</h1>
           <p className={styles.tagline}>Tours, stays and local guides you can trust.</p>
           <div className={styles.actions}>
@@ -43,7 +36,7 @@ export default function BentoHero({ mainImage, secondImage, featuredTour }: Bent
         </div>
 
         <Link className={styles.featured} href={featuredTour ? `/tour/${featuredTour.id}/` : "/tours/"}>
-          {featuredTour?.image_url ? <img src={getImageUrl(featuredTour.image_url)} alt="" /> : <span className={styles.featuredPlaceholder}>✦</span>}
+          {featuredImage || featuredTour?.image_url ? <img src={getImageUrl(featuredImage || featuredTour?.image_url)} alt="" /> : <span className={styles.featuredPlaceholder}>✦</span>}
           <span className={styles.featuredCopy}>
             <span className={styles.featuredLabel}>A PLACE TO BEGIN</span>
             <strong>{featuredTour?.title || "Find an experience"}</strong>

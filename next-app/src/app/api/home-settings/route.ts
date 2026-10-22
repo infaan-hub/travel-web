@@ -52,6 +52,8 @@ async function updateSettings(request: NextRequest, requireAdmin: boolean) {
   const heroFields = [
     ["hero_image", "heroImage", "heroImageData", "heroImageMime"],
     ["hero_secondary_image", "heroSecondaryImage", "heroSecondaryImageData", "heroSecondaryImageMime"],
+    ["hero_feature_image", "heroFeatureImage", "heroFeatureImageData", "heroFeatureImageMime"],
+    ["hero_thumb_image", "heroThumbImage", "heroThumbImageData", "heroThumbImageMime"],
   ] as const;
   for (const [inputKey, pathKey, dataKey, mimeKey] of heroFields) {
     const file = fileFrom(payload, inputKey);

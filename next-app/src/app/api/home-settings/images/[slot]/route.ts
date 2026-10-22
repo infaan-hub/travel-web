@@ -14,6 +14,8 @@ const portfolioImageFields = [
 const heroImageFields = {
   hero: ["heroImageData", "heroImageMime", "heroImage"] as const,
   secondary: ["heroSecondaryImageData", "heroSecondaryImageMime", "heroSecondaryImage"] as const,
+  feature: ["heroFeatureImageData", "heroFeatureImageMime", "heroFeatureImage"] as const,
+  thumb: ["heroThumbImageData", "heroThumbImageMime", "heroThumbImage"] as const,
 } as const;
 
 export async function GET(
