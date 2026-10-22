@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -6,14 +6,6 @@ import { useEffect, useState } from "react";
 import { Menu, Palmtree, X } from "@/components/icons";
 import { useAuth } from "@/context/AuthContext";
 
-const NAV_LINKS = [
-  { to: "/", label: "Home" },
-  { to: "/tours", label: "Experiences" },
-  { to: "/companies", label: "Companies" },
-  { to: "/attractions", label: "Places" },
-  { to: "/trips", label: "Trip planning" },
-  { to: "/contact", label: "Support" },
-];
 
 /**
  * Sticky top header rendered on every page. It carries the Travel. wordmark,
@@ -64,16 +56,6 @@ export default function TopHeader() {
           <span className="top-header-wordmark brand-wordmark">Travel.</span>
         </Link>
 
-        <nav className="top-header-nav" aria-label="Main navigation">
-          {NAV_LINKS.map((link) => {
-            const active = link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);
-            return (
-              <Link key={link.to} href={link.to} className={`top-header-link${active ? " active" : ""}`} aria-current={active ? "page" : undefined}>
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
 
         <div className="top-header-actions">
           {isAuthenticated ? (
