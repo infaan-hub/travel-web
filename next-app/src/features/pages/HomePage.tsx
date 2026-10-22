@@ -98,9 +98,8 @@ export default function HomePage() {
       />
 
       <section className="destinations-section">
-        <div className="section-header">
+        <div className="section-header" style={{ textAlign: "center" }}>
           <h2>Start with a place</h2>
-          <p>find the local company and experience that suit your plans.</p>
         </div>
         <div className="destinations-grid">
           <Link className="destination-card zanzibar" href="/tours/zanzibar/">

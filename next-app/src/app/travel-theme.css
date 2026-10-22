@@ -4109,7 +4109,7 @@ svg {
 }
 
 .destinations-grid {
-  grid-template-columns: repeat(2, minmax(min(100%, 320px), 440px));
+  grid-template-columns: repeat(2, minmax(min(100%, 280px), 360px));
   justify-content: center;
   justify-items: stretch;
 }
