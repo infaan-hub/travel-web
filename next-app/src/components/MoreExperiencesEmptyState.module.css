@@ -52,6 +52,27 @@
   line-height: 1.1;
 }
 
+.skeletonLine {
+  display: block;
+  width: 76%;
+  height: 5px;
+  border-radius: 999px;
+  background: rgb(15 23 42 / 18%);
+}
+
+.skeleton {
+  display: grid;
+  width: 72%;
+  gap: 8px;
+}
+
+.brandTitle {
+  color: #0b4f4c;
+  font-size: clamp(9px, 2vw, 15px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
 .skeletonTitle,
 .skeletonLine {
   display: block;

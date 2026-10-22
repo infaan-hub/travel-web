@@ -64,15 +64,23 @@ export default function AdminHomeEditorPage() {
     setSaving(true);
     setMessage('');
     try {
-      const formData = new FormData();
-      if (heroFile) formData.append('hero_image', heroFile);
-      if (zanzibarFile) formData.append('zanzibar_image', zanzibarFile);
-      if (tanzaniaFile) formData.append('tanzania_image', tanzaniaFile);
-      moreExperiencesFiles.forEach((file, index) => {
-        if (file) formData.append(`more_experiences_image_${index + 1}`, file);
-      });
-      const res = await homeSettingsAPI.update(formData);
-      setSettings(res.data);
+      let updatedSettings = settings;
+      if (heroFile || zanzibarFile || tanzaniaFile) {
+        const formData = new FormData();
+        if (heroFile) formData.append('hero_image', heroFile);
+        if (zanzibarFile) formData.append('zanzibar_image', zanzibarFile);
+        if (tanzaniaFile) formData.append('tanzania_image', tanzaniaFile);
+        const res = await homeSettingsAPI.update(formData);
+        updatedSettings = res.data;
+      }
+      for (const [index, file] of moreExperiencesFiles.entries()) {
+        if (!file) continue;
+        const formData = new FormData();
+        formData.append(`more_experiences_image_${index + 1}`, file);
+        const res = await homeSettingsAPI.update(formData);
+        updatedSettings = res.data;
+      }
+      if (updatedSettings) setSettings(updatedSettings);
       setHeroFile(null); setHeroPreview(null);
       setZanzibarFile(null); setZanzibarPreview(null);
       setTanzaniaFile(null); setTanzaniaPreview(null);

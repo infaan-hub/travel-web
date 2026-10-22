@@ -395,6 +395,17 @@ export function tipSerializer(tip: TravelTip & { author?: User | null }): Json {
 }
 
 export function homeSettingSerializer(setting: HomeSetting): Json {
+  const portfolioImage = (
+    data: Uint8Array | null,
+    storedPath: string | null,
+    slot: number,
+  ) => {
+    if (data) return `/api/home-settings/images/${slot}?v=${setting.updatedAt.getTime()}`;
+    if (!storedPath) return null;
+    if (/^https?:\/\//i.test(storedPath)) return publicImageUrl(storedPath);
+    return `/api/home-settings/images/${slot}?v=${setting.updatedAt.getTime()}`;
+  };
+
   return {
     id: setting.id,
     hero_image: setting.heroImage,
@@ -406,12 +417,12 @@ export function homeSettingSerializer(setting: HomeSetting): Json {
     tanzania_image_url: publicImageUrl(setting.tanzaniaImage),
     more_experiences_image_url: publicImageUrl(setting.moreExperiencesImage),
     more_experiences_image_urls: [
-      setting.moreExperiencesImage1,
-      setting.moreExperiencesImage2,
-      setting.moreExperiencesImage3,
-      setting.moreExperiencesImage4,
-      setting.moreExperiencesImage5,
-    ].map(publicImageUrl),
+      portfolioImage(setting.moreExperiencesImageData1, setting.moreExperiencesImage1, 1),
+      portfolioImage(setting.moreExperiencesImageData2, setting.moreExperiencesImage2, 2),
+      portfolioImage(setting.moreExperiencesImageData3, setting.moreExperiencesImage3, 3),
+      portfolioImage(setting.moreExperiencesImageData4, setting.moreExperiencesImage4, 4),
+      portfolioImage(setting.moreExperiencesImageData5, setting.moreExperiencesImage5, 5),
+    ],
     updated_at: iso(setting.updatedAt),
   };
 }

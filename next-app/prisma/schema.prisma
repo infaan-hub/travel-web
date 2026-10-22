@@ -388,6 +388,16 @@ model HomeSetting {
   moreExperiencesImage3 String? @map("more_experiences_image_3")
   moreExperiencesImage4 String? @map("more_experiences_image_4")
   moreExperiencesImage5 String? @map("more_experiences_image_5")
+  moreExperiencesImageData1 Bytes?  @map("more_experiences_image_data_1") @db.ByteA
+  moreExperiencesImageData2 Bytes?  @map("more_experiences_image_data_2") @db.ByteA
+  moreExperiencesImageData3 Bytes?  @map("more_experiences_image_data_3") @db.ByteA
+  moreExperiencesImageData4 Bytes?  @map("more_experiences_image_data_4") @db.ByteA
+  moreExperiencesImageData5 Bytes?  @map("more_experiences_image_data_5") @db.ByteA
+  moreExperiencesImageMime1 String? @map("more_experiences_image_mime_1")
+  moreExperiencesImageMime2 String? @map("more_experiences_image_mime_2")
+  moreExperiencesImageMime3 String? @map("more_experiences_image_mime_3")
+  moreExperiencesImageMime4 String? @map("more_experiences_image_mime_4")
+  moreExperiencesImageMime5 String? @map("more_experiences_image_mime_5")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("home_settings")

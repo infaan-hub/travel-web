@@ -1,5 +1,5 @@
 import "server-only";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { fileTypeFromBuffer } from "file-type";
@@ -41,7 +41,20 @@ function uploadsRoot(): string {
  * and returns its storage key. Keys are relative to the uploads root.
  */
 export async function saveImage(file: File, folder: UploadFolder): Promise<string> {
+  const { buffer, extension } = await validatedImage(file);
   const safeFolder = assertAllowedFolder(folder);
+  const key = `${safeFolder}/${randomUUID()}.${extension}`;
+  const target = path.join(uploadsRoot(), key);
+  await mkdir(path.dirname(target), { recursive: true });
+  await writeFile(target, buffer);
+  return key;
+}
+
+export async function validatedImage(file: File): Promise<{
+  buffer: Buffer;
+  mimeType: string;
+  extension: string;
+}> {
   if (!file || typeof file.arrayBuffer !== "function") {
     throw new ApiError(400, "No image file provided.");
   }
@@ -59,11 +72,20 @@ export async function saveImage(file: File, folder: UploadFolder): Promise<strin
     throw new ApiError(400, "Invalid image type. Allowed formats: JPG, PNG, WEBP.");
   }
 
-  const key = `${safeFolder}/${randomUUID()}.${extension}`;
-  const target = path.join(uploadsRoot(), key);
-  await mkdir(path.dirname(target), { recursive: true });
-  await writeFile(target, buffer);
-  return key;
+  return { buffer, mimeType: detected!.mime, extension };
+}
+
+export async function readStoredImage(key: string): Promise<{ buffer: Buffer; mimeType: string } | null> {
+  const safe = key.replace(/^\/?(uploads|media)\//, "");
+  if (!/^[a-z0-9/_.-]+$/i.test(safe) || safe.includes("..")) return null;
+  try {
+    const buffer = await readFile(path.join(uploadsRoot(), safe));
+    const detected = await fileTypeFromBuffer(buffer);
+    if (!detected || !ALLOWED.has(detected.mime)) return null;
+    return { buffer, mimeType: detected.mime };
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteImage(key: string | null | undefined): Promise<void> {

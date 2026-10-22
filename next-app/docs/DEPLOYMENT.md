@@ -6,7 +6,8 @@
 - PostgreSQL 15+ (managed provider recommended)
 - VAPID keys for Web Push notifications (optional)
 - A durable object-storage integration for production media (not yet
-  implemented; the current code writes to local `public/uploads`)
+  implemented for general uploads; the five More Experiences portfolio images
+  are stored in PostgreSQL)
 
 ## Steps
 
@@ -20,9 +21,10 @@
    `--assign-tours` unless the legacy tour's real owner has been confirmed.
 6. Verify with `npm run db:verify:companies` (use `--baseline` if a pre-migration
    count snapshot was captured).
-7. Before enabling uploads in production, integrate durable external media
-   storage. Uploading `public/uploads` manually is not a supported production
-   storage strategy because the Vercel filesystem is ephemeral.
+7. Before enabling general uploads in production, integrate durable external
+   media storage. Uploading `public/uploads` manually is not a supported
+   production storage strategy because the Vercel filesystem is ephemeral. The
+   five More Experiences portfolio image slots are stored in PostgreSQL.
 8. Start with `npm run start` or the platform's Next.js adapter.
 
 Do not run the demo seed against production. It creates demo tours, an
