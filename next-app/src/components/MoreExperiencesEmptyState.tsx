@@ -1,3 +1,6 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
 import styles from "./MoreExperiencesEmptyState.module.css";
 
 type MoreExperiencesEmptyStateProps = {
@@ -5,11 +8,11 @@ type MoreExperiencesEmptyStateProps = {
 };
 
 const cards = [
-  { color: "#FFC8D6", className: styles.cardPink, imageIndex: 0 },
-  { color: "#FDEBA8", className: styles.cardYellow, imageIndex: 1 },
-  { color: "#CFC3F5", className: styles.cardLavender, imageIndex: 2 },
-  { color: "#B9F0D0", className: styles.cardMint, imageIndex: 3 },
-  { color: "#FFD3B0", className: styles.cardPeach, imageIndex: 4 },
+  { color: "#FFC8D6", className: styles.cardPink, imageIndex: 0, rotation: -8 },
+  { color: "#FDEBA8", className: styles.cardYellow, imageIndex: 1, rotation: 6 },
+  { color: "#CFC3F5", className: styles.cardLavender, imageIndex: 2, rotation: -5 },
+  { color: "#B9F0D0", className: styles.cardMint, imageIndex: 3, rotation: 6 },
+  { color: "#FFD3B0", className: styles.cardPeach, imageIndex: 4, rotation: -4 },
 ];
 
 function PhotoGlyph() {
@@ -34,39 +37,71 @@ function PhotoGlyph() {
 export default function MoreExperiencesEmptyState({
   imageUrls = [],
 }: MoreExperiencesEmptyStateProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section className={styles.emptyState} aria-labelledby="more-experiences-heading">
-      <div className={styles.stage} aria-hidden="true">
+    <div className={styles.emptyState}>
+      <div className={styles.stage} aria-hidden="true" data-testid="more-experiences-stage">
         {cards.map((card, index) => {
           const image = imageUrls[card.imageIndex];
+
           return (
-            <div
+            <motion.div
               key={card.className}
               className={`${styles.card} ${card.className}`}
-              style={{
-                backgroundColor: image ? "transparent" : card.color,
-                animationDelay: `${index * 70}ms, ${index * 70 + 420}ms`,
-              }}
+              style={{ backgroundColor: image ? "transparent" : card.color }}
+              initial={
+                reduceMotion
+                  ? { opacity: 1, y: 0, scale: 1, rotate: card.rotation }
+                  : { opacity: 0, y: -44, scale: 0.86, rotate: card.rotation - 10 }
+              }
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotate: card.rotation }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : {
+                      type: "spring",
+                      stiffness: 120,
+                      damping: 16,
+                      mass: 0.9,
+                      delay: index * 0.09,
+                    }
+              }
+              whileHover={
+                reduceMotion
+                  ? undefined
+                  : {
+                      scale: 1.05,
+                      rotate: card.rotation + 2,
+                      transition: { type: "spring", stiffness: 260, damping: 18 },
+                    }
+              }
             >
-              {image ? (
-                <img className={styles.cardImage} src={image} alt="" loading="lazy" />
-              ) : (
-                <PhotoGlyph />
-              )}
-            </div>
+              <motion.div
+                className={styles.float}
+                animate={reduceMotion ? undefined : { y: [0, -10, 0] }}
+                transition={
+                  reduceMotion
+                    ? undefined
+                    : {
+                        duration: 3.8 + index * 0.35,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "easeInOut",
+                        delay: 0.7 + index * 0.1,
+                      }
+                }
+              >
+                {image ? (
+                  <img className={styles.cardImage} src={image} alt="" loading="lazy" />
+                ) : (
+                  <PhotoGlyph />
+                )}
+              </motion.div>
+            </motion.div>
           );
         })}
       </div>
-
-      <div className={styles.copy}>
-        <h2 id="more-experiences-heading" className={styles.heading}>
-          More experiences are on the way
-        </h2>
-        <p className={styles.subheading}>Browse companies to plan your next trip</p>
-        <p className={styles.muted}>
-          Tour listings appear here when a provider publishes an experience.
-        </p>
-      </div>
-    </section>
+    </div>
   );
 }
