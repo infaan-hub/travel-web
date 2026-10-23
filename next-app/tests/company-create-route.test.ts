@@ -59,6 +59,7 @@ describe("POST /api/admin/companies", () => {
       isPublic: false,
       createdByUserId: 5,
     });
+    expect(prismaCompanyCreate.mock.calls[0][0]).not.toHaveProperty("include");
     expect(body).toMatchObject({
       id: 31,
       name: "Acme Safaris",

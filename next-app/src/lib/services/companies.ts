@@ -413,8 +413,7 @@ async function createAdminCompany(input, actor, images = {}) {
                     createdByUserId: actor.id,
                     logoImageKey: images.logoImageKey ?? null,
                     coverImageKey: images.coverImageKey ?? null
-                },
-                include: COMPANY_LIST_INCLUDE
+                }
             });
             break;
         } catch (error) {
