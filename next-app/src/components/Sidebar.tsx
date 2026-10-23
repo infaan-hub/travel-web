@@ -26,10 +26,10 @@ import {
   Image,
   Star,
   MessageSquare,
-  ChevronLeft,
   Truck,
   Briefcase,
   Building2,
+  X,
 } from "@/components/icons";
 import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -49,16 +49,15 @@ function NavIcon({ icon: Icon }: { icon: AppIcon }) {
 }
 
 export default function Sidebar() {
-  const [expanded, setExpanded] = useState(true);
+  // The navigation is a closed drawer until the header's hamburger button opens
+  // it. It never reserves space in the page shell and has no chevron toggle.
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileOpenRef = useRef(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  // On phones the rail is an off-canvas drawer, so it always shows its labels;
-  // on desktop the labels follow the expanded/collapsed rail state.
-  const showLabels = expanded || mobileOpen;
+  const showLabels = mobileOpen;
 
   // The mobile menu state is owned here, but the toggle button lives in the top
   // header. Both components stay in sync through a pair of window events:
@@ -101,11 +100,16 @@ export default function Sidebar() {
     const close = () => {
       applyMobileOpen(false);
     };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
     window.addEventListener("travel:toggle-nav", toggle);
     window.addEventListener("travel:close-nav", close);
+    window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("travel:toggle-nav", toggle);
       window.removeEventListener("travel:close-nav", close);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [applyMobileOpen]);
 
@@ -113,13 +117,11 @@ export default function Sidebar() {
     applyMobileOpen(false);
   };
 
-  const toggleRail = () => {
-    if (mobileOpenRef.current) {
-      closeAll();
-      return;
-    }
-    setExpanded((value) => !value);
-  };
+  // Lock the page behind the drawer while it is open.
+  useEffect(() => {
+    document.body.classList.toggle("nav-drawer-open", mobileOpen);
+    return () => document.body.classList.remove("nav-drawer-open");
+  }, [mobileOpen]);
 
   const adminNavItems: NavItem[] = [
     { to: "/admin/dashboard", label: "Platform overview", icon: LayoutDashboard, exact: true },
@@ -228,7 +230,8 @@ export default function Sidebar() {
   return (
     <>
       <aside
-        className={`sidebar glass-sidebar ${expanded ? "expanded" : ""} ${mobileOpen ? "mobile-open" : ""}`}
+        className={`sidebar glass-sidebar ${mobileOpen ? "expanded mobile-open" : ""}`}
+        aria-hidden={!mobileOpen}
       >
         <div className="sidebar-header">
           <Link href="/" className="sidebar-logo" onClick={closeAll}>
@@ -238,14 +241,11 @@ export default function Sidebar() {
           <button
             type="button"
             className="collapse-btn"
-            onClick={toggleRail}
-            aria-label={expanded ? "Collapse navigation" : "Expand navigation"}
-            title={expanded ? "Collapse navigation" : "Expand navigation"}
+            onClick={closeAll}
+            aria-label="Close navigation"
+            title="Close navigation"
           >
-            <ChevronLeft
-              size={16}
-              style={{ transform: expanded ? undefined : "rotate(180deg)" }}
-            />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 

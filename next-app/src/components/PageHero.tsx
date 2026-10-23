@@ -105,9 +105,9 @@ function renderCta(cta: HeroCta, variant: "primary" | "secondary") {
 }
 
 /**
- * Single-card Bento hero used across the public pages. It keeps the home
- * page's pastel panel language — cream copy, clipped corner, thumbnail and
- * pill controls — while giving every page one consistent hero card.
+ * Single-card Bento hero used across the public pages. Every page gets the same
+ * clipped-corner card and glass controls, with a photo background when the
+ * home settings provide one and a neutral surface when they do not.
  */
 export function PageHero({
   eyebrow = "Travel.",
@@ -140,9 +140,10 @@ export function PageHero({
     };
   }, []);
 
-  const backgroundUrl = media?.src ?? getImageUrl(resolveHomeImage(settings, backgroundImageKey));
-  const patternUrl = patternMedia ?? getImageUrl(resolveHomeImage(settings, patternImageKey));
-  const hasPatternImage = Boolean(patternUrl);
+  const backgroundSource = media?.src || resolveHomeImage(settings, backgroundImageKey);
+  const patternSource = patternMedia || resolveHomeImage(settings, patternImageKey);
+  const backgroundUrl = backgroundSource ? getImageUrl(backgroundSource) : null;
+  const patternUrl = patternSource ? getImageUrl(patternSource) : null;
   const hasBackgroundImage = Boolean(backgroundUrl);
 
   return (
@@ -159,7 +160,7 @@ export function PageHero({
         ) : null}
 
         <span className={styles.scrim} aria-hidden="true" />
-        {hasPatternImage ? (
+        {patternUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             className={styles.patternImage}

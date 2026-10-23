@@ -78,8 +78,8 @@ img[src*="https"] {
   /* Dark accent for surfaces that carry white text (WCAG AA) */
   --aqua-deep: #4A4739;
   --aqua-subtle: rgba(157, 150, 121, 0.12);
-  --bg-gradient: #ECEBE4;
-  --bg-solid: #ECEBE4;
+  --bg-gradient: #F6F7F9;
+  --bg-solid: #F6F7F9;
 
   --text-primary: #111827;
   --text-secondary: #4B5563;

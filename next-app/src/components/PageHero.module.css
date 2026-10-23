@@ -13,7 +13,7 @@
   min-height: clamp(380px, 44vw, 560px);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: clamp(26px, 3.4cqw, 42px);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.82);
   clip-path: polygon(0 0, 100% 0, 100% 86%, 94% 100%, 0 100%);
   filter: drop-shadow(0 24px 52px rgba(11, 47, 51, 0.12));
   animation: hero-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;

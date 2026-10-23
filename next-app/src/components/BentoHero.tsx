@@ -9,18 +9,14 @@ type BentoHeroProps = {
   mainImage?: string | null;
   secondImage?: string | null;
   featuredImage?: string | null;
-  thumbImage?: string | null;
   featuredTour?: Tour | null;
 };
 
-export default function BentoHero({ mainImage, secondImage, featuredImage, thumbImage, featuredTour }: BentoHeroProps) {
+export default function BentoHero({ mainImage, secondImage, featuredImage, featuredTour }: BentoHeroProps) {
   return (
     <section className={styles.frame} aria-labelledby="bento-hero-title">
       <div className={styles.panels}>
-        <div
-          className={styles.copy}
-          style={thumbImage ? { backgroundImage: `url("${getImageUrl(thumbImage)}")` } : undefined}
-        >
+        <div className={styles.copy}>
           <h1 id="bento-hero-title">Find your<br />next trip</h1>
           <p className={styles.tagline}>Tours, stays and local guides you can trust.</p>
           <div className={styles.actions}>
