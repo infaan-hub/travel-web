@@ -29,6 +29,7 @@ import {
 } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { hasCompleteCoordinates, openStreetMapUrl } from "@/lib/company-domain";
+import { openingHoursEntries } from "@/lib/company-opening-hours";
 import CompanyForm from "@/features/pages/CompanyForm";
 import type {
   Company,
@@ -314,6 +315,7 @@ export default function AdminCompanyDetailPage() {
     );
   }
 
+  const companyHours = openingHoursEntries(company.opening_hours);
   const stats = company.stats;
   const activeMembers = (company.members ?? []).filter((member) => member.status === "ACTIVE");
   const revokedMembers = (company.members ?? []).filter(
@@ -526,7 +528,19 @@ export default function AdminCompanyDetailPage() {
               </div>
               <div className={styles.overviewItem}>
                 <dt>Opening hours</dt>
-                <dd>{company.opening_hours || "—"}</dd>
+                <dd>
+                  {companyHours.length ? (
+                    <ul>
+                      {companyHours.map((entry) => (
+                        <li key={entry.day}>
+                          <strong>{entry.day}:</strong> {entry.hours}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
               </div>
               <div className={styles.overviewItem}>
                 <dt>Coordinates</dt>

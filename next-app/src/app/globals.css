@@ -3592,6 +3592,11 @@ body {
   gap: 16px;
 }
 
+:where(.page, .admin-page) form {
+  max-width: 1080px;
+  margin-inline: auto;
+}
+
 .admin-form .form-group {
   display: flex;
   flex-direction: column;

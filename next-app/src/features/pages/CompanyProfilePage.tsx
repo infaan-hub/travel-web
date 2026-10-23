@@ -20,6 +20,11 @@ import {
 import { useToast } from "@/components/ToastProvider";
 import { useAuth } from "@/context/AuthContext";
 import { companyAPI } from "@/lib/api/client";
+import OpeningHoursEditor from "@/components/OpeningHoursEditor";
+import {
+  openingHoursForEditor,
+  type CompanyOpeningHours,
+} from "@/lib/company-opening-hours";
 import styles from "@/features/pages/company-operations.module.css";
 
 type SocialLinks = {
@@ -53,7 +58,7 @@ type CompanyProfile = {
   longitude: number | null;
   website: string | null;
   social_links: SocialLinks | null;
-  opening_hours: string | null;
+  opening_hours: CompanyOpeningHours | string | null;
   status: string;
   is_public: boolean;
 };
@@ -72,7 +77,8 @@ type FormState = {
   latitude: string;
   longitude: string;
   website: string;
-  opening_hours: string;
+  opening_hours: CompanyOpeningHours;
+  legacy_opening_hours: string | null;
   social_facebook: string;
   social_instagram: string;
   social_x: string;
@@ -83,6 +89,7 @@ type FormState = {
 
 function formFrom(company: CompanyProfile): FormState {
   const social = company.social_links ?? {};
+  const openingHours = openingHoursForEditor(company.opening_hours);
   return {
     description: company.description ?? "",
     contact_email: company.contact_email ?? "",
@@ -103,7 +110,8 @@ function formFrom(company: CompanyProfile): FormState {
         ? ""
         : String(company.longitude),
     website: company.website ?? "",
-    opening_hours: company.opening_hours ?? "",
+    opening_hours: openingHours.schedule,
+    legacy_opening_hours: openingHours.legacyText,
     social_facebook: social.facebook ?? "",
     social_instagram: social.instagram ?? "",
     social_x: social.x ?? "",
@@ -178,7 +186,10 @@ export default function CompanyProfilePage() {
     void load();
   };
 
-  const setField = (key: keyof FormState, value: string) => {
+  const setField = (
+    key: Exclude<keyof FormState, "opening_hours" | "legacy_opening_hours">,
+    value: string,
+  ) => {
     setForm((current) => (current ? { ...current, [key]: value } : current));
   };
 
@@ -216,7 +227,9 @@ export default function CompanyProfilePage() {
       data.append("region", form.region);
       data.append("country", form.country);
       data.append("website", form.website);
-      data.append("opening_hours", form.opening_hours);
+      if (form.legacy_opening_hours === null) {
+        data.append("opening_hours", JSON.stringify(form.opening_hours));
+      }
       data.append("latitude", form.latitude);
       data.append("longitude", form.longitude);
 
@@ -314,7 +327,11 @@ export default function CompanyProfilePage() {
         </div>
       ) : null}
 
-      <form className={styles.formStack} onSubmit={handleSubmit} noValidate>
+      <form
+        className={`${styles.formStack} ${styles.profileForm}`}
+        onSubmit={handleSubmit}
+        noValidate
+      >
         <div className={styles.profileGrid}>
           <div className={styles.formStack}>
             <section className={`glass-card ${styles.formSection}`}>
@@ -394,15 +411,21 @@ export default function CompanyProfilePage() {
                     disabled={!canUpdate}
                   />
                 </div>
-                <div className={styles.formField}>
-                  <label htmlFor="profile-hours">Opening hours</label>
-                  <input
-                    id="profile-hours"
+                <div className={`${styles.formField} ${styles.formFieldFull}`}>
+                  <OpeningHoursEditor
                     value={form.opening_hours}
-                    onChange={(event) =>
-                      setField("opening_hours", event.target.value)
+                    legacyText={form.legacy_opening_hours}
+                    onChange={(opening_hours) =>
+                      setForm((current) =>
+                        current
+                          ? {
+                              ...current,
+                              opening_hours,
+                              legacy_opening_hours: null,
+                            }
+                          : current,
+                      )
                     }
-                    placeholder="Mon-Fri, 08:00-17:00"
                     disabled={!canUpdate}
                   />
                 </div>

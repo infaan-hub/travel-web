@@ -394,12 +394,13 @@
 
 /* Form */
 .companyForm {
+  width: 100%;
   gap: 0;
 }
 
 .formSection {
   padding: 22px 0;
-  border-top: 1px solid var(--glass-border);
+  border-top: 1px solid rgba(20, 163, 163, 0.24);
 }
 
 .formSection:first-of-type {
@@ -428,6 +429,18 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px 20px;
+}
+
+.companyForm :global(.form-group input),
+.companyForm :global(.form-group select),
+.companyForm :global(.form-group textarea) {
+  border-color: rgba(20, 163, 163, 0.28);
+}
+
+.companyForm :global(.form-group input:focus),
+.companyForm :global(.form-group select:focus),
+.companyForm :global(.form-group textarea:focus) {
+  border-color: rgba(20, 163, 163, 0.72);
 }
 
 .fullWidth {

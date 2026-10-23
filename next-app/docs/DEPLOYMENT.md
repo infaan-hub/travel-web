@@ -5,9 +5,9 @@
 - Node.js 22+
 - PostgreSQL 15+ (managed provider recommended)
 - VAPID keys for Web Push notifications (optional)
-- A durable object-storage integration for production media (not yet
-  implemented for general uploads; homepage hero and More Experiences images
-  are stored in PostgreSQL)
+- A connected public Vercel Blob store for production uploads. Vercel's
+  connected-store OIDC credentials are preferred; `BLOB_READ_WRITE_TOKEN` is
+  supported for development or non-Vercel hosts.
 
 ## Steps
 
@@ -21,11 +21,11 @@
    `--assign-tours` unless the legacy tour's real owner has been confirmed.
 6. Verify with `npm run db:verify:companies` (use `--baseline` if a pre-migration
    count snapshot was captured).
-7. Before enabling general uploads in production, integrate durable external
-   media storage. Uploading `public/uploads` manually is not a supported
-   production storage strategy because the Vercel filesystem is ephemeral. The
-   homepage hero photos and five More Experiences portfolio slots are stored
-   in PostgreSQL.
+7. In Vercel Storage, create a **public Blob store** and connect it to the
+   project for Production and Preview. The SDK uses the connected store's OIDC
+   credentials automatically. Do not rely on `public/uploads` on Vercel; its
+   filesystem is ephemeral. Homepage hero photos and More Experiences images
+   continue to be stored in PostgreSQL.
 8. Start with `npm run start` or the platform's Next.js adapter.
 
 Demo seeding is not part of the application. Create administrator accounts

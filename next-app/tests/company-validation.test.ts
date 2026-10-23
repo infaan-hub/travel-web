@@ -10,6 +10,51 @@ import {
 } from "@/lib/validation/company";
 
 describe("company validation", () => {
+  it("validates and parses a weekly company opening schedule", () => {
+    const schedule = {
+      monday: { is_open: true, opens_at: "09:00", closes_at: "17:00" },
+      tuesday: { is_open: false, opens_at: null, closes_at: null },
+      wednesday: { is_open: false, opens_at: null, closes_at: null },
+      thursday: { is_open: false, opens_at: null, closes_at: null },
+      friday: { is_open: false, opens_at: null, closes_at: null },
+      saturday: { is_open: false, opens_at: null, closes_at: null },
+      sunday: { is_open: false, opens_at: null, closes_at: null },
+    };
+    const parsed = companyCreateSchema.safeParse({
+      name: "Acme Safaris",
+      opening_hours: JSON.stringify(schedule),
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.opening_hours).toEqual(schedule);
+
+    expect(
+      companyCreateSchema.safeParse({
+        name: "Acme Safaris",
+        opening_hours: JSON.stringify({
+          ...schedule,
+          monday: { is_open: true, opens_at: "17:00", closes_at: "09:00" },
+        }),
+      }).success,
+    ).toBe(false);
+    expect(
+      companyCreateSchema.safeParse({
+        name: "Acme Safaris",
+        opening_hours: JSON.stringify({ monday: schedule.monday }),
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts a legacy opening-hours string while old clients are phased out", () => {
+    const parsed = companyCreateSchema.safeParse({
+      name: "Acme Safaris",
+      opening_hours: "Mon-Fri, 08:00-17:00",
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.opening_hours).toBe("Mon-Fri, 08:00-17:00");
+    }
+  });
+
   it("applies safe defaults to a minimal company", () => {
     const result = companyCreateSchema.safeParse({
       name: "  Acme Safaris  ",

@@ -3,6 +3,7 @@
  * response types describe the fields the UI relies on and allow additional
  * fields coming from the server.
  */
+import type { CompanyOpeningHours } from "@/lib/company-opening-hours";
 
 export type ImageUrl = string | null;
 
@@ -261,7 +262,7 @@ export type Company = {
   longitude?: number | null;
   website?: string | null;
   social_links?: Record<string, string> | null;
-  opening_hours?: string | null;
+  opening_hours?: CompanyOpeningHours | string | null;
   status: CompanyStatus;
   is_public: boolean;
   public_path: string;

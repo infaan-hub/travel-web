@@ -6,6 +6,7 @@ import { getPublicCompany } from "@/lib/services/public-companies";
 import TourCard from "@/components/TourCard";
 import { Building2, Globe, MapPin, Star } from "@/components/icons";
 import { publicImageUrl } from "@/lib/storage/images";
+import { openingHoursEntries } from "@/lib/company-opening-hours";
 import styles from "@/features/pages/company-public.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -26,6 +27,7 @@ export default async function CompanyProfilePage({ params }: Props) {
   if (!company) notFound();
 
   const tours = Array.isArray(company.tours) ? company.tours : [];
+  const companyHours = openingHoursEntries(company.opening_hours);
 
   return (
     <div className={`page ${styles.page}`}>
@@ -83,7 +85,18 @@ export default async function CompanyProfilePage({ params }: Props) {
           ) : null}
           {company.contact_email ? <p>Email: {company.contact_email}</p> : null}
           {company.contact_phone ? <p>Phone: {company.contact_phone}</p> : null}
-          {company.opening_hours ? <p>Hours: {company.opening_hours}</p> : null}
+          {companyHours.length ? (
+            <div>
+              <h3>Opening hours</h3>
+              <ul>
+                {companyHours.map((entry) => (
+                  <li key={entry.day}>
+                    <strong>{entry.day}:</strong> {entry.hours}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {company.review_count > 0 ? (
             <p className={styles.rating}>
               <Star size={16} /> {Number(company.average_rating ?? 0).toFixed(1)} from{" "}

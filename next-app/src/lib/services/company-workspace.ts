@@ -83,7 +83,13 @@ export async function updateCompanyWorkspaceProfile(
   setText("district", "district", "");
   setText("region", "region", "");
   setText("website", "website", "");
-  setText("opening_hours", "openingHours", "");
+  if (input.opening_hours !== undefined) {
+    data.openingHours =
+      input.opening_hours === null
+        ? Prisma.DbNull
+        : input.opening_hours;
+    changed.push("opening_hours");
+  }
 
   if (input.latitude !== undefined) {
     data.latitude = input.latitude;

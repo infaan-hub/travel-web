@@ -7,6 +7,7 @@ import {
   coordinatePairIssue,
 } from "@/lib/company-domain";
 import { COMPANY_EDITABLE_TOUR_STATUSES } from "@/lib/company-operations";
+import type { CompanyOpeningHours } from "@/lib/company-opening-hours";
 import { booleanishSchema, tourSchema } from "@/lib/validation/schemas";
 
 const emptyToNull = (value: unknown): unknown => {
@@ -72,6 +73,50 @@ const socialLinksSchema = z.preprocess((value) => {
   .nullable()
   .optional());
 
+const openingDaySchema = z
+  .object({
+    is_open: z.boolean(),
+    opens_at: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/).nullable(),
+    closes_at: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/).nullable(),
+  })
+  .strict()
+  .superRefine((day, context) => {
+    if (!day.is_open) return;
+    if (!day.opens_at || !day.closes_at) {
+      context.addIssue({
+        code: "custom",
+        message: "Set both opening and closing times for an open day.",
+      });
+      return;
+    }
+    if (day.closes_at <= day.opens_at) {
+      context.addIssue({
+        code: "custom",
+        path: ["closes_at"],
+        message: "Closing time must be later than opening time.",
+      });
+    }
+  });
+
+export const companyOpeningHoursSchema = z.object({
+  monday: openingDaySchema,
+  tuesday: openingDaySchema,
+  wednesday: openingDaySchema,
+  thursday: openingDaySchema,
+  friday: openingDaySchema,
+  saturday: openingDaySchema,
+  sunday: openingDaySchema,
+}).strict();
+
+const openingHoursSchema = z.preprocess((value) => {
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}, z.union([companyOpeningHoursSchema, z.string().max(500)]).nullable().optional());
+
 const companyBaseSchema = z.object({
   name: optionalText(200),
   slug: z.preprocess(emptyToNull, z.string().max(120).nullable().optional()),
@@ -91,7 +136,7 @@ const companyBaseSchema = z.object({
   longitude: nullableCoordinate(-180, 180),
   website: optionalUrl,
   social_links: socialLinksSchema,
-  opening_hours: optionalText(500),
+  opening_hours: openingHoursSchema,
 });
 
 export const companyCreateSchema = companyBaseSchema.extend({
@@ -243,6 +288,7 @@ export const companyBookingStatusUpdateSchema = z.object({
 });
 
 export type CompanyCreateInput = z.infer<typeof companyCreateSchema>;
+export type CompanyOpeningHoursInput = CompanyOpeningHours | string | null;
 export type CompanyUpdateInput = z.infer<typeof companyUpdateSchema>;
 export type CompanyListQuery = z.infer<typeof companyListQuerySchema>;
 export type CompanyMemberAssignInput = z.infer<typeof companyMemberAssignSchema>;

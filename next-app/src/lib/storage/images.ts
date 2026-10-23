@@ -2,6 +2,7 @@ import "server-only";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { del, put } from "@vercel/blob";
 import { fileTypeFromBuffer } from "file-type";
 import { ApiError } from "@/lib/api/http";
 
@@ -36,14 +37,39 @@ function uploadsRoot(): string {
   return path.join(process.cwd(), "public", "uploads");
 }
 
+function hasBlobCredentials(): boolean {
+  return Boolean(
+    process.env.BLOB_READ_WRITE_TOKEN ||
+      (process.env.BLOB_STORE_ID && process.env.VERCEL_OIDC_TOKEN),
+  );
+}
+
 /**
  * Validates the bytes (not the browser-provided MIME type), stores the file
- * and returns its storage key. Keys are relative to the uploads root.
+ * and returns its storage key or public URL.
  */
 export async function saveImage(file: File, folder: UploadFolder): Promise<string> {
-  const { buffer, extension } = await validatedImage(file);
+  const { buffer, extension, mimeType } = await validatedImage(file);
   const safeFolder = assertAllowedFolder(folder);
-  const key = `${safeFolder}/${randomUUID()}.${extension}`;
+  const filename = `${randomUUID()}.${extension}`;
+
+  if (hasBlobCredentials()) {
+    const blob = await put(`${safeFolder}/${filename}`, buffer, {
+      access: "public",
+      addRandomSuffix: false,
+      contentType: mimeType,
+    });
+    return blob.url;
+  }
+
+  if (process.env.VERCEL === "1") {
+    throw new ApiError(
+      503,
+      "Image storage is not configured. Connect a Vercel Blob store and retry.",
+    );
+  }
+
+  const key = `${safeFolder}/${filename}`;
   const target = path.join(uploadsRoot(), key);
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, buffer);
@@ -90,6 +116,18 @@ export async function readStoredImage(key: string): Promise<{ buffer: Buffer; mi
 
 export async function deleteImage(key: string | null | undefined): Promise<void> {
   if (!key) return;
+
+  if (/^https:\/\/[^/]+\.blob\.vercel-storage\.com\//i.test(key)) {
+    try {
+      await del(key);
+    } catch (error) {
+      console.error("Failed to delete image from Vercel Blob", error);
+    }
+    return;
+  }
+
+  if (/^https?:\/\//i.test(key)) return;
+
   const safe = key.replace(/^\/?(uploads|media)\//, "");
   if (!/^[a-z0-9/_.-]+$/i.test(safe) || safe.includes("..")) return;
 

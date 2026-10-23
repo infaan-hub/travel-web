@@ -3,6 +3,7 @@ import type {
   CompanyMembershipStatus,
   CompanyRole,
   CompanyStatus,
+  Prisma,
 } from "@prisma/client";
 
 /**
@@ -116,7 +117,7 @@ export type CompanyAccessCompany = {
   latitude: number | null;
   longitude: number | null;
   website: string | null;
-  openingHours: string | null;
+  openingHours: Prisma.JsonValue | null;
 };
 
 export type CompanyAccessMembership = {

@@ -123,7 +123,10 @@ function createData(input, slug) {
         ...input.social_links !== undefined ? {
             socialLinks: cleanSocialLinks(input.social_links)
         } : {},
-        openingHours: input.opening_hours ?? null
+        openingHours:
+            input.opening_hours === null || input.opening_hours === undefined
+                ? Prisma.DbNull
+                : input.opening_hours
     };
 }
 function updateData(input, existing, slug) {
@@ -145,7 +148,10 @@ function updateData(input, existing, slug) {
     if (input.region !== undefined) data.region = input.region;
     if (input.country !== undefined) data.country = input.country ?? "Tanzania";
     if (input.website !== undefined) data.website = input.website;
-    if (input.opening_hours !== undefined) data.openingHours = input.opening_hours;
+    if (input.opening_hours !== undefined) {
+        data.openingHours =
+            input.opening_hours === null ? Prisma.DbNull : input.opening_hours;
+    }
     if (input.social_links !== undefined) {
         data.socialLinks = cleanSocialLinks(input.social_links);
     }

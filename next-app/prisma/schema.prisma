@@ -140,7 +140,7 @@ model Company {
   longitude             Float?
   website               String?
   socialLinks           Json?                    @map("social_links")
-  openingHours          String?                  @map("opening_hours")
+  openingHours          Json?                    @map("opening_hours")
   status                CompanyStatus            @default(PENDING)
   isPublic              Boolean                  @default(false) @map("is_public")
   createdByUserId       Int?                     @map("created_by_user_id")

@@ -7,6 +7,11 @@ import { companiesAPI, geocodeAPI } from "@/lib/api/client";
 import { useToast } from "@/components/ToastProvider";
 import { getImageUrl } from "@/lib/utils/image-url";
 import LocationPicker from "@/components/LocationPicker";
+import OpeningHoursEditor from "@/components/OpeningHoursEditor";
+import {
+  openingHoursForEditor,
+  type CompanyOpeningHours,
+} from "@/lib/company-opening-hours";
 import { ArrowLeft, Loader, MapPin, Save, X } from "@/components/icons";
 import { isFile } from "@/features/pages/types";
 import type { Company, CompanyBusinessType } from "@/features/pages/types";
@@ -36,7 +41,8 @@ type FormState = {
   latitude: string;
   longitude: string;
   website: string;
-  opening_hours: string;
+  opening_hours: CompanyOpeningHours;
+  legacy_opening_hours: string | null;
   is_public: boolean;
   social_facebook: string;
   social_instagram: string;
@@ -50,6 +56,7 @@ type FieldErrors = Record<string, string[]>;
 
 function initialForm(company?: Company | null): FormState {
   const social = (company?.social_links ?? {}) as Record<string, string>;
+  const openingHours = openingHoursForEditor(company?.opening_hours);
   return {
     name: company?.name ?? "",
     slug: company?.slug ?? "",
@@ -68,7 +75,8 @@ function initialForm(company?: Company | null): FormState {
     latitude: company?.latitude == null ? "" : String(company.latitude),
     longitude: company?.longitude == null ? "" : String(company.longitude),
     website: company?.website ?? "",
-    opening_hours: company?.opening_hours ?? "",
+    opening_hours: openingHours.schedule,
+    legacy_opening_hours: openingHours.legacyText,
     is_public: company?.is_public ?? false,
     social_facebook: social.facebook ?? "",
     social_instagram: social.instagram ?? "",
@@ -247,7 +255,9 @@ export default function CompanyForm({ company, onSaved, onCancel }: CompanyFormP
     payload.append("latitude", latitude === null ? "" : String(latitude));
     payload.append("longitude", longitude === null ? "" : String(longitude));
     payload.append("website", form.website.trim());
-    payload.append("opening_hours", form.opening_hours.trim());
+    if (!company || form.legacy_opening_hours === null) {
+      payload.append("opening_hours", JSON.stringify(form.opening_hours));
+    }
 
     const social = {
       facebook: form.social_facebook.trim(),
@@ -455,15 +465,17 @@ export default function CompanyForm({ company, onSaved, onCancel }: CompanyFormP
               </span>
             )}
           </div>
-          <div className="form-group">
-            <label htmlFor="company-opening-hours">Opening hours</label>
-            <input
-              id="company-opening-hours"
-              type="text"
+          <div className={styles.fullWidth}>
+            <OpeningHoursEditor
               value={form.opening_hours}
-              onChange={(event) => update("opening_hours", event.target.value)}
-              maxLength={500}
-              placeholder="Mon–Fri, 08:00–18:00"
+              legacyText={form.legacy_opening_hours}
+              onChange={(opening_hours) =>
+                setForm((current) => ({
+                  ...current,
+                  opening_hours,
+                  legacy_opening_hours: null,
+                }))
+              }
             />
           </div>
         </div>
