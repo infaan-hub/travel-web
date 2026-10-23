@@ -141,6 +141,8 @@ export default function TripsPage() {
       <PageHero
         title="Plan Your Route"
         subtitle="Estimate distances, plan the day and pick up the tips locals actually use."
+        backgroundImageKey="zanzibar"
+        patternImageKey="more1"
         chips={["Route estimator", "Travel tips", "Getting around"]}
         onChipClick={(chip) => {
           const target = chip === "Route estimator" ? "route-estimator" : "travel-tips";

@@ -32,6 +32,8 @@ export default function ContactPage() {
         eyebrow="Travel. platform support"
         title="How can we help?"
         subtitle="Send a question about using the platform, finding a provider, or managing a booking request."
+        backgroundImageKey="thumb"
+        patternImageKey="zanzibar"
         ctaPrimary={{ label: "Browse companies", href: "/companies/" }}
         ctaSecondary={{ label: "View experiences", href: "/tours/" }}
       />

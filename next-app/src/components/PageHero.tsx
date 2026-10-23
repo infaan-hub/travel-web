@@ -1,7 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { homeSettingsAPI } from "@/lib/api/client";
+import { getImageUrl } from "@/lib/utils/image-url";
+import type { HomeSettings } from "@/features/pages/types";
 import styles from "./PageHero.module.css";
 
 type HeroMedia = {
@@ -19,6 +23,18 @@ type HeroCta = {
   onClick?: () => void;
 };
 
+export type HomeHeroImageKey =
+  | "hero"
+  | "secondary"
+  | "feature"
+  | "thumb"
+  | "zanzibar"
+  | "more1"
+  | "more2"
+  | "more3"
+  | "more4"
+  | "more5";
+
 type PageHeroProps = {
   eyebrow?: string;
   title: string;
@@ -27,11 +43,41 @@ type PageHeroProps = {
   onChipClick?: (chip: string) => void;
   /** Optional full-bleed background media (image or auto-playing muted loop video). */
   media?: HeroMedia;
+  /** Home-settings image slot used for this page's hero background. */
+  backgroundImageKey?: HomeHeroImageKey;
+  /** Home-settings image slot used for this page's faded pattern image. */
+  patternImageKey?: HomeHeroImageKey;
   /** Up to two primary call-to-action buttons rendered under the subtitle. */
   ctaPrimary?: HeroCta;
   ctaSecondary?: HeroCta;
   children?: ReactNode;
 };
+
+function resolveHomeImage(settings: HomeSettings | null, key?: HomeHeroImageKey): string | null {
+  if (!settings || !key) return null;
+  switch (key) {
+    case "hero":
+      return settings.hero_image_url ?? null;
+    case "secondary":
+      return settings.hero_secondary_image_url ?? null;
+    case "feature":
+      return settings.hero_feature_image_url ?? null;
+    case "thumb":
+      return settings.hero_thumb_image_url ?? null;
+    case "zanzibar":
+      return settings.zanzibar_image_url ?? null;
+    case "more1":
+    case "more2":
+    case "more3":
+    case "more4":
+    case "more5": {
+      const index = Number(key.replace("more", "")) - 1;
+      return settings.more_experiences_image_urls?.[index] ?? null;
+    }
+    default:
+      return null;
+  }
+}
 
 function isVideo(src: string, type?: "image" | "video"): boolean {
   if (type === "video") return true;
@@ -68,38 +114,58 @@ export function PageHero({
   chips,
   onChipClick,
   media,
+  backgroundImageKey,
+  patternImageKey,
   ctaPrimary,
   ctaSecondary,
   children,
 }: PageHeroProps) {
+  const [settings, setSettings] = useState<HomeSettings | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    homeSettingsAPI
+      .get()
+      .then((response) => {
+        if (!cancelled) setSettings(response.data as HomeSettings);
+      })
+      .catch(() => {
+        if (!cancelled) setSettings(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const backgroundUrl = media?.src ?? getImageUrl(resolveHomeImage(settings, backgroundImageKey));
+  const patternUrl = getImageUrl(resolveHomeImage(settings, patternImageKey));
+  const hasPatternImage = Boolean(resolveHomeImage(settings, patternImageKey));
+
   return (
     <header className={styles.hero}>
       <div className={styles.card}>
-        {media ? (
-          isVideo(media.src, media.type) ? (
-            <video
-              className={styles.media}
-              autoPlay
-              muted
-              loop
-              playsInline
-              aria-hidden="true"
-            >
-              <source src={media.src} type="video/mp4" />
-            </video>
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              className={styles.media}
-              src={media.src}
-              alt={media.alt}
-              aria-hidden="true"
-            />
-          )
+        {backgroundUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className={styles.media}
+            src={backgroundUrl}
+            alt={media?.alt ?? ""}
+            aria-hidden="true"
+          />
         ) : null}
 
         <span className={styles.scrim} aria-hidden="true" />
-        <span className={styles.pattern} aria-hidden="true" />
+        {hasPatternImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className={styles.patternImage}
+            src={patternUrl}
+            alt=""
+            aria-hidden="true"
+          />
+        ) : (
+          <span className={styles.pattern} aria-hidden="true" />
+        )}
 
         <div className={styles.inner}>
           <span className={styles.thumb} aria-hidden="true">✦</span>

@@ -45,6 +45,8 @@ export default function ToursPage() {
       <PageHero
         title={title}
         subtitle={subtitle}
+        backgroundImageKey="hero"
+        patternImageKey="secondary"
         chips={["All", "Zanzibar", "Tanzania", "International"]}
         onChipClick={(chip) => router.push(chip === "All" ? "/tours/" : `/tours/${chip.toLowerCase()}/`)}
       />

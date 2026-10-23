@@ -111,6 +111,8 @@ export default function TourDetailPage() {
       <PageHero
         title={displayTitle ?? "Tour details"}
         subtitle={`${tour?.duration ?? ""} - ${tour?.destination ?? ""} - from $${tour?.price ?? 0}`}
+        backgroundImageKey="more1"
+        patternImageKey="more2"
         chips={tour?.category ? [tour.category] : []}
       />
       <button className="btn btn-back" onClick={() => router.back()}><ArrowLeft size={18} /> Back</button>

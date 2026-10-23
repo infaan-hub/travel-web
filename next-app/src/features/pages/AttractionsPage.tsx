@@ -47,6 +47,8 @@ export default function AttractionsPage() {
       <PageHero
         title="Attractions"
         subtitle="Beaches, caves, markets and wildlife — the places travellers keep coming back to."
+        backgroundImageKey="secondary"
+        patternImageKey="feature"
         chips={["All", "National Parks", "Beaches", "Mountains", "Cultural"]}
         onChipClick={(chip: string) => {
           const values: Record<string, string> = {

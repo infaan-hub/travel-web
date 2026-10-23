@@ -75,6 +75,8 @@ export default function CompaniesPage() {
         eyebrow="Tourism providers"
         title="Meet the companies behind the experiences"
         subtitle="Compare public company profiles, service areas and published tours, safaris and local experiences."
+        backgroundImageKey="feature"
+        patternImageKey="thumb"
       >
         <div className={styles.filters}>
           <select
