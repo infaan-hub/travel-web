@@ -45,7 +45,10 @@ export default function BentoHero({ mainImage, secondImage, featuredImage, thumb
           {secondImage ? <img src={getImageUrl(secondImage)} alt="Discover Zanzibar and Tanzania" /> : <span className={styles.placeholder}>Made for the journey</span>}
         </div>
 
-        <Link className={styles.featured} href={featuredTour ? `/tour/${featuredTour.id}/` : "/tours/"}>
+        <Link
+          className={`${styles.featured} ${featuredImage || featuredTour?.image_url ? styles.featuredHasImage : styles.featuredFallback}`}
+          href={featuredTour ? `/tour/${featuredTour.id}/` : "/tours/"}
+        >
           {featuredImage || featuredTour?.image_url ? <img src={getImageUrl(featuredImage || featuredTour?.image_url)} alt="" /> : null}
           <span className={styles.featuredCopy}>
             <span className={styles.featuredLabel}>A PLACE TO BEGIN</span>

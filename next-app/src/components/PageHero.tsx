@@ -143,10 +143,11 @@ export function PageHero({
   const backgroundUrl = media?.src ?? getImageUrl(resolveHomeImage(settings, backgroundImageKey));
   const patternUrl = patternMedia ?? getImageUrl(resolveHomeImage(settings, patternImageKey));
   const hasPatternImage = Boolean(patternUrl);
+  const hasBackgroundImage = Boolean(backgroundUrl);
 
   return (
     <header className={styles.hero}>
-      <div className={styles.card}>
+      <div className={`${styles.card} ${hasBackgroundImage ? styles.hasBackground : ""}`}>
         {backgroundUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -166,9 +167,7 @@ export function PageHero({
             alt=""
             aria-hidden="true"
           />
-        ) : (
-          <span className={styles.pattern} aria-hidden="true" />
-        )}
+        ) : null}
 
         <div className={styles.inner}>
           <p className={styles.eyebrow}>{eyebrow}</p>
