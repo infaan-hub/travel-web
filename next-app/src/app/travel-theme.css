@@ -1782,6 +1782,7 @@ select:focus,
   }
 }
 
+
 :focus-visible {
   outline: 2px solid var(--brand-accent);
   outline-offset: 2px;
@@ -5383,4 +5384,182 @@ body.nav-drawer-open {
   .sidebar.glass-sidebar {
     transition: none;
   }
+}
+
+/* ======================================================================
+   Shared glacier-glass controls for admin and customer forms
+   ====================================================================== */
+:root {
+  --glacier-surface: rgba(255, 255, 255, 0.68);
+  --glacier-line: rgba(255, 255, 255, 0.78);
+  --glacier-ink: #183238;
+  --glacier-focus: rgba(139, 165, 171, 0.32);
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page, .admin-form, .auth-form, .booking-form-detailed, .review-form, .profile-form, .contact-form, .formStack)
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="hidden"]), select, textarea) {
+  color: var(--glacier-ink) !important;
+  background: var(--glacier-surface) !important;
+  border: 1px solid var(--glacier-line) !important;
+  border-radius: 14px !important;
+  min-height: 46px !important;
+  padding: 12px 14px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 5px 18px rgba(35,55,61,.045) !important;
+  backdrop-filter: blur(16px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(115%) !important;
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease !important;
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page, .admin-form, .auth-form, .booking-form-detailed, .review-form, .profile-form, .contact-form, .formStack)
+  :where(textarea) {
+  min-height: 124px !important;
+  resize: vertical;
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page, .admin-form, .auth-form, .booking-form-detailed, .review-form, .profile-form, .contact-form, .formStack)
+  :where(.form-group, .form-field, .field-group) {
+  row-gap: 8px;
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page, .admin-form, .auth-form, .booking-form-detailed, .review-form, .profile-form, .contact-form, .formStack)
+  input[type="file"]::file-selector-button {
+  min-height: 36px;
+  margin-right: 12px;
+  padding: 8px 12px;
+  color: #263b41;
+  background: rgba(255,255,255,.84);
+  border: 1px solid rgba(255,255,255,.94);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page, .admin-form, .auth-form, .booking-form-detailed, .review-form, .profile-form, .contact-form, .formStack)
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="hidden"]), select, textarea)::placeholder {
+  color: #7c898e !important;
+  opacity: 1 !important;
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page, .admin-form, .auth-form, .booking-form-detailed, .review-form, .profile-form, .contact-form, .formStack)
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="hidden"]), select, textarea):hover {
+  background: rgba(255,255,255,.8) !important;
+  border-color: rgba(255,255,255,.98) !important;
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page, .admin-form, .auth-form, .booking-form-detailed, .review-form, .profile-form, .contact-form, .formStack)
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="hidden"]), select, textarea):focus-visible {
+  outline: none !important;
+  border-color: rgba(151,171,176,.82) !important;
+  box-shadow: 0 0 0 4px var(--glacier-focus), inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page, .admin-form, .auth-form, .booking-form-detailed, .review-form, .profile-form, .contact-form, .formStack)
+  :where(label, .form-label, legend) {
+  color: #35474d !important;
+  font-weight: 600 !important;
+}
+
+:where(.page, .admin-page, .auth-page, .company-page, .profile-page, .booking-page, .contact-page)
+  :where(input[type="checkbox"], input[type="radio"]) {
+  accent-color: #91a9ae;
+}
+
+:where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+  a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]) {
+  color: #263b41 !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.84), rgba(232,240,242,.56)) !important;
+  border: 1px solid rgba(255,255,255,.94) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.96), 0 8px 22px rgba(32,54,60,.10) !important;
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease !important;
+}
+
+:where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+  a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):hover:not(:disabled) {
+  color: #172f35 !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(239,245,246,.86)) !important;
+  box-shadow: inset 0 1px 0 #fff, 0 11px 26px rgba(32,54,60,.14) !important;
+  transform: translateY(-1px);
+}
+
+:where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+  a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):focus-visible {
+  outline: 3px solid rgba(145,169,174,.48);
+  outline-offset: 3px;
+}
+
+:where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"]):disabled {
+  cursor: not-allowed;
+  opacity: .58;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+    a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"],
+    input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    transition-duration: .01ms !important;
+  }
+}
+
+/* Keep the shared glass controls ahead of legacy page and component rules. */
+html body :is(.app-layout .main-content .page, .app-layout .app-shell, .app-bare .onboarding-screen)
+  :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+    a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]) {
+  color: #263b41 !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.84), rgba(232,240,242,.56)) !important;
+  border: 1px solid rgba(255,255,255,.94) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.96), 0 8px 22px rgba(32,54,60,.10) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+}
+
+html body :is(.app-layout .main-content .page, .app-layout .app-shell, .app-bare .onboarding-screen)
+  :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+    a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):hover:not(:disabled) {
+  color: #172f35 !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(239,245,246,.86)) !important;
+  box-shadow: inset 0 1px 0 #fff, 0 11px 26px rgba(32,54,60,.14) !important;
+  transform: translateY(-1px);
+}
+
+html body :is(.app-layout .main-content .page, .app-layout .app-shell, .app-bare .onboarding-screen)
+  :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+    a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):focus-visible {
+  outline: 3px solid rgba(145,169,174,.48) !important;
+  outline-offset: 3px;
+}
+
+html body .app-layout .main-content .page
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="hidden"]), select, textarea) {
+  color: var(--glacier-ink) !important;
+  background: var(--glacier-surface) !important;
+  border: 1px solid var(--glacier-line) !important;
+  border-radius: 14px !important;
+  min-height: 46px !important;
+  padding: 12px 14px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 5px 18px rgba(35,55,61,.045) !important;
+  backdrop-filter: blur(16px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(115%) !important;
+}
+
+html body .app-layout .main-content .page :is(textarea) {
+  min-height: 124px !important;
+  resize: vertical;
+}
+
+html body .app-layout .main-content .page :is(label, .form-label, legend) {
+  color: #35474d !important;
+  font-weight: 600 !important;
+}
+
+html body .app-layout .main-content .page :is(input[type="checkbox"], input[type="radio"]) {
+  accent-color: #91a9ae !important;
+}
+
+html body .app-layout .main-content .page
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="hidden"]), select, textarea):focus-visible {
+  outline: none !important;
+  border-color: rgba(151,171,176,.82) !important;
+  box-shadow: 0 0 0 4px var(--glacier-focus), inset 0 1px 0 rgba(255,255,255,.8) !important;
 }

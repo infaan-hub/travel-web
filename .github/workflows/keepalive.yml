@@ -1,0 +1,35 @@
+name: Neon PostgreSQL keepalive
+
+on:
+  schedule:
+    # Neon defaults to suspending idle computes after five minutes.
+    - cron: "3-58/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: neon-postgres-keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Wake Neon and verify the connection
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Add NEON_DATABASE_URL in the repository Actions secrets."
+            exit 1
+          fi
+          psql "$DATABASE_URL" \
+            --no-psqlrc \
+            --set=ON_ERROR_STOP=1 \
+            --tuples-only \
+            --no-align \
+            --command='SELECT 1'
