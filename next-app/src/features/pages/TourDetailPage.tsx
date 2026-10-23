@@ -113,6 +113,8 @@ export default function TourDetailPage() {
         subtitle={`${tour?.duration ?? ""} - ${tour?.destination ?? ""} - from $${tour?.price ?? 0}`}
         backgroundImageKey="more1"
         patternImageKey="more2"
+        media={tour?.main_image_url || tour?.image_url ? { src: getImageUrl(tour.main_image_url || tour.image_url), alt: tour.title } : undefined}
+        patternMedia={tour?.image2_url || tour?.image3_url ? getImageUrl(tour.image2_url || tour.image3_url) : undefined}
         chips={tour?.category ? [tour.category] : []}
       />
       <button className="btn btn-back" onClick={() => router.back()}><ArrowLeft size={18} /> Back</button>

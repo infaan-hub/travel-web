@@ -47,6 +47,8 @@ type PageHeroProps = {
   backgroundImageKey?: HomeHeroImageKey;
   /** Home-settings image slot used for this page's faded pattern image. */
   patternImageKey?: HomeHeroImageKey;
+  /** Optional page-specific pattern image, used for per-tour detail heroes. */
+  patternMedia?: string;
   /** Up to two primary call-to-action buttons rendered under the subtitle. */
   ctaPrimary?: HeroCta;
   ctaSecondary?: HeroCta;
@@ -116,6 +118,7 @@ export function PageHero({
   media,
   backgroundImageKey,
   patternImageKey,
+  patternMedia,
   ctaPrimary,
   ctaSecondary,
   children,
@@ -138,8 +141,8 @@ export function PageHero({
   }, []);
 
   const backgroundUrl = media?.src ?? getImageUrl(resolveHomeImage(settings, backgroundImageKey));
-  const patternUrl = getImageUrl(resolveHomeImage(settings, patternImageKey));
-  const hasPatternImage = Boolean(resolveHomeImage(settings, patternImageKey));
+  const patternUrl = patternMedia ?? getImageUrl(resolveHomeImage(settings, patternImageKey));
+  const hasPatternImage = Boolean(patternUrl);
 
   return (
     <header className={styles.hero}>
