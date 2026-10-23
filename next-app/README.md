@@ -76,7 +76,7 @@ cp .env.example .env
 npm install
 npm run db:local      # starts the embedded PostgreSQL cluster on 127.0.0.1:55432
 npm run db:migrate    # applies prisma/migrations
-npm run db:seed       # seeds demo content, an administrator and a demo company/owner (idempotent)
+npm run admin:create  # create an administrator explicitly
 npm run dev
 ```
 
@@ -99,8 +99,6 @@ Open `http://localhost:3000`.
   asserts every page still renders the light aqua theme, and that the home page
   destination cards use cinematic 16:9 media on desktop with an in-flow light
   panel (4:3 on phones)
-- `npm run db:seed` — seed demo content, an administrator and a non-production demo company/owner
-- `npm run db:seed:check` — read-only verification of the seeded demo rows, company ownership and publication state
 - `npm run db:backfill:companies` — dry-run by default; pass `--apply` to fill booking attribution/snapshots, and `--company <slug> --assign-tours` for explicit legacy-tour assignment
 - `npm run db:verify:companies` — read-only row-count/orphan checks; use `--baseline <file>` after capturing a pre-migration baseline
 - `npm run admin:create` — create an administrator explicitly

@@ -271,7 +271,7 @@ export default function CompanyForm({ company, onSaved, onCancel }: CompanyFormP
       const response = company
         ? await companiesAPI.update(company.id, payload)
         : await companiesAPI.create(payload);
-      toast.success(company ? "Company details updated." : "Company created as pending.");
+      toast.success(company ? "Company changes saved." : "Company saved as pending.");
       onSaved(response.data as Company);
     } catch (caught) {
       const failure = caught as ApiFailure;

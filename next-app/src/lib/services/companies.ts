@@ -413,7 +413,8 @@ async function createAdminCompany(input, actor, images = {}) {
                     createdByUserId: actor.id,
                     logoImageKey: images.logoImageKey ?? null,
                     coverImageKey: images.coverImageKey ?? null
-                }
+                },
+                include: COMPANY_LIST_INCLUDE
             });
             break;
         } catch (error) {
@@ -440,12 +441,7 @@ async function createAdminCompany(input, actor, images = {}) {
         ipAddress: actor.ipAddress,
         userAgent: actor.userAgent
     });
-    return prisma.company.findUniqueOrThrow({
-        where: {
-            id: company.id
-        },
-        include: COMPANY_LIST_INCLUDE
-    });
+    return company;
 }
 async function updateAdminCompany(id, input, actor, images = {}) {
     const existing = await prisma.company.findUnique({
@@ -932,4 +928,3 @@ export {
   updateCompanyMembershipRole,
   revokeCompanyMembership,
 };
-

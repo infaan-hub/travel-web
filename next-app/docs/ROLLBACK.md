@@ -12,8 +12,7 @@
 2. Restore `public/uploads` or the storage bucket prefix from backup.
 3. Run the available verification suite against the restored database. The
    legacy `npm run db:verify` script is not present in `package.json`; use
-   `npm run smoke`, `npm run db:verify:companies`, and, on a seeded
-   environment, `npm run db:seed:check`.
+   `npm run smoke` and `npm run db:verify:companies`.
 
 ## Safety notes
 

@@ -18,8 +18,6 @@
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts",
-    "db:seed:check": "node --env-file=.env scripts/seed-check.mjs",
     "db:backfill:companies": "tsx --env-file=.env scripts/backfill-companies.ts",
     "db:verify:companies": "tsx --env-file=.env scripts/verify-company-migration.ts",
     "admin:create": "tsx scripts/create-admin.ts",
@@ -76,8 +74,5 @@
     "tsx": "4.23.15",
     "typescript": "5.9.3",
     "vitest": "5.0.5"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   }
 }

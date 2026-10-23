@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       coverImageKey,
     });
     committed = true;
-    return ok(adminCompanyListSerializer(company), 201);
+    return ok(adminCompanyListSerializer(company));
   } catch (error) {
     if (!committed) {
       await Promise.all([deleteImage(logoImageKey), deleteImage(coverImageKey)]);

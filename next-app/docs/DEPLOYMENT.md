@@ -28,8 +28,8 @@
    in PostgreSQL.
 8. Start with `npm run start` or the platform's Next.js adapter.
 
-Do not run the demo seed against production. It creates demo tours, an
-administrator and a demo company owner with known development passwords.
+Demo seeding is not part of the application. Create administrator accounts
+explicitly with the documented admin setup workflow.
 
 ## Production checklist
 
