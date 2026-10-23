@@ -8,11 +8,11 @@ type MoreExperiencesEmptyStateProps = {
 };
 
 const cards = [
-  { color: "#FFC8D6", className: styles.cardPink, imageIndex: 0, rotation: -8 },
-  { color: "#FDEBA8", className: styles.cardYellow, imageIndex: 1, rotation: 6 },
-  { color: "#CFC3F5", className: styles.cardLavender, imageIndex: 2, rotation: -5 },
-  { color: "#B9F0D0", className: styles.cardMint, imageIndex: 3, rotation: 6 },
-  { color: "#FFD3B0", className: styles.cardPeach, imageIndex: 4, rotation: -4 },
+  { className: styles.cardPink, imageIndex: 0, rotation: -8 },
+  { className: styles.cardYellow, imageIndex: 1, rotation: 6 },
+  { className: styles.cardLavender, imageIndex: 2, rotation: -5 },
+  { className: styles.cardMint, imageIndex: 3, rotation: 6 },
+  { className: styles.cardPeach, imageIndex: 4, rotation: -4 },
 ];
 
 function PhotoGlyph() {
@@ -49,7 +49,6 @@ export default function MoreExperiencesEmptyState({
             <motion.div
               key={card.className}
               className={`${styles.card} ${card.className}`}
-              style={{ backgroundColor: image ? "transparent" : card.color }}
               initial={
                 reduceMotion
                   ? { opacity: 1, y: 0, scale: 1, rotate: card.rotation }
