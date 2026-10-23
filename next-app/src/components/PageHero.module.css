@@ -1,7 +1,7 @@
 .hero {
   container-type: inline-size;
-  width: min(100%, 1240px);
-  margin: 0 auto clamp(22px, 3.2vw, 40px);
+  width: min(100%, 1100px);
+  margin: 0 auto clamp(18px, 2.8vw, 32px);
 }
 
 .card {
@@ -10,12 +10,12 @@
   display: flex;
   align-items: center;
   overflow: hidden;
-  min-height: clamp(380px, 44vw, 560px);
+  min-height: clamp(340px, 38vw, 500px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: clamp(26px, 3.4cqw, 42px);
+  border-radius: clamp(22px, 3cqw, 34px);
   background: rgba(255, 255, 255, 0.82);
   clip-path: polygon(0 0, 100% 0, 100% 86%, 94% 100%, 0 100%);
-  filter: drop-shadow(0 24px 52px rgba(11, 47, 51, 0.12));
+  filter: drop-shadow(0 16px 36px rgba(11, 47, 51, 0.1));
   animation: hero-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
@@ -54,15 +54,15 @@
 .inner {
   position: relative;
   z-index: 1;
-  width: min(100%, 820px);
-  padding: clamp(30px, 6cqw, 78px);
+  width: min(100%, 700px);
+  padding: clamp(26px, 5cqw, 60px);
   animation: hero-content-in 0.55s 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .eyebrow {
   margin: 0 0 10px;
   color: #0b2f33;
-  font-size: clamp(10px, 1.05cqw, 13px);
+  font-size: clamp(10px, 1cqw, 12px);
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -70,10 +70,10 @@
 
 .title {
   margin: 0;
-  max-width: 18ch;
+  max-width: 16ch;
   color: #0b2f33;
-  font-size: 56px;
-  font-size: clamp(36px, 5.4cqw, 76px);
+  font-size: 48px;
+  font-size: clamp(32px, 5cqw, 64px);
   font-weight: 850;
   letter-spacing: -0.055em;
   line-height: 0.98;
@@ -81,11 +81,11 @@
 }
 
 .subtitle {
-  max-width: 58ch;
-  margin: clamp(12px, 1.6vw, 18px) 0 0;
+  max-width: 52ch;
+  margin: clamp(10px, 1.4vw, 16px) 0 0;
   color: rgba(11, 47, 51, .82);
-  font-size: 16px;
-  font-size: clamp(14px, 1.35cqw, 18px);
+  font-size: 15px;
+  font-size: clamp(13px, 1.25cqw, 16px);
   line-height: 1.6;
 }
 

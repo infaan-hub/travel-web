@@ -1676,18 +1676,19 @@ body {
 
 /* ========== AUTH PAGES ========== */
 .auth-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 24px 16px;
   background: var(--bg-gradient);
+  box-sizing: border-box;
 }
 
 .auth-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  max-width: 900px;
+  grid-template-columns: 1fr;
+  max-width: 480px;
   width: 100%;
   border-radius: var(--glass-radius-lg);
   overflow: hidden;
@@ -1700,7 +1701,9 @@ body {
 
 .auth-card {
   background: rgba(255, 255, 255, 0.5);
-  padding: 48px;
+  padding: clamp(24px, 4vw, 40px);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .auth-header {
@@ -2962,11 +2965,11 @@ body {
   }
 
   .auth-page {
-    padding: 20px;
+    padding: 16px;
   }
 
   .auth-card {
-    padding: 32px 24px;
+    padding: 24px 20px;
   }
 
   .tour-detail-hero {
