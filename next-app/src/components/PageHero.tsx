@@ -171,7 +171,6 @@ export function PageHero({
         )}
 
         <div className={styles.inner}>
-          <span className={styles.thumb} aria-hidden="true">✦</span>
           <p className={styles.eyebrow}>{eyebrow}</p>
           <h1 className={styles.title}>{title}</h1>
           {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}

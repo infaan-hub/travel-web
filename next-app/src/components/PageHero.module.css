@@ -73,23 +73,6 @@
   animation: hero-content-in 0.55s 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-.thumb {
-  display: grid;
-  place-items: center;
-  width: clamp(46px, 5.4cqw, 70px);
-  aspect-ratio: 1;
-  margin-bottom: clamp(16px, 2.2cqw, 24px);
-  border-radius: 20%;
-  border: 1px solid rgba(255, 255, 255, .76);
-  background: rgba(245, 250, 249, .36);
-  color: #fff;
-  font-size: clamp(20px, 2.8cqw, 34px);
-  line-height: 1;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .78), 0 12px 30px rgba(4, 19, 22, .16);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-}
-
 .eyebrow {
   margin: 0 0 10px;
   color: rgba(255, 255, 255, .84);
@@ -255,12 +238,6 @@ button.chip {
 
   .inner {
     padding: 24px;
-  }
-
-  .thumb {
-    width: 52px;
-    margin-bottom: 16px;
-    font-size: 22px;
   }
 
   .title {

@@ -17,8 +17,10 @@ export default function BentoHero({ mainImage, secondImage, featuredImage, thumb
   return (
     <section className={styles.frame} aria-labelledby="bento-hero-title">
       <div className={styles.panels}>
-        <div className={styles.copy}>
-          <span className={styles.thumb}>{thumbImage ? <img src={getImageUrl(thumbImage)} alt="" /> : "✦"}</span>
+        <div
+          className={styles.copy}
+          style={thumbImage ? { backgroundImage: `url("${getImageUrl(thumbImage)}")` } : undefined}
+        >
           <h1 id="bento-hero-title">Find your<br />next trip</h1>
           <p className={styles.tagline}>Tours, stays and local guides you can trust.</p>
           <div className={styles.actions}>
@@ -44,7 +46,7 @@ export default function BentoHero({ mainImage, secondImage, featuredImage, thumb
         </div>
 
         <Link className={styles.featured} href={featuredTour ? `/tour/${featuredTour.id}/` : "/tours/"}>
-          {featuredImage || featuredTour?.image_url ? <img src={getImageUrl(featuredImage || featuredTour?.image_url)} alt="" /> : <span className={styles.featuredPlaceholder}>✦</span>}
+          {featuredImage || featuredTour?.image_url ? <img src={getImageUrl(featuredImage || featuredTour?.image_url)} alt="" /> : null}
           <span className={styles.featuredCopy}>
             <span className={styles.featuredLabel}>A PLACE TO BEGIN</span>
             <strong>{featuredTour?.title || "Find an experience"}</strong>
