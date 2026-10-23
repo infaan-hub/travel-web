@@ -1,18 +1,30 @@
 .emptyState {
   display: grid;
   justify-items: center;
-  gap: 14px;
-  padding: clamp(28px, 5vw, 52px) 16px;
+  gap: 22px;
+  padding: clamp(34px, 5vw, 64px) 16px 12px;
 }
 
 .stage {
   position: relative;
-  width: min(100%, 640px);
-  aspect-ratio: 4 / 3;
+  width: min(100%, 1040px);
+  aspect-ratio: 16 / 10;
   overflow: hidden;
-  border-radius: 24px;
-  background: transparent;
+  border-radius: 28px;
   isolation: isolate;
+}
+
+.card {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 3px solid rgb(255 255 255 / 85%);
+  border-radius: 20px;
+  box-shadow: 0 18px 40px rgb(15 23 42 / 14%);
+  opacity: 0;
+  animation: card-drop 480ms cubic-bezier(.22, 1, .36, 1) both,
+    card-float 4.2s ease-in-out infinite;
 }
 
 .cardImage {
@@ -21,164 +33,161 @@
   object-fit: cover;
 }
 
-.card {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgb(15 23 42 / 8%);
-  opacity: 0;
-  animation: card-drop 420ms cubic-bezier(.22, 1, .36, 1) both,
-    card-float 3.6s ease-in-out infinite;
-}
-
 .photoGlyph {
-  width: 34%;
-  height: 34%;
+  width: 30%;
+  height: 30%;
   color: rgb(15 23 42 / 34%);
 }
 
-.skeleton {
-  display: grid;
-  width: 72%;
-  gap: 8px;
-}
-
-.brandTitle {
-  color: #0b4f4c;
-  font-size: clamp(9px, 2vw, 15px);
-  font-weight: 800;
-  line-height: 1.1;
-}
-
-.skeletonLine {
-  display: block;
-  width: 76%;
-  height: 5px;
-  border-radius: 999px;
-  background: rgb(15 23 42 / 18%);
-}
-
-.skeleton {
-  display: grid;
-  width: 72%;
-  gap: 8px;
-}
-
-.brandTitle {
-  color: #0b4f4c;
-  font-size: clamp(9px, 2vw, 15px);
-  font-weight: 800;
-  line-height: 1.1;
-}
-
-.skeletonTitle,
-.skeletonLine {
-  display: block;
-  border-radius: 999px;
-  background: rgb(15 23 42 / 18%);
-}
-
-.skeletonTitle { height: 8px; }
-.skeletonLine { width: 76%; height: 5px; background: rgb(15 23 42 / 12%); }
-
+/* Five oversized cards cascade diagonally so every image stays visible. */
 .cardPink {
   z-index: 1;
-  top: -8%;
-  left: -6%;
-  width: 55%;
-  height: 45%;
-  --rotation: 34deg;
+  top: 0;
+  left: 0;
+  width: 31%;
+  height: 42%;
+  --rotation: -8deg;
 }
 
 .cardYellow {
   z-index: 2;
-  top: 12%;
-  left: 18%;
-  width: 22%;
-  height: 20%;
-  --rotation: -30deg;
+  top: 11%;
+  left: 17.25%;
+  width: 31%;
+  height: 44%;
+  --rotation: 6deg;
 }
 
 .cardLavender {
   z-index: 3;
   top: 22%;
-  left: 30%;
-  width: 26%;
-  height: 22%;
-  --rotation: -12deg;
-}
-
-.cardBlue {
-  z-index: 4;
-  top: 32%;
-  left: 38%;
-  width: 30%;
-  height: 35%;
-  --rotation: 2deg;
+  left: 34.5%;
+  width: 31%;
+  height: 46%;
+  --rotation: -5deg;
 }
 
 .cardMint {
-  z-index: 5;
-  top: 48%;
-  left: 58%;
-  width: 24%;
-  height: 20%;
-  --rotation: 12deg;
+  z-index: 4;
+  top: 33%;
+  left: 51.75%;
+  width: 31%;
+  height: 48%;
+  --rotation: 6deg;
 }
 
 .cardPeach {
-  z-index: 6;
-  top: 60%;
-  left: 68%;
-  width: 26%;
-  height: 22%;
-  --rotation: 30deg;
+  z-index: 5;
+  top: 44%;
+  left: 69%;
+  width: 31%;
+  height: 50%;
+  --rotation: -4deg;
 }
 
-.cardMagenta {
-  z-index: 7;
-  top: 68%;
-  left: 62%;
-  width: 55%;
-  height: 45%;
-  --rotation: 34deg;
+.copy {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  max-width: 760px;
+  text-align: center;
+}
+
+.heading {
+  margin: 0;
+  color: #0b4f4c;
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.subheading {
+  margin: 0;
+  color: #0f9d94;
+  font-size: clamp(15px, 1.8vw, 19px);
+  font-weight: 600;
+}
+
+.muted {
+  max-width: 54ch;
+  margin: 0;
+  color: #5b6b6d;
+  font-size: clamp(13px, 1.5vw, 15px);
+  line-height: 1.55;
 }
 
 @keyframes card-drop {
-  from { opacity: 0; transform: translateY(-18%) rotate(var(--rotation)); }
-  to { opacity: 1; transform: translateY(0) rotate(var(--rotation)); }
+  from { opacity: 0; transform: translateY(-12%) rotate(var(--rotation)) scale(.94); }
+  to { opacity: 1; transform: translateY(0) rotate(var(--rotation)) scale(1); }
 }
 
 @keyframes card-float {
   0%, 100% { transform: translateY(0) rotate(var(--rotation)); }
-  50% { transform: translateY(-4px) rotate(var(--rotation)); }
+  50% { transform: translateY(-5px) rotate(var(--rotation)); }
 }
 
-.pill {
-  justify-self: center;
-  min-height: 42px;
-  margin-top: 10px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 999px;
-  background: #0f9d94;
-  color: #fff;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 160ms ease, transform 160ms ease;
-}
+@media (max-width: 720px) {
+  .emptyState {
+    gap: 18px;
+    padding-inline: 0;
+  }
 
-.pill:hover { background: #0b827b; transform: translateY(-1px); }
-.pill:focus-visible { outline: 3px solid rgb(15 157 148 / 32%); outline-offset: 3px; }
+  .stage {
+    aspect-ratio: 3 / 4;
+    border-radius: 22px;
+  }
 
-@media (max-width: 520px) {
-  .emptyState { gap: 18px; padding-inline: 0; }
+  .card {
+    border-width: 3px;
+    border-radius: 16px;
+  }
+
+  .cardPink {
+    top: 0;
+    left: 0;
+    width: 68%;
+    height: 21%;
+    --rotation: -3deg;
+  }
+
+  .cardYellow {
+    top: 19%;
+    left: 32%;
+    width: 68%;
+    height: 21%;
+    --rotation: 3deg;
+  }
+
+  .cardLavender {
+    top: 38%;
+    left: 4%;
+    width: 68%;
+    height: 21%;
+    --rotation: -2deg;
+  }
+
+  .cardMint {
+    top: 57%;
+    left: 36%;
+    width: 68%;
+    height: 21%;
+    --rotation: 2deg;
+  }
+
+  .cardPeach {
+    top: 76%;
+    left: 8%;
+    width: 68%;
+    height: 21%;
+    --rotation: -3deg;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card { animation: none; opacity: 1; }
-  .pill { transition: none; }
+  .card {
+    animation: none;
+    opacity: 1;
+    transform: rotate(var(--rotation));
+  }
 }

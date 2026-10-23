@@ -13,7 +13,8 @@
 }
 .panels { position: relative; display: grid; grid-template-columns: 1.05fr 1fr .7fr; grid-template-rows: 1.05fr .9fr; gap: 12px; height: 100%; }
 .copy, .photo, .featured { min-width: 0; min-height: 0; border-radius: clamp(20px, 3cqw, 36px); animation: panel-in .55s cubic-bezier(.2,.8,.2,1) both; }
-.copy { z-index: 2; grid-area: 1 / 1 / 2 / 2; position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 7% 8%; background: #FBEBD9; clip-path: polygon(0 0, 100% 0, 100% 76%, 84% 100%, 0 100%); animation-delay: 60ms; }
+.copy { z-index: 2; grid-area: 1 / 1 / 2 / 2; position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 7% 8%; overflow: hidden; background-color: #FBEBD9; background-position: center; background-size: cover; clip-path: polygon(0 0, 100% 0, 100% 76%, 84% 100%, 0 100%); animation-delay: 60ms; isolation: isolate; }
+.copy::before { position: absolute; inset: 0; z-index: -1; content: ""; background: linear-gradient(100deg, rgb(251 235 217 / 97%) 0%, rgb(251 235 217 / 89%) 44%, rgb(251 235 217 / 46%) 100%); }
 .thumb { position: relative; display: grid; place-items: center; overflow: hidden; width: 17%; aspect-ratio: 1; margin-bottom: 2%; border-radius: 20%; background: #D9CCF2; font-size: 2.8cqw; }
 .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .copy h1 { margin: 0 0 2%; font-size: clamp(24px, 4.3cqw, 58px); line-height: .98; letter-spacing: -.055em; font-weight: 850; }

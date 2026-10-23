@@ -14,10 +14,15 @@ type BentoHeroProps = {
 };
 
 export default function BentoHero({ mainImage, secondImage, featuredImage, thumbImage, featuredTour }: BentoHeroProps) {
+  const copyBackground = mainImage || secondImage || featuredImage || thumbImage;
+
   return (
     <section className={styles.frame} aria-labelledby="bento-hero-title">
       <div className={styles.panels}>
-        <div className={styles.copy}>
+        <div
+          className={styles.copy}
+          style={copyBackground ? { backgroundImage: `url("${getImageUrl(copyBackground)}")` } : undefined}
+        >
           <span className={styles.thumb}>{thumbImage ? <img src={getImageUrl(thumbImage)} alt="" /> : "✦"}</span>
           <h1 id="bento-hero-title">Find your<br />next trip</h1>
           <p className={styles.tagline}>Tours, stays and local guides you can trust.</p>
