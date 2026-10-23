@@ -592,36 +592,6 @@
   background: rgba(255, 255, 255, 0.48);
 }
 
-.searchField {
-  display: flex;
-  flex: 1 1 280px;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  height: 46px;
-  padding: 0 12px;
-  border: 1px solid var(--glass-border-strong, var(--line));
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.78);
-  color: var(--text-light);
-}
-
-.searchField:focus-within {
-  border-color: var(--aqua-strong);
-  box-shadow: 0 0 0 3px rgba(20, 163, 163, 0.15);
-}
-
-.searchField input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 0.88rem;
-  outline: none;
-}
-
 .filterField {
   display: flex;
   flex: 0 1 175px;
@@ -1507,7 +1477,6 @@ a.summaryValue:hover {
     align-items: stretch;
   }
 
-  .searchField,
   .filterField {
     flex-basis: 100%;
   }

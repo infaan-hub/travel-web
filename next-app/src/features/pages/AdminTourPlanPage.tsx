@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { workspacesAPI, toursAPI, travelDriversAPI, travelVehiclesAPI, hotelsAPI, roomsAPI, adminAPI } from '@/lib/api/client';
 import {
   ArrowLeft, Plus, X, Hotel, Globe, Truck, BedDouble, DollarSign,
-  Check, Save, Search, Building2, MapPin, Phone, User, Calendar
+  Check, Save, Building2, MapPin, Phone, User, Calendar
 } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
@@ -35,8 +35,6 @@ export default function AdminTourPlanPage() {
   const [allDrivers, setAllDrivers] = useState<TravelDriver[]>([]);
   const [allVehicles, setAllVehicles] = useState<TravelVehicle[]>([]);
   const [allHotels, setAllHotels] = useState<HotelType[]>([]);
-  const [searchHotel, setSearchHotel] = useState('');
-  const [searchTour, setSearchTour] = useState('');
 
   const [selectedTours, setSelectedTours] = useState<Tour[]>([]);
   const [selectedHotel, setSelectedHotel] = useState<HotelType | null>(null);
@@ -246,15 +244,6 @@ export default function AdminTourPlanPage() {
   if (!isAuthenticated || !isAdmin) return null;
   if (loading) return <div className="page"><div className="loading">Loading workspace...</div></div>;
 
-  const filteredTours = Array.isArray(allTours) ? allTours.filter(t =>
-    t.title?.toLowerCase().includes(searchTour.toLowerCase())
-  ) : [];
-
-  const filteredHotels = Array.isArray(allHotels) ? allHotels.filter(h =>
-    h.name?.toLowerCase().includes(searchHotel.toLowerCase()) ||
-    h.location?.toLowerCase().includes(searchHotel.toLowerCase())
-  ) : [];
-
   return (
     <div className="page admin-page">
       <div className="page-header">
@@ -329,16 +318,12 @@ export default function AdminTourPlanPage() {
           <div className="sub-panel">
             <div className="panel-header">
               <h3>Select Tours</h3>
-              <div className="search-input-group small">
-                <Search size={14} />
-                <input type="text" placeholder="Search tours..." value={searchTour} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearchTour(e.target.value)} />
-              </div>
             </div>
-            {filteredTours.length === 0 ? (
+            {allTours.length === 0 ? (
               <p className="empty-text">No tours available</p>
             ) : (
               <div className="selection-grid">
-                {filteredTours.map(tour => {
+                {allTours.map(tour => {
                   const isSelected = selectedTours.find(t => (t.id || t) === (tour.id || tour));
                   return (
                     <div
@@ -383,18 +368,14 @@ export default function AdminTourPlanPage() {
                 <Plus size={14} /> Add HotelType
               </button>
             </div>
-            <div className="search-input-group small" style={{ marginBottom: '1rem' }}>
-              <Search size={14} />
-              <input type="text" placeholder="Search hotels in Zanzibar..." value={searchHotel} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearchHotel(e.target.value)} />
-            </div>
-            {filteredHotels.length === 0 ? (
+            {allHotels.length === 0 ? (
               <div className="empty-state">
                 <Building2 size={48} />
-                <p>No hotels found. Add a hotel or search for available options.</p>
+                <p>No hotels found. Add a hotel to get started.</p>
               </div>
             ) : (
               <div className="hotel-list">
-                {filteredHotels.map(hotel => (
+                {allHotels.map(hotel => (
                   <div
                     key={hotel.id}
                     className={`hotel-card ${selectedHotel?.id === hotel.id ? 'selected' : ''}`}

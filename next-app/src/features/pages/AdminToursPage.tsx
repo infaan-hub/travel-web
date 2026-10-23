@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from "next/image";
 import { api, toursAPI, geocodeAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Globe, Plus, Pencil, Trash2, Search, X, MapPin, Loader, Star, GripVertical, Check, CheckSquare, Square } from '@/components/icons';
+import { Globe, Plus, Pencil, Trash2, X, MapPin, Loader, Star, GripVertical, Check, CheckSquare, Square } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
@@ -52,7 +52,6 @@ export default function AdminToursPage() {
   const router = useRouter();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [ordering, setOrdering] = useState('-created_at');
   const [page, setPage] = useState(1);
   const [pageSize] = useState(15);
@@ -91,18 +90,9 @@ export default function AdminToursPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, isAuthenticated, isAdmin, router, ordering, page]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setPage(1);
-      loadTours();
-    }, 350);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
-
   const loadTours = () => {
     toursAPI
-      .getAll({ search: search || undefined, ordering, page, page_size: pageSize })
+      .getAll({ ordering, page, page_size: pageSize })
       .then((res: any) => {
         setTours(res.data.results || res.data);
         setTotal(res.data.count ?? (res.data.results || res.data).length);
@@ -367,16 +357,6 @@ export default function AdminToursPage() {
       </div>
 
       <div className="admin-toolbar">
-        <div className="search-input-group">
-          <Search size={16} />
-          <input
-            type="text"
-            placeholder="Search tours..."
-            value={search}
-            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)}
-            aria-label="Search tours"
-          />
-        </div>
         <div className="search-input-group">
           <label className="sr-only" htmlFor="tour-ordering">Sort tours</label>
           <select

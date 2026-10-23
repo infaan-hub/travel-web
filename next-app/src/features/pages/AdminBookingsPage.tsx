@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { ClipboardList, Search, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Filter } from '@/components/icons';
+import { ClipboardList, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Filter } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 
@@ -17,7 +17,6 @@ export default function AdminBookingsPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const perPage = 15;
@@ -50,9 +49,8 @@ export default function AdminBookingsPage() {
   if (loading) return <div className="page"><div className="loading">Loading bookings...</div></div>;
 
   const filtered = bookings.filter(b => {
-    const matchSearch = !search || b.full_name?.toLowerCase().includes(search.toLowerCase()) || b.email?.toLowerCase().includes(search.toLowerCase()) || b.tour_title?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'all' || b.status === statusFilter;
-    return matchSearch && matchStatus;
+    return matchStatus;
   });
   const totalPages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
@@ -65,10 +63,6 @@ export default function AdminBookingsPage() {
       </div>
 
       <div className="admin-toolbar">
-        <div className="search-input-group">
-          <Search size={16} />
-          <input type="text" placeholder="Search by name, email, or tour..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setSearch(e.target.value); setPage(1); }} />
-        </div>
         <div className="filter-select-group">
           <Filter size={16} />
           <select value={statusFilter} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setStatusFilter(e.target.value); setPage(1); }}>

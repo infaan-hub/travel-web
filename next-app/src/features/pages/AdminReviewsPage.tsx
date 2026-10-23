@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { reviewsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Star, Search, Trash2, Check, X, BarChart3 } from '@/components/icons';
+import { Star, Trash2, Check, X, BarChart3 } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 
@@ -18,7 +18,6 @@ export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
@@ -67,9 +66,7 @@ export default function AdminReviewsPage() {
     if (filter === 'pending') return r.status === 'pending';
     if (filter === 'deleted') return r.status === 'deleted';
     return true;
-  }).filter(r =>
-    search ? r.user_name?.toLowerCase().includes(search.toLowerCase()) || r.content?.toLowerCase().includes(search.toLowerCase()) || r.tour_title?.toLowerCase().includes(search.toLowerCase()) : true
-  );
+  });
 
   if (!isAuthenticated || !isAdmin) return null;
   if (loading) return <div className="page"><div className="loading">Loading reviews...</div></div>;
@@ -92,10 +89,6 @@ export default function AdminReviewsPage() {
       )}
 
       <div className="admin-toolbar">
-        <div className="search-input-group">
-          <Search size={16} />
-          <input type="text" placeholder="Search reviews..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)} />
-        </div>
         <select value={filter} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setFilter(e.target.value)} className="filter-select">
           <option value="all">All Reviews</option>
           <option value="approved">Approved</option>

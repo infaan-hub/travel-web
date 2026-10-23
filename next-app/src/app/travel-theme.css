@@ -1346,31 +1346,6 @@ select:focus,
   justify-content: center;
 }
 
-/* Search bar rendered over media — kept light so text is legible. */
-.page-hero-search {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin: var(--space-5) auto 0;
-  max-width: 460px;
-  padding: 12px 16px;
-  border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  color: #0F2A2E;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.page-hero-search input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  padding-left: 0;
-  color: #0F2A2E;
-}
-
 .page-hero-chips {
   display: flex;
   justify-content: center;
@@ -1727,10 +1702,6 @@ select:focus,
 
   .page-hero-subtitle {
     font-size: 0.92rem;
-  }
-
-  .page-hero-search {
-    padding: 10px 14px;
   }
 
   .page-hero-chips {
@@ -2569,8 +2540,7 @@ svg {
 .form-group input,
 .form-group select,
 .form-group textarea,
-.search-input-group input,
-.page-hero-search input {
+.search-input-group input {
   font-size: 16px;
 }
 
@@ -2719,7 +2689,6 @@ svg {
     .collapse-btn,
     .top-header-menu-btn,
     .logout-btn,
-    .search-clear,
     .gallery-nav
   ) {
   min-width: 44px;
@@ -3022,11 +2991,6 @@ svg {
   line-height: 1.6;
 }
 
-.page-hero-search {
-  margin-top: 16px;
-  min-height: var(--control-h);
-}
-
 .page-hero-chips {
   margin-top: 16px;
   gap: 8px;
@@ -3218,10 +3182,6 @@ svg {
 
   .page-hero-subtitle {
     font-size: 0.92rem;
-  }
-
-  .page-hero-search {
-    margin-top: 14px;
   }
 
   .page > .page-hero + * {
@@ -4248,9 +4208,7 @@ body {
 .page-hero-inner { padding: clamp(32px, 6vw, 72px) !important; max-width: 980px !important; }
 .page-hero-title, .page-hero h1 { color: #fff !important; -webkit-text-fill-color: #fff !important; text-shadow: 0 3px 22px rgba(15,23,42,.24); }
 .page-hero-subtitle, .page-hero-eyebrow { color: #fff !important; }
-.page-hero-search, .page-hero-chip { background: rgba(15,23,42,.46) !important; border: 1px solid rgba(255,255,255,.42) !important; color: white !important; backdrop-filter: blur(18px); }
-.page-hero-search input { color: white !important; background: transparent !important; }
-.page-hero-search input::placeholder { color: rgba(255,255,255,.88) !important; }
+.page-hero-chip { background: rgba(15,23,42,.46) !important; border: 1px solid rgba(255,255,255,.42) !important; color: white !important; backdrop-filter: blur(18px); }
 .page-hero-chip:hover { background: rgba(15,23,42,.62) !important; }
 
 .btn-primary, .login-btn, .register-btn {
@@ -4571,8 +4529,7 @@ label { color: #344256; }
 .form-group input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 .form-group select,
 .form-group input[type="file"],
-.search-input-group,
-.page-hero-search {
+.search-input-group {
   min-height: var(--input-height);
 }
 
@@ -4843,7 +4800,6 @@ input[type="radio"] {
 .page :where(.page-hero) { isolation: isolate; }
 .page :where(.page-hero-media) { filter: saturate(.82) contrast(1.03); }
 .page :where(.page-hero-cta) { gap: 12px; }
-.page :where(.page-hero-search) { border-radius: 16px; }
 .page :where(.page-hero-chip) { border-radius: 999px; }
 .page :where(.breadcrumbs, .breadcrumb) { color: #5b6779; font-size: .83rem; }
 .page :where(.breadcrumbs a, .breadcrumb a) { color: #475569; text-decoration: none; }
@@ -5131,9 +5087,7 @@ body {
 .page-hero-subtitle, .page-hero-eyebrow { color: rgba(255,255,255,.92) !important; }
 .page-hero { background: linear-gradient(130deg,#083f3f,#0a5252 58%,#0f6b6b) !important; }
 .page-hero::before { background: linear-gradient(105deg,rgba(5,54,54,.82),rgba(10,82,82,.72) 60%,rgba(15,107,107,.58)) !important; }
-.page-hero-search, .page-hero-chip { background: rgba(5,54,54,.76) !important; border: 1px solid rgba(255,255,255,.45) !important; color: white !important; backdrop-filter: blur(16px); }
-.page-hero-search input { color: white !important; background: transparent !important; }
-.page-hero-search input::placeholder { color: rgba(255,255,255,.82) !important; }
+.page-hero-chip { background: rgba(5,54,54,.76) !important; border: 1px solid rgba(255,255,255,.45) !important; color: white !important; backdrop-filter: blur(16px); }
 .page-hero-cta { gap: 12px; }
 .btn-primary, .login-btn, .register-btn, .onboarding-account-primary, .onboarding-slides-redesign .onboarding-cta {
   background: linear-gradient(135deg,#0F6B6B,#0A5252) !important;

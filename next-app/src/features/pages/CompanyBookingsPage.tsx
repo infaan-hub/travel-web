@@ -8,7 +8,6 @@ import {
   ChevronRight,
   ClipboardList,
   Filter,
-  Search,
 } from "@/components/icons";
 import styles from "@/features/pages/company-operations.module.css";
 
@@ -56,7 +55,6 @@ export default function CompanyBookingsPage() {
   const [tours, setTours] = useState<TourOption[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [tour, setTour] = useState("");
   const [travelDate, setTravelDate] = useState("");
@@ -94,7 +92,6 @@ export default function CompanyBookingsPage() {
         const response = await companyAPI.bookings({
           page,
           page_size: PAGE_SIZE,
-          ...(search.trim() ? { search: search.trim() } : {}),
           ...(status ? { status } : {}),
           ...(tour ? { tour } : {}),
           ...(travelDate ? { travel_date: travelDate } : {}),
@@ -121,16 +118,16 @@ export default function CompanyBookingsPage() {
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }, search ? 300 : 0);
+    }, 0);
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [page, search, status, tour, travelDate, reloadKey]);
+  }, [page, status, tour, travelDate, reloadKey]);
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const hasFilters = Boolean(search || status || tour || travelDate);
+  const hasFilters = Boolean(status || tour || travelDate);
 
   return (
     <div className={`page ${styles.pageStack}`}>
@@ -139,7 +136,7 @@ export default function CompanyBookingsPage() {
           <p className={styles.eyebrow}>Company workspace</p>
           <h1 className={styles.pageTitle}>Bookings</h1>
           <p className={styles.pageLead}>
-            Search and operate this company&apos;s booking queue. Contact details
+            Review and operate this company&apos;s booking queue. Contact details
             are shown only for delivering the selected booking.
           </p>
         </div>
@@ -151,19 +148,6 @@ export default function CompanyBookingsPage() {
       </div>
 
       <div className={styles.toolbar}>
-        <label className={styles.searchField}>
-          <Search size={17} />
-          <span className="sr-only">Search company bookings</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              setPage(1);
-            }}
-            placeholder="Reference, guest, email, phone or tour"
-          />
-        </label>
         <label className={styles.filterField}>
           <span className={styles.filterLabel}>Status</span>
           <select
@@ -213,7 +197,6 @@ export default function CompanyBookingsPage() {
               className="btn btn-ghost btn-sm"
               type="button"
               onClick={() => {
-                setSearch("");
                 setStatus("");
                 setTour("");
                 setTravelDate("");
@@ -253,7 +236,7 @@ export default function CompanyBookingsPage() {
           <h2 className={styles.emptyTitle}>No bookings found</h2>
           <p className={styles.emptyCopy}>
             {hasFilters
-              ? "No bookings match the current filters. Clear a filter or try a different search."
+              ? "No bookings match the current filters. Clear a filter or pick another date."
               : "New customer bookings for this company will appear here."}
           </p>
         </div>

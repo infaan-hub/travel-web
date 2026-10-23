@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { travelDriversAPI, travelVehiclesAPI } from '@/lib/api/client';
-import { Car, Plus, Pencil, Trash2, Search, X, User } from '@/components/icons';
+import { Car, Plus, Pencil, Trash2, X, User } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 
@@ -21,7 +21,6 @@ export default function AdminTravelPage() {
   const [drivers, setDrivers] = useState<TravelDriver[]>([]);
   const [vehicles, setVehicles] = useState<TravelVehicle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
 
   const [showDriverForm, setShowDriverForm] = useState(false);
   const [editingDriver, setEditingDriver] = useState<TravelDriver | null>(null);
@@ -134,14 +133,8 @@ export default function AdminTravelPage() {
 
   if (!isAuthenticated || !isAdmin) return null;
 
-  const filteredDrivers = drivers.filter(d =>
-    d.name?.toLowerCase().includes(search.toLowerCase()) ||
-    d.phone?.includes(search)
-  );
-  const filteredVehicles = vehicles.filter(v =>
-    v.car_name?.toLowerCase().includes(search.toLowerCase()) ||
-    v.plate_number?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredDrivers = drivers;
+  const filteredVehicles = vehicles;
 
   return (
     <div className="page admin-page">
@@ -160,11 +153,6 @@ export default function AdminTravelPage() {
       </div>
 
       <div className="admin-toolbar">
-        <div className="search-input-group">
-          <Search size={16} />
-          <input type="text" placeholder={`Search ${activeTab}...`} value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)} />
-          {search && <button className="search-clear" onClick={() => setSearch('')}><X size={14} /></button>}
-        </div>
         <button className="btn btn-primary" onClick={() => activeTab === 'drivers' ? setShowDriverForm(true) : setShowVehicleForm(true)}>
           <Plus size={16} /> Add {activeTab === 'drivers' ? 'Driver' : 'Vehicle'}
         </button>

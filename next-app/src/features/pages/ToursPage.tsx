@@ -15,7 +15,6 @@ export default function ToursPage() {
   const { category } = useParams<Record<string, string>>();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
 
   useEffect(() => {
     const params: Record<string, string> = {};
@@ -25,10 +24,6 @@ export default function ToursPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [category]);
-
-  const filtered = tours.filter(t =>
-    search ? [t.title, t.destination, t.company_name, t.category].some((value) => value?.toLowerCase().includes(search.toLowerCase())) : true
-  );
 
   const title = !category
     ? 'Tours, safaris & experiences'
@@ -50,14 +45,13 @@ export default function ToursPage() {
       <PageHero
         title={title}
         subtitle={subtitle}
-        search={{ value: search, onChange: (value: string) => setSearch(value), placeholder: "Search experiences or providers" }}
         chips={["All", "Zanzibar", "Tanzania", "International"]}
         onChipClick={(chip) => router.push(chip === "All" ? "/tours/" : `/tours/${chip.toLowerCase()}/`)}
       />
 
       {loading ? (
         <div className="loading">Loading amazing tours...</div>
-      ) : filtered.length === 0 ? (
+      ) : tours.length === 0 ? (
         <div className="empty-state">
           <span className="empty-icon"><Search size={24} /></span>
           <p>No published experiences match these filters yet. Try another destination or browse companies.</p>
@@ -65,7 +59,7 @@ export default function ToursPage() {
         </div>
       ) : (
         <div className="tours-grid">
-          {filtered.map((tour: Tour) => (
+          {tours.map((tour: Tour) => (
             <TourCard key={tour.id} tour={tour} />
           ))}
         </div>

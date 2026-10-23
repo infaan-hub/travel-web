@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Users, UserX, Shield, User, Search, ChevronLeft, ChevronRight } from '@/components/icons';
+import { Users, UserX, Shield, User, ChevronLeft, ChevronRight } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 
@@ -17,7 +17,6 @@ export default function AdminCustomersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [codes, setCodes] = useState<Record<string, string>>({});
   const [pendingResets, setPendingResets] = useState<Customer[]>([]);
@@ -75,25 +74,14 @@ export default function AdminCustomersPage() {
   if (!isAuthenticated || !isAdmin) return null;
   if (loading) return <div className="page"><div className="loading">Loading customers...</div></div>;
 
-  const filtered = users.filter(u =>
-    u.username.toLowerCase().includes(search.toLowerCase()) ||
-    u.email.toLowerCase().includes(search.toLowerCase())
-  );
-  const totalPages = Math.ceil(filtered.length / perPage);
-  const paged = filtered.slice((page - 1) * perPage, page * perPage);
+  const totalPages = Math.ceil(users.length / perPage);
+  const paged = users.slice((page - 1) * perPage, page * perPage);
 
   return (
     <div className="page admin-page">
       <div className="page-header">
         <h1>Customers</h1>
         <p>Manage registered users ({users.length} total)</p>
-      </div>
-
-      <div className="admin-toolbar">
-        <div className="search-input-group">
-          <Search size={16} />
-          <input type="text" placeholder="Search by name or email..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setSearch(e.target.value); setPage(1); }} />
-        </div>
       </div>
 
       <div className="admin-content">

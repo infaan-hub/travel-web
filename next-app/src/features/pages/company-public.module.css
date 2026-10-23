@@ -16,12 +16,6 @@
   }
 }
 
-.hero {
-  display: grid;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
 .eyebrow {
   color: var(--aqua-strong);
   font-size: 0.72rem;
@@ -49,19 +43,6 @@
   margin-top: 8px;
 }
 
-.searchField {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1 1 260px;
-  min-width: 0;
-  padding: 0 12px;
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  background: var(--glass-bg-soft);
-}
-
-.searchField input,
 .filters select,
 .filters input {
   min-height: 44px;
@@ -69,10 +50,6 @@
   background: transparent;
   color: var(--text-primary);
   font: inherit;
-}
-
-.searchField input {
-  width: 100%;
 }
 
 .filters select,

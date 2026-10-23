@@ -13,7 +13,6 @@ import {
   Eye,
   MapPin,
   Plus,
-  Search,
 } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { useToast } from "@/components/ToastProvider";
@@ -54,7 +53,6 @@ export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
   const [status, setStatus] = useState<CompanyStatus | "">("");
   const [businessType, setBusinessType] = useState<CompanyBusinessType | "">("");
   const [region, setRegion] = useState("");
@@ -79,7 +77,6 @@ export default function AdminCompaniesPage() {
         const response = await companiesAPI.list({
           page,
           page_size: PAGE_SIZE,
-          ...(search.trim() ? { search: search.trim() } : {}),
           ...(status ? { status } : {}),
           ...(businessType ? { business_type: businessType } : {}),
           ...(region.trim() ? { region: region.trim() } : {}),
@@ -105,7 +102,7 @@ export default function AdminCompaniesPage() {
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }, search || region ? 300 : 0);
+    }, region ? 300 : 0);
 
     return () => {
       cancelled = true;
@@ -116,7 +113,6 @@ export default function AdminCompaniesPage() {
     isAuthenticated,
     isAdmin,
     page,
-    search,
     status,
     businessType,
     region,
@@ -125,12 +121,11 @@ export default function AdminCompaniesPage() {
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const hasFilters = Boolean(search.trim() || status || businessType || region.trim());
+  const hasFilters = Boolean(status || businessType || region.trim());
   const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
   const resetFilters = () => {
-    setSearch("");
     setStatus("");
     setBusinessType("");
     setRegion("");
@@ -169,19 +164,6 @@ export default function AdminCompaniesPage() {
       </div>
 
       <div className={`admin-toolbar ${styles.companyToolbar}`}>
-        <div className="search-input-group">
-          <Search size={16} />
-          <input
-            type="search"
-            placeholder="Search companies…"
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              setPage(1);
-            }}
-            aria-label="Search companies"
-          />
-        </div>
         <div className="filter-select-group">
           <label className="sr-only" htmlFor="company-status-filter">
             Filter by status
@@ -224,7 +206,7 @@ export default function AdminCompaniesPage() {
         <div className="search-input-group">
           <MapPin size={16} />
           <input
-            type="search"
+            type="text"
             placeholder="Filter by region"
             value={region}
             onChange={(event) => {
@@ -272,7 +254,7 @@ export default function AdminCompaniesPage() {
             <h3>{hasFilters ? "No companies match" : "No companies yet"}</h3>
             <p>
               {hasFilters
-                ? "Try a different search or clear the filters."
+                ? "Try different filters or clear them."
                 : "Create the first company profile. It starts pending and private."}
             </p>
             {hasFilters ? (

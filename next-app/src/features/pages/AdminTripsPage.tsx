@@ -20,7 +20,6 @@ export default function AdminTripsPage() {
   const router = useRouter();
   const [trips, setTrips] = useState<TravelTip[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<number | null>(null);
@@ -108,12 +107,7 @@ export default function AdminTripsPage() {
 
   const tipCategories = Array.from(new Set(trips.map((t: TravelTip) => t.category).filter(Boolean))).sort();
   const filteredTrips = trips.filter((t: TravelTip) => {
-    const matchesSearch = search
-      ? (t.title || '').toLowerCase().includes(search.toLowerCase()) ||
-        (t.content || '').toLowerCase().includes(search.toLowerCase())
-      : true;
-    const matchesCategory = categoryFilter === 'all' || t.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    return categoryFilter === 'all' || t.category === categoryFilter;
   });
 
   if (!isAuthenticated || !isAdmin) return null;
@@ -127,15 +121,6 @@ export default function AdminTripsPage() {
       </div>
 
       <div className="admin-toolbar">
-        <div className="search-input-group">
-          <input
-            type="text"
-            placeholder="Search trips..."
-            value={search}
-            onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)}
-            aria-label="Search trips"
-          />
-        </div>
         <div className="search-input-group">
           <label className="sr-only" htmlFor="trip-category">Filter by category</label>
           <select

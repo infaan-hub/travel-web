@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI, workspacesAPI } from '@/lib/api/client';
-import { Users, Search, X, ChevronRight, Plus, Briefcase } from '@/components/icons';
+import { Users, X, ChevronRight, Plus, Briefcase } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 
@@ -19,7 +19,6 @@ export default function AdminWorkSpacePage() {
   const [tourists, setTourists] = useState<Customer[]>([]);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [selectedTourist, setSelectedTourist] = useState<Customer | null>(null);
   const [touristBookings, setTouristBookings] = useState<Booking[]>([]);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
@@ -64,7 +63,6 @@ export default function AdminWorkSpacePage() {
   const selectTourist = (tourist: any) => {
     setSelectedTourist(tourist);
     loadTouristBookings(tourist.id);
-    setSearch('');
   };
 
   const startPlanning = () => {
@@ -100,11 +98,6 @@ export default function AdminWorkSpacePage() {
   };
 
   if (!isAuthenticated || !isAdmin) return null;
-
-  const filtered = tourists.filter(t =>
-    t.username?.toLowerCase().includes(search.toLowerCase()) ||
-    t.email?.toLowerCase().includes(search.toLowerCase())
-  );
 
   const loadTemplates = async () => {
     try {
@@ -150,11 +143,6 @@ export default function AdminWorkSpacePage() {
       )}
 
       <div className="admin-toolbar">
-        <div className="search-input-group">
-          <Search size={16} />
-          <input type="text" placeholder="Search tourists by name or email..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)} />
-          {search && <button className="search-clear" onClick={() => setSearch('')}><X size={14} /></button>}
-        </div>
         <button className="btn btn-primary" onClick={() => setShowRegisterForm(true)}>
           <Plus size={16} /> Register Tourist
         </button>
@@ -162,12 +150,12 @@ export default function AdminWorkSpacePage() {
 
       <div className="workspace-layout">
         <div className="workspace-sidebar">
-          <h3>Tourists ({filtered.length})</h3>
+          <h3>Tourists ({tourists.length})</h3>
           {loading ? <div className="loading">Loading...</div> : (
             <div className="tourist-list">
-              {filtered.length === 0 ? (
+              {tourists.length === 0 ? (
                 <p className="empty-text">No tourists found</p>
-              ) : filtered.map(tourist => (
+              ) : tourists.map(tourist => (
                 <div
                   key={tourist.id}
                   className={`tourist-card ${selectedTourist?.id === tourist.id ? 'selected' : ''}`}

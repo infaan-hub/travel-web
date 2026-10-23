@@ -1228,45 +1228,6 @@ body {
   margin-bottom: 28px;
 }
 
-/* ========== SEARCH BAR ========== */
-.search-bar {
-  position: relative;
-  max-width: 500px;
-  margin: 20px auto 0;
-}
-
-.search-bar input {
-  width: 100%;
-  padding: 14px 20px 14px 48px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: 50px;
-  font-size: 16px;
-  transition: var(--transition);
-  color: var(--text-primary);
-}
-
-.search-bar input::placeholder {
-  color: var(--text-light);
-}
-
-.search-bar input:focus {
-  outline: none;
-  border-color: var(--aqua);
-  box-shadow: 0 0 0 4px var(--aqua-subtle);
-}
-
-.search-icon {
-  position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  opacity: 0.6;
-}
-
 /* ========== FILTERS ========== */
 .filters-bar {
   display: flex;

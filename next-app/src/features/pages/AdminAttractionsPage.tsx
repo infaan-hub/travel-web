@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { attractionsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Map, Plus, Pencil, Trash2, Search, X } from '@/components/icons';
+import { Map, Plus, Pencil, Trash2, X } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
@@ -20,7 +20,6 @@ export default function AdminAttractionsPage() {
   const router = useRouter();
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<number | null>(null);
@@ -96,13 +95,8 @@ export default function AdminAttractionsPage() {
     new Set(attractions.map((a: any) => a.category).filter(Boolean)),
   ).sort();
   const filtered = attractions.filter(a => {
-    const matchesSearch = search
-      ? a.name?.toLowerCase().includes(search.toLowerCase()) ||
-        a.location?.toLowerCase().includes(search.toLowerCase()) ||
-        a.region?.toLowerCase().includes(search.toLowerCase())
-      : true;
     const matchesCategory = categoryFilter === 'all' || a.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    return matchesCategory;
   });
 
   if (!isAuthenticated || !isAdmin) return null;
@@ -116,10 +110,6 @@ export default function AdminAttractionsPage() {
       </div>
 
       <div className="admin-toolbar">
-        <div className="search-input-group">
-          <Search size={16} />
-          <input type="text" placeholder="Search attractions..." value={search} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setSearch(e.target.value)} aria-label="Search attractions" />
-        </div>
         <div className="search-input-group">
           <label className="sr-only" htmlFor="attraction-category">Filter by category</label>
           <select

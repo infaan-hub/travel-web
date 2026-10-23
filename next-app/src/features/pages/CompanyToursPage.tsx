@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Globe,
   Plus,
-  Search,
   Trash2,
 } from "@/components/icons";
 import { useToast } from "@/components/ToastProvider";
@@ -59,7 +58,6 @@ export default function CompanyToursPage() {
   const [tours, setTours] = useState<CompanyTourRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +73,6 @@ export default function CompanyToursPage() {
         const response = await companyAPI.tours({
           page,
           page_size: PAGE_SIZE,
-          ...(search.trim() ? { search: search.trim() } : {}),
           ...(status ? { publication_status: status } : {}),
         });
         if (cancelled) return;
@@ -100,13 +97,13 @@ export default function CompanyToursPage() {
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }, search ? 300 : 0);
+    }, 0);
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [page, search, status, reloadKey]);
+  }, [page, status, reloadKey]);
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -150,19 +147,6 @@ export default function CompanyToursPage() {
       </div>
 
       <div className={styles.toolbar}>
-        <label className={styles.searchField}>
-          <Search size={17} />
-          <span className="sr-only">Search company tours</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              setPage(1);
-            }}
-            placeholder="Search title, destination or description"
-          />
-        </label>
         <label className={styles.filterField}>
           <span className={styles.filterLabel}>Publication</span>
           <select
@@ -213,11 +197,11 @@ export default function CompanyToursPage() {
           </span>
           <h2 className={styles.emptyTitle}>No tours found</h2>
           <p className={styles.emptyCopy}>
-            {search || status
-              ? "No tours match the current filters. Try a different search or publication state."
+            {status
+              ? "No tours match the current filters. Try a different publication state."
               : "Create the first tour for this company. It will stay in draft until you publish it."}
           </p>
-          {!search && !status ? (
+          {!status ? (
             <Link className="btn btn-primary btn-sm" href="/company/tours/create/">
               <Plus size={15} /> Create tour
             </Link>

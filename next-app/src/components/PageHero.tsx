@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Search } from "@/components/icons";
+import type { ReactNode } from "react";
+import styles from "./PageHero.module.css";
 
 type HeroMedia = {
   /** Image or video source URL. */
@@ -22,11 +23,6 @@ type PageHeroProps = {
   eyebrow?: string;
   title: string;
   subtitle?: string;
-  search?: {
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-  };
   chips?: string[];
   onChipClick?: (chip: string) => void;
   /** Optional full-bleed background media (image or auto-playing muted loop video). */
@@ -34,7 +30,7 @@ type PageHeroProps = {
   /** Up to two primary call-to-action buttons rendered under the subtitle. */
   ctaPrimary?: HeroCta;
   ctaSecondary?: HeroCta;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 function isVideo(src: string, type?: "image" | "video"): boolean {
@@ -44,8 +40,7 @@ function isVideo(src: string, type?: "image" | "video"): boolean {
 }
 
 function renderCta(cta: HeroCta, variant: "primary" | "secondary") {
-  const className =
-    variant === "primary" ? "btn btn-primary" : "btn btn-secondary";
+  const className = variant === "primary" ? styles.ctaPrimary : styles.ctaSecondary;
   const content = <>{cta.label}</>;
   if (cta.href) {
     return (
@@ -62,16 +57,14 @@ function renderCta(cta: HeroCta, variant: "primary" | "secondary") {
 }
 
 /**
- * Full-width, media-backed hero used across the public pages. Renders a
- * centered headline with an optional background image/video, up to two CTA
- * buttons, and the legacy search + chip bar. When no `media` is supplied it
- * falls back to the brand dark-teal gradient so it is always presentable.
+ * Single-card Bento hero used across the public pages. It keeps the home
+ * page's pastel panel language — cream copy, clipped corner, thumbnail and
+ * pill controls — while giving every page one consistent hero card.
  */
 export function PageHero({
   eyebrow = "Travel.",
   title,
   subtitle,
-  search,
   chips,
   onChipClick,
   media,
@@ -80,75 +73,68 @@ export function PageHero({
   children,
 }: PageHeroProps) {
   return (
-    <header className="page-hero">
-      {media ? (
-        isVideo(media.src, media.type) ? (
-          <video
-            className="page-hero-media"
-            autoPlay
-            muted
-            loop
-            playsInline
-            aria-hidden="true"
-          >
-            <source src={media.src} type="video/mp4" />
-          </video>
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            className="page-hero-media"
-            src={media.src}
-            alt={media.alt}
-            aria-hidden="true"
-          />
-        )
-      ) : null}
-
-      <div className="page-hero-inner">
-        <p className="page-hero-eyebrow">{eyebrow}</p>
-        <h1 className="page-hero-title">{title}</h1>
-        {subtitle ? <p className="page-hero-subtitle">{subtitle}</p> : null}
-
-        {(ctaPrimary || ctaSecondary) && (
-          <div className="page-hero-cta">
-            {ctaPrimary ? renderCta(ctaPrimary, "primary") : null}
-            {ctaSecondary ? renderCta(ctaSecondary, "secondary") : null}
-          </div>
-        )}
-
-        {search ? (
-          <div className="page-hero-search">
-            <Search size={18} aria-hidden="true" />
-            <input
-              type="search"
-              value={search.value}
-              onChange={(event) => search.onChange(event.target.value)}
-              placeholder={search.placeholder ?? "Search"}
-              aria-label={search.placeholder ?? "Search"}
+    <header className={styles.hero}>
+      <div className={styles.card}>
+        {media ? (
+          isVideo(media.src, media.type) ? (
+            <video
+              className={styles.media}
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-hidden="true"
+            >
+              <source src={media.src} type="video/mp4" />
+            </video>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              className={styles.media}
+              src={media.src}
+              alt={media.alt}
+              aria-hidden="true"
             />
-          </div>
+          )
         ) : null}
 
-        {chips && chips.length > 0 ? (
-          <div className="page-hero-chips">
-            {chips.map((chip) => (
-              onChipClick ? (
-                <button
-                  key={chip}
-                  type="button"
-                  className="page-hero-chip"
-                  onClick={() => onChipClick(chip)}
-                >
-                  {chip}
-                </button>
-              ) : (
-                <span key={chip} className="page-hero-chip">{chip}</span>
-              )
-            ))}
-          </div>
-        ) : null}
+        <span className={styles.scrim} aria-hidden="true" />
+        <span className={styles.pattern} aria-hidden="true" />
 
-        {children}
+        <div className={styles.inner}>
+          <span className={styles.thumb} aria-hidden="true">✦</span>
+          <p className={styles.eyebrow}>{eyebrow}</p>
+          <h1 className={styles.title}>{title}</h1>
+          {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+
+          {(ctaPrimary || ctaSecondary) && (
+            <div className={styles.actions}>
+              {ctaPrimary ? renderCta(ctaPrimary, "primary") : null}
+              {ctaSecondary ? renderCta(ctaSecondary, "secondary") : null}
+            </div>
+          )}
+
+          {chips && chips.length > 0 ? (
+            <div className={styles.chips}>
+              {chips.map((chip) => (
+                onChipClick ? (
+                  <button
+                    key={chip}
+                    type="button"
+                    className={styles.chip}
+                    onClick={() => onChipClick(chip)}
+                  >
+                    {chip}
+                  </button>
+                ) : (
+                  <span key={chip} className={styles.chip}>{chip}</span>
+                )
+              ))}
+            </div>
+          ) : null}
+
+          {children ? <div className={styles.children}>{children}</div> : null}
+        </div>
       </div>
     </header>
   );

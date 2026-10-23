@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { publicCompaniesAPI } from "@/lib/api/client";
-import { Search, Building2, MapPin, Globe } from "@/components/icons";
+import { Building2, Globe } from "@/components/icons";
+import { PageHero } from "@/components/PageHero";
 import styles from "@/features/pages/company-public.module.css";
 
 type Company = {
@@ -36,7 +37,6 @@ const BUSINESS_TYPES = [
 export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [region, setRegion] = useState("");
   const [page, setPage] = useState(1);
@@ -47,7 +47,6 @@ export default function CompaniesPage() {
     setLoading(true);
     try {
       const params: Record<string, string | number> = { page, page_size: pageSize };
-      if (search.trim()) params.search = search.trim();
       if (businessType) params.business_type = businessType;
       if (region.trim()) params.region = region.trim();
       const res = await publicCompaniesAPI.getAll(params);
@@ -61,35 +60,23 @@ export default function CompaniesPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, businessType, region, page]);
+  }, [businessType, region, page]);
 
   useEffect(() => {
     void load(); // eslint-disable-line react-hooks/set-state-in-effect
   }, [load]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const hasFilters = Boolean(search.trim() || businessType || region.trim());
+  const hasFilters = Boolean(businessType || region.trim());
 
   return (
     <div className={`page ${styles.page}`}>
-      <section className={styles.hero}>
-        <p className={styles.eyebrow}>Tourism providers</p>
-        <h1 className={styles.title}>Meet the companies behind the experiences</h1>
-        <p className={styles.lead}>
-          Compare public company profiles, service areas and published tours, safaris and local experiences.
-        </p>
+      <PageHero
+        eyebrow="Tourism providers"
+        title="Meet the companies behind the experiences"
+        subtitle="Compare public company profiles, service areas and published tours, safaris and local experiences."
+      >
         <div className={styles.filters}>
-          <label className={styles.searchField}>
-            <Search size={16} />
-            <input
-              value={search}
-              onChange={(event) => {
-                setPage(1);
-                setSearch(event.target.value);
-              }}
-              placeholder="Search companies, regions or services"
-            />
-          </label>
           <select
             value={businessType}
             onChange={(event) => {
@@ -115,7 +102,7 @@ export default function CompaniesPage() {
             aria-label="Region"
           />
         </div>
-      </section>
+      </PageHero>
 
       {loading ? (
         <div className={styles.loading}>Loading companies...</div>
@@ -123,9 +110,9 @@ export default function CompaniesPage() {
         <div className={styles.empty}>
           <Building2 size={28} />
           <h2>{hasFilters ? "No companies match these filters" : "No companies are listed yet"}</h2>
-          <p>{hasFilters ? "Try a broader search or clear the filters to see all listed providers." : "Published company profiles will appear here when providers join the marketplace."}</p>
+          <p>{hasFilters ? "Try clearing the filters to see all listed providers." : "Published company profiles will appear here when providers join the marketplace."}</p>
           {hasFilters ? (
-            <button className="btn btn-secondary" type="button" onClick={() => { setSearch(""); setBusinessType(""); setRegion(""); setPage(1); }}>
+            <button className="btn btn-secondary" type="button" onClick={() => { setBusinessType(""); setRegion(""); setPage(1); }}>
               Clear filters
             </button>
           ) : null}
