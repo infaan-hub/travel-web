@@ -1,6 +1,6 @@
 "use client";
 
-import axios from "axios";
+import axios, { type AxiosRequestHeaders } from "axios";
 
 const api = axios.create({
   baseURL: "/api",
@@ -40,7 +40,17 @@ export default api;
 export { api };
 
 const formDataConfig = (data: unknown) =>
-  data instanceof FormData ? { headers: { "Content-Type": undefined } } : undefined;
+  data instanceof FormData
+    ? {
+        headers: { "Content-Type": undefined },
+        transformRequest: [
+          (payload: unknown, headers: AxiosRequestHeaders) => {
+            headers.setContentType(false);
+            return payload;
+          },
+        ],
+      }
+    : undefined;
 
 type Params = Record<string, unknown>;
 
