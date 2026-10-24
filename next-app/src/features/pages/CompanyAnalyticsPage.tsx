@@ -28,6 +28,46 @@ export default function CompanyAnalyticsPage({
     data.booking_status.find((item) => item.name === "Confirmed")?.value ?? 0;
   const cancelled =
     data.booking_status.find((item) => item.name === "Cancelled")?.value ?? 0;
+  const analyticsMetrics = [
+    {
+      label: "Confirmation rate",
+      value:
+        data.totals.confirmation_rate_pct === null
+          ? "—"
+          : `${data.totals.confirmation_rate_pct.toFixed(1)}%`,
+      hint: "Confirmed ÷ pending and confirmed bookings",
+      icon: CheckCircle,
+    },
+    {
+      label: "Cancellation rate",
+      value:
+        data.totals.cancellation_rate_pct === null
+          ? "—"
+          : `${data.totals.cancellation_rate_pct.toFixed(1)}%`,
+      hint: "Cancelled ÷ all company bookings",
+      icon: XCircle,
+    },
+    {
+      label: "Average group size",
+      value:
+        data.totals.average_travelers_per_booking === null
+          ? "—"
+          : data.totals.average_travelers_per_booking.toFixed(2),
+      hint: "Travelers ÷ non-cancelled bookings",
+      icon: Users,
+    },
+    {
+      label: "Average booked value",
+      value:
+        data.totals.average_booked_value_tzs === null
+          ? "—"
+          : `TSh ${Math.round(
+              data.totals.average_booked_value_tzs,
+            ).toLocaleString("en-US")}`,
+      hint: "Saved value ÷ priced, non-cancelled bookings",
+      icon: BarChart3,
+    },
+  ];
 
   const stats = [
     {
@@ -142,6 +182,24 @@ export default function CompanyAnalyticsPage({
               <span className={styles.statValue}>{stat.value}</span>
               <span className={styles.statLabel}>{stat.label}</span>
               <span className={styles.statHint}>{stat.hint}</span>
+            </article>
+          );
+        })}
+      </section>
+
+      <section className={styles.insightStats} aria-label="Calculated performance metrics">
+        {analyticsMetrics.map((metric) => {
+          const Icon = metric.icon;
+          return (
+            <article className={styles.statCard} key={metric.label}>
+              <div className={styles.statTop}>
+                <span className={styles.statIcon}>
+                  <Icon size={17} />
+                </span>
+              </div>
+              <span className={styles.statValue}>{metric.value}</span>
+              <span className={styles.statLabel}>{metric.label}</span>
+              <span className={styles.statHint}>{metric.hint}</span>
             </article>
           );
         })}

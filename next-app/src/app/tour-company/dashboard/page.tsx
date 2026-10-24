@@ -1,13 +1,11 @@
 import { redirect } from "next/navigation";
 import { Building2, Clock } from "@/components/icons";
-import CompanyWorkspaceHeader from "@/components/CompanyWorkspaceHeader";
 import TourCompanyApplicationPage from "@/features/pages/TourCompanyApplicationPage";
 import CompanyWorkspacePage from "@/features/pages/CompanyWorkspacePage";
 import { requirePageCompanyMember, readActiveCompanySelector } from "@/lib/auth/company";
 import { getServerUser } from "@/lib/auth/server-guard";
 import { listActiveCompanyMemberships } from "@/lib/services/company-access";
 import { getCompanyDashboard } from "@/lib/services/company-workspace";
-import { publicImageUrl } from "@/lib/storage/images";
 
 export const dynamic = "force-dynamic";
 
@@ -65,14 +63,6 @@ export default async function TourCompanyDashboardRoute() {
 
   return (
     <>
-      <CompanyWorkspaceHeader
-        companyName={context.company.name}
-        companySlug={context.company.slug}
-        role={context.role}
-        permissions={context.permissions}
-        logoUrl={publicImageUrl(context.company.logoImageKey)}
-        canSwitch={activeCompanies.length > 1}
-      />
       {context.company.status === "PENDING" ? (
         <div className="page">
           <div className="alert" role="status">

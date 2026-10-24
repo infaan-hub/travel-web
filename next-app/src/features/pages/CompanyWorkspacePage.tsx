@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { CompanyContext } from "@/lib/auth/company";
 import type { CompanySwitcherOption } from "@/components/CompanySwitcher";
 import CompanySwitcher from "@/components/CompanySwitcher";
+import CompanyDashboardCharts from "@/features/pages/CompanyDashboardChartsClient";
 import type { AppIcon } from "@/components/icons";
 import {
   Activity,
@@ -351,6 +352,8 @@ export default function CompanyWorkspacePage({
           );
         })}
       </section>
+
+      <CompanyDashboardCharts stats={data.stats} upcoming={data.upcoming} />
 
       <div className={styles.dashboardGrid}>
         <div className={styles.detailStack}>

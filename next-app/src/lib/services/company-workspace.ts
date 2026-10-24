@@ -5,6 +5,7 @@ import type { Pagination } from "@/lib/api/pagination";
 import prisma from "@/lib/db/prisma";
 import { recordAudit } from "@/lib/audit";
 import { coordinatePairIssue } from "@/lib/company-domain";
+import { calculateCompanyAnalyticsMetrics } from "@/lib/company-analytics-metrics";
 import {
   companyBookingListSerializer,
   companyNotificationSerializer,
@@ -414,7 +415,12 @@ export async function getCompanyAnalytics(companyId: number) {
       }),
       prisma.booking.findMany({
         where: { companyId, createdAt: { gte: start } },
-        select: { createdAt: true, travelers: true, status: true },
+        select: {
+          createdAt: true,
+          travelers: true,
+          status: true,
+          totalPriceAtBooking: true,
+        },
       }),
       prisma.tour.findMany({
         where: { companyId, deletedAt: null },
@@ -424,7 +430,8 @@ export async function getCompanyAnalytics(companyId: number) {
           publicationStatus: true,
           _count: { select: { bookings: true } },
         },
-        take: 50,
+        orderBy: [{ bookings: { _count: "desc" } }, { updatedAt: "desc" }],
+        take: 8,
       }),
       prisma.booking.aggregate({
         where: { companyId, status: { not: "cancelled" } },
@@ -453,18 +460,32 @@ export async function getCompanyAnalytics(companyId: number) {
   let confirmedValue = 0;
   let bookingsWithPrice = 0;
   let bookingsWithoutPrice = 0;
+  let pricedActiveBookings = 0;
   for (const group of statusGroups) {
     statusCounts[group.status] = group._count._all;
     const groupValue = Number(group._sum.totalPriceAtBooking ?? 0);
     bookingsWithPrice += group._count.totalPriceAtBooking;
     bookingsWithoutPrice += group._count._all - group._count.totalPriceAtBooking;
-    if (group.status !== "cancelled") bookedValue += groupValue;
+    if (group.status !== "cancelled") {
+      bookedValue += groupValue;
+      pricedActiveBookings += group._count.totalPriceAtBooking;
+    }
     if (group.status === "confirmed") confirmedValue = groupValue;
   }
 
   const monthly = new Map<
     string,
-    { month: string; label: string; bookings: number; travelers: number }
+    {
+      month: string;
+      label: string;
+      bookings: number;
+      pending_bookings: number;
+      confirmed_bookings: number;
+      cancelled_bookings: number;
+      travelers: number;
+      booked_value_tzs: number;
+      confirmed_value_tzs: number;
+    }
   >();
   for (let offset = 5; offset >= 0; offset -= 1) {
     const month = new Date(
@@ -478,14 +499,28 @@ export async function getCompanyAnalytics(companyId: number) {
         timeZone: "UTC",
       }),
       bookings: 0,
+      pending_bookings: 0,
+      confirmed_bookings: 0,
+      cancelled_bookings: 0,
       travelers: 0,
+      booked_value_tzs: 0,
+      confirmed_value_tzs: 0,
     });
   }
   for (const row of monthlyRows) {
     const entry = monthly.get(row.createdAt.toISOString().slice(0, 7));
     if (!entry) continue;
     entry.bookings += 1;
-    if (row.status !== "cancelled") entry.travelers += row.travelers;
+    if (row.status === "pending") entry.pending_bookings += 1;
+    if (row.status === "confirmed") entry.confirmed_bookings += 1;
+    if (row.status === "cancelled") {
+      entry.cancelled_bookings += 1;
+      continue;
+    }
+    entry.travelers += row.travelers;
+    const bookingValue = Number(row.totalPriceAtBooking ?? 0);
+    entry.booked_value_tzs += bookingValue;
+    if (row.status === "confirmed") entry.confirmed_value_tzs += bookingValue;
   }
 
   return {
@@ -516,6 +551,18 @@ export async function getCompanyAnalytics(companyId: number) {
       confirmed_value_tzs: confirmedValue,
       bookings_with_price: bookingsWithPrice,
       bookings_without_price: bookingsWithoutPrice,
+      ...calculateCompanyAnalyticsMetrics({
+        bookings:
+          statusCounts.pending +
+          statusCounts.confirmed +
+          statusCounts.cancelled,
+        pendingBookings: statusCounts.pending,
+        confirmedBookings: statusCounts.confirmed,
+        cancelledBookings: statusCounts.cancelled,
+        travelers: travelerAggregate._sum.travelers ?? 0,
+        bookedValueTzs: bookedValue,
+        pricedActiveBookings,
+      }),
       tour_views: tourViews,
       reviews: reviewSummary._count._all,
       average_rating: reviewSummary._avg.rating,
