@@ -1,8 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { deleteBlob, putBlob } = vi.hoisted(() => ({
+const { createImage, deleteBlob, putBlob } = vi.hoisted(() => ({
+  createImage: vi.fn(),
   deleteBlob: vi.fn(),
   putBlob: vi.fn(),
+}));
+
+vi.mock("@/lib/db/prisma", () => ({
+  default: {
+    storedImage: {
+      create: createImage,
+    },
+  },
 }));
 
 vi.mock("@vercel/blob", () => ({
@@ -77,12 +86,19 @@ describe("Vercel Blob image storage", () => {
     expect(putBlob).toHaveBeenCalled();
   });
 
-  it("returns a clear configuration error instead of writing to Vercel's filesystem", async () => {
+  it("stores tour images in PostgreSQL when Vercel Blob is not configured", async () => {
     process.env.VERCEL = "1";
+    createImage.mockResolvedValue({
+      id: "123e4567-e89b-42d3-a456-426614174000",
+    });
     const file = new File([PNG], "logo.png", { type: "image/png" });
 
-    await expect(saveImage(file, "tours")).rejects.toMatchObject({
-      status: 503,
+    await expect(saveImage(file, "tours")).resolves.toBe(
+      "db/123e4567-e89b-42d3-a456-426614174000",
+    );
+    expect(createImage).toHaveBeenCalledWith({
+      data: { data: expect.any(Uint8Array), mimeType: "image/png" },
+      select: { id: true },
     });
     expect(putBlob).not.toHaveBeenCalled();
   });

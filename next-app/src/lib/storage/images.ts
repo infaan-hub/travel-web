@@ -55,7 +55,11 @@ export async function saveImage(file: File, folder: UploadFolder): Promise<strin
   const safeFolder = assertAllowedFolder(folder);
   const filename = `${randomUUID()}.${extension}`;
 
-  if (safeFolder === "companies" || safeFolder === "companies/covers") {
+  if (
+    safeFolder === "companies" ||
+    safeFolder === "companies/covers" ||
+    (process.env.VERCEL === "1" && !hasBlobCredentials())
+  ) {
     const image = await prisma.storedImage.create({
       data: { data: Uint8Array.from(buffer), mimeType },
       select: { id: true },
@@ -70,13 +74,6 @@ export async function saveImage(file: File, folder: UploadFolder): Promise<strin
       contentType: mimeType,
     });
     return blob.url;
-  }
-
-  if (process.env.VERCEL === "1") {
-    throw new ApiError(
-      503,
-      "Image storage is not configured. Connect a Vercel Blob store and retry.",
-    );
   }
 
   const key = `${safeFolder}/${filename}`;
