@@ -79,6 +79,14 @@ type NotificationItem = {
   created_at: string | null;
 };
 
+type DashboardStatTone =
+  | "general"
+  | "pending"
+  | "confirmed"
+  | "cancelled"
+  | "published"
+  | "neutral";
+
 function formatDate(value: string | null | undefined, withYear = true) {
   if (!value) return "Not set";
   const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -148,59 +156,76 @@ export default function CompanyWorkspacePage({
     value: number;
     hint: string;
     icon: AppIcon;
+    tone: DashboardStatTone;
   }[] = [
     {
       label: "Total bookings",
       value: data.stats.bookings_total,
       hint: "All company bookings",
       icon: ClipboardList,
+      tone: "general",
     },
     {
       label: "Pending",
       value: data.stats.bookings_pending,
       hint: "Awaiting confirmation",
       icon: Hourglass,
+      tone: "pending",
     },
     {
       label: "Confirmed",
       value: data.stats.bookings_confirmed,
       hint: "Ready to operate",
       icon: CheckCircle,
+      tone: "confirmed",
     },
     {
       label: "Cancelled",
       value: data.stats.bookings_cancelled,
       hint: "Historical records kept",
       icon: XCircle,
+      tone: "cancelled",
     },
     {
       label: "Upcoming travelers",
       value: data.stats.travelers_upcoming,
       hint: "Travel date today or later",
       icon: Users,
+      tone: "general",
     },
     {
       label: "Published tours",
       value: data.stats.tours_published,
       hint: "Visible on the public site",
       icon: Globe,
+      tone: "published",
     },
     {
       label: "Unpublished tours",
       value: data.stats.tours_unpublished,
       hint: "Draft, review or archived",
       icon: BarChart3,
+      tone: "neutral",
     },
     {
       label: "Total tours",
       value: data.stats.tours_total,
       hint: "Active company catalogue",
       icon: CalendarDays,
+      tone: "general",
     },
   ];
+  const statToneClasses: Record<DashboardStatTone, string> = {
+    general: styles.statToneGeneral,
+    pending: styles.statTonePending,
+    confirmed: styles.statToneConfirmed,
+    cancelled: styles.statToneCancelled,
+    published: styles.statTonePublished,
+    neutral: styles.statToneNeutral,
+  };
 
   return (
-    <div className={`page ${styles.pageStack}`}>
+    <div className={`page ${styles.dashboardRoot} ${styles.pageStack}`}>
       <div className={styles.pageHead}>
         <div className={styles.pageTitleWrap}>
           <p className={styles.eyebrow}>Company workspace</p>
@@ -308,7 +333,7 @@ export default function CompanyWorkspacePage({
           return (
             <article className={styles.statCard} key={stat.label}>
               <div className={styles.statTop}>
-                <span className={styles.statIcon}>
+                <span className={`${styles.statIcon} ${statToneClasses[stat.tone]}`}>
                   <Icon size={17} />
                 </span>
               </div>
@@ -462,18 +487,45 @@ export default function CompanyWorkspacePage({
               <div>
                 {notifications.map((notification) => (
                   <div className={styles.notificationItem} key={notification.id}>
-                    <span className={styles.notificationDot} />
-                    <div className={styles.notificationBody}>
-                      <span className={styles.notificationTitle}>
-                        {notification.title}
-                      </span>
-                      <span className={styles.notificationCopy}>
-                        {notification.body}
-                      </span>
-                      <span className={styles.notificationTime}>
-                        <Clock size={11} /> {formatDate(notification.created_at)}
-                      </span>
-                    </div>
+                    <span
+                      className={`${styles.notificationDot} ${
+                        notification.read
+                          ? styles.notificationRead
+                          : styles.notificationUnread
+                      }`}
+                      role="img"
+                      aria-label={notification.read ? "Read" : "Unread"}
+                    />
+                    {notification.url ? (
+                      <Link
+                        className={styles.notificationBody}
+                        href={notification.url}
+                      >
+                        <span className={styles.notificationTitle}>
+                          {notification.title}
+                        </span>
+                        <span className={styles.notificationCopy}>
+                          {notification.body}
+                        </span>
+                        <span className={styles.notificationTime}>
+                          <Clock size={11} />{" "}
+                          {formatDate(notification.created_at)}
+                        </span>
+                      </Link>
+                    ) : (
+                      <div className={styles.notificationBody}>
+                        <span className={styles.notificationTitle}>
+                          {notification.title}
+                        </span>
+                        <span className={styles.notificationCopy}>
+                          {notification.body}
+                        </span>
+                        <span className={styles.notificationTime}>
+                          <Clock size={11} />{" "}
+                          {formatDate(notification.created_at)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -525,16 +577,22 @@ export default function CompanyWorkspacePage({
                 </p>
               </div>
             </div>
-            <ul className={styles.list}>
-              {context.permissions.slice(0, 6).map((permission) => (
-                <li className={styles.listItem} key={permission}>
-                  <span className={styles.listSub}>
-                    {COMPANY_PERMISSION_LABELS[permission]}
-                  </span>
-                  <CheckCircle size={15} color="var(--aqua-strong)" />
-                </li>
-              ))}
-            </ul>
+            {context.permissions.length === 0 ? (
+              <p className={styles.emptyInline}>
+                No permissions are assigned to this workspace role.
+              </p>
+            ) : (
+              <ul className={styles.list}>
+                {context.permissions.slice(0, 6).map((permission) => (
+                  <li className={styles.listItem} key={permission}>
+                    <span className={styles.listSub}>
+                      {COMPANY_PERMISSION_LABELS[permission]}
+                    </span>
+                    <CheckCircle size={15} aria-hidden="true" />
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         </div>
       </div>

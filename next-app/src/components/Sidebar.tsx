@@ -202,6 +202,8 @@ export default function Sidebar() {
               key={item.to}
               href={item.to}
               className={`nav-item ${isActive(item) ? "active" : ""}`}
+              aria-label={!showLabels ? item.label : undefined}
+              title={!showLabels ? item.label : undefined}
               onClick={closeAll}
             >
               <span className="nav-icon">
@@ -211,7 +213,13 @@ export default function Sidebar() {
             </Link>
           ))}
           {(user?.companies?.length ?? 0) > 1 && (
-            <Link href="/company/select/" className="nav-item" onClick={closeAll}>
+            <Link
+              href="/company/select/"
+              className="nav-item"
+              aria-label={!showLabels ? "Switch company" : undefined}
+              title={!showLabels ? "Switch company" : undefined}
+              onClick={closeAll}
+            >
               <span className="nav-icon">
                 <NavIcon icon={Users} />
               </span>
@@ -292,6 +300,8 @@ export default function Sidebar() {
               key={item.to}
               href={item.to}
               className={`nav-item ${isActive(item) ? "active" : ""}`}
+              aria-label={!showLabels ? item.label : undefined}
+              title={!showLabels ? item.label : undefined}
               onClick={closeAll}
             >
               <span className="nav-icon">
