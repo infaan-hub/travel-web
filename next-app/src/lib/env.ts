@@ -33,6 +33,13 @@ const EnvSchema = z.object({
   /** Shared cache endpoint for geocoding (Upstash Redis). */
   CACHE_URL: z.string().optional(),
   CACHE_TOKEN: z.string().optional(),
+  /** SMTP / email delivery (Gmail app password supported). */
+  SMTP_HOST: z.string().trim().min(1).default("smtp.gmail.com"),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_SECURE: z.enum(["true", "false"]).optional(),
+  SMTP_USER: z.string().trim().min(1).optional(),
+  SMTP_PASS: z.string().trim().min(1).optional(),
+  SMTP_FROM: z.string().trim().min(1).optional(),
 });
 
 export type ServerEnv = z.infer<typeof EnvSchema>;

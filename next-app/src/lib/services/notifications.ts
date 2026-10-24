@@ -2,6 +2,8 @@ import "server-only";
 import { env } from "@/lib/env";
 import prisma from "@/lib/db/prisma";
 import { createInAppNotification, sendPushToStaff, sendPushToUsers } from "@/lib/push";
+import { sendEmail } from "@/lib/email";
+import { broadcastRealtime } from "@/lib/realtime/connections";
 import type { BookingStatus } from "@prisma/client";
 
 export type BookingNotificationInput = {
@@ -73,6 +75,7 @@ export async function notifyCompanyMembersByRole(
     }),
   );
   await sendPushToUsers(userIds, payload);
+  broadcastRealtime({ type: "notification", payload, audience: "company", company_id: companyId ?? null });
 }
 
 export async function notifyBookingCreated(booking: BookingNotificationInput): Promise<void> {
@@ -113,6 +116,16 @@ export async function notifyBookingCreated(booking: BookingNotificationInput): P
       tag: `booking-${booking.id}`,
     });
   }
+
+  if (booking.email) {
+    await sendEmail({
+      to: booking.email,
+      subject: `Booking received: ${booking.tourTitle}`,
+      text: `Hi ${booking.fullName},\n\nWe received your booking ${reference} for ${booking.tourTitle} on ${booking.travelDate.toISOString().slice(0, 10)} for ${booking.travelers} traveler(s). We will confirm shortly.\n`,
+    });
+  }
+
+  broadcastRealtime({ type: "booking_created", booking_id: booking.id });
 }
 
 export async function notifyBookingStatusChanged(
@@ -151,4 +164,14 @@ export async function notifyBookingStatusChanged(
     url: "/admin/bookings/",
     tag: `booking-${booking.id}`,
   });
+
+  if (booking.email) {
+    await sendEmail({
+      to: booking.email,
+      subject: `Booking ${label.toLowerCase()}: ${booking.tourTitle}`,
+      text: `Hi ${booking.fullName},\n\n${body}\n`,
+    });
+  }
+
+  broadcastRealtime({ type: "booking_status_changed", booking_id: booking.id, status });
 }

@@ -5,6 +5,7 @@ import prisma from "@/lib/db/prisma";
 import { hashPassword } from "@/lib/auth/password";
 import { recordAudit } from "@/lib/audit";
 import { createInAppNotification, sendPushToUsers } from "@/lib/push";
+import { sendEmail } from "@/lib/email";
 
 export type VerificationPurpose = "password_reset" | "email_verification";
 
@@ -86,6 +87,13 @@ export async function requestPasswordReset(email: string): Promise<{
     entity: "user",
     entityId: user.id,
   });
+  if (user.email) {
+    await sendEmail({
+      to: user.email,
+      subject: "Your password reset code",
+      text: `Your password reset code is ${code}. It expires at ${expiresAt.toISOString()}. If you did not request this, you can ignore this email.`,
+    });
+  }
   return { userId: user.id, username: user.username, code, expiresAt };
 }
 
@@ -134,6 +142,13 @@ export async function issueEmailVerificationCode(userId: number): Promise<{
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new ApiError(404, "User not found.");
   const { code, expiresAt } = await createVerificationCode(user.id, "email_verification");
+  if (user.email) {
+    await sendEmail({
+      to: user.email,
+      subject: "Your email verification code",
+      text: `Your verification code is ${code}. It expires at ${expiresAt.toISOString()}.`,
+    });
+  }
   return { code, expiresAt, username: user.username };
 }
 
