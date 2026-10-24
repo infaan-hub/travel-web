@@ -8,7 +8,7 @@
 .ownerAccountPanel {
   display: grid;
   gap: 14px;
-  border: 1px solid rgba(20, 163, 163, 0.24);
+  border: 1px solid rgba(82, 125, 100, 0.24);
 }
 
 .ownerAccountPanel h2 {
@@ -47,7 +47,7 @@
   min-width: 0;
   min-height: 42px;
   padding: 9px 11px;
-  border: 1px solid rgba(20, 163, 163, 0.28);
+  border: 1px solid rgba(82, 125, 100, 0.28);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.86);
   color: var(--text-primary);
@@ -185,7 +185,7 @@
 }
 
 .privateBadge {
-  background: rgba(15, 107, 107, 0.08);
+  background: rgba(82, 125, 100, 0.08);
   color: var(--text-secondary);
 }
 
@@ -419,7 +419,7 @@
 }
 
 .socialLinks a:hover {
-  background: rgba(20, 163, 163, 0.18);
+  background: rgba(82, 125, 100, 0.18);
 }
 
 .inlineLink {
@@ -468,7 +468,7 @@
 
 .formSection {
   padding: 22px 0;
-  border-top: 1px solid rgba(20, 163, 163, 0.24);
+  border-top: 1px solid rgba(82, 125, 100, 0.24);
 }
 
 .formSection:first-of-type {
@@ -502,13 +502,13 @@
 .companyForm :global(.form-group input),
 .companyForm :global(.form-group select),
 .companyForm :global(.form-group textarea) {
-  border-color: rgba(20, 163, 163, 0.28);
+  border-color: rgba(82, 125, 100, 0.28);
 }
 
 .companyForm :global(.form-group input:focus),
 .companyForm :global(.form-group select:focus),
 .companyForm :global(.form-group textarea:focus) {
-  border-color: rgba(20, 163, 163, 0.72);
+  border-color: rgba(82, 125, 100, 0.72);
 }
 
 .applicationPage {
@@ -536,7 +536,7 @@
 
 .applicationCard {
   width: 100%;
-  border: 1px solid rgba(20, 163, 163, 0.24);
+  border: 1px solid rgba(82, 125, 100, 0.24);
 }
 
 .fullWidth {
@@ -649,7 +649,7 @@
   place-items: center;
   overflow: hidden;
   border-radius: 12px;
-  border: 1px dashed rgba(15, 107, 107, 0.22);
+  border: 1px dashed rgba(82, 125, 100, 0.22);
   background: rgba(216, 228, 224, 0.28);
   color: var(--text-light);
   font-size: 0.78rem;

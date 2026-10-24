@@ -71,8 +71,8 @@ for (const scheme of ["dark", "light"]) {
         };
       });
 
-      // --page-bg must stay the light aqua value (#D8E4E0) regardless of scheme.
-      const lightPageBg = data.pageBgVar.toUpperCase() === "#D8E4E0";
+      // --page-bg must stay the light aqua value (#E5E9E1) regardless of scheme.
+      const lightPageBg = data.pageBgVar.toUpperCase() === "#E5E9E1";
       record(
         `${scheme}: ${route} keeps the light --page-bg token`,
         lightPageBg,

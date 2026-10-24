@@ -30,7 +30,7 @@
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border: 1px solid rgba(20, 163, 163, 0.24);
+  border: 1px solid rgba(82, 125, 100, 0.24);
   border-radius: 10px;
   background: var(--surface, #fff);
 }
@@ -55,15 +55,15 @@
   min-width: 0;
   min-height: 40px;
   padding: 7px 9px;
-  border: 1px solid rgba(20, 163, 163, 0.28);
+  border: 1px solid rgba(82, 125, 100, 0.28);
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.82);
   color: var(--text-primary);
 }
 
 .time:focus-visible {
-  border-color: rgba(20, 163, 163, 0.72);
-  outline: 3px solid rgba(20, 163, 163, 0.3);
+  border-color: rgba(82, 125, 100, 0.72);
+  outline: 3px solid rgba(82, 125, 100, 0.3);
   outline-offset: 1px;
 }
 
