@@ -360,9 +360,7 @@
   gap: 18px;
 }
 
-.pickerCard {
-  min-width: 0;
-}
+.pickerCard {min-width: 0;}
 
 .pickerButton {
   display: flex;
@@ -397,13 +395,7 @@
   cursor: wait;
 }
 
-.pickerCardTop {
-  display: flex;
-  width: 100%;
-  align-items: flex-start;
-  gap: 14px;
-  min-width: 0;
-}
+.pickerCardTop {display: flex;width: 100%;align-items: flex-start;gap: 10px;min-width: 0;}
 
 .pickerLogo,
 .pickerLogoFallback {
@@ -490,11 +482,7 @@
   padding: 20px 0;
 }
 
-.forbiddenCard {
-  width: min(100%, 560px);
-  padding: clamp(26px, 5vw, 46px);
-  text-align: center;
-}
+.forbiddenCard {width: min(100%, 560px);padding: clamp(20px, 5vw, 34px);text-align: center;}
 
 .forbiddenIcon {
   display: grid;

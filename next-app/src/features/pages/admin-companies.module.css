@@ -534,10 +534,7 @@
   color: var(--text-secondary);
 }
 
-.applicationCard {
-  width: 100%;
-  border: 1px solid rgba(82, 125, 100, 0.24);
-}
+.applicationCard {width: 100%;border: 1px solid rgba(82, 125, 100, 0.24);}
 
 .fullWidth {
   grid-column: 1 / -1;
@@ -620,23 +617,9 @@
   gap: 20px;
 }
 
-.imageCard {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.28);
-}
+.imageCard {display: flex;flex-direction: column;gap: 8px;min-width: 0;padding: 10px;border: 1px solid var(--glass-border);border-radius: 16px;background: rgba(255, 255, 255, 0.28);}
 
-.imageCardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
+.imageCardHeader {display: flex;align-items: center;justify-content: space-between;gap: 6px;}
 
 .imageNote {
   color: var(--text-light);
