@@ -139,6 +139,7 @@ export default function AdminCompanyDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [lifecycleBusy, setLifecycleBusy] = useState<CompanyLifecycleAction | null>(null);
+  const [deletingCompany, setDeletingCompany] = useState(false);
   const [memberUserId, setMemberUserId] = useState("");
   const [memberRole, setMemberRole] = useState<CompanyRole>("MANAGER");
   const [memberBusy, setMemberBusy] = useState<number | null>(null);
@@ -229,6 +230,23 @@ export default function AdminCompanyDetailPage() {
       toast.error(readApiError(caught, `Could not ${action} this company.`));
     } finally {
       setLifecycleBusy(null);
+    }
+  };
+
+  const handleDeleteCompany = async () => {
+    if (!company) return;
+    const confirmed = window.confirm(
+      `Permanently delete ${company.name}? This also deletes its tours, bookings, memberships, company audit history, and images. This action cannot be undone.`,
+    );
+    if (!confirmed) return;
+    setDeletingCompany(true);
+    try {
+      await companiesAPI.delete(company.id);
+      toast.success("Company and its associated data permanently deleted.");
+      router.push("/admin/companies");
+    } catch (caught) {
+      toast.error(readApiError(caught, "Could not delete this company."));
+      setDeletingCompany(false);
     }
   };
 
@@ -730,7 +748,7 @@ export default function AdminCompanyDetailPage() {
             <div className={styles.panelHeader}>
               <div>
                 <h2>Lifecycle</h2>
-                <p>Status changes are explicit and audited.</p>
+                <p>Status changes are explicit and audited. Deletion permanently removes company data.</p>
               </div>
             </div>
             <div className={styles.lifecycleStatus}>
@@ -785,6 +803,15 @@ export default function AdminCompanyDetailPage() {
                 make the profile public.
               </p>
             )}
+            <button
+              type="button"
+              className="btn btn-sm btn-danger"
+              onClick={handleDeleteCompany}
+              disabled={deletingCompany || lifecycleBusy !== null}
+            >
+              <Trash2 size={14} />
+              {deletingCompany ? "Deleting company…" : "Delete company permanently"}
+            </button>
           </section>
 
           <section className="admin-content">

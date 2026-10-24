@@ -132,7 +132,7 @@ export default function CompanyToursPage() {
       <div className={styles.pageHead}>
         <div className={styles.pageTitleWrap}>
           <p className={styles.eyebrow}>Company workspace</p>
-          <h1 className={styles.pageTitle}>Tours</h1>
+          <h1 className={styles.pageTitle}>Experiences</h1>
           <p className={styles.pageLead}>
             Create and maintain this company&apos;s tours. Publication is a
             separate control from availability, so a tour can be temporarily
@@ -176,7 +176,7 @@ export default function CompanyToursPage() {
           <span className={styles.emptyIcon}>
             <Globe size={20} />
           </span>
-          <h2 className={styles.emptyTitle}>Tours unavailable</h2>
+          <h2 className={styles.emptyTitle}>Experiences unavailable</h2>
           <p className={styles.emptyCopy}>{error}</p>
           <button
             className="btn btn-outline btn-sm"
@@ -188,14 +188,14 @@ export default function CompanyToursPage() {
         </div>
       ) : loading ? (
         <div className={styles.loading} role="status">
-          Loading company tours...
+          Loading company experiences...
         </div>
       ) : tours.length === 0 ? (
         <div className={styles.empty}>
           <span className={styles.emptyIcon}>
             <Globe size={20} />
           </span>
-          <h2 className={styles.emptyTitle}>No tours found</h2>
+          <h2 className={styles.emptyTitle}>No experiences found</h2>
           <p className={styles.emptyCopy}>
             {status
               ? "No tours match the current filters. Try a different publication state."

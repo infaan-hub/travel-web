@@ -677,7 +677,7 @@ async function assignCompanyMembership(companyId, input, actor) {
     let before = null;
     if (existing) {
         if (existing.status === "ACTIVE" && existing.role === input.role) {
-            return prisma.companyMembership.findUniqueOrThrow({
+            const membership = await prisma.companyMembership.findUniqueOrThrow({
                 where: {
                     id: existing.id
                 },
@@ -695,6 +695,11 @@ async function assignCompanyMembership(companyId, input, actor) {
                     }
                 }
             });
+            await prisma.user.update({
+                where: { id: input.user_id },
+                data: { accountType: "TOUR_COMPANY" }
+            });
+            return membership;
         }
         before = {
             status: existing.status,
@@ -757,6 +762,10 @@ async function assignCompanyMembership(companyId, input, actor) {
             throw error;
         }
     }
+    await prisma.user.update({
+        where: { id: input.user_id },
+        data: { accountType: "TOUR_COMPANY" }
+    });
     await (0, recordAudit)({
         actorId: actor.id,
         companyId,

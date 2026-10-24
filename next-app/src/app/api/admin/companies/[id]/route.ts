@@ -74,3 +74,88 @@ export async function PATCH(request: NextRequest, context: Context) {
     return handleApiError(error);
   }
 }
+
+export async function DELETE(request: NextRequest, context: Context) {
+  try {
+    await requireStaff(request);
+    const id = parseId((await context.params).id);
+    const company = await prisma.$transaction(async (transaction) => {
+      const existing = await transaction.company.findUnique({
+        where: { id },
+        include: {
+          memberships: { select: { id: true } },
+          tours: {
+            select: {
+              id: true,
+              image: true,
+              image2: true,
+              image3: true,
+              galleryImages: { select: { image: true } },
+            },
+          },
+          trips: { select: { image: true } },
+        },
+      });
+      if (!existing) throw new ApiError(404, "Company not found.");
+
+      const tourIds = existing.tours.map((tour) => tour.id);
+      const membershipNotificationTags = existing.memberships.map(
+        (membership) => `company-membership-${membership.id}`,
+      );
+      await transaction.booking.deleteMany({
+        where: {
+          OR: [
+            { companyId: id },
+            ...(tourIds.length ? [{ tourId: { in: tourIds } }] : []),
+          ],
+        },
+      });
+      await transaction.visitorTracking.deleteMany({
+        where: { tourId: { in: tourIds } },
+      });
+      await transaction.funnelEvent.deleteMany({
+        where: { tourId: { in: tourIds } },
+      });
+      await transaction.auditLog.deleteMany({
+        where: {
+          OR: [
+            { companyId: id },
+            { entity: "company", entityId: String(id) },
+            ...(tourIds.length
+              ? [{ entity: "tour", entityId: { in: tourIds.map(String) } }]
+              : []),
+          ],
+        },
+      });
+      await transaction.notification.deleteMany({
+        where: {
+          OR: [
+            { companyId: id },
+            ...(membershipNotificationTags.length
+              ? [{ tag: { in: membershipNotificationTags } }]
+              : []),
+          ],
+        },
+      });
+      await transaction.tour.deleteMany({ where: { companyId: id } });
+      await transaction.company.delete({ where: { id } });
+      return existing;
+    });
+
+    const imageKeys = [
+      company.logoImageKey,
+      company.coverImageKey,
+      ...company.tours.flatMap((tour) => [
+        tour.image,
+        tour.image2,
+        tour.image3,
+        ...tour.galleryImages.map((image) => image.image),
+      ]),
+      ...company.trips.map((trip) => trip.image),
+    ].filter((image): image is string => Boolean(image));
+    await Promise.all([...new Set(imageKeys)].map((image) => deleteImage(image)));
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}

@@ -6,6 +6,7 @@ import type {
   CompanyMembership,
   CompanyMembershipStatus,
   CompanyRole,
+  CompanyTrip,
   ContactMessage,
   HomeSetting,
   Hotel,
@@ -764,7 +765,7 @@ export function companyWorkspaceProfileSerializer(company: Company): Json {
 }
 
 export function companyPublicSerializer(
-  company: Company & { _count?: { tours: number } },
+  company: Company & { _count?: { tours: number; trips?: number } },
 ): Json {
   return {
     id: company.id,
@@ -791,6 +792,7 @@ export function companyPublicSerializer(
         ? `https://www.openstreetmap.org/?mlat=${company.latitude}&mlon=${company.longitude}#map=15/${company.latitude}/${company.longitude}`
         : null,
     tours_count: company._count?.tours ?? 0,
+    trips_count: company._count?.trips ?? 0,
   };
 }
 
@@ -801,6 +803,7 @@ export function companyPublicDetailSerializer(
       galleryImages?: TourGalleryImage[];
       company?: { name: string; slug: string } | null;
     })[];
+    trips?: CompanyTrip[];
   },
   summary: { averageRating: number | null; reviewCount: number },
 ): Json {
@@ -817,6 +820,21 @@ export function companyPublicDetailSerializer(
       publication_status: tour.publicationStatus,
       available: tour.available,
     })),
+    trips: (company.trips ?? []).map(companyTripSerializer),
+  };
+}
+
+export function companyTripSerializer(trip: CompanyTrip): Json {
+  return {
+    id: trip.id,
+    company_id: trip.companyId,
+    title: trip.title,
+    place: trip.place,
+    description: trip.description,
+    image_url: publicImageUrl(trip.image),
+    price: decimal(trip.price),
+    created_at: iso(trip.createdAt),
+    updated_at: iso(trip.updatedAt),
   };
 }
 

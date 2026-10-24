@@ -176,6 +176,7 @@ export const companiesAPI = {
     api.post("/admin/companies/", data, formDataConfig(data)),
   update: (id: string | number, data: FormData | Record<string, unknown>) =>
     api.patch(`/admin/companies/${id}/`, data, formDataConfig(data)),
+  delete: (id: string | number) => api.delete(`/admin/companies/${id}/`),
   transition: (id: string | number, action: string) =>
     api.post(`/admin/companies/${id}/lifecycle/`, { action }),
   addMember: (id: string | number, data: { user_id: number; role: string }) =>
@@ -202,6 +203,18 @@ export const companyAPI = {
   updateTour: (id: string | number, data: FormData | Record<string, unknown>) =>
     api.patch(`/company/tours/${id}/`, data, formDataConfig(data)),
   deleteTour: (id: string | number) => api.delete(`/company/tours/${id}/`),
+  addTourGalleryImage: (id: string | number, data: FormData) =>
+    api.post(`/company/tours/${id}/gallery/`, data, formDataConfig(data)),
+  deleteTourGalleryImage: (
+    id: string | number,
+    imageId: string | number,
+  ) => api.delete(`/company/tours/${id}/gallery/${imageId}/`),
+  trips: (params?: Params) => api.get("/company/trips/", { params }),
+  createTrip: (data: FormData | Record<string, unknown>) =>
+    api.post("/company/trips/", data, formDataConfig(data)),
+  updateTrip: (id: string | number, data: FormData | Record<string, unknown>) =>
+    api.patch(`/company/trips/${id}/`, data, formDataConfig(data)),
+  deleteTrip: (id: string | number) => api.delete(`/company/trips/${id}/`),
   bookings: (params?: Params) => api.get("/company/bookings/", { params }),
   booking: (id: string | number) => api.get(`/company/bookings/${id}/`),
   updateBookingStatus: (id: string | number, status: string) =>

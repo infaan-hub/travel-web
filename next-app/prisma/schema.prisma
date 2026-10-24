@@ -77,22 +77,22 @@ enum TourPublicationStatus {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  username         String    @unique
-  email            String    @default("")
+  id               Int             @id @default(autoincrement())
+  username         String          @unique
+  email            String          @default("")
   password         String
   accountType      UserAccountType @default(CUSTOMER) @map("account_type")
-  firstName        String    @default("") @map("first_name")
-  lastName         String    @default("") @map("last_name")
-  isStaff          Boolean   @default(false) @map("is_staff")
-  isActive         Boolean   @default(true) @map("is_active")
-  isSuperuser      Boolean   @default(false) @map("is_superuser")
-  dateJoined       DateTime  @default(now()) @map("date_joined")
-  lastLogin        DateTime? @map("last_login")
-  sessionVersion   Int       @default(1) @map("session_version")
-  emailVerified    Boolean   @default(false) @map("email_verified")
-  resetRequestedAt DateTime? @map("reset_requested_at")
-  deletedAt        DateTime? @map("deleted_at")
+  firstName        String          @default("") @map("first_name")
+  lastName         String          @default("") @map("last_name")
+  isStaff          Boolean         @default(false) @map("is_staff")
+  isActive         Boolean         @default(true) @map("is_active")
+  isSuperuser      Boolean         @default(false) @map("is_superuser")
+  dateJoined       DateTime        @default(now()) @map("date_joined")
+  lastLogin        DateTime?       @map("last_login")
+  sessionVersion   Int             @default(1) @map("session_version")
+  emailVerified    Boolean         @default(false) @map("email_verified")
+  resetRequestedAt DateTime?       @map("reset_requested_at")
+  deletedAt        DateTime?       @map("deleted_at")
 
   profile                    Profile?
   bookings                   Booking[]
@@ -164,6 +164,7 @@ model Company {
   createdBy     User?               @relation("CompanyCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   memberships   CompanyMembership[]
   tours         Tour[]
+  trips         CompanyTrip[]
   bookings      Booking[]
   auditLogs     AuditLog[]
   notifications Notification[]
@@ -175,6 +176,23 @@ model Company {
   @@index([createdAt])
   @@index([searchVector], type: Gin)
   @@map("companies")
+}
+
+model CompanyTrip {
+  id          Int      @id @default(autoincrement())
+  companyId   Int      @map("company_id")
+  title       String
+  place       String
+  description String   @default("")
+  image       String
+  price       Decimal  @db.Decimal(12, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, updatedAt])
+  @@map("company_trips")
 }
 
 model StoredImage {
@@ -400,38 +418,38 @@ model TravelTip {
 }
 
 model HomeSetting {
-  id            Int      @id @default(1)
-  heroImage     String?  @map("hero_image")
-  zanzibarImage String?  @map("zanzibar_image")
-  tanzaniaImage String?  @map("tanzania_image")
-  heroImageData Bytes?   @map("hero_image_data") @db.ByteA
-  heroImageMime String?  @map("hero_image_mime")
-  heroSecondaryImageData Bytes? @map("hero_secondary_image_data") @db.ByteA
-  heroSecondaryImageMime String? @map("hero_secondary_image_mime")
-  heroSecondaryImage String? @map("hero_secondary_image")
-  heroFeatureImage String? @map("hero_feature_image")
-  heroFeatureImageData Bytes? @map("hero_feature_image_data") @db.ByteA
-  heroFeatureImageMime String? @map("hero_feature_image_mime")
-  heroThumbImage String? @map("hero_thumb_image")
-  heroThumbImageData Bytes? @map("hero_thumb_image_data") @db.ByteA
-  heroThumbImageMime String? @map("hero_thumb_image_mime")
-  moreExperiencesImage String? @map("more_experiences_image")
-  moreExperiencesImage1 String? @map("more_experiences_image_1")
-  moreExperiencesImage2 String? @map("more_experiences_image_2")
-  moreExperiencesImage3 String? @map("more_experiences_image_3")
-  moreExperiencesImage4 String? @map("more_experiences_image_4")
-  moreExperiencesImage5 String? @map("more_experiences_image_5")
-  moreExperiencesImageData1 Bytes?  @map("more_experiences_image_data_1") @db.ByteA
-  moreExperiencesImageData2 Bytes?  @map("more_experiences_image_data_2") @db.ByteA
-  moreExperiencesImageData3 Bytes?  @map("more_experiences_image_data_3") @db.ByteA
-  moreExperiencesImageData4 Bytes?  @map("more_experiences_image_data_4") @db.ByteA
-  moreExperiencesImageData5 Bytes?  @map("more_experiences_image_data_5") @db.ByteA
-  moreExperiencesImageMime1 String? @map("more_experiences_image_mime_1")
-  moreExperiencesImageMime2 String? @map("more_experiences_image_mime_2")
-  moreExperiencesImageMime3 String? @map("more_experiences_image_mime_3")
-  moreExperiencesImageMime4 String? @map("more_experiences_image_mime_4")
-  moreExperiencesImageMime5 String? @map("more_experiences_image_mime_5")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id                        Int      @id @default(1)
+  heroImage                 String?  @map("hero_image")
+  zanzibarImage             String?  @map("zanzibar_image")
+  tanzaniaImage             String?  @map("tanzania_image")
+  heroImageData             Bytes?   @map("hero_image_data") @db.ByteA
+  heroImageMime             String?  @map("hero_image_mime")
+  heroSecondaryImageData    Bytes?   @map("hero_secondary_image_data") @db.ByteA
+  heroSecondaryImageMime    String?  @map("hero_secondary_image_mime")
+  heroSecondaryImage        String?  @map("hero_secondary_image")
+  heroFeatureImage          String?  @map("hero_feature_image")
+  heroFeatureImageData      Bytes?   @map("hero_feature_image_data") @db.ByteA
+  heroFeatureImageMime      String?  @map("hero_feature_image_mime")
+  heroThumbImage            String?  @map("hero_thumb_image")
+  heroThumbImageData        Bytes?   @map("hero_thumb_image_data") @db.ByteA
+  heroThumbImageMime        String?  @map("hero_thumb_image_mime")
+  moreExperiencesImage      String?  @map("more_experiences_image")
+  moreExperiencesImage1     String?  @map("more_experiences_image_1")
+  moreExperiencesImage2     String?  @map("more_experiences_image_2")
+  moreExperiencesImage3     String?  @map("more_experiences_image_3")
+  moreExperiencesImage4     String?  @map("more_experiences_image_4")
+  moreExperiencesImage5     String?  @map("more_experiences_image_5")
+  moreExperiencesImageData1 Bytes?   @map("more_experiences_image_data_1") @db.ByteA
+  moreExperiencesImageData2 Bytes?   @map("more_experiences_image_data_2") @db.ByteA
+  moreExperiencesImageData3 Bytes?   @map("more_experiences_image_data_3") @db.ByteA
+  moreExperiencesImageData4 Bytes?   @map("more_experiences_image_data_4") @db.ByteA
+  moreExperiencesImageData5 Bytes?   @map("more_experiences_image_data_5") @db.ByteA
+  moreExperiencesImageMime1 String?  @map("more_experiences_image_mime_1")
+  moreExperiencesImageMime2 String?  @map("more_experiences_image_mime_2")
+  moreExperiencesImageMime3 String?  @map("more_experiences_image_mime_3")
+  moreExperiencesImageMime4 String?  @map("more_experiences_image_mime_4")
+  moreExperiencesImageMime5 String?  @map("more_experiences_image_mime_5")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
 
   @@map("home_settings")
 }

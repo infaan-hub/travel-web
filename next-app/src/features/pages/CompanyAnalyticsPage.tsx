@@ -3,10 +3,12 @@ import {
   BarChart3,
   CheckCircle,
   ClipboardList,
+  Eye,
   Globe,
   Hourglass,
   Users,
   XCircle,
+  Star,
 } from "@/components/icons";
 import type { CompanyAnalyticsData } from "@/lib/services/company-workspace";
 import type { CompanyContext } from "@/lib/auth/company";
@@ -45,6 +47,20 @@ export default function CompanyAnalyticsPage({
       value: data.totals.tours,
       hint: "Active company catalogue",
       icon: Globe,
+    },
+    {
+      label: "Tour page views",
+      value: data.totals.tour_views,
+      hint: "Tracked visits to this company's tour pages",
+      icon: Eye,
+    },
+    {
+      label: "Approved reviews",
+      value: data.totals.reviews,
+      hint: data.totals.average_rating
+        ? `${Number(data.totals.average_rating).toFixed(1)} average stars`
+        : "No approved ratings yet",
+      icon: Star,
     },
     {
       label: "Pending",

@@ -98,6 +98,15 @@ export type Customer = {
   username: string;
   email: string;
   is_staff: boolean;
+  account_type?: "CUSTOMER" | "TOUR_COMPANY";
+  is_active?: boolean;
+  companies?: {
+    id: number;
+    name: string;
+    slug: string;
+    role: string;
+    status: "ACTIVE" | "INVITED" | "REVOKED";
+  }[];
   email_verified?: boolean;
   profile_image_url?: ImageUrl;
   date_joined?: string;

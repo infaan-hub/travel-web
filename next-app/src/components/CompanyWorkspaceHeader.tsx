@@ -11,6 +11,7 @@ import {
   ClipboardList,
   Globe,
   LayoutDashboard,
+  Map,
   Settings,
   Shield,
   Users,
@@ -37,25 +38,31 @@ const LINKS: HeaderLink[] = [
   },
   {
     href: "/company/tours/",
-    label: "Tours",
+    label: "Experiences",
     icon: Globe,
     permission: "tours:read",
   },
   {
+    href: "/company/trips/",
+    label: "Trips",
+    icon: Map,
+    permission: "tours:read",
+  },
+  {
     href: "/company/bookings/",
-    label: "Bookings",
+    label: "Booking requests",
     icon: ClipboardList,
     permission: "bookings:read",
   },
   {
     href: "/company/profile/",
-    label: "Profile",
+    label: "Company profile",
     icon: Building2,
     permission: "profile:read",
   },
   {
     href: "/company/analytics/",
-    label: "Analytics",
+    label: "Insights",
     icon: BarChart3,
     permission: "analytics:read",
   },
@@ -128,9 +135,9 @@ export default function CompanyWorkspaceHeader({
           <CalendarDays size={14} />
           Operations only
         </span>
-        <Link className={styles.shellNavSettings} href="/settings" title="Account settings">
+        <Link className={styles.shellNavSettings} href="/settings" title="Account profile">
           <Settings size={16} />
-          <span className="sr-only">Account settings</span>
+          <span>Account profile</span>
         </Link>
       </nav>
     </div>

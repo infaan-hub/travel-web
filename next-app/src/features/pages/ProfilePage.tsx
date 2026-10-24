@@ -3,14 +3,14 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { profileAPI } from '@/lib/api/client';
+import { authAPI, profileAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Settings, Save, User, Mail, Phone, MapPin, Camera, Trash2, X, AlertCircle } from '@/components/icons';
 
 import type {  Customer  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function ProfilePage() {
-  const { isAuthenticated, user, loading: authLoading } = useAuth();
+  const { isAuthenticated, user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,10 @@ export default function ProfilePage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [credentialsUsernameOverride, setCredentialsUsernameOverride] = useState<string | null>(null);
+  const credentialsUsername = credentialsUsernameOverride ?? user?.username ?? '';
+  const [newPassword, setNewPassword] = useState('');
+  const [savingCredentials, setSavingCredentials] = useState(false);
 
   const [form, setForm] = useState<{
     full_name: string;
@@ -104,6 +108,7 @@ export default function ProfilePage() {
       setProfile(res.data);
       setImageFile(null);
       setDirty(false);
+      await refreshUser();
       window.dispatchEvent(new Event('profile-updated'));
       showMessage('Profile updated successfully');
     } catch (err: any) {
@@ -111,6 +116,29 @@ export default function ProfilePage() {
       showMessage(msg, 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCredentialsSave = async () => {
+    if (newPassword && newPassword.length < 8) {
+      showMessage('New password must be at least 8 characters', 'error');
+      return;
+    }
+    setSavingCredentials(true);
+    try {
+      await authAPI.updateUser({
+        username: credentialsUsername,
+        ...(newPassword ? { password: newPassword } : {}),
+      });
+      await refreshUser();
+      setCredentialsUsernameOverride(null);
+      setNewPassword('');
+      showMessage('Account details updated successfully');
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.response?.data?.message || 'Failed to update account details';
+      showMessage(msg, 'error');
+    } finally {
+      setSavingCredentials(false);
     }
   };
 
@@ -193,6 +221,46 @@ export default function ProfilePage() {
             </div>
           </form>
         </div>
+
+        {user?.account_type === 'TOUR_COMPANY' && (
+          <div className="profile-card" style={{ marginTop: 20 }}>
+            <h2>Login and security</h2>
+            <div className="profile-form">
+              <div className="form-group">
+                <label><User size={14} /> Username</label>
+                <input
+                  type="text"
+                  value={credentialsUsername}
+                  onChange={(event) => setCredentialsUsernameOverride(event.target.value)}
+                  autoComplete="username"
+                  minLength={3}
+                  maxLength={150}
+                />
+              </div>
+              <div className="form-group">
+                <label><Settings size={14} /> New password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  placeholder="Leave blank to keep your current password"
+                  autoComplete="new-password"
+                  minLength={8}
+                />
+              </div>
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={savingCredentials || (!newPassword && credentialsUsername === user.username) || credentialsUsername.length < 3 || Boolean(newPassword && newPassword.length < 8)}
+                  onClick={handleCredentialsSave}
+                >
+                  <Save size={16} /> {savingCredentials ? 'Saving...' : 'Update account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

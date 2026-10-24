@@ -9,9 +9,19 @@ import { Settings, Save, User, Mail, Camera, Trash2 } from '@/components/icons';
 
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminSettingsPage() {
-  const { isAuthenticated, isAdmin, user, loading: authLoading } = useAuth();
+  const { isAuthenticated, isAdmin, user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
-  const [form, setForm] = useState<{ username: string; email: string }>({ username: user?.username || '', email: user?.email || '' });
+  const [form, setForm] = useState<{
+    full_name: string;
+    username: string;
+    email: string;
+    password: string;
+  }>({
+    full_name: "",
+    username: user?.username || "",
+    email: user?.email || "",
+    password: "",
+  });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -22,9 +32,15 @@ export default function AdminSettingsPage() {
     if (isAuthenticated) {
       profileAPI.get().then(res => {
         if (res.data.profile_image) setProfileImageUrl(res.data.profile_image);
-      }).catch(() => {});
+        setForm((current) => ({
+          ...current,
+          full_name: res.data.full_name || "",
+          username: user?.username || current.username,
+          email: user?.email || current.email,
+        }));
+      }).catch(() => setMessage("Could not load your profile details."));
     }
-  }, [authLoading, isAuthenticated]);
+  }, [authLoading, isAuthenticated, user?.email, user?.username]);
 
   if (!isAuthenticated || !isAdmin) return null;
 
@@ -33,7 +49,14 @@ export default function AdminSettingsPage() {
     setSaving(true);
     setMessage('');
     try {
-      await authAPI.updateUser(form);
+      await authAPI.updateUser({
+        username: form.username,
+        email: form.email,
+        ...(form.password ? { password: form.password } : {}),
+      });
+      await profileAPI.update({ full_name: form.full_name });
+      await refreshUser();
+      setForm((current) => ({ ...current, password: "" }));
       setMessage('Settings saved successfully');
     } catch {
       setMessage('Failed to save settings');
@@ -120,12 +143,27 @@ export default function AdminSettingsPage() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
+            <label><User size={14} /> Account name</label>
+            <input type="text" value={form.full_name} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, full_name: e.target.value})} />
+          </div>
+          <div className="form-group">
             <label><User size={14} /> Username</label>
             <input type="text" value={form.username} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, username: e.target.value})} />
           </div>
           <div className="form-group">
             <label><Mail size={14} /> Email</label>
             <input type="email" value={form.email} onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, email: e.target.value})} />
+          </div>
+          <div className="form-group">
+            <label>New password</label>
+            <input
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              value={form.password}
+              onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({...form, password: e.target.value})}
+              placeholder="Leave blank to keep your current password"
+            />
           </div>
           <div className="form-actions">
             <button type="submit" className="btn btn-primary" disabled={saving}><Save size={16} /> {saving ? 'Saving...' : 'Save Settings'}</button>

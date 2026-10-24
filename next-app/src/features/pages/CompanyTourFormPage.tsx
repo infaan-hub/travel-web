@@ -48,6 +48,7 @@ type FormState = {
 };
 
 type ImageKey = "image" | "image2" | "image3";
+type GalleryImage = { id: number; image_url: string };
 
 const EMPTY_FORM: FormState = {
   title: "",
@@ -109,6 +110,8 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
   const [imagePreviews, setImagePreviews] = useState<
     Record<ImageKey, string | null>
   >({ image: null, image2: null, image3: null });
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [gallerySaving, setGallerySaving] = useState(false);
 
   useEffect(() => {
     if (!tourId) return;
@@ -159,6 +162,11 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
           image2: (tour.image2_url as string | null) ?? null,
           image3: (tour.image3_url as string | null) ?? null,
         });
+        setGalleryImages(
+          Array.isArray(tour.gallery_images)
+            ? (tour.gallery_images as GalleryImage[])
+            : [],
+        );
       })
       .catch(() => {
         if (!cancelled) {
@@ -191,6 +199,53 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
           ? current[key]
           : null,
     }));
+  };
+
+  const addGalleryImages = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!tourId) return;
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (galleryImages.length + files.length > 5) {
+      setError(`A tour can have up to five gallery images. You can add ${Math.max(0, 5 - galleryImages.length)} more.`);
+      return;
+    }
+    setError(null);
+    setGallerySaving(true);
+    try {
+      for (const [index, file] of files.entries()) {
+        const data = new FormData();
+        data.append("image", file);
+        data.append("order", String(galleryImages.length + index));
+        const response = await companyAPI.addTourGalleryImage(tourId, data);
+        setGalleryImages((current) => [
+          ...current,
+          response.data as GalleryImage,
+        ]);
+      }
+      if (files.length) toast.success("Gallery images uploaded.");
+    } catch (uploadError) {
+      setError(messageFrom(uploadError));
+    } finally {
+      setGallerySaving(false);
+    }
+  };
+
+  const removeGalleryImage = async (galleryImage: GalleryImage) => {
+    if (!tourId) return;
+    if (!window.confirm("Remove this gallery image?")) return;
+    setGallerySaving(true);
+    setError(null);
+    try {
+      await companyAPI.deleteTourGalleryImage(tourId, galleryImage.id);
+      setGalleryImages((current) =>
+        current.filter((image) => image.id !== galleryImage.id),
+      );
+      toast.success("Gallery image removed.");
+    } catch (removeError) {
+      setError(messageFrom(removeError));
+    } finally {
+      setGallerySaving(false);
+    }
   };
 
   const addItinerary = () => {
@@ -717,7 +772,7 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
               <div className={styles.formStack} style={{ gap: 16 }}>
                 {(
                   [
-                    ["image", "Main image"],
+                    ["image", "Main image (cover)"],
                     ["image2", "Second image"],
                     ["image3", "Third image"],
                   ] as const
@@ -729,6 +784,7 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
                         id={`tour-${key}`}
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
+                        required={key === "image" && !tourId}
                         onChange={(event) => onImage(key, event)}
                       />
                     </label>
@@ -752,6 +808,67 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
                 ))}
               </div>
             </section>
+
+            {tourId ? (
+              <section className={`glass-card ${styles.formSection}`}>
+                <div className={styles.formSectionHead}>
+                  <h2 className={styles.formSectionTitle}>Tour gallery</h2>
+                  <p className={styles.formSectionCopy}>
+                    Add up to five extra photos. The average star rating is
+                    calculated from approved customer reviews.
+                  </p>
+                </div>
+                <div className={styles.formStack} style={{ gap: 12 }}>
+                  <div className={styles.formField}>
+                    <label htmlFor="tour-gallery-images">
+                      Gallery images ({galleryImages.length}/5)
+                    </label>
+                    <input
+                      id="tour-gallery-images"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      disabled={gallerySaving || galleryImages.length >= 5}
+                      onChange={addGalleryImages}
+                    />
+                    <p className={styles.formHint}>
+                      Upload up to {Math.max(0, 5 - galleryImages.length)} more
+                      images; each file can be at most 5 MB.
+                    </p>
+                  </div>
+                  {galleryImages.length ? (
+                    <div className={styles.imageList}>
+                      {galleryImages.map((galleryImage) => (
+                        <div className={styles.imageField} key={galleryImage.id}>
+                          <Image
+                            src={galleryImage.image_url}
+                            alt="Tour gallery"
+                            width={240}
+                            height={160}
+                            unoptimized
+                          />
+                          <button
+                            className="btn btn-outline btn-sm"
+                            type="button"
+                            disabled={gallerySaving}
+                            onClick={() => void removeGalleryImage(galleryImage)}
+                          >
+                            <Trash2 size={14} /> Remove image
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className={styles.emptyInline}>No gallery images yet.</p>
+                  )}
+                </div>
+              </section>
+            ) : (
+              <p className={styles.note}>
+                Create the tour first, then add up to five gallery images from
+                its edit page.
+              </p>
+            )}
 
             <div className={styles.stickyActions}>
               <button

@@ -27,6 +27,7 @@ export default async function CompanyProfilePage({ params }: Props) {
   if (!company) notFound();
 
   const tours = Array.isArray(company.tours) ? company.tours : [];
+  const trips = Array.isArray(company.trips) ? company.trips : [];
   const companyHours = openingHoursEntries(company.opening_hours);
 
   return (
@@ -133,6 +134,41 @@ export default async function CompanyProfilePage({ params }: Props) {
           <div className="tours-grid">
             {tours.map((tour: any) => (
               <TourCard key={tour.id} tour={tour} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className={styles.toursSection}>
+        <div className={styles.sectionHead}>
+          <h2>Trips and places</h2>
+          <p>{trips.length} trip{trips.length === 1 ? "" : "s"}</p>
+        </div>
+        {trips.length === 0 ? (
+          <div className={styles.empty}>
+            <Building2 size={28} />
+            <p>This company has no trip listings yet.</p>
+          </div>
+        ) : (
+          <div className={styles.tripsGrid}>
+            {trips.map((trip: any) => (
+              <article className={styles.tripCard} key={trip.id}>
+                {trip.image_url ? (
+                  <img
+                    className={styles.tripImage}
+                    src={trip.image_url}
+                    alt={trip.title}
+                  />
+                ) : null}
+                <div className={styles.tripBody}>
+                  <h3>{trip.title}</h3>
+                  <p><MapPin size={14} /> {trip.place}</p>
+                  {trip.description ? <p>{trip.description}</p> : null}
+                  <p className={styles.tripPrice}>
+                    ${Number(trip.price ?? 0).toLocaleString("en-US")}
+                  </p>
+                </div>
+              </article>
             ))}
           </div>
         )}

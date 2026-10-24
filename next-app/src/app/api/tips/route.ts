@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { handleApiError, ok } from "@/lib/api/http";
 import { requireStaff } from "@/lib/auth/session";
 import { readPayload, storeUpload, stripFiles } from "@/lib/api/body";
-import { listResponse } from "@/lib/api/pagination";
+import { listResponse, paginatedResponse, paginationFrom } from "@/lib/api/pagination";
 import { tipSchema } from "@/lib/validation/schemas";
 import prisma from "@/lib/db/prisma";
 import { tipSerializer } from "@/lib/serializers";
@@ -21,17 +21,26 @@ export async function GET(request: NextRequest) {
       }
     })();
     const canReadUnpublished = all && context?.user.isStaff === true;
-    const tips = await prisma.travelTip.findMany({
-      where: {
-        deletedAt: null,
-        ...(canReadUnpublished ? {} : { published: true }),
-        ...(category ? { category } : {}),
-      },
-      include: { author: true },
-      orderBy: { createdAt: "desc" },
-      take: 500,
-    });
-    return listResponse(tips.map(tipSerializer), tips.length);
+    const where = {
+      deletedAt: null,
+      ...(canReadUnpublished ? {} : { published: true }),
+      ...(category ? { category } : {}),
+    };
+    const pagination = paginationFrom(searchParams);
+    const [tips, total] = await Promise.all([
+      prisma.travelTip.findMany({
+        where,
+        include: { author: true },
+        orderBy: { createdAt: "desc" },
+        skip: pagination?.skip ?? 0,
+        take: pagination?.take ?? 500,
+      }),
+      prisma.travelTip.count({ where }),
+    ]);
+    const data = tips.map(tipSerializer);
+    return pagination
+      ? paginatedResponse(request, data, total, pagination)
+      : listResponse(data, total);
   } catch (error) {
     return handleApiError(error);
   }

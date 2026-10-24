@@ -217,7 +217,6 @@ export default function CompanyProfilePage() {
     try {
       const data = new FormData();
       data.append("description", form.description);
-      data.append("contact_email", form.contact_email);
       data.append("contact_phone", form.contact_phone);
       data.append("alternative_phone", form.alternative_phone);
       data.append("whatsapp_number", form.whatsapp_number);
@@ -359,10 +358,8 @@ export default function CompanyProfilePage() {
                     id="profile-email"
                     type="email"
                     value={form.contact_email}
-                    onChange={(event) =>
-                      setField("contact_email", event.target.value)
-                    }
-                    disabled={!canUpdate}
+                    readOnly
+                    aria-readonly="true"
                   />
                 </div>
                 <div className={styles.formField}>

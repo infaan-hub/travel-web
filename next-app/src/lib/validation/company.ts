@@ -176,7 +176,6 @@ export const companyUpdateSchema = companyBaseSchema.partial().extend({
 export const companyWorkspaceProfileUpdateSchema = companyBaseSchema
   .pick({
     description: true,
-    contact_email: true,
     contact_phone: true,
     alternative_phone: true,
     whatsapp_number: true,
@@ -196,6 +195,15 @@ export const companyWorkspaceProfileUpdateSchema = companyBaseSchema
     remove_logo: booleanishSchema.optional(),
     remove_cover: booleanishSchema.optional(),
   });
+
+export const companyTripCreateSchema = z.object({
+  title: z.string().trim().min(1, "Trip name is required.").max(200),
+  place: z.string().trim().min(1, "Place is required.").max(200),
+  description: z.string().trim().max(5000).optional().default(""),
+  price: z.coerce.number().nonnegative("Price cannot be negative."),
+});
+
+export const companyTripUpdateSchema = companyTripCreateSchema.partial();
 
 export const companyListQuerySchema = z.object({
   search: z.string().trim().max(120).optional().default(""),
@@ -307,6 +315,8 @@ export type CompanySwitchInput = z.infer<typeof companySwitchSchema>;
 export type CompanyWorkspaceProfileUpdateInput = z.infer<
   typeof companyWorkspaceProfileUpdateSchema
 >;
+export type CompanyTripCreateInput = z.infer<typeof companyTripCreateSchema>;
+export type CompanyTripUpdateInput = z.infer<typeof companyTripUpdateSchema>;
 export type CompanyTourCreateInput = z.infer<typeof companyTourCreateSchema>;
 export type CompanyTourUpdateInput = z.infer<typeof companyTourUpdateSchema>;
 export type CompanyTourListQuery = z.infer<typeof companyTourListQuerySchema>;

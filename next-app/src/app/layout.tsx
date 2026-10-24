@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import AppFrame from "@/components/AppFrame";
 import { ToastProvider } from "@/components/ToastProvider";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { RealtimeProvider } from "@/context/RealtimeContext";
 import { PushPrompt } from "@/components/PushPrompt";
 import { ModalA11y } from "@/components/ModalA11y";
 import { VisitorTracker } from "@/components/VisitorTracker";
@@ -62,12 +63,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <AuthProvider>
           <CurrencyProvider>
+          <RealtimeProvider>
           <ToastProvider>
             <VisitorTracker />
             <AppFrame>{children}</AppFrame>
             <PushPrompt />
             <ModalA11y />
           </ToastProvider>
+           </RealtimeProvider>
+
           </CurrencyProvider>
         </AuthProvider>
       </body>

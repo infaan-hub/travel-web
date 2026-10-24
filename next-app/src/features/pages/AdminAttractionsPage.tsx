@@ -2,7 +2,7 @@
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from "next/image";
 import { attractionsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
@@ -27,18 +27,38 @@ export default function AdminAttractionsPage() {
   const [form, setForm] = useState<{ name: string; location: string; image: File | null }>({ name: '', location: '', image: null });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  const loadAttractions = useCallback(() => {
+    setLoading(true);
+    void (async () => {
+      const pageSize = 100;
+      const first = await attractionsAPI.getAll({ page: 1, page_size: pageSize });
+      const payload = first.data;
+      if (Array.isArray(payload)) {
+        setAttractions(payload as Attraction[]);
+        return;
+      }
+      const rows = (payload.results ?? []) as Attraction[];
+      const pageCount = Math.ceil((payload.count ?? rows.length) / pageSize);
+      const remaining = await Promise.all(
+        Array.from({ length: Math.max(0, pageCount - 1) }, (_, index) =>
+          attractionsAPI.getAll({ page: index + 2, page_size: pageSize }),
+        ),
+      );
+      setAttractions([
+        ...rows,
+        ...remaining.flatMap((response) => response.data.results ?? []),
+      ]);
+    })()
+      .catch(() => toast.error('Failed to load attractions'))
+      .finally(() => setLoading(false));
+  }, [toast]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
-    loadAttractions();
-  }, [authLoading, isAuthenticated, isAdmin, router]);
-
-  const loadAttractions = () => {
-    attractionsAPI.getAll()
-      .then(res => setAttractions((res.data.results || res.data) as Attraction[]))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
+    const timer = window.setTimeout(loadAttractions, 0);
+    return () => window.clearTimeout(timer);
+  }, [authLoading, isAuthenticated, isAdmin, router, loadAttractions]);
 
   const resetForm = () => {
     setForm({ name: '', location: '', image: null });

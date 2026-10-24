@@ -2,42 +2,51 @@
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { contactAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { MessageSquare, Mail, Phone, User, CheckCircle, Trash2, Eye, EyeOff } from '@/components/icons';
+import { MessageSquare, Mail, Phone, User, Trash2, Eye, EyeOff } from '@/components/icons';
+import { useToast } from "@/components/ToastProvider";
 
 import type {  ContactMessage  } from "@/features/pages/types";
 export default function AdminMessagesPage() {
+  const toast = useToast();
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ContactMessage | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
-    loadMessages();
-  }, []);
-
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
       const res = await contactAPI.getAll();
       setMessages(res.data);
     } catch {
-      console.error('Failed to load messages');
+      setError('Messages could not be loaded. Please try again.');
+      toast.error('Failed to load messages');
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    const timer = window.setTimeout(() => void loadMessages(), 0);
+    return () => window.clearTimeout(timer);
+  }, [authLoading, isAuthenticated, isAdmin, loadMessages, router]);
 
   const toggleRead = async (msg: any) => {
     try {
       await contactAPI.update(msg.id, { is_read: !msg.is_read });
-      loadMessages();
+      const updated = { ...msg, is_read: !msg.is_read };
+      setMessages((current) =>
+        current.map((message) => (message.id === msg.id ? updated : message)),
+      );
+      setSelected(updated);
     } catch {
-      console.error('Failed to update message');
+      toast.error('Failed to update message');
     }
   };
 
@@ -46,9 +55,9 @@ export default function AdminMessagesPage() {
     try {
       await contactAPI.delete(id);
       if (selected?.id === id) setSelected(null);
-      loadMessages();
+      setMessages((current) => current.filter((message) => message.id !== id));
     } catch {
-      console.error('Failed to delete message');
+      toast.error('Failed to delete message');
     }
   };
 
@@ -64,6 +73,7 @@ export default function AdminMessagesPage() {
       </div>
 
       <div className="admin-content">
+        {error && <div className="alert alert-error" role="alert">{error}</div>}
         {loading ? (
           <p>Loading messages...</p>
         ) : messages.length === 0 ? (

@@ -73,7 +73,6 @@ export async function updateCompanyWorkspaceProfile(
   };
 
   setText("description", "description");
-  setText("contact_email", "contactEmail");
   setText("contact_phone", "contactPhone");
   setText("address", "address");
   setText("country", "country", before.country);
@@ -433,6 +432,21 @@ export async function getCompanyAnalytics(companyId: number) {
       }),
       prisma.tour.count({ where: { companyId, deletedAt: null } }),
     ]);
+  const companyTourIds = await prisma.tour.findMany({
+    where: { companyId, deletedAt: null },
+    select: { id: true },
+  });
+  const tourIds = companyTourIds.map((tour) => tour.id);
+  const [tourViews, reviewSummary] = await Promise.all([
+    tourIds.length
+      ? prisma.visitorTracking.count({ where: { tourId: { in: tourIds } } })
+      : Promise.resolve(0),
+    prisma.review.aggregate({
+      where: { status: "approved", tourId: { in: tourIds } },
+      _avg: { rating: true },
+      _count: { _all: true },
+    }),
+  ]);
 
   const statusCounts = { pending: 0, confirmed: 0, cancelled: 0 };
   let bookedValue = 0;
@@ -502,6 +516,9 @@ export async function getCompanyAnalytics(companyId: number) {
       confirmed_value_tzs: confirmedValue,
       bookings_with_price: bookingsWithPrice,
       bookings_without_price: bookingsWithoutPrice,
+      tour_views: tourViews,
+      reviews: reviewSummary._count._all,
+      average_rating: reviewSummary._avg.rating,
     },
   };
 }

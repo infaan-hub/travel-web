@@ -92,7 +92,7 @@ export default function AdminToursPage() {
 
   const loadTours = () => {
     toursAPI
-      .getAll({ ordering, page, page_size: pageSize })
+      .getAll({ all: true, ordering, page, page_size: pageSize })
       .then((res: any) => {
         setTours(res.data.results || res.data);
         setTotal(res.data.count ?? (res.data.results || res.data).length);

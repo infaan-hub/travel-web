@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass, Briefcase } from '@/components/icons';
+import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 
@@ -49,7 +49,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="page admin-page">
       <div className="page-header">
-        <h1>Admin Dashboard</h1>
+        <h1>Dashboard</h1>
         <p>Welcome, {user?.username}! Manage your travel system</p>
       </div>
 
@@ -62,12 +62,7 @@ export default function AdminDashboardPage() {
           <div className="dashboard-stat-card pending"><span className="stat-icon"><Hourglass size={24} /></span><span className="stat-value">{stats.pending_bookings}</span><span className="stat-label">Pending</span></div>
           <div className="dashboard-stat-card confirmed"><span className="stat-icon"><CheckCircle size={24} /></span><span className="stat-value">{stats.confirmed_bookings}</span><span className="stat-label">Confirmed</span></div>
           <div className="dashboard-stat-card" style={{borderLeft: '4px solid #3498db'}}><span className="stat-icon"><Palmtree size={24} /></span><span className="stat-value">{stats.zanzibar_tours}</span><span className="stat-label">Zanzibar Tours</span></div>
-          <div className="dashboard-stat-card" style={{borderLeft: '4px solid #e67e22'}}><span className="stat-icon"><Compass size={24} /></span><span className="stat-value">{stats.tanzania_tours}</span><span className="stat-label">Travel.</span></div>
-          <div className="dashboard-stat-card action" onClick={() => router.push('/view-workspace')} style={{borderLeft: '4px solid #9D9679', cursor: 'pointer'}}>
-            <span className="stat-icon"><Briefcase size={24} /></span>
-            <span className="stat-value">{stats.total_workspaces || 0}</span>
-            <span className="stat-label">Workspaces <small style={{opacity:0.6}}>View all</small></span>
-          </div>
+          <div className="dashboard-stat-card" style={{borderLeft: '4px solid #e67e22'}}><span className="stat-icon"><Compass size={24} /></span><span className="stat-value">{stats.tanzania_tours}</span><span className="stat-label">Tanzania Tours</span></div>
         </div>
       )}
 
@@ -81,16 +76,16 @@ export default function AdminDashboardPage() {
         {activeTab === 'overview' && (
           <div className="overview-welcome">
             <h2>Welcome to Admin Panel</h2>
-            <p>From here you can manage all tours, bookings, users, and attractions for your Travel. system.</p>
+            <p>Manage platform activity, users, companies, experiences, bookings, and attractions.</p>
             <div className="overview-links">
-              <button className="btn btn-outline" onClick={() => router.push('/tours')}>
-                View Tours
+              <button className="btn btn-outline" onClick={() => router.push('/admin/tours')}>
+                Manage Experiences
               </button>
-              <button className="btn btn-outline" onClick={() => router.push('/attractions')}>
-                View Attractions
+              <button className="btn btn-outline" onClick={() => router.push('/admin/users')}>
+                Manage Users
               </button>
-              <button className="btn btn-primary" onClick={() => router.push('/view-workspace')}>
-                <Briefcase size={16} /> View Workspaces
+              <button className="btn btn-primary" onClick={() => router.push('/admin/companies')}>
+                Manage Companies
               </button>
             </div>
           </div>
@@ -170,7 +165,7 @@ export default function AdminDashboardPage() {
                       <td><strong>{u.username}</strong></td>
                       <td>{u.email}</td>
                       <td>{u.is_staff ? <span><CheckCircle size={14} /> Admin</span> : <span><Users size={14} /> Customer</span>}</td>
-                      <td><button type="button" onClick={() => router.push('/admin/customers')} className="btn btn-sm btn-outline">Manage</button></td>
+                      <td><button type="button" onClick={() => router.push('/admin/users')} className="btn btn-sm btn-outline">Manage</button></td>
                     </tr>
                   ))}
                 </tbody>

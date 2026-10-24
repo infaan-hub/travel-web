@@ -1,0 +1,8 @@
+
+> infaan-travel-next@1.0.0 db:local
+> tsx scripts/local-postgres.ts
+
+Using existing PostgreSQL cluster at D:\travel-web\next-app\.data\pg
+[pg] 2026-10-24 13:36:01.563 EAT [2124] FATAL:  lock file "postmaster.pid" already exists
+2026-10-24 13:36:01.563 EAT [2124] HINT:  Is another postmaster (PID 10224) running in data directory "D:/travel-web/next-app/.data/pg"?
+

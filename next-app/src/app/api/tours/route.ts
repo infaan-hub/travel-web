@@ -12,10 +12,12 @@ import type { Prisma, TourCategory } from "@prisma/client";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const where: Prisma.TourWhereInput = {
-      deletedAt: null,
-      AND: [PUBLIC_TOUR_VISIBILITY],
-    };
+    const staff = searchParams.get("all") === "true"
+      ? await optionalAuth(request)
+      : null;
+    const where: Prisma.TourWhereInput = staff?.user.isStaff
+      ? { deletedAt: null }
+      : { deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] };
 
     const category = searchParams.get("category");
     if (category && ["zanzibar", "tanzania", "international"].includes(category)) {

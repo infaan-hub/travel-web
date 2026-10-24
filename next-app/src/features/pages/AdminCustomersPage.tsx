@@ -3,13 +3,13 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { adminAPI } from '@/lib/api/client';
+import { adminAPI, companiesAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Users, UserX, Shield, User, ChevronLeft, ChevronRight } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 
-import type {  Customer  } from "@/features/pages/types";
+import type { Company, Customer } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminCustomersPage() {
   const toast = useToast();
@@ -18,6 +18,9 @@ export default function AdminCustomersPage() {
   const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [companySelections, setCompanySelections] = useState<Record<number, string>>({});
+  const [assigningUserId, setAssigningUserId] = useState<number | null>(null);
   const [codes, setCodes] = useState<Record<string, string>>({});
   const [pendingResets, setPendingResets] = useState<Customer[]>([]);
   const perPage = 10;
@@ -25,12 +28,18 @@ export default function AdminCustomersPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
-    adminAPI.getAllUsers()
-      .then(res => setUsers((res.data.results || res.data) as Customer[]))
-      .catch(console.error)
+    Promise.all([adminAPI.getAllUsers(), companiesAPI.list()])
+      .then(([userResponse, companyResponse]) => {
+        setUsers((userResponse.data.results || userResponse.data) as Customer[]);
+        const companyData = companyResponse.data;
+        setCompanies(
+          (Array.isArray(companyData) ? companyData : companyData.results ?? []) as Company[],
+        );
+      })
+      .catch(() => toast.error('Failed to load users and company assignments'))
       .finally(() => setLoading(false));
     loadPendingResets();
-  }, [authLoading, isAuthenticated, isAdmin, router]);
+  }, [authLoading, isAuthenticated, isAdmin, router, toast]);
 
   const loadPendingResets = async () => {
     try {
@@ -71,8 +80,28 @@ export default function AdminCustomersPage() {
     } catch { toast.error('Failed to delete user'); }
   };
 
+  const handleAssignCompany = async (userId: number) => {
+    const companyId = Number(companySelections[userId]);
+    if (!companyId) {
+      toast.error('Select a company first');
+      return;
+    }
+    setAssigningUserId(userId);
+    try {
+      await companiesAPI.addMember(companyId, { user_id: userId, role: 'MANAGER' });
+      const response = await adminAPI.getAllUsers();
+      setUsers((response.data.results || response.data) as Customer[]);
+      setCompanySelections((current) => ({ ...current, [userId]: '' }));
+      toast.success('Company assigned to user');
+    } catch {
+      toast.error('Failed to assign company');
+    } finally {
+      setAssigningUserId(null);
+    }
+  };
+
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading customers...</div></div>;
+  if (loading) return <div className="page"><div className="loading">Loading users...</div></div>;
 
   const totalPages = Math.ceil(users.length / perPage);
   const paged = users.slice((page - 1) * perPage, page * perPage);
@@ -80,8 +109,8 @@ export default function AdminCustomersPage() {
   return (
     <div className="page admin-page">
       <div className="page-header">
-        <h1>Customers</h1>
-        <p>Manage registered users ({users.length} total)</p>
+        <h1>Users</h1>
+        <p>Manage registered accounts and company assignments ({users.length} total)</p>
       </div>
 
       <div className="admin-content">
@@ -92,26 +121,94 @@ export default function AdminCustomersPage() {
                 <th>ID</th>
                 <th>Username</th>
                 <th>Email</th>
-                <th>Role</th>
-                <th>Email</th>
+                <th>Account type</th>
+                <th>Companies</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {paged.length === 0 ? (
-                <tr><td colSpan={6} className="empty-cell">No customers found</td></tr>
+                <tr><td colSpan={7} className="empty-cell">No users found</td></tr>
               ) : paged.map(u => (
                 <tr key={u.id}>
                   <td>#{u.id}</td>
                   <td><strong>{u.username}</strong></td>
                   <td>{u.email}</td>
-                  <td>{u.is_staff ? <span className="role-badge admin-role"><Shield size={12} /> Admin</span> : <span className="role-badge customer-role"><User size={12} /> Customer</span>}</td>
                   <td>
-                    {u.email_verified ? (
-                      <span className="role-badge customer-role">Verified</span>
+                    {u.is_staff ? (
+                      <span className="role-badge admin-role"><Shield size={12} /> Admin</span>
+                    ) : u.account_type === "TOUR_COMPANY" ? (
+                      <span className="role-badge customer-role">Tour company</span>
                     ) : (
-                      <span className="role-badge" style={{ background: 'rgba(234,179,8,0.15)', color: '#92400e' }}>Unverified</span>
+                      <span className="role-badge customer-role"><User size={12} /> Customer</span>
                     )}
+                  </td>
+                  <td>
+                    {u.companies?.length ? (
+                      <div className="admin-actions">
+                        {u.companies.map((company) => (
+                          <Link
+                            key={`${company.id}-${company.role}`}
+                            href={`/admin/companies/${company.id}`}
+                            className="btn btn-sm btn-outline"
+                            title={`${company.role.replaceAll("_", " ")} · ${company.status.toLowerCase()}`}
+                          >
+                            {company.name} ({company.status.toLowerCase()})
+                          </Link>
+                        ))}
+                      </div>
+                    ) : null}
+                    {!u.is_staff && (
+                      <div className="admin-actions" style={{ marginTop: 6 }}>
+                        <label className="sr-only" htmlFor={`company-${u.id}`}>
+                          Company to assign to {u.username}
+                        </label>
+                        <select
+                          id={`company-${u.id}`}
+                          value={companySelections[u.id] ?? ''}
+                          onChange={(event) =>
+                            setCompanySelections((current) => ({
+                              ...current,
+                              [u.id]: event.target.value,
+                            }))
+                          }
+                        >
+                          <option value="">Assign company…</option>
+                          {companies
+                            .filter(
+                              (company) =>
+                                company.status !== 'ARCHIVED' &&
+                                !u.companies?.some(
+                                  (membership) =>
+                                    membership.id === company.id &&
+                                    membership.status === 'ACTIVE',
+                                ),
+                            )
+                            .map((company) => (
+                              <option key={company.id} value={company.id}>
+                                {company.name}
+                              </option>
+                            ))}
+                        </select>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline"
+                          disabled={!companySelections[u.id] || assigningUserId === u.id}
+                          onClick={() => handleAssignCompany(u.id)}
+                        >
+                          {assigningUserId === u.id ? 'Assigning…' : 'Assign'}
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    <span className={`role-badge ${u.is_active === false ? "" : "customer-role"}`}>
+                      {u.is_active === false ? "Inactive" : "Active"}
+                    </span>
+                    <span className="role-badge" style={{ marginLeft: 6, background: u.email_verified ? undefined : 'rgba(234,179,8,0.15)', color: u.email_verified ? undefined : '#92400e' }}>
+                      {u.email_verified ? "Verified" : "Unverified"}
+                    </span>
                   </td>
                   <td>
                     <div className="admin-actions">

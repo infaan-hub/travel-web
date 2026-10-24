@@ -46,7 +46,8 @@ into `NEXT_PUBLIC_VAPID_PUBLIC_KEY`.
 | `/api/push/subscribe/` | DELETE | User | Removes a push subscription |
 | `/api/notifications/` | GET | User | In-app notifications (`?unread=true`) |
 | `/api/notifications/` | PATCH | User | Mark one (`id`) or all (`all`) as read |
-| `/api/cron/cleanup/` | GET/POST | `CRON_SECRET` | Removes stale subscriptions, notifications and visits |
+| `/api/ws/` | GET (upgrade) | User cookie | Realtime WebSocket for instant updates |
+| `/api/push/send/` | POST | User | Triggers an instant Web Push delivery |
 
 ## Notes
 

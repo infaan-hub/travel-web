@@ -25,7 +25,8 @@ export type UploadFolder =
   | "drivers"
   | "tips"
   | "companies"
-  | "companies/covers";
+  | "companies/covers"
+  | "companies/trips";
 
 function assertAllowedFolder(folder: string): string {
   if (!/^[a-z0-9/_-]+$/i.test(folder) || folder.includes("..")) {

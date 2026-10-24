@@ -2,7 +2,7 @@
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from "next/image";
 import { tripsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
@@ -27,18 +27,46 @@ export default function AdminTripsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const loadTrips = useCallback(() => {
+    setLoading(true);
+    void (async () => {
+      const pageSize = 100;
+      const first = await tripsAPI.getAll({
+        all: true,
+        page: 1,
+        page_size: pageSize,
+      });
+      const payload = first.data;
+      if (Array.isArray(payload)) {
+        setTrips(payload);
+        return;
+      }
+      const rows = (payload.results ?? []) as TravelTip[];
+      const pageCount = Math.ceil((payload.count ?? rows.length) / pageSize);
+      const remaining = await Promise.all(
+        Array.from({ length: Math.max(0, pageCount - 1) }, (_, index) =>
+          tripsAPI.getAll({
+            all: true,
+            page: index + 2,
+            page_size: pageSize,
+          }),
+        ),
+      );
+      setTrips([
+        ...rows,
+        ...remaining.flatMap((response) => response.data.results ?? []),
+      ]);
+    })()
+      .catch(() => toast.error('Failed to load trips'))
+      .finally(() => setLoading(false));
+  }, [toast]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
-    loadTrips();
-  }, [authLoading, isAuthenticated, isAdmin, router]);
-
-  const loadTrips = () => {
-    tripsAPI.getAll()
-      .then(res => setTrips(res.data.results || res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
+    const timer = window.setTimeout(loadTrips, 0);
+    return () => window.clearTimeout(timer);
+  }, [authLoading, isAuthenticated, isAdmin, loadTrips, router]);
 
   const resetForm = () => {
     setForm({ title: '', content: '', category: '', image: null });

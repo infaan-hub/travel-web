@@ -1,0 +1,24 @@
+
+> infaan-travel-next@1.0.0 start
+> next start
+
+▲ Next.js 16.4.2
+- Local:         http://localhost:3000
+- Network:       http://192.168.18.2:3000
+✓ Ready in 1093ms
+✓ Running next.config.ts took 961ms
+prisma:error 
+Invalid `prisma.company.create()` invocation:
+
+
+Unique constraint failed on the fields: (`slug`)
+prisma:error 
+Invalid `prisma.company.create()` invocation:
+
+
+Unique constraint failed on the fields: (`slug`)
+prisma:error 
+Invalid `prisma.company.create()` invocation:
+
+
+Unique constraint failed on the fields: (`slug`)

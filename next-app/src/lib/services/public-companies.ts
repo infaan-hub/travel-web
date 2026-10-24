@@ -45,7 +45,12 @@ export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
-        _count: { select: { tours: { where: { publicationStatus: "PUBLISHED", deletedAt: null } } } },
+        _count: {
+          select: {
+            tours: { where: { publicationStatus: "PUBLISHED", deletedAt: null } },
+            trips: true,
+          },
+        },
       },
     }),
     prisma.company.count({ where }),
@@ -72,6 +77,7 @@ export async function getPublicCompany(slug: string) {
           company: { select: { name: true, slug: true } },
         },
       },
+      trips: { orderBy: { updatedAt: "desc" } },
     },
   });
   if (!company) return null;
@@ -88,4 +94,3 @@ export async function getPublicCompany(slug: string) {
     reviewCount: reviewAggregate._count?._all ?? 0,
   });
 }
-

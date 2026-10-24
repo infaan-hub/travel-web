@@ -1,0 +1,16 @@
+
+> infaan-travel-next@1.0.0 dev
+> next dev
+
+▲ Next.js 16.4.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.18.2:3000
+- Environments: .env
+✓ Ready in 7.0s
+✓ Running next.config.ts took 1590ms
+- Experiments (use with caution):
+  ✓ authInterrupts
+  · serverActions
+
+○ Compiling /api/health ...
+ GET /api/health/ 200 in 6.0s (next.js: 1368ms, application-code: 4.7s)

@@ -5,6 +5,7 @@ import {
   companyMemberAssignSchema,
   companyTourCreateSchema,
   companyTourUpdateSchema,
+  companyTripCreateSchema,
   companyUpdateSchema,
   companyWorkspaceProfileUpdateSchema,
 } from "@/lib/validation/company";
@@ -169,13 +170,30 @@ describe("company validation", () => {
     });
     expect(result.success).toBe(true);
     if (!result.success) return;
-    expect(result.data).toEqual({
-      description: "Delegated description",
-      contact_email: "hello@example.com",
-    });
+    expect(result.data).toEqual({ description: "Delegated description" });
     expect(result.data).not.toHaveProperty("name");
+    expect(result.data).not.toHaveProperty("contact_email");
     expect(result.data).not.toHaveProperty("status");
     expect(result.data).not.toHaveProperty("is_public");
+  });
+
+  it("validates separate company trip listings", () => {
+    const valid = companyTripCreateSchema.safeParse({
+      title: "Stone Town Walk",
+      place: "Stone Town",
+      description: "A guided historic town walk.",
+      price: "35.50",
+    });
+    expect(valid.success).toBe(true);
+    if (valid.success) expect(valid.data.price).toBe(35.5);
+
+    expect(
+      companyTripCreateSchema.safeParse({
+        title: "",
+        place: "Stone Town",
+        price: "-5",
+      }).success,
+    ).toBe(false);
   });
 
   it("validates company tour publication and itinerary payloads", () => {
