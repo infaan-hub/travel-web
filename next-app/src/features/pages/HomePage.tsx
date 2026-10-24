@@ -13,7 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
-import DestinationCardWhite from "@/components/DestinationCardWhite";
+import DestinationCard from "@/components/DestinationCard";
 
 import type {  Attraction, HomeSettings, Review, Tour  } from "@/features/pages/types";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
@@ -275,7 +275,7 @@ export default function HomePage() {
           </div>
           <div className="home-companies-grid">
             {companies.map((company) => (
-              <DestinationCardWhite
+              <DestinationCard
                 key={company.id}
                 image={company.logo_image_url ? getImageUrl(company.logo_image_url) : undefined}
                 title={company.name}
