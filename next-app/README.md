@@ -109,7 +109,7 @@ Open `http://localhost:3000`.
 See `.env.example`. Production requires a real PostgreSQL `DATABASE_URL` and a
 32+ character `AUTH_SECRET`. The current upload implementation writes to
 `public/uploads`; that directory is ephemeral on Vercel, so a durable external
-media service must be integrated before relying on production uploads. Supabase
+media service must be integrated before relying on production uploads. External object
 Storage is not currently implemented. SMTP, WhatsApp and Nominatim settings are
 optional; in-app notifications and Web Push are the supported notification
 paths.

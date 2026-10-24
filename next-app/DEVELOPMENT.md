@@ -46,7 +46,7 @@ complete until its gate is evidenced.
 | Auth | JWT (`jose`), HTTP-only cookies and Bearer tokens |
 | UI | Existing aqua glassmorphism CSS, Tailwind utilities, Hugeicons, Playfair/Inter |
 | Local database | embedded PostgreSQL at `127.0.0.1:55432`, database `infaan_travel` |
-| Production database | Supabase PostgreSQL; Vercel root is `next-app` |
+| Production database | Neon PostgreSQL; Vercel root is `next-app` |
 | Migrations | 4, all applied locally |
 | Git state | clean at audit start; no application changes made in Phase 1 |
 
@@ -1415,7 +1415,7 @@ Production constraints:
 - Vercel filesystem is ephemeral; local uploads do not survive deployments.
 - `RATE_LIMIT_URL`/`CACHE_URL` should be configured for multi-instance
   consistency; otherwise limits/caches are per-process.
-- Supabase direct connection strings must be used for runtime and migrations.
+- Neon connection strings must be used for runtime (pooled) and migrations (direct).
 - No SMTP is implemented; verification/password reset use staff-issued codes.
 - Web Push is optional; in-app notifications must continue to work without it.
 

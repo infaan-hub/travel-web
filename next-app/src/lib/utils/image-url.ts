@@ -11,7 +11,7 @@ const PLACEHOLDER =
 /**
  * Resolves stored media paths and storage keys into web URLs.
  * New API responses are already relative (`/uploads/...`) or absolute
- * (Supabase public URLs), so this remains only as a compatibility helper.
+ * (external public URLs), so this remains only as a compatibility helper.
  */
 export function getImageUrl(url: string | null | undefined): string {
   if (!url) return PLACEHOLDER;
