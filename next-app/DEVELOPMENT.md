@@ -1,4 +1,4 @@
-﻿# Travel. Multi-Company Platform â€” Development Plan
+# Travel. Multi-Company Platform — Development Plan
 
 Status: **Phases 1-12 complete. Phase 10 visual refresh reopened by the user on 2026-10-22 and now complete.**
 Date: 2026-10-22 (Phase 2 verified 2026-10-22)
@@ -32,7 +32,7 @@ complete until its gate is evidenced.
 
 ---
 
-## 1. Phase 1 â€” Repository Audit (COMPLETE)
+## 1. Phase 1 — Repository Audit (COMPLETE)
 
 ### 1.1 Project and stack
 
@@ -46,7 +46,7 @@ complete until its gate is evidenced.
 | Auth | JWT (`jose`), HTTP-only cookies and Bearer tokens |
 | UI | Existing aqua glassmorphism CSS, Tailwind utilities, Hugeicons, Playfair/Inter |
 | Local database | embedded PostgreSQL at `127.0.0.1:55432`, database `infaan_travel` |
-| Production database | Neon PostgreSQL; Vercel root is `next-app` |
+| Production database | Supabase PostgreSQL; Vercel root is `next-app` |
 | Migrations | 4, all applied locally |
 | Git state | clean at audit start; no application changes made in Phase 1 |
 
@@ -275,8 +275,8 @@ Read-only counts from `infaan_travel`:
 
 Existing tours:
 
-- `46` â€” "Test Safari" â€” `tanzania`, available, featured
-- `48` â€” "Stone town" â€” `zanzibar`, unavailable
+- `46` — "Test Safari" — `tanzania`, available, featured
+- `48` — "Stone town" — `zanzibar`, unavailable
 
 Both are currently **unowned**. They must stay out of public multi-company
 discovery until an administrator assigns them. Production was not re-queried
@@ -311,7 +311,7 @@ palette or global styling strategy.
 All commands below were run from `D:\travel-web\next-app` against the actual
 local application and database. The production build was run with port 3000
 stopped to avoid the Prisma engine lock. These are historical baseline results;
-the current Phase 2 results are in Â§2.6.
+the current Phase 2 results are in §2.6.
 
 | Command | Result | Evidence |
 | --- | --- | --- |
@@ -330,7 +330,7 @@ the current Phase 2 results are in Â§2.6.
 
 The `audit:spacing` result differs from the older verification report (which
 claimed 0). Phase 2 fixed the measured `98x44` login brand link and re-ran the
-audit at 0 findings. Phase 2 also re-ran the full suite (see Â§2.6), including
+audit at 0 findings. Phase 2 also re-ran the full suite (see §2.6), including
 `audit:theme` via `THEME_BASE_URL=http://127.0.0.1:3000`. Two stale theme-audit
 assertions were corrected without changing the visual CSS: the body uses a
 transparent `background-color` over the light `html` surface, and desktop
@@ -383,7 +383,7 @@ destination media is intentionally 16:9 (phones remain 4:3).
 
 ---
 
-## 2. Phase 2 â€” Repair Existing Core Functionality (COMPLETE)
+## 2. Phase 2 — Repair Existing Core Functionality (COMPLETE)
 
 Goal: make the existing single-company application safe and reliable before
 adding company tenancy.
@@ -535,7 +535,7 @@ their original later phases.
 
 ---
 
-## 3. Phase 3 â€” Company Domain and Safe Migration
+## 3. Phase 3 — Company Domain and Safe Migration
 
 Goal: add the minimum correct multi-company schema without duplicating Tour or
 Booking and without exposing legacy offerings. Phase 3 adds no public company
@@ -710,7 +710,7 @@ Gate:
   `tourTitleSnapshot` from the tour row loaded inside the existing capacity
   lock; no client value is accepted. `src/lib/booking-attribution.ts` keeps the
   derivation testable, and the booking serializer returns `company`/
-  `company_name` plus the snapshot-backed `tour_title`. This closes the Â§3.1
+  `company_name` plus the snapshot-backed `tour_title`. This closes the §3.1
   contract without waiting for Phase 8.
 - Smoke coverage now proves both an unowned legacy tour and a temporary
   company-owned tour persist server-derived snapshots. The temporary company,
@@ -735,7 +735,7 @@ Gate:
 
 ---
 
-## 4. Phase 4 â€” Administrator Company Management
+## 4. Phase 4 — Administrator Company Management
 
 Routes:
 
@@ -867,7 +867,7 @@ Gate:
 
 ---
 
-## 5. Phase 5 â€” Company Access Control
+## 5. Phase 5 — Company Access Control
 
 Goal: one explicit authorization path for every company operation.
 
@@ -997,11 +997,11 @@ Gate:
   profile remains Phase 7 scope and currently 404s.
 - No payment gateway was added. Bookings remain booking requests and are not
   marked paid.
-- Phase 2â€“5 changes remain uncommitted.
+- Phase 2–5 changes remain uncommitted.
 
 ---
 
-## 6. Phase 6 â€” Company Dashboard and Operations UI
+## 6. Phase 6 — Company Dashboard and Operations UI
 
 Routes:
 
@@ -1066,7 +1066,7 @@ Gate:
 
 ---
 
-## 7. Phase 7 â€” Public Company Discovery
+## 7. Phase 7 — Public Company Discovery
 
 Routes:
 
@@ -1121,7 +1121,7 @@ Gate:
 
 ---
 
-## 8. Phase 8 â€” Booking and Guest Management
+## 8. Phase 8 — Booking and Guest Management
 
 Likely files:
 
@@ -1182,7 +1182,7 @@ Gate:
 
 ---
 
-## 9. Phase 9 â€” Notifications, Analytics, and Audit Integration
+## 9. Phase 9 — Notifications, Analytics, and Audit Integration
 
 Likely files:
 
@@ -1227,7 +1227,7 @@ Gate:
 
 ---
 
-## 10. Phase 10 â€” UI/UX Consistency and Responsive Verification
+## 10. Phase 10 — UI/UX Consistency and Responsive Verification
 
 Tasks:
 
@@ -1253,7 +1253,7 @@ Gate:
 
 ---
 
-## 11. Phase 11 â€” Integration, Security, and Regression Testing
+## 11. Phase 11 — Integration, Security, and Regression Testing
 
 ### 11.1 Test matrix
 
@@ -1355,7 +1355,7 @@ Gate:
 
 ---
 
-## 12. Phase 12 â€” Production Readiness and Final Report
+## 12. Phase 12 — Production Readiness and Final Report
 
 Tasks:
 
@@ -1387,13 +1387,13 @@ Gate:
 
 Required:
 
-- `DATABASE_URL` â€” PostgreSQL connection (pooled in production).
-- `DIRECT_URL` â€” direct connection for migrations.
-- `APP_URL` â€” public origin, no trailing slash. Production:
+- `DATABASE_URL` — PostgreSQL connection (pooled in production).
+- `DIRECT_URL` — direct connection for migrations.
+- `APP_URL` — public origin, no trailing slash. Production:
   `https://travelisland.vercel.app`; local verification:
   `http://localhost:3000`.
-- `AUTH_SECRET` â€” at least 32 characters.
-- `AUTH_COOKIE_SECURE` â€” `true` in production.
+- `AUTH_SECRET` — at least 32 characters.
+- `AUTH_COOKIE_SECURE` — `true` in production.
 
 Existing optional services/flags:
 
@@ -1419,8 +1419,7 @@ Production constraints:
 - Vercel filesystem is ephemeral; local uploads do not survive deployments.
 - `RATE_LIMIT_URL`/`CACHE_URL` should be configured for multi-instance
   consistency; otherwise limits/caches are per-process.
-- Neon pooler connection strings must be used for runtime; `DIRECT_URL` for
-  migrations.
+- Supabase direct connection strings must be used for runtime and migrations.
 - No SMTP is implemented; verification/password reset use staff-issued codes.
 - Web Push is optional; in-app notifications must continue to work without it.
 
@@ -1453,13 +1452,13 @@ Production constraints:
 ## 15. Ordered Implementation Checklist
 
 - [x] Phase 2: repair seed, refresh revocation, soft-delete reads, capacity
-  updates, login spacing, regression tests. Verified in Â§2.6.
+  updates, login spacing, regression tests. Verified in §2.6.
 - [x] Phase 3: company schema, membership partial unique index, publication
   status, booking attribution/snapshots, audit/notification company fields,
   additive migration, backfill/verify scripts, demo seed company. Verified in
-  Â§3.3.
+  §3.3.
 - [x] Phase 4: admin company CRUD, lifecycle, members, uploads, map picker,
-  audit, sidebar. Verified in Â§4.2.
+  audit, sidebar. Verified in §4.2.
 - [x] Phase 5: company auth context/guards, role matrix, active-company
   selection, suspension/revocation tests.
 - [x] Phase 6: company dashboard/tours/bookings/profile/analytics UI, scoped
@@ -1477,14 +1476,14 @@ Production constraints:
 
 ## 16. Phase 1 and Phase 2 Completion Statement
 
-Phase 1 is complete and its audit is preserved in Â§1. Phase 2 is complete per
-Â§2: the seed is valid and idempotent, refresh/logout revocation is enforced,
+Phase 1 is complete and its audit is preserved in §1. Phase 2 is complete per
+§2: the seed is valid and idempotent, refresh/logout revocation is enforced,
 public soft-deleted reads return 404, booking capacity is transactional, the
 login touch target is fixed, docs are corrected, and the regression suite is
 green. The local database and all historical records were preserved.
 
 No multi-company code has been implemented yet. Company schema, tenancy,
-membership, and company UI remain in Phases 3â€“12.
+membership, and company UI remain in Phases 3–12.
 
 **Next step:** wait for explicit Phase 3 authorization. Do not begin Phase 3
 automatically from this document alone.
@@ -1730,10 +1729,10 @@ Completed so far:
 - `npm run vercel-build` passed locally: `prisma migrate deploy`,
   `prisma generate`, and `next build`.
 - `prisma migrate status` passed before and after deployment against the
-  provided Neon database.
+  provided Supabase database.
 - The pending `20261024000000_company_domain` migration was applied
-  successfully to Neon.
-- `npm run db:verify:companies` passed against Neon: 0 companies,
+  successfully to Supabase.
+- `npm run db:verify:companies` passed against Supabase: 0 companies,
   0 memberships, migration verification passed.
 - Local verification remains: typecheck 0, lint 0 errors/31 warnings,
   tests 64/64, build 102 routes, smoke 111/111, browser 95/95,
@@ -1749,8 +1748,8 @@ Completed and verified:
 - Production backup/migration approach is additive only; no reset or truncate
   was used.
 - Production pre-migration and post-migration integrity checks were run.
-- `20261024000000_company_domain` was applied successfully to Neon.
-- `npm run db:verify:companies` passed against Neon.
+- `20261024000000_company_domain` was applied successfully to Supabase.
+- `npm run db:verify:companies` passed against Supabase.
 - Existing users, tours, and records were preserved.
 - Admin, company and visitor workflows were verified locally and through
   smoke/browser tests.

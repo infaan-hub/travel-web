@@ -410,8 +410,8 @@ Phase 12 production readiness and final reporting is complete.
 
 - `npm run vercel-build` passed: migrate deploy, Prisma generate, Next build.
 - `prisma migrate status` passed before and after migration.
-- `20261024000000_company_domain` applied successfully to Neon.
-- `npm run db:verify:companies` passed against Neon.
+- `20261024000000_company_domain` applied successfully to Supabase.
+- `npm run db:verify:companies` passed against Supabase.
 - Existing users, tours and records were preserved.
 - Admin, company and visitor workflows verified.
 - Company isolation and auth boundaries verified.
