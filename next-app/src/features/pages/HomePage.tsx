@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -131,35 +131,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {!loading && companies.length > 0 && (
-        <section className="home-companies-section">
-          <div className="section-header">
-            <div>
-              <span className="section-kicker">Meet the providers</span>
-              <h2>Travel with people who know the place</h2>
-              <p>Independent companies share their published experiences on Travel.</p>
-            </div>
-            <Link href="/companies/" className="section-text-link">All companies <ArrowRight size={16} /></Link>
-          </div>
-          <div className="home-companies-grid">
-            {companies.map((company) => (
-              <Link className="home-company-card glass-card" href={company.public_path} key={company.id}>
-                {company.logo_image_url ? (
-                  <Image src={getImageUrl(company.logo_image_url)} alt="" width={52} height={52} className="home-company-logo" />
-                ) : (
-                  <span className="home-company-logo home-company-logo-fallback"><Building2 size={22} /></span>
-                )}
-                <span className="home-company-copy">
-                  <strong>{company.name}</strong>
-                  <span>{[company.locality, company.region].filter(Boolean).join(", ") || "Tourism company"} · {company.tours_count} experiences</span>
-                  {company.description ? <span className="home-company-description">{company.description}</span> : null}
-                </span>
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       {!loading && allTours.length > 0 && (
         <section className="all-tours-section">
@@ -291,6 +262,35 @@ export default function HomePage() {
         </div>
       )}
 
+      {!loading && companies.length > 0 && (
+        <section className="home-companies-section">
+          <div className="section-header">
+            <div>
+              <span className="section-kicker">Meet the providers</span>
+              <h2>Travel with people who know the place</h2>
+              <p>Independent companies share their published experiences on Travel.</p>
+            </div>
+            <Link href="/companies/" className="section-text-link">All companies <ArrowRight size={16} /></Link>
+          </div>
+          <div className="home-companies-grid">
+            {companies.map((company) => (
+              <Link className="home-company-card glass-card" href={company.public_path} key={company.id}>
+                {company.logo_image_url ? (
+                  <Image src={getImageUrl(company.logo_image_url)} alt="" width={52} height={52} className="home-company-logo" />
+                ) : (
+                  <span className="home-company-logo home-company-logo-fallback"><Building2 size={22} /></span>
+                )}
+                <span className="home-company-copy">
+                  <strong>{company.name}</strong>
+                  <span>{[company.locality, company.region].filter(Boolean).join(", ") || "Tourism company"} ┬╖ {company.tours_count} experiences</span>
+                  {company.description ? <span className="home-company-description">{company.description}</span> : null}
+                </span>
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       <section className="cta-section">
         <div className="cta-content">
           <h2>Your next trip begins with a good match.</h2>

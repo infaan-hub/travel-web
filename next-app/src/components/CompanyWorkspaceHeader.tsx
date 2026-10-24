@@ -1,18 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { CompanyRole } from "@prisma/client";
 import Image from "next/image";
 import {
-  BarChart3,
   Building2,
-  CalendarDays,
-  ClipboardList,
-  Globe,
-  LayoutDashboard,
-  Map,
-  Settings,
   Shield,
   Users,
 } from "@/components/icons";
@@ -20,59 +12,10 @@ import type { CompanyPermission } from "@/lib/company-access";
 import { COMPANY_ROLE_LABELS } from "@/lib/company-access";
 import styles from "@/features/pages/company-operations.module.css";
 
-type HeaderLink = {
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  permission: CompanyPermission;
-  exact?: boolean;
-};
-
-const LINKS: HeaderLink[] = [
-  {
-    href: "/company/dashboard/",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    permission: "dashboard:read",
-    exact: true,
-  },
-  {
-    href: "/company/tours/",
-    label: "Experiences",
-    icon: Globe,
-    permission: "tours:read",
-  },
-  {
-    href: "/company/trips/",
-    label: "Trips",
-    icon: Map,
-    permission: "tours:read",
-  },
-  {
-    href: "/company/bookings/",
-    label: "Booking requests",
-    icon: ClipboardList,
-    permission: "bookings:read",
-  },
-  {
-    href: "/company/profile/",
-    label: "Company profile",
-    icon: Building2,
-    permission: "profile:read",
-  },
-  {
-    href: "/company/analytics/",
-    label: "Insights",
-    icon: BarChart3,
-    permission: "analytics:read",
-  },
-];
-
 export default function CompanyWorkspaceHeader({
   companyName,
   companySlug,
   role,
-  permissions,
   logoUrl,
   canSwitch,
 }: {
@@ -83,9 +26,6 @@ export default function CompanyWorkspaceHeader({
   logoUrl: string | null;
   canSwitch: boolean;
 }) {
-  const pathname = usePathname();
-  const links = LINKS.filter((link) => permissions.includes(link.permission));
-
   return (
     <div className={styles.shellHeader}>
       <div className={styles.shellIdentity}>
@@ -112,34 +52,6 @@ export default function CompanyWorkspaceHeader({
           </Link>
         ) : null}
       </div>
-
-      <nav className={styles.shellNav} aria-label="Company workspace navigation">
-        {links.map((link) => {
-          const active = link.exact
-            ? pathname === link.href
-            : pathname === link.href || pathname.startsWith(link.href);
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`${styles.shellNavLink} ${active ? styles.shellNavLinkActive : ""}`}
-              aria-current={active ? "page" : undefined}
-            >
-              <Icon size={16} />
-              <span>{link.label}</span>
-            </Link>
-          );
-        })}
-        <span className={styles.shellNavHint}>
-          <CalendarDays size={14} />
-          Operations only
-        </span>
-        <Link className={styles.shellNavSettings} href="/settings" title="Account profile">
-          <Settings size={16} />
-          <span>Account profile</span>
-        </Link>
-      </nav>
     </div>
   );
 }
