@@ -5200,3 +5200,22 @@ html body .app-layout .main-content .page
   border-color: rgba(151,171,176,.82) !important;
   box-shadow: 0 0 0 4px var(--glacier-focus), inset 0 1px 0 rgba(255,255,255,.8) !important;
 }
+
+.home-companies-grid {
+  grid-template-columns: repeat(2, minmax(min(100%, 280px), 360px));
+  justify-content: center;
+  justify-items: stretch;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .home-companies-grid {
+    grid-template-columns: repeat(2, minmax(min(100%, 280px), 380px));
+  }
+}
+
+@media (max-width: 640px) {
+  .home-companies-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--grid-gap-mobile, 16px);
+  }
+}
