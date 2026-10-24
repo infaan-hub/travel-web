@@ -148,7 +148,7 @@ export default function AdminCompanyDetailPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated || !isAdmin) {
-      router.push("/admin/login");
+      router.push("/login");
     }
   }, [authLoading, isAuthenticated, isAdmin, router]);
 

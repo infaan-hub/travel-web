@@ -23,7 +23,7 @@ export default function AdminBookingsPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     adminAPI.getAllBookings()
       .then(res => setBookings((res.data.results || res.data) as Booking[]))
       .catch(console.error)

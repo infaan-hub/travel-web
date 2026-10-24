@@ -34,7 +34,7 @@ export default function AdminHomeEditorPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     loadSettings();
   }, [authLoading, isAuthenticated, isAdmin, router]);
 

@@ -34,7 +34,7 @@ export default function AdminTravelPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     loadData();
   }, [authLoading, isAuthenticated, isAdmin, router]);
 

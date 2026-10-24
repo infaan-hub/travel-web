@@ -39,7 +39,7 @@ export async function requirePageUser(): Promise<AuthUser> {
 
 export async function requirePageStaff(): Promise<AuthUser> {
   const user = await getServerUser();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect("/login");
   if (!user.isStaff) redirect("/dashboard");
   return user;
 }

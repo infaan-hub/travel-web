@@ -77,23 +77,6 @@ export async function authenticateUser(
   };
 }
 
-export async function createStaffUser(input: {
-  username: string;
-  email: string;
-  password: string;
-}) {
-  const password = await hashPassword(input.password);
-  return prisma.user.create({
-    data: {
-      username: input.username,
-      email: input.email.toLowerCase(),
-      password,
-      isStaff: true,
-      profile: { create: {} },
-    },
-  });
-}
-
 export async function createTourCompanyOwner(input: {
   username: string;
   email: string;

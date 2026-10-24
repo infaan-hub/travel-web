@@ -14,7 +14,7 @@ export default function AdminCompanyCreatePage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!isAuthenticated || !isAdmin) router.push("/admin/login");
+    if (!isAuthenticated || !isAdmin) router.push("/login");
   }, [loading, isAuthenticated, isAdmin, router]);
 
   if (loading || !isAuthenticated || !isAdmin) {

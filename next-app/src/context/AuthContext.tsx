@@ -36,12 +36,6 @@ type AuthContextValue = {
   loading: boolean;
   login: (username: string, password: string) => Promise<AuthUser>;
   register: (username: string, email: string, password: string) => Promise<unknown>;
-  adminRegister: (
-    username: string,
-    email: string,
-    password: string,
-    setupToken?: string,
-  ) => Promise<unknown>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
@@ -85,17 +79,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return response.data;
   }, []);
 
-  const adminRegister = useCallback(
-    async (username: string, email: string, password: string, setupToken?: string) => {
-      const response = await authAPI.adminRegister(
-        { username, email, password },
-        setupToken,
-      );
-      return response.data;
-    },
-    [],
-  );
-
   const logout = useCallback(async () => {
     try {
       await authAPI.logout();
@@ -116,7 +99,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         login,
         register,
-        adminRegister,
         logout,
         refreshUser,
         isAuthenticated: Boolean(user),

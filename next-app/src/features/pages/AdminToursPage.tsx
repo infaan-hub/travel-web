@@ -85,7 +85,7 @@ export default function AdminToursPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     loadTours();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, isAuthenticated, isAdmin, router, ordering, page]);

@@ -22,7 +22,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     Promise.all([
       api.get('/dashboard/stats/'),
       api.get('/all-bookings/'),

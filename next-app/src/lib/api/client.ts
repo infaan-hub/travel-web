@@ -46,10 +46,6 @@ type Params = Record<string, unknown>;
 
 export const authAPI = {
   register: (data: Record<string, unknown>) => api.post("/register/", data),
-  adminRegister: (data: Record<string, unknown>, setupToken?: string) =>
-    api.post("/admin/register/", data, {
-      headers: setupToken ? { "X-Admin-Setup-Token": setupToken } : undefined,
-    }),
   login: (data: { username: string; password: string }) => api.post("/token/", data),
   logout: () => api.post("/auth/logout/"),
   getUser: () => api.get("/user/"),

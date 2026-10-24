@@ -35,16 +35,16 @@
    in PostgreSQL.
 8. Start with `npm run start` or the platform's Next.js adapter.
 
-Demo seeding is not part of the application. Create administrator accounts
-explicitly with the documented admin setup workflow.
+Demo seeding is not part of the application. Bootstrap the single administrator
+with `npm run admin:create` in an environment connected to the target database;
+the script prompts for credentials and refuses to create a second administrator.
+Use `npm run admin:set` to reset that administrator's credentials.
 
 ## Production checklist
 
 - `APP_URL=https://travelisland.vercel.app` (exactly, without a trailing slash).
 - `AUTH_SECRET` is at least 32 random characters.
 - `AUTH_COOKIE_SECURE=true`.
-- `ADMIN_SETUP_TOKEN` is either unset or removed after the first administrator is
-  created.
 - `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
   are set so booking notifications can be delivered.
 - `RATE_LIMIT_URL` / `RATE_LIMIT_TOKEN` and `CACHE_URL` / `CACHE_TOKEN` point at

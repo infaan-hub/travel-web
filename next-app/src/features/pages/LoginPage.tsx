@@ -25,6 +25,10 @@ export default function LoginPage() {
     setError('');
     try {
       const user = await login(form.username, form.password);
+      if (user.is_staff) {
+        router.replace("/admin/dashboard");
+        return;
+      }
       router.replace(
         user.account_type === "TOUR_COMPANY" && from === "/"
           ? "/tour-company/dashboard"

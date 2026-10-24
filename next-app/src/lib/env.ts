@@ -6,7 +6,6 @@ const EnvSchema = z.object({
   APP_URL: z.string().url().default("http://localhost:3000"),
   AUTH_SECRET: z.string().min(32, "AUTH_SECRET must be at least 32 characters"),
   AUTH_COOKIE_SECURE: z.enum(["true", "false"]).optional(),
-  ADMIN_SETUP_TOKEN: z.string().optional(),
   /** Shared rate-limit store (Upstash Redis). Falls back to in-process memory. */
   RATE_LIMIT_URL: z.string().optional(),
   RATE_LIMIT_TOKEN: z.string().optional(),

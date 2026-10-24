@@ -16,7 +16,7 @@ export default function ViewWorkspaceListPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     loadWorkspaces();
   }, [authLoading, isAuthenticated, isAdmin, router]);
 

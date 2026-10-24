@@ -14,6 +14,17 @@ async function main() {
 
   const parsed = registerSchema.parse({ username, email, password });
   const existing = await prisma.user.findUnique({ where: { username: parsed.username } });
+  const existingStaff = await prisma.user.findFirst({
+    where: { isStaff: true },
+    select: { id: true, username: true },
+  });
+
+  if (existingStaff && existingStaff.id !== existing?.id) {
+    throw new Error(
+      `Administrator "${existingStaff.username}" already exists. Only one administrator account is supported.`,
+    );
+  }
+
   if (existing) {
     if (!existing.isStaff) {
       await prisma.user.update({ where: { id: existing.id }, data: { isStaff: true } });

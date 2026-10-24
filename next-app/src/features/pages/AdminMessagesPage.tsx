@@ -32,7 +32,7 @@ export default function AdminMessagesPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     const timer = window.setTimeout(() => void loadMessages(), 0);
     return () => window.clearTimeout(timer);
   }, [authLoading, isAuthenticated, isAdmin, loadMessages, router]);

@@ -11,8 +11,8 @@ import { registerSchema } from "../src/lib/validation/schemas";
  * Unlike create-admin.ts this also resets the password of an existing account,
  * which is what a production deployment needs after a database restore.
  *
- * Usage:
- *   ADMIN_USERNAME=admin ADMIN_EMAIL=admin@travel.com ADMIN_PASSWORD='admin@504' npx tsx scripts/set-admin.ts
+ * Supply ADMIN_USERNAME, ADMIN_EMAIL, and ADMIN_PASSWORD in the environment,
+ * or enter them at the prompts. This script will not create a second admin.
  */
 async function main() {
   const interactive = !process.env.ADMIN_USERNAME || !process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD;
@@ -27,6 +27,16 @@ async function main() {
   const hashed = await hashPassword(parsed.password);
 
   const existing = await prisma.user.findUnique({ where: { username: parsed.username } });
+  const existingStaff = await prisma.user.findFirst({
+    where: { isStaff: true },
+    select: { id: true, username: true },
+  });
+  if (existingStaff && existingStaff.id !== existing?.id) {
+    throw new Error(
+      `Administrator "${existingStaff.username}" already exists. Only one administrator account is supported.`,
+    );
+  }
+
   if (existing) {
     await prisma.user.update({
       where: { id: existing.id },

@@ -88,10 +88,8 @@ Existing page routes:
 - `/bookings/`
 - `/settings/`
 
-**Admin**
+**Admin (sign in through `/login`)**
 
-- `/admin/login`
-- `/admin/register`
 - `/admin/dashboard`
 - `/admin/home-editor`
 - `/admin/customers`
@@ -124,7 +122,6 @@ operations route.
 - `POST /api/token/`
 - `POST /api/token/refresh/`
 - `POST /api/register/`
-- `POST /api/admin/register/`
 - `POST /api/auth/logout/`
 - `POST /api/auth/password-reset/request/`
 - `GET /api/auth/password-reset/pending/`
@@ -1397,7 +1394,6 @@ Required:
 
 Existing optional services/flags:
 
-- `ADMIN_SETUP_TOKEN` (one-time bootstrap only).
 - `RATE_LIMIT_URL` / `RATE_LIMIT_TOKEN` (Upstash-compatible shared limiter).
 - `CACHE_URL` / `CACHE_TOKEN` (geocoding cache).
 - `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`,

@@ -27,7 +27,7 @@ export default function AdminCustomersPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     Promise.all([adminAPI.getAllUsers(), companiesAPI.list()])
       .then(([userResponse, companyResponse]) => {
         setUsers((userResponse.data.results || userResponse.data) as Customer[]);

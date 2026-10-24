@@ -71,10 +71,6 @@ export const registerSchema = z.object({
   last_name: z.string().trim().max(150).optional(),
 });
 
-export const adminRegisterSchema = registerSchema.extend({
-  setup_token: z.string().optional(),
-});
-
 export const loginSchema = z.object({
   username: z.string().trim().min(1, "Username is required."),
   password: z.string().min(1, "Password is required."),

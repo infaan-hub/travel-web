@@ -55,7 +55,7 @@ export default function AdminAttractionsPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     const timer = window.setTimeout(loadAttractions, 0);
     return () => window.clearTimeout(timer);
   }, [authLoading, isAuthenticated, isAdmin, router, loadAttractions]);

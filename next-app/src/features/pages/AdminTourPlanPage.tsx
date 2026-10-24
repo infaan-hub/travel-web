@@ -53,7 +53,7 @@ export default function AdminTourPlanPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     loadAllData();
   }, [isAuthenticated, isAdmin, router, id]);
 

@@ -76,7 +76,7 @@ cp .env.example .env
 npm install
 npm run db:local      # starts the embedded PostgreSQL cluster on 127.0.0.1:55432
 npm run db:migrate    # applies prisma/migrations
-npm run admin:create  # create an administrator explicitly
+npm run admin:create  # bootstrap the single administrator (prompts for credentials)
 npm run dev
 ```
 
@@ -101,7 +101,8 @@ Open `http://localhost:3000`.
   panel (4:3 on phones)
 - `npm run db:backfill:companies` — dry-run by default; pass `--apply` to fill booking attribution/snapshots, and `--company <slug> --assign-tours` for explicit legacy-tour assignment
 - `npm run db:verify:companies` — read-only row-count/orphan checks; use `--baseline <file>` after capturing a pre-migration baseline
-- `npm run admin:create` — create an administrator explicitly
+- `npm run admin:create` — create the single administrator explicitly
+- `npm run admin:set` — reset the existing administrator's credentials
 
 ## Environment
 
@@ -116,6 +117,8 @@ paths.
 ## Authentication
 
 - Browser sessions use HTTP-only `infaan_session` / `infaan_refresh` cookies.
+- Customers, tour-company users, and the single administrator sign in at
+  `/login`; staff accounts are sent to `/admin/dashboard`.
 - Mobile applications continue to use `POST /api/token/` and
   `POST /api/token/refresh/` with Bearer tokens.
 - Legacy Django `pbkdf2_sha256` password hashes are accepted and upgraded to

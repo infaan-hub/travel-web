@@ -63,7 +63,7 @@ export default function AdminTripsPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated || !isAdmin) { router.push('/admin/login'); return; }
+    if (!isAuthenticated || !isAdmin) { router.push('/login'); return; }
     const timer = window.setTimeout(loadTrips, 0);
     return () => window.clearTimeout(timer);
   }, [authLoading, isAuthenticated, isAdmin, loadTrips, router]);
