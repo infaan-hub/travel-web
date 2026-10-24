@@ -50,9 +50,9 @@ describe("Vercel Blob image storage", () => {
     putBlob.mockResolvedValue({ url });
 
     const file = new File([PNG], "logo.png", { type: "image/png" });
-    await expect(saveImage(file, "companies")).resolves.toBe(url);
+    await expect(saveImage(file, "tours")).resolves.toBe(url);
     expect(putBlob).toHaveBeenCalledWith(
-      expect.stringMatching(/^companies\/[0-9a-f-]+\.png$/),
+      expect.stringMatching(/^tours\/[0-9a-f-]+\.png$/),
       expect.any(Buffer),
       {
         access: "public",
@@ -73,7 +73,7 @@ describe("Vercel Blob image storage", () => {
     });
 
     const file = new File([PNG], "logo.png", { type: "image/png" });
-    await expect(saveImage(file, "companies")).resolves.toContain(".blob.vercel-storage.com/");
+    await expect(saveImage(file, "tours")).resolves.toContain(".blob.vercel-storage.com/");
     expect(putBlob).toHaveBeenCalled();
   });
 
@@ -81,7 +81,7 @@ describe("Vercel Blob image storage", () => {
     process.env.VERCEL = "1";
     const file = new File([PNG], "logo.png", { type: "image/png" });
 
-    await expect(saveImage(file, "companies")).rejects.toMatchObject({
+    await expect(saveImage(file, "tours")).rejects.toMatchObject({
       status: 503,
     });
     expect(putBlob).not.toHaveBeenCalled();

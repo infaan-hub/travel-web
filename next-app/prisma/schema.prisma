@@ -166,6 +166,15 @@ model Company {
   @@map("companies")
 }
 
+model StoredImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  data      Bytes    @db.ByteA
+  mimeType  String   @map("mime_type")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("stored_images")
+}
+
 model CompanyMembership {
   id               Int                     @id @default(autoincrement())
   companyId        Int                     @map("company_id")

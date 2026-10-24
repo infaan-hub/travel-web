@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { del, put } from "@vercel/blob";
 import { fileTypeFromBuffer } from "file-type";
 import { ApiError } from "@/lib/api/http";
+import prisma from "@/lib/db/prisma";
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -52,6 +53,14 @@ export async function saveImage(file: File, folder: UploadFolder): Promise<strin
   const { buffer, extension, mimeType } = await validatedImage(file);
   const safeFolder = assertAllowedFolder(folder);
   const filename = `${randomUUID()}.${extension}`;
+
+  if (safeFolder === "companies" || safeFolder === "companies/covers") {
+    const image = await prisma.storedImage.create({
+      data: { data: Uint8Array.from(buffer), mimeType },
+      select: { id: true },
+    });
+    return `db/${image.id}`;
+  }
 
   if (hasBlobCredentials()) {
     const blob = await put(`${safeFolder}/${filename}`, buffer, {
@@ -117,6 +126,18 @@ export async function readStoredImage(key: string): Promise<{ buffer: Buffer; mi
 export async function deleteImage(key: string | null | undefined): Promise<void> {
   if (!key) return;
 
+  const databaseImage = key.match(
+    /^db\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i,
+  );
+  if (databaseImage) {
+    try {
+      await prisma.storedImage.deleteMany({ where: { id: databaseImage[1] } });
+    } catch (error) {
+      console.error("Failed to delete image from PostgreSQL", error);
+    }
+    return;
+  }
+
   if (/^https:\/\/[^/]+\.blob\.vercel-storage\.com\//i.test(key)) {
     try {
       await del(key);
@@ -141,6 +162,10 @@ export async function deleteImage(key: string | null | undefined): Promise<void>
 /** Resolves a stored key into a browser-usable URL. */
 export function publicImageUrl(key: string | null | undefined): string | null {
   if (!key) return null;
+  const databaseImage = key.match(
+    /^db\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i,
+  );
+  if (databaseImage) return `/api/images/${databaseImage[1]}`;
   if (key.startsWith("http://") || key.startsWith("https://")) return key;
   const safe = key.replace(/^\/?(uploads|media)\//, "");
   const base = process.env.NEXT_PUBLIC_MEDIA_BASE_URL;
