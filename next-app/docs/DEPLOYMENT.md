@@ -15,8 +15,13 @@
 1. Set environment variables from `.env.example`.
 2. Run `npm ci`.
 3. On Vercel, use the default install command and set the build command to
-   `npm run vercel-build` (or run `npm run db:migrate` before `npm run build`).
-4. Run `npm run db:migrate` against the target database.
+   `npm run vercel-build` (or `npm run build`). The build generates the Prisma
+   client and builds the app without applying migrations or requiring a
+   successful database connection. If the database is unavailable, the build
+   omits database-backed sitemap entries.
+4. Run `npm run db:migrate` as a separate release step against the target
+   database, from an environment that can reach it, before deploying code that
+   depends on the new schema.
 5. Run `npm run db:backfill:companies -- --dry-run`, review the report, then
    run it again with `--apply` to fill historical booking snapshots. Do not use
    `--assign-tours` unless the legacy tour's real owner has been confirmed.
