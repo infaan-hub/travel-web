@@ -6,13 +6,14 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI, publicCompaniesAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
-import { ArrowRight, Star, MapPin, Send, X, Building2 } from '@/components/icons';
+import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
+import DestinationCardWhite from "@/components/DestinationCardWhite";
 
 import type {  Attraction, HomeSettings, Review, Tour  } from "@/features/pages/types";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
@@ -274,32 +275,52 @@ export default function HomePage() {
           </div>
           <div className="home-companies-grid">
             {companies.map((company) => (
-              <Link className="home-company-card glass-card" href={company.public_path} key={company.id}>
-                {company.logo_image_url ? (
-                  <Image src={getImageUrl(company.logo_image_url)} alt="" width={52} height={52} className="home-company-logo" />
-                ) : (
-                  <span className="home-company-logo home-company-logo-fallback"><Building2 size={22} /></span>
-                )}
-                <span className="home-company-copy">
-                  <strong>{company.name}</strong>
-                  <span>{[company.locality, company.region].filter(Boolean).join(", ") || "Tourism company"} ┬╖ {company.tours_count} experiences</span>
-                  {company.description ? <span className="home-company-description">{company.description}</span> : null}
-                </span>
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
+              <DestinationCardWhite
+                key={company.id}
+                image={company.logo_image_url ? getImageUrl(company.logo_image_url) : undefined}
+                title={company.name}
+                location={[company.locality, company.region].filter(Boolean).join(", ") || "Tourism company"}
+                description={company.description || `${company.tours_count} published experiences`}
+                stats={[
+                  { value: String(company.tours_count), label: "Experiences" },
+                  { value: "Local", label: "Provider" },
+                  { value: "Verified", label: "Company" },
+                ]}
+                onSeeMore={() => router.push(company.public_path)}
+              />
             ))}
           </div>
         </section>
       )}
-      <section className="cta-section">
-        <div className="cta-content">
-          <h2>Your next trip begins with a good match.</h2>
-          <p>Explore providers, compare the details that matter, and contact the company behind an experience when you are ready.</p>
-          <button className="btn btn-primary btn-large" onClick={() => router.push('/companies/')}>
-            Meet the companies
-          </button>
-        </div>
-      </section>
+      {!loading && allTours.length > 0 && (
+        <section className="all-tours-section">
+          <div className="section-header">
+            <h2>Your next trip begins with a good match.</h2>
+            <p>Explore providers, compare the details that matter, and contact the company behind an experience when you are ready.</p>
+          </div>
+          <div className="tours-grid">
+            {allTours.slice(0, 6).map((tour: Tour) => (
+              <TourCard key={tour.id} tour={tour} />
+            ))}
+          </div>
+          <div className="section-footer">
+            <button className="btn btn-primary btn-large" onClick={() => router.push('/tours/')}>
+              Explore experiences
+            </button>
+          </div>
+        </section>
+      )}
+      {(!loading && allTours.length === 0) && (
+        <section className="cta-section">
+          <div className="cta-content">
+            <h2>Your next trip begins with a good match.</h2>
+            <p>Explore providers, compare the details that matter, and contact the company behind an experience when you are ready.</p>
+            <button className="btn btn-primary btn-large" onClick={() => router.push('/companies/')}>
+              Meet the companies
+            </button>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

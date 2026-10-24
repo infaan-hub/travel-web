@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, Star, Clock, MapPin } from "@/components/icons";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Star } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
+import "./DestinationCard.css";
 
 type Tour = {
   id: number;
@@ -36,88 +39,87 @@ export default function TourCard({ tour }: { tour: Tour }) {
   const uniqueImages = [...new Set(images)];
 
   const detailHref = `/tour/${tour.id}/`;
+  const router = useRouter();
+  const [liked, setLiked] = useState(false);
+
+  const rating =
+    tour.average_rating != null ? Number(tour.average_rating).toFixed(1) : null;
+  const reviews = tour.review_count || 0;
 
   return (
-    <article className="tour-card glass-card">
-      <div className="tour-card-image">
-        {uniqueImages[0] ? (
-          <Image
-            src={uniqueImages[0]}
-            alt={tour.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="tour-card-cover"
-            style={{ objectFit: "cover" }}
-          />
-        ) : <div className="tour-card-image-fallback"><MapPin size={28} /><span>Experience</span></div>}
-        <span className={`tour-category ${tour.category}`}>
-          {tour.category === "zanzibar"
-            ? "Zanzibar"
-            : tour.category === "tanzania"
-              ? "Tanzania Safari"
-              : "International"}
-        </span>
-      </div>
-      <div className="tour-card-body">
-        <div className="tour-card-heading">
-          <div>
-            <h3><Link href={detailHref}>{tour.title}</Link></h3>
-            <span className="tour-destination"><MapPin size={14} /> {tour.destination}</span>
-          </div>
+    <article className="dc">
+      {uniqueImages[0] ? (
+        <Image
+          className="dc__img"
+          src={uniqueImages[0]}
+          alt={`${tour.title}, ${tour.destination}`}
+          fill
+          sizes="(max-width: 768px) 100vw, 300px"
+          style={{ objectFit: "cover" }}
+        />
+      ) : (
+        <div className="dc__img" style={{ display: "grid", placeItems: "center" }}>
+          <span>Experience</span>
         </div>
-        <p className="tour-card-description">
-          {tour.short_description ||
-            (tour.description ? `${tour.description.slice(0, 112).trim()}${tour.description.length > 112 ? "…" : ""}` : "Explore this experience and send a booking request to its provider.")}
-        </p>
+      )}
+      <div className="dc__shade" />
+
+      <button
+        className="dc__heart"
+        aria-label={liked ? "Remove from favourites" : "Add to favourites"}
+        aria-pressed={liked}
+        onClick={() => setLiked((v) => !v)}
+        type="button"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24"
+          fill={liked ? "#fff" : "none"} stroke="#fff" strokeWidth="2"
+          strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" />
+        </svg>
+      </button>
+
+      <div className="dc__info">
+        <h3 className="dc__title">
+          <Link href={detailHref}>{tour.title}</Link>
+        </h3>
+        <p className="dc__loc">{tour.destination}</p>
         {tour.company_name && tour.company_public_path ? (
           <Link
             href={tour.company_public_path}
             className="tour-company-link"
             aria-label={`View ${tour.company_name}`}
+            onClick={(event) => event.stopPropagation()}
           >
-            <Building2 size={14} />
+            <Star size={12} />
             <span>{tour.company_name}</span>
           </Link>
         ) : null}
-        <div className="tour-card-meta">
-          {tour.average_rating ? (
-            <span className="tour-rating">
-              <span className="stars-display">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star
-                    key={s}
-                    size={12}
-                    fill={s <= Math.round(Number(tour.average_rating)) ? "#f59e0b" : "none"}
-                    color={s <= Math.round(Number(tour.average_rating)) ? "#f59e0b" : "#d1d5db"}
-                  />
-                ))}
-              </span>
-              {Number(tour.average_rating).toFixed(1)} ({tour.review_count || 0})
-            </span>
+        <span className="dc__rating">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+            stroke="#fff" strokeWidth="2" strokeLinejoin="round">
+            <polygon points="12 2 15 9 22 9.3 16.5 14 18.2 21 12 17 5.8 21 7.5 14 2 9.3 9 9" />
+          </svg>
+          {rating ? (
+            <>
+              <b>{rating}</b>
+              <span>{reviews} reviews</span>
+            </>
           ) : (
-            <span className="tour-rating">
-              <span className="stars-display">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} size={12} fill="none" color="#d1d5db" />
-                ))}
-              </span>
-              No reviews
-            </span>
+            <span>No reviews</span>
           )}
-          <span className="tour-duration">
-            <Clock size={14} /> {tour.duration}
-          </span>
-        </div>
-        <div className="tour-card-footer">
-          <span className="tour-price">
-            From <strong>${tour.price}</strong>
-            <span className="tour-per-person"> / person</span>
-          </span>
-          <Link className="tour-card-action" href={detailHref} aria-label={`View ${tour.title}`}>
-            View experience <span aria-hidden="true">→</span>
-          </Link>
-        </div>
+        </span>
       </div>
+
+      <button className="dc__cta" onClick={() => router.push(detailHref)} type="button">
+        <span>See more</span>
+        <i className="dc__chev" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="#0a2a4a" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+        </i>
+      </button>
     </article>
   );
 }
+
