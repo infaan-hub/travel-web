@@ -4801,7 +4801,7 @@ label { color: var(--text-primary); }
 .section-header h2 { margin: 4px 0 8px; font: 650 clamp(1.45rem,2.8vw,2rem)/1.16 var(--font-display); }
 .section-header p { max-width: 640px; margin: 0; line-height: 1.55; }
 .section-kicker { color: var(--brand); font-size: .68rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
-.home-companies-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,280px),1fr)); gap: 14px; }
+.home-companies-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
 .home-company-card {display: flex;align-items: center;gap: 4px;min-width: 0;padding: 4px;color: inherit;text-decoration: none;}
 .home-company-logo { display: block; width: 52px; height: 52px; flex: 0 0 52px; border: 1px solid rgba(82, 125, 100,.12); border-radius: 15px; object-fit: cover; }
 .home-company-logo-fallback { display: grid; place-items: center; background: rgba(241,245,249,.9); color: var(--brand); }
