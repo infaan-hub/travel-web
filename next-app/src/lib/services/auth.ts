@@ -41,6 +41,7 @@ export type AuthenticatedUser = {
   isStaff: boolean;
   isSuperuser: boolean;
   isActive: boolean;
+  accountType: "CUSTOMER" | "TOUR_COMPANY";
   sessionVersion: number;
 };
 
@@ -71,6 +72,7 @@ export async function authenticateUser(
     isStaff: updated.isStaff,
     isSuperuser: updated.isSuperuser,
     isActive: updated.isActive,
+    accountType: updated.accountType,
     sessionVersion: updated.sessionVersion,
   };
 }
@@ -88,6 +90,45 @@ export async function createStaffUser(input: {
       password,
       isStaff: true,
       profile: { create: {} },
+    },
+  });
+}
+
+export async function createTourCompanyOwner(input: {
+  username: string;
+  email: string;
+  password: string;
+}) {
+  const username = input.username.trim();
+  const email = input.email.trim().toLowerCase();
+  const [existingUsername, existingEmail] = await Promise.all([
+    prisma.user.findUnique({ where: { username }, select: { id: true } }),
+    prisma.user.findFirst({ where: { email }, select: { id: true } }),
+  ]);
+  if (existingUsername) {
+    throw new ApiError(400, "A user with that username already exists.", {
+      username: ["A user with that username already exists."],
+    });
+  }
+  if (existingEmail) {
+    throw new ApiError(400, "A user with that email already exists.", {
+      email: ["A user with that email already exists."],
+    });
+  }
+
+  return prisma.user.create({
+    data: {
+      username,
+      email,
+      password: await hashPassword(input.password),
+      accountType: "TOUR_COMPANY",
+      profile: { create: {} },
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      accountType: true,
     },
   });
 }

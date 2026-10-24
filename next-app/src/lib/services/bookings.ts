@@ -85,6 +85,8 @@ export async function createBooking(user: AuthUser | null, input: BookingCreateI
             phone: input.phone,
             address: input.address,
             travelers: input.travelers,
+            unitPriceAtBooking: currentTour.price,
+            totalPriceAtBooking: currentTour.price.mul(input.travelers),
             travelDate,
             notes: input.notes,
             userLat: input.user_lat,
@@ -239,7 +241,12 @@ export async function updateBooking(
   if (data.email !== undefined) update.email = data.email;
   if (data.phone !== undefined) update.phone = data.phone;
   if (data.address !== undefined) update.address = data.address;
-  if (data.travelers !== undefined) update.travelers = data.travelers;
+  if (data.travelers !== undefined) {
+    update.travelers = data.travelers;
+    if (booking.unitPriceAtBooking !== null) {
+      update.totalPriceAtBooking = booking.unitPriceAtBooking.mul(data.travelers);
+    }
+  }
 
   let requestedTravelDate = booking.travelDate;
   if (data.travel_date !== undefined) {

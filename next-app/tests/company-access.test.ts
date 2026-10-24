@@ -54,6 +54,7 @@ describe("company permission matrix", () => {
       "bookings:read",
       "bookings:update",
       "analytics:read",
+      "reports:export",
       "members:read",
       "members:manage",
     ]);
@@ -81,6 +82,27 @@ describe("company permission matrix", () => {
     expect(hasCompanyPermission("STAFF", "profile:read")).toBe(false);
     expect(hasCompanyPermission("STAFF", "tours:write")).toBe(false);
     expect(hasCompanyPermission("STAFF", "members:read")).toBe(false);
+  });
+
+  it("limits specialist roles to their assigned workspace functions", () => {
+    expect(hasCompanyPermission("RESERVATIONS_AGENT", "bookings:update")).toBe(true);
+    expect(hasCompanyPermission("RESERVATIONS_AGENT", "tours:write")).toBe(false);
+    expect(hasCompanyPermission("RESERVATIONS_AGENT", "profile:read")).toBe(false);
+
+    expect(hasCompanyPermission("TOUR_EDITOR", "tours:write")).toBe(true);
+    expect(hasCompanyPermission("TOUR_EDITOR", "bookings:read")).toBe(false);
+    expect(hasCompanyPermission("TOUR_EDITOR", "profile:read")).toBe(false);
+
+    expect(hasCompanyPermission("FINANCE", "analytics:read")).toBe(true);
+    expect(hasCompanyPermission("FINANCE", "reports:export")).toBe(true);
+    expect(hasCompanyPermission("FINANCE", "tours:read")).toBe(false);
+    expect(hasCompanyPermission("FINANCE", "bookings:update")).toBe(false);
+    expect(hasCompanyPermission("FINANCE", "members:manage")).toBe(false);
+
+    expect(hasCompanyPermission("OPERATIONS_COORDINATOR", "tours:write")).toBe(true);
+    expect(hasCompanyPermission("OPERATIONS_COORDINATOR", "bookings:update")).toBe(true);
+    expect(hasCompanyPermission("OPERATIONS_COORDINATOR", "analytics:read")).toBe(false);
+    expect(hasCompanyPermission("OPERATIONS_COORDINATOR", "profile:read")).toBe(false);
   });
 
   it("returns the configured permission list and handles unknown roles as denied", () => {
@@ -117,6 +139,13 @@ describe("active company selection", () => {
       reason: "unavailable",
       membership: suspended,
     });
+  });
+
+  it("allows pending owner workspaces but not pending staff memberships", () => {
+    const pendingOwner = membership(1, "OWNER", "PENDING");
+    const pendingStaff = membership(2, "STAFF", "PENDING");
+    expect(resolveCompanySelection([pendingOwner], null).reason).toBe("ok");
+    expect(resolveCompanySelection([pendingStaff], null).reason).toBe("unavailable");
   });
 
   it("requires an explicit choice when several companies are available", () => {

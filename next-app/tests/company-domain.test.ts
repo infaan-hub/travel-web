@@ -37,6 +37,8 @@ describe("company domain", () => {
     expect(nextCompanyStatus("ARCHIVED", "reactivate")).toBeNull();
     expect(nextCompanyStatus("ACTIVE", "archive")).toBe("ARCHIVED");
     expect(nextCompanyStatus("PENDING", "archive")).toBe("ARCHIVED");
+    expect(nextCompanyStatus("PENDING", "reject")).toBe("REJECTED");
+    expect(nextCompanyStatus("ACTIVE", "reject")).toBeNull();
   });
 
   it("requires active status before a company can be public", () => {

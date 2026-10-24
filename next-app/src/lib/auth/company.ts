@@ -77,7 +77,11 @@ function assertCompanyAccess(
   }
   if (
     options.requireActiveCompany !== false &&
-    selection.membership.company.status !== "ACTIVE"
+    selection.membership.company.status !== "ACTIVE" &&
+    !(
+      selection.membership.company.status === "PENDING" &&
+      selection.membership.role === "OWNER"
+    )
   ) {
     throw new ApiError(403, "This company workspace is unavailable.");
   }
@@ -142,7 +146,13 @@ function assertPageCompanyAccess(
   ) {
     redirect("/dashboard");
   }
-  if (selection.membership.company.status !== "ACTIVE") {
+  if (
+    selection.membership.company.status !== "ACTIVE" &&
+    !(
+      selection.membership.company.status === "PENDING" &&
+      selection.membership.role === "OWNER"
+    )
+  ) {
     forbidden();
   }
   if (options.roles && !options.roles.includes(selection.membership.role)) {

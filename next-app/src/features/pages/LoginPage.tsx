@@ -24,8 +24,12 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     try {
-      await login(form.username, form.password);
-      router.replace(from);
+      const user = await login(form.username, form.password);
+      router.replace(
+        user.account_type === "TOUR_COMPANY" && from === "/"
+          ? "/tour-company/dashboard"
+          : from,
+      );
     } catch (err: any) {
       setError(err.response?.data?.detail || err.response?.data?.message || 'Invalid username or password');
       setFieldErrors(err.fieldErrors || {});

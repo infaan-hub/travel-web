@@ -4,6 +4,8 @@
  * fields coming from the server.
  */
 import type { CompanyOpeningHours } from "@/lib/company-opening-hours";
+import type { CompanyRole, CompanyStatus } from "@prisma/client";
+export type { CompanyRole, CompanyStatus } from "@prisma/client";
 
 export type ImageUrl = string | null;
 
@@ -212,8 +214,6 @@ export type HomeSettings = {
   [key: string]: any;
 };
 
-export type CompanyStatus = "PENDING" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
-export type CompanyRole = "OWNER" | "MANAGER" | "STAFF";
 export type CompanyBusinessType =
   | "TOUR_OPERATOR"
   | "SAFARI_OPERATOR"

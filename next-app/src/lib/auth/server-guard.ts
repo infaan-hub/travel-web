@@ -21,6 +21,7 @@ export async function getServerUser(): Promise<AuthUser | null> {
       isStaff: true,
       isSuperuser: true,
       isActive: true,
+      accountType: true,
       sessionVersion: true,
       deletedAt: true,
     },

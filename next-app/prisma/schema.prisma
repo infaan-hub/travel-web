@@ -37,6 +37,7 @@ enum CompanyStatus {
   ACTIVE
   SUSPENDED
   ARCHIVED
+  REJECTED
 }
 
 enum CompanyBusinessType {
@@ -50,6 +51,15 @@ enum CompanyRole {
   OWNER
   MANAGER
   STAFF
+  RESERVATIONS_AGENT
+  TOUR_EDITOR
+  FINANCE
+  OPERATIONS_COORDINATOR
+}
+
+enum UserAccountType {
+  CUSTOMER
+  TOUR_COMPANY
 }
 
 enum CompanyMembershipStatus {
@@ -71,6 +81,7 @@ model User {
   username         String    @unique
   email            String    @default("")
   password         String
+  accountType      UserAccountType @default(CUSTOMER) @map("account_type")
   firstName        String    @default("") @map("first_name")
   lastName         String    @default("") @map("last_name")
   isStaff          Boolean   @default(false) @map("is_staff")
@@ -327,6 +338,8 @@ model Booking {
   phone               String
   address             String        @default("")
   travelers           Int
+  unitPriceAtBooking  Decimal?      @map("unit_price_at_booking") @db.Decimal(12, 2)
+  totalPriceAtBooking Decimal?      @map("total_price_at_booking") @db.Decimal(12, 2)
   travelDate          DateTime      @map("travel_date") @db.Date
   notes               String        @default("")
   status              BookingStatus @default(pending)

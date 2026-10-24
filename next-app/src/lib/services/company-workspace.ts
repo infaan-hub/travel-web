@@ -410,7 +410,8 @@ export async function getCompanyAnalytics(companyId: number) {
       prisma.booking.groupBy({
         by: ["status"],
         where: { companyId },
-        _count: { _all: true },
+        _count: { _all: true, totalPriceAtBooking: true },
+        _sum: { totalPriceAtBooking: true },
       }),
       prisma.booking.findMany({
         where: { companyId, createdAt: { gte: start } },
@@ -434,8 +435,17 @@ export async function getCompanyAnalytics(companyId: number) {
     ]);
 
   const statusCounts = { pending: 0, confirmed: 0, cancelled: 0 };
+  let bookedValue = 0;
+  let confirmedValue = 0;
+  let bookingsWithPrice = 0;
+  let bookingsWithoutPrice = 0;
   for (const group of statusGroups) {
     statusCounts[group.status] = group._count._all;
+    const groupValue = Number(group._sum.totalPriceAtBooking ?? 0);
+    bookingsWithPrice += group._count.totalPriceAtBooking;
+    bookingsWithoutPrice += group._count._all - group._count.totalPriceAtBooking;
+    if (group.status !== "cancelled") bookedValue += groupValue;
+    if (group.status === "confirmed") confirmedValue = groupValue;
   }
 
   const monthly = new Map<
@@ -488,6 +498,10 @@ export async function getCompanyAnalytics(companyId: number) {
         statusCounts.pending + statusCounts.confirmed + statusCounts.cancelled,
       travelers: travelerAggregate._sum.travelers ?? 0,
       tours: toursTotal,
+      booked_value_tzs: bookedValue,
+      confirmed_value_tzs: confirmedValue,
+      bookings_with_price: bookingsWithPrice,
+      bookings_without_price: bookingsWithoutPrice,
     },
   };
 }

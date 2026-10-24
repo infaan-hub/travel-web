@@ -20,6 +20,7 @@ export const COMPANY_PERMISSIONS = [
   "bookings:read",
   "bookings:update",
   "analytics:read",
+  "reports:export",
   "members:read",
   "members:manage",
 ] as const;
@@ -39,6 +40,7 @@ export const COMPANY_ROLE_PERMISSIONS: Readonly<
     "bookings:read",
     "bookings:update",
     "analytics:read",
+    "reports:export",
     "members:read",
     "members:manage",
   ],
@@ -52,10 +54,38 @@ export const COMPANY_ROLE_PERMISSIONS: Readonly<
     "bookings:read",
     "bookings:update",
     "analytics:read",
+    "reports:export",
   ],
   STAFF: [
     "company:read",
     "dashboard:read",
+    "bookings:read",
+    "bookings:update",
+  ],
+  RESERVATIONS_AGENT: [
+    "company:read",
+    "dashboard:read",
+    "bookings:read",
+    "bookings:update",
+  ],
+  TOUR_EDITOR: [
+    "company:read",
+    "dashboard:read",
+    "tours:read",
+    "tours:write",
+  ],
+  FINANCE: [
+    "company:read",
+    "dashboard:read",
+    "bookings:read",
+    "analytics:read",
+    "reports:export",
+  ],
+  OPERATIONS_COORDINATOR: [
+    "company:read",
+    "dashboard:read",
+    "tours:read",
+    "tours:write",
     "bookings:read",
     "bookings:update",
   ],
@@ -73,6 +103,7 @@ export const COMPANY_PERMISSION_LABELS: Readonly<
   "bookings:read": "View company bookings",
   "bookings:update": "Update company booking status",
   "analytics:read": "View company analytics",
+  "reports:export": "Export company financial reports",
   "members:read": "View company members",
   "members:manage": "Manage company members",
 };
@@ -81,6 +112,10 @@ export const COMPANY_ROLE_LABELS: Readonly<Record<CompanyRole, string>> = {
   OWNER: "Owner",
   MANAGER: "Manager",
   STAFF: "Staff",
+  RESERVATIONS_AGENT: "Reservations Agent",
+  TOUR_EDITOR: "Tour Editor",
+  FINANCE: "Finance",
+  OPERATIONS_COORDINATOR: "Operations Coordinator",
 };
 
 export function companyRolePermissions(
@@ -157,7 +192,11 @@ export function resolveCompanySelection(
     );
     if (selected) {
       return {
-        reason: selected.company.status === "ACTIVE" ? "ok" : "unavailable",
+        reason:
+          selected.company.status === "ACTIVE" ||
+          (selected.company.status === "PENDING" && selected.role === "OWNER")
+            ? "ok"
+            : "unavailable",
         membership: selected,
       };
     }
@@ -166,7 +205,11 @@ export function resolveCompanySelection(
   if (memberships.length === 1) {
     const only = memberships[0];
     return {
-      reason: only.company.status === "ACTIVE" ? "ok" : "unavailable",
+      reason:
+        only.company.status === "ACTIVE" ||
+        (only.company.status === "PENDING" && only.role === "OWNER")
+          ? "ok"
+          : "unavailable",
       membership: only,
     };
   }

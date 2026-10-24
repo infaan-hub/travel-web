@@ -22,6 +22,7 @@ export type AuthUser = {
   isStaff: boolean;
   isSuperuser: boolean;
   isActive: boolean;
+  accountType: "CUSTOMER" | "TOUR_COMPANY";
 };
 
 export type AuthContext = {
@@ -66,6 +67,7 @@ export async function optionalAuth(request: Request): Promise<AuthContext | null
       isStaff: true,
       isSuperuser: true,
       isActive: true,
+      accountType: true,
       sessionVersion: true,
       deletedAt: true,
     },

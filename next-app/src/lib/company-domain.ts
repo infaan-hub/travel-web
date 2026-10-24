@@ -1,7 +1,21 @@
 import type { CompanyStatus } from "@prisma/client";
 
-export const COMPANY_STATUSES = ["PENDING", "ACTIVE", "SUSPENDED", "ARCHIVED"] as const;
-export const COMPANY_ROLES = ["OWNER", "MANAGER", "STAFF"] as const;
+export const COMPANY_STATUSES = [
+  "PENDING",
+  "ACTIVE",
+  "SUSPENDED",
+  "ARCHIVED",
+  "REJECTED",
+] as const;
+export const COMPANY_ROLES = [
+  "OWNER",
+  "MANAGER",
+  "STAFF",
+  "RESERVATIONS_AGENT",
+  "TOUR_EDITOR",
+  "FINANCE",
+  "OPERATIONS_COORDINATOR",
+] as const;
 export const COMPANY_BUSINESS_TYPES = [
   "TOUR_OPERATOR",
   "SAFARI_OPERATOR",
@@ -14,6 +28,7 @@ export const COMPANY_LIFECYCLE_ACTIONS = [
   "suspend",
   "reactivate",
   "archive",
+  "reject",
 ] as const;
 
 export type CompanyLifecycleAction = (typeof COMPANY_LIFECYCLE_ACTIONS)[number];
@@ -26,6 +41,7 @@ const TRANSITIONS: Record<
   suspend: { from: ["ACTIVE"], to: "SUSPENDED" },
   reactivate: { from: ["SUSPENDED"], to: "ACTIVE" },
   archive: { from: ["PENDING", "ACTIVE", "SUSPENDED"], to: "ARCHIVED" },
+  reject: { from: ["PENDING"], to: "REJECTED" },
 };
 
 /** Lowercase, URL-safe slugs with a hard length bound. */

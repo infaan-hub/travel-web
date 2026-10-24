@@ -20,6 +20,7 @@ import styles from "@/features/pages/admin-companies.module.css";
 type CompanyFormProps = {
   company?: Company | null;
   onSaved: (company: Company) => void;
+  onCreate?: (data: FormData) => Promise<{ data: Company }>;
   onCancel?: () => void;
 };
 
@@ -104,7 +105,12 @@ type ApiFailure = {
   response?: { data?: { message?: string; errors?: FieldErrors } };
 };
 
-export default function CompanyForm({ company, onSaved, onCancel }: CompanyFormProps) {
+export default function CompanyForm({
+  company,
+  onSaved,
+  onCreate,
+  onCancel,
+}: CompanyFormProps) {
   const toast = useToast();
   const [form, setForm] = useState<FormState>(() => initialForm(company));
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -280,7 +286,9 @@ export default function CompanyForm({ company, onSaved, onCancel }: CompanyFormP
     try {
       const response = company
         ? await companiesAPI.update(company.id, payload)
-        : await companiesAPI.create(payload);
+        : onCreate
+          ? await onCreate(payload)
+          : await companiesAPI.create(payload);
       toast.success(company ? "Company changes saved." : "Company saved as pending.");
       onSaved(response.data as Company);
     } catch (caught) {

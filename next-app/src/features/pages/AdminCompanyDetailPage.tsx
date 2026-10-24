@@ -28,8 +28,9 @@ import {
   XCircle,
 } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
-import { hasCompleteCoordinates, openStreetMapUrl } from "@/lib/company-domain";
+import { COMPANY_ROLES, hasCompleteCoordinates, openStreetMapUrl } from "@/lib/company-domain";
 import { openingHoursEntries } from "@/lib/company-opening-hours";
+import { COMPANY_ROLE_LABELS } from "@/lib/company-access";
 import CompanyForm from "@/features/pages/CompanyForm";
 import type {
   Company,
@@ -46,6 +47,7 @@ const STATUS_LABELS: Record<CompanyStatus, string> = {
   ACTIVE: "Active",
   SUSPENDED: "Suspended",
   ARCHIVED: "Archived",
+  REJECTED: "Rejected",
 };
 
 const STATUS_CLASSES: Record<CompanyStatus, string> = {
@@ -53,19 +55,15 @@ const STATUS_CLASSES: Record<CompanyStatus, string> = {
   ACTIVE: styles.statusActive,
   SUSPENDED: styles.statusSuspended,
   ARCHIVED: styles.statusArchived,
-};
-
-const ROLE_LABELS: Record<CompanyRole, string> = {
-  OWNER: "Owner",
-  MANAGER: "Manager",
-  STAFF: "Staff",
+  REJECTED: styles.statusRejected,
 };
 
 const LIFECYCLE_LABELS: Record<CompanyLifecycleAction, string> = {
-  activate: "Activate",
+  activate: "Approve & publish",
   suspend: "Suspend",
   reactivate: "Reactivate",
   archive: "Archive",
+  reject: "Reject application",
 };
 
 function formatDate(value?: string | null) {
@@ -98,7 +96,7 @@ function readApiError(caught: unknown, fallback: string) {
 }
 
 function lifecycleActions(status: CompanyStatus): CompanyLifecycleAction[] {
-  if (status === "PENDING") return ["activate", "archive"];
+  if (status === "PENDING") return ["activate", "reject", "archive"];
   if (status === "ACTIVE") return ["suspend", "archive"];
   if (status === "SUSPENDED") return ["reactivate", "archive"];
   return [];
@@ -201,6 +199,12 @@ export default function AdminCompanyDetailPage() {
       return;
     }
     if (
+      action === "reject" &&
+      !window.confirm("Reject this application? The owner will be unable to use this company workspace.")
+    ) {
+      return;
+    }
+    if (
       action === "suspend" &&
       !window.confirm("Suspend this company? Its public profile will be removed.")
     ) {
@@ -212,9 +216,11 @@ export default function AdminCompanyDetailPage() {
       setCompany(response.data as Company);
       toast.success(
         action === "activate"
-          ? "Company activated. Review its details, then make it public when ready."
+          ? "Company approved and published to tourists."
           : action === "suspend"
             ? "Company suspended and removed from public view."
+            : action === "reject"
+              ? "Company application rejected."
             : action === "reactivate"
               ? "Company reactivated. It remains private until you publish it."
               : "Company archived. Historical bookings were retained.",
@@ -754,7 +760,7 @@ export default function AdminCompanyDetailPage() {
                     key={action}
                     type="button"
                     className={`btn btn-sm ${
-                      action === "archive"
+                      action === "archive" || action === "reject"
                         ? "btn-danger"
                         : action === "activate" || action === "reactivate"
                           ? "btn-success"
@@ -823,9 +829,9 @@ export default function AdminCompanyDetailPage() {
                         }
                         disabled={memberBusy !== null}
                       >
-                        <option value="OWNER">Owner</option>
-                        <option value="MANAGER">Manager</option>
-                        <option value="STAFF">Staff</option>
+                        {COMPANY_ROLES.map((role) => (
+                          <option key={role} value={role}>{COMPANY_ROLE_LABELS[role]}</option>
+                        ))}
                       </select>
                       <button
                         type="button"
@@ -874,9 +880,9 @@ export default function AdminCompanyDetailPage() {
                       value={memberRole}
                       onChange={(event) => setMemberRole(event.target.value as CompanyRole)}
                     >
-                      <option value="OWNER">Owner</option>
-                      <option value="MANAGER">Manager</option>
-                      <option value="STAFF">Staff</option>
+                      {COMPANY_ROLES.map((role) => (
+                        <option key={role} value={role}>{COMPANY_ROLE_LABELS[role]}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -898,7 +904,7 @@ export default function AdminCompanyDetailPage() {
                     <li key={member.id}>
                       <span>{member.user.full_name}</span>
                       <span>
-                        {ROLE_LABELS[member.role]} · revoked {formatDate(member.revoked_at)}
+                        {COMPANY_ROLE_LABELS[member.role]} · revoked {formatDate(member.revoked_at)}
                       </span>
                     </li>
                   ))}

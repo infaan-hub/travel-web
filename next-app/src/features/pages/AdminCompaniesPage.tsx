@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { companiesAPI } from "@/lib/api/client";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -26,6 +26,7 @@ const STATUS_LABELS: Record<CompanyStatus, string> = {
   ACTIVE: "Active",
   SUSPENDED: "Suspended",
   ARCHIVED: "Archived",
+  REJECTED: "Rejected",
 };
 
 const TYPE_LABELS: Record<CompanyBusinessType, string> = {
@@ -40,6 +41,7 @@ const STATUS_CLASSES: Record<CompanyStatus, string> = {
   ACTIVE: styles.statusActive,
   SUSPENDED: styles.statusSuspended,
   ARCHIVED: styles.statusArchived,
+  REJECTED: styles.statusRejected,
 };
 
 function locationLabel(company: Company) {
@@ -59,6 +61,14 @@ export default function AdminCompaniesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [ownerForm, setOwnerForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [creatingOwner, setCreatingOwner] = useState(false);
+  const [ownerMessage, setOwnerMessage] = useState<string | null>(null);
+  const [ownerError, setOwnerError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -132,6 +142,27 @@ export default function AdminCompaniesPage() {
     setPage(1);
   };
 
+  const createOwner = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCreatingOwner(true);
+    setOwnerMessage(null);
+    setOwnerError(null);
+    try {
+      await companiesAPI.createOwner(ownerForm);
+      setOwnerMessage(
+        `Tour Company account @${ownerForm.username} created. They can sign in at /login and submit a company for review.`,
+      );
+      setOwnerForm({ username: "", email: "", password: "" });
+    } catch (caught) {
+      const failure = caught as { response?: { data?: { message?: string } } };
+      setOwnerError(
+        failure.response?.data?.message ?? "Could not create the Tour Company account.",
+      );
+    } finally {
+      setCreatingOwner(false);
+    }
+  };
+
   const cardMetrics = useMemo(
     () => ({
       active: companies.filter((company) => company.status === "ACTIVE").length,
@@ -163,6 +194,60 @@ export default function AdminCompaniesPage() {
         </p>
       </div>
 
+      <section className={`admin-content ${styles.ownerAccountPanel}`}>
+        <div>
+          <h2>Create Tour Company owner</h2>
+          <p>
+            Create login credentials for an owner. They submit their company
+            profile for review before it can appear to tourists.
+          </p>
+        </div>
+        {ownerMessage ? <p role="status">{ownerMessage}</p> : null}
+        {ownerError ? <p className={styles.ownerAccountError} role="alert">{ownerError}</p> : null}
+        <form className={styles.ownerAccountForm} onSubmit={createOwner}>
+          <label>
+            Username
+            <input
+              required
+              minLength={3}
+              value={ownerForm.username}
+              onChange={(event) =>
+                setOwnerForm((current) => ({ ...current, username: event.target.value }))
+              }
+              autoComplete="off"
+            />
+          </label>
+          <label>
+            Email
+            <input
+              required
+              type="email"
+              value={ownerForm.email}
+              onChange={(event) =>
+                setOwnerForm((current) => ({ ...current, email: event.target.value }))
+              }
+              autoComplete="off"
+            />
+          </label>
+          <label>
+            Temporary password
+            <input
+              required
+              type="password"
+              minLength={8}
+              value={ownerForm.password}
+              onChange={(event) =>
+                setOwnerForm((current) => ({ ...current, password: event.target.value }))
+              }
+              autoComplete="new-password"
+            />
+          </label>
+          <button className="btn btn-primary" type="submit" disabled={creatingOwner}>
+            {creatingOwner ? "Creating account..." : "Create owner account"}
+          </button>
+        </form>
+      </section>
+
       <div className={`admin-toolbar ${styles.companyToolbar}`}>
         <div className="filter-select-group">
           <label className="sr-only" htmlFor="company-status-filter">
@@ -181,6 +266,7 @@ export default function AdminCompaniesPage() {
             <option value="ACTIVE">Active</option>
             <option value="SUSPENDED">Suspended</option>
             <option value="ARCHIVED">Archived</option>
+            <option value="REJECTED">Rejected</option>
           </select>
         </div>
         <div className="filter-select-group">

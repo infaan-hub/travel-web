@@ -5,6 +5,67 @@
   max-width: none;
 }
 
+.ownerAccountPanel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(20, 163, 163, 0.24);
+}
+
+.ownerAccountPanel h2 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.ownerAccountPanel p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+}
+
+.ownerAccountError {
+  color: var(--danger-text) !important;
+}
+
+.ownerAccountForm {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.ownerAccountForm label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ownerAccountForm input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid rgba(20, 163, 163, 0.28);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+@media (max-width: 900px) {
+  .ownerAccountForm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .ownerAccountForm {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 1200px) {
   .companyToolbar {
     display: grid;
@@ -138,7 +199,8 @@
 .statusPending,
 .statusActive,
 .statusSuspended,
-.statusArchived {
+.statusArchived,
+.statusRejected {
   border: 1px solid transparent;
 }
 
@@ -164,6 +226,12 @@
   background: rgba(107, 114, 128, 0.12);
   color: #4b5563;
   border-color: rgba(107, 114, 128, 0.24);
+}
+
+.statusRejected {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-color: rgba(239, 68, 68, 0.28);
 }
 
 /* Detail header */
@@ -441,6 +509,34 @@
 .companyForm :global(.form-group select:focus),
 .companyForm :global(.form-group textarea:focus) {
   border-color: rgba(20, 163, 163, 0.72);
+}
+
+.applicationPage {
+  display: grid;
+  gap: 20px;
+}
+
+.applicationHeader {
+  max-width: 760px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.applicationHeader h1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.applicationHeader > p:last-child {
+  color: var(--text-secondary);
+}
+
+.applicationCard {
+  width: 100%;
+  border: 1px solid rgba(20, 163, 163, 0.24);
 }
 
 .fullWidth {

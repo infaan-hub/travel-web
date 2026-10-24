@@ -9,12 +9,13 @@ import {
   type ReactNode,
 } from "react";
 import api, { authAPI } from "@/lib/api/client";
+import type { CompanyRole } from "@prisma/client";
 
 export type AuthCompanyMembership = {
   id: number;
   name: string;
   slug: string;
-  role: "OWNER" | "MANAGER" | "STAFF";
+  role: CompanyRole;
   permissions: string[];
 };
 
@@ -23,6 +24,7 @@ export type AuthUser = {
   username: string;
   email: string;
   is_staff: boolean;
+  account_type: "CUSTOMER" | "TOUR_COMPANY";
   date_joined: string;
   profile_image_url?: string | null;
   companies?: AuthCompanyMembership[];

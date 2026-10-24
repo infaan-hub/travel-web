@@ -166,6 +166,10 @@ export const geocodeAPI = {
 };
 
 export const companiesAPI = {
+  createOwner: (data: { username: string; email: string; password: string }) =>
+    api.post("/admin/tour-company-owners/", data),
+  createApplication: (data: FormData | Record<string, unknown>) =>
+    api.post("/tour-company/application/", data, formDataConfig(data)),
   list: (params?: Params) => api.get("/admin/companies/", { params }),
   get: (id: string | number) => api.get(`/admin/companies/${id}/`),
   create: (data: FormData | Record<string, unknown>) =>

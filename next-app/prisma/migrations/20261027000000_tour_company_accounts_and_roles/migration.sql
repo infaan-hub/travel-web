@@ -1,0 +1,15 @@
+ALTER TYPE "CompanyStatus" ADD VALUE 'REJECTED';
+
+ALTER TYPE "CompanyRole" ADD VALUE 'RESERVATIONS_AGENT';
+ALTER TYPE "CompanyRole" ADD VALUE 'TOUR_EDITOR';
+ALTER TYPE "CompanyRole" ADD VALUE 'FINANCE';
+ALTER TYPE "CompanyRole" ADD VALUE 'OPERATIONS_COORDINATOR';
+
+CREATE TYPE "UserAccountType" AS ENUM ('CUSTOMER', 'TOUR_COMPANY');
+
+ALTER TABLE "users"
+ADD COLUMN "account_type" "UserAccountType" NOT NULL DEFAULT 'CUSTOMER';
+
+ALTER TABLE "bookings"
+ADD COLUMN "unit_price_at_booking" DECIMAL(12, 2),
+ADD COLUMN "total_price_at_booking" DECIMAL(12, 2);

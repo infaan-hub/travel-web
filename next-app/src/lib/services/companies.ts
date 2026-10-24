@@ -577,7 +577,7 @@ async function transitionCompany(id, action, actor) {
     const now = new Date();
     const data = {
         status: nextStatus,
-        isPublic: false
+        isPublic: action === "activate"
     };
     if (action === "suspend") data.suspendedAt = now;
     if (action === "activate" || action === "reactivate") data.suspendedAt = null;
@@ -604,7 +604,7 @@ async function transitionCompany(id, action, actor) {
         },
         after: {
             status: nextStatus,
-            isPublic: false
+            isPublic: data.isPublic
         },
         ipAddress: actor.ipAddress,
         userAgent: actor.userAgent

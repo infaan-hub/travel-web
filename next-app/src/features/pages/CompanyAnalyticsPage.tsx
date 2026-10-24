@@ -64,6 +64,18 @@ export default function CompanyAnalyticsPage({
       hint: "Retained for history",
       icon: XCircle,
     },
+    {
+      label: "Booked value",
+      value: `TSh ${Math.round(data.totals.booked_value_tzs).toLocaleString("en-US")}`,
+      hint: "Pending and confirmed; cancelled excluded",
+      icon: BarChart3,
+    },
+    {
+      label: "Confirmed value",
+      value: `TSh ${Math.round(data.totals.confirmed_value_tzs).toLocaleString("en-US")}`,
+      hint: "Booking-time price snapshots in TZS",
+      icon: CheckCircle,
+    },
   ];
 
   return (
@@ -78,11 +90,28 @@ export default function CompanyAnalyticsPage({
           </p>
         </div>
         <div className={styles.pageActions}>
+          {context.permissions.includes("reports:export") ? (
+            <a className="btn btn-outline" href="/api/company/reports/bookings">
+              Export booking values
+            </a>
+          ) : null}
           <Link className="btn btn-outline" href="/company/dashboard/">
             <BarChart3 size={16} /> Dashboard
           </Link>
         </div>
       </div>
+
+      {data.totals.bookings_without_price > 0 ? (
+        <p className={styles.note} role="status">
+          {data.totals.bookings_without_price} older booking
+          {data.totals.bookings_without_price === 1 ? " has" : "s have"} no saved
+          booking-time price, so those records are excluded from value totals.
+        </p>
+      ) : null}
+      <p className={styles.note}>
+        Booking value reflects saved prices at booking time. It is not a record
+        of payments received or refunds.
+      </p>
 
       <section className={styles.analyticsStats} aria-label="Company totals">
         {stats.map((stat) => {

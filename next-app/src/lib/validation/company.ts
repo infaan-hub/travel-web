@@ -208,6 +208,17 @@ export const companyLifecycleSchema = z.object({
   action: z.enum(COMPANY_LIFECYCLE_ACTIONS),
 });
 
+export const tourCompanyOwnerCreateSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(3, "Username must be at least 3 characters.")
+    .max(150)
+    .regex(/^[\w.@+-]+$/, "Username contains invalid characters."),
+  email: z.string().trim().email("Enter a valid email address.").max(254),
+  password: z.string().min(8, "Password must be at least 8 characters.").max(128),
+});
+
 export const companyMemberAssignSchema = z.object({
   user_id: z.coerce.number().int().positive(),
   role: z.enum(COMPANY_ROLES),

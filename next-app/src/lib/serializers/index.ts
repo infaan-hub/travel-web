@@ -51,6 +51,7 @@ export function userSerializer(user: User): Json {
     username: user.username,
     email: user.email,
     is_staff: user.isStaff,
+    account_type: user.accountType,
     email_verified: user.emailVerified,
     date_joined: iso(user.dateJoined),
     profile_image_url: null,
@@ -252,7 +253,10 @@ export function bookingSerializer(
   },
 ): Json {
   const tour = booking.tour ?? null;
-  const total = tour ? Number(tour.price) * booking.travelers : null;
+  const total =
+    booking.totalPriceAtBooking === null
+      ? null
+      : Number(booking.totalPriceAtBooking);
   return {
     id: booking.id,
     reference: booking.reference,
@@ -275,7 +279,10 @@ export function bookingSerializer(
     google_maps_url: booking.googleMapsUrl,
     created_at: iso(booking.createdAt),
     tour_title: booking.tourTitleSnapshot ?? tour?.title ?? null,
-    tour_price: tour ? decimal(tour.price) : null,
+    tour_price:
+      booking.unitPriceAtBooking === null
+        ? (tour ? decimal(tour.price) : null)
+        : decimal(booking.unitPriceAtBooking),
     tour_destination: tour?.destination ?? null,
     tour_destination_lat: tour?.destinationLat ?? null,
     tour_destination_lng: tour?.destinationLng ?? null,
@@ -309,9 +316,10 @@ export function companyBookingListSerializer(
     tour: booking.tourId,
     tour_title: booking.tourTitleSnapshot ?? booking.tour?.title ?? null,
     tour_destination: booking.tour?.destination ?? null,
-    total_price: booking.tour
-      ? Number(booking.tour.price) * booking.travelers
-      : null,
+    total_price:
+      booking.totalPriceAtBooking === null
+        ? null
+        : Number(booking.totalPriceAtBooking),
     created_at: iso(booking.createdAt),
   };
 }
