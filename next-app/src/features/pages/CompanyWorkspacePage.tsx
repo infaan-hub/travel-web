@@ -157,20 +157,15 @@ export default function CompanyWorkspacePage({
     hint: string;
     icon: AppIcon;
     tone: DashboardStatTone;
+    highlighted?: boolean;
   }[] = [
-    {
-      label: "Total bookings",
-      value: data.stats.bookings_total,
-      hint: "All company bookings",
-      icon: ClipboardList,
-      tone: "general",
-    },
     {
       label: "Pending",
       value: data.stats.bookings_pending,
       hint: "Awaiting confirmation",
       icon: Hourglass,
       tone: "pending",
+      highlighted: true,
     },
     {
       label: "Confirmed",
@@ -185,6 +180,13 @@ export default function CompanyWorkspacePage({
       hint: "Historical records kept",
       icon: XCircle,
       tone: "cancelled",
+    },
+    {
+      label: "Total bookings",
+      value: data.stats.bookings_total,
+      hint: "All company bookings",
+      icon: ClipboardList,
+      tone: "general",
     },
     {
       label: "Upcoming travelers",
@@ -331,7 +333,12 @@ export default function CompanyWorkspacePage({
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <article className={styles.statCard} key={stat.label}>
+            <article
+              className={`${styles.statCard} ${
+                stat.highlighted ? styles.statCardHot : ""
+              }`}
+              key={stat.label}
+            >
               <div className={styles.statTop}>
                 <span className={`${styles.statIcon} ${statToneClasses[stat.tone]}`}>
                   <Icon size={17} />
@@ -347,44 +354,6 @@ export default function CompanyWorkspacePage({
 
       <div className={styles.dashboardGrid}>
         <div className={styles.detailStack}>
-          <section className={`glass-card ${styles.panel}`}>
-            <div className={styles.panelHead}>
-              <div>
-                <h2 className={styles.panelTitle}>Upcoming travel dates</h2>
-                <p className={styles.panelCopy}>
-                  Confirmed and pending travel in the next 30 days.
-                </p>
-              </div>
-              <Link className={styles.panelLink} href="/company/bookings/">
-                Schedule <ArrowRight size={14} />
-              </Link>
-            </div>
-            {data.upcoming.length === 0 ? (
-              <p className={styles.emptyInline}>
-                No upcoming travel dates in the next 30 days.
-              </p>
-            ) : (
-              <ul className={styles.list}>
-                {data.upcoming.map((item) => (
-                  <li className={styles.listItem} key={item.date}>
-                    <div className={styles.listMain}>
-                      <span className={styles.listTitle}>
-                        {formatDate(item.date)}
-                      </span>
-                      <span className={styles.listSub}>
-                        {item.bookings} booking
-                        {item.bookings === 1 ? "" : "s"} on this date
-                      </span>
-                    </div>
-                    <span className={styles.listMeta}>
-                      {item.travelers} travelers
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
           <section className={`glass-card ${styles.panel}`}>
             <div className={styles.panelHead}>
               <div>
@@ -423,6 +392,45 @@ export default function CompanyWorkspacePage({
                         {formatPrice(booking.total_price)}
                       </span>
                     </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+
+          <section className={`glass-card ${styles.panel}`}>
+            <div className={styles.panelHead}>
+              <div>
+                <h2 className={styles.panelTitle}>Upcoming travel dates</h2>
+                <p className={styles.panelCopy}>
+                  Confirmed and pending travel in the next 30 days.
+                </p>
+              </div>
+              <Link className={styles.panelLink} href="/company/bookings/">
+                Schedule <ArrowRight size={14} />
+              </Link>
+            </div>
+            {data.upcoming.length === 0 ? (
+              <p className={styles.emptyInline}>
+                No upcoming travel dates in the next 30 days.
+              </p>
+            ) : (
+              <ul className={styles.list}>
+                {data.upcoming.map((item) => (
+                  <li className={styles.listItem} key={item.date}>
+                    <div className={styles.listMain}>
+                      <span className={styles.listTitle}>
+                        {formatDate(item.date)}
+                      </span>
+                      <span className={styles.listSub}>
+                        {item.bookings} booking
+                        {item.bookings === 1 ? "" : "s"} on this date
+                      </span>
+                    </div>
+                    <span className={styles.listMeta}>
+                      {item.travelers} travelers
+                    </span>
                   </li>
                 ))}
               </ul>

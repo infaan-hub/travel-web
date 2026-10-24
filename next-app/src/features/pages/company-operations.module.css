@@ -1985,3 +1985,219 @@ a.summaryValue:hover {
     animation-duration: 0.01ms !important;
   }
 }
+/* Glass dashboard override (deep blue dusk) */
+.dashboardRoot {
+  --dashboard-bg: #08203d;
+  --dashboard-surface: rgba(255, 255, 255, 0.1);
+  --dashboard-surface-soft: rgba(255, 255, 255, 0.06);
+  --dashboard-primary: #1b7fb4;
+  --dashboard-primary-hover: #bfe3ff;
+  --dashboard-primary-soft: rgba(27, 127, 180, 0.22);
+  --dashboard-accent: #7be0b0;
+  --dashboard-accent-soft: rgba(123, 224, 176, 0.18);
+  --dashboard-text: #f4f8ff;
+  --dashboard-text-secondary: rgba(235, 244, 255, 0.68);
+  --dashboard-border: rgba(255, 255, 255, 0.22);
+  --dashboard-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  --text-primary: var(--dashboard-text);
+  --text-secondary: var(--dashboard-text-secondary);
+  --text-light: var(--dashboard-text-secondary);
+  --line: var(--dashboard-border);
+  --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.07));
+  --glass-bg-elevated: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08));
+  --glass-bg-soft: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.22);
+  --glass-border-strong: rgba(255, 255, 255, 0.32);
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --glass-shadow: var(--dashboard-shadow);
+  --glass-shadow-elevated: var(--dashboard-shadow);
+  --glass-blur-md: 18px;
+  --glass-blur-lg: 24px;
+  --glass-radius: 24px;
+  --aqua-strong: #bfe3ff;
+  --aqua-subtle: rgba(27, 127, 180, 0.22);
+  --brand: var(--dashboard-primary);
+  --brand-strong: var(--dashboard-primary-hover);
+  --brand-accent: var(--dashboard-primary-hover);
+  --brand-soft: var(--dashboard-primary-soft);
+
+  background:
+    radial-gradient(900px 500px at 10% -10%, #2a7fb0 0, transparent 60%),
+    radial-gradient(700px 500px at 100% 20%, rgba(224, 146, 90, 0.33) 0, transparent 60%),
+    linear-gradient(160deg, #08203d, #0b3254 55%, #071a33);
+  background-attachment: fixed;
+  color: var(--dashboard-text);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.dashboardRoot .hero,
+.dashboardRoot .panel,
+.dashboardRoot .statCard,
+.dashboardRoot .heroAside {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: var(--glass-bg);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+}
+
+.dashboardRoot .heroAside {
+  background: rgba(5, 20, 40, 0.35);
+}
+
+.dashboardRoot .statCardHot {
+  border-color: rgba(255, 210, 122, 0.55);
+}
+
+.dashboardRoot .statCardHot .statValue {
+  color: #ffd27a;
+}
+
+.dashboardRoot .statIcon {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f4f8ff;
+}
+
+.dashboardRoot .statTonePending {
+  background: rgba(255, 210, 122, 0.18);
+  color: #ffd27a;
+}
+
+.dashboardRoot .statToneConfirmed,
+.dashboardRoot .statTonePublished {
+  background: rgba(123, 224, 176, 0.18);
+  color: #7be0b0;
+}
+
+.dashboardRoot .statToneCancelled {
+  background: rgba(255, 154, 154, 0.18);
+  color: #ff9a9a;
+}
+
+.dashboardRoot .statToneNeutral {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(235, 244, 255, 0.68);
+}
+
+.dashboardRoot .statLabel,
+.dashboardRoot .statHint {
+  color: rgba(235, 244, 255, 0.68);
+}
+
+.dashboardRoot .pill {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  color: #f4f8ff;
+}
+
+.dashboardRoot .activePill {
+  border-color: rgba(123, 224, 176, 0.35);
+  background: rgba(123, 224, 176, 0.18);
+  color: #7be0b0;
+}
+
+.dashboardRoot :global(.btn) {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  color: #f4f8ff;
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dashboardRoot :global(.btn-primary),
+.dashboardRoot :global(.btn.btn-primary) {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(90deg, #0b2d52, #1b7fb4);
+  box-shadow: 0 8px 16px rgba(10, 60, 110, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.dashboardRoot :global(.btn-outline),
+.dashboardRoot :global(.btn.btn-outline) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dashboardRoot :global(.btn-ghost),
+.dashboardRoot :global(.btn.btn-ghost) {
+  background: transparent;
+}
+
+.dashboardRoot .badge {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.dashboardRoot .badgePending {
+  border-color: #ffd27a;
+  color: #ffd27a;
+}
+
+.dashboardRoot .badgeConfirmed,
+.dashboardRoot .badgePublished {
+  border-color: #7be0b0;
+  color: #7be0b0;
+}
+
+.dashboardRoot .badgeCancelled,
+.dashboardRoot .badgeArchived {
+  border-color: #ff9a9a;
+  color: #ff9a9a;
+}
+
+.dashboardRoot .badgeDraft,
+.dashboardRoot .badgeNeutral,
+.dashboardRoot .badgeReview {
+  border-color: rgba(235, 244, 255, 0.68);
+  color: rgba(235, 244, 255, 0.68);
+}
+
+.dashboardRoot .emptyInline {
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  color: rgba(235, 244, 255, 0.68);
+  border-radius: 16px;
+  padding: 14px;
+  text-align: center;
+  background: transparent;
+}
+
+.dashboardRoot .panelTitle,
+.dashboardRoot .listTitle,
+.dashboardRoot .notificationTitle,
+.dashboardRoot .asideValue {
+  color: #f4f8ff;
+}
+
+.dashboardRoot .panelCopy,
+.dashboardRoot .listSub,
+.dashboardRoot .listMeta,
+.dashboardRoot .asideCopy,
+.dashboardRoot .asideLabel,
+.dashboardRoot .notificationCopy,
+.dashboardRoot .statLabel,
+.dashboardRoot .statHint {
+  color: rgba(235, 244, 255, 0.68);
+}
+
+.dashboardRoot .eyebrow {
+  color: rgba(235, 244, 255, 0.68);
+}
+
+.dashboardRoot .pageLead {
+  color: rgba(235, 244, 255, 0.68);
+}
+
+.dashboardRoot a:focus-visible,
+.dashboardRoot button:focus-visible,
+.dashboardRoot select:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboardRoot :global(.btn) {
+    transition: none;
+  }
+}
+

@@ -1,12 +1,12 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import Image from "next/image";
-import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI, publicCompaniesAPI } from '@/lib/api/client';
+import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI, publicCompaniesAPI, tripsAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
-import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
+import { ArrowRight, Star, MapPin, Send, X, Lightbulb, Clock } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';
 
@@ -15,7 +15,7 @@ import BentoHero from "@/components/BentoHero";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import DestinationCard from "@/components/DestinationCard";
 
-import type {  Attraction, HomeSettings, Review, Tour  } from "@/features/pages/types";
+import type {  Attraction, HomeSettings, Review, Tour, TravelTip  } from "@/features/pages/types";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
 
 type FeaturedCompany = {
@@ -33,6 +33,7 @@ export default function HomePage() {
   const toast = useToast();
   const { isAuthenticated } = useAuth();
   const [allTours, setAllTours] = useState<Tour[]>([]);
+  const [allTrips, setAllTrips] = useState<TravelTip[]>([]);
   const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [attractions, setAttractions] = useState<Attraction[]>([]);
@@ -48,11 +49,12 @@ export default function HomePage() {
   useEffect(() => {
     void Promise.allSettled([
       toursAPI.getAll({}),
+      tripsAPI.getAll(),
       homeSettingsAPI.get(),
       reviewsAPI.getAll({ status: 'approved' }),
       attractionsAPI.getAll({}),
       publicCompaniesAPI.getAll({ page: 1, page_size: 4 }),
-    ]).then(([toursRes, homeRes, reviewsRes, attractionsRes, companiesRes]) => {
+    ]).then(([toursRes, tripsRes, homeRes, reviewsRes, attractionsRes, companiesRes]) => {
       const readList = (value: unknown) => {
         if (Array.isArray(value)) return value;
         if (value && typeof value === "object" && "results" in value && Array.isArray(value.results)) return value.results;
@@ -60,6 +62,8 @@ export default function HomePage() {
       };
       if (toursRes.status === "fulfilled") setAllTours(readList(toursRes.value.data) as Tour[]);
       else { setTourLoadError(true); console.error(toursRes.reason); }
+      if (tripsRes.status === "fulfilled") setAllTrips(readList(tripsRes.value.data) as TravelTip[]);
+      else console.error(tripsRes.reason);
       if (homeRes.status === "fulfilled") setHomeSettings(homeRes.value.data);
       else console.error(homeRes.reason);
       if (reviewsRes.status === "fulfilled") setReviews(readList(reviewsRes.value.data) as Review[]);
@@ -137,7 +141,6 @@ export default function HomePage() {
         <section className="all-tours-section">
           <div className="section-header">
             <h2>Explore experiences</h2>
-            <p>Compare published tours and safaris from participating companies.</p>
           </div>
           <div className="tours-grid">
             {allTours.map((tour: Tour) => (
@@ -269,7 +272,6 @@ export default function HomePage() {
             <div>
               <span className="section-kicker">Meet the providers</span>
               <h2>Travel with people who know the place</h2>
-              <p>Independent companies share their published experiences on Travel.</p>
             </div>
             <Link href="/companies/" className="section-text-link">All companies <ArrowRight size={16} /></Link>
           </div>
@@ -292,29 +294,40 @@ export default function HomePage() {
           </div>
         </section>
       )}
-      {!loading && allTours.length > 0 && (
+      {!loading && allTrips.length > 0 && (
         <section className="all-tours-section">
           <div className="section-header">
             <h2>Your next trip begins with a good match.</h2>
-            <p>Explore providers, compare the details that matter, and contact the company behind an experience when you are ready.</p>
           </div>
-          <div className="tours-grid">
-            {allTours.slice(0, 6).map((tour: Tour) => (
-              <TourCard key={tour.id} tour={tour} />
+          <div className="tips-grid">
+            {allTrips.slice(0, 6).map((trip) => (
+              <div key={trip.id} className="tip-card">
+                <div className="tip-card-header">
+                  <Lightbulb size={20} className="tip-icon" />
+                  <h3>{trip.title}</h3>
+                </div>
+                {trip.image_url && <Image src={getImageUrl(trip.image_url)} alt={trip.title} width={640} height={360} className="trip-image" />}
+                <p className="tip-content">{trip.content}</p>
+                <div className="tip-meta">
+                  {trip.category && <span className="tip-category">{trip.category}</span>}
+                  {trip.created_at && (
+                    <span className="tip-date"><Clock size={12} /> {new Date(trip.created_at).toLocaleDateString()}</span>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
           <div className="section-footer">
-            <button className="btn btn-primary btn-large" onClick={() => router.push('/tours/')}>
-              Explore experiences
+            <button className="btn btn-primary btn-large" onClick={() => router.push('/trips/')}>
+              Explore trips
             </button>
           </div>
         </section>
       )}
-      {(!loading && allTours.length === 0) && (
+      {(!loading && allTrips.length === 0) && (
         <section className="cta-section">
           <div className="cta-content">
             <h2>Your next trip begins with a good match.</h2>
-            <p>Explore providers, compare the details that matter, and contact the company behind an experience when you are ready.</p>
             <button className="btn btn-primary btn-large" onClick={() => router.push('/companies/')}>
               Meet the companies
             </button>
