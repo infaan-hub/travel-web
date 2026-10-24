@@ -4,7 +4,7 @@
   margin: 0 auto clamp(18px, 2.8vw, 32px);
 }
 
-.card {position: relative;isolation: isolate;display: flex;align-items: center;overflow: hidden;min-height: clamp(340px, 38vw, 500px);border: 1px solid rgba(255, 255, 255, 0.5);border-radius: clamp(22px, 3cqw, 34px);background: rgba(255, 255, 255, 0.82);clip-path: polygon(0 0, 100% 0, 100% 86%, 94% 100%, 0 100%);filter: drop-shadow(0 16px 36px rgba(11, 47, 51, 0.1));animation: hero-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;}
+.card {position: relative;isolation: isolate;display: flex;align-items: center;overflow: hidden;min-height: clamp(246px, 38vw, 361px);border: 1px solid rgba(255, 255, 255, 0.5);border-radius: clamp(22px, 3cqw, 34px);background: rgba(255, 255, 255, 0.82);clip-path: polygon(0 0, 100% 0, 100% 86%, 94% 100%, 0 100%);filter: drop-shadow(0 16px 36px rgba(11, 47, 51, 0.1));animation: hero-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;}
 
 .media {
   position: absolute;
