@@ -88,7 +88,7 @@ function formatDate(value: string | null | undefined, withYear = true) {
     month: "short",
     day: "numeric",
     ...(withYear ? { year: "numeric" as const } : {}),
-    timeZone: dateOnly ? "UTC" : undefined,
+    timeZone: "UTC",
   });
 }
 

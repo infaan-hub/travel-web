@@ -3,9 +3,8 @@ import { Building2, Clock } from "@/components/icons";
 import CompanyWorkspaceHeader from "@/components/CompanyWorkspaceHeader";
 import TourCompanyApplicationPage from "@/features/pages/TourCompanyApplicationPage";
 import CompanyWorkspacePage from "@/features/pages/CompanyWorkspacePage";
-import { requirePageCompanyMember } from "@/lib/auth/company";
+import { requirePageCompanyMember, readActiveCompanySelector } from "@/lib/auth/company";
 import { getServerUser } from "@/lib/auth/server-guard";
-import { setActiveCompanyCookie } from "@/lib/auth/company";
 import { listActiveCompanyMemberships } from "@/lib/services/company-access";
 import { getCompanyDashboard } from "@/lib/services/company-workspace";
 import { publicImageUrl } from "@/lib/storage/images";
@@ -48,7 +47,12 @@ export default async function TourCompanyDashboardRoute() {
     );
   }
 
-  await setActiveCompanyCookie(application.company.id);
+  const selector = await readActiveCompanySelector();
+  if (selector !== String(application.company.id)) {
+    redirect(
+      `/api/company/activate/?company_id=${application.company.id}&next=${encodeURIComponent("/tour-company/dashboard/")}`,
+    );
+  }
   const context = await requirePageCompanyMember({ permission: "dashboard:read" });
   const activeCompanies = memberships
     .filter((membership) => membership.company.status === "ACTIVE")
