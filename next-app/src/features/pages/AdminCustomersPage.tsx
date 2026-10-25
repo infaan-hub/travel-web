@@ -9,6 +9,7 @@ import { Users, UserX, Shield, User, ChevronLeft, ChevronRight } from '@/compone
 
 import { useToast } from "@/components/ToastProvider";
 
+import styles from "@/features/pages/admin-dashboard.module.css";
 import type { Company, Customer } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 export default function AdminCustomersPage() {
@@ -101,20 +102,39 @@ export default function AdminCustomersPage() {
   };
 
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading users...</div></div>;
+  if (loading) return <div className={styles.dashboardRoot}><div className="loading">Loading users...</div></div>;
 
   const totalPages = Math.ceil(users.length / perPage);
   const paged = users.slice((page - 1) * perPage, page * perPage);
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1>Users</h1>
-        <p>Manage registered accounts and company assignments ({users.length} total)</p>
-      </div>
+    <div className={styles.dashboardRoot}>
+      <header className={styles.dashMasthead}>
+        <div className={styles.dashMastheadText}>
+          <p className={styles.dashEyebrow}>Admin workspace</p>
+          <h1 className={styles.dashTitle}><Users size={20} /> Users</h1>
+          <p className={styles.dashLead}>Manage registered accounts and company assignments ({users.length} total)</p>
+        </div>
+        <div className={styles.dashActions}>
+          <button className="btn btn-outline" onClick={() => router.push('/admin/dashboard')}>
+            <ChevronLeft size={16} /> Back
+          </button>
+        </div>
+      </header>
 
-      <div className="admin-content">
-        <div className="admin-bookings-table">
+      <section className={styles.dashPanel} aria-label="Registered users">
+        <div className={styles.dashPanelHead}>
+          <div className={styles.dashPanelHeadMain}>
+            <span className={styles.dashPanelIcon} aria-hidden="true">
+              <Users size={17} />
+            </span>
+            <div>
+              <h2 className={styles.dashPanelTitle}>Registered users ({users.length})</h2>
+              <p className={styles.dashPanelCopy}>Customer, tour company, and admin accounts.</p>
+            </div>
+          </div>
+        </div>
+        <div className="admin-table-container">
           <div className="table-responsive"><table>
             <thead>
               <tr>
@@ -226,10 +246,21 @@ export default function AdminCustomersPage() {
             </tbody>
           </table></div>
         </div>
-        {pendingResets.length > 0 && (
-          <div className="admin-panel">
-            <h2>Pending password resets</h2>
-            <ul className="pending-list">
+      </section>
+      {pendingResets.length > 0 && (
+        <section className={styles.dashPanel} aria-label="Pending password resets">
+          <div className={styles.dashPanelHead}>
+            <div className={styles.dashPanelHeadMain}>
+              <span className={styles.dashPanelIcon} aria-hidden="true">
+                <Shield size={17} />
+              </span>
+              <div>
+                <h2 className={styles.dashPanelTitle}>Pending password resets</h2>
+                <p className={styles.dashPanelCopy}>Accounts waiting for a reset code.</p>
+              </div>
+            </div>
+          </div>
+          <ul className="pending-list">
               {pendingResets.map((item: Customer) => (
                 <li key={item.id}>
                   <strong>{item.username}</strong> · {item.email} · requested{' '}
@@ -240,8 +271,8 @@ export default function AdminCustomersPage() {
                 </li>
               ))}
             </ul>
-          </div>
-        )}
+        </section>
+      )}
         {totalPages > 1 && (
           <div className="pagination">
             <button className="btn btn-sm btn-ghost" disabled={page === 1} onClick={() => setPage(p => p - 1)}><ChevronLeft size={16} /></button>
@@ -249,7 +280,6 @@ export default function AdminCustomersPage() {
             <button className="btn btn-sm btn-ghost" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}><ChevronRight size={16} /></button>
           </div>
         )}
-      </div>
     </div>
   );
 }
