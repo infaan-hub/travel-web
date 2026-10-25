@@ -41,8 +41,10 @@ export default function ToursPage() {
         ? 'Compare safaris and guided experiences from participating Tanzanian companies.'
         : 'Browse international trips and services published by participating providers.';
 
+  const isZanzibar = category === 'zanzibar';
+
   return (
-    <div className={`page tours-page ${styles.toursPageRoot}`}>
+    <div className={`page tours-page ${isZanzibar ? styles.toursPageRootZanzibar : styles.toursPageRoot}`}>
       <PageHero
         title={title}
         subtitle={subtitle}
@@ -55,7 +57,7 @@ export default function ToursPage() {
       {loading ? (
         <div className={`loading ${styles.toursLoading}`}>Loading amazing tours...</div>
       ) : tours.length === 0 ? (
-        <div className={`empty-state ${styles.toursEmpty}`}>
+        <div className={`empty-state ${isZanzibar ? styles.toursEmptyZanzibar : styles.toursEmpty}`}>
           <span className="empty-icon"><Search size={24} /></span>
           <p>No published experiences match these filters yet. Try another destination or browse companies.</p>
           <Link className="btn btn-secondary" href="/companies/">Browse companies</Link>

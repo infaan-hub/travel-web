@@ -15,6 +15,14 @@
   border-radius: 20px;
 }
 
-.toursEmpty p {
+.toursPageRootZanzibar {
+  background: #44576D;
   color: #08428C;
+}
+
+.toursEmptyZanzibar {
+  background: #44576D;
+  border: 1px dashed #08428C;
+  color: #08428C;
+  border-radius: 20px;
 }
