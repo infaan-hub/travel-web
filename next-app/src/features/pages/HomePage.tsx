@@ -108,30 +108,26 @@ export default function HomePage() {
           <h2>Start with a place</h2>
         </div>
         <div className="destinations-grid">
-          <Link className="destination-card zanzibar" href="/tours/zanzibar/">
-            <div className="destination-image">
-              <img
-                src={getImageUrl(homeSettings?.zanzibar_image_url || allTours.find(t => t.category === 'zanzibar')?.image_url || '/uploads/home/Zanzibar_trip.jpg') || '/uploads/home/Zanzibar_trip.jpg'}
-                alt="Zanzibar"
-              />
-            </div>
-            <div className="destination-info">
-              <h3>Zanzibar</h3>
-              <p>Pristine beaches, spice farms, and rich Swahili culture. Paradise on Earth.</p>
-            </div>
-          </Link>
-          <Link className="destination-card tanzania" href="/tours/tanzania/">
-            <div className="destination-image">
-              <img
-                src={getImageUrl(homeSettings?.tanzania_image_url || allTours.find(t => t.category === 'tanzania')?.image_url || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg') || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg'}
-                alt="Tanzania Safari"
-              />
-            </div>
-            <div className="destination-info">
-              <h3>Tanzania Safaris</h3>
-              <p>Serengeti, Kilimanjaro, Ngorongoro - Africa&apos;s greatest wildlife experiences with expert-guided tours and premium service.</p>
-            </div>
-          </Link>
+          <DestinationCard
+            image={getImageUrl(homeSettings?.zanzibar_image_url || allTours.find(t => t.category === 'zanzibar')?.image_url || '/uploads/home/Zanzibar_trip.jpg') || '/uploads/home/Zanzibar_trip.jpg'}
+            title="Zanzibar"
+            location="Zanzibar, Tanzania"
+            description="Pristine beaches, spice farms, and rich Swahili culture. Paradise on Earth."
+            stats={[]}
+            hideCta
+            hideLike
+            boldText
+          />
+          <DestinationCard
+            image={getImageUrl(homeSettings?.tanzania_image_url || allTours.find(t => t.category === 'tanzania')?.image_url || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg') || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg'}
+            title="Tanzania Safaris"
+            location="Tanzania"
+            description="Serengeti, Kilimanjaro, Ngorongoro - Africa's greatest wildlife experiences with expert-guided tours and premium service."
+            stats={[]}
+            hideCta
+            hideLike
+            boldText
+          />
         </div>
       </section>
 

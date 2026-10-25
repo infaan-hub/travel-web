@@ -17,6 +17,7 @@ export default function DestinationCard({
   stats,
   onSeeMore = () => {},
   hideCta = false,
+  hideLike = false,
   boldText = false,
 }: {
   image?: string;
@@ -28,6 +29,7 @@ export default function DestinationCard({
   stats?: Stat[];
   onSeeMore?: () => void;
   hideCta?: boolean;
+  hideLike?: boolean;
   boldText?: boolean;
 }) {
   const [liked, setLiked] = useState(false);
@@ -44,6 +46,7 @@ export default function DestinationCard({
       />
       <div className="dc__shade" />
 
+      {!hideLike && (
       <button
         className="dc__heart"
         aria-label={liked ? "Remove from favourites" : "Add to favourites"}
@@ -57,6 +60,7 @@ export default function DestinationCard({
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" />
         </svg>
       </button>
+      )}
 
       <div className="dc__info">
         <h3 className="dc__title">{title}</h3>
