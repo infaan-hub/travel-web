@@ -5230,3 +5230,21 @@ html body .app-layout .main-content .page
 .destinations-section .destination-info p {
   font-weight: 700;
 }
+
+/* Explore experiences section: white bold copy and white like button */
+.all-tours-section .dc__title,
+.all-tours-section .dc__title a,
+.all-tours-section .dc__loc,
+.all-tours-section .dc__description {
+  color: #fff;
+  font-weight: 700;
+}
+
+.all-tours-section .dc__heart {
+  color: #fff;
+}
+
+.all-tours-section .dc__heart svg {
+  stroke: #fff;
+  fill: none;
+}
