@@ -46,17 +46,25 @@
 }
 
 .matchFilter {
-  min-height: 30px;
-  padding: 8px 14px;
-  border: 1px solid #1b1b3a;
+  min-height: 34px;
+  padding: 8px 16px;
+  border: 1px solid rgba(27, 27, 58, 0.28);
   border-radius: 999px;
-  background: transparent;
+  background: #fff;
   color: #1b1b3a;
   cursor: pointer;
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   line-height: 1;
-  transition: background 250ms ease, color 250ms ease, transform 150ms ease;
+  transition: background 250ms ease, color 250ms ease, border-color 250ms ease, transform 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.matchFilter:hover {
+  border-color: rgba(27, 27, 58, 0.55);
 }
 
 .matchFilter:active {
@@ -66,19 +74,18 @@
 .matchFilterActive {
   background: #0a0a2a;
   color: #fff;
+  border-color: #0a0a2a;
 }
 
 .matchMore {
-  display: inline-flex;
-  align-items: center;
-  padding-inline: 20px;
+  padding-inline: 18px;
   text-decoration: none;
 }
 
 .matchStage {
   position: relative;
   height: 370px;
-  max-width: 760px;
+  max-width: 820px;
   margin: 0 auto;
   overflow: hidden;
   touch-action: pan-y;
@@ -90,32 +97,46 @@
   top: 50%;
   left: 50%;
   display: block;
-  width: 240px;
-  height: 295px;
+  width: 205px;
+  height: 190px;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #e8edf2;
-  box-shadow: 0 22px 50px rgba(30, 60, 120, 0.35);
   color: #fff;
   text-decoration: none;
-  transition: transform 650ms cubic-bezier(0.22, 0.8, 0.24, 1), opacity 500ms ease;
+  box-shadow: 0 10px 24px rgba(15, 35, 80, 0.16);
+  transition: transform 700ms cubic-bezier(0.22, 0.8, 0.24, 1), opacity 500ms ease, width 700ms cubic-bezier(0.22, 0.8, 0.24, 1), height 700ms cubic-bezier(0.22, 0.8, 0.24, 1), box-shadow 500ms ease;
 }
 
-.matchCard::after {
+.matchCard img {
+  object-fit: cover;
+}
+
+.matchCardFallback {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 35%, rgba(10, 10, 40, 0.72));
-  content: "";
-  opacity: 0;
-  transition: opacity 500ms ease;
+  background: linear-gradient(135deg, #d8e1ea, #b7c5d6);
 }
 
-.matchCard[data-distance="1"]::after {
-  opacity: 0.7;
+.matchCard[data-distance="0"] {
+  width: 240px;
+  height: 295px;
+  border-radius: 18px;
+  box-shadow: 0 24px 52px rgba(15, 35, 80, 0.28);
 }
 
-.matchCard[data-distance="2"]::after {
-  opacity: 1;
+.matchCard[data-distance="1"] {
+  width: 225px;
+  height: 240px;
+  border-radius: 17px;
+  box-shadow: 0 16px 36px rgba(15, 35, 80, 0.2);
+}
+
+.matchCard[data-distance="2"] {
+  width: 205px;
+  height: 190px;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(15, 35, 80, 0.16);
 }
 
 .matchControls {
@@ -123,7 +144,7 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-  margin-top: 12px;
+  margin-top: 18px;
 }
 
 .matchEmpty {
@@ -134,14 +155,15 @@
 
 .matchControl {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border: 1px solid rgba(27, 27, 58, 0.35);
   border-radius: 50%;
   background: #fff;
   color: #0a0a2a;
   cursor: pointer;
+  font-size: 0.85rem;
 }
 
 .matchDots {
@@ -178,20 +200,37 @@
 }
 
 @media (max-width: 640px) {
-  .matchSection {
-    margin: 20px auto 40px;
-    padding-top: 28px;
+  .matchFilters {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .matchFilters::-webkit-scrollbar {
+    display: none;
   }
 }
 
 @media (max-width: 560px) {
   .matchStage {
-    height: 320px;
+    height: 300px;
   }
 
-  .matchCard {
+  .matchCard[data-distance="0"] {
     width: 190px;
     height: 234px;
+  }
+
+  .matchCard[data-distance="1"] {
+    width: 176px;
+    height: 196px;
+  }
+
+  .matchCard[data-distance="2"] {
+    width: 160px;
+    height: 166px;
   }
 }
 

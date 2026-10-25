@@ -40,7 +40,8 @@ type CompanyPostedTrip = {
   title: string;
   place: string;
   description: string;
-  image_url: string;
+  image_url: string | null;
+  price?: number | null;
 };
 
 export default function HomePage() {
@@ -65,6 +66,8 @@ export default function HomePage() {
   const [matchEngaged, setMatchEngaged] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [matchCardWidth, setMatchCardWidth] = useState(240);
+  const [matchInView, setMatchInView] = useState(false);
+  const matchStageRef = useRef<HTMLDivElement | null>(null);
   const matchDragStart = useRef<number | null>(null);
   const router = useRouter();
   const matchDestinations = [
@@ -94,12 +97,26 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (matchPaused || matchEngaged || reducedMotion || matchTrips.length < 2) return;
+    if (matchPaused || matchEngaged || reducedMotion || !matchInView || matchTrips.length < 2) return;
     const timer = window.setInterval(() => {
       setMatchIndex((current) => (current + 1) % matchTrips.length);
     }, 3000);
     return () => window.clearInterval(timer);
-  }, [matchEngaged, matchPaused, matchTrips.length, reducedMotion]);
+  }, [matchEngaged, matchPaused, matchTrips.length, reducedMotion, matchInView]);
+
+  useEffect(() => {
+    const node = matchStageRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') {
+      setMatchInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setMatchInView(entry.isIntersecting),
+      { threshold: 0.25 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [postedTripsLoading]);
 
   useEffect(() => {
     void Promise.allSettled([
@@ -144,6 +161,7 @@ export default function HomePage() {
                 ...trip,
                 company_name: company.name,
                 company_public_path: company.public_path,
+                image_url: trip.image_url ?? null,
               }))];
           });
           const trips: CompanyPostedTrip[] = [];
@@ -413,10 +431,11 @@ export default function HomePage() {
                   );
                 })}
                 <Link href="/companies/" className={`${styles.matchFilter} ${styles.matchMore}`}>
-                  View more →
+                  View more <ArrowRight size={14} />
                 </Link>
               </nav>
               <div
+                ref={matchStageRef}
                 className={styles.matchStage}
                 role="region"
                 aria-roledescription="carousel"
@@ -451,8 +470,7 @@ export default function HomePage() {
                   if (offset > matchTrips.length / 2) offset -= matchTrips.length;
                   if (offset < -matchTrips.length / 2) offset += matchTrips.length;
                   const distance = Math.abs(offset);
-                  const scale = distance === 0 ? 1 : distance === 1 ? 0.82 : 0.62;
-                  const horizontalOffset = distance === 0 ? 0 : distance === 1 ? 0.8 : 1.35;
+                  const horizontalOffset = distance === 0 ? 0 : distance === 1 ? 0.72 : 1.28;
                   return (
                     <Link
                       key={`${trip.company_id}-${trip.id}`}
@@ -460,7 +478,7 @@ export default function HomePage() {
                       className={`${styles.matchCard} ${distance === 0 ? styles.matchCardActive : ''}`}
                       data-distance={distance}
                       style={{
-                        transform: `translate(-50%, -50%) translateX(${Math.sign(offset) * matchCardWidth * horizontalOffset}px) scale(${scale})`,
+                        transform: `translate(-50%, -50%) translateX(${Math.sign(offset) * matchCardWidth * horizontalOffset}px)`,
                         zIndex: 10 - distance,
                         opacity: distance > 2 ? 0 : distance === 2 ? 0.85 : 1,
                         pointerEvents: distance > 2 ? 'none' : 'auto',
@@ -476,13 +494,18 @@ export default function HomePage() {
                         }
                       }}
                     >
-                      <Image
-                        src={getImageUrl(trip.image_url)}
-                        alt=""
-                        fill
-                        sizes="(max-width: 560px) 190px, 240px"
-                        priority={distance === 0}
-                      />
+                      {trip.image_url ? (
+                        <Image
+                          src={getImageUrl(trip.image_url)}
+                          alt={trip.title}
+                          fill
+                          sizes="(max-width: 560px) 190px, 240px"
+                          priority={distance === 0}
+                          style={{ objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div className={styles.matchCardFallback} aria-hidden="true" />
+                      )}
                     </Link>
                   );
                 })}
