@@ -2,11 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
-import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI, publicCompaniesAPI, tripsAPI } from '@/lib/api/client';
+import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI, publicCompaniesAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
-import { ArrowRight, Star, MapPin, Send, X, Lightbulb, Clock } from '@/components/icons';
+import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { useAuth } from '@/context/AuthContext';
 
@@ -16,46 +16,99 @@ import styles from "@/features/pages/home-page.module.css";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import DestinationCard from "@/components/DestinationCard";
 
-import type {  Attraction, HomeSettings, Review, Tour, TravelTip  } from "@/features/pages/types";
+import type {  Attraction, HomeSettings, Review, Tour } from "@/features/pages/types";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
 
 type FeaturedCompany = {
   id: number;
   name: string;
+  slug: string;
   description: string | null;
   logo_image_url: string | null;
   locality: string | null;
   region: string | null;
   public_path: string;
   tours_count: number;
+  trips_count: number;
+};
+
+type CompanyPostedTrip = {
+  id: number;
+  company_id: number;
+  company_name: string;
+  company_public_path: string;
+  title: string;
+  place: string;
+  description: string;
+  image_url: string;
 };
 
 export default function HomePage() {
   const toast = useToast();
   const { isAuthenticated } = useAuth();
   const [allTours, setAllTours] = useState<Tour[]>([]);
-  const [allTrips, setAllTrips] = useState<TravelTip[]>([]);
   const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [companies, setCompanies] = useState<FeaturedCompany[]>([]);
+  const [postedTrips, setPostedTrips] = useState<CompanyPostedTrip[]>([]);
+  const [postedTripsLoading, setPostedTripsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [tourLoadError, setTourLoadError] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
   const [reviewSaving, setReviewSaving] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState('');
+  const [matchDestination, setMatchDestination] = useState<string>('all');
+  const [matchIndex, setMatchIndex] = useState(0);
+  const [matchPaused, setMatchPaused] = useState(false);
+  const [matchEngaged, setMatchEngaged] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [matchCardWidth, setMatchCardWidth] = useState(240);
+  const matchDragStart = useRef<number | null>(null);
   const router = useRouter();
+  const matchDestinations = [
+    { value: 'all', label: 'All destinations' },
+    ...Array.from(new Set(postedTrips.map((trip) => trip.place.trim()).filter(Boolean)))
+      .slice(0, 8)
+      .map((place) => ({ value: place, label: place })),
+  ];
+  const matchTrips = postedTrips
+    .filter((trip) => matchDestination === 'all' || trip.place.trim() === matchDestination)
+    .slice(0, 5);
+
+  useEffect(() => {
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updateMotionPreference = () => setReducedMotion(motionPreference.matches);
+    updateMotionPreference();
+    motionPreference.addEventListener('change', updateMotionPreference);
+    return () => motionPreference.removeEventListener('change', updateMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    const mobileLayout = window.matchMedia('(max-width: 560px)');
+    const updateCardWidth = () => setMatchCardWidth(mobileLayout.matches ? 190 : 240);
+    updateCardWidth();
+    mobileLayout.addEventListener('change', updateCardWidth);
+    return () => mobileLayout.removeEventListener('change', updateCardWidth);
+  }, []);
+
+  useEffect(() => {
+    if (matchPaused || matchEngaged || reducedMotion || matchTrips.length < 2) return;
+    const timer = window.setInterval(() => {
+      setMatchIndex((current) => (current + 1) % matchTrips.length);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [matchEngaged, matchPaused, matchTrips.length, reducedMotion]);
 
   useEffect(() => {
     void Promise.allSettled([
       toursAPI.getAll({}),
-      tripsAPI.getAll(),
       homeSettingsAPI.get(),
       reviewsAPI.getAll({ status: 'approved' }),
       attractionsAPI.getAll({}),
-      publicCompaniesAPI.getAll({ page: 1, page_size: 4 }),
-    ]).then(([toursRes, tripsRes, homeRes, reviewsRes, attractionsRes, companiesRes]) => {
+      publicCompaniesAPI.getAll({ page: 1, page_size: 50 }),
+    ]).then(([toursRes, homeRes, reviewsRes, attractionsRes, companiesRes]) => {
       const readList = (value: unknown) => {
         if (Array.isArray(value)) return value;
         if (value && typeof value === "object" && "results" in value && Array.isArray(value.results)) return value.results;
@@ -63,16 +116,50 @@ export default function HomePage() {
       };
       if (toursRes.status === "fulfilled") setAllTours(readList(toursRes.value.data) as Tour[]);
       else { setTourLoadError(true); console.error(toursRes.reason); }
-      if (tripsRes.status === "fulfilled") setAllTrips(readList(tripsRes.value.data) as TravelTip[]);
-      else console.error(tripsRes.reason);
       if (homeRes.status === "fulfilled") setHomeSettings(homeRes.value.data);
       else console.error(homeRes.reason);
       if (reviewsRes.status === "fulfilled") setReviews(readList(reviewsRes.value.data) as Review[]);
       else console.error(reviewsRes.reason);
       if (attractionsRes.status === "fulfilled") setAttractions(readList(attractionsRes.value.data) as Attraction[]);
       else console.error(attractionsRes.reason);
-      if (companiesRes.status === "fulfilled") setCompanies(readList(companiesRes.value.data).slice(0, 4) as FeaturedCompany[]);
-      else console.error(companiesRes.reason);
+      if (companiesRes.status === "fulfilled") {
+        const publicCompanyList = readList(companiesRes.value.data) as FeaturedCompany[];
+        setCompanies(publicCompanyList.slice(0, 4));
+        const companiesWithTrips = publicCompanyList.filter((company) => company.trips_count > 0);
+        void Promise.allSettled(
+          companiesWithTrips.map((company) => publicCompaniesAPI.getBySlug(company.slug)),
+        ).then((companyResults) => {
+          const tripsByCompany = companyResults.flatMap((result, index) => {
+            if (result.status === "rejected") {
+              console.error(result.reason);
+              return [];
+            }
+            const company = companiesWithTrips[index];
+            const companyTrips = result.value.data?.trips;
+            if (!Array.isArray(companyTrips)) {
+              console.error(`Public trip list missing for company ${company.name}.`);
+              return [];
+            }
+            return [companyTrips.map((trip: Omit<CompanyPostedTrip, "company_name" | "company_public_path">) => ({
+                ...trip,
+                company_name: company.name,
+                company_public_path: company.public_path,
+              }))];
+          });
+          const trips: CompanyPostedTrip[] = [];
+          const maxTripsPerCompany = Math.max(0, ...tripsByCompany.map((companyTrips) => companyTrips.length));
+          for (let tripIndex = 0; tripIndex < maxTripsPerCompany; tripIndex += 1) {
+            for (const companyTrips of tripsByCompany) {
+              if (companyTrips[tripIndex]) trips.push(companyTrips[tripIndex]);
+            }
+          }
+          setPostedTrips(trips);
+          setPostedTripsLoading(false);
+        });
+      } else {
+        console.error(companiesRes.reason);
+        setPostedTripsLoading(false);
+      }
     }).finally(() => setLoading(false));
   }, []);
 
@@ -290,44 +377,155 @@ export default function HomePage() {
           </div>
         </section>
       )}
-      {!loading && allTrips.length > 0 && (
-        <section className="all-tours-section">
-          <div className="section-header">
-            <h2>Your next trip begins with a good match.</h2>
-          </div>
-          <div className="tips-grid">
-            {allTrips.slice(0, 6).map((trip) => (
-              <div key={trip.id} className="tip-card">
-                <div className="tip-card-header">
-                  <Lightbulb size={20} className="tip-icon" />
-                  <h3>{trip.title}</h3>
-                </div>
-                {trip.image_url && <Image src={getImageUrl(trip.image_url)} alt={trip.title} width={640} height={360} className="trip-image" />}
-                <p className="tip-content">{trip.content}</p>
-                <div className="tip-meta">
-                  {trip.category && <span className="tip-category">{trip.category}</span>}
-                  {trip.created_at && (
-                    <span className="tip-date"><Clock size={12} /> {new Date(trip.created_at).toLocaleDateString()}</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="section-footer">
-            <button className="btn btn-primary btn-large" onClick={() => router.push('/trips/')}>
-              Explore trips
-            </button>
-          </div>
-        </section>
-      )}
-      {(!loading && allTrips.length === 0) && (
-        <section className="cta-section">
-          <div className="cta-content">
-            <h2>Your next trip begins with a good match.</h2>
+      {!loading && !postedTripsLoading && (
+        <section
+          className={`cta-section ${styles.matchSection}`}
+          onFocusCapture={() => setMatchEngaged(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+              setMatchEngaged(false);
+            }
+          }}
+        >
+          <div className={styles.matchHeader}>
+            <div>
+              <span className={styles.matchEyebrow}>Trips posted by local companies</span>
+              <h2>Your next trip begins with a good match.</h2>
+            </div>
             <button className="btn btn-primary btn-large" onClick={() => router.push('/companies/')}>
               Meet the companies
             </button>
           </div>
+          {matchTrips.length > 0 ? (
+            <>
+              <nav className={styles.matchFilters} aria-label="Filter company trips by destination">
+                {matchDestinations.map((destination) => {
+                  return (
+                    <button
+                      key={destination.value}
+                      type="button"
+                      className={`${styles.matchFilter} ${matchDestination === destination.value ? styles.matchFilterActive : ''}`}
+                      aria-pressed={matchDestination === destination.value}
+                      onClick={() => {
+                        setMatchDestination(destination.value);
+                        setMatchIndex(0);
+                      }}
+                    >
+                      {destination.label}
+                    </button>
+                  );
+                })}
+                <Link href="/companies/" className={`${styles.matchFilter} ${styles.matchMore}`}>
+                  View more →
+                </Link>
+              </nav>
+              <div
+                className={styles.matchStage}
+                role="region"
+                aria-roledescription="carousel"
+                aria-label="Company-posted trips"
+                tabIndex={0}
+                onMouseEnter={() => setMatchEngaged(true)}
+                onMouseLeave={() => setMatchEngaged(false)}
+                onKeyDown={(event) => {
+                  if (event.key === 'ArrowRight') setMatchIndex((current) => (current + 1) % matchTrips.length);
+                  if (event.key === 'ArrowLeft') setMatchIndex((current) => (current - 1 + matchTrips.length) % matchTrips.length);
+                }}
+                onPointerDown={(event) => {
+                  matchDragStart.current = event.clientX;
+                  setMatchEngaged(true);
+                }}
+                onPointerUp={(event) => {
+                  if (matchDragStart.current === null) return;
+                  const distance = event.clientX - matchDragStart.current;
+                  matchDragStart.current = null;
+                  if (Math.abs(distance) > 40 && matchTrips.length > 1) {
+                    setMatchIndex((current) => (current + (distance < 0 ? 1 : -1) + matchTrips.length) % matchTrips.length);
+                  }
+                  setMatchEngaged(false);
+                }}
+                onPointerCancel={() => {
+                  matchDragStart.current = null;
+                  setMatchEngaged(false);
+                }}
+              >
+                {matchTrips.map((trip, index) => {
+                  let offset = index - matchIndex;
+                  if (offset > matchTrips.length / 2) offset -= matchTrips.length;
+                  if (offset < -matchTrips.length / 2) offset += matchTrips.length;
+                  const distance = Math.abs(offset);
+                  const scale = distance === 0 ? 1 : distance === 1 ? 0.82 : 0.62;
+                  return (
+                    <Link
+                      key={`${trip.company_id}-${trip.id}`}
+                      href={trip.company_public_path}
+                      className={`${styles.matchCard} ${distance === 0 ? styles.matchCardActive : ''}`}
+                      style={{
+                        transform: `translate(-50%, -50%) translateX(${offset * matchCardWidth * 0.8}px) scale(${scale})`,
+                        zIndex: 10 - distance,
+                        opacity: distance > 2 ? 0 : distance === 2 ? 0.85 : 1,
+                        pointerEvents: distance > 2 ? 'none' : 'auto',
+                      }}
+                      tabIndex={distance === 0 ? 0 : -1}
+                      aria-hidden={distance > 2}
+                      aria-label={`${trip.title} in ${trip.place}, posted by ${trip.company_name}`}
+                      onClick={(event) => {
+                        if (distance !== 0) {
+                          event.preventDefault();
+                          setMatchIndex(index);
+                        }
+                      }}
+                    >
+                      <Image
+                        src={getImageUrl(trip.image_url)}
+                        alt=""
+                        fill
+                        sizes="(max-width: 560px) 190px, 240px"
+                        priority={distance === 0}
+                      />
+                      <span className={styles.matchCardCopy}>
+                        <span>{trip.place}</span>
+                        <strong>{trip.title}</strong>
+                        <small>Posted by {trip.company_name}</small>
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+              <div className={styles.matchControls}>
+                <button
+                  type="button"
+                  className={styles.matchControl}
+                  aria-label={matchPaused ? 'Resume carousel autoplay' : 'Pause carousel autoplay'}
+                  onClick={() => setMatchPaused((paused) => !paused)}
+                >
+                  {matchPaused ? '▶' : 'Ⅱ'}
+                </button>
+                <div className={styles.matchDots} aria-label="Choose an experience">
+                  {matchTrips.map((trip, index) => (
+                    <button
+                      key={`${trip.company_id}-${trip.id}`}
+                      type="button"
+                      className={`${styles.matchDot} ${matchIndex === index ? styles.matchDotActive : ''}`}
+                      aria-label={`Show ${trip.title}`}
+                      aria-current={matchIndex === index ? 'true' : undefined}
+                      onClick={() => setMatchIndex(index)}
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className={styles.matchControl}
+                  aria-label="Show next experience"
+                  onClick={() => setMatchIndex((current) => (current + 1) % matchTrips.length)}
+                >
+                  →
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className={styles.matchEmpty}>No company-posted trips are available right now. Meet the companies to discover their experiences.</p>
+          )}
         </section>
       )}
     </div>
