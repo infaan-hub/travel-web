@@ -117,7 +117,7 @@ export default function LocationPicker({
           icon: leaflet.divIcon({
             className: styles.mapMarker,
             html:
-              '<span style="display:block;width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0F6B6B;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)"></span>',
+              '<span style="display:block;width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--map-marker,#0F6B6B);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)"></span>',
             iconSize: [28, 28],
             iconAnchor: [14, 28],
           }),
