@@ -1,11 +1,47 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import { Building2, Image as ImageIcon, Pencil, Plus, Save, Trash2, X } from "@/components/icons";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
+import {
+  AlertCircle,
+  Building2,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+  Loader,
+  MapPin,
+  Pencil,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  Upload,
+  X,
+} from "@/components/icons";
 import { useToast } from "@/components/ToastProvider";
 import { companyAPI } from "@/lib/api/client";
-import styles from "@/features/pages/company-operations.module.css";
+import styles from "@/features/pages/company-trips.module.css";
+
+const PAGE_SIZE = 12;
+
+const SORT_OPTIONS = [
+  { value: "recent", label: "Recently updated" },
+  { value: "price-asc", label: "Price: low to high" },
+  { value: "price-desc", label: "Price: high to low" },
+  { value: "title", label: "Title A–Z" },
+] as const;
+
+type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 type CompanyTrip = {
   id: number;
@@ -14,6 +50,8 @@ type CompanyTrip = {
   description: string;
   price: string | null;
   image_url: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 type TripForm = {
@@ -23,62 +61,150 @@ type TripForm = {
   price: string;
 };
 
-const EMPTY_FORM: TripForm = { title: "", place: "", description: "", price: "" };
+const EMPTY_FORM: TripForm = {
+  title: "",
+  place: "",
+  description: "",
+  price: "",
+};
+
+function priceValue(value: string | null) {
+  if (value === null || value.trim() === "") return null;
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : null;
+}
+
+function formatPrice(value: string | null) {
+  const amount = priceValue(value);
+  if (amount === null) return null;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+  }).format(amount);
+}
+
+function formatCurrency(amount: number, maximumFractionDigits = 0) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits,
+  }).format(amount);
+}
+
+function formatDate(value: string | null | undefined, prefix: string) {
+  if (!value) return `${prefix} recently`;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return `${prefix} recently`;
+  return `${prefix} ${date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  })}`;
+}
+
+function tripTimestamp(trip: CompanyTrip) {
+  const raw = trip.updated_at ?? trip.created_at;
+  const time = raw ? Date.parse(raw) : Number.NaN;
+  return Number.isFinite(time) ? time : 0;
+}
+
+function sortTrips(rows: CompanyTrip[], sort: SortValue) {
+  const sorted = [...rows];
+  if (sort === "title") {
+    return sorted.sort((a, b) =>
+      a.title.localeCompare(b.title, "en", { sensitivity: "base" }),
+    );
+  }
+  if (sort === "price-asc" || sort === "price-desc") {
+    const direction = sort === "price-asc" ? 1 : -1;
+    return sorted.sort((a, b) => {
+      const priceA = priceValue(a.price);
+      const priceB = priceValue(b.price);
+      if (priceA === null && priceB === null) {
+        return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
+      }
+      if (priceA === null) return 1;
+      if (priceB === null) return -1;
+      return (priceA - priceB) * direction;
+    });
+  }
+  return sorted.sort((a, b) => tripTimestamp(b) - tripTimestamp(a));
+}
 
 function errorMessage(error: unknown) {
   if (typeof error === "object" && error) {
     const candidate = error as {
-      response?: { data?: { message?: string; error?: string } };
+      response?: {
+        data?: {
+          message?: string;
+          error?: string;
+          errors?: Record<string, string[] | string>;
+        };
+      };
     };
-    return (
-      candidate.response?.data?.message ||
-      candidate.response?.data?.error ||
-      "The trip could not be saved."
-    );
+    const data = candidate.response?.data;
+    if (data?.message) return data.message;
+    if (data?.error) return data.error;
+    const firstError = data?.errors ? Object.values(data.errors)[0] : null;
+    if (Array.isArray(firstError) && firstError[0]) return firstError[0];
+    if (typeof firstError === "string" && firstError) return firstError;
   }
-  return "The trip could not be saved.";
+  return "The trip could not be saved. Please try again.";
+}
+
+function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 }
 
 export default function CompanyTripsPage() {
   const toast = useToast();
   const [trips, setTrips] = useState<CompanyTrip[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const [searchInput, setSearchInput] = useState("");
+  const [sort, setSort] = useState<SortValue>("recent");
+  const [page, setPage] = useState(1);
+
+  const [editing, setEditing] = useState<CompanyTrip | null>(null);
   const [form, setForm] = useState<TripForm>(EMPTY_FORM);
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+
+  const composerRef = useRef<HTMLElement | null>(null);
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const previewObjectUrl = useRef<string | null>(null);
 
   const fetchTrips = useCallback(async () => {
     const response = await companyAPI.trips();
     const payload = response.data;
-    return (Array.isArray(payload) ? payload : payload.results ?? []) as CompanyTrip[];
+    return (Array.isArray(payload) ? payload : payload?.results ?? []) as CompanyTrip[];
   }, []);
-
-  const loadTrips = useCallback(async () => {
-    try {
-      const nextTrips = await fetchTrips();
-      setError(null);
-      setTrips(nextTrips);
-    } catch {
-      setError("Company trips could not be loaded. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchTrips]);
 
   useEffect(() => {
     let active = true;
+
     fetchTrips()
-      .then((nextTrips) => {
+      .then((rows) => {
         if (!active) return;
+        setTrips(rows);
         setError(null);
-        setTrips(nextTrips);
       })
       .catch(() => {
-        if (active) setError("Company trips could not be loaded. Please try again.");
+        if (active) {
+          setError("Company trips could not be loaded. Please try again.");
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -87,74 +213,200 @@ export default function CompanyTripsPage() {
     return () => {
       active = false;
     };
+  }, [fetchTrips, reloadKey]);
+
+  const refreshTrips = useCallback(async () => {
+    const rows = await fetchTrips();
+    setTrips(rows);
+    setError(null);
   }, [fetchTrips]);
 
-  const resetForm = () => {
-    setEditingId(null);
+  const releasePreviewUrl = useCallback(() => {
+    if (!previewObjectUrl.current) return;
+    URL.revokeObjectURL(previewObjectUrl.current);
+    previewObjectUrl.current = null;
+  }, []);
+
+  useEffect(() => releasePreviewUrl, [releasePreviewUrl]);
+
+  const search = searchInput.trim().toLowerCase();
+
+  const filteredTrips = useMemo(() => {
+    const rows = search
+      ? trips.filter((trip) =>
+          [trip.title, trip.place, trip.description ?? ""].some((value) =>
+            value.toLowerCase().includes(search),
+          ),
+        )
+      : trips;
+    return sortTrips(rows, sort);
+  }, [trips, search, sort]);
+
+  const total = filteredTrips.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const currentPage = Math.min(page, pages);
+  const pageTrips = filteredTrips.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+  const rangeStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(total, rangeStart + pageTrips.length - 1);
+
+  const pricedTrips = filteredTrips
+    .map((trip) => priceValue(trip.price))
+    .filter((amount): amount is number => amount !== null);
+  const averagePrice = pricedTrips.length
+    ? pricedTrips.reduce((sum, amount) => sum + amount, 0) / pricedTrips.length
+    : null;
+  const placeCount = new Set(
+    filteredTrips
+      .map((trip) => trip.place.trim().toLowerCase())
+      .filter(Boolean),
+  ).size;
+
+  const isFiltered = Boolean(search);
+  const isAdjusted = isFiltered || sort !== "recent";
+
+  const clearForm = useCallback(() => {
+    releasePreviewUrl();
+    setEditing(null);
     setForm(EMPTY_FORM);
     setImage(null);
     setPreview(null);
-  };
+    setFormError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [releasePreviewUrl]);
+
+  const focusComposer = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      composerRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion() ? "auto" : "smooth",
+        block: "start",
+      });
+      titleInputRef.current?.focus({ preventScroll: true });
+    });
+  }, []);
+
+  const startCreate = useCallback(() => {
+    clearForm();
+    focusComposer();
+  }, [clearForm, focusComposer]);
 
   const editTrip = (trip: CompanyTrip) => {
-    setEditingId(trip.id);
+    releasePreviewUrl();
+    setEditing(trip);
     setForm({
       title: trip.title,
       place: trip.place,
-      description: trip.description,
+      description: trip.description ?? "",
       price: trip.price ?? "",
     });
     setImage(null);
     setPreview(trip.image_url);
+    setFormError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    focusComposer();
   };
 
   const onImage = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
+    releasePreviewUrl();
+    setFormError(null);
+
+    if (!file) {
+      setImage(null);
+      setPreview(editing?.image_url ?? null);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      event.target.value = "";
+      setImage(null);
+      setPreview(editing?.image_url ?? null);
+      setFormError("Choose an image no larger than 5 MB.");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    previewObjectUrl.current = objectUrl;
     setImage(file);
-    setPreview(
-      file
-        ? URL.createObjectURL(file)
-        : editingId
-          ? trips.find((trip) => trip.id === editingId)?.image_url ?? null
-          : null,
-    );
+    setPreview(objectUrl);
   };
 
   const saveTrip = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const title = form.title.trim();
+    const place = form.place.trim();
+    const description = form.description.trim();
+    const price = Number(form.price);
+
+    if (!title) {
+      setFormError("Enter a name for this trip.");
+      titleInputRef.current?.focus();
+      return;
+    }
+    if (!place) {
+      setFormError("Enter the place this trip visits.");
+      return;
+    }
+    if (form.price.trim() === "" || !Number.isFinite(price) || price < 0) {
+      setFormError("Enter a valid price of 0 or more.");
+      return;
+    }
+    if (!editing && !image) {
+      setFormError("Choose a JPG, PNG or WebP image for this trip.");
+      fileInputRef.current?.focus();
+      return;
+    }
+
     setSaving(true);
-    setError(null);
+    setFormError(null);
+
     try {
       const data = new FormData();
-      data.append("title", form.title);
-      data.append("place", form.place);
-      data.append("description", form.description);
-      data.append("price", form.price);
+      data.append("title", title);
+      data.append("place", place);
+      data.append("description", description);
+      data.append("price", String(price));
       if (image) data.append("image", image);
-      if (editingId) {
-        await companyAPI.updateTrip(editingId, data);
+
+      if (editing) {
+        await companyAPI.updateTrip(editing.id, data);
         toast.success("Trip updated.");
       } else {
         await companyAPI.createTrip(data);
         toast.success("Trip created.");
+        setPage(1);
       }
-      resetForm();
-      await loadTrips();
+
+      clearForm();
+      try {
+        await refreshTrips();
+      } catch {
+        toast.error("The trip was saved, but the list could not be refreshed.");
+      }
     } catch (submitError) {
-      setError(errorMessage(submitError));
+      setFormError(errorMessage(submitError));
     } finally {
       setSaving(false);
     }
   };
 
   const deleteTrip = async (trip: CompanyTrip) => {
-    if (!window.confirm(`Delete "${trip.title}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete "${trip.title}"? This cannot be undone.`)) {
+      return;
+    }
+
     setDeletingId(trip.id);
     try {
       await companyAPI.deleteTrip(trip.id);
+      setTrips((rows) => rows.filter((row) => row.id !== trip.id));
       toast.success("Trip deleted.");
-      if (editingId === trip.id) resetForm();
-      await loadTrips();
+      if (editing?.id === trip.id) clearForm();
+      void refreshTrips().catch(() => {
+        toast.error("The list could not be refreshed. Reload the page to try again.");
+      });
     } catch {
       toast.error("The trip could not be deleted.");
     } finally {
@@ -162,150 +414,663 @@ export default function CompanyTripsPage() {
     }
   };
 
+  const resetView = () => {
+    setSearchInput("");
+    setSort("recent");
+    setPage(1);
+  };
+
+  const emptyTitle = isFiltered ? "No matching trips" : "No trips yet";
+  const emptyCopy = isFiltered
+    ? `No trips match “${searchInput.trim()}”. Try a different title, place or description.`
+    : "Add the first place-based listing above. It will appear on this company's public profile.";
+
   return (
-    <div className={`page ${styles.pageStack}`}>
-      <div className={styles.pageHead}>
-        <div className={styles.pageTitleWrap}>
-          <p className={styles.eyebrow}>Company workspace</p>
-          <h1 className={styles.pageTitle}>Trips</h1>
-          <p className={styles.pageLead}>
-            Add separate place-based trip listings with a photo and price.
-            These appear on your public company profile.
+    <div id="trips-workspace" className={styles.tripsRoot}>
+      <header className={styles.tripsMasthead}>
+        <div className={styles.tripsMastheadText}>
+          <nav className={styles.tripsBreadcrumb} aria-label="Breadcrumb">
+            <Link href="/company/dashboard/">Company workspace</Link>
+            <span className={styles.tripsBreadcrumbSep} aria-hidden="true">
+              /
+            </span>
+            <span className={styles.tripsBreadcrumbCurrent}>Trips</span>
+          </nav>
+          <p className={styles.tripsEyebrow}>Company workspace</p>
+          <h1 className={styles.tripsTitle}>Trips</h1>
+          <p className={styles.tripsLead}>
+            Standalone place-based listings shown on your public company profile.
+            Add a photo and price, then keep every destination up to date from
+            this page.
           </p>
         </div>
-        <div className={styles.pageActions}>
-          <button className="btn btn-primary" type="button" onClick={resetForm}>
+        <div className={styles.tripsActions}>
+          <button className="btn btn-primary" type="button" onClick={startCreate}>
             <Plus size={16} /> Add trip
           </button>
         </div>
-      </div>
+      </header>
 
-      {error ? <div className={`${styles.note} ${styles.warningNote}`} role="alert">{error}</div> : null}
-
-      <form className={`glass-card ${styles.formSection}`} onSubmit={saveTrip}>
-        <div className={styles.formSectionHead}>
-          <h2 className={styles.formSectionTitle}>
-            {editingId ? "Edit trip" : "New trip"}
-          </h2>
-          <p className={styles.formSectionCopy}>
-            {editingId ? "Update the details shown to visitors." : "A trip image is required when creating a listing."}
-          </p>
+      <section className={styles.tripsHero} aria-label="Catalogue overview">
+        <div className={styles.tripsHeroMain}>
+          <div className={styles.tripsHeroHead}>
+            <span className={styles.tripsHeroIcon} aria-hidden="true">
+              <MapPin size={23} />
+            </span>
+            <div>
+              <h2 className={styles.tripsHeroTitle}>Trip catalogue</h2>
+              <p className={styles.tripsHeroCopy}>
+                Every trip below belongs to your active company and appears on
+                its public profile. Search, sort and manage the listings without
+                leaving this page.
+              </p>
+            </div>
+          </div>
+          <ul className={styles.tripsStatRow}>
+            <li className={styles.tripsStat}>
+              <span className={styles.tripsStatLabel}>Results</span>
+              <span className={styles.tripsStatValue}>{total}</span>
+              <span className={styles.tripsStatHint}>
+                {isFiltered ? "After search" : "Whole catalogue"}
+              </span>
+            </li>
+            <li className={styles.tripsStat}>
+              <span className={styles.tripsStatLabel}>Average price</span>
+              <span className={styles.tripsStatValue}>
+                {averagePrice === null ? "—" : formatCurrency(averagePrice)}
+              </span>
+              <span className={styles.tripsStatHint}>
+                {pricedTrips.length
+                  ? `Across ${pricedTrips.length} priced trip${
+                      pricedTrips.length === 1 ? "" : "s"
+                    }`
+                  : "No prices set"}
+              </span>
+            </li>
+            <li className={styles.tripsStat}>
+              <span className={styles.tripsStatLabel}>Places</span>
+              <span className={styles.tripsStatValue}>{placeCount}</span>
+              <span className={styles.tripsStatHint}>Unique destinations</span>
+            </li>
+          </ul>
         </div>
-        <div className={styles.formGrid}>
-          <div className={styles.formField}>
-            <label htmlFor="company-trip-title">Trip name</label>
-            <input
-              id="company-trip-title"
-              value={form.title}
-              onChange={(event) => setForm({ ...form, title: event.target.value })}
-              required
-              maxLength={200}
-            />
+        <aside className={styles.tripsAside}>
+          <div className={styles.tripsAsideMain}>
+            <p className={styles.tripsAsideLabel}>Catalogue size</p>
+            <p className={styles.tripsAsideValue}>
+              {total} <span>trip{total === 1 ? "" : "s"}</span>
+            </p>
+            <p className={styles.tripsAsideCopy}>
+              {isFiltered
+                ? "match the current search. Clear it to see the whole catalogue."
+                : "in this company's catalogue. Trips are published alongside your tours and company profile."}
+            </p>
           </div>
-          <div className={styles.formField}>
-            <label htmlFor="company-trip-place">Place</label>
-            <input
-              id="company-trip-place"
-              value={form.place}
-              onChange={(event) => setForm({ ...form, place: event.target.value })}
-              required
-              maxLength={200}
-            />
-          </div>
-          <div className={styles.formField}>
-            <label htmlFor="company-trip-price">Price (USD)</label>
-            <input
-              id="company-trip-price"
-              type="number"
-              min="0"
-              step="0.01"
-              value={form.price}
-              onChange={(event) => setForm({ ...form, price: event.target.value })}
-              required
-            />
-          </div>
-          <div className={`${styles.formField} ${styles.formFieldFull}`}>
-            <label htmlFor="company-trip-description">Description</label>
-            <textarea
-              id="company-trip-description"
-              value={form.description}
-              onChange={(event) => setForm({ ...form, description: event.target.value })}
-              maxLength={5000}
-            />
-          </div>
-          <div className={styles.formField}>
-            <label htmlFor="company-trip-image">Trip image</label>
-            <input
-              id="company-trip-image"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={onImage}
-              required={!editingId}
-            />
-            <span className={styles.formHint}>JPG, PNG or WebP; maximum 5 MB.</span>
-          </div>
-          <div className={styles.imageField}>
-            {preview ? (
-              <div className={styles.imagePreview}>
-                <Image src={preview} alt="Trip preview" width={360} height={240} unoptimized />
-              </div>
-            ) : (
-              <div className={styles.imagePreviewEmpty}>
-                <ImageIcon size={22} />
-                <span>No image selected</span>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className={styles.pageActions}>
-          <button className="btn btn-primary" type="submit" disabled={saving}>
-            <Save size={16} /> {saving ? "Saving..." : editingId ? "Save trip" : "Create trip"}
+          <button
+            className={styles.tripsAsideCta}
+            type="button"
+            onClick={startCreate}
+          >
+            <Plus size={15} /> Add a trip
           </button>
-          {editingId ? (
-            <button className="btn btn-outline" type="button" onClick={resetForm}>
-              <X size={16} /> Cancel edit
+        </aside>
+      </section>
+
+      <section
+        id="trip-composer"
+        ref={composerRef}
+        className={`${styles.tripsComposer} ${
+          editing ? styles.tripsComposerEditing : ""
+        }`}
+        aria-labelledby="trip-composer-title"
+      >
+        <div className={styles.tripsComposerHead}>
+          <div className={styles.tripsComposerTitleWrap}>
+            <span className={styles.tripsComposerIcon} aria-hidden="true">
+              {editing ? <Pencil size={20} /> : <Plus size={20} />}
+            </span>
+            <div>
+              <p className={styles.tripsComposerEyebrow}>
+                {editing ? "Editing listing" : "New listing"}
+              </p>
+              <h2 className={styles.tripsComposerTitle} id="trip-composer-title">
+                {editing ? editing.title : "Add a trip to your catalogue"}
+              </h2>
+              <p className={styles.tripsComposerCopy}>
+                {editing
+                  ? "Update the details visitors see on the public company profile. Choose a new image only if you want to replace the current one."
+                  : "Create a standalone place-based listing. Every new trip needs a name, place, price and photo."}
+              </p>
+            </div>
+          </div>
+          <span className={styles.tripsComposerMode}>
+            {editing ? `Trip #${editing.id}` : "Draft"}
+          </span>
+        </div>
+
+        <form className={styles.tripsForm} onSubmit={saveTrip}>
+          <div className={styles.tripsFormGrid}>
+            <div className={`${styles.tripsField} ${styles.tripsFieldTitle}`}>
+              <label className={styles.tripsFieldLabel} htmlFor="trip-title">
+                Trip name{" "}
+                <span className={styles.tripsRequired} aria-hidden="true">
+                  *
+                </span>
+              </label>
+              <input
+                id="trip-title"
+                ref={titleInputRef}
+                className={styles.tripsInput}
+                value={form.title}
+                onChange={(event) =>
+                  setForm({ ...form, title: event.target.value })
+                }
+                placeholder="e.g. Sunrise hike to Mount Batur"
+                autoComplete="off"
+                maxLength={200}
+                required
+              />
+            </div>
+
+            <div className={styles.tripsField}>
+              <label className={styles.tripsFieldLabel} htmlFor="trip-place">
+                Place{" "}
+                <span className={styles.tripsRequired} aria-hidden="true">
+                  *
+                </span>
+              </label>
+              <input
+                id="trip-place"
+                className={styles.tripsInput}
+                value={form.place}
+                onChange={(event) =>
+                  setForm({ ...form, place: event.target.value })
+                }
+                placeholder="e.g. Bali, Indonesia"
+                autoComplete="off"
+                maxLength={200}
+                required
+              />
+            </div>
+
+            <div className={styles.tripsField}>
+              <label className={styles.tripsFieldLabel} htmlFor="trip-price">
+                Price (USD){" "}
+                <span className={styles.tripsRequired} aria-hidden="true">
+                  *
+                </span>
+              </label>
+              <div className={styles.tripsMoney}>
+                <span className={styles.tripsMoneySymbol} aria-hidden="true">
+                  $
+                </span>
+                <input
+                  id="trip-price"
+                  className={styles.tripsInput}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={form.price}
+                  onChange={(event) =>
+                    setForm({ ...form, price: event.target.value })
+                  }
+                  placeholder="0"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className={`${styles.tripsField} ${styles.tripsFieldWide}`}>
+              <div className={styles.tripsFieldHead}>
+                <label
+                  className={styles.tripsFieldLabel}
+                  htmlFor="trip-description"
+                >
+                  Description
+                </label>
+                <span className={styles.tripsCounter}>
+                  {form.description.length.toLocaleString("en-US")} / 5,000
+                </span>
+              </div>
+              <textarea
+                id="trip-description"
+                className={styles.tripsTextarea}
+                value={form.description}
+                onChange={(event) =>
+                  setForm({ ...form, description: event.target.value })
+                }
+                placeholder="What makes this place worth visiting?"
+                rows={3}
+                maxLength={5000}
+              />
+            </div>
+
+            <div className={`${styles.tripsField} ${styles.tripsMediaField}`}>
+              <span className={styles.tripsFieldLabel}>
+                Listing image{" "}
+                {editing ? (
+                  <span className={styles.tripsFieldHint}>(optional)</span>
+                ) : (
+                  <span className={styles.tripsRequired} aria-hidden="true">
+                    *
+                  </span>
+                )}
+              </span>
+              <div className={styles.tripsMediaRow}>
+                <div className={styles.tripsUpload}>
+                  <input
+                    id="trip-image"
+                    ref={fileInputRef}
+                    className={styles.tripsFileInput}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={onImage}
+                    aria-label="Listing image"
+                    aria-describedby="trip-image-hint"
+                  />
+                  <label className={styles.tripsFileButton} htmlFor="trip-image">
+                    <Upload size={15} />
+                    {image
+                      ? "Change image"
+                      : editing
+                        ? "Replace image"
+                        : "Choose image"}
+                  </label>
+                  <div className={styles.tripsUploadMeta}>
+                    <span className={styles.tripsFileName}>
+                      {image
+                        ? image.name
+                        : editing
+                          ? "Keeping the current image"
+                          : "No file selected"}
+                    </span>
+                    <span className={styles.tripsFieldHint} id="trip-image-hint">
+                      JPG, PNG or WebP; maximum 5 MB.
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.tripsPreview}>
+                  {preview ? (
+                    <Image
+                      className={styles.tripsPreviewImg}
+                      src={preview}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 100vw, 300px"
+                      unoptimized
+                    />
+                  ) : (
+                    <span className={styles.tripsPreviewEmpty}>
+                      <ImageIcon size={22} aria-hidden="true" />
+                      <span>Image preview</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {formError ? (
+            <p className={styles.tripsFormError} role="alert">
+              <AlertCircle size={16} aria-hidden="true" />
+              <span>{formError}</span>
+            </p>
+          ) : null}
+
+          <div className={styles.tripsFormActions}>
+            <button className="btn btn-primary" type="submit" disabled={saving}>
+              {saving ? (
+                <span className={styles.tripsSpin}>
+                  <Loader size={16} />
+                </span>
+              ) : (
+                <Save size={16} />
+              )}
+              {saving
+                ? "Saving…"
+                : editing
+                  ? "Save changes"
+                  : "Create trip"}
+            </button>
+            {editing ? (
+              <button
+                className="btn btn-outline"
+                type="button"
+                onClick={clearForm}
+                disabled={saving}
+              >
+                <X size={16} /> Cancel edit
+              </button>
+            ) : (
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={clearForm}
+                disabled={saving}
+              >
+                <X size={16} /> Clear
+              </button>
+            )}
+            <span className={styles.tripsFormNote}>
+              Saved trips appear immediately on your public company profile.
+            </span>
+          </div>
+        </form>
+      </section>
+
+      <section className={styles.tripsControls} aria-label="Search and sort trips">
+        <div className={styles.tripsControlsTop}>
+          <div className={styles.tripsSearch}>
+            <span className={styles.tripsSearchIcon} aria-hidden="true">
+              <Search size={16} />
+            </span>
+            <label className={styles.tripsSrOnly} htmlFor="trip-search">
+              Search trips
+            </label>
+            <input
+              id="trip-search"
+              className={styles.tripsSearchInput}
+              type="search"
+              placeholder="Search by title, place or description…"
+              value={searchInput}
+              onChange={(event) => {
+                setSearchInput(event.target.value);
+                setPage(1);
+              }}
+              autoComplete="off"
+              maxLength={200}
+            />
+            {searchInput ? (
+              <button
+                className={styles.tripsSearchClear}
+                type="button"
+                onClick={() => {
+                  setSearchInput("");
+                  setPage(1);
+                }}
+                aria-label="Clear trip search"
+              >
+                <X size={15} />
+              </button>
+            ) : null}
+          </div>
+          <div className={styles.tripsControlsMeta}>
+            <p className={styles.tripsCount} role="status" aria-live="polite">
+              <strong>{total}</strong> trip{total === 1 ? "" : "s"}
+              {isFiltered ? " match" : " listed"}
+            </p>
+          </div>
+        </div>
+        <div className={styles.tripsFilters}>
+          <span className={styles.tripsSortLabel}>Sort</span>
+          <div
+            className={styles.tripsFilterScroll}
+            role="group"
+            aria-label="Sort trips"
+          >
+            {SORT_OPTIONS.map((option) => {
+              const active = sort === option.value;
+              return (
+                <button
+                  key={option.value}
+                  className={`${styles.tripsFilter} ${
+                    active ? styles.tripsFilterActive : ""
+                  }`}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => {
+                    setSort(option.value);
+                    setPage(1);
+                  }}
+                >
+                  {active ? (
+                    <span className={styles.tripsFilterDot} aria-hidden="true" />
+                  ) : null}
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+          {isAdjusted ? (
+            <button className={styles.tripsReset} type="button" onClick={resetView}>
+              Reset view
             </button>
           ) : null}
         </div>
-      </form>
+      </section>
 
-      {loading ? (
-        <div className={styles.loading} role="status">Loading company trips...</div>
-      ) : trips.length === 0 ? (
-        <div className={styles.empty}>
-          <span className={styles.emptyIcon}><Building2 size={20} /></span>
-          <h2 className={styles.emptyTitle}>No trips yet</h2>
-          <p className={styles.emptyCopy}>Create your first place-based trip listing above.</p>
+      {error ? (
+        <div
+          className={`${styles.tripsState} ${styles.tripsStateDanger}`}
+          role="alert"
+        >
+          <span className={styles.tripsStateIcon} aria-hidden="true">
+            <AlertCircle size={22} />
+          </span>
+          <h2 className={styles.tripsStateTitle}>Trips unavailable</h2>
+          <p className={styles.tripsStateCopy}>{error}</p>
+          <div className={styles.tripsStateActions}>
+            <button
+              className="btn btn-outline btn-sm"
+              type="button"
+              onClick={() => {
+                setError(null);
+                setLoading(true);
+                setReloadKey((value) => value + 1);
+              }}
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      ) : loading ? (
+        <div className={styles.tripsGridWrap} role="status">
+          <span className={styles.tripsSrOnly}>Loading company trips…</span>
+          <ul className={styles.tripsGrid} aria-hidden="true">
+            {Array.from({ length: 6 }, (_, index) => (
+              <li className={styles.tripsSkeleton} key={index}>
+                <div className={styles.tripsSkeletonMedia} />
+                <div className={styles.tripsSkeletonBody}>
+                  <div
+                    className={`${styles.tripsSkeletonLine} ${styles.tripsSkeletonTitle}`}
+                  />
+                  <div
+                    className={`${styles.tripsSkeletonLine} ${styles.tripsSkeletonLineMedium}`}
+                  />
+                  <div
+                    className={`${styles.tripsSkeletonLine} ${styles.tripsSkeletonLineShort}`}
+                  />
+                  <div className={styles.tripsSkeletonFooter}>
+                    <div className={styles.tripsSkeletonPrice} />
+                    <div className={styles.tripsSkeletonMeta} />
+                  </div>
+                </div>
+                <div className={styles.tripsSkeletonActions}>
+                  <div className={styles.tripsSkeletonButton} />
+                  <div
+                    className={`${styles.tripsSkeletonButton} ${styles.tripsSkeletonButtonIcon}`}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : pageTrips.length === 0 ? (
+        <div className={styles.tripsState}>
+          <span className={styles.tripsStateIcon} aria-hidden="true">
+            {isFiltered ? <Search size={22} /> : <Building2 size={22} />}
+          </span>
+          <h2 className={styles.tripsStateTitle}>{emptyTitle}</h2>
+          <p className={styles.tripsStateCopy}>{emptyCopy}</p>
+          <div className={styles.tripsStateActions}>
+            {isFiltered ? (
+              <button
+                className="btn btn-outline btn-sm"
+                type="button"
+                onClick={() => {
+                  setSearchInput("");
+                  setPage(1);
+                }}
+              >
+                Clear search
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary btn-sm"
+                type="button"
+                onClick={startCreate}
+              >
+                <Plus size={15} /> Add trip
+              </button>
+            )}
+          </div>
         </div>
       ) : (
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr><th scope="col">Trip</th><th scope="col">Price</th><th scope="col">Actions</th></tr>
-            </thead>
-            <tbody>
-              {trips.map((trip) => (
-                <tr key={trip.id}>
-                  <td>
-                    <span className={styles.cellTitle}>{trip.title}</span>
-                    <span className={styles.cellSub}>{trip.place}</span>
-                  </td>
-                  <td>${Number(trip.price ?? 0).toLocaleString("en-US")}</td>
-                  <td>
-                    <div className={styles.rowActions}>
-                      <button className="btn btn-outline btn-sm" type="button" onClick={() => editTrip(trip)}>
-                        <Pencil size={14} /> Edit
+        <>
+          <div className={styles.tripsGridWrap}>
+            <ul className={styles.tripsGrid}>
+              {pageTrips.map((trip) => {
+                const price = formatPrice(trip.price);
+                const busy = deletingId === trip.id;
+                const isEditing = editing?.id === trip.id;
+
+                return (
+                  <li
+                    className={`${styles.tripsCard} ${
+                      isEditing ? styles.tripsCardEditing : ""
+                    }`}
+                    key={trip.id}
+                  >
+                    <div className={styles.tripsMedia}>
+                      {trip.image_url ? (
+                        <Image
+                          className={styles.tripsMediaImg}
+                          src={trip.image_url}
+                          alt=""
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <span
+                          className={styles.tripsMediaFallback}
+                          aria-hidden="true"
+                        >
+                          <MapPin size={34} />
+                        </span>
+                      )}
+                      <span
+                        className={styles.tripsMediaShade}
+                        aria-hidden="true"
+                      />
+                      <span className={styles.tripsPlaceBadge}>
+                        {trip.place || "No place"}
+                      </span>
+                      <span className={styles.tripsPriceBadge}>
+                        {price ?? "No price"}
+                      </span>
+                      {isEditing ? (
+                        <span className={styles.tripsEditingTag}>Editing</span>
+                      ) : null}
+                    </div>
+
+                    <div className={styles.tripsBody}>
+                      <h3 className={styles.tripsCardTitle}>{trip.title}</h3>
+                      <p className={styles.tripsMeta}>
+                        <span className={styles.tripsMetaItem}>
+                          <MapPin size={13} aria-hidden="true" />
+                          <span>{trip.place || "No place"}</span>
+                        </span>
+                        <span className={styles.tripsMetaItem}>
+                          <CalendarDays size={13} aria-hidden="true" />
+                          <span>{formatDate(trip.created_at, "Added")}</span>
+                        </span>
+                      </p>
+                      <p
+                        className={`${styles.tripsCopy} ${
+                          trip.description?.trim() ? "" : styles.tripsCopyEmpty
+                        }`}
+                      >
+                        {trip.description?.trim() || "No description yet."}
+                      </p>
+                      <div className={styles.tripsFoot}>
+                        <div className={styles.tripsPrice}>
+                          <span className={styles.tripsPriceValue}>
+                            {price ?? "Price on request"}
+                          </span>
+                          <span className={styles.tripsPriceHint}>
+                            {price ? "Listed price" : "No price set"}
+                          </span>
+                        </div>
+                        <div className={styles.tripsFootMeta}>
+                          <span className={styles.tripsUpdated}>
+                            {formatDate(trip.updated_at, "Updated")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.tripsCardActions}>
+                      <button
+                        className="btn btn-primary btn-sm"
+                        type="button"
+                        onClick={() => editTrip(trip)}
+                      >
+                        <Pencil size={14} /> Edit trip
                       </button>
-                      <button className="btn btn-danger btn-sm" type="button" disabled={deletingId === trip.id} onClick={() => void deleteTrip(trip)}>
-                        <Trash2 size={14} /> {deletingId === trip.id ? "Deleting..." : "Delete"}
+                      <button
+                        className={styles.tripsDelete}
+                        type="button"
+                        onClick={() => void deleteTrip(trip)}
+                        disabled={busy}
+                        aria-label={`Delete ${trip.title}`}
+                        title="Delete trip"
+                      >
+                        {busy ? (
+                          <span className={styles.tripsSpin}>
+                            <Loader size={15} />
+                          </span>
+                        ) : (
+                          <Trash2 size={15} />
+                        )}
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <nav className={styles.tripsPagination} aria-label="Trip pages">
+            <p className={styles.tripsRange}>
+              Showing <strong>{rangeStart}</strong>–<strong>{rangeEnd}</strong> of{" "}
+              <strong>{total}</strong> trip{total === 1 ? "" : "s"}
+            </p>
+            <div className={styles.tripsPageControls}>
+              <button
+                className="btn btn-outline btn-sm"
+                type="button"
+                onClick={() => setPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage <= 1}
+                aria-label="Previous page"
+              >
+                <ChevronLeft size={15} /> Previous
+              </button>
+              <span className={styles.tripsPageStatus}>
+                Page {currentPage} of {pages}
+              </span>
+              <button
+                className="btn btn-outline btn-sm"
+                type="button"
+                onClick={() => setPage(Math.min(pages, currentPage + 1))}
+                disabled={currentPage >= pages}
+                aria-label="Next page"
+              >
+                Next <ChevronRight size={15} />
+              </button>
+            </div>
+          </nav>
+        </>
       )}
     </div>
   );
