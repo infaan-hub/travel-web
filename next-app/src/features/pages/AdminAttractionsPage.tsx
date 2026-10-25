@@ -10,6 +10,7 @@ import { Map, Plus, Pencil, Trash2, X } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
 
 import { isFile } from "@/features/pages/types";
 import type {  Attraction  } from "@/features/pages/types";
@@ -120,14 +121,17 @@ export default function AdminAttractionsPage() {
   });
 
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading attractions...</div></div>;
+  if (loading) return <div className={dashStyles.dashboardRoot}><div className="loading">Loading attractions...</div></div>;
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1><Map size={20} /> Attractions Management</h1>
-        <p>{attractions.length} attractions</p>
-      </div>
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace</p>
+          <h1 className={dashStyles.dashTitle}>Attractions Management</h1>
+          <p className={dashStyles.dashLead}>{attractions.length} attractions</p>
+        </div>
+      </header>
 
       <div className="admin-toolbar">
         <div className="search-input-group">
@@ -180,7 +184,19 @@ export default function AdminAttractionsPage() {
         </div>
       )}
 
-      <div className="admin-content">
+      <section className={dashStyles.dashPanel} aria-label="Attractions">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <Map size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Attractions</h2>
+              <p className={dashStyles.dashPanelCopy}>Manage attractions and categories.</p>
+            </div>
+          </div>
+        </div>
+        <div className="admin-content">
         {filtered.length === 0 ? (
           <div className="empty-state"><p>No attractions found</p></div>
         ) : (
@@ -220,6 +236,7 @@ export default function AdminAttractionsPage() {
           </div>
         )}
       </div>
+      </section>
     </div>
   );
 }
