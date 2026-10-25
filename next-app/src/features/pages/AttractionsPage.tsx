@@ -7,6 +7,7 @@ import { Map } from '@/components/icons';
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import type {  Attraction  } from "@/features/pages/types";
 import { PageHero } from "@/components/PageHero";
+import styles from "@/features/pages/attractions-page.module.css";
 
 export default function AttractionsPage() {
   const [attractions, setAttractions] = useState<Attraction[]>([]);
@@ -43,7 +44,7 @@ export default function AttractionsPage() {
   ];
 
   return (
-    <div className="page attractions-page">
+    <div className={`page attractions-page ${styles.attractionsPageRoot}`}>
       <PageHero
         title="Attractions"
         subtitle="Beaches, caves, markets and wildlife — the places travellers keep coming back to."
@@ -78,9 +79,9 @@ export default function AttractionsPage() {
       </div>
 
       {loading ? (
-        <div className="loading">Discovering attractions...</div>
+        <div className={`loading ${styles.attractionsLoading}`}>Discovering attractions...</div>
       ) : attractions.length === 0 ? (
-        <div className="empty-state">
+        <div className={`empty-state ${styles.attractionsEmpty}`}>
           <span className="empty-icon"><Map size={24} /></span>
           <p>No attractions found for this filter</p>
         </div>
