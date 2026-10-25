@@ -1,0 +1,20 @@
+.toursPageRoot {
+  background: #FFFFFF;
+  color: #08428C;
+}
+
+.toursLoading {
+  color: #08428C;
+  font-weight: 600;
+}
+
+.toursEmpty {
+  background: #FFFFFF;
+  border: 1px dashed #08428C;
+  color: #08428C;
+  border-radius: 20px;
+}
+
+.toursEmpty p {
+  color: #08428C;
+}

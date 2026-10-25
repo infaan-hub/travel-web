@@ -9,6 +9,7 @@ import { Search } from '@/components/icons';
 import type { DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import type {  Tour  } from "@/features/pages/types";
 import { PageHero } from "@/components/PageHero";
+import styles from "@/features/pages/tours-page.module.css";
 
 export default function ToursPage() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function ToursPage() {
         : 'Browse international trips and services published by participating providers.';
 
   return (
-    <div className="page tours-page">
+    <div className={`page tours-page ${styles.toursPageRoot}`}>
       <PageHero
         title={title}
         subtitle={subtitle}
@@ -52,9 +53,9 @@ export default function ToursPage() {
       />
 
       {loading ? (
-        <div className="loading">Loading amazing tours...</div>
+        <div className={`loading ${styles.toursLoading}`}>Loading amazing tours...</div>
       ) : tours.length === 0 ? (
-        <div className="empty-state">
+        <div className={`empty-state ${styles.toursEmpty}`}>
           <span className="empty-icon"><Search size={24} /></span>
           <p>No published experiences match these filters yet. Try another destination or browse companies.</p>
           <Link className="btn btn-secondary" href="/companies/">Browse companies</Link>
