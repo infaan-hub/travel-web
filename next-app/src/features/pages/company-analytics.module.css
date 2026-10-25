@@ -1,0 +1,1270 @@
+/* ==========================================================================
+   /company/analytics
+   Neutral #D3D3D3 ground (primary) + deep blue #08428C accent (secondary).
+   Self-contained: nothing outside .analyticsRoot is affected.
+   The #analytics-workspace id on the page root lifts control overrides above
+   the legacy app-shell !important rules in travel-theme.css.
+   ========================================================================== */
+
+.analyticsRoot {
+  /* palette ------------------------------------------------------------- */
+  --analytics-primary: #d3d3d3;
+  --analytics-secondary: #08428c;
+  --analytics-accent: #08428c;
+  --analytics-accent-hover: #0a52ad;
+  --analytics-accent-deep: #063a78;
+  --analytics-accent-soft: #e7eef9;
+  --analytics-accent-soft-2: #d6e2f5;
+  --analytics-surface: #ffffff;
+  --analytics-surface-soft: #f2f2f2;
+  --analytics-surface-sunken: #e6e6e6;
+  --analytics-ink: #12223a;
+  --analytics-ink-2: #44546c;
+  --analytics-ink-3: #5c6a82;
+  --analytics-line: rgba(8, 66, 140, 0.14);
+  --analytics-line-soft: rgba(8, 66, 140, 0.08);
+  --analytics-line-strong: rgba(8, 66, 140, 0.3);
+
+  --analytics-ok: #0e7c5a;
+  --analytics-ok-soft: #e4f4ee;
+  --analytics-warn: #8a5a00;
+  --analytics-warn-soft: #fbf0da;
+  --analytics-danger: #b23a34;
+  --analytics-danger-soft: #fae9e7;
+
+  --analytics-radius-xl: 22px;
+  --analytics-radius-lg: 18px;
+  --analytics-radius-md: 14px;
+  --analytics-radius-sm: 11px;
+  --analytics-shadow:
+    0 1px 2px rgba(18, 34, 58, 0.04),
+    0 14px 34px rgba(8, 66, 140, 0.07);
+  --analytics-shadow-hover:
+    0 2px 6px rgba(18, 34, 58, 0.06),
+    0 22px 48px rgba(8, 66, 140, 0.16);
+
+  /* remap shared tokens so nested content follows this theme ------------ */
+  --text-primary: var(--analytics-ink);
+  --text-secondary: var(--analytics-ink-2);
+  --text-light: var(--analytics-ink-3);
+  --line: var(--analytics-line);
+  --glass-bg: var(--analytics-surface);
+  --glass-bg-elevated: var(--analytics-surface);
+  --glass-bg-soft: var(--analytics-surface-soft);
+  --glass-border: var(--analytics-line);
+  --glass-border-strong: var(--analytics-line-strong);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: var(--analytics-shadow);
+  --glass-shadow-elevated: var(--analytics-shadow-hover);
+  --glass-blur-md: 0px;
+  --glass-radius: var(--analytics-radius-xl);
+  --aqua-strong: var(--analytics-accent);
+  --aqua-deep: var(--analytics-accent-deep);
+  --aqua-subtle: var(--analytics-accent-soft);
+  --brand: var(--analytics-accent);
+  --brand-strong: var(--analytics-accent-hover);
+  --brand-accent: var(--analytics-accent);
+  --brand-soft: var(--analytics-accent-soft);
+  --success-bg: var(--analytics-ok-soft);
+  --success-text: var(--analytics-ok);
+  --warning-bg: var(--analytics-warn-soft);
+  --warning-text: var(--analytics-warn);
+  --danger-bg: var(--analytics-danger-soft);
+  --danger-text: var(--analytics-danger);
+
+  /* shell --------------------------------------------------------------- */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0;
+  padding: clamp(20px, 2.6vw, 34px) clamp(16px, 2.6vw, 36px)
+    clamp(34px, 4vw, 56px);
+  background:
+    radial-gradient(900px 480px at 6% -12%, rgba(8, 66, 140, 0.12), transparent 62%),
+    radial-gradient(760px 460px at 102% -4%, rgba(8, 66, 140, 0.08), transparent 58%),
+    var(--analytics-primary);
+  color: var(--analytics-ink);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  animation: analyticsRise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes analyticsRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* every direct child sits on the same 1440px content rail */
+.analyticsRoot > * {
+  width: 100%;
+  max-width: 1440px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Masthead
+   -------------------------------------------------------------------------- */
+.analyticsMasthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--analytics-line);
+}
+
+.analyticsMastheadText {
+  min-width: 0;
+  max-width: 780px;
+}
+
+.analyticsBreadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 12px;
+  color: var(--analytics-ink-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.analyticsBreadcrumb a {
+  color: var(--analytics-accent);
+  text-decoration: none;
+}
+
+.analyticsBreadcrumb a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.analyticsBreadcrumbSep {
+  color: var(--analytics-line-strong);
+}
+
+.analyticsBreadcrumbCurrent {
+  color: var(--analytics-ink-2);
+}
+
+.analyticsEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  color: var(--analytics-accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.analyticsEyebrow::before {
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  content: "";
+}
+
+.analyticsTitle {
+  margin: 0;
+  color: var(--analytics-accent);
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 3vw, 2.55rem);
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.analyticsLead {
+  max-width: 68ch;
+  margin: 10px 0 0;
+  color: var(--analytics-ink-2);
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+
+.analyticsActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+/* --------------------------------------------------------------------------
+   Performance snapshot
+   -------------------------------------------------------------------------- */
+.analyticsHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(270px, 340px);
+  gap: 22px;
+  align-items: stretch;
+  padding: clamp(18px, 2.2vw, 26px);
+  border: 1px solid var(--analytics-line);
+  border-radius: var(--analytics-radius-xl);
+  background: var(--analytics-surface);
+  box-shadow: var(--analytics-shadow);
+}
+
+.analyticsHeroMain {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  min-width: 0;
+}
+
+.analyticsHeroHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  min-width: 0;
+}
+
+.analyticsHeroIcon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--analytics-accent-soft);
+  color: var(--analytics-accent);
+}
+
+.analyticsHeroTitle {
+  margin: 0;
+  color: var(--analytics-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  line-height: 1.16;
+}
+
+.analyticsHeroCopy {
+  max-width: 62ch;
+  margin: 5px 0 0;
+  color: var(--analytics-ink-2);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.analyticsKpiRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.analyticsKpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid var(--analytics-line-soft);
+  border-radius: var(--analytics-radius-md);
+  background: var(--analytics-surface-soft);
+}
+
+.analyticsKpiLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--analytics-ink-3);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.analyticsKpiLabel svg {
+  flex: 0 0 auto;
+  color: var(--analytics-accent);
+}
+
+.analyticsKpiValue {
+  color: var(--analytics-ink);
+  font-size: clamp(1rem, 1.4vw, 1.3rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.analyticsKpiHint {
+  color: var(--analytics-ink-3);
+  font-size: 0.68rem;
+  line-height: 1.38;
+}
+
+.analyticsAside {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  overflow: hidden;
+  border-radius: var(--analytics-radius-lg);
+  background: linear-gradient(
+    165deg,
+    var(--analytics-accent) 0%,
+    #0b57b8 52%,
+    var(--analytics-accent-deep) 100%
+  );
+  box-shadow: 0 18px 38px rgba(8, 66, 140, 0.26);
+  color: #fff;
+}
+
+.analyticsAside::after {
+  position: absolute;
+  z-index: 0;
+  top: -70px;
+  right: -50px;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.22), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.analyticsAsideMain,
+.analyticsAsideList {
+  position: relative;
+  z-index: 1;
+}
+
+.analyticsAsideMain {
+  min-width: 0;
+}
+
+.analyticsAsideLabel {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.analyticsAsideValue {
+  margin: 6px 0 0;
+  color: #fff;
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.analyticsAsideCopy {
+  margin: 7px 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.analyticsAsideList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  list-style: none;
+}
+
+.analyticsAsideList li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.analyticsAsideList svg {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* --------------------------------------------------------------------------
+   Notes
+   -------------------------------------------------------------------------- */
+.analyticsNoticeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+.analyticsNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 13px 15px;
+  border: 1px solid var(--analytics-line);
+  border-radius: var(--analytics-radius-md);
+  background: var(--analytics-surface);
+  box-shadow: 0 1px 2px rgba(18, 34, 58, 0.03);
+}
+
+.analyticsNoticeWarn {
+  border-color: rgba(138, 90, 0, 0.28);
+  background: var(--analytics-warn-soft);
+}
+
+.analyticsNoticeIcon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  margin-top: 1px;
+  color: var(--analytics-accent);
+}
+
+.analyticsNoticeWarn .analyticsNoticeIcon {
+  color: var(--analytics-warn);
+}
+
+.analyticsNoticeBody {
+  min-width: 0;
+}
+
+.analyticsNoticeTitle {
+  display: block;
+  color: var(--analytics-ink);
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.analyticsNoticeWarn .analyticsNoticeTitle {
+  color: var(--analytics-warn);
+}
+
+.analyticsNoticeCopy {
+  margin: 3px 0 0;
+  color: var(--analytics-ink-2);
+  font-size: 0.73rem;
+  line-height: 1.55;
+}
+
+.analyticsNoticeWarn .analyticsNoticeCopy {
+  color: var(--analytics-warn);
+}
+
+/* --------------------------------------------------------------------------
+   Section headers
+   -------------------------------------------------------------------------- */
+.analyticsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.analyticsSectionHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.analyticsSectionIcon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--analytics-accent-soft);
+  color: var(--analytics-accent);
+}
+
+.analyticsSectionHeadText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.analyticsSectionTitle {
+  margin: 0;
+  color: var(--analytics-ink);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1.24;
+}
+
+.analyticsSectionCopy {
+  max-width: 62ch;
+  margin: 4px 0 0;
+  color: var(--analytics-ink-2);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.analyticsSectionBadge {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 4px 9px;
+  border: 1px solid rgba(8, 66, 140, 0.2);
+  border-radius: 999px;
+  background: var(--analytics-accent-soft);
+  color: var(--analytics-accent);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.analyticsSectionNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--analytics-line);
+  border-radius: var(--analytics-radius-md);
+  background: var(--analytics-surface);
+  color: var(--analytics-ink-2);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.analyticsSectionNote svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--analytics-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Stat cards
+   -------------------------------------------------------------------------- */
+.analyticsStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.analyticsMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.analyticsStatCard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--analytics-line);
+  border-radius: var(--analytics-radius-lg);
+  background: var(--analytics-surface);
+  box-shadow: var(--analytics-shadow);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.analyticsStatCard:hover {
+  border-color: var(--analytics-line-strong);
+  box-shadow: var(--analytics-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.analyticsStatCardMetric {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92),
+    var(--analytics-accent-soft)
+  );
+  border-color: rgba(8, 66, 140, 0.18);
+}
+
+.analyticsStatCardMetric .analyticsStatIcon {
+  background: var(--analytics-surface);
+}
+
+.analyticsStatCardMetric .analyticsStatValue {
+  color: var(--analytics-accent);
+}
+
+.analyticsStatCardMetric .analyticsStatValueMuted {
+  color: var(--analytics-ink-3);
+  font-weight: 700;
+}
+
+.analyticsStatTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.analyticsStatIcon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--analytics-accent-soft);
+  color: var(--analytics-accent);
+}
+
+.analyticsStatValue {
+  color: var(--analytics-ink);
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.analyticsStatLabel {
+  color: var(--analytics-ink-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.analyticsStatHint {
+  color: var(--analytics-ink-3);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+/* --------------------------------------------------------------------------
+   Charts
+   -------------------------------------------------------------------------- */
+.analyticsChartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  min-width: 0;
+}
+
+.analyticsChartCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: clamp(16px, 2vw, 22px);
+  border: 1px solid var(--analytics-line);
+  border-radius: var(--analytics-radius-xl);
+  background: var(--analytics-surface);
+  box-shadow: var(--analytics-shadow);
+}
+
+.analyticsChartCardWide {
+  grid-column: 1 / -1;
+}
+
+.analyticsChartHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  min-width: 0;
+  margin-bottom: 14px;
+}
+
+.analyticsChartIcon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--analytics-accent-soft);
+  color: var(--analytics-accent);
+}
+
+.analyticsChartHeadText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.analyticsChartTitle {
+  margin: 0;
+  color: var(--analytics-ink);
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.analyticsChartCopy {
+  margin: 3px 0 0;
+  color: var(--analytics-ink-2);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.analyticsChartBadge {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 4px 9px;
+  border: 1px solid rgba(8, 66, 140, 0.2);
+  border-radius: 999px;
+  background: var(--analytics-accent-soft);
+  color: var(--analytics-accent);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.analyticsChartWrap {
+  width: 100%;
+  min-width: 0;
+  height: 280px;
+}
+
+.analyticsChartWrapTall {
+  height: 340px;
+}
+
+.analyticsDonutWrap {
+  position: relative;
+}
+
+.analyticsDonutCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.analyticsDonutValue {
+  color: var(--analytics-ink);
+  font-size: 1.7rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.analyticsDonutLabel {
+  color: var(--analytics-ink-3);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.analyticsLegend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 10px;
+}
+
+.analyticsLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--analytics-ink-2);
+  font-size: 0.71rem;
+  line-height: 1.35;
+}
+
+.analyticsLegendDot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 3px;
+}
+
+.analyticsLegendLabel {
+  font-weight: 600;
+}
+
+.analyticsLegendValue {
+  margin-left: 2px;
+  color: var(--analytics-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.analyticsChartNote {
+  margin: 12px 0 0;
+  padding-top: 11px;
+  border-top: 1px solid var(--analytics-line-soft);
+  color: var(--analytics-ink-3);
+  font-size: 0.69rem;
+  line-height: 1.5;
+}
+
+.analyticsChartEmpty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 280px;
+  padding: 24px;
+  border: 1px dashed var(--analytics-line-strong);
+  border-radius: var(--analytics-radius-md);
+  background: var(--analytics-surface-soft);
+  text-align: center;
+}
+
+.analyticsChartEmptyIcon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 2px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--analytics-surface);
+  color: var(--analytics-accent);
+}
+
+.analyticsChartEmptyTitle {
+  margin: 0;
+  color: var(--analytics-ink);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.analyticsChartEmptyCopy {
+  max-width: 38ch;
+  margin: 0;
+  color: var(--analytics-ink-3);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.analyticsChartWrap :global(.recharts-text) {
+  fill: var(--analytics-ink-3);
+  font-family: var(--font-inter), Inter, sans-serif;
+}
+
+.analyticsChartWrap :global(.recharts-default-tooltip) {
+  font-family: var(--font-inter), Inter, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Chart loading skeleton
+   -------------------------------------------------------------------------- */
+.analyticsSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.analyticsChartSkeleton {
+  position: relative;
+  gap: 14px;
+  min-height: 360px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.analyticsChartSkeletonHead {
+  width: 56%;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--analytics-surface-sunken);
+}
+
+.analyticsChartSkeletonBody {
+  flex: 1;
+  min-height: 260px;
+  border-radius: var(--analytics-radius-md);
+  background: var(--analytics-surface-soft);
+}
+
+.analyticsChartSkeleton::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.72) 50%,
+    transparent 100%
+  );
+  content: "";
+  transform: translateX(-100%);
+  animation: analyticsShimmer 1.35s ease-in-out infinite;
+}
+
+@keyframes analyticsShimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Global controls inside the page
+   -------------------------------------------------------------------------- */
+:global(#analytics-workspace) :global(.btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.83rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: none !important;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease !important;
+}
+
+:global(#analytics-workspace) :global(.btn-primary) {
+  border: 1px solid var(--analytics-accent) !important;
+  background: var(--analytics-accent) !important;
+  box-shadow: 0 10px 20px rgba(8, 66, 140, 0.22) !important;
+  color: #fff !important;
+}
+
+:global(#analytics-workspace) :global(.btn-primary):hover {
+  border-color: var(--analytics-accent-hover) !important;
+  background: var(--analytics-accent-hover) !important;
+  box-shadow: 0 14px 26px rgba(8, 66, 140, 0.28) !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+:global(#analytics-workspace) :global(.btn-outline) {
+  border: 1px solid rgba(8, 66, 140, 0.5) !important;
+  background: var(--analytics-surface) !important;
+  box-shadow: none !important;
+  color: var(--analytics-accent) !important;
+}
+
+:global(#analytics-workspace) :global(.btn-outline):hover {
+  border-color: rgba(8, 66, 140, 0.6) !important;
+  background: var(--analytics-accent-soft) !important;
+  box-shadow: none !important;
+  color: var(--analytics-accent) !important;
+  transform: translateY(-1px);
+}
+
+:global(#analytics-workspace) :global(.btn-ghost) {
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--analytics-accent) !important;
+}
+
+:global(#analytics-workspace) :global(.btn-ghost):hover {
+  background: var(--analytics-accent-soft) !important;
+  box-shadow: none !important;
+  color: var(--analytics-accent) !important;
+}
+
+:global(#analytics-workspace) :global(.btn-sm) {
+  min-height: 38px;
+  padding-inline: 11px;
+  font-size: 0.75rem;
+}
+
+:global(#analytics-workspace) :global(.btn:disabled) {
+  opacity: 0.5;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+:global(#analytics-workspace) a:focus-visible,
+:global(#analytics-workspace) button:focus-visible,
+:global(#analytics-workspace) [tabindex]:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.45) !important;
+  outline-offset: 2px;
+}
+
+:global(#analytics-workspace) :global(.btn) {
+  -webkit-backdrop-filter: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1180px) {
+  .analyticsStatsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .analyticsHero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .analyticsAside {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .analyticsAsideMain {
+    flex: 1 1 auto;
+  }
+
+  .analyticsAsideList {
+    flex: 0 0 auto;
+    padding: 2px 0 2px 18px;
+    border-top: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.24);
+  }
+}
+
+@media (max-width: 1024px) {
+  .analyticsStatsGrid,
+  .analyticsMetricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analyticsChartsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .analyticsChartCardWide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .analyticsMasthead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .analyticsActions {
+    width: 100%;
+  }
+
+  .analyticsActions :global(.btn) {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .analyticsKpiRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analyticsAside {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px;
+  }
+
+  .analyticsAsideList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 12px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    border-left: 0;
+  }
+
+  .analyticsSectionBadge {
+    display: none;
+  }
+
+  .analyticsChartHead {
+    flex-wrap: wrap;
+  }
+
+  .analyticsChartBadge {
+    margin-left: 49px;
+  }
+}
+
+@media (max-width: 640px) {
+  .analyticsRoot {
+    gap: 15px;
+    padding: 16px 14px 34px;
+  }
+
+  .analyticsTitle {
+    font-size: clamp(1.65rem, 8vw, 2.15rem);
+  }
+
+  .analyticsLead {
+    font-size: 0.86rem;
+  }
+
+  .analyticsHero {
+    padding: 14px;
+  }
+
+  .analyticsHeroHead {
+    gap: 10px;
+  }
+
+  .analyticsHeroIcon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    border-radius: 12px;
+  }
+
+  .analyticsKpiRow,
+  .analyticsStatsGrid,
+  .analyticsMetricGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .analyticsKpi {
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 7px 10px;
+    padding: 11px 12px;
+  }
+
+  .analyticsKpiLabel {
+    flex: 1 0 auto;
+  }
+
+  .analyticsKpiValue {
+    font-size: 1.08rem;
+  }
+
+  .analyticsKpiHint {
+    flex-basis: 100%;
+  }
+
+  .analyticsSectionHead {
+    gap: 10px;
+  }
+
+  .analyticsSectionIcon {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    border-radius: 12px;
+  }
+
+  .analyticsSectionTitle {
+    font-size: 1.08rem;
+  }
+
+  .analyticsStatCard {
+    padding: 14px;
+  }
+
+  .analyticsChartCard {
+    padding: 15px;
+    border-radius: var(--analytics-radius-lg);
+  }
+
+  .analyticsChartWrap {
+    height: 250px;
+  }
+
+  .analyticsChartWrapTall {
+    height: 300px;
+  }
+
+  .analyticsChartBadge {
+    display: none;
+  }
+
+  .analyticsNoticeGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .analyticsNotice {
+    padding: 12px 13px;
+  }
+
+  .analyticsChartSkeleton {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analyticsActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .analyticsActions :global(.btn) {
+    width: 100%;
+  }
+
+  .analyticsKpiValue {
+    font-size: 1.02rem;
+  }
+
+  .analyticsAside {
+    padding: 17px;
+  }
+
+  .analyticsAsideValue {
+    font-size: 1.65rem;
+  }
+
+  .analyticsChartWrap {
+    height: 230px;
+  }
+
+  .analyticsChartWrapTall {
+    height: 280px;
+  }
+
+  .analyticsLegend {
+    gap: 7px 10px;
+  }
+
+  .analyticsChartEmpty {
+    min-height: 230px;
+    padding: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .analyticsRoot,
+  .analyticsRoot *,
+  .analyticsRoot *::before,
+  .analyticsRoot *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
