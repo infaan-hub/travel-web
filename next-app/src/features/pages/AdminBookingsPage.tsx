@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { ClipboardList, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Filter } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
 
 import type {  Booking  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
@@ -46,7 +47,7 @@ export default function AdminBookingsPage() {
   };
 
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading bookings...</div></div>;
+  if (loading) return <div className={dashStyles.dashboardRoot}><div className="loading">Loading bookings...</div></div>;
 
   const filtered = bookings.filter(b => {
     const matchStatus = statusFilter === 'all' || b.status === statusFilter;
@@ -56,11 +57,14 @@ export default function AdminBookingsPage() {
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1>All Bookings</h1>
-        <p>{bookings.length} total bookings</p>
-      </div>
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace</p>
+          <h1 className={dashStyles.dashTitle}>All Bookings</h1>
+          <p className={dashStyles.dashLead}>{bookings.length} total bookings</p>
+        </div>
+      </header>
 
       <div className="admin-toolbar">
         <div className="filter-select-group">
@@ -74,9 +78,21 @@ export default function AdminBookingsPage() {
         </div>
       </div>
 
-      <div className="admin-content">
-        <div className="admin-bookings-table">
-          <div className="table-responsive"><table>
+      <section className={dashStyles.dashPanel} aria-label="Bookings">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <ClipboardList size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Bookings</h2>
+              <p className={dashStyles.dashPanelCopy}>Manage customer bookings and statuses.</p>
+            </div>
+          </div>
+        </div>
+        <div className="admin-content">
+          <div className="admin-bookings-table">
+            <div className="table-responsive"><table>
             <thead>
               <tr>
                 <th>ID</th>
@@ -131,6 +147,7 @@ export default function AdminBookingsPage() {
           </div>
         )}
       </div>
+      </section>
     </div>
   );
 }

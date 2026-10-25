@@ -10,6 +10,7 @@ import { BookOpen, Plus, Pencil, Trash2 } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
 
 import { isFile } from "@/features/pages/types";
 import type {  TravelTip, Tour  } from "@/features/pages/types";
@@ -139,14 +140,20 @@ export default function AdminTripsPage() {
   });
 
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading trips...</div></div>;
+  if (loading) return <div className={dashStyles.dashboardRoot}><div className="loading">Loading trips...</div></div>;
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1>Trips</h1>
-        <p>Manage trips ({trips.length} trips)</p>
-      </div>
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace</p>
+          <h1 className={dashStyles.dashTitle}>Trips</h1>
+          <p className={dashStyles.dashLead}>Manage trips ({trips.length} trips)</p>
+        </div>
+        <div className={dashStyles.dashActions}>
+          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}><Plus size={16} /> Add Trip</button>
+        </div>
+      </header>
 
       <div className="admin-toolbar">
         <div className="search-input-group">
@@ -162,7 +169,6 @@ export default function AdminTripsPage() {
             ))}
           </select>
         </div>
-        <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}><Plus size={16} /> Add Trip</button>
       </div>
 
       {showForm && (
@@ -196,9 +202,21 @@ export default function AdminTripsPage() {
         </div>
       )}
 
-      <div className="admin-content">
-        <div className="admin-bookings-table">
-          <div className="table-responsive"><table>
+      <section className={dashStyles.dashPanel} aria-label="Trips">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <BookOpen size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Trips</h2>
+              <p className={dashStyles.dashPanelCopy}>Manage travel tips and trip content.</p>
+            </div>
+          </div>
+        </div>
+        <div className="admin-content">
+          <div className="admin-bookings-table">
+            <div className="table-responsive"><table>
             <thead>
               <tr>
                 <th>ID</th>
@@ -231,6 +249,7 @@ export default function AdminTripsPage() {
           </table></div>
         </div>
       </div>
+      </section>
     </div>
   );
 }

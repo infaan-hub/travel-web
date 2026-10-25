@@ -11,6 +11,8 @@ import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
 
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
+
 import { isFile } from "@/features/pages/types";
 import type {  GalleryImage, Tour, TourTranslation  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
@@ -344,17 +346,23 @@ export default function AdminToursPage() {
   };
 
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading tours...</div></div>;
+  if (loading) return <div className={dashStyles.dashboardRoot}><div className="loading">Loading tours...</div></div>;
 
   const filtered = tours;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1>Manage Tours</h1>
-        <p>{tours.length} tours total</p>
-      </div>
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace</p>
+          <h1 className={dashStyles.dashTitle}>Manage Tours</h1>
+          <p className={dashStyles.dashLead}>{tours.length} tours total</p>
+        </div>
+        <div className={dashStyles.dashActions}>
+          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}><Plus size={16} /> Add Tour</button>
+        </div>
+      </header>
 
       <div className="admin-toolbar">
         <div className="search-input-group">
@@ -372,7 +380,6 @@ export default function AdminToursPage() {
             <option value="-duration">Longest duration</option>
           </select>
         </div>
-        <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}><Plus size={16} /> Add Tour</button>
       </div>
 
       {showForm && (
@@ -615,8 +622,20 @@ export default function AdminToursPage() {
         </div>
       )}
 
-      <div className="admin-content">
-        <div className="admin-bookings-table">
+      <section className={dashStyles.dashPanel} aria-label="Tours">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <Globe size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Tours</h2>
+              <p className={dashStyles.dashPanelCopy}>Manage the tour catalogue and pricing.</p>
+            </div>
+          </div>
+        </div>
+        <div className="admin-content">
+          <div className="admin-bookings-table">
           <div className="table-responsive"><table>
             <thead>
               <tr>
@@ -677,6 +696,7 @@ export default function AdminToursPage() {
           </div>
         </div>
       </div>
+      </section>
     </div>
   );
 }
