@@ -13,24 +13,69 @@ import {
   YAxis,
 } from "recharts";
 import type { CompanyDashboardData } from "@/lib/services/company-workspace";
-import styles from "@/features/pages/company-operations.module.css";
+import styles from "@/features/pages/company-dashboard.module.css";
 
-const STATUS_COLORS = ["#d89b39", "#4c9979", "#c96b65"];
-const TOUR_COLORS = ["#4c9979", "#8a9aa3"];
-const METRIC_COLORS = [
-  "#d89b39",
-  "#4c9979",
-  "#c96b65",
-  "#278bb6",
-  "#5a9b83",
-];
+const INK = "#4c5d76";
+const GRID = "rgba(8, 66, 140, 0.1)";
+const AXIS_LINE = "rgba(8, 66, 140, 0.18)";
+
+const STATUS_COLORS = ["#b8790a", "#0e7c5a", "#b23a34"];
+const TOUR_COLORS = ["#08428c", "#9fb0c4"];
+const METRIC_COLORS = ["#b8790a", "#0e7c5a", "#b23a34", "#08428c", "#3b8ad9"];
+
 const TOOLTIP = {
   contentStyle: {
     borderRadius: 12,
-    border: "1px solid #e5edf1",
-    background: "#fff",
+    border: "1px solid rgba(8, 66, 140, 0.14)",
+    background: "#ffffff",
+    boxShadow: "0 12px 28px rgba(8, 66, 140, 0.16)",
+    color: "#12223a",
+    fontSize: 12,
+    padding: "8px 10px",
   },
+  labelStyle: { color: INK, fontSize: 11, fontWeight: 700 },
+  itemStyle: { color: "#12223a" },
+  cursor: { fill: "rgba(8, 66, 140, 0.06)" },
 };
+
+const AXIS = {
+  tick: { fontSize: 11, fill: INK },
+  axisLine: { stroke: AXIS_LINE },
+  tickLine: false as const,
+};
+
+function DonutCenter({ value, label }: { value: number; label: string }) {
+  return (
+    <div className={styles.dashDonutCenter}>
+      <div>
+        <div className={styles.dashDonutValue}>{value}</div>
+        <div className={styles.dashDonutLabel}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function Legend({
+  items,
+  colors,
+}: {
+  items: { name: string; value: number }[];
+  colors: string[];
+}) {
+  return (
+    <div className={styles.dashLegend}>
+      {items.map((item, index) => (
+        <span className={styles.dashLegendItem} key={item.name}>
+          <span
+            className={styles.dashLegendSwatch}
+            style={{ background: colors[index] }}
+          />
+          {item.name}: {item.value}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default function CompanyDashboardCharts({
   stats,
@@ -63,8 +108,8 @@ export default function CompanyDashboardCharts({
     { metric: "Pending", value: stats.bookings_pending },
     { metric: "Confirmed", value: stats.bookings_confirmed },
     { metric: "Cancelled", value: stats.bookings_cancelled },
-    { metric: "Total bookings", value: stats.bookings_total },
-    { metric: "Upcoming travelers", value: stats.travelers_upcoming },
+    { metric: "Total", value: stats.bookings_total },
+    { metric: "Travelers", value: stats.travelers_upcoming },
   ];
   const tourMetrics = [
     { metric: "Published", value: stats.tours_published },
@@ -73,28 +118,28 @@ export default function CompanyDashboardCharts({
   ];
 
   return (
-    <section className={styles.dashboardAnalytics} aria-label="Company data charts">
-      <div className={styles.dashboardAnalyticsHead}>
-        <div>
-          <p className={styles.eyebrow}>At a glance</p>
-          <h2 className={styles.dashboardAnalyticsTitle}>
-            Dashboard statistics
-          </h2>
-          <p className={styles.panelCopy}>
+    <section className={styles.dashCharts} aria-label="Company data charts">
+      <div className={styles.dashSectionHead}>
+        <div className={styles.dashSectionText}>
+          <p className={styles.dashSectionKicker}>At a glance</p>
+          <h2 className={styles.dashSectionTitle}>Dashboard statistics</h2>
+          <p className={styles.dashSectionCopy}>
             Every company metric below is rendered as a live chart built from
             the current booking and tour data.
           </p>
         </div>
       </div>
 
-      <div className={styles.chartsGrid}>
-        <section className={`glass-card ${styles.chartCard}`}>
-          <h3 className={styles.chartTitle}>Booking status</h3>
+      <div className={styles.dashChartGrid}>
+        <section className={styles.dashChartCard}>
+          <div className={styles.dashChartCardHead}>
+            <h3 className={styles.dashChartTitle}>Booking status</h3>
+            <span className={styles.dashChartHint}>All time</span>
+          </div>
           {bookingStatus.some((item) => item.value > 0) ? (
             <>
               <div
-                className={styles.chartWrap}
-                style={{ position: "relative" }}
+                className={styles.dashChartWrap}
                 role="img"
                 aria-label="Company bookings by pending, confirmed, and cancelled status"
               >
@@ -107,6 +152,8 @@ export default function CompanyDashboardCharts({
                       innerRadius={58}
                       outerRadius={86}
                       paddingAngle={2}
+                      stroke="#ffffff"
+                      strokeWidth={2}
                     >
                       {bookingStatus.map((item, index) => (
                         <Cell
@@ -118,67 +165,29 @@ export default function CompanyDashboardCharts({
                     <Tooltip {...TOOLTIP} />
                   </PieChart>
                 </ResponsiveContainer>
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "grid",
-                    placeItems: "center",
-                    pointerEvents: "none",
-                    textAlign: "center",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        color: "var(--text-primary)",
-                        fontFamily: "var(--font-display)",
-                        fontSize: "1.5rem",
-                        fontWeight: 700,
-                        lineHeight: 1,
-                      }}
-                    >
-                      {stats.bookings_total}
-                    </div>
-                    <div
-                      style={{
-                        color: "var(--text-light)",
-                        fontSize: "0.72rem",
-                        fontWeight: 700,
-                        marginTop: 4,
-                      }}
-                    >
-                      Total bookings
-                    </div>
-                  </div>
-                </div>
+                <DonutCenter
+                  value={stats.bookings_total}
+                  label="Total bookings"
+                />
               </div>
-              <div className={styles.legend}>
-                {bookingStatus.map((item, index) => (
-                  <span className={styles.legendItem} key={item.name}>
-                    <span
-                      className={styles.legendSwatch}
-                      style={{ background: STATUS_COLORS[index] }}
-                    />
-                    {item.name}: {item.value}
-                  </span>
-                ))}
-              </div>
+              <Legend items={bookingStatus} colors={STATUS_COLORS} />
             </>
           ) : (
-            <div className={styles.chartEmpty}>
+            <div className={styles.dashChartEmpty}>
               Booking status appears here after the first booking.
             </div>
           )}
         </section>
 
-        <section className={`glass-card ${styles.chartCard}`}>
-          <h3 className={styles.chartTitle}>Tour publication</h3>
+        <section className={styles.dashChartCard}>
+          <div className={styles.dashChartCardHead}>
+            <h3 className={styles.dashChartTitle}>Tour publication</h3>
+            <span className={styles.dashChartHint}>Catalogue</span>
+          </div>
           {tourStatus.some((item) => item.value > 0) ? (
             <>
               <div
-                className={styles.chartWrap}
-                style={{ position: "relative" }}
+                className={styles.dashChartWrap}
                 role="img"
                 aria-label="Company tours by published and unpublished status"
               >
@@ -191,6 +200,8 @@ export default function CompanyDashboardCharts({
                       innerRadius={58}
                       outerRadius={86}
                       paddingAngle={2}
+                      stroke="#ffffff"
+                      strokeWidth={2}
                     >
                       {tourStatus.map((item, index) => (
                         <Cell key={item.name} fill={TOUR_COLORS[index]} />
@@ -199,64 +210,24 @@ export default function CompanyDashboardCharts({
                     <Tooltip {...TOOLTIP} />
                   </PieChart>
                 </ResponsiveContainer>
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "grid",
-                    placeItems: "center",
-                    pointerEvents: "none",
-                    textAlign: "center",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        color: "var(--text-primary)",
-                        fontFamily: "var(--font-display)",
-                        fontSize: "1.5rem",
-                        fontWeight: 700,
-                        lineHeight: 1,
-                      }}
-                    >
-                      {stats.tours_total}
-                    </div>
-                    <div
-                      style={{
-                        color: "var(--text-light)",
-                        fontSize: "0.72rem",
-                        fontWeight: 700,
-                        marginTop: 4,
-                      }}
-                    >
-                      Total tours
-                    </div>
-                  </div>
-                </div>
+                <DonutCenter value={stats.tours_total} label="Total tours" />
               </div>
-              <div className={styles.legend}>
-                {tourStatus.map((item, index) => (
-                  <span className={styles.legendItem} key={item.name}>
-                    <span
-                      className={styles.legendSwatch}
-                      style={{ background: TOUR_COLORS[index] }}
-                    />
-                    {item.name}: {item.value}
-                  </span>
-                ))}
-              </div>
+              <Legend items={tourStatus} colors={TOUR_COLORS} />
             </>
           ) : (
-            <div className={styles.chartEmpty}>
+            <div className={styles.dashChartEmpty}>
               Tour publication appears here after a tour is added.
             </div>
           )}
         </section>
 
-        <section className={`glass-card ${styles.chartCard}`}>
-          <h3 className={styles.chartTitle}>Booking metrics</h3>
+        <section className={styles.dashChartCard}>
+          <div className={styles.dashChartCardHead}>
+            <h3 className={styles.dashChartTitle}>Booking metrics</h3>
+            <span className={styles.dashChartHint}>Counts</span>
+          </div>
           <div
-            className={styles.chartWrap}
+            className={styles.dashChartWrap}
             role="img"
             aria-label="Bar chart of pending, confirmed, cancelled, total bookings and upcoming travelers"
           >
@@ -264,19 +235,19 @@ export default function CompanyDashboardCharts({
               <BarChart
                 data={bookingMetrics}
                 layout="vertical"
-                margin={{ top: 8, right: 12, bottom: 4, left: 92 }}
+                margin={{ top: 8, right: 16, bottom: 4, left: 8 }}
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#e9eff2"
+                  stroke={GRID}
                   horizontal={false}
                 />
-                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+                <XAxis type="number" allowDecimals={false} {...AXIS} />
                 <YAxis
                   type="category"
                   dataKey="metric"
-                  width={90}
-                  tick={{ fontSize: 11 }}
+                  width={78}
+                  {...AXIS}
                 />
                 <Tooltip {...TOOLTIP} />
                 <Bar dataKey="value" name="Count" radius={[0, 6, 6, 0]}>
@@ -292,10 +263,13 @@ export default function CompanyDashboardCharts({
           </div>
         </section>
 
-        <section className={`glass-card ${styles.chartCard}`}>
-          <h3 className={styles.chartTitle}>Tour metrics</h3>
+        <section className={styles.dashChartCard}>
+          <div className={styles.dashChartCardHead}>
+            <h3 className={styles.dashChartTitle}>Tour metrics</h3>
+            <span className={styles.dashChartHint}>Counts</span>
+          </div>
           <div
-            className={styles.chartWrap}
+            className={styles.dashChartWrap}
             role="img"
             aria-label="Bar chart of published, unpublished and total tours"
           >
@@ -303,19 +277,19 @@ export default function CompanyDashboardCharts({
               <BarChart
                 data={tourMetrics}
                 layout="vertical"
-                margin={{ top: 8, right: 12, bottom: 4, left: 92 }}
+                margin={{ top: 8, right: 16, bottom: 4, left: 8 }}
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#e9eff2"
+                  stroke={GRID}
                   horizontal={false}
                 />
-                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+                <XAxis type="number" allowDecimals={false} {...AXIS} />
                 <YAxis
                   type="category"
                   dataKey="metric"
-                  width={90}
-                  tick={{ fontSize: 11 }}
+                  width={78}
+                  {...AXIS}
                 />
                 <Tooltip {...TOOLTIP} />
                 <Bar dataKey="value" name="Count" radius={[0, 6, 6, 0]}>
@@ -331,46 +305,49 @@ export default function CompanyDashboardCharts({
           </div>
         </section>
 
-        <section
-          className={`glass-card ${styles.chartCard} ${styles.dashboardUpcomingChart}`}
-        >
-          <h3 className={styles.chartTitle}>Upcoming travel · next 30 days</h3>
+        <section className={`${styles.dashChartCard} ${styles.dashChartCardWide}`}>
+          <div className={styles.dashChartCardHead}>
+            <h3 className={styles.dashChartTitle}>
+              Upcoming travel · next 30 days
+            </h3>
+            <span className={styles.dashChartHint}>Schedule</span>
+          </div>
           {upcoming.length > 0 ? (
             <div
-              className={styles.chartWrap}
+              className={styles.dashChartWrap}
               role="img"
               aria-label="Upcoming company bookings and travelers by travel date"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={upcoming}
-                  margin={{ top: 8, right: 12, bottom: 4, left: 0 }}
+                  margin={{ top: 8, right: 16, bottom: 4, left: -18 }}
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="#e9eff2"
+                    stroke={GRID}
                     vertical={false}
                   />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="date" {...AXIS} />
+                  <YAxis allowDecimals={false} {...AXIS} />
                   <Tooltip {...TOOLTIP} />
                   <Bar
                     dataKey="bookings"
                     name="Bookings"
-                    fill="#278bb6"
+                    fill="#08428c"
                     radius={[5, 5, 0, 0]}
                   />
                   <Bar
                     dataKey="travelers"
                     name="Travelers"
-                    fill="#5a9b83"
+                    fill="#3b8ad9"
                     radius={[5, 5, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className={styles.chartEmpty}>
+            <div className={styles.dashChartEmpty}>
               No confirmed or pending travel is scheduled in the next 30 days.
             </div>
           )}

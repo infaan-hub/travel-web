@@ -1,0 +1,1413 @@
+/* ==========================================================================
+   /company/dashboard
+   Deep blue #08428C (primary) + warm white #FAF5EF (secondary).
+   Self-contained: nothing outside .dashboardRoot is affected.
+   ========================================================================== */
+
+.dashboardRoot {
+  /* palette ------------------------------------------------------------- */
+  --dash-primary: #08428c;
+  --dash-primary-hover: #0a52ad;
+  --dash-primary-deep: #063a78;
+  --dash-primary-soft: #e7eef9;
+  --dash-primary-soft-2: #d6e2f5;
+  --dash-secondary: #faf5ef;
+  --dash-surface: #ffffff;
+  --dash-surface-soft: #f7f2eb;
+  --dash-surface-sunken: #f0ebe3;
+  --dash-ink: #12223a;
+  --dash-ink-2: #4c5d76;
+  --dash-ink-3: #5c6a82;
+  --dash-line: rgba(8, 66, 140, 0.14);
+  --dash-line-soft: rgba(8, 66, 140, 0.08);
+  --dash-line-strong: rgba(8, 66, 140, 0.3);
+
+  --dash-ok: #0e7c5a;
+  --dash-ok-soft: #e4f4ee;
+  --dash-warn: #8a5a00;
+  --dash-warn-soft: #fbf0da;
+  --dash-danger: #b23a34;
+  --dash-danger-soft: #fae9e7;
+
+  --dash-radius-lg: 22px;
+  --dash-radius-md: 16px;
+  --dash-radius-sm: 12px;
+  --dash-shadow:
+    0 1px 2px rgba(18, 34, 58, 0.04),
+    0 14px 34px rgba(8, 66, 140, 0.07);
+  --dash-shadow-hover:
+    0 2px 6px rgba(18, 34, 58, 0.06),
+    0 20px 44px rgba(8, 66, 140, 0.13);
+
+  /* remap shared tokens so nested components follow this theme ---------- */
+  --text-primary: var(--dash-ink);
+  --text-secondary: var(--dash-ink-2);
+  --text-light: var(--dash-ink-3);
+  --line: var(--dash-line);
+  --glass-bg: var(--dash-surface);
+  --glass-bg-elevated: var(--dash-surface);
+  --glass-bg-soft: var(--dash-surface-soft);
+  --glass-border: var(--dash-line);
+  --glass-border-strong: var(--dash-line-strong);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: var(--dash-shadow);
+  --glass-shadow-elevated: var(--dash-shadow-hover);
+  --glass-blur-md: 0px;
+  --glass-radius: var(--dash-radius-lg);
+  --aqua-strong: var(--dash-primary);
+  --aqua-deep: var(--dash-primary-deep);
+  --aqua-subtle: var(--dash-primary-soft);
+  --brand: var(--dash-primary);
+  --brand-strong: var(--dash-primary-hover);
+  --brand-accent: var(--dash-primary);
+  --brand-soft: var(--dash-primary-soft);
+  --success-bg: var(--dash-ok-soft);
+  --success-text: var(--dash-ok);
+  --warning-bg: var(--dash-warn-soft);
+  --warning-text: var(--dash-warn);
+  --danger-bg: var(--dash-danger-soft);
+  --danger-text: var(--dash-danger);
+
+  /* shell --------------------------------------------------------------- */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0;
+  padding: clamp(20px, 2.6vw, 34px) clamp(16px, 2.6vw, 36px)
+    clamp(34px, 4vw, 56px);
+  background:
+    radial-gradient(900px 480px at 6% -12%, rgba(8, 66, 140, 0.12), transparent 62%),
+    radial-gradient(760px 460px at 102% -4%, rgba(8, 66, 140, 0.08), transparent 58%),
+    var(--dash-secondary);
+  color: var(--dash-ink);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  animation: dashRise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes dashRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* every direct child sits on the same 1440px content rail */
+.dashboardRoot > * {
+  width: 100%;
+  max-width: 1440px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+/* shared card sheen from the glass library, tuned for a white surface */
+.dashboardRoot :global(.glass-card)::before {
+  background: linear-gradient(160deg, rgba(8, 66, 140, 0.06), transparent 46%);
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Masthead
+   -------------------------------------------------------------------------- */
+.dashMasthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--dash-line);
+}
+
+.dashMastheadText {
+  min-width: 0;
+  max-width: 780px;
+}
+
+.dashEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  color: var(--dash-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.dashEyebrow::before {
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  content: "";
+}
+
+.dashTitle {
+  margin: 0;
+  color: var(--dash-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 3vw, 2.55rem);
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.dashLead {
+  max-width: 64ch;
+  margin: 10px 0 0;
+  color: var(--dash-ink-2);
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+
+.dashActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+/* --------------------------------------------------------------------------
+   Company identity hero + "next 30 days" aside
+   -------------------------------------------------------------------------- */
+.dashHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
+  gap: 22px;
+  align-items: stretch;
+  padding: clamp(18px, 2.2vw, 26px);
+  border: 1px solid var(--dash-line);
+  border-radius: var(--dash-radius-lg);
+  background: var(--dash-surface);
+  box-shadow: var(--dash-shadow);
+}
+
+.dashHeroMain {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.dashIdentity {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  min-width: 0;
+}
+
+.dashLogo {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--dash-line);
+  border-radius: 17px;
+  background: var(--dash-primary-soft);
+  color: var(--dash-primary);
+}
+
+.dashLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dashIdentityText {
+  min-width: 0;
+}
+
+.dashName {
+  margin: 0;
+  color: var(--dash-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.3vw, 1.85rem);
+  line-height: 1.14;
+  overflow-wrap: anywhere;
+}
+
+.dashSlug {
+  margin: 3px 0 0;
+  color: var(--dash-ink-3);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.dashIdentityPill {
+  margin-left: auto;
+}
+
+.dashCopy {
+  max-width: 66ch;
+  margin: 0;
+  color: var(--dash-ink-2);
+  font-size: 0.87rem;
+  line-height: 1.65;
+}
+
+.dashMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 10px;
+  border: 1px solid var(--dash-line);
+  border-radius: 999px;
+  background: var(--dash-surface-soft);
+  color: var(--dash-ink-2);
+  font-size: 0.73rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dashPillOk {
+  border-color: rgba(14, 124, 90, 0.28);
+  background: var(--dash-ok-soft);
+  color: var(--dash-ok);
+}
+
+.dashAside {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px;
+  overflow: hidden;
+  border-radius: var(--dash-radius-md);
+  background: linear-gradient(
+    165deg,
+    var(--dash-primary) 0%,
+    #0b57b8 52%,
+    var(--dash-primary-deep) 100%
+  );
+  box-shadow: 0 18px 38px rgba(8, 66, 140, 0.26);
+  color: #fff;
+}
+
+.dashAside::after {
+  position: absolute;
+  z-index: 0;
+  top: -70px;
+  right: -50px;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.22), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.dashAsideMain,
+.dashAsideCta {
+  position: relative;
+  z-index: 1;
+}
+
+.dashAsideMain {
+  min-width: 0;
+}
+
+.dashAsideLabel {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dashAsideValue {
+  margin: 6px 0 0;
+  color: #fff;
+  font-size: 1.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.dashAsideCopy {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.dashAsideCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+.dashAsideCta:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.26);
+  transform: translateY(-1px);
+}
+
+.dashAsideCta:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Panels
+   -------------------------------------------------------------------------- */
+.dashPanel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: clamp(16px, 1.8vw, 22px);
+  border: 1px solid var(--dash-line);
+  border-radius: var(--dash-radius-lg);
+  background: var(--dash-surface);
+  box-shadow: var(--dash-shadow);
+}
+
+.dashPanelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--dash-line-soft);
+}
+
+.dashPanelHeadMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  min-width: 0;
+}
+
+.dashPanelIcon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--dash-primary-soft);
+  color: var(--dash-primary);
+}
+
+.dashPanelTitle {
+  margin: 0;
+  color: var(--dash-ink);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  line-height: 1.3;
+}
+
+.dashPanelCopy {
+  margin: 4px 0 0;
+  color: var(--dash-ink-3);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.dashPanelLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 40px;
+  padding: 0 2px;
+  color: var(--dash-primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dashPanelLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dashPanelLink svg {
+  transition: transform 160ms ease;
+}
+
+.dashPanelLink:hover svg {
+  transform: translateX(3px);
+}
+
+/* --------------------------------------------------------------------------
+   Rows, badges, empty states
+   -------------------------------------------------------------------------- */
+.dashList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 11px 12px;
+  border-radius: 14px;
+  transition: background-color 150ms ease;
+}
+
+.dashRow:hover {
+  background: var(--dash-surface-soft);
+}
+
+.dashRowMain {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dashRowTitle {
+  color: var(--dash-ink);
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+a.dashRowTitle:hover {
+  color: var(--dash-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dashRowSub {
+  color: var(--dash-ink-3);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.dashRowEnd {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.dashRowMeta {
+  color: var(--dash-ink-2);
+  font-size: 0.74rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dashBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 2px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.dashBadgeOk {
+  border-color: rgba(14, 124, 90, 0.25);
+  background: var(--dash-ok-soft);
+  color: var(--dash-ok);
+}
+
+.dashBadgeWarn {
+  border-color: rgba(138, 90, 0, 0.24);
+  background: var(--dash-warn-soft);
+  color: var(--dash-warn);
+}
+
+.dashBadgeDanger {
+  border-color: rgba(178, 58, 52, 0.24);
+  background: var(--dash-danger-soft);
+  color: var(--dash-danger);
+}
+
+.dashBadgeInfo {
+  border-color: rgba(8, 66, 140, 0.22);
+  background: var(--dash-primary-soft);
+  color: var(--dash-primary);
+}
+
+.dashBadgeNeutral {
+  border-color: var(--dash-line);
+  background: var(--dash-surface-sunken);
+  color: var(--dash-ink-2);
+}
+
+.dashEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 26px 18px;
+  border: 1px dashed var(--dash-line-strong);
+  border-radius: var(--dash-radius-md);
+  background: var(--dash-surface-soft);
+  color: var(--dash-ink-3);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Upcoming travel date strip
+   -------------------------------------------------------------------------- */
+.dashDateStrip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(168px, 1fr);
+  gap: 10px;
+  margin: 0;
+  padding: 2px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  list-style: none;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+
+.dashDateChip {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid var(--dash-line);
+  border-radius: var(--dash-radius-md);
+  background: var(--dash-surface-soft);
+  scroll-snap-align: start;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.dashDateChip:hover {
+  border-color: var(--dash-line-strong);
+  box-shadow: var(--dash-shadow);
+  transform: translateY(-2px);
+}
+
+.dashDateChipTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dashDateChipDay {
+  color: var(--dash-primary);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dashDateChipDate {
+  color: var(--dash-ink);
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.dashDateChipMeta {
+  color: var(--dash-ink-3);
+  font-size: 0.74rem;
+}
+
+.dashDateChipBar {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--dash-surface-sunken);
+}
+
+.dashDateChipBar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--dash-primary), #3b8ad9);
+}
+
+/* --------------------------------------------------------------------------
+   Two column workspace grid
+   -------------------------------------------------------------------------- */
+.dashGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.dashStack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Notifications
+   -------------------------------------------------------------------------- */
+.dashNotifList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashNotif {
+  position: relative;
+  display: flex;
+  gap: 11px;
+  min-width: 0;
+  padding: 12px 13px 12px 15px;
+  overflow: hidden;
+  border: 1px solid var(--dash-line-soft);
+  border-radius: var(--dash-radius-md);
+  background: var(--dash-surface-soft);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.dashNotif::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: transparent;
+  content: "";
+}
+
+.dashNotifUnread {
+  border-color: rgba(8, 66, 140, 0.18);
+  background: var(--dash-primary-soft);
+}
+
+.dashNotifUnread::before {
+  background: var(--dash-primary);
+}
+
+.dashNotifDot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: #c7d0dc;
+}
+
+.dashNotifDotUnread {
+  background: var(--dash-primary);
+  box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.14);
+}
+
+.dashNotifBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.dashNotifTitle {
+  color: var(--dash-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+a.dashNotifBody:hover .dashNotifTitle {
+  color: var(--dash-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dashNotifCopy {
+  color: var(--dash-ink-2);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.dashNotifTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--dash-ink-3);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Recent activity timeline
+   -------------------------------------------------------------------------- */
+.dashTimeline {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashTimelineItem {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+.dashTimelineItem:last-child {
+  padding-bottom: 0;
+}
+
+.dashTimelineItem:not(:last-child)::before {
+  position: absolute;
+  top: 16px;
+  bottom: 0;
+  left: 5px;
+  width: 1px;
+  background: linear-gradient(var(--dash-line), transparent);
+  content: "";
+}
+
+.dashTimelineDot {
+  position: relative;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  flex: 0 0 11px;
+  margin-top: 5px;
+  border: 2px solid var(--dash-primary);
+  border-radius: 999px;
+  background: var(--dash-surface);
+}
+
+.dashTimelineBody {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashTimelineTitle {
+  margin: 0;
+  color: var(--dash-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.dashTimelineMeta {
+  margin: 3px 0 0;
+  color: var(--dash-ink-3);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+.dashTimelineDate {
+  flex: 0 0 auto;
+  padding-top: 1px;
+  color: var(--dash-ink-3);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Permissions
+   -------------------------------------------------------------------------- */
+.dashPermGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashPermChip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid var(--dash-line);
+  border-radius: 12px;
+  background: var(--dash-surface-soft);
+  color: var(--dash-ink-2);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.dashPermChip svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--dash-primary);
+}
+
+.dashPermMore {
+  margin: 10px 0 0;
+  color: var(--dash-ink-3);
+  font-size: 0.74rem;
+}
+
+/* --------------------------------------------------------------------------
+   Charts
+   -------------------------------------------------------------------------- */
+.dashCharts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.dashSectionHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.dashSectionText {
+  min-width: 0;
+  max-width: 720px;
+}
+
+.dashSectionKicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 7px;
+  color: var(--dash-primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.dashSectionKicker::before {
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  content: "";
+}
+
+.dashSectionTitle {
+  margin: 0;
+  color: var(--dash-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2vw, 1.65rem);
+  line-height: 1.14;
+}
+
+.dashSectionCopy {
+  max-width: 66ch;
+  margin: 8px 0 0;
+  color: var(--dash-ink-2);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.dashChartGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dashChartCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--dash-line);
+  border-radius: var(--dash-radius-lg);
+  background: var(--dash-surface);
+  box-shadow: var(--dash-shadow);
+}
+
+.dashChartCardWide {
+  grid-column: 1 / -1;
+}
+
+.dashChartCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.dashChartTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--dash-ink);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dashChartTitle::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--dash-primary);
+  content: "";
+}
+
+.dashChartHint {
+  padding: 3px 9px;
+  border: 1px solid var(--dash-line);
+  border-radius: 999px;
+  background: var(--dash-surface-soft);
+  color: var(--dash-ink-3);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dashChartWrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 250px;
+}
+
+.dashChartEmpty {
+  display: grid;
+  min-height: 250px;
+  place-items: center;
+  padding: 18px;
+  border: 1px dashed var(--dash-line);
+  border-radius: var(--dash-radius-md);
+  background: var(--dash-surface-soft);
+  color: var(--dash-ink-3);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.dashChartLoading {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--dash-line);
+  border-radius: var(--dash-radius-lg);
+  background: var(--dash-surface);
+  color: var(--dash-ink-3);
+  font-size: 0.82rem;
+}
+
+.dashDonutCenter {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.dashDonutValue {
+  color: var(--dash-ink);
+  font-size: 1.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.dashDonutLabel {
+  margin-top: 5px;
+  color: var(--dash-ink-3);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.dashLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--dash-line-soft);
+}
+
+.dashLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dash-ink-2);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.dashLegendSwatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   Global controls inside the dashboard
+   -------------------------------------------------------------------------- */
+.dashboardRoot :global(.btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.83rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.dashboardRoot :global(.btn-primary) {
+  border-color: var(--dash-primary);
+  background: var(--dash-primary);
+  box-shadow: 0 10px 20px rgba(8, 66, 140, 0.22);
+  color: #fff;
+}
+
+.dashboardRoot :global(.btn-primary):hover {
+  border-color: var(--dash-primary-hover);
+  background: var(--dash-primary-hover);
+  box-shadow: 0 14px 26px rgba(8, 66, 140, 0.28);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.dashboardRoot :global(.btn-outline) {
+  border-color: rgba(8, 66, 140, 0.5);
+  background: var(--dash-surface);
+  color: var(--dash-primary);
+}
+
+.dashboardRoot :global(.btn-outline):hover {
+  border-color: rgba(8, 66, 140, 0.45);
+  background: var(--dash-primary-soft) !important;
+  color: var(--dash-primary) !important;
+  transform: translateY(-1px);
+}
+
+.dashboardRoot :global(.btn-ghost) {
+  border-color: transparent;
+  background: transparent;
+  color: var(--dash-primary);
+}
+
+.dashboardRoot :global(.btn-ghost):hover {
+  background: var(--dash-primary-soft) !important;
+  color: var(--dash-primary);
+}
+
+.dashboardRoot :global(.btn-sm) {
+  min-height: 40px;
+  padding-inline: 13px;
+  font-size: 0.78rem;
+}
+
+.dashboardRoot a:focus-visible,
+.dashboardRoot button:focus-visible,
+.dashboardRoot select:focus-visible,
+.dashboardRoot [tabindex]:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.45);
+  outline-offset: 2px;
+}
+
+/* the switcher ships from another module — keep its focus ring on-theme */
+.dashboardRoot > form select:focus-visible,
+.dashboardRoot > form button:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.45);
+  outline-offset: 2px;
+}
+
+/* company switcher (rendered from another module, targeted by element) */
+.dashboardRoot > form {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--dash-line);
+  border-radius: var(--dash-radius-lg);
+  background: var(--dash-surface);
+  box-shadow: var(--dash-shadow);
+}
+
+.dashboardRoot > form > div {
+  display: flex;
+  flex: 1 1 260px;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dashboardRoot > form label {
+  color: var(--dash-ink-3);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dashboardRoot > form select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--dash-line-strong);
+  border-radius: 12px;
+  background: var(--dash-surface);
+  color: var(--dash-ink);
+  font: inherit;
+  font-size: 0.86rem;
+}
+
+.dashboardRoot > form button {
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid var(--dash-primary);
+  border-radius: 12px;
+  background: var(--dash-primary);
+  color: #fff;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.dashboardRoot > form button:hover {
+  background: var(--dash-primary-hover);
+}
+
+.dashboardRoot > form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .dashHero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashAside {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .dashAsideMain {
+    flex: 1 1 auto;
+  }
+
+  .dashAsideCta {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 980px) {
+  .dashChartGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashChartCardWide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashMasthead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashIdentityPill {
+    margin-left: 0;
+  }
+
+  .dashPermGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashDateStrip {
+    grid-auto-columns: minmax(168px, 46%);
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboardRoot {
+    gap: 15px;
+    padding: 16px 14px 34px;
+  }
+
+  .dashActions {
+    width: 100%;
+  }
+
+  .dashActions :global(.btn) {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .dashPanelLink {
+    min-height: 44px;
+  }
+
+  .dashRow {
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+
+  .dashRowEnd {
+    align-items: flex-start;
+  }
+
+  .dashRowMeta {
+    white-space: normal;
+  }
+
+  .dashDateStrip {
+    grid-auto-columns: minmax(158px, 72%);
+  }
+
+  .dashAside {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px;
+  }
+
+  .dashPermGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashChartCard {
+    padding: 15px;
+  }
+
+  .dashPanel {
+    padding: 15px;
+  }
+
+  .dashboardRoot > form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboardRoot > form > div,
+  .dashboardRoot > form button {
+    width: 100%;
+    flex-basis: auto;
+  }
+}
+
+@media (max-width: 400px) {
+  .dashLogo {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    border-radius: 14px;
+  }
+
+  .dashDonutValue {
+    font-size: 1.45rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboardRoot,
+  .dashboardRoot *,
+  .dashboardRoot *::before,
+  .dashboardRoot *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

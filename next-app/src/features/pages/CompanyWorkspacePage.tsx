@@ -4,7 +4,6 @@ import type { CompanyContext } from "@/lib/auth/company";
 import type { CompanySwitcherOption } from "@/components/CompanySwitcher";
 import CompanySwitcher from "@/components/CompanySwitcher";
 import CompanyDashboardCharts from "@/features/pages/CompanyDashboardChartsClient";
-import type { AppIcon } from "@/components/icons";
 import {
   Activity,
   ArrowRight,
@@ -13,14 +12,12 @@ import {
   CalendarDays,
   CheckCircle,
   ClipboardList,
-  Clock,
   Globe,
-  Hourglass,
   MapPin,
+  MessageSquare,
   Plus,
   Shield,
   Users,
-  XCircle,
 } from "@/components/icons";
 import {
   COMPANY_PERMISSION_LABELS,
@@ -28,7 +25,7 @@ import {
 } from "@/lib/company-access";
 import type { CompanyDashboardData } from "@/lib/services/company-workspace";
 import { publicImageUrl } from "@/lib/storage/images";
-import styles from "@/features/pages/company-operations.module.css";
+import styles from "@/features/pages/company-dashboard.module.css";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pending review",
@@ -80,14 +77,6 @@ type NotificationItem = {
   created_at: string | null;
 };
 
-type DashboardStatTone =
-  | "general"
-  | "pending"
-  | "confirmed"
-  | "cancelled"
-  | "published"
-  | "neutral";
-
 function formatDate(value: string | null | undefined, withYear = true) {
   if (!value) return "Not set";
   const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -101,24 +90,62 @@ function formatDate(value: string | null | undefined, withYear = true) {
   });
 }
 
+function formatWeekday(value: string) {
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const date = new Date(dateOnly ? `${value}T00:00:00.000Z` : value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" });
+}
+
 function formatPrice(value: number | null) {
   if (value === null || !Number.isFinite(value)) return "No price";
   return `$${Math.round(value).toLocaleString("en-US")}`;
 }
 
 function bookingBadgeClass(status: string) {
-  if (status === "confirmed") return `${styles.badge} ${styles.badgeConfirmed}`;
-  if (status === "cancelled") return `${styles.badge} ${styles.badgeCancelled}`;
-  return `${styles.badge} ${styles.badgePending}`;
+  if (status === "confirmed") return `${styles.dashBadge} ${styles.dashBadgeOk}`;
+  if (status === "cancelled") {
+    return `${styles.dashBadge} ${styles.dashBadgeDanger}`;
+  }
+  return `${styles.dashBadge} ${styles.dashBadgeWarn}`;
 }
 
 function tourBadgeClass(status: string) {
-  if (status === "PUBLISHED") return `${styles.badge} ${styles.badgePublished}`;
-  if (status === "PENDING_REVIEW") return `${styles.badge} ${styles.badgeReview}`;
-  if (status === "REJECTED" || status === "ARCHIVED") {
-    return `${styles.badge} ${styles.badgeArchived}`;
+  if (status === "PUBLISHED") return `${styles.dashBadge} ${styles.dashBadgeOk}`;
+  if (status === "PENDING_REVIEW") {
+    return `${styles.dashBadge} ${styles.dashBadgeInfo}`;
   }
-  return `${styles.badge} ${styles.badgeDraft}`;
+  if (status === "REJECTED" || status === "ARCHIVED") {
+    return `${styles.dashBadge} ${styles.dashBadgeDanger}`;
+  }
+  return `${styles.dashBadge} ${styles.dashBadgeNeutral}`;
+}
+
+function PanelHead({
+  icon,
+  title,
+  copy,
+  action,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  copy: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className={styles.dashPanelHead}>
+      <div className={styles.dashPanelHeadMain}>
+        <span className={styles.dashPanelIcon} aria-hidden="true">
+          {icon}
+        </span>
+        <div>
+          <h2 className={styles.dashPanelTitle}>{title}</h2>
+          <p className={styles.dashPanelCopy}>{copy}</p>
+        </div>
+      </div>
+      {action}
+    </div>
+  );
 }
 
 export default function CompanyWorkspacePage({
@@ -151,20 +178,24 @@ export default function CompanyWorkspacePage({
     (total, item) => total + item.travelers,
     0,
   );
+  const peakUpcoming = Math.max(
+    1,
+    ...data.upcoming.map((item) => Math.max(item.bookings, item.travelers)),
+  );
 
   return (
-    <div className={`page ${styles.dashboardRoot} ${styles.pageStack}`}>
-      <div className={styles.pageHead}>
-        <div className={styles.pageTitleWrap}>
-          <p className={styles.eyebrow}>Company workspace</p>
-          <h1 className={styles.pageTitle}>Operations overview</h1>
-          <p className={styles.pageLead}>
+    <div className={styles.dashboardRoot}>
+      <header className={styles.dashMasthead}>
+        <div className={styles.dashMastheadText}>
+          <p className={styles.dashEyebrow}>Company workspace</p>
+          <h1 className={styles.dashTitle}>Operations overview</h1>
+          <p className={styles.dashLead}>
             Keep bookings, tours and the operational profile for{" "}
             {context.company.name} in one place. Every number here is scoped to
             your active company.
           </p>
         </div>
-        <div className={styles.pageActions}>
+        <div className={styles.dashActions}>
           {can("tours:write") && (
             <Link className="btn btn-primary" href="/company/tours/create/">
               <Plus size={16} /> New tour
@@ -174,7 +205,7 @@ export default function CompanyWorkspacePage({
             <ClipboardList size={16} /> All bookings
           </Link>
         </div>
-      </div>
+      </header>
 
       {companies.length > 1 && (
         <CompanySwitcher
@@ -183,116 +214,164 @@ export default function CompanyWorkspacePage({
         />
       )}
 
-      <section className={`glass-card ${styles.hero}`}>
-        <div className={styles.heroMain}>
-          <div className={styles.logoRow}>
-            <span className={styles.shellLogo}>
+      <section className={styles.dashHero} aria-label="Company identity">
+        <div className={styles.dashHeroMain}>
+          <div className={styles.dashIdentity}>
+            <span className={styles.dashLogo}>
               {logoUrl ? (
-                <Image src={logoUrl} alt="" width={40} height={40} />
+                <Image src={logoUrl} alt="" width={58} height={58} />
               ) : (
-                <Building2 size={20} />
+                <Building2 size={24} />
               )}
             </span>
-            <div>
-              <h2 className={styles.heroTitle}>{context.company.name}</h2>
-              <p className={styles.detailSub}>@{context.company.slug}</p>
+            <div className={styles.dashIdentityText}>
+              <h2 className={styles.dashName}>{context.company.name}</h2>
+              <p className={styles.dashSlug}>@{context.company.slug}</p>
             </div>
-          </div>
-          <p className={styles.heroCopy}>
-            {context.company.description ||
-              "Your company profile is ready. Add a description from the company profile page so customers know what you offer."}
-          </p>
-          <div className={styles.metaRow}>
             <span
-              className={`${styles.pill} ${
-                context.company.status === "ACTIVE" ? styles.activePill : ""
-              }`}
+              className={`${styles.dashPill} ${styles.dashPillOk} ${styles.dashIdentityPill}`}
             >
               <Shield size={13} />
               {STATUS_LABELS[context.company.status] ?? context.company.status}
             </span>
-            <span className={styles.pill}>
+          </div>
+
+          <p className={styles.dashCopy}>
+            {context.company.description ||
+              "Your company profile is ready. Add a description from the company profile page so customers know what you offer."}
+          </p>
+
+          <ul className={styles.dashMetaRow}>
+            <li className={styles.dashPill}>
               <Building2 size={13} />
               {BUSINESS_LABELS[context.company.businessType] ??
                 context.company.businessType}
-            </span>
+            </li>
             {location && (
-              <span className={styles.pill}>
+              <li className={styles.dashPill}>
                 <MapPin size={13} /> {location}
-              </span>
+              </li>
             )}
-            <span className={styles.pill}>
+            <li className={styles.dashPill}>
               <Users size={13} /> {COMPANY_ROLE_LABELS[context.role]}
-            </span>
-          </div>
-          <div className={styles.quickActions} style={{ marginTop: 16 }}>
+            </li>
+          </ul>
+
+          <div className={styles.dashActions}>
             {can("profile:update") && (
               <Link className="btn btn-outline btn-sm" href="/company/profile/">
                 Edit company profile
               </Link>
             )}
             {can("analytics:read") && (
-              <Link
-                className="btn btn-ghost btn-sm"
-                href="/company/analytics/"
-              >
+              <Link className="btn btn-ghost btn-sm" href="/company/analytics/">
                 <BarChart3 size={15} /> View analytics
               </Link>
             )}
           </div>
         </div>
-        <aside className={styles.heroAside}>
-          <div>
-            <p className={styles.asideLabel}>Next 30 days</p>
-            <p className={styles.asideValue}>{upcomingBookings} bookings</p>
-            <p className={styles.asideCopy}>
+
+        <aside className={styles.dashAside}>
+          <div className={styles.dashAsideMain}>
+            <p className={styles.dashAsideLabel}>Next 30 days</p>
+            <p className={styles.dashAsideValue}>{upcomingBookings} bookings</p>
+            <p className={styles.dashAsideCopy}>
               {upcomingTravelers} travelers across upcoming travel dates.
             </p>
           </div>
-          <Link className="btn btn-outline btn-sm" href="/company/bookings/">
+          <Link className={styles.dashAsideCta} href="/company/bookings/">
             Review schedule <ArrowRight size={14} />
           </Link>
         </aside>
       </section>
 
+      <section className={styles.dashPanel}>
+        <PanelHead
+          icon={<CalendarDays size={17} />}
+          title="Upcoming travel dates"
+          copy="Confirmed and pending travel in the next 30 days."
+          action={
+            <Link className={styles.dashPanelLink} href="/company/bookings/">
+              Schedule <ArrowRight size={13} />
+            </Link>
+          }
+        />
+        {data.upcoming.length === 0 ? (
+          <p className={styles.dashEmpty}>
+            No upcoming travel dates in the next 30 days.
+          </p>
+        ) : (
+          <ul className={styles.dashDateStrip}>
+            {data.upcoming.map((item) => (
+              <li className={styles.dashDateChip} key={item.date}>
+                <div className={styles.dashDateChipTop}>
+                  <span className={styles.dashDateChipDay}>
+                    {formatWeekday(item.date)}
+                  </span>
+                  <span className={`${styles.dashBadge} ${styles.dashBadgeInfo}`}>
+                    {item.bookings} booking{item.bookings === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <span className={styles.dashDateChipDate}>
+                  {formatDate(item.date)}
+                </span>
+                <span className={styles.dashDateChipMeta}>
+                  {item.travelers} traveler{item.travelers === 1 ? "" : "s"}
+                </span>
+                <div className={styles.dashDateChipBar}>
+                  <span
+                    style={{
+                      width: `${Math.round(
+                        (Math.max(item.bookings, item.travelers) /
+                          peakUpcoming) *
+                          100,
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       <CompanyDashboardCharts stats={data.stats} upcoming={data.upcoming} />
 
-      <div className={styles.dashboardGrid}>
-        <div className={styles.detailStack}>
-          <section className={`glass-card ${styles.panel}`}>
-            <div className={styles.panelHead}>
-              <div>
-                <h2 className={styles.panelTitle}>Recent bookings</h2>
-                <p className={styles.panelCopy}>
-                  Latest operational activity from your booking queue.
-                </p>
-              </div>
-              <Link className={styles.panelLink} href="/company/bookings/">
-                View all <ArrowRight size={14} />
-              </Link>
-            </div>
+      <div className={styles.dashGrid}>
+        <div className={styles.dashStack}>
+          <section className={styles.dashPanel}>
+            <PanelHead
+              icon={<ClipboardList size={17} />}
+              title="Recent bookings"
+              copy="Latest operational activity from your booking queue."
+              action={
+                <Link className={styles.dashPanelLink} href="/company/bookings/">
+                  View all <ArrowRight size={13} />
+                </Link>
+              }
+            />
             {recentBookings.length === 0 ? (
-              <p className={styles.emptyInline}>No company bookings yet.</p>
+              <p className={styles.dashEmpty}>No company bookings yet.</p>
             ) : (
-              <ul className={styles.list}>
+              <ul className={styles.dashList}>
                 {recentBookings.map((booking) => (
-                  <li className={styles.listItem} key={booking.id}>
-                    <div className={styles.listMain}>
+                  <li className={styles.dashRow} key={booking.id}>
+                    <div className={styles.dashRowMain}>
                       <Link
-                        className={styles.listTitle}
+                        className={styles.dashRowTitle}
                         href={`/company/bookings/${booking.id}/`}
                       >
                         {booking.reference || `Booking ${booking.id}`}
                       </Link>
-                      <span className={styles.listSub}>
+                      <span className={styles.dashRowSub}>
                         {booking.full_name} · {booking.tour_title || "Tour"}
                       </span>
                     </div>
-                    <div>
+                    <div className={styles.dashRowEnd}>
                       <span className={bookingBadgeClass(booking.status)}>
-                        {booking.status}
+                        {booking.status.replace("_", " ")}
                       </span>
-                      <span className={styles.listSub}>
+                      <span className={styles.dashRowMeta}>
                         {formatDate(booking.travel_date)} ·{" "}
                         {formatPrice(booking.total_price)}
                       </span>
@@ -303,77 +382,39 @@ export default function CompanyWorkspacePage({
             )}
           </section>
 
-
-          <section className={`glass-card ${styles.panel}`}>
-            <div className={styles.panelHead}>
-              <div>
-                <h2 className={styles.panelTitle}>Upcoming travel dates</h2>
-                <p className={styles.panelCopy}>
-                  Confirmed and pending travel in the next 30 days.
-                </p>
-              </div>
-              <Link className={styles.panelLink} href="/company/bookings/">
-                Schedule <ArrowRight size={14} />
-              </Link>
-            </div>
-            {data.upcoming.length === 0 ? (
-              <p className={styles.emptyInline}>
-                No upcoming travel dates in the next 30 days.
+          <section className={styles.dashPanel}>
+            <PanelHead
+              icon={<Globe size={17} />}
+              title="Recent tours"
+              copy="Publication state and booking interest for your catalogue."
+              action={
+                <Link className={styles.dashPanelLink} href="/company/tours/">
+                  Manage tours <ArrowRight size={13} />
+                </Link>
+              }
+            />
+            {recentTours.length === 0 ? (
+              <p className={styles.dashEmpty}>
+                No tours have been created yet.
               </p>
             ) : (
-              <ul className={styles.list}>
-                {data.upcoming.map((item) => (
-                  <li className={styles.listItem} key={item.date}>
-                    <div className={styles.listMain}>
-                      <span className={styles.listTitle}>
-                        {formatDate(item.date)}
-                      </span>
-                      <span className={styles.listSub}>
-                        {item.bookings} booking
-                        {item.bookings === 1 ? "" : "s"} on this date
-                      </span>
-                    </div>
-                    <span className={styles.listMeta}>
-                      {item.travelers} travelers
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className={`glass-card ${styles.panel}`}>
-            <div className={styles.panelHead}>
-              <div>
-                <h2 className={styles.panelTitle}>Recent tours</h2>
-                <p className={styles.panelCopy}>
-                  Publication state and booking interest for your catalogue.
-                </p>
-              </div>
-              <Link className={styles.panelLink} href="/company/tours/">
-                Manage tours <ArrowRight size={14} />
-              </Link>
-            </div>
-            {recentTours.length === 0 ? (
-              <p className={styles.emptyInline}>No tours have been created yet.</p>
-            ) : (
-              <ul className={styles.list}>
+              <ul className={styles.dashList}>
                 {recentTours.map((tour) => (
-                  <li className={styles.listItem} key={tour.id}>
-                    <div className={styles.listMain}>
+                  <li className={styles.dashRow} key={tour.id}>
+                    <div className={styles.dashRowMain}>
                       <Link
-                        className={styles.listTitle}
+                        className={styles.dashRowTitle}
                         href={`/company/tours/${tour.id}/`}
                       >
                         {tour.title}
                       </Link>
-                      <span className={styles.listSub}>
+                      <span className={styles.dashRowSub}>
                         {tour.bookings_count ?? 0} bookings ·{" "}
                         {tour.available ? "Available" : "Not bookable"}
                       </span>
                     </div>
                     <span className={tourBadgeClass(tour.publication_status)}>
-                      {tour.publication_status.replace("_", " ")}
+                      {tour.publication_status.toLowerCase().replace("_", " ")}
                     </span>
                   </li>
                 ))}
@@ -382,129 +423,130 @@ export default function CompanyWorkspacePage({
           </section>
         </div>
 
-        <div className={styles.detailStack}>
-          <section className={`glass-card ${styles.panel}`}>
-            <div className={styles.panelHead}>
-              <div>
-                <h2 className={styles.panelTitle}>Notifications</h2>
-                <p className={styles.panelCopy}>
-                  Company-relevant updates only.
-                </p>
-              </div>
-            </div>
+        <div className={styles.dashStack}>
+          <section className={styles.dashPanel}>
+            <PanelHead
+              icon={<MessageSquare size={17} />}
+              title="Notifications"
+              copy="Company-relevant updates only."
+            />
             {notifications.length === 0 ? (
-              <p className={styles.emptyInline}>
+              <p className={styles.dashEmpty}>
                 No new company notifications.
               </p>
             ) : (
-              <div>
-                {notifications.map((notification) => (
-                  <div className={styles.notificationItem} key={notification.id}>
-                    <span
-                      className={`${styles.notificationDot} ${
-                        notification.read
-                          ? styles.notificationRead
-                          : styles.notificationUnread
+              <ul className={styles.dashNotifList}>
+                {notifications.map((notification) => {
+                  const unread = !notification.read;
+                  const body = (
+                    <>
+                      <span className={styles.dashNotifTitle}>
+                        {notification.title}
+                      </span>
+                      <span className={styles.dashNotifCopy}>
+                        {notification.body}
+                      </span>
+                      <span className={styles.dashNotifTime}>
+                        <CalendarDays size={11} />{" "}
+                        {formatDate(notification.created_at)}
+                      </span>
+                    </>
+                  );
+
+                  return (
+                    <li
+                      className={`${styles.dashNotif} ${
+                        unread ? styles.dashNotifUnread : ""
                       }`}
-                      role="img"
-                      aria-label={notification.read ? "Read" : "Unread"}
-                    />
-                    {notification.url ? (
-                      <Link
-                        className={styles.notificationBody}
-                        href={notification.url}
-                      >
-                        <span className={styles.notificationTitle}>
-                          {notification.title}
-                        </span>
-                        <span className={styles.notificationCopy}>
-                          {notification.body}
-                        </span>
-                        <span className={styles.notificationTime}>
-                          <Clock size={11} />{" "}
-                          {formatDate(notification.created_at)}
-                        </span>
-                      </Link>
-                    ) : (
-                      <div className={styles.notificationBody}>
-                        <span className={styles.notificationTitle}>
-                          {notification.title}
-                        </span>
-                        <span className={styles.notificationCopy}>
-                          {notification.body}
-                        </span>
-                        <span className={styles.notificationTime}>
-                          <Clock size={11} />{" "}
-                          {formatDate(notification.created_at)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                      key={notification.id}
+                    >
+                      <span
+                        className={`${styles.dashNotifDot} ${
+                          unread ? styles.dashNotifDotUnread : ""
+                        }`}
+                        role="img"
+                        aria-label={unread ? "Unread" : "Read"}
+                      />
+                      {notification.url ? (
+                        <Link
+                          className={styles.dashNotifBody}
+                          href={notification.url}
+                        >
+                          {body}
+                        </Link>
+                      ) : (
+                        <div className={styles.dashNotifBody}>{body}</div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </section>
 
-          <section className={`glass-card ${styles.panel}`}>
-            <div className={styles.panelHead}>
-              <div>
-                <h2 className={styles.panelTitle}>Recent activity</h2>
-                <p className={styles.panelCopy}>
-                  Audited changes made in this workspace.
-                </p>
-              </div>
-            </div>
+          <section className={styles.dashPanel}>
+            <PanelHead
+              icon={<Activity size={17} />}
+              title="Recent activity"
+              copy="Audited changes made in this workspace."
+            />
             {data.recent_activity.length === 0 ? (
-              <p className={styles.emptyInline}>No audited activity yet.</p>
+              <p className={styles.dashEmpty}>No audited activity yet.</p>
             ) : (
-              <ul className={styles.list}>
+              <ul className={styles.dashTimeline}>
                 {data.recent_activity.map((entry) => (
-                  <li className={styles.listItem} key={entry.id}>
-                    <div className={styles.listMain}>
-                      <span className={styles.listTitle}>
-                        {ACTIVITY_LABELS[entry.action] ??
-                          entry.action.replace(/[._]/g, " ")}
-                      </span>
-                      <span className={styles.listSub}>
-                        {entry.actor?.username
-                          ? `By ${entry.actor.username}`
-                          : "System"}{" "}
-                        · {entry.entity}
+                  <li className={styles.dashTimelineItem} key={entry.id}>
+                    <span className={styles.dashTimelineDot} aria-hidden="true" />
+                    <div className={styles.dashTimelineBody}>
+                      <div>
+                        <p className={styles.dashTimelineTitle}>
+                          {ACTIVITY_LABELS[entry.action] ??
+                            entry.action.replace(/[._]/g, " ")}
+                        </p>
+                        <p className={styles.dashTimelineMeta}>
+                          {entry.actor?.username
+                            ? `By ${entry.actor.username}`
+                            : "System"}{" "}
+                          · {entry.entity}
+                        </p>
+                      </div>
+                      <span className={styles.dashTimelineDate}>
+                        {formatDate(entry.created_at, false)}
                       </span>
                     </div>
-                    <span className={styles.listMeta}>
-                      {formatDate(entry.created_at, false)}
-                    </span>
                   </li>
                 ))}
               </ul>
             )}
           </section>
 
-          <section className={`glass-card ${styles.panel}`}>
-            <div className={styles.panelHead}>
-              <div>
-                <h2 className={styles.panelTitle}>What this role can do</h2>
-                <p className={styles.panelCopy}>
-                  {COMPANY_ROLE_LABELS[context.role]} role at this company.
-                </p>
-              </div>
-            </div>
+          <section className={styles.dashPanel}>
+            <PanelHead
+              icon={<Shield size={17} />}
+              title="What this role can do"
+              copy={`${COMPANY_ROLE_LABELS[context.role]} role at this company.`}
+            />
             {context.permissions.length === 0 ? (
-              <p className={styles.emptyInline}>
+              <p className={styles.dashEmpty}>
                 No permissions are assigned to this workspace role.
               </p>
             ) : (
-              <ul className={styles.list}>
-                {context.permissions.slice(0, 6).map((permission) => (
-                  <li className={styles.listItem} key={permission}>
-                    <span className={styles.listSub}>
+              <>
+                <ul className={styles.dashPermGrid}>
+                  {context.permissions.slice(0, 6).map((permission) => (
+                    <li className={styles.dashPermChip} key={permission}>
+                      <CheckCircle size={14} aria-hidden="true" />
                       {COMPANY_PERMISSION_LABELS[permission]}
-                    </span>
-                    <CheckCircle size={15} aria-hidden="true" />
-                  </li>
-                ))}
-              </ul>
+                    </li>
+                  ))}
+                </ul>
+                {context.permissions.length > 6 && (
+                  <p className={styles.dashPermMore}>
+                    +{context.permissions.length - 6} more permissions for this
+                    role
+                  </p>
+                )}
+              </>
             )}
           </section>
         </div>
