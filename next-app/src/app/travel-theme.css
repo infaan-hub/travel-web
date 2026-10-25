@@ -5219,3 +5219,14 @@ html body .app-layout .main-content .page
     gap: var(--grid-gap-mobile, 16px);
   }
 }
+/* Start with a place section: glassy transparent info panel + bold copy */
+.destinations-section .destination-info {
+  background: rgba(255, 255, 255, 0.32) !important;
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+}
+
+.destinations-section .destination-info h3,
+.destinations-section .destination-info p {
+  font-weight: 700;
+}
