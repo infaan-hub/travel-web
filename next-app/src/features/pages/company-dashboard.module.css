@@ -1,6 +1,6 @@
 /* ==========================================================================
    /company/dashboard
-   Deep blue #08428C (primary) + warm white #FAF5EF (secondary).
+   Deep blue #08428C (primary) + neutral #D3D3D3 (secondary).
    Self-contained: nothing outside .dashboardRoot is affected.
    ========================================================================== */
 
@@ -11,12 +11,12 @@
   --dash-primary-deep: #063a78;
   --dash-primary-soft: #e7eef9;
   --dash-primary-soft-2: #d6e2f5;
-  --dash-secondary: #faf5ef;
+  --dash-secondary: #d3d3d3;
   --dash-surface: #ffffff;
-  --dash-surface-soft: #f7f2eb;
-  --dash-surface-sunken: #f0ebe3;
+  --dash-surface-soft: #f2f2f2;
+  --dash-surface-sunken: #e6e6e6;
   --dash-ink: #12223a;
-  --dash-ink-2: #4c5d76;
+  --dash-ink-2: #44546c;
   --dash-ink-3: #5c6a82;
   --dash-line: rgba(8, 66, 140, 0.14);
   --dash-line-soft: rgba(8, 66, 140, 0.08);
