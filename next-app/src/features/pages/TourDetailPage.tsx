@@ -11,6 +11,7 @@ import { getImageUrl } from '@/lib/utils/image-url';
 import type {  Review, Tour, TourTranslation  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import { PageHero } from "@/components/PageHero";
+import styles from "@/features/pages/tour-detail-page.module.css";
 export default function TourDetailPage() {
   const { id } = useParams<Record<string, string>>();
   const router = useRouter();
@@ -93,8 +94,8 @@ export default function TourDetailPage() {
     }
   };
 
-  if (loading) return <div className="page"><div className="loading">Loading tour details...</div></div>;
-  if (!tour) return <div className="page"><div className="empty-state"><p>Tour not found</p></div></div>;
+  if (loading) return <div className={`page ${styles.tourDetailPageRoot}`}><div className={`loading ${styles.tourDetailLoading}`}>Loading tour details...</div></div>;
+  if (!tour) return <div className={`page ${styles.tourDetailPageRoot}`}><div className={`empty-state ${styles.tourDetailEmpty}`}><p>Tour not found</p></div></div>;
 
   const openLightbox = (index: number) => { setCurrentImageIndex(index); setShowLightbox(true); };
 
@@ -107,7 +108,7 @@ export default function TourDetailPage() {
   );
 
   return (
-    <div className="page tour-detail-page">
+    <div className={`page tour-detail-page ${styles.tourDetailPageRoot}`}>
       <PageHero
         title={displayTitle ?? "Tour details"}
         subtitle={`${tour?.duration ?? ""} - ${tour?.destination ?? ""} - from $${tour?.price ?? 0}`}

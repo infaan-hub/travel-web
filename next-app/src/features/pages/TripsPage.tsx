@@ -9,6 +9,7 @@ import { getImageUrl } from '@/lib/utils/image-url';
 import type {  Tour, TravelTip  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import { PageHero } from "@/components/PageHero";
+import styles from "@/features/pages/trips-page.module.css";
 export default function TripsPage() {
   const [trips, setTrips] = useState<TravelTip[]>([]);
   const [tours, setTours] = useState<Tour[]>([]);
@@ -137,7 +138,7 @@ export default function TripsPage() {
   const destConfirmed = destCoords !== null;
 
   return (
-    <div className="page trips-page">
+    <div className={`page trips-page ${styles.tripsPageRoot}`}>
       <PageHero
         title="Plan Your Route"
         subtitle="Estimate distances, plan the day and pick up the tips locals actually use."
@@ -233,9 +234,9 @@ export default function TripsPage() {
         </div>
 
         {loading ? (
-          <div className="loading">Loading tips...</div>
+          <div className={`loading ${styles.tripsLoading}`}>Loading tips...</div>
         ) : trips.length === 0 ? (
-          <div className="empty-state">
+          <div className={`empty-state ${styles.tripsEmpty}`}>
             <BookOpen size={32} />
             <p>No tips available yet. Check back soon!</p>
           </div>

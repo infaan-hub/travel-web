@@ -7,6 +7,7 @@ import { Building2, ClipboardList, CheckCircle } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 import { PageHero } from "@/components/PageHero";
+import styles from "@/features/pages/contact-page.module.css";
 import type { ChangeEvent, FormEvent } from "react";
 export default function ContactPage() {
   const toast = useToast();
@@ -27,7 +28,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="page contact-page">
+    <div className={`page contact-page ${styles.contactPageRoot}`}>
       <PageHero
         eyebrow="Travel. platform support"
         title="How can we help?"

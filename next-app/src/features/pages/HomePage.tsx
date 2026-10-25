@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
+import styles from "@/features/pages/home-page.module.css";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import DestinationCard from "@/components/DestinationCard";
 
@@ -93,7 +94,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="page home-page">
+    <div className={`page home-page ${styles.homePageRoot}`}>
       <BentoHero
         mainImage={homeSettings?.hero_image_url}
         secondImage={homeSettings?.hero_secondary_image_url || homeSettings?.zanzibar_image_url}

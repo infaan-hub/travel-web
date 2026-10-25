@@ -1,0 +1,20 @@
+.tripsPageRoot {
+  background: #FFFFFF;
+  color: #08428C;
+}
+
+.tripsLoading {
+  color: #08428C;
+  font-weight: 600;
+}
+
+.tripsEmpty {
+  background: #FFFFFF;
+  border: 1px dashed #08428C;
+  color: #08428C;
+  border-radius: 20px;
+}
+
+.tripsEmpty p {
+  color: #08428C;
+}
