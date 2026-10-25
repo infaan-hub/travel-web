@@ -118,7 +118,6 @@ export default function HomePage() {
             <div className="destination-info">
               <h3>Zanzibar</h3>
               <p>Pristine beaches, spice farms, and rich Swahili culture. Paradise on Earth.</p>
-              <span className="destination-link">Explore Zanzibar Tours <ArrowRight size={16} className="inline-icon" /></span>
             </div>
           </Link>
           <Link className="destination-card tanzania" href="/tours/tanzania/">
@@ -131,7 +130,6 @@ export default function HomePage() {
             <div className="destination-info">
               <h3>Tanzania Safaris</h3>
               <p>Serengeti, Kilimanjaro, Ngorongoro - Africa&apos;s greatest wildlife experiences with expert-guided tours and premium service.</p>
-              <span className="destination-link">Explore Tanzania Safaris <ArrowRight size={16} className="inline-icon" /></span>
             </div>
           </Link>
         </div>
