@@ -3914,7 +3914,7 @@ body {
 .dashboard-card, .workspace-card, .modal-content, .toast {background: rgba(255,255,255,.48) !important;border: 1px solid rgba(255,255,255,.72) !important;box-shadow: var(--glass-shadow) !important;backdrop-filter: var(--glass-blur) !important;-webkit-backdrop-filter: var(--glass-blur) !important;}
 
 .top-header.glass-header {
-  background: rgba(245,248,252,.60) !important;
+  background: #F2F0EF !important;
   border: 1px solid rgba(255,255,255,.76) !important;
   box-shadow: 0 8px 30px rgba(31,41,55,.07), inset 0 1px rgba(255,255,255,.85) !important;
 }
@@ -4682,7 +4682,7 @@ body {
 ::selection { color: #0F2A2E; background: rgba(82, 125, 100,.22); }
 
 .top-header.glass-header {
-  background: rgba(255,255,255,.82) !important;
+  background: #F2F0EF !important;
   border-color: rgba(255,255,255,.88) !important;
   box-shadow: 0 10px 30px rgba(15,55,55,.08), inset 0 1px rgba(255,255,255,.92) !important;
 }

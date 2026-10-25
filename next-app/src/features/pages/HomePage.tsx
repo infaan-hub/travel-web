@@ -289,7 +289,8 @@ export default function HomePage() {
                   { value: "Local", label: "Provider" },
                   { value: "Verified", label: "Company" },
                 ]}
-                onSeeMore={() => router.push(company.public_path)}
+                hideCta
+                boldText
               />
             ))}
           </div>

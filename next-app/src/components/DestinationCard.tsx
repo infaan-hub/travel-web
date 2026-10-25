@@ -16,6 +16,8 @@ export default function DestinationCard({
   description,
   stats,
   onSeeMore = () => {},
+  hideCta = false,
+  boldText = false,
 }: {
   image?: string;
   title?: string;
@@ -25,11 +27,13 @@ export default function DestinationCard({
   description?: string;
   stats?: Stat[];
   onSeeMore?: () => void;
+  hideCta?: boolean;
+  boldText?: boolean;
 }) {
   const [liked, setLiked] = useState(false);
 
   return (
-    <article className={`dc${stats ? " dc--company" : ""}`}>
+    <article className={`dc${stats ? " dc--company" : ""}${hideCta ? " dc--no-cta" : ""}${boldText ? " dc--bold-text" : ""}`}>
       <Image
         className="dc__img"
         src={image}
@@ -79,15 +83,17 @@ export default function DestinationCard({
         )}
       </div>
 
-      <button className="dc__cta" onClick={onSeeMore} type="button">
-        <span>See more</span>
-        <i className="dc__chev" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="#0a2a4a" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 6 15 12 9 18" />
-          </svg>
-        </i>
-      </button>
+      {!hideCta && (
+        <button className="dc__cta" onClick={onSeeMore} type="button">
+          <span>See more</span>
+          <i className="dc__chev" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="#0a2a4a" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 6 15 12 9 18" />
+            </svg>
+          </i>
+        </button>
+      )}
     </article>
   );
 }

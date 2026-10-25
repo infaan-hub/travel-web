@@ -169,6 +169,21 @@
 .dc__heart:focus-visible,
 .dc__cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
+.dc--no-cta .dc__info {
+  bottom: 14px;
+}
+
+.dc--bold-text .dc__title {
+  color: #fff;
+  font-weight: 700;
+}
+
+.dc--bold-text .dc__description {
+  color: #fff;
+  font-weight: 700;
+  opacity: 1;
+}
+
 @media (max-width: 360px) {
   .dc--company {
     min-height: 360px;
