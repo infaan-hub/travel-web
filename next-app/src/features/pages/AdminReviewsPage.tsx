@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { reviewsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Star, Trash2, Check, X, BarChart3 } from '@/components/icons';
+import { Star, Trash2, Check, X, BarChart3, ClipboardList } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
 
 import type {  Review  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
@@ -69,14 +70,17 @@ export default function AdminReviewsPage() {
   });
 
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading reviews...</div></div>;
+  if (loading) return <div className={dashStyles.dashboardRoot}><div className="loading">Loading reviews...</div></div>;
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1><Star size={20} /> Reviews Management</h1>
-        <p>{reviews.length} total reviews</p>
-      </div>
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace</p>
+          <h1 className={dashStyles.dashTitle}>Reviews Management</h1>
+          <p className={dashStyles.dashLead}>{reviews.length} total reviews</p>
+        </div>
+      </header>
 
       {stats && (
         <div className="admin-reviews-stats">
@@ -97,7 +101,19 @@ export default function AdminReviewsPage() {
         </select>
       </div>
 
-      <div className="admin-content">
+      <section className={dashStyles.dashPanel} aria-label="Reviews">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <Star size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Reviews</h2>
+              <p className={dashStyles.dashPanelCopy}>Moderate customer reviews and ratings.</p>
+            </div>
+          </div>
+        </div>
+        <div className="admin-content">
         <div className="admin-bookings-table">
           <div className="table-responsive"><table>
             <thead>
@@ -155,6 +171,7 @@ export default function AdminReviewsPage() {
           </table></div>
         </div>
       </div>
+      </section>
     </div>
   );
 }
