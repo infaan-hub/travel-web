@@ -152,81 +152,6 @@ export default function CompanyWorkspacePage({
     0,
   );
 
-  const stats: {
-    label: string;
-    value: number;
-    hint: string;
-    icon: AppIcon;
-    tone: DashboardStatTone;
-    highlighted?: boolean;
-  }[] = [
-    {
-      label: "Pending",
-      value: data.stats.bookings_pending,
-      hint: "Awaiting confirmation",
-      icon: Hourglass,
-      tone: "pending",
-      highlighted: true,
-    },
-    {
-      label: "Confirmed",
-      value: data.stats.bookings_confirmed,
-      hint: "Ready to operate",
-      icon: CheckCircle,
-      tone: "confirmed",
-    },
-    {
-      label: "Cancelled",
-      value: data.stats.bookings_cancelled,
-      hint: "Historical records kept",
-      icon: XCircle,
-      tone: "cancelled",
-    },
-    {
-      label: "Total bookings",
-      value: data.stats.bookings_total,
-      hint: "All company bookings",
-      icon: ClipboardList,
-      tone: "general",
-    },
-    {
-      label: "Upcoming travelers",
-      value: data.stats.travelers_upcoming,
-      hint: "Travel date today or later",
-      icon: Users,
-      tone: "general",
-    },
-    {
-      label: "Published tours",
-      value: data.stats.tours_published,
-      hint: "Visible on the public site",
-      icon: Globe,
-      tone: "published",
-    },
-    {
-      label: "Unpublished tours",
-      value: data.stats.tours_unpublished,
-      hint: "Draft, review or archived",
-      icon: BarChart3,
-      tone: "neutral",
-    },
-    {
-      label: "Total tours",
-      value: data.stats.tours_total,
-      hint: "Active company catalogue",
-      icon: CalendarDays,
-      tone: "general",
-    },
-  ];
-  const statToneClasses: Record<DashboardStatTone, string> = {
-    general: styles.statToneGeneral,
-    pending: styles.statTonePending,
-    confirmed: styles.statToneConfirmed,
-    cancelled: styles.statToneCancelled,
-    published: styles.statTonePublished,
-    neutral: styles.statToneNeutral,
-  };
-
   return (
     <div className={`page ${styles.dashboardRoot} ${styles.pageStack}`}>
       <div className={styles.pageHead}>
@@ -328,29 +253,6 @@ export default function CompanyWorkspacePage({
             Review schedule <ArrowRight size={14} />
           </Link>
         </aside>
-      </section>
-
-      <section className={styles.statsGrid} aria-label="Company metrics">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <article
-              className={`${styles.statCard} ${
-                stat.highlighted ? styles.statCardHot : ""
-              }`}
-              key={stat.label}
-            >
-              <div className={styles.statTop}>
-                <span className={`${styles.statIcon} ${statToneClasses[stat.tone]}`}>
-                  <Icon size={17} />
-                </span>
-              </div>
-              <span className={styles.statValue}>{stat.value}</span>
-              <span className={styles.statLabel}>{stat.label}</span>
-              <span className={styles.statHint}>{stat.hint}</span>
-            </article>
-          );
-        })}
       </section>
 
       <CompanyDashboardCharts stats={data.stats} upcoming={data.upcoming} />

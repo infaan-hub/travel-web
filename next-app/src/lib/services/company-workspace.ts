@@ -278,6 +278,7 @@ export async function getCompanyDashboard(companyId: number) {
     recentTours,
     recentActivity,
     notifications,
+    allTravelersAggregate,
   ] = await Promise.all([
     prisma.booking.groupBy({
       by: ["status"],
@@ -334,6 +335,13 @@ export async function getCompanyDashboard(companyId: number) {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
+    prisma.booking.aggregate({
+      where: {
+        companyId,
+        status: { not: "cancelled" },
+      },
+      _sum: { travelers: true },
+    }),
   ]);
 
   const bookingCounts = { pending: 0, confirmed: 0, cancelled: 0 };
@@ -374,6 +382,7 @@ export async function getCompanyDashboard(companyId: number) {
       bookings_confirmed: bookingCounts.confirmed,
       bookings_cancelled: bookingCounts.cancelled,
       travelers_upcoming: travelersAggregate._sum.travelers ?? 0,
+      travelers_total: allTravelersAggregate._sum.travelers ?? 0,
       tours_total: toursTotal,
       tours_published: toursPublished,
       tours_unpublished: toursTotal - toursPublished,
