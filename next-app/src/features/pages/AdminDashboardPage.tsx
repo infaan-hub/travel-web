@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
+import styles from "@/features/pages/admin-dashboard.module.css";
 
 import type {  Booking, Customer, DashboardStats  } from "@/features/pages/types";
 export default function AdminDashboardPage() {
@@ -47,7 +48,7 @@ export default function AdminDashboardPage() {
   if (loading) return <div className="page"><div className="loading">Loading admin dashboard...</div></div>;
 
   return (
-    <div className="page admin-page">
+    <div className={styles.dashboardRoot}>
       <div className="page-header">
         <h1>Dashboard</h1>
         <p>Welcome, {user?.username}! Manage your travel system</p>
