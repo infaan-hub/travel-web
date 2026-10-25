@@ -5324,4 +5324,11 @@ html body .app-layout .main-content .page
 .destinations-section .dc__description {
   color: #fff !important;
   font-weight: 700;
+/* Start with a place: keep previous card size */
+.destinations-section .dc {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+}
 }
