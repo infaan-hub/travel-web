@@ -392,9 +392,6 @@ export default function HomePage() {
               <span className={styles.matchEyebrow}>Trips posted by local companies</span>
               <h2>Your next trip begins with a good match.</h2>
             </div>
-            <button className="btn btn-primary btn-large" onClick={() => router.push('/companies/')}>
-              Meet the companies
-            </button>
           </div>
           {matchTrips.length > 0 ? (
             <>
@@ -455,13 +452,15 @@ export default function HomePage() {
                   if (offset < -matchTrips.length / 2) offset += matchTrips.length;
                   const distance = Math.abs(offset);
                   const scale = distance === 0 ? 1 : distance === 1 ? 0.82 : 0.62;
+                  const horizontalOffset = distance === 0 ? 0 : distance === 1 ? 0.8 : 1.35;
                   return (
                     <Link
                       key={`${trip.company_id}-${trip.id}`}
                       href={trip.company_public_path}
                       className={`${styles.matchCard} ${distance === 0 ? styles.matchCardActive : ''}`}
+                      data-distance={distance}
                       style={{
-                        transform: `translate(-50%, -50%) translateX(${offset * matchCardWidth * 0.8}px) scale(${scale})`,
+                        transform: `translate(-50%, -50%) translateX(${Math.sign(offset) * matchCardWidth * horizontalOffset}px) scale(${scale})`,
                         zIndex: 10 - distance,
                         opacity: distance > 2 ? 0 : distance === 2 ? 0.85 : 1,
                         pointerEvents: distance > 2 ? 'none' : 'auto',
@@ -469,6 +468,7 @@ export default function HomePage() {
                       tabIndex={distance === 0 ? 0 : -1}
                       aria-hidden={distance > 2}
                       aria-label={`${trip.title} in ${trip.place}, posted by ${trip.company_name}`}
+                      title={`${trip.title} — ${trip.company_name}`}
                       onClick={(event) => {
                         if (distance !== 0) {
                           event.preventDefault();
@@ -483,11 +483,6 @@ export default function HomePage() {
                         sizes="(max-width: 560px) 190px, 240px"
                         priority={distance === 0}
                       />
-                      <span className={styles.matchCardCopy}>
-                        <span>{trip.place}</span>
-                        <strong>{trip.title}</strong>
-                        <small>Posted by {trip.company_name}</small>
-                      </span>
                     </Link>
                   );
                 })}
