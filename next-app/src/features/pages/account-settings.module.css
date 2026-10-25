@@ -1,0 +1,1605 @@
+/* ==========================================================================
+   /settings
+   Neutral #D3D3D3 ground (primary) + deep blue #08428C accent (secondary).
+   Self-contained: nothing outside .settingsRoot is affected.
+   The #settings-workspace id on the page root lifts control overrides above
+   the legacy app-shell !important rules in travel-theme.css.
+   ========================================================================== */
+
+.settingsRoot {
+  /* palette ------------------------------------------------------------- */
+  --settings-primary: #d3d3d3;
+  --settings-secondary: #08428c;
+  --settings-accent: #08428c;
+  --settings-accent-hover: #0a52ad;
+  --settings-accent-deep: #063a78;
+  --settings-accent-soft: #e7eef9;
+  --settings-accent-soft-2: #d6e2f5;
+  --settings-surface: #ffffff;
+  --settings-surface-soft: #f2f2f2;
+  --settings-surface-sunken: #e6e6e6;
+  --settings-ink: #12223a;
+  --settings-ink-2: #44546c;
+  --settings-ink-3: #5c6a82;
+  --settings-line: rgba(8, 66, 140, 0.14);
+  --settings-line-soft: rgba(8, 66, 140, 0.08);
+  --settings-line-strong: rgba(8, 66, 140, 0.3);
+
+  --settings-ok: #0e7c5a;
+  --settings-ok-soft: #e4f4ee;
+  --settings-warn: #8a5a00;
+  --settings-warn-soft: #fbf0da;
+  --settings-danger: #b23a34;
+  --settings-danger-soft: #fae9e7;
+
+  --settings-radius-xl: 22px;
+  --settings-radius-lg: 18px;
+  --settings-radius-md: 14px;
+  --settings-radius-sm: 11px;
+  --settings-shadow:
+    0 1px 2px rgba(18, 34, 58, 0.04),
+    0 14px 34px rgba(8, 66, 140, 0.07);
+  --settings-shadow-hover:
+    0 2px 6px rgba(18, 34, 58, 0.06),
+    0 22px 48px rgba(8, 66, 140, 0.16);
+
+  /* remap shared tokens so nested content follows this theme ------------ */
+  --text-primary: var(--settings-ink);
+  --text-secondary: var(--settings-ink-2);
+  --text-light: var(--settings-ink-3);
+  --line: var(--settings-line);
+  --glass-bg: var(--settings-surface);
+  --glass-bg-elevated: var(--settings-surface);
+  --glass-bg-soft: var(--settings-surface-soft);
+  --glass-border: var(--settings-line);
+  --glass-border-strong: var(--settings-line-strong);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: var(--settings-shadow);
+  --glass-shadow-elevated: var(--settings-shadow-hover);
+  --glass-blur-md: 0px;
+  --glass-radius: var(--settings-radius-xl);
+  --aqua-strong: var(--settings-accent);
+  --aqua-deep: var(--settings-accent-deep);
+  --aqua-subtle: var(--settings-accent-soft);
+  --brand: var(--settings-accent);
+  --brand-strong: var(--settings-accent-hover);
+  --brand-accent: var(--settings-accent);
+  --brand-soft: var(--settings-accent-soft);
+  --success-bg: var(--settings-ok-soft);
+  --success-text: var(--settings-ok);
+  --warning-bg: var(--settings-warn-soft);
+  --warning-text: var(--settings-warn);
+  --danger-bg: var(--settings-danger-soft);
+  --danger-text: var(--settings-danger);
+
+  /* shell --------------------------------------------------------------- */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0;
+  padding: clamp(20px, 2.6vw, 34px) clamp(16px, 2.6vw, 36px)
+    clamp(34px, 4vw, 56px);
+  background:
+    radial-gradient(900px 480px at 6% -12%, rgba(8, 66, 140, 0.12), transparent 62%),
+    radial-gradient(760px 460px at 102% -4%, rgba(8, 66, 140, 0.08), transparent 58%),
+    var(--settings-primary);
+  color: var(--settings-ink);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  animation: settingsRise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.settingsRoot *,
+.settingsRoot *::before,
+.settingsRoot *::after {
+  box-sizing: border-box;
+}
+
+@keyframes settingsRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* every direct child sits on the same 1440px content rail */
+.settingsRoot > * {
+  width: 100%;
+  max-width: 1440px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.settingsSpin {
+  display: inline-grid;
+  place-items: center;
+  animation: settingsSpin 900ms linear infinite;
+}
+
+@keyframes settingsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Masthead
+   -------------------------------------------------------------------------- */
+.settingsMasthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--settings-line);
+}
+
+.settingsMastheadText {
+  min-width: 0;
+  max-width: 800px;
+}
+
+.settingsBreadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 12px;
+  color: var(--settings-ink-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.settingsBreadcrumb a {
+  color: var(--settings-accent);
+  text-decoration: none;
+}
+
+.settingsBreadcrumb a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.settingsBreadcrumbSep {
+  color: var(--settings-line-strong);
+}
+
+.settingsBreadcrumbCurrent {
+  color: var(--settings-ink-2);
+}
+
+.settingsEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  color: var(--settings-accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.settingsEyebrow::before {
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  content: "";
+}
+
+.settingsTitle {
+  margin: 0;
+  color: var(--settings-accent);
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 3vw, 2.55rem);
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.settingsLead {
+  max-width: 74ch;
+  margin: 10px 0 0;
+  color: var(--settings-ink-2);
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+
+.settingsActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.settingsPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 6px 13px;
+  border: 1px solid rgba(8, 66, 140, 0.22);
+  border-radius: 999px;
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.settingsPillDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--settings-accent);
+  box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.1);
+}
+
+:global(#settings-workspace) .settingsMastButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid rgba(8, 66, 140, 0.38);
+  border-radius: 12px;
+  background: var(--settings-surface);
+  box-shadow: var(--settings-shadow);
+  color: var(--settings-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+:global(#settings-workspace) .settingsMastButton:hover {
+  border-color: var(--settings-accent);
+  background: var(--settings-accent-soft);
+  box-shadow: none;
+  color: var(--settings-accent);
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   Notices
+   -------------------------------------------------------------------------- */
+.settingsNotice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid var(--settings-line);
+  border-radius: var(--settings-radius-md);
+  background: var(--settings-surface);
+  box-shadow: var(--settings-shadow);
+}
+
+.settingsNoticeSuccess {
+  border-color: rgba(14, 124, 90, 0.26);
+  background: var(--settings-ok-soft);
+  color: var(--settings-ok);
+}
+
+.settingsNoticeError {
+  border-color: rgba(178, 58, 52, 0.28);
+  background: var(--settings-danger-soft);
+  color: var(--settings-danger);
+}
+
+.settingsNoticeIcon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.settingsNoticeText {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.settingsNoticeClose {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.78;
+}
+
+.settingsNoticeClose:hover {
+  background: rgba(18, 34, 58, 0.08);
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Identity hero
+   -------------------------------------------------------------------------- */
+.settingsHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 350px);
+  gap: 22px;
+  align-items: stretch;
+  padding: clamp(18px, 2.2vw, 26px);
+  border: 1px solid var(--settings-line);
+  border-radius: var(--settings-radius-xl);
+  background: var(--settings-surface);
+  box-shadow: var(--settings-shadow);
+}
+
+.settingsHeroMain {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  min-width: 0;
+}
+
+.settingsIdentity {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(16px, 2vw, 24px);
+  min-width: 0;
+}
+
+.settingsAvatarWrap {
+  position: relative;
+  display: grid;
+  width: clamp(104px, 10vw, 128px);
+  height: clamp(104px, 10vw, 128px);
+  flex: 0 0 auto;
+  overflow: visible;
+  place-items: center;
+  border: 4px solid var(--settings-surface);
+  border-radius: 32px;
+  background:
+    radial-gradient(160px 120px at 28% 18%, rgba(255, 255, 255, 0.3), transparent 66%),
+    linear-gradient(145deg, var(--settings-accent) 0%, #0b57b8 52%, var(--settings-accent-deep) 100%);
+  box-shadow:
+    0 0 0 1px var(--settings-line),
+    0 16px 30px rgba(8, 66, 140, 0.18);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 2.9rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.settingsAvatarImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 27px;
+  object-fit: cover;
+}
+
+.settingsAvatarPlaceholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  border-radius: 27px;
+  line-height: 1;
+}
+
+.settingsRoot .settingsAvatarCamera,
+.settingsRoot .settingsAvatarRemove {
+  position: absolute;
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(8, 66, 140, 0.22);
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.settingsRoot .settingsAvatarCamera {
+  right: -8px;
+  bottom: -8px;
+  background: var(--settings-surface);
+  box-shadow: 0 8px 18px rgba(8, 66, 140, 0.2);
+  color: var(--settings-accent);
+}
+
+.settingsRoot .settingsAvatarCamera:hover {
+  background: var(--settings-accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.settingsRoot .settingsAvatarRemove {
+  top: -8px;
+  right: -8px;
+  border-color: rgba(178, 58, 52, 0.28);
+  background: var(--settings-surface);
+  box-shadow: 0 8px 18px rgba(18, 34, 58, 0.16);
+  color: var(--settings-danger);
+}
+
+.settingsRoot .settingsAvatarRemove:hover {
+  background: var(--settings-danger);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.settingsFileInput {
+  display: none;
+}
+
+.settingsIdentityText {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 3px;
+}
+
+.settingsTagRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+
+.settingsTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 25px;
+  padding: 3px 9px;
+  border: 1px solid var(--settings-line);
+  border-radius: 999px;
+  background: var(--settings-surface-soft);
+  color: var(--settings-ink-2);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.settingsTagAccent {
+  border-color: rgba(8, 66, 140, 0.22);
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+}
+
+.settingsHeroTitle {
+  margin: 0;
+  color: var(--settings-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.2vw, 1.8rem);
+  line-height: 1.14;
+  overflow-wrap: anywhere;
+}
+
+.settingsHeroMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 6px 0 0;
+  color: var(--settings-ink-3);
+  font-size: 0.78rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.settingsMetaDot {
+  width: 4px;
+  height: 4px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--settings-line-strong);
+}
+
+.settingsPhotoRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+:global(#settings-workspace) .settingsPhotoAction,
+:global(#settings-workspace) .settingsPhotoRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px !important;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+:global(#settings-workspace) .settingsPhotoAction {
+  border-color: rgba(8, 66, 140, 0.24);
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+}
+
+:global(#settings-workspace) .settingsPhotoAction:hover {
+  border-color: var(--settings-accent);
+  background: var(--settings-accent);
+  color: #fff;
+}
+
+:global(#settings-workspace) .settingsPhotoRemove {
+  color: var(--settings-danger);
+}
+
+:global(#settings-workspace) .settingsPhotoRemove:hover {
+  background: var(--settings-danger-soft);
+}
+
+.settingsPhotoHint {
+  color: var(--settings-ink-3);
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.settingsStatRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.settingsStat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--settings-line-soft);
+  border-radius: var(--settings-radius-md);
+  background: var(--settings-surface-soft);
+}
+
+.settingsStatLabel {
+  color: var(--settings-ink-3);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.settingsStatValue {
+  color: var(--settings-ink);
+  font-size: 1.22rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.settingsStatValueSmall {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.settingsStatUnit {
+  color: var(--settings-ink-3);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.settingsStatHint {
+  color: var(--settings-ink-3);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.settingsAside {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  overflow: hidden;
+  border-radius: var(--settings-radius-lg);
+  background: linear-gradient(
+    165deg,
+    var(--settings-accent) 0%,
+    #0b57b8 52%,
+    var(--settings-accent-deep) 100%
+  );
+  box-shadow: 0 18px 38px rgba(8, 66, 140, 0.26);
+  color: #fff;
+}
+
+.settingsAside::after {
+  position: absolute;
+  z-index: 0;
+  top: -74px;
+  right: -54px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.24), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.settingsAsideMain,
+.settingsAsideCta {
+  position: relative;
+  z-index: 1;
+}
+
+.settingsAsideMain {
+  min-width: 0;
+}
+
+.settingsAsideLabel {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.settingsAsideValue {
+  margin: 6px 0 0;
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1.04;
+}
+
+.settingsProgress {
+  position: relative;
+  width: 100%;
+  height: 7px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.settingsProgressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #fff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.36);
+  transition: width 260ms ease;
+}
+
+.settingsAsideCopy {
+  margin: 11px 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+:global(#settings-workspace) .settingsAsideCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.44);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  backdrop-filter: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+:global(#settings-workspace) .settingsAsideCta:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.26);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   Cards and layout
+   -------------------------------------------------------------------------- */
+.settingsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(310px, 0.75fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.settingsMain,
+.settingsRail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.settingsForm {
+  width: 100%;
+  min-width: 0;
+}
+
+.settingsSection {
+  min-width: 0;
+  padding: clamp(17px, 2vw, 22px);
+  border: 1px solid var(--settings-line);
+  border-radius: var(--settings-radius-xl);
+  background: var(--settings-surface);
+  box-shadow: var(--settings-shadow);
+  scroll-margin-top: 24px;
+}
+
+.settingsSectionHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 17px;
+}
+
+.settingsSectionIcon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+}
+
+.settingsSectionHeadText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.settingsSectionTitle {
+  margin: 0;
+  color: var(--settings-ink);
+  font-family: var(--font-display);
+  font-size: 1.16rem;
+  line-height: 1.24;
+}
+
+.settingsSectionCopy {
+  max-width: 58ch;
+  margin: 4px 0 0;
+  color: var(--settings-ink-2);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.settingsSectionBadge {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 4px 9px;
+  border: 1px solid rgba(14, 124, 90, 0.22);
+  border-radius: 999px;
+  background: var(--settings-ok-soft);
+  color: var(--settings-ok);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.settingsSectionBadgeDirty {
+  border-color: rgba(138, 90, 0, 0.26);
+  background: var(--settings-warn-soft);
+  color: var(--settings-warn);
+}
+
+/* --------------------------------------------------------------------------
+   Fields
+   -------------------------------------------------------------------------- */
+.settingsFieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.settingsField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.settingsFieldFull {
+  grid-column: 1 / -1;
+}
+
+.settingsFieldLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--settings-ink-2);
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.settingsFieldLabel svg {
+  flex: 0 0 auto;
+  color: var(--settings-accent);
+}
+
+:global(#settings-workspace) .settingsInput,
+:global(#settings-workspace) .settingsTextarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--settings-line-strong) !important;
+  border-radius: 11px;
+  background: var(--settings-surface) !important;
+  box-shadow: none !important;
+  color: var(--settings-ink) !important;
+  font: inherit;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+:global(#settings-workspace) .settingsInput::placeholder,
+:global(#settings-workspace) .settingsTextarea::placeholder {
+  color: var(--settings-ink-3) !important;
+  opacity: 1 !important;
+}
+
+:global(#settings-workspace) .settingsTextarea {
+  min-height: 112px;
+  padding: 12px;
+  resize: vertical;
+}
+
+:global(#settings-workspace) .settingsInput:hover:not(:disabled),
+:global(#settings-workspace) .settingsTextarea:hover:not(:disabled) {
+  border-color: rgba(8, 66, 140, 0.45) !important;
+  background: var(--settings-surface) !important;
+}
+
+:global(#settings-workspace) .settingsInput:focus,
+:global(#settings-workspace) .settingsTextarea:focus {
+  border-color: var(--settings-accent) !important;
+  outline: none;
+  background: var(--settings-surface) !important;
+  box-shadow: 0 0 0 3px rgba(8, 66, 140, 0.16) !important;
+}
+
+:global(#settings-workspace) .settingsInput:disabled,
+:global(#settings-workspace) .settingsTextarea:disabled {
+  opacity: 0.62;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+
+.settingsHint {
+  margin: 0;
+  color: var(--settings-ink-3);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+/* --------------------------------------------------------------------------
+   Form footer and buttons
+   -------------------------------------------------------------------------- */
+.settingsFormFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 17px;
+  border-top: 1px solid var(--settings-line-soft);
+}
+
+.settingsFormNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--settings-ink-3);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+.settingsFormNote svg {
+  flex: 0 0 auto;
+  color: var(--settings-accent);
+}
+
+.settingsFormActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+:global(#settings-workspace) .settingsButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+:global(#settings-workspace) .settingsButtonPrimary {
+  border: 1px solid var(--settings-accent);
+  background: var(--settings-accent);
+  box-shadow: 0 10px 20px rgba(8, 66, 140, 0.22);
+  color: #fff;
+}
+
+:global(#settings-workspace) .settingsButtonPrimary:hover:not(:disabled) {
+  border-color: var(--settings-accent-hover);
+  background: var(--settings-accent-hover);
+  box-shadow: 0 14px 26px rgba(8, 66, 140, 0.28);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+:global(#settings-workspace) .settingsButtonSecondary {
+  border: 1px solid rgba(8, 66, 140, 0.3);
+  background: var(--settings-surface);
+  box-shadow: none;
+  color: var(--settings-accent);
+}
+
+:global(#settings-workspace) .settingsButtonSecondary:hover:not(:disabled) {
+  border-color: var(--settings-accent);
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+  transform: translateY(-1px);
+}
+
+:global(#settings-workspace) .settingsButton:hover:not(:disabled) {
+  box-shadow: none;
+}
+
+:global(#settings-workspace) .settingsButton:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+:global(#settings-workspace) .settingsButtonFull {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Account record
+   -------------------------------------------------------------------------- */
+.settingsFactList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+
+.settingsFact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--settings-line-soft);
+}
+
+.settingsFact:first-child {
+  padding-top: 0;
+}
+
+.settingsFact:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.settingsFactLabel {
+  flex: 0 0 auto;
+  color: var(--settings-ink-3);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.settingsFactValue {
+  min-width: 0;
+  margin: 0;
+  color: var(--settings-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.settingsFactNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 10px 11px;
+  border: 1px solid var(--settings-line-soft);
+  border-radius: var(--settings-radius-sm);
+  background: var(--settings-surface-soft);
+  color: var(--settings-ink-2);
+  font-size: 0.71rem;
+  line-height: 1.55;
+}
+
+.settingsFactNote svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--settings-ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   Login and security
+   -------------------------------------------------------------------------- */
+.settingsSecurityForm {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.settingsSecurityFooter {
+  padding-top: 2px;
+}
+
+.settingsSecurityNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--settings-line-soft);
+  border-radius: var(--settings-radius-md);
+  background: var(--settings-surface-soft);
+}
+
+.settingsSecurityIcon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+}
+
+.settingsSecurityTitle {
+  margin: 1px 0 0;
+  color: var(--settings-ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.settingsSecurityCopy {
+  margin: 3px 0 0;
+  color: var(--settings-ink-2);
+  font-size: 0.73rem;
+  line-height: 1.5;
+}
+
+.settingsSecurityCopy a {
+  color: var(--settings-accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Workspace link
+   -------------------------------------------------------------------------- */
+:global(#settings-workspace) .settingsSupportLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(8, 66, 140, 0.26);
+  border-radius: 11px;
+  background: var(--settings-accent-soft);
+  color: var(--settings-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+:global(#settings-workspace) .settingsSupportLink:hover {
+  border-color: var(--settings-accent);
+  background: var(--settings-accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   Loading skeleton
+   -------------------------------------------------------------------------- */
+.settingsSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+}
+
+.settingsSkeletonHead {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--settings-line);
+}
+
+.settingsSkeletonLine {
+  height: 12px;
+  border-radius: 999px;
+  background: var(--settings-surface-sunken);
+}
+
+.settingsSkeletonBreadcrumb {
+  width: 180px;
+  height: 9px;
+}
+
+.settingsSkeletonTitle {
+  width: min(340px, 58%);
+  height: 34px;
+  border-radius: 8px;
+}
+
+.settingsSkeletonLead {
+  width: min(620px, 84%);
+  height: 11px;
+}
+
+.settingsSkeletonHero {
+  height: 340px;
+  border: 1px solid var(--settings-line);
+  border-radius: var(--settings-radius-xl);
+  background: var(--settings-surface);
+  box-shadow: var(--settings-shadow);
+}
+
+.settingsSkeletonLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(310px, 0.75fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.settingsSkeletonSection {
+  height: 430px;
+  border: 1px solid var(--settings-line);
+  border-radius: var(--settings-radius-xl);
+  background: var(--settings-surface);
+  box-shadow: var(--settings-shadow);
+}
+
+.settingsSkeletonSectionShort {
+  height: 330px;
+}
+
+.settingsSkeletonHero,
+.settingsSkeletonSection,
+.settingsSkeletonLine {
+  position: relative;
+  overflow: hidden;
+}
+
+.settingsSkeletonHero::after,
+.settingsSkeletonSection::after,
+.settingsSkeletonLine::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.72) 50%,
+    transparent 100%
+  );
+  content: "";
+  transform: translateX(-100%);
+  animation: settingsShimmer 1.35s ease-in-out infinite;
+}
+
+@keyframes settingsShimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Focus and legacy control overrides
+   -------------------------------------------------------------------------- */
+:global(#settings-workspace) a:focus-visible,
+:global(#settings-workspace) button:focus-visible,
+:global(#settings-workspace) input:focus-visible,
+:global(#settings-workspace) textarea:focus-visible,
+:global(#settings-workspace) [tabindex]:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.42);
+  outline-offset: 2px;
+}
+
+:global(#settings-workspace) .settingsInput:focus-visible,
+:global(#settings-workspace) .settingsTextarea:focus-visible {
+  outline: none;
+}
+
+:global(#settings-workspace) button,
+:global(#settings-workspace) a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settingsSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1160px) {
+  .settingsLayout,
+  .settingsSkeletonLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settingsRail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .settingsRail > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1060px) {
+  .settingsHero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settingsAside {
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .settingsAsideMain {
+    flex: 1 1 auto;
+    max-width: 620px;
+  }
+
+  .settingsAsideCta {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .settingsMasthead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .settingsAside {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 19px;
+  }
+
+  .settingsAsideCta {
+    align-self: flex-start;
+  }
+
+  .settingsRail {
+    display: flex;
+  }
+
+  .settingsRail > :last-child {
+    grid-column: auto;
+  }
+
+  .settingsIdentity {
+    gap: 17px;
+  }
+
+  .settingsSectionBadge {
+    display: none;
+  }
+
+  .settingsFormFooter {
+    align-items: stretch;
+  }
+
+  .settingsFormActions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .settingsFormActions .settingsButton {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .settingsRoot {
+    gap: 15px;
+    padding: 16px 14px 34px;
+  }
+
+  .settingsTitle {
+    font-size: clamp(1.65rem, 8vw, 2.15rem);
+  }
+
+  .settingsLead {
+    font-size: 0.86rem;
+  }
+
+  .settingsHero {
+    padding: 15px;
+  }
+
+  .settingsAvatarWrap {
+    width: 92px;
+    height: 92px;
+    border-radius: 25px;
+    font-size: 2rem;
+  }
+
+  .settingsAvatarImage,
+  .settingsAvatarPlaceholder {
+    border-radius: 20px;
+  }
+
+  .settingsIdentity {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .settingsIdentityText {
+    width: 100%;
+  }
+
+  .settingsStatRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .settingsStat {
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .settingsStatLabel {
+    flex: 1 0 auto;
+  }
+
+  .settingsStatValue {
+    font-size: 1.05rem;
+  }
+
+  .settingsStatHint {
+    flex-basis: 100%;
+  }
+
+  .settingsAsideValue {
+    font-size: 1.9rem;
+  }
+
+  .settingsFieldGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settingsSection {
+    padding: 15px;
+  }
+
+  .settingsSectionHead {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .settingsSectionIcon {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    border-radius: 12px;
+  }
+
+  .settingsSectionTitle {
+    font-size: 1.06rem;
+  }
+
+  .settingsFormActions {
+    flex-direction: column-reverse;
+  }
+
+  .settingsFormActions .settingsButton {
+    width: 100%;
+  }
+
+  .settingsNotice {
+    padding: 10px 11px;
+  }
+
+  .settingsSkeletonHero {
+    height: 440px;
+  }
+
+  .settingsSkeletonSection {
+    height: 360px;
+  }
+
+  .settingsSkeletonSectionShort {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settingsActions {
+    width: 100%;
+  }
+
+  .settingsMastButton {
+    flex: 1 1 auto;
+  }
+
+  .settingsPill {
+    min-height: 34px;
+  }
+
+  .settingsPhotoRow {
+    align-items: flex-start;
+  }
+
+  .settingsPhotoHint {
+    flex-basis: 100%;
+  }
+
+  .settingsAvatarWrap {
+    width: 84px;
+    height: 84px;
+    border-width: 3px;
+    border-radius: 23px;
+    font-size: 1.8rem;
+  }
+
+  .settingsAvatarImage,
+  .settingsAvatarPlaceholder {
+    border-radius: 17px;
+  }
+
+  .settingsRoot .settingsAvatarCamera,
+  .settingsRoot .settingsAvatarRemove {
+    width: 36px;
+    height: 36px;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  .settingsFact {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .settingsFactValue {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settingsRoot,
+  .settingsRoot *,
+  .settingsRoot *::before,
+  .settingsRoot *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
