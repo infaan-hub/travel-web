@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { homeSettingsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Save, Upload, Trash2, Eye, Image as ImageIcon } from '@/components/icons';
+import { Save, Upload, Trash2, Eye, Image as ImageIcon, ArrowLeft } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  HomeSettings  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import styles from "@/features/pages/admin-dashboard.module.css";
 export default function AdminHomeEditorPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -133,7 +134,7 @@ export default function AdminHomeEditorPage() {
   };
 
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading editor...</div></div>;
+  if (loading) return <div className={styles.dashboardRoot}><div className={styles.dashEmpty}>Loading editor...</div></div>;
 
   const previewUrl = (field: string) => {
     if (field === 'hero') return heroPreview || settings?.hero_image_url || null;
@@ -157,15 +158,43 @@ export default function AdminHomeEditorPage() {
   };
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1><Eye size={20} /> Home Editor</h1>
-        <p>Manage homepage content and images</p>
-      </div>
+    <div className={styles.dashboardRoot}>
+      <header className={styles.dashMasthead}>
+        <div className={styles.dashMastheadText}>
+          <p className={styles.dashEyebrow}>Admin workspace</p>
+          <h1 className={styles.dashTitle}><Eye size={20} /> Home Editor</h1>
+          <p className={styles.dashLead}>Manage homepage content and images.</p>
+        </div>
+        <div className={styles.dashActions}>
+          <button className="btn btn-outline" onClick={() => router.push('/admin/dashboard')}>
+            <ArrowLeft size={16} /> Back
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={saving || (!heroFile && !heroSecondaryFile && !heroFeatureFile && !heroThumbFile && !zanzibarFile && !tanzaniaFile && !moreExperiencesFiles.some(Boolean))}
+          >
+            <Save size={16} /> {saving ? 'Saving...' : 'Save All Changes'}
+          </button>
+        </div>
+      </header>
 
       {message && <div className="alert alert-success">{message}</div>}
 
-      <div className="home-editor-grid">
+      <section className={styles.dashPanel} aria-label="Homepage images">
+        <div className={styles.dashPanelHead}>
+          <div className={styles.dashPanelHeadMain}>
+            <span className={styles.dashPanelIcon} aria-hidden="true">
+              <ImageIcon size={17} />
+            </span>
+            <div>
+              <h2 className={styles.dashPanelTitle}>Homepage images</h2>
+              <p className={styles.dashPanelCopy}>Replace, upload or remove images used across the homepage.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="home-editor-grid">
         <div className="home-editor-card">
           <h3>Hero Main Photo</h3>
           <div className="editor-preview">
@@ -305,13 +334,8 @@ export default function AdminHomeEditorPage() {
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="home-editor-save">
-        <button className="btn btn-primary" onClick={handleSave} disabled={saving || (!heroFile && !zanzibarFile && !tanzaniaFile && !moreExperiencesFiles.some(Boolean))}>
-          <Save size={16} /> {saving ? 'Saving...' : 'Save All Changes'}
-        </button>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
