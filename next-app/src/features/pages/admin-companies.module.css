@@ -8,7 +8,7 @@
 .ownerAccountPanel {
   display: grid;
   gap: 14px;
-  border: 1px solid rgba(82, 125, 100, 0.24);
+  border: 1px solid rgba(8, 66, 140, 0.24);
 }
 
 .ownerAccountPanel h2 {
@@ -47,9 +47,9 @@
   min-width: 0;
   min-height: 42px;
   padding: 9px 11px;
-  border: 1px solid rgba(82, 125, 100, 0.28);
+  border: 1px solid rgba(8, 66, 140, 0.28);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(211, 211, 211, 0.86);
   color: var(--text-primary);
   font: inherit;
 }

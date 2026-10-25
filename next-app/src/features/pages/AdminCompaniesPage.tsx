@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { companiesAPI } from "@/lib/api/client";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -18,6 +18,7 @@ import { getImageUrl } from "@/lib/utils/image-url";
 import { useToast } from "@/components/ToastProvider";
 import type { Company, CompanyBusinessType, CompanyStatus } from "@/features/pages/types";
 import styles from "@/features/pages/admin-companies.module.css";
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
 
 const PAGE_SIZE = 10;
 
@@ -163,17 +164,9 @@ export default function AdminCompaniesPage() {
     }
   };
 
-  const cardMetrics = useMemo(
-    () => ({
-      active: companies.filter((company) => company.status === "ACTIVE").length,
-      public: companies.filter((company) => company.is_public).length,
-    }),
-    [companies],
-  );
-
   if (authLoading) {
     return (
-      <div className="page">
+      <div className={dashStyles.dashboardRoot}>
         <div className="loading">Checking access…</div>
       </div>
     );
@@ -182,25 +175,32 @@ export default function AdminCompaniesPage() {
   if (!isAuthenticated || !isAdmin) return null;
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1>
-          <Building2 size={20} /> Companies
-        </h1>
-        <p>
-          {total} {total === 1 ? "company" : "companies"}
-          {cardMetrics.active > 0 && ` · ${cardMetrics.active} active on this page`}
-          {cardMetrics.public > 0 && ` · ${cardMetrics.public} public on this page`}
-        </p>
-      </div>
-
-      <section className={`admin-content ${styles.ownerAccountPanel}`}>
-        <div>
-          <h2>Create Tour Company owner</h2>
-          <p>
-            Create login credentials for an owner. They submit their company
-            profile for review before it can appear to tourists.
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace</p>
+          <h1 className={dashStyles.dashTitle}>
+            <Building2 size={20} /> Companies
+          </h1>
+          <p className={dashStyles.dashCopy}>
+            {total} total compan{total === 1 ? "y" : "ies"} across the platform
           </p>
+        </div>
+      </header>
+
+      <section className={dashStyles.dashPanel} aria-label="Create Tour Company owner">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <Building2 size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Create Tour Company owner</h2>
+              <p className={dashStyles.dashPanelCopy}>
+                Create login credentials for an owner. They submit their company for review.
+              </p>
+            </div>
+          </div>
         </div>
         {ownerMessage ? <p role="status">{ownerMessage}</p> : null}
         {ownerError ? <p className={styles.ownerAccountError} role="alert">{ownerError}</p> : null}
@@ -319,7 +319,20 @@ export default function AdminCompaniesPage() {
         </div>
       )}
 
-      <div className="admin-content">
+      <section className={dashStyles.dashPanel} aria-label="Companies">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <Building2 size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Companies</h2>
+              <p className={dashStyles.dashPanelCopy}>
+                Manage tour company accounts, filters, and pagination.
+              </p>
+            </div>
+          </div>
+        </div>
         {loading ? (
           <div className="loading">Loading companies…</div>
         ) : error ? (
@@ -467,7 +480,7 @@ export default function AdminCompaniesPage() {
             </div>
           </>
         )}
-      </div>
+      </section>
     </div>
   );
 }
