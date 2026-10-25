@@ -1,16 +1,21 @@
 "use client";
 
-import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Globe, ClipboardList, Map, Users, Hourglass, CheckCircle, Palmtree, Compass } from '@/components/icons';
+import { Globe, ClipboardList, Users, CheckCircle, ArrowRight, Plus, Shield } from '@/components/icons';
 
 import { useToast } from "@/components/ToastProvider";
 import styles from "@/features/pages/admin-dashboard.module.css";
 
 import type {  Booking, Customer, DashboardStats  } from "@/features/pages/types";
+function bookingBadgeClass(status: string) {
+  if (status === 'confirmed') return `${styles.dashBadge} ${styles.dashBadgeOk}`;
+  if (status === 'cancelled') return `${styles.dashBadge} ${styles.dashBadgeDanger}`;
+  return `${styles.dashBadge} ${styles.dashBadgeWarn}`;
+}
+
 export default function AdminDashboardPage() {
   const toast = useToast();
   const { user, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
@@ -45,40 +50,202 @@ export default function AdminDashboardPage() {
   };
 
   if (!isAuthenticated || !isAdmin) return null;
-  if (loading) return <div className="page"><div className="loading">Loading admin dashboard...</div></div>;
+  if (loading) {
+    return (
+      <div className={styles.dashboardRoot}>
+        <div className={styles.dashEmpty}>Loading admin dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.dashboardRoot}>
-      <div className="page-header">
-        <h1>Dashboard</h1>
-        <p>Welcome, {user?.username}! Manage your travel system</p>
+      <header className={styles.dashMasthead}>
+        <div className={styles.dashMastheadText}>
+          <p className={styles.dashEyebrow}>Admin workspace</p>
+          <h1 className={styles.dashTitle}>Platform dashboard</h1>
+          <p className={styles.dashLead}>
+            Manage platform activity, users, companies, experiences, bookings, and attractions.
+          </p>
+        </div>
+        <div className={styles.dashActions}>
+          <button className="btn btn-primary" onClick={() => router.push('/admin/companies')}>
+            <Plus size={16} /> Manage Companies
+          </button>
+          <button className="btn btn-outline" onClick={() => router.push('/admin/tours')}>
+            Manage Experiences
+          </button>
+          <button className="btn btn-outline" onClick={() => router.push('/admin/users')}>
+            Manage Users
+          </button>
+        </div>
+      </header>
+
+      {stats && (
+        <section className={styles.dashHero} aria-label="Admin overview">
+          <div className={styles.dashHeroMain}>
+            <div className={styles.dashIdentity}>
+              <span className={styles.dashLogo}>
+                <Shield size={24} />
+              </span>
+              <div className={styles.dashIdentityText}>
+                <h2 className={styles.dashName}>{user?.username ?? 'Administrator'}</h2>
+                <p className={styles.dashSlug}>@admin</p>
+              </div>
+              <span className={`${styles.dashPill} ${styles.dashPillOk} ${styles.dashIdentityPill}`}>
+                <CheckCircle size={13} /> Admin access
+              </span>
+            </div>
+            <p className={styles.dashCopy}>
+              Monitor tours, bookings, users, and platform health from one place.
+            </p>
+            <ul className={styles.dashMetaRow}>
+              <li className={styles.dashPill}>
+                <Globe size={13} /> {stats.total_tours} tours
+              </li>
+              <li className={styles.dashPill}>
+                <Users size={13} /> {stats.total_users} users
+              </li>
+              <li className={styles.dashPill}>
+                <ClipboardList size={13} /> {stats.total_bookings} bookings
+              </li>
+            </ul>
+          </div>
+
+          <aside className={styles.dashAside}>
+            <div className={styles.dashAsideMain}>
+              <p className={styles.dashAsideLabel}>Pending bookings</p>
+              <p className={styles.dashAsideValue}>{stats.pending_bookings}</p>
+              <p className={styles.dashAsideCopy}>
+                Require confirmation or cancellation.
+              </p>
+            </div>
+            <button className={styles.dashAsideCta} onClick={() => setActiveTab('bookings')}>
+              Review queue <ArrowRight size={14} />
+            </button>
+          </aside>
+        </section>
+      )}
+
+      <div className={styles.dashActions}>
+        <button className={activeTab === 'overview' ? 'btn btn-primary' : 'btn btn-outline'} onClick={() => setActiveTab('overview')}>
+          Overview
+        </button>
+        <button className={activeTab === 'bookings' ? 'btn btn-primary' : 'btn btn-outline'} onClick={() => setActiveTab('bookings')}>
+          Bookings
+        </button>
+        <button className={activeTab === 'users' ? 'btn btn-primary' : 'btn btn-outline'} onClick={() => setActiveTab('users')}>
+          Users
+        </button>
       </div>
 
       {stats && (
-        <div className="dashboard-stats-grid">
-          <div className="dashboard-stat-card"><span className="stat-icon"><Globe size={24} /></span><span className="stat-value">{stats.total_tours}</span><span className="stat-label">Tours</span></div>
-          <div className="dashboard-stat-card"><span className="stat-icon"><ClipboardList size={24} /></span><span className="stat-value">{stats.total_bookings}</span><span className="stat-label">Bookings</span></div>
-          <div className="dashboard-stat-card"><span className="stat-icon"><Map size={24} /></span><span className="stat-value">{stats.total_attractions}</span><span className="stat-label">Attractions</span></div>
-          <div className="dashboard-stat-card"><span className="stat-icon"><Users size={24} /></span><span className="stat-value">{stats.total_users}</span><span className="stat-label">Users</span></div>
-          <div className="dashboard-stat-card pending"><span className="stat-icon"><Hourglass size={24} /></span><span className="stat-value">{stats.pending_bookings}</span><span className="stat-label">Pending</span></div>
-          <div className="dashboard-stat-card confirmed"><span className="stat-icon"><CheckCircle size={24} /></span><span className="stat-value">{stats.confirmed_bookings}</span><span className="stat-label">Confirmed</span></div>
-          <div className="dashboard-stat-card" style={{borderLeft: '4px solid #3498db'}}><span className="stat-icon"><Palmtree size={24} /></span><span className="stat-value">{stats.zanzibar_tours}</span><span className="stat-label">Zanzibar Tours</span></div>
-          <div className="dashboard-stat-card" style={{borderLeft: '4px solid #e67e22'}}><span className="stat-icon"><Compass size={24} /></span><span className="stat-value">{stats.tanzania_tours}</span><span className="stat-label">Tanzania Tours</span></div>
-        </div>
+        <section className={styles.dashPanel}>
+          <div className={styles.dashPanelHead}>
+            <div className={styles.dashPanelHeadMain}>
+              <span className={styles.dashPanelIcon} aria-hidden="true">
+                <Globe size={17} />
+              </span>
+              <div>
+                <h2 className={styles.dashPanelTitle}>Platform metrics</h2>
+                <p className={styles.dashPanelCopy}>Key counts across the travel system.</p>
+              </div>
+            </div>
+          </div>
+          <ul className={styles.dashList}>
+            <li className={styles.dashRow}>
+              <div className={styles.dashRowMain}>
+                <span className={styles.dashRowTitle}>Tours</span>
+                <span className={styles.dashRowSub}>Total experiences in the catalogue</span>
+              </div>
+              <div className={styles.dashRowEnd}>
+                <span className={styles.dashRowMeta}>{stats.total_tours}</span>
+              </div>
+            </li>
+            <li className={styles.dashRow}>
+              <div className={styles.dashRowMain}>
+                <span className={styles.dashRowTitle}>Bookings</span>
+                <span className={styles.dashRowSub}>All customer bookings</span>
+              </div>
+              <div className={styles.dashRowEnd}>
+                <span className={styles.dashRowMeta}>{stats.total_bookings}</span>
+              </div>
+            </li>
+            <li className={styles.dashRow}>
+              <div className={styles.dashRowMain}>
+                <span className={styles.dashRowTitle}>Attractions</span>
+                <span className={styles.dashRowSub}>Listed attractions</span>
+              </div>
+              <div className={styles.dashRowEnd}>
+                <span className={styles.dashRowMeta}>{stats.total_attractions}</span>
+              </div>
+            </li>
+            <li className={styles.dashRow}>
+              <div className={styles.dashRowMain}>
+                <span className={styles.dashRowTitle}>Users</span>
+                <span className={styles.dashRowSub}>Registered accounts</span>
+              </div>
+              <div className={styles.dashRowEnd}>
+                <span className={styles.dashRowMeta}>{stats.total_users}</span>
+              </div>
+            </li>
+            <li className={styles.dashRow}>
+              <div className={styles.dashRowMain}>
+                <span className={styles.dashRowTitle}>Pending</span>
+                <span className={styles.dashRowSub}>Bookings awaiting review</span>
+              </div>
+              <div className={styles.dashRowEnd}>
+                <span className={styles.dashRowMeta}>{stats.pending_bookings}</span>
+              </div>
+            </li>
+            <li className={styles.dashRow}>
+              <div className={styles.dashRowMain}>
+                <span className={styles.dashRowTitle}>Confirmed</span>
+                <span className={styles.dashRowSub}>Approved bookings</span>
+              </div>
+              <div className={styles.dashRowEnd}>
+                <span className={styles.dashRowMeta}>{stats.confirmed_bookings}</span>
+              </div>
+            </li>
+            <li className={styles.dashRow}>
+              <div className={styles.dashRowMain}>
+                <span className={styles.dashRowTitle}>Zanzibar Tours</span>
+                <span className={styles.dashRowSub}>Zanzibar experiences</span>
+              </div>
+              <div className={styles.dashRowEnd}>
+                <span className={styles.dashRowMeta}>{stats.zanzibar_tours}</span>
+              </div>
+            </li>
+            <li className={styles.dashRow}>
+              <div className={styles.dashRowMain}>
+                <span className={styles.dashRowTitle}>Tanzania Tours</span>
+                <span className={styles.dashRowSub}>Mainland experiences</span>
+              </div>
+              <div className={styles.dashRowEnd}>
+                <span className={styles.dashRowMeta}>{stats.tanzania_tours}</span>
+              </div>
+            </li>
+          </ul>
+        </section>
       )}
 
-      <div className="admin-tabs">
-        <button className={`admin-tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button>
-        <button className={`admin-tab ${activeTab === 'bookings' ? 'active' : ''}`} onClick={() => setActiveTab('bookings')}>Bookings</button>
-        <button className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>Users</button>
-      </div>
-
-      <div className="admin-content">
+      <>
         {activeTab === 'overview' && (
-          <div className="overview-welcome">
-            <h2>Welcome to Admin Panel</h2>
-            <p>Manage platform activity, users, companies, experiences, bookings, and attractions.</p>
-            <div className="overview-links">
+          <section className={styles.dashPanel}>
+            <div className={styles.dashPanelHead}>
+              <div className={styles.dashPanelHeadMain}>
+                <span className={styles.dashPanelIcon} aria-hidden="true">
+                  <Globe size={17} />
+                </span>
+                <div>
+                  <h2 className={styles.dashPanelTitle}>Welcome to Admin Panel</h2>
+                  <p className={styles.dashPanelCopy}>
+                    Manage platform activity, users, companies, experiences, bookings, and attractions.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className={styles.dashActions}>
               <button className="btn btn-outline" onClick={() => router.push('/admin/tours')}>
                 Manage Experiences
               </button>
@@ -89,92 +256,92 @@ export default function AdminDashboardPage() {
                 Manage Companies
               </button>
             </div>
-          </div>
+          </section>
         )}
 
         {activeTab === 'bookings' && (
-          <div className="admin-bookings">
-            <h2>All Bookings ({bookings.length})</h2>
-            {bookings.length === 0 ? (
-              <div className="empty-state"><p>No bookings found</p></div>
-            ) : (
-              <div className="admin-bookings-table">
-                <div className="table-responsive"><table>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Customer</th>
-                      <th>Tour</th>
-                      <th>Travelers</th>
-                      <th>Date</th>
-                      <th>Total</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bookings.map((b: Booking) => (
-                      <tr key={b.id}>
-                        <td>#{b.id}</td>
-                        <td>
-                          <strong>{b.full_name}</strong><br />
-                          <small>{b.email}<br />{b.phone}</small>
-                        </td>
-                        <td>{b.tour_title}</td>
-                        <td>{b.travelers}</td>
-                        <td>{new Date(b.travel_date).toLocaleDateString()}</td>
-                        <td>${b.total_price}</td>
-                        <td><span className={`booking-status status-${b.status}`}>{b.status}</span></td>
-                        <td>
-                          {b.status === 'pending' && (
-                            <div className="admin-actions">
-                              <button className="btn btn-sm btn-success" onClick={() => handleBookingStatus(b.id, 'confirmed')}>Confirm</button>
-                              <button className="btn btn-sm btn-danger" onClick={() => handleBookingStatus(b.id, 'cancelled')}>Cancel</button>
-                            </div>
-                          )}
-                          {b.status === 'confirmed' && (
-                            <button className="btn btn-sm btn-danger" onClick={() => handleBookingStatus(b.id, 'cancelled')}>Cancel</button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table></div>
+          <section className={styles.dashPanel}>
+            <div className={styles.dashPanelHead}>
+              <div className={styles.dashPanelHeadMain}>
+                <span className={styles.dashPanelIcon} aria-hidden="true">
+                  <ClipboardList size={17} />
+                </span>
+                <div>
+                  <h2 className={styles.dashPanelTitle}>All Bookings ({bookings.length})</h2>
+                  <p className={styles.dashPanelCopy}>Latest platform booking activity.</p>
+                </div>
               </div>
+            </div>
+            {bookings.length === 0 ? (
+              <p className={styles.dashEmpty}>No bookings found</p>
+            ) : (
+              <ul className={styles.dashList}>
+                {bookings.map((b: Booking) => (
+                  <li className={styles.dashRow} key={b.id}>
+                    <div className={styles.dashRowMain}>
+                      <span className={styles.dashRowTitle}>#{b.id} · {b.full_name}</span>
+                      <span className={styles.dashRowSub}>
+                        {b.tour_title || 'Tour'} · {b.travelers} travelers · {new Date(b.travel_date).toLocaleDateString()} · ${b.total_price}
+                      </span>
+                      <span className={styles.dashRowSub}>{b.email} · {b.phone}</span>
+                    </div>
+                    <div className={styles.dashRowEnd}>
+                      <span className={bookingBadgeClass(b.status)}>{b.status}</span>
+                      {b.status === 'pending' && (
+                        <div className={styles.dashActions}>
+                          <button className="btn btn-sm btn-success" onClick={() => handleBookingStatus(b.id, 'confirmed')}>Confirm</button>
+                          <button className="btn btn-sm btn-danger" onClick={() => handleBookingStatus(b.id, 'cancelled')}>Cancel</button>
+                        </div>
+                      )}
+                      {b.status === 'confirmed' && (
+                        <button className="btn btn-sm btn-danger" onClick={() => handleBookingStatus(b.id, 'cancelled')}>Cancel</button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
             )}
-          </div>
+          </section>
         )}
 
         {activeTab === 'users' && (
-          <div className="admin-users">
-            <h2>Registered Users ({users.length})</h2>
-            <div className="admin-bookings-table">
-              <div className="table-responsive"><table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Staff</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u: any) => (
-                    <tr key={u.id}>
-                      <td>#{u.id}</td>
-                      <td><strong>{u.username}</strong></td>
-                      <td>{u.email}</td>
-                      <td>{u.is_staff ? <span><CheckCircle size={14} /> Admin</span> : <span><Users size={14} /> Customer</span>}</td>
-                      <td><button type="button" onClick={() => router.push('/admin/users')} className="btn btn-sm btn-outline">Manage</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table></div>
+          <section className={styles.dashPanel}>
+            <div className={styles.dashPanelHead}>
+              <div className={styles.dashPanelHeadMain}>
+                <span className={styles.dashPanelIcon} aria-hidden="true">
+                  <Users size={17} />
+                </span>
+                <div>
+                  <h2 className={styles.dashPanelTitle}>Registered Users ({users.length})</h2>
+                  <p className={styles.dashPanelCopy}>Customer and admin accounts.</p>
+                </div>
+              </div>
             </div>
-          </div>
+            {users.length === 0 ? (
+              <p className={styles.dashEmpty}>No users found</p>
+            ) : (
+              <ul className={styles.dashList}>
+                {users.map((u: any) => (
+                  <li className={styles.dashRow} key={u.id}>
+                    <div className={styles.dashRowMain}>
+                      <span className={styles.dashRowTitle}>{u.username}</span>
+                      <span className={styles.dashRowSub}>{u.email}</span>
+                    </div>
+                    <div className={styles.dashRowEnd}>
+                      <span className={styles.dashPill}>
+                        {u.is_staff ? <><CheckCircle size={13} /> Admin</> : <><Users size={13} /> Customer</>}
+                      </span>
+                      <button type="button" onClick={() => router.push('/admin/users')} className="btn btn-sm btn-outline">
+                        Manage
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         )}
-      </div>
+      </>
     </div>
   );
 }
