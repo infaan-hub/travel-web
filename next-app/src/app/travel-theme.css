@@ -5235,18 +5235,26 @@ html body .app-layout .main-content .page
 .all-tours-section .dc__title,
 .all-tours-section .dc__title a,
 .all-tours-section .dc__loc,
-.all-tours-section .dc__description {
+.all-tours-section .dc__description,
+.all-tours-section .tour-company-link,
+.all-tours-section .tour-company-link span,
+.all-tours-section .dc__rating,
+.all-tours-section .dc__rating b,
+.all-tours-section .dc__rating span,
+.all-tours-section .dc__cta {
   color: #fff;
   font-weight: 700;
 }
 
-.all-tours-section .dc__heart {
-  color: #fff;
-}
-
+.all-tours-section .dc__heart,
 .all-tours-section .dc__heart svg {
+  color: #fff;
   stroke: #fff;
   fill: none;
+}
+
+.all-tours-section .dc__heart svg path {
+  stroke: #fff;
 }
 /* Start with a place: redesign cards to match Meet the providers cards */
 .destinations-section .destination-card {
@@ -5302,12 +5310,12 @@ html body .app-layout .main-content .page
 
 .destinations-section .destination-info p {
   display: block !important;
+}
 .destinations-section .destination-info h3,
 .destinations-section .destination-info p,
 .destinations-section .destination-link {
   color: #fff !important;
   font-weight: 700;
-}
 }
 /* Start with a place: use DestinationCard with glassy text panel */
 .destinations-section .dc__info {
@@ -5324,11 +5332,11 @@ html body .app-layout .main-content .page
 .destinations-section .dc__description {
   color: #fff !important;
   font-weight: 700;
+}
 /* Start with a place: keep previous card size */
 .destinations-section .dc {
   width: 100%;
   height: auto;
   min-height: 0;
   aspect-ratio: 4 / 3;
-}
 }
