@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Settings, Save, User, Mail, Camera, Trash2 } from '@/components/icons';
 
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
 export default function AdminSettingsPage() {
   const { isAuthenticated, isAdmin, user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
@@ -104,13 +105,28 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1>Settings</h1>
-        <p>Manage your account settings</p>
-      </div>
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace</p>
+          <h1 className={dashStyles.dashTitle}>Settings</h1>
+          <p className={dashStyles.dashLead}>Manage your account settings</p>
+        </div>
+      </header>
 
-      <div className="admin-content" style={{ maxWidth: 600, margin: '0 auto' }}>
+      <section className={dashStyles.dashPanel} aria-label="Settings">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <Settings size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Account Settings</h2>
+              <p className={dashStyles.dashPanelCopy}>Update your profile and credentials.</p>
+            </div>
+          </div>
+        </div>
+        <div className="admin-content" style={{ maxWidth: 600, margin: '0 auto' }}>
         {message && <div className={`alert ${message.includes('successfully') || message.includes('removed') ? 'alert-success' : 'alert-error'}`}>{message}</div>}
 
         <div className="profile-image-section" style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -170,6 +186,7 @@ export default function AdminSettingsPage() {
           </div>
         </form>
       </div>
+      </section>
     </div>
   );
 }
