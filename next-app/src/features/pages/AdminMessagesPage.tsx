@@ -7,6 +7,7 @@ import { contactAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { MessageSquare, Mail, Phone, User, Trash2, Eye, EyeOff } from '@/components/icons';
 import { useToast } from "@/components/ToastProvider";
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
 
 import type {  ContactMessage  } from "@/features/pages/types";
 export default function AdminMessagesPage() {
@@ -66,13 +67,28 @@ export default function AdminMessagesPage() {
   if (!isAuthenticated || !isAdmin) return null;
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1><MessageSquare size={24} /> Messages</h1>
-        <p>{unread > 0 ? `${unread} unread messages` : 'All messages read'}</p>
-      </div>
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace</p>
+          <h1 className={dashStyles.dashTitle}>Messages</h1>
+          <p className={dashStyles.dashLead}>{unread > 0 ? `${unread} unread messages` : 'All messages read'}</p>
+        </div>
+      </header>
 
-      <div className="admin-content">
+      <section className={dashStyles.dashPanel} aria-label="Messages">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
+              <MessageSquare size={17} />
+            </span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Messages</h2>
+              <p className={dashStyles.dashPanelCopy}>Review and manage contact messages.</p>
+            </div>
+          </div>
+        </div>
+        <div className="admin-content">
         {error && <div className="alert alert-error" role="alert">{error}</div>}
         {loading ? (
           <p>Loading messages...</p>
@@ -118,6 +134,7 @@ export default function AdminMessagesPage() {
           </div>
         )}
       </div>
+      </section>
     </div>
   );
 }
