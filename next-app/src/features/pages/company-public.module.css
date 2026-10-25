@@ -2,8 +2,8 @@
   max-width: var(--content-max-width);
   margin-inline: auto;
   padding: var(--page-padding-desktop);
-  background: #FFFFFF;
-  color: #08428C;
+  background: #08428C;
+  color: #FFFFFF;
 }
 
 @media (max-width: 1024px) {
@@ -155,7 +155,7 @@
   display: grid;
   place-items: center;
   gap: 10px;
-  color: #08428C;
+  color: #FFFFFF;
   font-weight: 600;
 }
 
