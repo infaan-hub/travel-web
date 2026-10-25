@@ -1,16 +1,16 @@
 .tourDetailPageRoot {
-  background: #08428C;
-  color: #FFFFFF;
+  background: #F0E5DA;
+  color: #08428C;
 }
 
 .tourDetailLoading {
-  color: #FFFFFF;
+  color: #08428C;
   font-weight: 600;
 }
 
 .tourDetailEmpty {
-  background: #08428C;
-  border: 1px dashed #FFFFFF;
-  color: #FFFFFF;
+  background: #F0E5DA;
+  border: 1px dashed #08428C;
+  color: #08428C;
   border-radius: 20px;
 }
