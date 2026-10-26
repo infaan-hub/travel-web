@@ -318,7 +318,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {!loading && allTours.length === 0 && !tourLoadError && (
+      {!loading && (allTours.length === 0 || homeSettings?.more_experiences_image_urls?.some((image) => Boolean(image))) && (
         <MoreExperiencesEmptyState
           imageUrls={homeSettings?.more_experiences_image_urls?.slice(0, 5).map((image) => image ? getImageUrl(image) : null)}
         />
