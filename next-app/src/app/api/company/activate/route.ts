@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   const companyId = Number(request.nextUrl.searchParams.get("company_id"));
   if (!Number.isInteger(companyId) || companyId <= 0) {
-    return NextResponse.redirect(new URL("/dashboard/", request.url));
+    return NextResponse.redirect(new URL("/tour-company/dashboard/", request.url));
   }
 
   const membership = await prisma.companyMembership.findFirst({
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   });
 
   if (!membership) {
-    return NextResponse.redirect(new URL("/dashboard/", request.url));
+    return NextResponse.redirect(new URL("/tour-company/dashboard/", request.url));
   }
 
   const companyStatus = membership.company.status;
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     (companyStatus === "PENDING" && membership.role === "OWNER");
 
   if (!allowed) {
-    return NextResponse.redirect(new URL("/dashboard/", request.url));
+    return NextResponse.redirect(new URL("/tour-company/dashboard/", request.url));
   }
 
   await setActiveCompanyCookie(companyId);

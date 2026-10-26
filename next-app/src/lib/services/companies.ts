@@ -924,7 +924,7 @@ async function revokeCompanyMembership(companyId, membershipId, actor) {
         userId: revoked.userId,
         title: "Company membership revoked",
         body: `Your membership for company ${companyId} has been revoked.`,
-        url: "/dashboard/",
+        url: "/",
         tag: `company-membership-${revoked.id}`,
       },
     }).catch(() => undefined);

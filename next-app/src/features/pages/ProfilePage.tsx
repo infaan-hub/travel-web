@@ -358,7 +358,8 @@ const persistPreference = (key: string, value: string) => {
     ? "/admin/dashboard/"
     : isCompanyAccount
       ? "/company/dashboard/"
-      : "/dashboard/";
+      : "/bookings/";
+  const dashboardLabel = user?.is_staff || isCompanyAccount ? "Dashboard" : "Bookings";
   const username = user?.username || profile?.username || "account";
   const displayName = form.full_name.trim() || user?.username || "Your account";
   const avatarInitial = displayName.trim().charAt(0).toUpperCase() || "U";
@@ -393,7 +394,7 @@ const persistPreference = (key: string, value: string) => {
       <header className={styles.settingsMasthead}>
         <div className={styles.settingsMastheadText}>
           <nav className={styles.settingsBreadcrumb} aria-label="Breadcrumb">
-            <Link href={dashboardHref}>Dashboard</Link>
+            <Link href={dashboardHref}>{dashboardLabel}</Link>
             <span className={styles.settingsBreadcrumbSep} aria-hidden="true">
               /
             </span>
@@ -414,7 +415,7 @@ const persistPreference = (key: string, value: string) => {
           </span>
           <Link className={styles.settingsMastButton} href={dashboardHref}>
             <LayoutDashboard size={15} aria-hidden="true" />
-            Dashboard
+            {dashboardLabel}
           </Link>
         </div>
       </header>
@@ -997,7 +998,7 @@ const persistPreference = (key: string, value: string) => {
             </div>
             <Link className={styles.settingsSupportLink} href={dashboardHref}>
               <LayoutDashboard size={15} aria-hidden="true" />
-              Open dashboard
+              Open {dashboardLabel.toLowerCase()}
             </Link>
           </section>
         </aside>

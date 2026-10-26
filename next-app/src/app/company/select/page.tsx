@@ -4,14 +4,15 @@ import CompanySelectPage from "@/features/pages/CompanySelectPage";
 import { publicImageUrl } from "@/lib/storage/images";
 
 export default async function SelectCompanyPage() {
-  const { memberships, selection } = await getCompanyPickerData();
+  const { user, memberships, selection } = await getCompanyPickerData();
   const available = memberships.filter(
     (membership) => membership.company.status === "ACTIVE",
   );
 
   if (available.length === 0) {
     if (memberships.length > 0) forbidden();
-    redirect("/dashboard");
+    if (user.accountType === "TOUR_COMPANY") redirect("/tour-company/dashboard");
+    redirect("/");
   }
 
   if (selection.reason === "ok") {

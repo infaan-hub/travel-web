@@ -16,7 +16,7 @@ export default async function TourCompanyDashboardRoute() {
       `/api/token/refresh/?next=${encodeURIComponent("/tour-company/dashboard/")}`,
     );
   }
-  if (user.accountType !== "TOUR_COMPANY") redirect("/dashboard");
+  if (user.accountType !== "TOUR_COMPANY") redirect("/");
 
   const memberships = await listActiveCompanyMemberships(user.id);
   const application = memberships[0];

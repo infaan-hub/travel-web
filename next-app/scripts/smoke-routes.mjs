@@ -865,11 +865,15 @@ async function run() {
     `status=${customerAdminPage.status}`,
   );
 
-  const customerPage = await request("/dashboard/", {
+  const removedCustomerDashboard = await request("/dashboard/", {
     headers: { Cookie: `infaan_session=${customerAToken}` },
     redirect: "manual",
   });
-  record("customer can open /dashboard/ with a session cookie", customerPage.status === 200);
+  record(
+    "customer dashboard page is removed",
+    removedCustomerDashboard.status === 404,
+    `status=${removedCustomerDashboard.status}`,
+  );
 
   const anonymousAdminPage = await request("/admin/dashboard/", { redirect: "manual" });
   record(

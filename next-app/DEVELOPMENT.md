@@ -84,7 +84,6 @@ Existing page routes:
 
 **Customer (server-guarded `(customer)` layout)**
 
-- `/dashboard/`
 - `/bookings/`
 - `/settings/`
 

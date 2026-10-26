@@ -144,7 +144,7 @@ function assertPageCompanyAccess(
     selection.reason === "selection_required" ||
     !selection.membership
   ) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (
     selection.membership.company.status !== "ACTIVE" &&
@@ -181,7 +181,8 @@ export async function requirePageCompanyMember(
   const selection = await resolveUserCompanySelection(user.id, selector);
 
   if (selection.reason === "none") {
-    redirect("/dashboard");
+    if (user.accountType === "TOUR_COMPANY") redirect("/tour-company/dashboard");
+    redirect("/");
   }
   if (selection.reason === "selection_required") {
     redirect("/company/select/");

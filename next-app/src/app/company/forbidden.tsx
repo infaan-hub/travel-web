@@ -15,8 +15,8 @@ export default function CompanyForbidden() {
           This company workspace is suspended, archived, or your membership is
           no longer active. Company data and operations are unavailable.
         </p>
-        <Link className={styles.forbiddenLink} href="/dashboard/">
-          Return to your dashboard
+        <Link className={styles.forbiddenLink} href="/">
+          Return home
         </Link>
       </section>
     </div>
