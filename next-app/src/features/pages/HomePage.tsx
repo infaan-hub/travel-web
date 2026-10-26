@@ -65,6 +65,7 @@ export default function HomePage() {
   const [matchPaused, setMatchPaused] = useState(false);
   const [matchEngaged, setMatchEngaged] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isMobileHome, setIsMobileHome] = useState(false);
   const [matchCardWidth, setMatchCardWidth] = useState(240);
   const [matchInView, setMatchInView] = useState(false);
   const matchStageRef = useRef<HTMLDivElement | null>(null);
@@ -80,6 +81,8 @@ export default function HomePage() {
     .filter((trip) => matchDestination === 'all' || trip.place.trim() === matchDestination)
     .slice(0, 5);
 
+  const homeCardLimit = isMobileHome ? 3 : 5;
+
   useEffect(() => {
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const updateMotionPreference = () => setReducedMotion(motionPreference.matches);
@@ -94,6 +97,14 @@ export default function HomePage() {
     updateCardWidth();
     mobileLayout.addEventListener('change', updateCardWidth);
     return () => mobileLayout.removeEventListener('change', updateCardWidth);
+  }, []);
+
+  useEffect(() => {
+    const mobileLayout = window.matchMedia('(max-width: 640px)');
+    const update = () => setIsMobileHome(mobileLayout.matches);
+    update();
+    mobileLayout.addEventListener('change', update);
+    return () => mobileLayout.removeEventListener('change', update);
   }, []);
 
   useEffect(() => {
@@ -208,6 +219,19 @@ export default function HomePage() {
         featuredTour={allTours.find((tour) => tour.featured) || allTours[0] || null}
       />
 
+      {!loading && allTours.length > 0 && (
+        <section className="all-tours-section">
+          <div className="section-header">
+            <h2>Explore experiences</h2>
+          </div>
+          <div className="tours-grid">
+            {allTours.slice(0, homeCardLimit).map((tour: Tour) => (
+              <TourCard key={tour.id} tour={tour} />
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="destinations-section">
         <div className="section-header" style={{ textAlign: "center", alignItems: "center" }}>
           <h2>Start with a place</h2>
@@ -237,164 +261,6 @@ export default function HomePage() {
       </section>
 
 
-      {!loading && allTours.length > 0 && (
-        <section className="all-tours-section">
-          <div className="section-header">
-            <h2>Explore experiences</h2>
-          </div>
-          <div className="tours-grid">
-            {allTours.map((tour: Tour) => (
-              <TourCard key={tour.id} tour={tour} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {!loading && attractions.length > 0 && (
-        <section className="attractions-section">
-          <div className="section-header">
-            <h2>Places worth exploring</h2>
-            <p>Discover notable places across the destinations represented on Travel.</p>
-          </div>
-          <div className="home-attractions-grid">
-            {attractions.slice(0, 6).map(att => (
-              <div key={att.id} className="home-attraction-card">
-                <div className="home-attraction-image">
-                  <Image src={getImageUrl(att.image_url)} alt={att.name} width={320} height={220} />
-                </div>
-                <div className="home-attraction-info">
-                  <h3>{att.name}</h3>
-                  <span className="home-attraction-location"><MapPin size={14} /> {att.location}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="section-footer">
-            <button className="btn btn-outline" onClick={() => router.push('/attractions')}>
-              View All Attractions
-            </button>
-          </div>
-        </section>
-      )}
-
-      {reviews.length > 0 && (
-        <section className="testimonials-section">
-          <div className="section-header">
-            <h2>Notes from other travelers</h2>
-            <p>Read feedback shared after real experiences.</p>
-          </div>
-          <div className="testimonials-grid">
-            {reviews.slice(0, 6).map(review => (
-              <div key={review.id} className="testimonial-card">
-                <div className="testimonial-stars">
-                  {Array.from({ length: 5 }, (_: any, i: number) => (
-                    <Star key={i} size={16} fill={i < review.rating ? '#f59e0b' : 'none'} color={i < review.rating ? '#f59e0b' : '#d1d5db'} />
-                  ))}
-                </div>
-                <p>&quot;{review.content}&quot;</p>
-                <div className="testimonial-author-row">
-                  <div className="testimonial-avatar">
-                    {review.user_name?.charAt(0).toUpperCase() || '?'}
-                  </div>
-                  <div>
-                    <span className="testimonial-author">{review.user_name}</span>
-                    <span className="testimonial-date">{new Date(review.created_at ?? 0).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="section-footer">
-            {isAuthenticated ? (
-              <button className="btn btn-primary" onClick={() => setShowReviewForm(true)}>
-                Write a Review
-              </button>
-            ) : (
-              <button className="btn btn-primary" onClick={() => router.push('/login')}>
-                Login to Write a Review
-              </button>
-            )}
-          </div>
-        </section>
-      )}
-
-      {!loading && (allTours.length === 0 || homeSettings?.more_experiences_image_urls?.some((image) => Boolean(image))) && (
-        <MoreExperiencesEmptyState
-          imageUrls={homeSettings?.more_experiences_image_urls?.slice(0, 5).map((image) => image ? getImageUrl(image) : null)}
-        />
-      )}
-      {!loading && tourLoadError && (
-        <section className="home-discovery-empty glass-card" role="status">
-          <span className="section-kicker">Catalogue temporarily unavailable</span>
-          <h2>We could not load experiences right now.</h2>
-          <p>Browse company profiles in the meantime, or refresh this page to try again.</p>
-          <Link href="/companies/" className="btn btn-primary">Explore companies</Link>
-        </section>
-      )}
-
-      {showReviewForm && (
-        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
-          <div className="modal-content review-form-modal">
-            <div className="modal-header">
-              <h3>Share Your Experience</h3>
-              <button className="modal-close" onClick={() => setShowReviewForm(false)}><X size={18} /></button>
-            </div>
-            {reviewSuccess && <div className="alert alert-success">{reviewSuccess}</div>}
-            <form onSubmit={handleReviewSubmit} className="review-form">
-              <div className="form-group">
-                <label>Rating</label>
-                <div className="star-rating-input">
-                  {[1, 2, 3, 4, 5].map(s => (
-                    <button key={s} type="button" className={`star-btn ${s <= reviewForm.rating ? 'active' : ''}`}
-                      onClick={() => setReviewForm({ ...reviewForm, rating: s })}>
-                      <Star size={24} fill={s <= reviewForm.rating ? '#f59e0b' : 'none'}
-                        color={s <= reviewForm.rating ? '#f59e0b' : '#d1d5db'} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Your Review</label>
-                <textarea placeholder="Share your experience..." rows={4} value={reviewForm.content}
-                  onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setReviewForm({ ...reviewForm, content: e.target.value })} required />
-              </div>
-              <button type="submit" className="btn btn-primary btn-block" disabled={reviewSaving}>
-                <Send size={16} /> {reviewSaving ? 'Submitting...' : 'Submit Review'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {!loading && companies.length > 0 && (
-        <section className="home-companies-section">
-          <div className="section-header">
-            <div>
-              <span className="section-kicker">Meet the providers</span>
-              <h2>Travel with people who know the place</h2>
-            </div>
-            <Link href="/companies/" className="section-text-link">All companies <ArrowRight size={16} /></Link>
-          </div>
-          <div className="home-companies-grid">
-            {companies.map((company) => (
-              <DestinationCard
-                key={company.id}
-                image={company.logo_image_url ? getImageUrl(company.logo_image_url) : undefined}
-                title={company.name}
-                location={[company.locality, company.region].filter(Boolean).join(", ") || "Tourism company"}
-                description={company.description || `${company.tours_count} published experiences`}
-                stats={[
-                  { value: String(company.tours_count), label: "Experiences" },
-                  { value: "Local", label: "Provider" },
-                  { value: "Verified", label: "Company" },
-                ]}
-                hideCta
-                boldText
-              />
-            ))}
-          </div>
-        </section>
-      )}
       {!loading && !postedTripsLoading && (
         <section
           className={`cta-section ${styles.matchSection}`}
@@ -530,6 +396,155 @@ export default function HomePage() {
           )}
         </section>
       )}
+
+
+      {!loading && companies.length > 0 && (
+        <section className="home-companies-section">
+          <div className="section-header">
+            <div>
+              <span className="section-kicker">Meet the providers</span>
+              <h2>Travel with people who know the place</h2>
+            </div>
+            <Link href="/companies/" className="section-text-link">All companies <ArrowRight size={16} /></Link>
+          </div>
+          <div className="home-companies-grid">
+            {companies.slice(0, homeCardLimit).map((company) => (
+              <DestinationCard
+                key={company.id}
+                image={company.logo_image_url ? getImageUrl(company.logo_image_url) : undefined}
+                title={company.name}
+                location={[company.locality, company.region].filter(Boolean).join(", ") || "Tourism company"}
+                description={company.description || `${company.tours_count} published experiences`}
+                stats={[
+                  { value: String(company.tours_count), label: "Experiences" },
+                  { value: "Local", label: "Provider" },
+                  { value: "Verified", label: "Company" },
+                ]}
+                hideCta
+                boldText
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+
+      {!loading && attractions.length > 0 && (
+        <section className="attractions-section">
+          <div className="section-header">
+            <h2>Places worth exploring</h2>
+            <p>Discover notable places across the destinations represented on Travel.</p>
+          </div>
+          <div className="home-attractions-grid">
+            {attractions.slice(0, 6).map(att => (
+              <div key={att.id} className="home-attraction-card">
+                <div className="home-attraction-image">
+                  <Image src={getImageUrl(att.image_url)} alt={att.name} width={320} height={220} />
+                </div>
+                <div className="home-attraction-info">
+                  <h3>{att.name}</h3>
+                  <span className="home-attraction-location"><MapPin size={14} /> {att.location}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="section-footer">
+            <button className="btn btn-outline" onClick={() => router.push('/attractions')}>
+              View All Attractions
+            </button>
+          </div>
+        </section>
+      )}
+
+      {reviews.length > 0 && (
+        <section className="testimonials-section">
+          <div className="section-header">
+            <h2>Notes from other travelers</h2>
+            <p>Read feedback shared after real experiences.</p>
+          </div>
+          <div className="testimonials-grid">
+            {reviews.slice(0, 6).map(review => (
+              <div key={review.id} className="testimonial-card">
+                <div className="testimonial-stars">
+                  {Array.from({ length: 5 }, (_: any, i: number) => (
+                    <Star key={i} size={16} fill={i < review.rating ? '#f59e0b' : 'none'} color={i < review.rating ? '#f59e0b' : '#d1d5db'} />
+                  ))}
+                </div>
+                <p>&quot;{review.content}&quot;</p>
+                <div className="testimonial-author-row">
+                  <div className="testimonial-avatar">
+                    {review.user_name?.charAt(0).toUpperCase() || '?'}
+                  </div>
+                  <div>
+                    <span className="testimonial-author">{review.user_name}</span>
+                    <span className="testimonial-date">{new Date(review.created_at ?? 0).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="section-footer">
+            {isAuthenticated ? (
+              <button className="btn btn-primary" onClick={() => setShowReviewForm(true)}>
+                Write a Review
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={() => router.push('/login')}>
+                Login to Write a Review
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+
+      {!loading && tourLoadError && (
+        <section className="home-discovery-empty glass-card" role="status">
+          <span className="section-kicker">Catalogue temporarily unavailable</span>
+          <h2>We could not load experiences right now.</h2>
+          <p>Browse company profiles in the meantime, or refresh this page to try again.</p>
+          <Link href="/companies/" className="btn btn-primary">Explore companies</Link>
+        </section>
+      )}
+
+      {!loading && (allTours.length === 0 || homeSettings?.more_experiences_image_urls?.some((image) => Boolean(image))) && (
+        <MoreExperiencesEmptyState
+          imageUrls={homeSettings?.more_experiences_image_urls?.slice(0, 5).map((image) => image ? getImageUrl(image) : null)}
+        />
+      )}
+      {showReviewForm && (
+        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
+          <div className="modal-content review-form-modal">
+            <div className="modal-header">
+              <h3>Share Your Experience</h3>
+              <button className="modal-close" onClick={() => setShowReviewForm(false)}><X size={18} /></button>
+            </div>
+            {reviewSuccess && <div className="alert alert-success">{reviewSuccess}</div>}
+            <form onSubmit={handleReviewSubmit} className="review-form">
+              <div className="form-group">
+                <label>Rating</label>
+                <div className="star-rating-input">
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <button key={s} type="button" className={`star-btn ${s <= reviewForm.rating ? 'active' : ''}`}
+                      onClick={() => setReviewForm({ ...reviewForm, rating: s })}>
+                      <Star size={24} fill={s <= reviewForm.rating ? '#f59e0b' : 'none'}
+                        color={s <= reviewForm.rating ? '#f59e0b' : '#d1d5db'} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Your Review</label>
+                <textarea placeholder="Share your experience..." rows={4} value={reviewForm.content}
+                  onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setReviewForm({ ...reviewForm, content: e.target.value })} required />
+              </div>
+              <button type="submit" className="btn btn-primary btn-block" disabled={reviewSaving}>
+                <Send size={16} /> {reviewSaving ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
