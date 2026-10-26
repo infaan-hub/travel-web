@@ -21,6 +21,7 @@
 .dc__shade {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background: linear-gradient(
     to bottom,
     rgba(5, 20, 40, 0.05) 0%,
@@ -47,6 +48,36 @@
   transition: transform 0.15s ease;
 }
 .dc__heart:active { transform: scale(0.92); }
+
+/* category / status chips */
+.dc__badges {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: calc(100% - 58px);
+}
+
+.dc__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  background: rgba(5, 20, 40, 0.30);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-shadow: 0 1px 8px rgba(5, 20, 40, 0.35);
+  text-transform: uppercase;
+}
 
 /* text block */
 .dc__info {
@@ -198,6 +229,79 @@
   color: #fff;
   font-weight: 700;
   opacity: 1;
+}
+
+/* Full-width media card used on detail pages. */
+.dc--hero {
+  width: 100%;
+  height: clamp(300px, 46vw, 480px);
+  min-height: 0;
+  border-radius: 28px;
+}
+
+.dc--hero .dc__shade {
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 20, 40, 0.02) 0%,
+    rgba(5, 20, 40, 0) 48%,
+    rgba(5, 20, 40, 0.58) 100%
+  );
+}
+
+.dc--hero .dc__info {
+  left: clamp(16px, 2.4vw, 26px);
+  right: clamp(16px, 2.4vw, 26px);
+  bottom: clamp(16px, 2.4vw, 26px);
+  gap: 8px;
+}
+
+.dc--hero .dc__title {
+  border-radius: 18px;
+  padding: 7px 16px;
+  font-size: clamp(1.05rem, 1.5vw, 1.45rem);
+  line-height: 1.25;
+}
+
+.dc--hero .dc__loc {
+  padding: 6px 14px;
+  font-size: 11px;
+  opacity: 0.92;
+}
+
+.dc--hero .dc__stats {
+  display: flex;
+  flex-wrap: wrap;
+  width: auto;
+  margin-top: 0;
+  gap: 8px;
+}
+
+.dc--hero .dc__stats > div {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 14px;
+}
+
+.dc--hero .dc__stats dt {
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.dc--hero .dc__stats dd {
+  margin: 0;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 768px) {
+  .dc--hero {
+    height: clamp(300px, 64vw, 400px);
+  }
+
+  .dc--hero .dc__info {
+    gap: 6px;
+  }
 }
 
 @media (max-width: 360px) {

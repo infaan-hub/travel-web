@@ -11,23 +11,25 @@
   --line: rgba(8, 66, 140, 0.14);
   --border: rgba(8, 66, 140, 0.14);
 
-  --glass-bg: rgba(255, 255, 255, 0.22);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.28);
-  --glass-bg-soft: rgba(255, 255, 255, 0.16);
-  --glass-border: rgba(255, 255, 255, 0.32);
-  --glass-border-strong: rgba(255, 255, 255, 0.42);
-  --glass-highlight: rgba(255, 255, 255, 0.85);
-  --glass-shadow: 0 10px 28px rgba(8, 66, 140, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  --glass-shadow-hover: 0 18px 40px rgba(8, 66, 140, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --glass-blur: blur(12px) saturate(150%);
-  --glass-blur-md: blur(12px) saturate(150%);
-  --glass-radius: 20px;
-  --glass-radius-sm: 12px;
+  /* Transparent glass: a light wash, a crisp rim and a soft inner highlight
+     instead of the flat white fill used previously. */
+  --glass-bg: rgba(255, 255, 255, 0.10);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.18);
+  --glass-bg-soft: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-border-strong: rgba(255, 255, 255, 0.72);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 18px 44px rgba(8, 66, 140, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --glass-shadow-hover: 0 24px 56px rgba(8, 66, 140, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --glass-blur: blur(18px) saturate(160%);
+  --glass-blur-md: blur(18px) saturate(160%);
+  --glass-radius: 22px;
+  --glass-radius-sm: 16px;
 
   --brand: var(--tour-secondary);
   --brand-strong: #063a78;
   --brand-accent: var(--tour-secondary);
-  --brand-soft: #e7eef9;
+  --brand-soft: rgba(8, 66, 140, 0.08);
 
   --aqua: var(--tour-secondary);
   --aqua-dark: #063a78;
@@ -37,51 +39,194 @@
   --aqua-subtle: rgba(8, 66, 140, 0.10);
   --aqua-glow: rgba(8, 66, 140, 0.18);
 
-  --success-bg: #e4f4ee;
-  --success-text: #0e7c5a;
-  --danger-bg: #fae9e7;
-  --danger-text: #b23a34;
+  --success-bg: rgba(14, 124, 90, 0.11);
+  --success-text: #0b6b4f;
+  --danger-bg: rgba(178, 58, 52, 0.10);
+  --danger-text: #a33a34;
 
   --bg-solid: var(--tour-primary);
   --bg-gradient: var(--tour-primary);
 
-  background: var(--tour-primary);
+  /* Soft colour behind the cards so the frosted surfaces have something to
+     pick up; the page itself stays light rather than becoming a blue panel. */
+  background:
+    radial-gradient(900px 540px at 0% -8%, rgba(8, 66, 140, 0.14), transparent 62%),
+    radial-gradient(780px 540px at 100% 2%, rgba(82, 125, 100, 0.16), transparent 58%),
+    radial-gradient(900px 640px at 44% 110%, rgba(8, 66, 140, 0.10), transparent 62%),
+    linear-gradient(150deg, #f6f3f0 0%, #eef3f6 48%, #f3f0ec 100%);
   color: var(--tour-secondary);
 }
 
-.tourDetailPageRoot :global(.tour-detail-overlay) {
-  background: linear-gradient(180deg, rgba(8, 66, 140, 0.82) 0%, rgba(8, 66, 140, 0.94) 100%);
+/* -------------------------------------------------------------------------
+   Tour media card (DestinationCard)
+   ------------------------------------------------------------------------- */
+
+.tourHeroCard {
+  position: relative;
+  margin-bottom: 4px;
 }
 
-.tourDetailPageRoot :global(.tour-detail-main section) {
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  border-radius: 20px;
-  box-shadow: 0 10px 28px rgba(8, 66, 140, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+.photoBadge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1;
+  text-shadow: 0 1px 8px rgba(5, 20, 40, 0.35);
+  cursor: pointer;
   -webkit-backdrop-filter: blur(12px) saturate(150%);
   backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: 0 8px 22px rgba(5, 20, 40, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.photoBadge:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.photoBadge:active {
+  transform: scale(0.97);
+}
+
+.tourHeroPlaceholder {
+  width: 100%;
+  height: clamp(300px, 46vw, 480px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(8, 66, 140, 0.08), rgba(255, 255, 255, 0.04));
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: var(--glass-shadow);
+}
+
+.tourLanguageSwitcher {
+  margin: 8px 0 4px;
+}
+
+.tourLanguageSwitcher :global(.btn) {
+  border: 1px solid rgba(255, 255, 255, 0.58) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: var(--tour-secondary) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.tourLanguageSwitcher :global(.btn-primary) {
+  border-color: rgba(8, 66, 140, 0.22) !important;
+  background: rgba(8, 66, 140, 0.84) !important;
+  color: #fff !important;
+}
+
+.tourDetailPageRoot :global(.tour-gallery-thumbs img) {
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(8, 66, 140, 0.08);
+}
+
+/* -------------------------------------------------------------------------
+   Content cards: About / Itinerary / Included / Excluded / Reviews
+   ------------------------------------------------------------------------- */
+
+.tourDetailPageRoot :global(.tour-detail-main section) {
+  background:
+    linear-gradient(145deg, rgba(8, 66, 140, 0.08) 0%, rgba(255, 255, 255, 0.05) 46%, rgba(8, 66, 140, 0.04) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 
 .tourDetailPageRoot :global(.itinerary-item) {
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.32);
+  background:
+    linear-gradient(140deg, rgba(8, 66, 140, 0.06), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  border-radius: var(--glass-radius-sm);
+  box-shadow: 0 10px 26px rgba(8, 66, 140, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+
+.tourDetailPageRoot :global(.itinerary-day) {
+  border: 1px solid rgba(8, 66, 140, 0.20);
+  background:
+    linear-gradient(145deg, rgba(8, 66, 140, 0.16), rgba(8, 66, 140, 0.05));
+  color: var(--tour-secondary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 8px 20px rgba(8, 66, 140, 0.06);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
   backdrop-filter: blur(12px) saturate(150%);
+}
+
+.tourDetailPageRoot :global(.include-item),
+.tourDetailPageRoot :global(.exclude-item) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.tourDetailPageRoot :global(.include-item) {
+  border: 1px solid rgba(14, 124, 90, 0.22);
+  background: rgba(14, 124, 90, 0.11);
+  color: #0b6b4f;
+}
+
+.tourDetailPageRoot :global(.exclude-item) {
+  border: 1px solid rgba(178, 58, 52, 0.20);
+  background: rgba(178, 58, 52, 0.09);
+  color: #a33a34;
 }
 
 .tourDetailPageRoot :global(.review-card) {
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  backdrop-filter: blur(12px) saturate(150%);
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: var(--glass-radius-sm);
+  background:
+    linear-gradient(140deg, rgba(8, 66, 140, 0.07), rgba(255, 255, 255, 0.03));
+  box-shadow: 0 10px 26px rgba(8, 66, 140, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
 }
 
+/* -------------------------------------------------------------------------
+   Booking sidebar
+   ------------------------------------------------------------------------- */
+
 .tourDetailPageRoot :global(.booking-card) {
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  backdrop-filter: blur(12px) saturate(150%);
+  padding: 22px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.62) !important;
+  border-radius: var(--glass-radius);
+  background:
+    linear-gradient(155deg, rgba(8, 66, 140, 0.09), rgba(255, 255, 255, 0.04)) !important;
+  box-shadow: var(--glass-shadow) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  backdrop-filter: var(--glass-blur) !important;
 }
+
+.tourDetailPageRoot :global(.booking-note) {
+  color: var(--text-muted);
+}
+
+/* -------------------------------------------------------------------------
+   States
+   ------------------------------------------------------------------------- */
 
 .tourDetailLoading {
   color: #08428C;
@@ -89,8 +234,19 @@
 }
 
 .tourDetailEmpty {
-  background: #F2F0EF;
-  border: 1px dashed #08428C;
+  border: 1px dashed rgba(8, 66, 140, 0.35);
+  background: rgba(255, 255, 255, 0.12);
   color: #08428C;
   border-radius: 20px;
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+}
+
+@media (max-width: 768px) {
+  .photoBadge {
+    top: 14px;
+    right: 14px;
+    padding: 7px 12px;
+    font-size: 0.72rem;
+  }
 }

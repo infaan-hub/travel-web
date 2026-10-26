@@ -7,6 +7,18 @@ type Stat = {
   label: string;
 };
 
+/**
+ * The app uses `trailingSlash: true`, and the built-in image optimizer does
+ * not follow the redirect from `/api/images/:id` to `/api/images/:id/`.
+ * Normalising the source here keeps Next/Image able to optimise stored media.
+ */
+function normalizeImageSrc(src: string): string {
+  if (src.startsWith("/api/") && !src.endsWith("/") && !src.includes("?")) {
+    return `${src}/`;
+  }
+  return src;
+}
+
 export default function DestinationCard({
   image = "/nigeen-lake.jpg",
   title = "Nigeen Lake",
@@ -18,7 +30,12 @@ export default function DestinationCard({
   onSeeMore = () => {},
   hideCta = false,
   hideLike = false,
+  hideTitle = false,
   boldText = false,
+  badges,
+  variant = "default",
+  imagePriority = false,
+  onImageClick,
 }: {
   image?: string;
   title?: string;
@@ -30,21 +47,36 @@ export default function DestinationCard({
   onSeeMore?: () => void;
   hideCta?: boolean;
   hideLike?: boolean;
+  hideTitle?: boolean;
   boldText?: boolean;
+  badges?: string[];
+  variant?: "default" | "hero";
+  imagePriority?: boolean;
+  onImageClick?: () => void;
 }) {
   const [liked, setLiked] = useState(false);
 
   return (
-    <article className={`dc${stats ? " dc--company" : ""}${hideCta ? " dc--no-cta" : ""}${boldText ? " dc--bold-text" : ""}`}>
+    <article className={`dc${stats && variant !== "hero" ? " dc--company" : ""}${hideCta ? " dc--no-cta" : ""}${boldText ? " dc--bold-text" : ""}${variant === "hero" ? " dc--hero" : ""}`}>
       <Image
         className="dc__img"
-        src={image}
+        src={normalizeImageSrc(image)}
         alt={`${title}, ${location}`}
         fill
-        sizes="(max-width: 768px) 100vw, 300px"
-        style={{ objectFit: "cover" }}
+        priority={imagePriority}
+        sizes={variant === "hero" ? "(max-width: 768px) 100vw, 1100px" : "(max-width: 768px) 100vw, 300px"}
+        onClick={onImageClick}
+        style={{ objectFit: "cover", cursor: onImageClick ? "pointer" : undefined }}
       />
       <div className="dc__shade" />
+
+      {badges && badges.length > 0 && (
+        <div className="dc__badges">
+          {badges.map((badge) => (
+            <span key={badge} className="dc__badge">{badge}</span>
+          ))}
+        </div>
+      )}
 
       {!hideLike && (
       <button
@@ -63,7 +95,7 @@ export default function DestinationCard({
       )}
 
       <div className="dc__info">
-        <h3 className="dc__title">{title}</h3>
+        {!hideTitle && <h3 className="dc__title">{title}</h3>}
         <p className="dc__loc">{location}</p>
         {description ? <p className="dc__description">{description}</p> : null}
         {stats ? (

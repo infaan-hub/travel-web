@@ -11,6 +11,7 @@ import { getImageUrl } from '@/lib/utils/image-url';
 import type {  Review, Tour, TourTranslation  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import { PageHero } from "@/components/PageHero";
+import DestinationCard from "@/components/DestinationCard";
 import styles from "@/features/pages/tour-detail-page.module.css";
 export default function TourDetailPage() {
   const { id } = useParams<Record<string, string>>();
@@ -99,6 +100,17 @@ export default function TourDetailPage() {
 
   const openLightbox = (index: number) => { setCurrentImageIndex(index); setShowLightbox(true); };
 
+  const categoryLabel = tour.category === 'zanzibar'
+    ? 'Zanzibar'
+    : tour.category === 'tanzania'
+      ? 'Tanzania Safari'
+      : 'International';
+
+  const heroStats = [
+    { value: tour.duration || 'Flexible', label: 'Duration' },
+    { value: `$${tour.price}`, label: 'per person' },
+  ];
+
   const renderStars = (rating: number, size = 14) => (
     <span className="review-rating">
       {[1, 2, 3, 4, 5].map(s => (
@@ -116,51 +128,60 @@ export default function TourDetailPage() {
         patternImageKey="more2"
         media={tour?.main_image_url || tour?.image_url ? { src: getImageUrl(tour.main_image_url || tour.image_url), alt: tour.title } : undefined}
         patternMedia={tour?.image2_url || tour?.image3_url ? getImageUrl(tour.image2_url || tour.image3_url) : undefined}
-        chips={tour?.category ? [tour.category] : []}
+        chips={[categoryLabel]}
       />
       <button className="btn btn-back" onClick={() => router.back()}><ArrowLeft size={18} /> Back</button>
 
-      <div className="tour-detail-hero">
+      <div className={styles.tourHeroCard}>
         {allImages.length > 0 ? (
-          <>
-            <img src={allImages[0]} alt={displayTitle} onClick={() => openLightbox(0)} style={{ cursor: 'pointer' }} />
-            {allImages.length > 1 && (
-              <div className="gallery-badge" onClick={() => openLightbox(0)}>
-                View {allImages.length} Photos
-              </div>
-            )}
-          </>
+          <DestinationCard
+            image={allImages[0]}
+            title={displayTitle ?? tour.title}
+            location={tour.destination}
+            stats={heroStats}
+            badges={[categoryLabel]}
+            hideCta
+            hideLike
+            hideTitle
+            variant="hero"
+            imagePriority
+            onImageClick={() => openLightbox(0)}
+          />
         ) : (
-          <div className="tour-detail-hero-placeholder"></div>
+          <div className={styles.tourHeroPlaceholder} />
         )}
-        <div className="tour-detail-overlay">
-          <span className={`tour-category ${tour.category}`}>
-            {tour.category === 'zanzibar' ? 'Zanzibar' : tour.category === 'tanzania' ? 'Tanzania Safari' : 'International'}
-          </span>
-        {translations.length > 0 && (
-          <div className="language-switcher" role="group" aria-label="Language">
-            <button
-              type="button"
-              className={`btn btn-sm ${locale === 'en' ? 'btn-primary' : 'btn-outline'}`}
-              onClick={() => setLocale('en')}
-            >
-              English
-            </button>
-            {translations.map((translation: TourTranslation) => (
-              <button
-                key={translation.locale}
-                type="button"
-                className={`btn btn-sm ${locale === translation.locale ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setLocale(translation.locale)}
-              >
-                {translation.locale.toUpperCase()}
-              </button>
-            ))}
-          </div>
+        {allImages.length > 1 && (
+          <button
+            type="button"
+            className={styles.photoBadge}
+            onClick={() => openLightbox(0)}
+          >
+            View {allImages.length} Photos
+          </button>
         )}
-          <p><MapPin size={16} /> {tour.destination} | <Clock size={16} /> {tour.duration} | ${tour.price}/person</p>
-        </div>
       </div>
+
+      {translations.length > 0 && (
+        <div className={`language-switcher ${styles.tourLanguageSwitcher}`} role="group" aria-label="Language">
+          <button
+            type="button"
+            className={`btn btn-sm ${locale === 'en' ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => setLocale('en')}
+          >
+            English
+          </button>
+          {translations.map((translation: TourTranslation) => (
+            <button
+              key={translation.locale}
+              type="button"
+              className={`btn btn-sm ${locale === translation.locale ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setLocale(translation.locale)}
+            >
+              {translation.locale.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
 
       {allImages.length > 1 && (
         <div className="tour-gallery-thumbs">
