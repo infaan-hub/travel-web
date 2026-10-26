@@ -23,7 +23,11 @@ export default function LoginPage() {
   const { login } = useAuth();
   const registered = searchParams.get('registered');
   const requested = searchParams.get('from');
-  const from = requested && requested.startsWith('/') && !requested.startsWith('//') ? requested : '/';
+  const normalizedRequested =
+    requested === '/dashboard' || requested === '/dashboard/' || requested?.startsWith('/dashboard/')
+      ? '/'
+      : requested;
+  const from = normalizedRequested && normalizedRequested.startsWith('/') && !normalizedRequested.startsWith('//') ? normalizedRequested : '/';
 
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [e.target.name]: e.target.value });
