@@ -18,7 +18,7 @@
   backdrop-filter: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
 }
 
 .matchHeader {
@@ -87,6 +87,7 @@
 
 .matchStage {
   position: relative;
+  width: 100%;
   height: 370px;
   max-width: 820px;
   margin: 0 auto;
