@@ -1,6 +1,78 @@
 .tourDetailPageRoot {
-  background: #F2F0EF;
-  color: #08428C;
+  /* palette ------------------------------------------------------------- */
+  --tour-primary: #F2F0EF;
+  --tour-secondary: #08428C;
+
+  --text-primary: var(--tour-secondary);
+  --text-secondary: rgba(8, 66, 140, 0.72);
+  --text-muted: rgba(8, 66, 140, 0.64);
+  --text-light: rgba(8, 66, 140, 0.56);
+
+  --line: rgba(8, 66, 140, 0.14);
+  --border: rgba(8, 66, 140, 0.14);
+
+  --glass-bg: #ffffff;
+  --glass-bg-elevated: #ffffff;
+  --glass-bg-soft: var(--tour-primary);
+  --glass-border: rgba(8, 66, 140, 0.14);
+  --glass-border-strong: rgba(8, 66, 140, 0.28);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 10px 28px rgba(8, 66, 140, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --glass-shadow-hover: 0 18px 40px rgba(8, 66, 140, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --glass-blur: none;
+  --glass-blur-md: 0px;
+  --glass-radius: 20px;
+  --glass-radius-sm: 12px;
+
+  --brand: var(--tour-secondary);
+  --brand-strong: #063a78;
+  --brand-accent: var(--tour-secondary);
+  --brand-soft: #e7eef9;
+
+  --aqua: var(--tour-secondary);
+  --aqua-dark: #063a78;
+  --aqua-light: #0a52ad;
+  --aqua-strong: var(--tour-secondary);
+  --aqua-deep: #063a78;
+  --aqua-subtle: rgba(8, 66, 140, 0.10);
+  --aqua-glow: rgba(8, 66, 140, 0.18);
+
+  --success-bg: #e4f4ee;
+  --success-text: #0e7c5a;
+  --danger-bg: #fae9e7;
+  --danger-text: #b23a34;
+
+  --bg-solid: var(--tour-primary);
+  --bg-gradient: var(--tour-primary);
+
+  background: var(--tour-primary);
+  color: var(--tour-secondary);
+}
+
+.tourDetailPageRoot :global(.tour-detail-overlay) {
+  background: linear-gradient(180deg, rgba(8, 66, 140, 0.82) 0%, rgba(8, 66, 140, 0.94) 100%);
+}
+
+.tourDetailPageRoot :global(.tour-detail-main section) {
+  background: #ffffff;
+  border: 1px solid rgba(8, 66, 140, 0.14);
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(8, 66, 140, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.tourDetailPageRoot :global(.itinerary-item) {
+  background: var(--tour-primary);
+  border: 1px solid rgba(8, 66, 140, 0.14);
+}
+
+.tourDetailPageRoot :global(.review-card) {
+  background: #ffffff;
+  border: 1px solid rgba(8, 66, 140, 0.14);
+}
+
+.tourDetailPageRoot :global(.booking-card) {
+  background: #ffffff;
+  border: 1px solid rgba(8, 66, 140, 0.14);
 }
 
 .tourDetailLoading {
