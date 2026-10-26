@@ -235,7 +235,18 @@ export default function TripsPage() {
           </div>
 
           {loading ? (
-            <div className={`loading ${styles.tripsLoading}`}>Loading trips...</div>
+            <div className="trips-skeleton-grid" aria-busy="true">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="trip-card trip-card--skeleton">
+                  <div className="trip-skeleton-image" />
+                  <div className="trip-card-body">
+                    <div className="trip-skeleton-line trip-skeleton-line--title" />
+                    <div className="trip-skeleton-line" />
+                    <div className="trip-skeleton-line trip-skeleton-line--short" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : trips.length === 0 ? (
             <div className={`empty-state ${styles.tripsEmpty}`}>
               <BookOpen size={32} />

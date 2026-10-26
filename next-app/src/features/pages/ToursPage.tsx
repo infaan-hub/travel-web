@@ -55,7 +55,13 @@ export default function ToursPage() {
       />
 
       {loading ? (
-        <div className={`loading ${styles.toursLoading}`}>Loading amazing tours...</div>
+        <div className="tours-grid" aria-busy="true">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="dc dc--skeleton">
+              <div className="dc-skeleton-shimmer" />
+            </div>
+          ))}
+        </div>
       ) : tours.length === 0 ? (
         <div className={`empty-state ${isZanzibar ? styles.toursEmptyZanzibar : styles.toursEmpty}`}>
           <span className="empty-icon"><Search size={24} /></span>

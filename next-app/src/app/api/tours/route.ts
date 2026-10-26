@@ -8,6 +8,9 @@ import prisma from "@/lib/db/prisma";
 import { tourListSerializer } from "@/lib/serializers";
 import { PUBLIC_TOUR_VISIBILITY } from "@/lib/public-tours";
 import type { Prisma, TourCategory } from "@prisma/client";
+import { cacheGet, cacheSet } from "@/lib/cache";
+
+const TOURS_CACHE_TTL_MS = 30_000;
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +18,29 @@ export async function GET(request: NextRequest) {
     const staff = searchParams.get("all") === "true"
       ? await optionalAuth(request)
       : null;
-    const where: Prisma.TourWhereInput = staff?.user.isStaff
+    const isStaff = !!staff?.user.isStaff;
+
+    // Cache only public (non-staff) listings; staff views are user-specific.
+    const cacheKey = isStaff ? null : `tours:list:${request.url}`;
+    if (cacheKey) {
+      const cached = await cacheGet<{
+        data: any[];
+        total: number;
+        paginated: boolean;
+        page?: number;
+        pageSize?: number;
+      }>(cacheKey);
+      if (cached) {
+        const pagination = cached.paginated && cached.page && cached.pageSize
+          ? { page: cached.page, pageSize: cached.pageSize, skip: (cached.page - 1) * cached.pageSize, take: cached.pageSize }
+          : null;
+        return pagination
+          ? paginatedResponse(request, cached.data, cached.total, pagination as any)
+          : listResponse(cached.data, cached.total);
+      }
+    }
+
+    const where: Prisma.TourWhereInput = isStaff
       ? { deletedAt: null }
       : { deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] };
 
@@ -70,6 +95,19 @@ export async function GET(request: NextRequest) {
     ]);
 
     const data = tours.map((tour) => tourListSerializer(tour));
+    if (cacheKey) {
+      await cacheSet(
+        cacheKey,
+        {
+          data,
+          total,
+          paginated: !!pagination,
+          page: pagination?.page,
+          pageSize: pagination?.pageSize,
+        },
+        TOURS_CACHE_TTL_MS,
+      );
+    }
     return pagination ? paginatedResponse(request, data, total, pagination) : listResponse(data, total);
   } catch (error) {
     return handleApiError(error);

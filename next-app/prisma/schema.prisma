@@ -192,6 +192,7 @@ model CompanyTrip {
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([companyId, updatedAt])
+  @@index([updatedAt])
   @@map("company_trips")
 }
 

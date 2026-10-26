@@ -1,3 +1,12 @@
+.dc__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
 .dc {
   position: relative;
   width: 300px;
@@ -10,13 +19,34 @@
   color: #fff;
 }
 
-.dc__img {
+.dc--skeleton {
+  background: linear-gradient(90deg, #d7e3f5 25%, #eaf1fb 50%, #d7e3f5 75%);
+  background-size: 200% 100%;
+  animation: dc-skeleton-shimmer 1.4s infinite;
+}
+
+.dc-skeleton-shimmer {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
+
+@keyframes dc-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+
+
+.dc-skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+}
+
+@keyframes dc-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 
 .dc__shade {
   position: absolute;
@@ -361,6 +391,23 @@
     font-size: 0.62rem;
   }
 }
+
+.dc--skeleton {
+  background: linear-gradient(90deg, #d7e3f5 25%, #eaf1fb 50%, #d7e3f5 75%);
+  background-size: 200% 100%;
+  animation: dc-skeleton-shimmer 1.4s infinite;
+}
+
+.dc-skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+}
+
+@keyframes dc-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   .dc__heart, .dc__cta { transition: none; }

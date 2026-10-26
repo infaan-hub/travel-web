@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { publicCompaniesAPI } from "@/lib/api/client";
 import { Building2, Globe } from "@/components/icons";
 import { PageHero } from "@/components/PageHero";
@@ -121,7 +122,26 @@ export default function CompaniesPage() {
         </div>
 
         {loading ? (
-          <div className={styles.loading}>Loading companies...</div>
+          <div className={styles.grid} aria-busy="true">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <article className={styles.card} key={index}>
+                <div className={styles.coverFrame}>
+                  <div className="company-skeleton-cover" />
+                </div>
+                <div className={styles.cardBody}>
+                  <div className={styles.identity}>
+                    <div className="company-skeleton-cover" style={{ width: 48, height: 48, borderRadius: '50%' }} />
+                    <div className={styles.identityCopy}>
+                      <div className="company-skeleton-line company-skeleton-line--title" />
+                      <div className="company-skeleton-line company-skeleton-line--short" />
+                    </div>
+                  </div>
+                  <div className="company-skeleton-line" />
+                  <div className="company-skeleton-line company-skeleton-line--short" />
+                </div>
+              </article>
+            ))}
+          </div>
         ) : companies.length === 0 ? (
           <div className={styles.empty}>
             <span className={styles.emptyIcon}>
@@ -142,11 +162,12 @@ export default function CompaniesPage() {
                 <article className={styles.card} key={company.id}>
                   <div className={styles.coverFrame}>
                     {company.cover_image_url ? (
-                      <img
+                      <Image
                         className={styles.cover}
                         src={company.cover_image_url}
                         alt=""
-                        loading="lazy"
+                        fill
+                        sizes="(max-width: 720px) 100vw, 33vw"
                       />
                     ) : (
                       <div className={styles.coverFallback}>
@@ -157,11 +178,12 @@ export default function CompaniesPage() {
                   <div className={styles.cardBody}>
                     <div className={styles.identity}>
                       {company.logo_image_url ? (
-                        <img
+                        <Image
                           className={styles.logo}
                           src={company.logo_image_url}
                           alt=""
-                          loading="lazy"
+                          width={48}
+                          height={48}
                         />
                       ) : (
                         <span className={styles.logoFallback}>
