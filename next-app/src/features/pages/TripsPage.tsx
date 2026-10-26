@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
+import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { BookOpen, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
@@ -11,9 +12,9 @@ import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } fro
 import { PageHero } from "@/components/PageHero";
 import styles from "@/features/pages/trips-page.module.css";
 export default function TripsPage() {
-  const [trips, setTrips] = useState<CompanyTrip[]>([]);
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [trips, setTrips] = useState<CompanyTrip[]>(() => readClientCache<CompanyTrip[]>("travel.trips.all") ?? []);
+  const [tours, setTours] = useState<Tour[]>(() => readClientCache<Tour[]>("travel.tours.all") ?? []);
+  const [loading, setLoading] = useState<boolean>(() => !(readClientCache<CompanyTrip[]>("travel.trips.all") || readClientCache<Tour[]>("travel.tours.all")));
 
   const [originInput, setOriginInput] = useState('');
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -40,8 +41,12 @@ export default function TripsPage() {
       tripsAPI.getAll(),
       toursAPI.getAll(),
     ]).then(([tripsRes, toursRes]) => {
-      setTrips(tripsRes.data.results || tripsRes.data);
-      setTours(toursRes.data.results || toursRes.data);
+      const nextTrips = tripsRes.data.results || tripsRes.data;
+      const nextTours = toursRes.data.results || toursRes.data;
+      setTrips(nextTrips);
+      setTours(nextTours);
+      writeClientCache("travel.trips.all", nextTrips);
+      writeClientCache("travel.tours.all", nextTours);
     }).catch(console.error)
     .finally(() => setLoading(false));
   }, []);

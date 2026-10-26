@@ -4,6 +4,7 @@ import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigat
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { toursAPI } from '@/lib/api/client';
+import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import TourCard from '@/components/TourCard';
 import { Search } from '@/components/icons';
 import type { DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
@@ -14,17 +15,23 @@ import styles from "@/features/pages/tours-page.module.css";
 export default function ToursPage() {
   const router = useRouter();
   const { category } = useParams<Record<string, string>>();
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `travel.tours.${category || 'all'}`;
+  const [tours, setTours] = useState<Tour[]>(() => readClientCache<Tour[]>(cacheKey) ?? []);
+  const [loading, setLoading] = useState<boolean>(() => readClientCache<Tour[]>(cacheKey) === null);
 
   useEffect(() => {
     const params: Record<string, string> = {};
     if (category) params.category = category;
+    const cached = readClientCache<Tour[]>(cacheKey);
     toursAPI.getAll(params)
-      .then((res: any) => setTours(res.data.results || res.data))
+      .then((res: any) => {
+        const next = res.data.results || res.data;
+        setTours(next);
+        writeClientCache(cacheKey, next);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [category]);
+  }, [category, cacheKey]);
 
   const title = !category
     ? 'Tours, safaris & experiences'

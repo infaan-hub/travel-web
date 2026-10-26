@@ -185,6 +185,11 @@ export default function Sidebar() {
       ].filter((item) => !item.permission || companyPermissions.has(item.permission))
     : [];
 
+const profileHref = isAdmin
+    ? "/admin/settings/"
+    : isTourCompany
+      ? "/company/profile/"
+      : "/profile/";
   const navItems = isAdmin ? adminNavItems : isTourCompany ? [] : customerNavItems;
   const isActive = (item: NavItem) => {
     if (item.exact) return pathname === item.to;
@@ -304,7 +309,7 @@ export default function Sidebar() {
         <div className={styles.footer}>
           {isAuthenticated ? (
             <>
-              <div className={styles.userCard}>
+<Link href={profileHref} className={styles.userCard} onClick={closeAll}>
                 <div className={styles.avatar}>
                   {profileImage ? (
                     <NextImage src={profileImage} alt="" width={42} height={42} className="avatar-img" />
@@ -324,17 +329,17 @@ export default function Sidebar() {
                     )}
                   </span>
                 </div>
-              </div>
-              <button type="button" className={styles.logout} onClick={handleLogout} title="Logout">
+              </Link>
+              <button type="button" className={styles.logout} onClick={handleLogout} title="Signout">
                 <LogOut size={16} />
-                <span>Logout</span>
+                <span>Signout</span>
               </button>
             </>
           ) : (
             <div className={styles.accessActions}>
               <Link href="/login" className={`${styles.accessAction} ${styles.login}`} onClick={closeAll}>
                 <Lock size={15} />
-                <span>Login</span>
+                <span>Signin</span>
               </Link>
               <Link href="/register" className={`${styles.accessAction} ${styles.register}`} onClick={closeAll}>
                 <UserPlus size={15} />

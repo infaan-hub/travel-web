@@ -8,6 +8,7 @@ import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI } from '@/lib
 import TourCard from '@/components/TourCard';
 import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
+import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
@@ -47,13 +48,19 @@ type CompanyPostedTrip = {
 export default function HomePage() {
   const toast = useToast();
   const { isAuthenticated } = useAuth();
-  const [allTours, setAllTours] = useState<Tour[]>([]);
-  const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [companies, setCompanies] = useState<FeaturedCompany[]>([]);
-  const [postedTrips, setPostedTrips] = useState<CompanyPostedTrip[]>([]);
-  const [postedTripsLoading, setPostedTripsLoading] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [allTours, setAllTours] = useState<Tour[]>(() => readClientCache<Tour[]>("travel.homeTours") ?? []);
+  const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(() => readClientCache<HomeSettings>("travel.homeSettings"));
+  const [reviews, setReviews] = useState<Review[]>(() => readClientCache<Review[]>("travel.homeReviews") ?? []);
+  const [companies, setCompanies] = useState<FeaturedCompany[]>(() => readClientCache<FeaturedCompany[]>("travel.homeCompanies") ?? []);
+  const [postedTrips, setPostedTrips] = useState<CompanyPostedTrip[]>(() => readClientCache<CompanyPostedTrip[]>("travel.homePostedTrips") ?? []);
+  const [postedTripsLoading, setPostedTripsLoading] = useState<boolean>(() => readClientCache<CompanyPostedTrip[]>("travel.homePostedTrips") === null);
+  const [loading, setLoading] = useState<boolean>(() => !(
+    readClientCache<Tour[]>("travel.homeTours") ||
+    readClientCache<HomeSettings>("travel.homeSettings") ||
+    readClientCache<Review[]>("travel.homeReviews") ||
+    readClientCache<FeaturedCompany[]>("travel.homeCompanies") ||
+    readClientCache<CompanyPostedTrip[]>("travel.homePostedTrips")
+  ));
   const [tourLoadError, setTourLoadError] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
@@ -82,6 +89,9 @@ export default function HomePage() {
     .slice(0, 5);
 
   const homeCardLimit = isMobileHome ? 3 : 5;
+
+  // Cache hydration is handled by lazy state initializers above.
+
 
   useEffect(() => {
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -141,15 +151,33 @@ export default function HomePage() {
         if (value && typeof value === "object" && "results" in value && Array.isArray(value.results)) return value.results;
         return [];
       };
-      if (toursRes.status === "fulfilled") setAllTours(readList(toursRes.value.data) as Tour[]);
+      if (toursRes.status === "fulfilled") {
+        const tours = readList(toursRes.value.data) as Tour[];
+        setAllTours(tours);
+        writeClientCache("travel.homeTours", tours);
+      }
       else { setTourLoadError(true); console.error(toursRes.reason); }
-      if (homeRes.status === "fulfilled") setHomeSettings(homeRes.value.data);
+      if (homeRes.status === "fulfilled") {
+        const settings = homeRes.value.data as HomeSettings;
+        setHomeSettings(settings);
+        writeClientCache("travel.homeSettings", settings);
+        try {
+          window.localStorage.setItem("travel.homeSettings", JSON.stringify(settings));
+        } catch {
+          // Ignore storage failures and keep the in-memory settings.
+        }
+      }
       else console.error(homeRes.reason);
-      if (reviewsRes.status === "fulfilled") setReviews(readList(reviewsRes.value.data) as Review[]);
+      if (reviewsRes.status === "fulfilled") {
+        const reviews = readList(reviewsRes.value.data) as Review[];
+        setReviews(reviews);
+        writeClientCache("travel.homeReviews", reviews);
+      }
       else console.error(reviewsRes.reason);
       if (companiesRes.status === "fulfilled") {
         const publicCompanyList = readList(companiesRes.value.data) as FeaturedCompany[];
         setCompanies(publicCompanyList.slice(0, 4));
+        writeClientCache("travel.homeCompanies", publicCompanyList.slice(0, 4));
         const companiesWithTrips = publicCompanyList.filter((company) => company.trips_count > 0);
         void Promise.allSettled(
           companiesWithTrips.map((company) => publicCompaniesAPI.getBySlug(company.slug)),
@@ -181,6 +209,7 @@ export default function HomePage() {
           }
           setPostedTrips(trips);
           setPostedTripsLoading(false);
+          writeClientCache("travel.homePostedTrips", trips);
         });
       } else {
         console.error(companiesRes.reason);
@@ -467,7 +496,7 @@ export default function HomePage() {
               </button>
             ) : (
               <button className="btn btn-primary" onClick={() => router.push('/login')}>
-                Login to Write a Review
+                Signin to Write a Review
               </button>
             )}
           </div>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { publicCompaniesAPI } from "@/lib/api/client";
+import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
 import { Building2, Globe } from "@/components/icons";
 import { PageHero } from "@/components/PageHero";
 import styles from "@/features/pages/company-public.module.css";
@@ -45,15 +46,26 @@ export default function CompaniesPage() {
   const pageSize = 12;
 
   const load = useCallback(async () => {
-    setLoading(true);
+    const params: Record<string, string | number> = { page, page_size: pageSize };
+    if (businessType) params.business_type = businessType;
+    if (region.trim()) params.region = region.trim();
+    const cacheKey = `travel.companies.${JSON.stringify(params)}`;
+    const cached = readClientCache<{ companies: Company[]; total: number }>(cacheKey);
+    if (cached) {
+      setCompanies(cached.companies);
+      setTotal(cached.total);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     try {
-      const params: Record<string, string | number> = { page, page_size: pageSize };
-      if (businessType) params.business_type = businessType;
-      if (region.trim()) params.region = region.trim();
       const res = await publicCompaniesAPI.getAll(params);
       const data = res.data;
-      setCompanies(Array.isArray(data) ? data : data.results || []);
-      setTotal(Array.isArray(data) ? data.length : data.total || 0);
+      const nextCompanies = Array.isArray(data) ? data : data.results || [];
+      const nextTotal = Array.isArray(data) ? data.length : data.total || 0;
+      setCompanies(nextCompanies);
+      setTotal(nextTotal);
+      writeClientCache(cacheKey, { companies: nextCompanies, total: nextTotal });
     } catch (error) {
       console.error(error);
       setCompanies([]);

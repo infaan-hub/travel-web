@@ -59,7 +59,7 @@ function formatMonthYear(value?: string | null) {
 }
 
 export default function ProfilePage() {
-  const { isAuthenticated, user, loading: authLoading, refreshUser } = useAuth();
+  const { isAuthenticated, user, loading: authLoading, refreshUser, logout } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,6 +75,19 @@ export default function ProfilePage() {
   const credentialsUsername = credentialsUsernameOverride ?? user?.username ?? "";
   const [newPassword, setNewPassword] = useState("");
   const [savingCredentials, setSavingCredentials] = useState(false);
+  const [allowNotifications, setAllowNotifications] = useState<boolean>(() => {
+    try { return localStorage.getItem("profile:notifications") === "true"; } catch { return false; }
+  });
+  const [allowLocation, setAllowLocation] = useState<boolean>(() => {
+    try { return localStorage.getItem("profile:location") === "true"; } catch { return false; }
+  });
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(() => {
+    try {
+      const saved = localStorage.getItem("profile:currentLocation");
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+  const [locating, setLocating] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const messageTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -149,6 +162,8 @@ export default function ProfilePage() {
       if (messageTimer.current) clearTimeout(messageTimer.current);
     };
   }, []);
+
+  // Preferences are hydrated by lazy state initializers above.
 
   const handleChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -249,6 +264,54 @@ export default function ProfilePage() {
     } finally {
       setSavingCredentials(false);
     }
+  };
+
+const persistPreference = (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Ignore storage failures in restricted environments.
+    }
+  };
+
+  const handleToggleNotifications = (checked: boolean) => {
+    setAllowNotifications(checked);
+    persistPreference("profile:notifications", String(checked));
+  };
+
+  const handleToggleLocation = (checked: boolean) => {
+    setAllowLocation(checked);
+    persistPreference("profile:location", String(checked));
+  };
+
+  const handleCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      showMessage("Geolocation is not supported by your browser", "error");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setCurrentLocation(location);
+        persistPreference("profile:currentLocation", JSON.stringify(location));
+        setLocating(false);
+        showMessage("Current location updated");
+      },
+      () => {
+        setLocating(false);
+        showMessage("Unable to get your current location", "error");
+      },
+      { timeout: 10000 },
+    );
+  };
+
+  const handleSignout = async () => {
+    await logout();
+    router.push("/login");
   };
 
   const handleCancel = () => {
@@ -746,7 +809,7 @@ export default function ProfilePage() {
                   className={styles.settingsSectionTitle}
                   id="settings-security-title"
                 >
-                  Login &amp; security
+                  Signin &amp; security
                 </h2>
                 <p className={styles.settingsSectionCopy}>
                   {isCompanyAccount
@@ -829,6 +892,93 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
+          </section>
+
+          <section className={styles.settingsSection}>
+            <div className={styles.settingsSectionHead}>
+              <span className={styles.settingsSectionIcon} aria-hidden="true">
+                <Mail size={19} />
+              </span>
+              <div className={styles.settingsSectionHeadText}>
+                <h2 className={styles.settingsSectionTitle}>Notifications</h2>
+                <p className={styles.settingsSectionCopy}>
+                  Choose whether Travel can send updates about your bookings and
+                  account.
+                </p>
+              </div>
+            </div>
+            <label className={styles.settingsField}>
+              <span className={styles.settingsFieldLabel}>
+                <Mail size={13} aria-hidden="true" /> Allow notifications
+              </span>
+              <input
+                className={styles.settingsInput}
+                type="checkbox"
+                checked={allowNotifications}
+                onChange={(event) => handleToggleNotifications(event.target.checked)}
+              />
+            </label>
+          </section>
+
+          <section className={styles.settingsSection}>
+            <div className={styles.settingsSectionHead}>
+              <span className={styles.settingsSectionIcon} aria-hidden="true">
+                <MapPin size={19} />
+              </span>
+              <div className={styles.settingsSectionHeadText}>
+                <h2 className={styles.settingsSectionTitle}>Location</h2>
+                <p className={styles.settingsSectionCopy}>
+                  Allow Travel to use your location and refresh it whenever you
+                  need.
+                </p>
+              </div>
+            </div>
+            <label className={styles.settingsField}>
+              <span className={styles.settingsFieldLabel}>
+                <MapPin size={13} aria-hidden="true" /> Allow location
+              </span>
+              <input
+                className={styles.settingsInput}
+                type="checkbox"
+                checked={allowLocation}
+                onChange={(event) => handleToggleLocation(event.target.checked)}
+              />
+            </label>
+            <button
+              className={`${styles.settingsButton} ${styles.settingsButtonPrimary}`}
+              type="button"
+              onClick={handleCurrentLocation}
+              disabled={locating}
+            >
+              {locating ? "Locating…" : "Current location"}
+            </button>
+            {currentLocation ? (
+              <p className={styles.settingsHint}>
+                Current location: {currentLocation.lat.toFixed(5)},{" "}
+                {currentLocation.lng.toFixed(5)}
+              </p>
+            ) : null}
+          </section>
+
+          <section className={styles.settingsSection}>
+            <div className={styles.settingsSectionHead}>
+              <span className={styles.settingsSectionIcon} aria-hidden="true">
+                <Lock size={19} />
+              </span>
+              <div className={styles.settingsSectionHeadText}>
+                <h2 className={styles.settingsSectionTitle}>Account</h2>
+                <p className={styles.settingsSectionCopy}>
+                  Sign out of your Travel account on this device.
+                </p>
+              </div>
+            </div>
+            <button
+              className={`${styles.settingsButton} ${styles.settingsButtonPrimary}`}
+              type="button"
+              onClick={handleSignout}
+            >
+              Signout
+            </button>
           </section>
 
           <section className={styles.settingsSection}>

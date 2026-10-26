@@ -197,7 +197,7 @@ export default function AdminCompaniesPage() {
             <div>
               <h2 className={dashStyles.dashPanelTitle}>Create Tour Company owner</h2>
               <p className={dashStyles.dashPanelCopy}>
-                Create login credentials for an owner. They submit their company for review.
+                Create signin credentials for an owner. They submit their company for review.
               </p>
             </div>
           </div>

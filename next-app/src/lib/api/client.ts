@@ -1,6 +1,7 @@
 "use client";
 
 import axios, { type AxiosRequestHeaders } from "axios";
+import { clearClientCache } from "@/lib/cache/client-cache";
 
 const api = axios.create({
   baseURL: "/api",
@@ -9,7 +10,14 @@ const api = axios.create({
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = response.config?.method?.toLowerCase();
+    const url = response.config?.url || "";
+    if (method && method !== "get" && !url.includes("/token/refresh/")) {
+      clearClientCache();
+    }
+    return response;
+  },
   async (error) => {
     // Surface field-level validation errors so forms can render them inline.
     if (error.response?.data?.errors && typeof error.response.data.errors === "object") {

@@ -4,6 +4,7 @@ import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigat
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { toursAPI, reviewsAPI, api } from '@/lib/api/client';
+import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
 import { ArrowLeft, Building2, MapPin, Clock, Star, Check, XCircle, ChevronLeft, ChevronRight, X, Send, User } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
@@ -35,7 +36,23 @@ export default function TourDetailPage() {
   }, [id]);
 
   const loadTour = () => {
-    setLoading(true);
+    const tourCacheKey = `travel.tour.${id}`;
+    const reviewCacheKey = `travel.tourReviews.${id}`;
+    const cachedTour = readClientCache<Tour>(tourCacheKey);
+    const cachedReviews = readClientCache<Review[]>(reviewCacheKey);
+    if (cachedTour) {
+      setTour(cachedTour);
+      const images: string[] = [];
+      if (cachedTour.main_image_url) images.push(getImageUrl(cachedTour.main_image_url));
+      (cachedTour.gallery_image_urls || []).forEach((url: string) => {
+        const fullUrl = getImageUrl(url);
+        if (!images.includes(fullUrl)) images.push(fullUrl);
+      });
+      setAllImages(images);
+      setLoading(false);
+    }
+    if (cachedReviews) setTourReviews(cachedReviews);
+
     Promise.all([
       toursAPI.getById(id),
       reviewsAPI.getTourReviews(id),
@@ -52,6 +69,8 @@ export default function TourDetailPage() {
         if (!images.includes(fullUrl)) images.push(fullUrl);
       });
       setAllImages(images);
+      writeClientCache(tourCacheKey, t);
+      writeClientCache(reviewCacheKey, revRes.data.results || revRes.data);
     }).catch(console.error).finally(() => setLoading(false));
   };
 
@@ -361,7 +380,7 @@ export default function TourDetailPage() {
             <p className="booking-note">
               {isAuthenticated
                 ? 'Click above to fill your booking details'
-                : 'Please login or register to book this amazing tour'}
+                : 'Please signin or register to book this amazing tour'}
             </p>
           </div>
         </aside>
