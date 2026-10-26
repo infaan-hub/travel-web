@@ -21,8 +21,7 @@ api.interceptors.response.use(
       originalRequest &&
       !originalRequest._retry &&
       !originalRequest.url?.includes("/token/refresh/") &&
-      !originalRequest.url?.includes("/token/") &&
-      !originalRequest.url?.includes("/user/")
+      !originalRequest.url?.includes("/token/")
     ) {
       originalRequest._retry = true;
       try {

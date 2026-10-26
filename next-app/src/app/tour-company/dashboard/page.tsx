@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic";
 
 export default async function TourCompanyDashboardRoute() {
   const user = await getServerUser();
-  if (!user) redirect("/login?from=%2Ftour-company%2Fdashboard");
+  if (!user) {
+    redirect(
+      `/api/token/refresh/?next=${encodeURIComponent("/tour-company/dashboard/")}`,
+    );
+  }
   if (user.accountType !== "TOUR_COMPANY") redirect("/dashboard");
 
   const memberships = await listActiveCompanyMemberships(user.id);
