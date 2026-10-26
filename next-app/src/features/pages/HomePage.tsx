@@ -511,14 +511,6 @@ export default function HomePage() {
                 })}
               </div>
               <div className={styles.matchControls}>
-                <button
-                  type="button"
-                  className={styles.matchControl}
-                  aria-label={matchPaused ? 'Resume carousel autoplay' : 'Pause carousel autoplay'}
-                  onClick={() => setMatchPaused((paused) => !paused)}
-                >
-                  {matchPaused ? '▶' : 'Ⅱ'}
-                </button>
                 <div className={styles.matchDots} aria-label="Choose an experience">
                   {matchTrips.map((trip, index) => (
                     <button
@@ -531,14 +523,6 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-                <button
-                  type="button"
-                  className={styles.matchControl}
-                  aria-label="Show next experience"
-                  onClick={() => setMatchIndex((current) => (current + 1) % matchTrips.length)}
-                >
-                  →
-                </button>
               </div>
             </>
           ) : (
