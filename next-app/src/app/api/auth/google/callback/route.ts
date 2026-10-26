@@ -5,6 +5,7 @@ import { setSessionCookies } from "@/lib/auth/session";
 import {
   exchangeGoogleCode,
   findOrCreateGoogleCustomer,
+  getGoogleRedirectUri,
   googleOAuthCookies,
   safeRedirectPath,
   verifyGoogleIdToken,
@@ -20,12 +21,14 @@ export async function GET(request: NextRequest) {
   const jar = await cookies();
   const stateCookie = jar.get(googleOAuthCookies.state)?.value;
   const fromCookie = jar.get(googleOAuthCookies.from)?.value;
+  const redirectUriCookie = jar.get(googleOAuthCookies.redirectUri)?.value;
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
   const oauthError = request.nextUrl.searchParams.get("error");
 
   jar.delete(googleOAuthCookies.state);
   jar.delete(googleOAuthCookies.from);
+  jar.delete(googleOAuthCookies.redirectUri);
 
   if (oauthError) {
     return loginErrorRedirect(request, "google_sign_in_failed");
@@ -35,7 +38,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { id_token } = await exchangeGoogleCode(code);
+    const { id_token } = await exchangeGoogleCode(code, redirectUriCookie || getGoogleRedirectUri(request.nextUrl.origin));
     const profile = await verifyGoogleIdToken(id_token);
     const user = await findOrCreateGoogleCustomer(profile);
     const access = await signAccessToken(user);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { isGoogleAuthConfigured, buildGoogleAuthorizationUrl, safeRedirectPath, googleOAuthCookies } from "@/lib/services/google-auth";
+import { isGoogleAuthConfigured, buildGoogleAuthorizationUrl, safeRedirectPath, googleOAuthCookies, getGoogleRedirectUri } from "@/lib/services/google-auth";
 
 export async function GET(request: NextRequest) {
   if (!isGoogleAuthConfigured()) {
@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   }
   const from = safeRedirectPath(request.nextUrl.searchParams.get("from"));
   const state = crypto.randomUUID();
+  const redirectUri = getGoogleRedirectUri(request.nextUrl.origin);
   const jar = await cookies();
   jar.set(googleOAuthCookies.state, state, {
     httpOnly: true,
@@ -23,5 +24,12 @@ export async function GET(request: NextRequest) {
     path: "/",
     maxAge: 60 * 10,
   });
-  return NextResponse.redirect(buildGoogleAuthorizationUrl(state));
+  jar.set(googleOAuthCookies.redirectUri, redirectUri, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.AUTH_COOKIE_SECURE === "true",
+    path: "/",
+    maxAge: 60 * 10,
+  });
+  return NextResponse.redirect(buildGoogleAuthorizationUrl(state, redirectUri));
 }

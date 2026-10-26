@@ -8,6 +8,7 @@ import type { AuthenticatedUser } from "@/lib/services/auth";
 
 const STATE_COOKIE = "google_oauth_state";
 const FROM_COOKIE = "google_oauth_from";
+const REDIRECT_URI_COOKIE = "google_oauth_redirect_uri";
 
 function googleClientId(): string {
   return process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -37,17 +38,16 @@ export function safeRedirectPath(value: string | null | undefined): string {
   return value;
 }
 
-export function getGoogleRedirectUri(): string {
-  const configured = process.env.GOOGLE_REDIRECT_URI;
-  if (configured) return configured;
-  return `${env().APP_URL.replace(/\/+$/, "")}/api/auth/google/callback`;
+export function getGoogleRedirectUri(origin?: string): string {
+  const base = (origin || env().APP_URL).replace(/\/+$/, "");
+  return `${base}/api/auth/google/callback`;
 }
 
-export function buildGoogleAuthorizationUrl(state: string): string {
+export function buildGoogleAuthorizationUrl(state: string, redirectUri: string): string {
   const { clientId } = requireGoogleConfig();
   const params = new URLSearchParams({
     client_id: clientId,
-    redirect_uri: getGoogleRedirectUri(),
+    redirect_uri: redirectUri,
     response_type: "code",
     scope: "openid email profile",
     state,
@@ -56,13 +56,13 @@ export function buildGoogleAuthorizationUrl(state: string): string {
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
-export async function exchangeGoogleCode(code: string): Promise<{ id_token: string }> {
+export async function exchangeGoogleCode(code: string, redirectUri: string): Promise<{ id_token: string }> {
   const { clientId, clientSecret } = requireGoogleConfig();
   const body = new URLSearchParams({
     code,
     client_id: clientId,
     client_secret: clientSecret,
-    redirect_uri: getGoogleRedirectUri(),
+    redirect_uri: redirectUri,
     grant_type: "authorization_code",
   });
   const response = await fetch("https://oauth2.googleapis.com/token", {
@@ -200,5 +200,6 @@ export async function findOrCreateGoogleCustomer(profile: GoogleProfile): Promis
 export const googleOAuthCookies = {
   state: STATE_COOKIE,
   from: FROM_COOKIE,
+  redirectUri: REDIRECT_URI_COOKIE,
 };
 
