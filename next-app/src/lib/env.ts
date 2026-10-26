@@ -34,6 +34,11 @@ const EnvSchema = z.object({
   CACHE_TOKEN: z.string().optional(),
   /** SMTP / email delivery (Gmail app password supported). */
   SMTP_HOST: z.string().trim().min(1).default("smtp.gmail.com"),
+  /** Google OAuth (server-side). The client secret must never be exposed to the browser. */
+  GOOGLE_CLIENT_ID: z.string().trim().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().trim().min(1).optional(),
+  GOOGLE_REDIRECT_URI: z.string().url().optional(),
+
   SMTP_PORT: z.coerce.number().int().positive().default(587),
   SMTP_SECURE: z.enum(["true", "false"]).optional(),
   SMTP_USER: z.string().trim().min(1).optional(),
