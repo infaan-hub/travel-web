@@ -89,16 +89,6 @@ export const tripsAPI = {
   delete: (id: string | number) => api.delete(`/tips/${id}/`),
 };
 
-export const attractionsAPI = {
-  getAll: (params?: Params) => api.get("/attractions/", { params }),
-  getById: (id: string | number) => api.get(`/attractions/${id}/`),
-  create: (data: FormData | Record<string, unknown>) =>
-    api.post("/attractions/", data, formDataConfig(data)),
-  update: (id: string | number, data: FormData | Record<string, unknown>) =>
-    api.patch(`/attractions/${id}/`, data, formDataConfig(data)),
-  delete: (id: string | number) => api.delete(`/attractions/${id}/`),
-};
-
 export const bookingsAPI = {
   getAll: () => api.get("/bookings/"),
   create: (data: Record<string, unknown>) => api.post("/bookings/", data),

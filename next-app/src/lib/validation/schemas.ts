@@ -115,28 +115,6 @@ export const tourSchema = z.object({
 
 export const tourUpdateSchema = tourSchema.partial();
 
-const attractionBaseSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(200),
-  description: z.string().trim().optional(),
-  location: z.string().trim().min(1, "Location is required.").max(200),
-  region: z.string().trim().max(100).optional(),
-  category: z.string().trim().max(20).optional(),
-  best_time_to_visit: z.string().trim().max(200).optional(),
-  entry_fee: z.string().trim().max(200).optional(),
-  activities: z.string().trim().optional(),
-});
-
-export const attractionSchema = attractionBaseSchema.extend({
-  description: z.string().trim().optional().default(""),
-  region: z.string().trim().max(100).optional().default(""),
-  category: z.string().trim().max(20).optional().default(""),
-  best_time_to_visit: z.string().trim().max(200).optional().default(""),
-  entry_fee: z.string().trim().max(200).optional().default(""),
-  activities: z.string().trim().optional().default(""),
-});
-
-export const attractionUpdateSchema = attractionBaseSchema.partial();
-
 export const reviewCreateSchema = z
   .object({
     rating: z.coerce.number().int().min(1, "Rating must be between 1 and 5.").max(5),

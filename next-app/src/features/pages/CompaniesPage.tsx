@@ -70,7 +70,7 @@ export default function CompaniesPage() {
   const hasFilters = Boolean(businessType || region.trim());
 
   return (
-    <div className={`page ${styles.page}`}>
+    <div className={`page ${styles.page} ${styles.listingRoot}`}>
       <PageHero
         eyebrow="Tourism providers"
         title="Meet the companies behind the experiences"
@@ -106,105 +106,124 @@ export default function CompaniesPage() {
         </div>
       </PageHero>
 
-      {loading ? (
-        <div className={styles.loading}>Loading companies...</div>
-      ) : companies.length === 0 ? (
-        <div className={styles.empty}>
-          <Building2 size={28} />
-          <h2>{hasFilters ? "No companies match these filters" : "No companies are listed yet"}</h2>
-          <p>{hasFilters ? "Try clearing the filters to see all listed providers." : "Published company profiles will appear here when providers join the marketplace."}</p>
-          {hasFilters ? (
-            <button className="btn btn-secondary" type="button" onClick={() => { setBusinessType(""); setRegion(""); setPage(1); }}>
-              Clear filters
-            </button>
-          ) : null}
+      <div className={styles.content}>
+        <div className={styles.listingHead}>
+          <div>
+            <span className={styles.listingKicker}>Provider directory</span>
+            <h2 className={styles.listingTitle}>Published companies</h2>
+            <p className={styles.listingLead}>
+              Browse public profiles, service areas and the experiences each provider has published.
+            </p>
+          </div>
+          <span className={styles.listingCount} aria-live="polite">
+            {loading ? "Loading" : `${total} ${total === 1 ? "company" : "companies"}`}
+          </span>
         </div>
-      ) : (
-        <>
-          <div className={styles.grid}>
-            {companies.map((company) => (
-              <article className={styles.card} key={company.id}>
-                {company.cover_image_url ? (
-                  <img
-                    className={styles.cover}
-                    src={company.cover_image_url}
-                    alt=""
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className={styles.coverFallback}>
-                    <Building2 size={28} />
-                  </div>
-                )}
-                <div className={styles.cardBody}>
-                  <div className={styles.identity}>
-                    {company.logo_image_url ? (
+
+        {loading ? (
+          <div className={styles.loading}>Loading companies...</div>
+        ) : companies.length === 0 ? (
+          <div className={styles.empty}>
+            <span className={styles.emptyIcon}>
+              <Building2 size={28} />
+            </span>
+            <h2>{hasFilters ? "No companies match these filters" : "No companies are listed yet"}</h2>
+            <p>{hasFilters ? "Try clearing the filters to see all listed providers." : "Published company profiles will appear here when providers join the marketplace."}</p>
+            {hasFilters ? (
+              <button className="btn btn-secondary" type="button" onClick={() => { setBusinessType(""); setRegion(""); setPage(1); }}>
+                Clear filters
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <>
+            <div className={styles.grid}>
+              {companies.map((company) => (
+                <article className={styles.card} key={company.id}>
+                  <div className={styles.coverFrame}>
+                    {company.cover_image_url ? (
                       <img
-                        className={styles.logo}
-                        src={company.logo_image_url}
+                        className={styles.cover}
+                        src={company.cover_image_url}
                         alt=""
                         loading="lazy"
                       />
                     ) : (
-                      <span className={styles.logoFallback}>
-                        <Building2 size={18} />
-                      </span>
+                      <div className={styles.coverFallback}>
+                        <Building2 size={28} />
+                      </div>
                     )}
-                    <div>
-                      <h2 className={styles.cardTitle}>{company.name}</h2>
-                      <p className={styles.cardMeta}>
-                        {company.business_type.replace(/_/g, " ")}
-                        {company.locality || company.region
-                          ? ` · ${[company.locality, company.region, company.country]
-                              .filter(Boolean)
-                              .join(", ")}`
-                          : ""}
-                      </p>
+                  </div>
+                  <div className={styles.cardBody}>
+                    <div className={styles.identity}>
+                      {company.logo_image_url ? (
+                        <img
+                          className={styles.logo}
+                          src={company.logo_image_url}
+                          alt=""
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className={styles.logoFallback}>
+                          <Building2 size={18} />
+                        </span>
+                      )}
+                      <div className={styles.identityCopy}>
+                        <h2 className={styles.cardTitle}>{company.name}</h2>
+                        <p className={styles.cardMeta}>
+                          {company.business_type.replace(/_/g, " ")}
+                          {company.locality || company.region
+                            ? ` · ${[company.locality, company.region, company.country]
+                                .filter(Boolean)
+                                .join(", ")}`
+                            : ""}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  {company.description ? (
-                    <p className={styles.description}>{company.description}</p>
-                  ) : null}
-                  <div className={styles.stats}>
-                    <span>
-                      <Globe size={14} /> {company.tours_count} published experiences
-                    </span>
-                    {company.website ? (
-                      <a href={company.website} target="_blank" rel="noreferrer">
-                        Website
-                      </a>
+                    {company.description ? (
+                      <p className={styles.description}>{company.description}</p>
                     ) : null}
+                    <div className={styles.stats}>
+                      <span>
+                        <Globe size={14} /> {company.tours_count} published experiences
+                      </span>
+                      {company.website ? (
+                        <a href={company.website} target="_blank" rel="noreferrer">
+                          Website
+                        </a>
+                      ) : null}
+                    </div>
+                    <Link className={styles.viewLink} href={company.public_path}>
+                      View company
+                    </Link>
                   </div>
-                  <Link className={styles.viewLink} href={company.public_path}>
-                    View company
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-          {totalPages > 1 ? (
-            <div className={styles.pagination}>
-              <button
-                type="button"
-                disabled={page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-              >
-                Previous
-              </button>
-              <span>
-                Page {page} of {totalPages}
-              </span>
-              <button
-                type="button"
-                disabled={page >= totalPages}
-                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-              >
-                Next
-              </button>
+                </article>
+              ))}
             </div>
-          ) : null}
-        </>
-      )}
+            {totalPages > 1 ? (
+              <div className={styles.pagination}>
+                <button
+                  type="button"
+                  disabled={page <= 1}
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -7,7 +7,7 @@ export default function NotFound() {
         <h1 style={{ fontSize: "3rem", marginBottom: "8px" }}>404</h1>
         <h2 style={{ marginBottom: "12px" }}>This page could not be found</h2>
         <p style={{ color: "var(--text-muted)", marginBottom: "24px" }}>
-          The tour, attraction or page you are looking for is no longer available.
+          The tour or page you are looking for is no longer available.
         </p>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/" className="btn btn-primary">

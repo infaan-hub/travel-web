@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
-import { toursAPI, homeSettingsAPI, reviewsAPI, attractionsAPI, publicCompaniesAPI } from '@/lib/api/client';
+import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI } from '@/lib/api/client';
 import TourCard from '@/components/TourCard';
 import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
@@ -16,7 +16,7 @@ import styles from "@/features/pages/home-page.module.css";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import DestinationCard from "@/components/DestinationCard";
 
-import type {  Attraction, HomeSettings, Review, Tour } from "@/features/pages/types";
+import type {  HomeSettings, Review, Tour } from "@/features/pages/types";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
 
 type FeaturedCompany = {
@@ -50,7 +50,6 @@ export default function HomePage() {
   const [allTours, setAllTours] = useState<Tour[]>([]);
   const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [companies, setCompanies] = useState<FeaturedCompany[]>([]);
   const [postedTrips, setPostedTrips] = useState<CompanyPostedTrip[]>([]);
   const [postedTripsLoading, setPostedTripsLoading] = useState(true);
@@ -70,6 +69,7 @@ export default function HomePage() {
   const [matchInView, setMatchInView] = useState(false);
   const matchStageRef = useRef<HTMLDivElement | null>(null);
   const matchDragStart = useRef<number | null>(null);
+  const matchSwiped = useRef(false);
   const router = useRouter();
   const matchDestinations = [
     { value: 'all', label: 'All destinations' },
@@ -134,9 +134,8 @@ export default function HomePage() {
       toursAPI.getAll({}),
       homeSettingsAPI.get(),
       reviewsAPI.getAll({ status: 'approved' }),
-      attractionsAPI.getAll({}),
       publicCompaniesAPI.getAll({ page: 1, page_size: 50 }),
-    ]).then(([toursRes, homeRes, reviewsRes, attractionsRes, companiesRes]) => {
+    ]).then(([toursRes, homeRes, reviewsRes, companiesRes]) => {
       const readList = (value: unknown) => {
         if (Array.isArray(value)) return value;
         if (value && typeof value === "object" && "results" in value && Array.isArray(value.results)) return value.results;
@@ -148,8 +147,6 @@ export default function HomePage() {
       else console.error(homeRes.reason);
       if (reviewsRes.status === "fulfilled") setReviews(readList(reviewsRes.value.data) as Review[]);
       else console.error(reviewsRes.reason);
-      if (attractionsRes.status === "fulfilled") setAttractions(readList(attractionsRes.value.data) as Attraction[]);
-      else console.error(attractionsRes.reason);
       if (companiesRes.status === "fulfilled") {
         const publicCompanyList = readList(companiesRes.value.data) as FeaturedCompany[];
         setCompanies(publicCompanyList.slice(0, 4));
@@ -246,6 +243,7 @@ export default function HomePage() {
             hideCta
             hideLike
             boldText
+            href="/tours/zanzibar/"
           />
           <DestinationCard
             image={getImageUrl(homeSettings?.tanzania_image_url || allTours.find(t => t.category === 'tanzania')?.image_url || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg') || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg'}
@@ -256,6 +254,7 @@ export default function HomePage() {
             hideCta
             hideLike
             boldText
+            href="/tours/tanzania/"
           />
         </div>
       </section>
@@ -315,6 +314,7 @@ export default function HomePage() {
                 }}
                 onPointerDown={(event) => {
                   matchDragStart.current = event.clientX;
+                  matchSwiped.current = false;
                   setMatchEngaged(true);
                 }}
                 onPointerUp={(event) => {
@@ -322,12 +322,14 @@ export default function HomePage() {
                   const distance = event.clientX - matchDragStart.current;
                   matchDragStart.current = null;
                   if (Math.abs(distance) > 40 && matchTrips.length > 1) {
+                    matchSwiped.current = true;
                     setMatchIndex((current) => (current + (distance < 0 ? 1 : -1) + matchTrips.length) % matchTrips.length);
                   }
                   setMatchEngaged(false);
                 }}
                 onPointerCancel={() => {
                   matchDragStart.current = null;
+                  matchSwiped.current = false;
                   setMatchEngaged(false);
                 }}
               >
@@ -341,7 +343,7 @@ export default function HomePage() {
                     <Link
                       key={`${trip.company_id}-${trip.id}`}
                       href={trip.company_public_path}
-                      className={`${styles.matchCard} ${distance === 0 ? styles.matchCardActive : ''}`}
+                      className={styles.matchCard}
                       data-distance={distance}
                       style={{
                         transform: `translate(-50%, -50%) translateX(${Math.sign(offset) * matchCardWidth * horizontalOffset}px)`,
@@ -354,9 +356,9 @@ export default function HomePage() {
                       aria-label={`${trip.title} in ${trip.place}, posted by ${trip.company_name}`}
                       title={`${trip.title} — ${trip.company_name}`}
                       onClick={(event) => {
-                        if (distance !== 0) {
+                        if (matchSwiped.current) {
                           event.preventDefault();
-                          setMatchIndex(index);
+                          matchSwiped.current = false;
                         }
                       }}
                     >
@@ -422,6 +424,7 @@ export default function HomePage() {
                 ]}
                 hideCta
                 boldText
+                href={company.public_path}
               />
             ))}
           </div>
@@ -429,32 +432,6 @@ export default function HomePage() {
       )}
 
 
-      {!loading && attractions.length > 0 && (
-        <section className="attractions-section">
-          <div className="section-header">
-            <h2>Places worth exploring</h2>
-            <p>Discover notable places across the destinations represented on Travel.</p>
-          </div>
-          <div className="home-attractions-grid">
-            {attractions.slice(0, 6).map(att => (
-              <div key={att.id} className="home-attraction-card">
-                <div className="home-attraction-image">
-                  <Image src={getImageUrl(att.image_url)} alt={att.name} width={320} height={220} />
-                </div>
-                <div className="home-attraction-info">
-                  <h3>{att.name}</h3>
-                  <span className="home-attraction-location"><MapPin size={14} /> {att.location}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="section-footer">
-            <button className="btn btn-outline" onClick={() => router.push('/attractions')}>
-              View All Attractions
-            </button>
-          </div>
-        </section>
-      )}
 
       {reviews.length > 0 && (
         <section className="testimonials-section">

@@ -39,59 +39,76 @@ export default function ContactPage() {
         ctaSecondary={{ label: "View experiences", href: "/tours/" }}
       />
 
-      <div className="contact-content">
-        <div className="contact-info">
-          <div className="contact-info-card">
-            <h3><Building2 size={18} /> Looking for a tour provider?</h3>
-            <p>Browse company profiles to find their published services and public contact details.</p>
-            <Link href="/companies/" className="btn btn-secondary">Find a company</Link>
-          </div>
-          <div className="contact-info-card">
-            <h3><ClipboardList size={18} /> About booking requests</h3>
-            <p>Requests are sent to the company that publishes the selected experience. The provider follows up with availability and next steps.</p>
-            <Link href="/bookings/" className="btn btn-secondary">My booking requests</Link>
-          </div>
-        </div>
-
-        <div className="contact-form-container">
-          {sent ? (
-            <div className="success-message">
-              <span className="success-icon"><CheckCircle size={32} /></span>
-              <h3>Message Sent Successfully!</h3>
-              <p>Your message has been sent to the Travel. support inbox.</p>
-              <button className="btn btn-primary" onClick={() => setSent(false)}>
-                Send Another Message
-              </button>
+      <div className={styles.content}>
+        <div className={`contact-content ${styles.contactContent}`}>
+          <div className={`contact-info ${styles.contactInfo}`}>
+            <div className={`contact-info-card ${styles.infoCard}`}>
+              <h3>
+                <span className={styles.infoIcon}><Building2 size={18} /></span>
+                Looking for a tour provider?
+              </h3>
+              <p>Browse company profiles to find their published services and public contact details.</p>
+              <Link href="/companies/" className="btn btn-secondary">Find a company</Link>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="contact-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Your Name *</label>
-                  <input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="John Doe" />
-                </div>
-                <div className="form-group">
-                  <label>Your Email *</label>
-                  <input type="email" name="email" value={form.email} onChange={handleChange} required placeholder="john@email.com" />
-                </div>
+            <div className={`contact-info-card ${styles.infoCard}`}>
+              <h3>
+                <span className={styles.infoIcon}><ClipboardList size={18} /></span>
+                About booking requests
+              </h3>
+              <p>Requests are sent to the company that publishes the selected experience. The provider follows up with availability and next steps.</p>
+              <Link href="/bookings/" className="btn btn-secondary">My booking requests</Link>
+            </div>
+          </div>
+
+          <div className={`contact-form-container ${styles.formCard}`}>
+            {sent ? (
+              <div className={`success-message ${styles.successMessage}`}>
+                <span className={`success-icon ${styles.successIcon}`}><CheckCircle size={32} /></span>
+                <h3>Message Sent Successfully!</h3>
+                <p>Your message has been sent to the Travel. support inbox.</p>
+                <button className="btn btn-primary" onClick={() => setSent(false)}>
+                  Send Another Message
+                </button>
               </div>
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Country code and phone number" />
+            ) : (
+              <>
+                <div className={styles.formHead}>
+                  <span className={styles.kicker}>Send a message</span>
+                  <h2>We&apos;re here to help</h2>
+                  <p>Share a few details and the support team will get back to you.</p>
                 </div>
-                <div className="form-group">
-                  <label>Subject *</label>
-                <input type="text" name="subject" value={form.subject} onChange={handleChange} required placeholder="How can we help?" />
-              </div>
-              <div className="form-group">
-                <label>Message *</label>
-                <textarea name="message" value={form.message} onChange={handleChange} required placeholder="Tell us about your travel plans..." rows={5} />
-              </div>
-              <button type="submit" className="btn btn-primary btn-block">
-                Send Message
-              </button>
-            </form>
-          )}
+                <form onSubmit={handleSubmit} className="contact-form">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Your Name *</label>
+                      <input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="John Doe" />
+                    </div>
+                    <div className="form-group">
+                      <label>Your Email *</label>
+                      <input type="email" name="email" value={form.email} onChange={handleChange} required placeholder="john@email.com" />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Phone</label>
+                      <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Country code and phone number" />
+                    </div>
+                    <div className="form-group">
+                      <label>Subject *</label>
+                      <input type="text" name="subject" value={form.subject} onChange={handleChange} required placeholder="How can we help?" />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Message *</label>
+                    <textarea name="message" value={form.message} onChange={handleChange} required placeholder="Tell us about your travel plans..." rows={5} />
+                  </div>
+                  <button type="submit" className="btn btn-primary btn-block">
+                    Send Message
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

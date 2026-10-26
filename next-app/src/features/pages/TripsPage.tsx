@@ -151,6 +151,7 @@ export default function TripsPage() {
         }}
       />
 
+      <div className={styles.content}>
       <div className="route-estimator-card" id="route-estimator">
         <div className="route-estimator-grid">
           <div className="route-estimator-field">
@@ -260,6 +261,7 @@ export default function TripsPage() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

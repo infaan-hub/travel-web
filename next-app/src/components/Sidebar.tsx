@@ -125,7 +125,7 @@ export default function Sidebar() {
     { to: "/admin/tours", label: "Experiences", icon: Globe },
     { to: "/admin/trips", label: "Trips", icon: BookOpen },
     { to: "/admin/bookings", label: "Bookings", icon: ClipboardList },
-    { to: "/admin/attractions", label: "Attractions", icon: Map },
+
     { to: "/admin/reviews", label: "Reviews", icon: Star },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare },
     { to: "/admin/settings", label: "Settings", icon: Settings },
@@ -135,8 +135,7 @@ export default function Sidebar() {
     { to: "/", label: "Home", icon: Home, exact: true },
     { to: "/tours", label: "Experiences", icon: Globe, exact: true },
     { to: "/companies", label: "Companies", icon: Building2 },
-    { to: "/attractions", label: "Places", icon: Map },
-    { to: "/trips", label: "Trip planning", icon: BookOpen },
+    { to: "/trips", label: "Trip", icon: Map },
     { to: "/contact", label: "Support", icon: Mail },
   ];
 

@@ -18,7 +18,7 @@ const ALLOWED = new Map<string, string>([
 export type UploadFolder =
   | "tours"
   | "tours/gallery"
-  | "attractions"
+
   | "home"
   | "hotels"
   | "profiles"

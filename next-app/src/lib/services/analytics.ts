@@ -10,7 +10,6 @@ export async function dashboardStats() {
   const [
     totalTours,
     totalBookings,
-    totalAttractions,
     totalReviews,
     totalUsers,
     totalTips,
@@ -33,7 +32,6 @@ export async function dashboardStats() {
   ] = await Promise.all([
     prisma.tour.count(),
     prisma.booking.count(),
-    prisma.attraction.count(),
     prisma.review.count(),
     prisma.user.count(),
     prisma.travelTip.count(),
@@ -68,7 +66,6 @@ export async function dashboardStats() {
   return {
     total_tours: totalTours,
     total_bookings: totalBookings,
-    total_attractions: totalAttractions,
     total_reviews: totalReviews,
     total_users: totalUsers,
     total_tips: totalTips,

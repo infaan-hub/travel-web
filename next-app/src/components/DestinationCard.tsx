@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import "./DestinationCard.css";
 
 type Stat = {
@@ -36,6 +37,7 @@ export default function DestinationCard({
   variant = "default",
   imagePriority = false,
   onImageClick,
+  href,
 }: {
   image?: string;
   title?: string;
@@ -53,11 +55,13 @@ export default function DestinationCard({
   variant?: "default" | "hero";
   imagePriority?: boolean;
   onImageClick?: () => void;
+  /** Makes the whole card a link, including the image and text areas. */
+  href?: string;
 }) {
   const [liked, setLiked] = useState(false);
 
   return (
-    <article className={`dc${stats && variant !== "hero" ? " dc--company" : ""}${hideCta ? " dc--no-cta" : ""}${boldText ? " dc--bold-text" : ""}${variant === "hero" ? " dc--hero" : ""}`}>
+    <article className={`dc${stats && variant !== "hero" ? " dc--company" : ""}${hideCta ? " dc--no-cta" : ""}${boldText ? " dc--bold-text" : ""}${variant === "hero" ? " dc--hero" : ""}${href ? " dc--linked" : ""}`}>
       <Image
         className="dc__img"
         src={normalizeImageSrc(image)}
@@ -69,6 +73,10 @@ export default function DestinationCard({
         style={{ objectFit: "cover", cursor: onImageClick ? "pointer" : undefined }}
       />
       <div className="dc__shade" />
+
+      {href ? (
+        <Link href={href} className="dc__cover-link" aria-label={`View ${title}`} />
+      ) : null}
 
       {badges && badges.length > 0 && (
         <div className="dc__badges">

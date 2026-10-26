@@ -47,7 +47,7 @@ export default function TourCard({ tour }: { tour: Tour }) {
   const reviews = tour.review_count || 0;
 
   return (
-    <article className="dc">
+    <article className="dc dc--linked">
       {uniqueImages[0] ? (
         <Image
           className="dc__img"
@@ -64,6 +64,12 @@ export default function TourCard({ tour }: { tour: Tour }) {
       )}
       <div className="dc__shade" />
 
+      <Link
+        href={detailHref}
+        className="dc__cover-link"
+        aria-label={`View tour: ${tour.title}`}
+      />
+
       <button
         className="dc__heart"
         aria-label={liked ? "Remove from favourites" : "Add to favourites"}
@@ -79,9 +85,7 @@ export default function TourCard({ tour }: { tour: Tour }) {
       </button>
 
       <div className="dc__info">
-        <h3 className="dc__title">
-          <Link href={detailHref}>{tour.title}</Link>
-        </h3>
+        <h3 className="dc__title">{tour.title}</h3>
         <p className="dc__loc">{tour.destination}</p>
         {tour.company_name && tour.company_public_path ? (
           <Link

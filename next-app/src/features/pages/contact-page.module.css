@@ -1,4 +1,337 @@
 .contactPageRoot {
-  background: #F2F0EF;
-  color: #08428C;
+  --tour-secondary: #08428c;
+
+  --text-primary: var(--tour-secondary);
+  --text-secondary: rgba(8, 66, 140, 0.72);
+  --text-muted: rgba(8, 66, 140, 0.64);
+  --text-light: rgba(8, 66, 140, 0.56);
+
+  --line: rgba(8, 66, 140, 0.14);
+  --border: rgba(8, 66, 140, 0.14);
+
+  --glass-bg: rgba(255, 255, 255, 0.10);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.18);
+  --glass-bg-soft: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-border-strong: rgba(255, 255, 255, 0.72);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 18px 44px rgba(8, 66, 140, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --glass-shadow-hover: 0 24px 56px rgba(8, 66, 140, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --glass-blur: blur(18px) saturate(160%);
+  --glass-radius: 22px;
+  --glass-radius-sm: 16px;
+
+  --brand: var(--tour-secondary);
+  --brand-strong: #063a78;
+  --brand-accent: var(--tour-secondary);
+  --brand-soft: rgba(8, 66, 140, 0.08);
+
+  --aqua: var(--tour-secondary);
+  --aqua-dark: #063a78;
+  --aqua-light: #0a52ad;
+  --aqua-strong: var(--tour-secondary);
+  --aqua-deep: #063a78;
+  --aqua-subtle: rgba(8, 66, 140, 0.10);
+  --aqua-glow: rgba(8, 66, 140, 0.18);
+
+  background:
+    radial-gradient(900px 540px at 0% -8%, rgba(8, 66, 140, 0.14), transparent 62%),
+    radial-gradient(780px 540px at 100% 2%, rgba(82, 125, 100, 0.16), transparent 58%),
+    radial-gradient(900px 640px at 44% 110%, rgba(8, 66, 140, 0.10), transparent 62%),
+    linear-gradient(150deg, #f6f3f0 0%, #eef3f6 48%, #f3f0ec 100%);
+  color: var(--tour-secondary);
+}
+
+.content {
+  width: min(100%, 1100px);
+  margin-inline: auto;
+}
+
+.contactContent {
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  align-items: start;
+  gap: 28px;
+}
+
+.contactInfo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 18px;
+}
+
+/* -------------------------------------------------------------------------
+   Info cards
+   ------------------------------------------------------------------------- */
+
+.contactPageRoot :global(.contact-info-card) {
+  padding: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.58) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(145deg, rgba(8, 66, 140, 0.08) 0%, rgba(255, 255, 255, 0.05) 46%, rgba(8, 66, 140, 0.04) 100%) !important;
+  box-shadow: var(--glass-shadow) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.contactPageRoot :global(.contact-info-card:hover) {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: var(--glass-shadow-hover) !important;
+}
+
+.infoCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.contactPageRoot :global(.contact-info-card) h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+  color: #08428c;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.32;
+}
+
+.infoIcon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86), 0 8px 18px rgba(8, 66, 140, 0.06);
+  color: #08428c;
+}
+
+.contactPageRoot :global(.contact-info-card) p {
+  margin: 0 0 18px;
+  color: rgba(8, 66, 140, 0.7);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.contactPageRoot :global(.contact-info-card) :global(.btn) {
+  margin-top: auto;
+  border: 1px solid rgba(255, 255, 255, 0.84) !important;
+  border-radius: 13px !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(232, 240, 242, 0.32)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 20px rgba(8, 66, 140, 0.07) !important;
+  color: #08428c !important;
+  font-size: 0.82rem !important;
+  font-weight: 750 !important;
+}
+
+.contactPageRoot :global(.contact-info-card) :global(.btn:hover) {
+  background: rgba(255, 255, 255, 0.82) !important;
+  transform: translateY(-1px);
+}
+
+/* -------------------------------------------------------------------------
+   Form card
+   ------------------------------------------------------------------------- */
+
+.contactPageRoot :global(.contact-form-container) {
+  max-width: none;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.58) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(155deg, rgba(8, 66, 140, 0.09), rgba(255, 255, 255, 0.04) 58%, rgba(8, 66, 140, 0.03)) !important;
+  box-shadow: var(--glass-shadow) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  backdrop-filter: var(--glass-blur) !important;
+}
+
+.formHead {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.46);
+}
+
+.kicker {
+  color: rgba(8, 66, 140, 0.72);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.formHead h2 {
+  margin: 0;
+  color: #08428c;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.formHead p {
+  max-width: 52ch;
+  margin: 0;
+  color: rgba(8, 66, 140, 0.68);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.contactPageRoot :global(.contact-form) {
+  display: grid;
+  gap: 16px;
+}
+
+.contactPageRoot :global(.contact-form) :global(.form-group) {
+  margin-bottom: 0;
+}
+
+.contactPageRoot :global(.contact-form) :global(.form-row) {
+  gap: 14px;
+}
+
+.contactPageRoot :global(.contact-form) label {
+  margin-bottom: 7px;
+  color: #08428c !important;
+  font-size: 0.72rem !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.contactPageRoot :global(.contact-form) input,
+.contactPageRoot :global(.contact-form) textarea {
+  border: 1px solid rgba(255, 255, 255, 0.78) !important;
+  background: rgba(255, 255, 255, 0.52) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 6px 18px rgba(8, 66, 140, 0.04) !important;
+  color: #08428c !important;
+  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+  backdrop-filter: blur(14px) saturate(150%) !important;
+}
+
+.contactPageRoot :global(.contact-form) input::placeholder,
+.contactPageRoot :global(.contact-form) textarea::placeholder {
+  color: rgba(8, 66, 140, 0.4) !important;
+  opacity: 1 !important;
+}
+
+.contactPageRoot :global(.contact-form) input:focus-visible,
+.contactPageRoot :global(.contact-form) textarea:focus-visible {
+  outline: none !important;
+  border-color: rgba(8, 66, 140, 0.5) !important;
+  box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
+}
+
+.contactPageRoot :global(.contact-form) textarea {
+  min-height: 150px !important;
+  padding-top: 13px !important;
+}
+
+.contactPageRoot :global(.btn-primary) {
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  background: linear-gradient(145deg, #0c57ae, #08428c) !important;
+  box-shadow: 0 12px 26px rgba(8, 66, 140, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
+  color: #fff !important;
+}
+
+.contactPageRoot :global(.btn-primary:hover:not(:disabled)) {
+  background: linear-gradient(145deg, #0a4d9d, #063a78) !important;
+  box-shadow: 0 16px 32px rgba(8, 66, 140, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.36) !important;
+}
+
+.contactPageRoot :global(.contact-form) :global(.btn-block) {
+  min-height: 50px !important;
+  margin-top: 2px;
+  border-radius: 14px !important;
+  font-size: 0.9rem !important;
+  font-weight: 750 !important;
+}
+
+/* -------------------------------------------------------------------------
+   Success state
+   ------------------------------------------------------------------------- */
+
+.successMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 26px 8px;
+  text-align: center;
+}
+
+.successIcon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  margin: 0 0 4px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  background: rgba(14, 124, 90, 0.11);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 12px 26px rgba(8, 66, 140, 0.06);
+  color: #0b6b4f;
+}
+
+.successMessage h3 {
+  margin: 0;
+  color: #08428c;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.24;
+}
+
+.successMessage p {
+  margin: 0 0 8px;
+  color: rgba(8, 66, 140, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.contactPageRoot .successMessage :global(.btn) {
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: 13px !important;
+  background: linear-gradient(145deg, #0c57ae, #08428c) !important;
+  box-shadow: 0 12px 26px rgba(8, 66, 140, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
+  color: #fff !important;
+  font-weight: 750 !important;
+}
+
+@media (max-width: 1024px) {
+  .contactContent {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contactPageRoot :global(.contact-form-container) {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .contactContent {
+    gap: 20px;
+  }
+
+  .contactPageRoot :global(.contact-form-container) {
+    padding: 20px;
+  }
+
+  .contactPageRoot :global(.contact-info-card) {
+    padding: 20px !important;
+  }
+
+  .contactPageRoot :global(.contact-form) :global(.form-row) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

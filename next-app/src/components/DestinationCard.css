@@ -21,6 +21,7 @@
 .dc__shade {
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
   background: linear-gradient(
     to bottom,
@@ -30,11 +31,29 @@
   );
 }
 
+/*
+ * Full-card link. It sits above the image so tapping anywhere on the media
+ * opens the card, while the controls below stay on top and remain usable.
+ */
+.dc__cover-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.dc__cover-link:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.9);
+  outline-offset: -4px;
+}
+
 /* heart */
 .dc__heart {
   position: absolute;
   top: 12px;
   right: 12px;
+  z-index: 4;
   width: 32px;
   height: 32px;
   display: grid;
@@ -54,11 +73,12 @@
   position: absolute;
   top: 14px;
   left: 14px;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   max-width: calc(100% - 58px);
+  pointer-events: none;
 }
 
 .dc__badge {
@@ -85,11 +105,24 @@
   left: 14px;
   right: 14px;
   bottom: 74px;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
   background: transparent;
+}
+
+/*
+ * Linked cards let taps on the title/copy fall through to the full-card link.
+ * Interactive children opt back in so the provider link and controls work.
+ */
+.dc--linked .dc__info {
+  pointer-events: none;
+}
+
+.dc--linked .dc__info :is(a, button) {
+  pointer-events: auto;
 }
 
 .dc__title,
@@ -181,6 +214,7 @@
   left: 14px;
   right: 14px;
   bottom: 14px;
+  z-index: 4;
   height: 44px;
   display: flex;
   align-items: center;

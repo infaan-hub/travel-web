@@ -9,6 +9,18 @@ const PLACEHOLDER =
   );
 
 /**
+ * Next.js uses `trailingSlash: true` for pages, which also redirects
+ * extensionless API routes. The built-in image optimizer does not follow those
+ * 308 responses, so point image requests at the canonical slashed URL.
+ */
+function withTrailingSlash(path: string): string {
+  if (!path.startsWith("/api/")) return path;
+  const [pathname, query] = path.split("?");
+  if (pathname.endsWith("/")) return path;
+  return `${pathname}/${query ? `?${query}` : ""}`;
+}
+
+/**
  * Resolves stored media paths and storage keys into web URLs.
  * New API responses are already relative (`/uploads/...`) or absolute
  * (external public URLs), so this remains only as a compatibility helper.
@@ -24,7 +36,7 @@ export function getImageUrl(url: string | null | undefined): string {
   }
   if (url.startsWith("/uploads/")) return url;
   if (url.startsWith("/media/")) return url.replace(/^\/media\//, "/uploads/");
-  if (url.startsWith("/")) return url;
+  if (url.startsWith("/")) return withTrailingSlash(url);
   return `/uploads/${url.replace(/^\/+/, "")}`;
 }
 

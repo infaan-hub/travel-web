@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
           <p className={styles.dashEyebrow}>Admin workspace</p>
           <h1 className={styles.dashTitle}>Platform dashboard</h1>
           <p className={styles.dashLead}>
-            Manage platform activity, users, companies, experiences, bookings, and attractions.
+            Manage platform activity, users, companies, experiences, and bookings.
           </p>
         </div>
         <div className={styles.dashActions}>
@@ -173,15 +173,6 @@ export default function AdminDashboardPage() {
             </li>
             <li className={styles.dashRow}>
               <div className={styles.dashRowMain}>
-                <span className={styles.dashRowTitle}>Attractions</span>
-                <span className={styles.dashRowSub}>Listed attractions</span>
-              </div>
-              <div className={styles.dashRowEnd}>
-                <span className={styles.dashRowMeta}>{stats.total_attractions}</span>
-              </div>
-            </li>
-            <li className={styles.dashRow}>
-              <div className={styles.dashRowMain}>
                 <span className={styles.dashRowTitle}>Users</span>
                 <span className={styles.dashRowSub}>Registered accounts</span>
               </div>
@@ -240,7 +231,7 @@ export default function AdminDashboardPage() {
                 <div>
                   <h2 className={styles.dashPanelTitle}>Welcome to Admin Panel</h2>
                   <p className={styles.dashPanelCopy}>
-                    Manage platform activity, users, companies, experiences, bookings, and attractions.
+                    Manage platform activity, users, companies, experiences, and bookings.
                   </p>
                 </div>
               </div>

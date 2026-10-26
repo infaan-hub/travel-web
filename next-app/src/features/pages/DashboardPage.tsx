@@ -102,10 +102,6 @@ export default function DashboardPage() {
               <span className="ql-icon"><Users size={24} /></span>
               <span>Tourism companies</span>
             </Link>
-            <Link className="quick-link-card" href="/attractions/">
-              <span className="ql-icon"><Map size={24} /></span>
-              <span>Places</span>
-            </Link>
             <Link className="quick-link-card" href="/contact/">
               <span className="ql-icon"><Mail size={24} /></span>
               <span>Contact Travel.</span>

@@ -1,5 +1,4 @@
 import type {
-  Attraction,
   AuditLog,
   Booking,
   Company,
@@ -225,24 +224,6 @@ export function tourDetailSerializer(
     review_count,
     created_at: iso(tour.createdAt),
     updated_at: iso(tour.updatedAt),
-  };
-}
-
-export function attractionSerializer(attraction: Attraction): Json {
-  return {
-    id: attraction.id,
-    name: attraction.name,
-    description: attraction.description,
-    location: attraction.location,
-    region: attraction.region,
-    category: attraction.category,
-    image: attraction.image,
-    image_url: publicImageUrl(attraction.image),
-    best_time_to_visit: attraction.bestTimeToVisit,
-    entry_fee: attraction.entryFee,
-    activities: attraction.activities,
-    created_at: iso(attraction.createdAt),
-    updated_at: iso(attraction.updatedAt),
   };
 }
 

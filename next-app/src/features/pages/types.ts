@@ -39,20 +39,6 @@ export type Tour = {
   [key: string]: any;
 };
 
-export type Attraction = {
-  id: number;
-  name: string;
-  description: string;
-  location: string;
-  region: string;
-  category: string;
-  image_url?: ImageUrl;
-  best_time_to_visit: string;
-  entry_fee: string;
-  activities: string;
-  [key: string]: any;
-};
-
 export type TravelTip = {
   id: number;
   title: string;
@@ -339,7 +325,6 @@ export type CompanyAuditEntry = {
 export type DashboardStats = {
   total_tours: number;
   total_bookings: number;
-  total_attractions: number;
   total_reviews: number;
   total_users: number;
   total_tips: number;

@@ -10,7 +10,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/tours/", priority: 0.9 },
     { path: "/tours/zanzibar/", priority: 0.8 },
     { path: "/tours/tanzania/", priority: 0.8 },
-    { path: "/attractions/", priority: 0.8 },
     { path: "/trips/", priority: 0.7 },
     { path: "/contact/", priority: 0.6 },
     { path: "/login/", priority: 0.4 },
@@ -27,13 +26,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // The database may be unavailable during a build; the sitemap must never
   // break the production build.
   try {
-    const [tours, attractions, tips] = await Promise.all([
+    const [tours, tips] = await Promise.all([
       prisma.tour.findMany({
         where: { deletedAt: null, available: true },
-        select: { id: true, updatedAt: true },
-      }),
-      prisma.attraction.findMany({
-        where: { deletedAt: null },
         select: { id: true, updatedAt: true },
       }),
       prisma.travelTip.findMany({
@@ -49,12 +44,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: tour.updatedAt,
         changeFrequency: "weekly" as const,
         priority: 0.8,
-      })),
-      ...attractions.map((attraction) => ({
-        url: `${base}/attractions/#${attraction.id}`,
-        lastModified: attraction.updatedAt,
-        changeFrequency: "monthly" as const,
-        priority: 0.6,
       })),
       ...tips.map((tip) => ({
         url: `${base}/trips/#${tip.id}`,
