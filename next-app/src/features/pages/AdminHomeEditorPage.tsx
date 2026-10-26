@@ -3,13 +3,14 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { homeSettingsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Save, Upload, Trash2, Eye, Image as ImageIcon, ArrowLeft } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  HomeSettings  } from "@/features/pages/types";
-import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import type { ChangeEvent } from "react";
 import styles from "@/features/pages/admin-dashboard.module.css";
 export default function AdminHomeEditorPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
@@ -32,6 +33,7 @@ export default function AdminHomeEditorPage() {
   const [moreExperiencesFiles, setMoreExperiencesFiles] = useState<(File | null)[]>(Array(5).fill(null));
   const [moreExperiencesPreviews, setMoreExperiencesPreviews] = useState<(string | null)[]>(Array(5).fill(null));
   const [message, setMessage] = useState('');
+  const [messageError, setMessageError] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -43,12 +45,22 @@ export default function AdminHomeEditorPage() {
     try {
       const res = await homeSettingsAPI.get();
       setSettings(res.data);
-    } catch { console.error('Failed to load home settings'); }
+    } catch (error) {
+      console.error('Failed to load home settings', error);
+      setMessage('Failed to load homepage images. Please refresh and try again.');
+      setMessageError(true);
+    }
     finally { setLoading(false); }
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, setFile: any, setPreview: any) => {
-    const file = (e.currentTarget as HTMLInputElement).files?.[0];
+  const handleFileChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    setFile: (file: File | null) => void,
+    setPreview: (preview: string | null) => void,
+  ) => {
+    const input = e.currentTarget;
+    const file = input.files?.[0];
+    input.value = '';
     if (!file) return;
     setFile(file);
     const reader = new FileReader();
@@ -73,36 +85,23 @@ export default function AdminHomeEditorPage() {
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
+    setMessageError(false);
     try {
-      let updatedSettings = settings;
-      const heroUploads: [File | null, string][] = [
+      const uploads: [File | null, string][] = [
         [heroFile, 'hero_image'],
         [heroSecondaryFile, 'hero_secondary_image'],
         [heroFeatureFile, 'hero_feature_image'],
         [heroThumbFile, 'hero_thumb_image'],
+        [zanzibarFile, 'zanzibar_image'],
+        [tanzaniaFile, 'tanzania_image'],
+        ...moreExperiencesFiles.map((file, index) => [file, `more_experiences_image_${index + 1}`] as [File | null, string]),
       ];
-      for (const [file, inputName] of heroUploads) {
-        if (!file) continue;
-        const formData = new FormData();
-        formData.append(inputName, file);
-        const res = await homeSettingsAPI.update(formData);
-        updatedSettings = res.data;
+      const formData = new FormData();
+      for (const [file, inputName] of uploads) {
+        if (file) formData.append(inputName, file);
       }
-      if (zanzibarFile || tanzaniaFile) {
-        const formData = new FormData();
-        if (zanzibarFile) formData.append('zanzibar_image', zanzibarFile);
-        if (tanzaniaFile) formData.append('tanzania_image', tanzaniaFile);
-        const res = await homeSettingsAPI.update(formData);
-        updatedSettings = res.data;
-      }
-      for (const [index, file] of moreExperiencesFiles.entries()) {
-        if (!file) continue;
-        const formData = new FormData();
-        formData.append(`more_experiences_image_${index + 1}`, file);
-        const res = await homeSettingsAPI.update(formData);
-        updatedSettings = res.data;
-      }
-      if (updatedSettings) setSettings(updatedSettings);
+      const res = await homeSettingsAPI.update(formData);
+      setSettings(res.data);
       setHeroFile(null); setHeroPreview(null);
       setHeroSecondaryFile(null); setHeroSecondaryPreview(null);
       setHeroFeatureFile(null); setHeroFeaturePreview(null);
@@ -111,14 +110,23 @@ export default function AdminHomeEditorPage() {
       setTanzaniaFile(null); setTanzaniaPreview(null);
       setMoreExperiencesFiles(Array(5).fill(null)); setMoreExperiencesPreviews(Array(5).fill(null));
       setMessage('Home page settings saved successfully!');
+      setMessageError(false);
       setTimeout(() => setMessage(''), 3000);
-    } catch { setMessage('Failed to save settings'); }
+    } catch (error) {
+      const detail = axios.isAxiosError(error)
+        ? error.response?.data?.message || error.response?.data?.detail
+        : error instanceof Error ? error.message : null;
+      setMessage(typeof detail === 'string' ? detail : 'Failed to save settings. Please try again.');
+      setMessageError(true);
+    }
     finally { setSaving(false); }
   };
 
   const handleDelete = async (field: string) => {
     if (!window.confirm(`Delete ${field} image?`)) return;
     setSaving(true);
+    setMessage('');
+    setMessageError(false);
     try {
       const formData = new FormData();
       const portfolioIndex = field.startsWith('more-experiences-') ? Number(field.slice('more-experiences-'.length)) : null;
@@ -128,8 +136,15 @@ export default function AdminHomeEditorPage() {
       setSettings(res.data);
       clearField(field);
       setMessage('Image deleted');
+      setMessageError(false);
       setTimeout(() => setMessage(''), 3000);
-    } catch { setMessage('Failed to delete image'); }
+    } catch (error) {
+      const detail = axios.isAxiosError(error)
+        ? error.response?.data?.message || error.response?.data?.detail
+        : error instanceof Error ? error.message : null;
+      setMessage(typeof detail === 'string' ? detail : 'Failed to delete image. Please try again.');
+      setMessageError(true);
+    }
     finally { setSaving(false); }
   };
 
@@ -179,7 +194,7 @@ export default function AdminHomeEditorPage() {
         </div>
       </header>
 
-      {message && <div className="alert alert-success">{message}</div>}
+      {message && <div className={`alert ${messageError ? 'alert-danger' : 'alert-success'}`} role="status" aria-live="polite">{message}</div>}
 
       <section className={styles.dashPanel} aria-label="Homepage images">
         <div className={styles.dashPanelHead}>
@@ -207,7 +222,7 @@ export default function AdminHomeEditorPage() {
           <div className="editor-actions">
             <label className="btn btn-sm btn-outline">
               <Upload size={14} /> Upload
-              <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleFileChange(e, setHeroFile, setHeroPreview)} />
+              <input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => handleFileChange(e, setHeroFile, setHeroPreview)} />
             </label>
             {(heroPreview || settings?.hero_image_url) && (
               <button className="btn btn-sm btn-danger" onClick={() => handleDelete('hero')}>
@@ -269,7 +284,7 @@ export default function AdminHomeEditorPage() {
           <div className="editor-actions">
             <label className="btn btn-sm btn-outline">
               <Upload size={14} /> Upload
-              <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleFileChange(e, setZanzibarFile, setZanzibarPreview)} />
+              <input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => handleFileChange(e, setZanzibarFile, setZanzibarPreview)} />
             </label>
             {(zanzibarPreview || settings?.zanzibar_image_url) && (
               <button className="btn btn-sm btn-danger" onClick={() => handleDelete('zanzibar')}>
@@ -292,7 +307,7 @@ export default function AdminHomeEditorPage() {
           <div className="editor-actions">
             <label className="btn btn-sm btn-outline">
               <Upload size={14} /> Upload
-              <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => handleFileChange(e, setTanzaniaFile, setTanzaniaPreview)} />
+              <input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => handleFileChange(e, setTanzaniaFile, setTanzaniaPreview)} />
             </label>
             {(tanzaniaPreview || settings?.tanzania_image_url) && (
               <button className="btn btn-sm btn-danger" onClick={() => handleDelete('tanzania')}>
