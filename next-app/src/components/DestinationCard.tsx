@@ -95,7 +95,11 @@ export default function DestinationCard({
       )}
 
       <div className="dc__info">
-        {!hideTitle && <h3 className="dc__title">{title}</h3>}
+        {!hideTitle && (
+          variant === "hero"
+            ? <h1 className="dc__title">{title}</h1>
+            : <h3 className="dc__title">{title}</h3>
+        )}
         <p className="dc__loc">{location}</p>
         {description ? <p className="dc__description">{description}</p> : null}
         {stats ? (

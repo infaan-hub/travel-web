@@ -10,7 +10,6 @@ import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  Review, Tour, TourTranslation  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
-import { PageHero } from "@/components/PageHero";
 import DestinationCard from "@/components/DestinationCard";
 import styles from "@/features/pages/tour-detail-page.module.css";
 export default function TourDetailPage() {
@@ -121,15 +120,6 @@ export default function TourDetailPage() {
 
   return (
     <div className={`page tour-detail-page ${styles.tourDetailPageRoot}`}>
-      <PageHero
-        title={displayTitle ?? "Tour details"}
-        subtitle={`${tour?.duration ?? ""} - ${tour?.destination ?? ""} - from $${tour?.price ?? 0}`}
-        backgroundImageKey="more1"
-        patternImageKey="more2"
-        media={tour?.main_image_url || tour?.image_url ? { src: getImageUrl(tour.main_image_url || tour.image_url), alt: tour.title } : undefined}
-        patternMedia={tour?.image2_url || tour?.image3_url ? getImageUrl(tour.image2_url || tour.image3_url) : undefined}
-        chips={[categoryLabel]}
-      />
       <button className="btn btn-back" onClick={() => router.back()}><ArrowLeft size={18} /> Back</button>
 
       <div className={styles.tourHeroCard}>
@@ -142,7 +132,6 @@ export default function TourDetailPage() {
             badges={[categoryLabel]}
             hideCta
             hideLike
-            hideTitle
             variant="hero"
             imagePriority
             onImageClick={() => openLightbox(0)}
