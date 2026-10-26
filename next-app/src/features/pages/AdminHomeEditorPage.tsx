@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { homeSettingsAPI } from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/components/ToastProvider';
 import { Save, Upload, Trash2, Eye, Image as ImageIcon, ArrowLeft } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
@@ -14,6 +15,7 @@ import type { ChangeEvent } from "react";
 import styles from "@/features/pages/admin-dashboard.module.css";
 export default function AdminHomeEditorPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
+  const toast = useToast();
   const router = useRouter();
   const [settings, setSettings] = useState<HomeSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -111,6 +113,7 @@ export default function AdminHomeEditorPage() {
       setMoreExperiencesFiles(Array(5).fill(null)); setMoreExperiencesPreviews(Array(5).fill(null));
       setMessage('Home page settings saved successfully!');
       setMessageError(false);
+      toast.success('Homepage changes saved and are now live.');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       const detail = axios.isAxiosError(error)
@@ -118,6 +121,7 @@ export default function AdminHomeEditorPage() {
         : error instanceof Error ? error.message : null;
       setMessage(typeof detail === 'string' ? detail : 'Failed to save settings. Please try again.');
       setMessageError(true);
+      toast.error(typeof detail === 'string' ? detail : 'Failed to save homepage changes.');
     }
     finally { setSaving(false); }
   };
@@ -137,6 +141,7 @@ export default function AdminHomeEditorPage() {
       clearField(field);
       setMessage('Image deleted');
       setMessageError(false);
+      toast.success('Homepage image removed.');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       const detail = axios.isAxiosError(error)
@@ -144,6 +149,7 @@ export default function AdminHomeEditorPage() {
         : error instanceof Error ? error.message : null;
       setMessage(typeof detail === 'string' ? detail : 'Failed to delete image. Please try again.');
       setMessageError(true);
+      toast.error(typeof detail === 'string' ? detail : 'Failed to remove homepage image.');
     }
     finally { setSaving(false); }
   };
@@ -162,6 +168,15 @@ export default function AdminHomeEditorPage() {
   };
 
   const portfolioPreview = (index: number) => moreExperiencesPreviews[index] || settings?.more_experiences_image_urls?.[index] || null;
+  const hasPendingUploads = Boolean(
+    heroFile ||
+    heroSecondaryFile ||
+    heroFeatureFile ||
+    heroThumbFile ||
+    zanzibarFile ||
+    tanzaniaFile ||
+    moreExperiencesFiles.some(Boolean),
+  );
 
   const choosePortfolioImage = (index: number, event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
@@ -187,7 +202,7 @@ export default function AdminHomeEditorPage() {
           <button
             className="btn btn-primary"
             onClick={handleSave}
-            disabled={saving || (!heroFile && !heroSecondaryFile && !heroFeatureFile && !heroThumbFile && !zanzibarFile && !tanzaniaFile && !moreExperiencesFiles.some(Boolean))}
+            disabled={saving || !hasPendingUploads}
           >
             <Save size={16} /> {saving ? 'Saving...' : 'Save All Changes'}
           </button>
@@ -349,6 +364,16 @@ export default function AdminHomeEditorPage() {
             ))}
           </div>
         </div>
+        </div>
+        <div className="home-editor-save">
+          <button
+            type="button"
+            className="btn btn-primary btn-large"
+            onClick={handleSave}
+            disabled={saving || !hasPendingUploads}
+          >
+            <Save size={16} /> {saving ? 'Saving...' : 'Save Homepage Changes'}
+          </button>
         </div>
       </section>
     </div>
