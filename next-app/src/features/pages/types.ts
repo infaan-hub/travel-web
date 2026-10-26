@@ -39,17 +39,19 @@ export type Tour = {
   [key: string]: any;
 };
 
-export type TravelTip = {
+export type CompanyTrip = {
   id: number;
+  company_id?: number;
+  company_name?: string | null;
+  company_slug?: string | null;
   title: string;
-  content: string;
-  category: string;
-  image_url?: ImageUrl;
-  published: boolean;
-  created_at?: string;
-  [key: string]: any;
+  place: string;
+  description: string;
+  price: string | null;
+  image_url: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
-
 export type GalleryImage = {
   id: number;
   tour_id?: number;

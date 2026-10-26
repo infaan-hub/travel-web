@@ -23,7 +23,6 @@ export type UploadFolder =
   | "hotels"
   | "profiles"
   | "drivers"
-  | "tips"
   | "companies"
   | "companies/covers"
   | "companies/trips";

@@ -180,19 +180,6 @@ export const contactSchema = z.object({
   message: z.string().trim().min(1, "Message is required.").max(5000),
 });
 
-const tipBaseSchema = z.object({
-  title: z.string().trim().min(1, "Title is required.").max(200),
-  content: z.string().trim().min(1, "Content is required.").max(20000),
-  category: z.string().trim().max(100).optional(),
-  published: booleanishSchema.optional(),
-});
-
-export const tipSchema = tipBaseSchema.extend({
-  category: z.string().trim().max(100).optional().default(""),
-});
-
-export const tipUpdateSchema = tipBaseSchema.partial();
-
 export const driverSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(200),
   phone: z.string().trim().min(1, "Phone is required.").max(20),

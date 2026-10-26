@@ -29,6 +29,7 @@ import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { profileAPI } from "@/lib/api/client";
 import { COMPANY_ROLE_LABELS } from "@/lib/company-access";
+import styles from "./sidebar.module.css";
 
 type NavItem = {
   to: string;
@@ -39,7 +40,7 @@ type NavItem = {
 };
 
 function NavIcon({ icon: Icon }: { icon: AppIcon }) {
-  return <Icon size={20} className="nav-svg-icon" />;
+  return <Icon size={20} />;
 }
 
 export default function Sidebar() {
@@ -51,7 +52,6 @@ export default function Sidebar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const showLabels = mobileOpen;
 
   // The mobile menu state is owned here, but the toggle button lives in the top
   // header. Both components stay in sync through a pair of window events:
@@ -123,7 +123,6 @@ export default function Sidebar() {
     { to: "/admin/users", label: "Users", icon: Users },
     { to: "/admin/companies", label: "Companies", icon: Building2 },
     { to: "/admin/tours", label: "Experiences", icon: Globe },
-    { to: "/admin/trips", label: "Trips", icon: BookOpen },
     { to: "/admin/bookings", label: "Bookings", icon: ClipboardList },
 
     { to: "/admin/reviews", label: "Reviews", icon: Star },
@@ -200,29 +199,25 @@ export default function Sidebar() {
             <Link
               key={item.to}
               href={item.to}
-              className={`nav-item ${isActive(item) ? "active" : ""}`}
-              aria-label={!showLabels ? item.label : undefined}
-              title={!showLabels ? item.label : undefined}
+              className={`${styles.item} ${isActive(item) ? styles.itemActive : ""}`}
               onClick={closeAll}
             >
-              <span className="nav-icon">
+              <span className={styles.icon}>
                 <NavIcon icon={item.icon} />
               </span>
-              {showLabels && <span className="nav-label">{item.label}</span>}
+              <span className={styles.label}>{item.label}</span>
             </Link>
           ))}
           {(user?.companies?.length ?? 0) > 1 && (
             <Link
               href="/company/select/"
-              className="nav-item"
-              aria-label={!showLabels ? "Switch company" : undefined}
-              title={!showLabels ? "Switch company" : undefined}
+              className={styles.item}
               onClick={closeAll}
             >
-              <span className="nav-icon">
+              <span className={styles.icon}>
                 <NavIcon icon={Users} />
               </span>
-              {showLabels && <span className="nav-label">Switch company</span>}
+              <span className={styles.label}>Switch company</span>
             </Link>
           )}
         </>
@@ -231,30 +226,28 @@ export default function Sidebar() {
           href={(user?.companies?.length ?? 0) > 1
             ? "/company/select/"
             : "/tour-company/dashboard"}
-          className="nav-item"
+          className={styles.item}
           onClick={closeAll}
         >
-          <span className="nav-icon">
+          <span className={styles.icon}>
             <NavIcon icon={(user?.companies?.length ?? 0) > 1 ? Users : LayoutDashboard} />
           </span>
-          {showLabels && (
-            <span className="nav-label">
-              {(user?.companies?.length ?? 0) > 1
-                ? "Select company"
-                : "Company application"}
-            </span>
-          )}
+          <span className={styles.label}>
+            {(user?.companies?.length ?? 0) > 1
+              ? "Select company"
+              : "Company application"}
+          </span>
         </Link>
       )}
       <Link
         href="/settings/"
-        className={`nav-item ${pathname === "/settings" ? "active" : ""}`}
+        className={`${styles.item} ${pathname === "/settings" ? styles.itemActive : ""}`}
         onClick={closeAll}
       >
-        <span className="nav-icon">
+        <span className={styles.icon}>
           <NavIcon icon={Settings} />
         </span>
-        {showLabels && <span className="nav-label">Account profile</span>}
+        <span className={styles.label}>Account profile</span>
       </Link>
     </>
   ) : null;
@@ -262,17 +255,18 @@ export default function Sidebar() {
   return (
     <>
       <aside
-        className={`sidebar glass-sidebar ${mobileOpen ? "expanded mobile-open" : ""}`}
+        className={`${styles.drawer} ${mobileOpen ? styles.open : ""}`}
         aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
       >
-        <div className="sidebar-header">
-          <Link href="/" className="sidebar-logo" onClick={closeAll}>
-            <Palmtree size={24} className="logo-plane" />
-            {showLabels && <span className="sidebar-wordmark">Travel<span>.</span></span>}
+        <div className={styles.header}>
+          <Link href="/" className={styles.brand} onClick={closeAll}>
+            <span className={styles.brandMark}><Palmtree size={20} /></span>
+            <span className={styles.wordmark}>Travel<span>.</span></span>
           </Link>
           <button
             type="button"
-            className="collapse-btn"
+            className={styles.close}
             onClick={closeAll}
             aria-label="Close navigation"
             title="Close navigation"
@@ -281,84 +275,77 @@ export default function Sidebar() {
           </button>
         </div>
 
-        <nav className="sidebar-nav">
-          {showLabels && (
-            <div className="nav-section-title">
-              {isAdmin
-                ? "Platform workspace"
-                : isTourCompany
-                  ? activeCompany
-                    ? `Company (${COMPANY_ROLE_LABELS[activeCompany.role]})`
-                    : "Company workspace"
-                  : "Discover"}
-            </div>
-          )}
+        <nav className={styles.nav} aria-label="Primary navigation">
+          <div className={styles.sectionTitle}>
+            {isAdmin
+              ? "Platform workspace"
+              : isTourCompany
+                ? activeCompany
+                  ? `Company (${COMPANY_ROLE_LABELS[activeCompany.role]})`
+                  : "Company workspace"
+                : "Discover"}
+          </div>
           {!isAdmin && isTourCompany && companySection}
           {navItems.map((item) => (
             <Link
               key={item.to}
               href={item.to}
-              className={`nav-item ${isActive(item) ? "active" : ""}`}
-              aria-label={!showLabels ? item.label : undefined}
-              title={!showLabels ? item.label : undefined}
+              className={`${styles.item} ${isActive(item) ? styles.itemActive : ""}`}
               onClick={closeAll}
             >
-              <span className="nav-icon">
+              <span className={styles.icon}>
                 <NavIcon icon={item.icon} />
               </span>
-              {showLabels && <span className="nav-label">{item.label}</span>}
+              <span className={styles.label}>{item.label}</span>
             </Link>
           ))}
-
         </nav>
 
-        <div className="sidebar-footer">
+        <div className={styles.footer}>
           {isAuthenticated ? (
             <>
-              <div className="sidebar-user">
-                <div className="user-avatar">
+              <div className={styles.userCard}>
+                <div className={styles.avatar}>
                   {profileImage ? (
-                    <NextImage src={profileImage} alt="" width={38} height={38} className="avatar-img" />
+                    <NextImage src={profileImage} alt="" width={42} height={42} className="avatar-img" />
                   ) : (
                     user?.username?.[0]?.toUpperCase() || "U"
                   )}
                 </div>
-                {showLabels && (
-                  <div className="user-info">
-                    <span className="user-name">{user?.username}</span>
-                    <span className="user-email">{user?.email}</span>
-                    <span className="user-badges">
-                      {isAdmin && <span className="user-badge">Admin</span>}
-                      {activeCompany && (
-                        <span className="user-badge">
-                          {COMPANY_ROLE_LABELS[activeCompany.role]}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                )}
+                <div className={styles.userInfo}>
+                  <span className={styles.userName}>{user?.username}</span>
+                  <span className={styles.userEmail}>{user?.email}</span>
+                  <span className={styles.badges}>
+                    {isAdmin && <span className={styles.badge}>Admin</span>}
+                    {activeCompany && (
+                      <span className={styles.badge}>
+                        {COMPANY_ROLE_LABELS[activeCompany.role]}
+                      </span>
+                    )}
+                  </span>
+                </div>
               </div>
-              <button type="button" className="logout-btn" onClick={handleLogout} title="Logout">
+              <button type="button" className={styles.logout} onClick={handleLogout} title="Logout">
                 <LogOut size={16} />
-                {showLabels && <span>Logout</span>}
+                <span>Logout</span>
               </button>
             </>
           ) : (
-            <div className="auth-buttons">
-              <Link href="/login" className="auth-btn login-btn" onClick={closeAll}>
-                <Lock size={14} />
-                {showLabels && <span>Login</span>}
+            <div className={styles.accessActions}>
+              <Link href="/login" className={`${styles.accessAction} ${styles.login}`} onClick={closeAll}>
+                <Lock size={15} />
+                <span>Login</span>
               </Link>
-              <Link href="/register" className="auth-btn register-btn" onClick={closeAll}>
-                <UserPlus size={14} />
-                {showLabels && <span>Register</span>}
+              <Link href="/register" className={`${styles.accessAction} ${styles.register}`} onClick={closeAll}>
+                <UserPlus size={15} />
+                <span>Create account</span>
               </Link>
             </div>
           )}
         </div>
       </aside>
 
-      {mobileOpen && <div className="sidebar-overlay" onClick={closeAll} />}
+      {mobileOpen && <div className={styles.overlay} onClick={closeAll} aria-hidden="true" />}
     </>
   );
 }

@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") ?? "";
     const results = await searchContent(query);
-    const total = results.tours.length + results.tips.length;
+    const total = results.tours.length + results.companies.length;
     return ok({ query, total, ...results });
   } catch (error) {
     return handleApiError(error);

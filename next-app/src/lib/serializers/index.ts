@@ -17,7 +17,6 @@ import type {
   Tour,
   TourGalleryImage,
   TravelDriver,
-  TravelTip,
   TravelVehicle,
   User,
   VisitorTracking,
@@ -365,22 +364,6 @@ export function contactSerializer(message: ContactMessage): Json {
     message: message.message,
     is_read: message.isRead,
     created_at: iso(message.createdAt),
-  };
-}
-
-export function tipSerializer(tip: TravelTip & { author?: User | null }): Json {
-  return {
-    id: tip.id,
-    title: tip.title,
-    content: tip.content,
-    category: tip.category,
-    image: tip.image,
-    image_url: publicImageUrl(tip.image),
-    author: tip.authorId,
-    author_name: tip.author?.username ?? null,
-    published: tip.published,
-    created_at: iso(tip.createdAt),
-    updated_at: iso(tip.updatedAt),
   };
 }
 
@@ -805,10 +788,12 @@ export function companyPublicDetailSerializer(
   };
 }
 
-export function companyTripSerializer(trip: CompanyTrip): Json {
+export function companyTripSerializer(trip: CompanyTrip & { company?: { name: string; slug: string } | null }): Json {
   return {
     id: trip.id,
     company_id: trip.companyId,
+    company_name: trip.company?.name ?? null,
+    company_slug: trip.company?.slug ?? null,
     title: trip.title,
     place: trip.place,
     description: trip.description,

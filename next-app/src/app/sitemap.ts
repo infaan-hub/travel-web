@@ -26,13 +26,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // The database may be unavailable during a build; the sitemap must never
   // break the production build.
   try {
-    const [tours, tips] = await Promise.all([
+    const [tours, trips] = await Promise.all([
       prisma.tour.findMany({
         where: { deletedAt: null, available: true },
         select: { id: true, updatedAt: true },
       }),
-      prisma.travelTip.findMany({
-        where: { deletedAt: null, published: true },
+      prisma.companyTrip.findMany({
+        where: { company: { status: "ACTIVE" as any, isPublic: true } },
         select: { id: true, updatedAt: true },
       }),
     ]);
@@ -45,9 +45,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly" as const,
         priority: 0.8,
       })),
-      ...tips.map((tip) => ({
-        url: `${base}/trips/#${tip.id}`,
-        lastModified: tip.updatedAt,
+      ...trips.map((trip) => ({
+        url: `${base}/trips/#${trip.id}`,
+        lastModified: trip.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.5,
       })),

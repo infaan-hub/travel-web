@@ -3,15 +3,15 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
-import { BookOpen, Lightbulb, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from '@/components/icons';
+import { BookOpen, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
-import type {  Tour, TravelTip  } from "@/features/pages/types";
+import type {  Tour, CompanyTrip  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import { PageHero } from "@/components/PageHero";
 import styles from "@/features/pages/trips-page.module.css";
 export default function TripsPage() {
-  const [trips, setTrips] = useState<TravelTip[]>([]);
+  const [trips, setTrips] = useState<CompanyTrip[]>([]);
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -140,13 +140,13 @@ export default function TripsPage() {
   return (
     <div className={`page trips-page ${styles.tripsPageRoot}`}>
       <PageHero
-        title="Plan Your Route"
-        subtitle="Estimate distances, plan the day and pick up the tips locals actually use."
+        title="Trips"
+        subtitle="Discover trips posted by our travel companies."
         backgroundImageKey="zanzibar"
         patternImageKey="more1"
-        chips={["Route estimator", "Travel tips", "Getting around"]}
+        chips={["Route estimator", "Posted trips", "Getting around"]}
         onChipClick={(chip) => {
-          const target = chip === "Route estimator" ? "route-estimator" : "travel-tips";
+          const target = chip === "Route estimator" ? "route-estimator" : "posted-trips";
           document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
         }}
       />
@@ -228,36 +228,47 @@ export default function TripsPage() {
           )}
         </div>
 
-        <div className="trips-tips-section" id="travel-tips">
+        <div className="trips-posted-section" id="posted-trips">
           <div className="section-header">
-            <h2>Travel Tips</h2>
-            <p>Helpful information for your trip</p>
+            <h2>Posted Trips</h2>
+            <p>Trips posted by travel companies</p>
           </div>
 
           {loading ? (
-            <div className={`loading ${styles.tripsLoading}`}>Loading tips...</div>
+            <div className={`loading ${styles.tripsLoading}`}>Loading trips...</div>
           ) : trips.length === 0 ? (
             <div className={`empty-state ${styles.tripsEmpty}`}>
               <BookOpen size={32} />
-              <p>No tips available yet. Check back soon!</p>
+              <p>No trips posted yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="tips-grid">
-              {trips.slice(0, 6).map(trip => (
-                <div key={trip.id} className="tip-card">
-                  <div className="tip-card-header">
-                    <Lightbulb size={20} className="tip-icon" />
+            <div className="trips-grid">
+              {trips.map((trip) => (
+                <article key={trip.id} className="trip-card">
+                  {trip.image_url && (
+                    <Image
+                      src={getImageUrl(trip.image_url)}
+                      alt={trip.title}
+                      width={640}
+                      height={360}
+                      className="trip-image"
+                    />
+                  )}
+                  <div className="trip-card-body">
                     <h3>{trip.title}</h3>
+                    {trip.company_name && <p className="trip-company">{trip.company_name}</p>}
+                    <p className="trip-place">{trip.place}</p>
+                    {trip.description && <p className="trip-content">{trip.description}</p>}
+                    <div className="trip-meta">
+                      {trip.price && <span className="trip-price">${trip.price}</span>}
+                      {trip.created_at && (
+                        <span className="trip-date">
+                          <Clock size={12} /> {new Date(trip.created_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {trip.image_url && <Image src={getImageUrl(trip.image_url)} alt={trip.title} width={640} height={360} className="trip-image" />}
-                  <p className="tip-content">{trip.content}</p>
-                  <div className="tip-meta">
-                    {trip.category && <span className="tip-category">{trip.category}</span>}
-                    {trip.created_at && (
-                      <span className="tip-date"><Clock size={12} /> {new Date(trip.created_at).toLocaleDateString()}</span>
-                    )}
-                  </div>
-                </div>
+                </article>
               ))}
             </div>
           )}

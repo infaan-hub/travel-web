@@ -3,22 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, Palmtree, X } from "@/components/icons";
-import { useAuth } from "@/context/AuthContext";
+import { Menu, X } from "@/components/icons";
 
-
-/**
- * Sticky top header rendered on every page. It carries the Travel. wordmark,
- * the primary navigation and the account actions. On phones it collapses into a
- * single glass bar with a menu button that opens the slide-in sidebar.
- */
 export default function TopHeader() {
   const pathname = usePathname();
-  const { isAuthenticated, user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // The sidebar owns the mobile menu state. The header requests a toggle and
-  // listens for the resulting state so the icon always matches the drawer.
   useEffect(() => {
     const sync = (event: Event) => {
       const open = (event as CustomEvent<{ open: boolean }>).detail?.open ?? false;
@@ -28,7 +18,6 @@ export default function TopHeader() {
     return () => window.removeEventListener("travel:nav-state", sync);
   }, []);
 
-  // A route change should always dismiss the mobile drawer.
   useEffect(() => {
     window.dispatchEvent(new Event("travel:close-nav"));
   }, [pathname]);
@@ -42,7 +31,6 @@ export default function TopHeader() {
           aria-label={menuOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={menuOpen}
           onClick={() => {
-            // The sidebar is the source of truth; it replies with the new state.
             window.dispatchEvent(new Event("travel:toggle-nav"));
           }}
         >
@@ -50,20 +38,8 @@ export default function TopHeader() {
         </button>
 
         <Link href="/" className="top-header-brand" aria-label="Travel. home">
-          <span className="top-header-mark">
-            <Palmtree size={20} aria-hidden="true" />
-          </span>
           <span className="top-header-wordmark brand-wordmark">Travel.</span>
         </Link>
-
-
-        <div className="top-header-actions">
-          {isAuthenticated ? (
-            <Link href="/dashboard" className="top-header-avatar" title={user?.username ?? "Account"}>
-              {(user?.username?.[0] ?? "T").toUpperCase()}
-            </Link>
-          ) : null}
-        </div>
       </div>
     </header>
   );

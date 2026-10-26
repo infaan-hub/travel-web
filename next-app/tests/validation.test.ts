@@ -6,7 +6,6 @@ import {
   bookingUpdateSchema,
   hotelUpdateSchema,
   reviewCreateSchema,
-  tipUpdateSchema,
   workspaceCreateSchema,
   workspaceUpdateSchema,
   workspaceTaskUpdateSchema,
@@ -57,7 +56,6 @@ describe("validation compatibility", () => {
   it("keeps all partial update schemas free of create-time defaults", () => {
     expect(bookingUpdateSchema.parse({ status: "cancelled" }).notes).toBeUndefined();
     expect(bookingUpdateSchema.parse({ status: "cancelled" }).address).toBeUndefined();
-    expect(tipUpdateSchema.parse({ title: "New" }).category).toBeUndefined();
     expect(hotelUpdateSchema.parse({ name: "New" }).phone).toBeUndefined();
     expect(workspaceTaskUpdateSchema.parse({ title: "New" }).description).toBeUndefined();
   });

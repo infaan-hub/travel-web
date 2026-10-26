@@ -80,13 +80,13 @@ export const toursAPI = {
 };
 
 export const tripsAPI = {
-  getAll: (params?: Params) => api.get("/tips/", { params }),
-  getById: (id: string | number) => api.get(`/tips/${id}/`),
+  getAll: (params?: Params) => api.get("/trips/", { params }),
+  getById: (id: string | number) => api.get(`/trips/${id}/`),
   create: (data: FormData | Record<string, unknown>) =>
-    api.post("/tips/", data, formDataConfig(data)),
+    api.post("/trips/", data, formDataConfig(data)),
   update: (id: string | number, data: FormData | Record<string, unknown>) =>
-    api.patch(`/tips/${id}/`, data, formDataConfig(data)),
-  delete: (id: string | number) => api.delete(`/tips/${id}/`),
+    api.patch(`/trips/${id}/`, data, formDataConfig(data)),
+  delete: (id: string | number) => api.delete(`/trips/${id}/`),
 };
 
 export const bookingsAPI = {
