@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
     authInterrupts: true,
   },
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       { protocol: "https", hostname: "**" },
     ],

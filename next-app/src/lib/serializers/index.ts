@@ -117,7 +117,7 @@ export function reviewSerializer(
   };
 }
 
-function ratingAggregate(reviews: Review[]): { average_rating: number | null; review_count: number } {
+function ratingAggregate(reviews: Array<Pick<Review, "rating" | "status">>): { average_rating: number | null; review_count: number } {
   const approved = reviews.filter((review) => review.status === "approved");
   if (approved.length === 0) return { average_rating: null, review_count: 0 };
   const total = approved.reduce((sum, review) => sum + review.rating, 0);
@@ -129,7 +129,7 @@ function ratingAggregate(reviews: Review[]): { average_rating: number | null; re
 
 export function tourListSerializer(
   tour: Tour & {
-    reviews?: Review[];
+    reviews?: Array<Pick<Review, "rating" | "status">>;
     galleryImages?: TourGalleryImage[];
     company?: { name: string; slug: string } | null;
   },
@@ -763,7 +763,7 @@ export function companyPublicSerializer(
 export function companyPublicDetailSerializer(
   company: Company & {
     tours?: (Tour & {
-      reviews?: Review[];
+      reviews?: Array<Pick<Review, "rating" | "status">>;
       galleryImages?: TourGalleryImage[];
       company?: { name: string; slug: string } | null;
     })[];

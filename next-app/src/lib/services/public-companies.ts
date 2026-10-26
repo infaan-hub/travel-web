@@ -72,7 +72,7 @@ export async function getPublicCompany(slug: string) {
         where: { publicationStatus: "PUBLISHED", deletedAt: null },
         orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
         include: {
-          reviews: { where: { status: "approved" } },
+          reviews: { where: { status: "approved" }, select: { rating: true, status: true } },
           galleryImages: { orderBy: { order: "asc" } },
           company: { select: { name: true, slug: true } },
         },

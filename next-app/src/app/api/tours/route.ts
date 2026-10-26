@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
         where,
         orderBy,
         include: {
-          reviews: true,
+          reviews: { select: { rating: true, status: true } },
           company: { select: { name: true, slug: true } },
         },
         skip: pagination?.skip ?? 0,
