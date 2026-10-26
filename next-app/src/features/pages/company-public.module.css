@@ -737,6 +737,27 @@
   opacity: 0.42;
 }
 
+@media (min-width: 900px) {
+  /* A directory with one provider reads as a single wide feature card rather
+     than a small card stranded in an empty grid. */
+  .page.listingRoot .grid > .card:only-child {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
+    align-items: stretch;
+  }
+
+  .page.listingRoot .grid > .card:only-child .coverFrame {
+    height: 100%;
+    min-height: 300px;
+    aspect-ratio: auto;
+  }
+
+  .page.listingRoot .grid > .card:only-child .cardBody {
+    padding: 28px 30px;
+  }
+}
+
 @media (max-width: 720px) {
   .listingHead {
     align-items: flex-start;

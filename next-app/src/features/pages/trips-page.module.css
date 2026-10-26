@@ -70,9 +70,7 @@
 
 .tripsPageRoot :global(.route-estimator-field) label {
   margin-bottom: 2px;
-  color: #08428c !important;
-  font-size: 0.7rem !important;
-  font-weight: 750 !important;
+  font-size: 0.7rem;
   letter-spacing: 0.12em;
   opacity: 0.78;
   text-transform: uppercase;
@@ -80,65 +78,6 @@
 
 .tripsPageRoot :global(.route-input-row) {
   gap: 8px;
-}
-
-.tripsPageRoot :global(.route-input-row) input {
-  min-height: 48px !important;
-  border: 1px solid rgba(255, 255, 255, 0.76) !important;
-  border-radius: 14px !important;
-  background: rgba(255, 255, 255, 0.46) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 6px 18px rgba(8, 66, 140, 0.04) !important;
-  color: #08428c !important;
-  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
-  backdrop-filter: blur(14px) saturate(150%) !important;
-}
-
-.tripsPageRoot :global(.route-input-row) input::placeholder {
-  color: rgba(8, 66, 140, 0.42) !important;
-  opacity: 1 !important;
-}
-
-.tripsPageRoot :global(.route-input-row) input:focus-visible {
-  outline: none !important;
-  border-color: rgba(8, 66, 140, 0.5) !important;
-  box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
-}
-
-.tripsPageRoot :global(.route-input-row) :global(.btn) {
-  min-width: 46px;
-  min-height: 46px !important;
-  padding: 0 12px !important;
-  border-radius: 13px !important;
-}
-
-.tripsPageRoot :global(.btn-primary) {
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  background: linear-gradient(145deg, #0c57ae, #08428c) !important;
-  box-shadow: 0 12px 26px rgba(8, 66, 140, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
-  color: #fff !important;
-}
-
-.tripsPageRoot :global(.btn-primary:hover:not(:disabled)) {
-  background: linear-gradient(145deg, #0a4d9d, #063a78) !important;
-  box-shadow: 0 16px 32px rgba(8, 66, 140, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.36) !important;
-}
-
-.tripsPageRoot :global(.btn-primary:disabled) {
-  box-shadow: none !important;
-  opacity: 0.46;
-}
-
-.tripsPageRoot :global(.btn-outline),
-.tripsPageRoot :global(.btn-secondary) {
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.6), rgba(232, 240, 242, 0.3)) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 8px 20px rgba(8, 66, 140, 0.06) !important;
-  color: #08428c !important;
-}
-
-.tripsPageRoot :global(.btn-outline:hover:not(:disabled)),
-.tripsPageRoot :global(.btn-secondary:hover:not(:disabled)) {
-  background: rgba(255, 255, 255, 0.82) !important;
 }
 
 .tripsPageRoot :global(.btn-calculate) {
@@ -197,7 +136,7 @@
   letter-spacing: 0.12em;
 }
 
-.tripsPageRoot :global(.dropdown-item) {
+:global(.app-layout .main-content) .tripsPageRoot :global(.tour-dest-dropdown .dropdown-item) {
   border: 0 !important;
   border-radius: 10px !important;
   background: transparent !important;
@@ -207,7 +146,7 @@
   backdrop-filter: none !important;
 }
 
-.tripsPageRoot :global(.dropdown-item:hover) {
+:global(.app-layout .main-content) .tripsPageRoot :global(.tour-dest-dropdown .dropdown-item:hover) {
   background: rgba(8, 66, 140, 0.08) !important;
   color: #063a78 !important;
 }

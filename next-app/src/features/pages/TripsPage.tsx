@@ -152,116 +152,116 @@ export default function TripsPage() {
       />
 
       <div className={styles.content}>
-      <div className="route-estimator-card" id="route-estimator">
-        <div className="route-estimator-grid">
-          <div className="route-estimator-field">
-            <label>Origin</label>
-            <div className="route-input-row">
-              <input
-                type="text" placeholder="e.g. Dar es Salaam, Arusha..."
-                value={originInput}
-                onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setOriginInput(e.target.value); setOriginCoords(null); setRoute(null); }}
-                onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') geocodeOrigin(); }}
-              />
-              <button className="btn btn-sm btn-outline" onClick={handleUseMyLocation} title="Use my location">
-                <Locate size={16} />
-              </button>
-              <button className="btn btn-sm btn-primary" onClick={geocodeOrigin} disabled={originGeocoding || !originInput.trim()}>
-                {originGeocoding ? <Loader size={14} className="spin" /> : <MapPin size={14} />}
-              </button>
-            </div>
-            {originConfirmed && <span className="coords-confirmed">Origin set ✓</span>}
-          </div>
-
-          <div className="route-estimator-field">
-            <label>Destination</label>
-            <div className="route-input-row" ref={destRef}>
-              <input
-                type="text" placeholder="e.g. Zanzibar, Serengeti..."
-                value={destInput}
-                onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setDestInput(e.target.value); setDestCoords(null); setRoute(null); setShowTourDropdown(false); }}
-                onFocus={() => setShowTourDropdown(true)}
-                onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') { geocodeDestination(); setShowTourDropdown(false); } }}
-              />
-              <button className="btn btn-sm btn-primary" onClick={() => { geocodeDestination(); setShowTourDropdown(false); }} disabled={destGeocoding || !destInput.trim()}>
-                {destGeocoding ? <Loader size={14} className="spin" /> : <MapPin size={14} />}
-              </button>
-            </div>
-            {destConfirmed && <span className="coords-confirmed">Destination set ✓</span>}
-            {showTourDropdown && tours.length > 0 && (
-              <div className="tour-dest-dropdown">
-                <div className="dropdown-label">Select a tour destination:</div>
-                {tours.filter(t => t.destination).map(t => (
-                  <button key={t.id} className="dropdown-item" onClick={() => selectTourDestination(t)}>
-                    <Globe size={14} /> {t.destination} — {t.title}
-                  </button>
-                ))}
+        <div className="route-estimator-card" id="route-estimator">
+          <div className="route-estimator-grid">
+            <div className="route-estimator-field">
+              <label>Origin</label>
+              <div className="route-input-row">
+                <input
+                  type="text" placeholder="e.g. Dar es Salaam, Arusha..."
+                  value={originInput}
+                  onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setOriginInput(e.target.value); setOriginCoords(null); setRoute(null); }}
+                  onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') geocodeOrigin(); }}
+                />
+                <button className="btn btn-sm btn-outline" onClick={handleUseMyLocation} title="Use my location">
+                  <Locate size={16} />
+                </button>
+                <button className="btn btn-sm btn-primary" onClick={geocodeOrigin} disabled={originGeocoding || !originInput.trim()}>
+                  {originGeocoding ? <Loader size={14} className="spin" /> : <MapPin size={14} />}
+                </button>
               </div>
-            )}
-          </div>
-        </div>
-
-        {error && <div className="alert alert-error">{error}</div>}
-
-        <button className="btn btn-primary btn-block btn-calculate" onClick={handleCalculate} disabled={calculating || !originConfirmed || !destConfirmed}>
-          {calculating ? <><Loader size={18} className="spin" /> Calculating Route...</> : <><Navigation size={18} /> Calculate Route</>}
-        </button>
-
-        {route && (
-          <div className="route-result-card">
-            <div className="route-stats-row">
-              <div className="route-stat-box">
-                <MapPin size={20} />
-                <span className="stat-val">{route.distance}</span>
-                <span className="stat-lbl">Distance</span>
-              </div>
-              <div className="route-stat-box">
-                <Clock size={20} />
-                <span className="stat-val">{route.duration}</span>
-                <span className="stat-lbl">Travel Time</span>
-              </div>
+              {originConfirmed && <span className="coords-confirmed">Origin set ✓</span>}
             </div>
-            <button className="btn btn-outline btn-block" onClick={openInGoogleMaps}>
-              <ExternalLink size={16} /> Open in Google Maps
-            </button>
-          </div>
-        )}
-      </div>
 
-      <div className="trips-tips-section" id="travel-tips">
-        <div className="section-header">
-          <h2>Travel Tips</h2>
-          <p>Helpful information for your trip</p>
-        </div>
-
-        {loading ? (
-          <div className={`loading ${styles.tripsLoading}`}>Loading tips...</div>
-        ) : trips.length === 0 ? (
-          <div className={`empty-state ${styles.tripsEmpty}`}>
-            <BookOpen size={32} />
-            <p>No tips available yet. Check back soon!</p>
-          </div>
-        ) : (
-          <div className="tips-grid">
-            {trips.slice(0, 6).map(trip => (
-              <div key={trip.id} className="tip-card">
-                <div className="tip-card-header">
-                  <Lightbulb size={20} className="tip-icon" />
-                  <h3>{trip.title}</h3>
+            <div className="route-estimator-field">
+              <label>Destination</label>
+              <div className="route-input-row" ref={destRef}>
+                <input
+                  type="text" placeholder="e.g. Zanzibar, Serengeti..."
+                  value={destInput}
+                  onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setDestInput(e.target.value); setDestCoords(null); setRoute(null); setShowTourDropdown(false); }}
+                  onFocus={() => setShowTourDropdown(true)}
+                  onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') { geocodeDestination(); setShowTourDropdown(false); } }}
+                />
+                <button className="btn btn-sm btn-primary" onClick={() => { geocodeDestination(); setShowTourDropdown(false); }} disabled={destGeocoding || !destInput.trim()}>
+                  {destGeocoding ? <Loader size={14} className="spin" /> : <MapPin size={14} />}
+                </button>
+              </div>
+              {destConfirmed && <span className="coords-confirmed">Destination set ✓</span>}
+              {showTourDropdown && tours.length > 0 && (
+                <div className="tour-dest-dropdown">
+                  <div className="dropdown-label">Select a tour destination:</div>
+                  {tours.filter(t => t.destination).map(t => (
+                    <button key={t.id} className="dropdown-item" onClick={() => selectTourDestination(t)}>
+                      <Globe size={14} /> {t.destination} — {t.title}
+                    </button>
+                  ))}
                 </div>
-                {trip.image_url && <Image src={getImageUrl(trip.image_url)} alt={trip.title} width={640} height={360} className="trip-image" />}
-                <p className="tip-content">{trip.content}</p>
-                <div className="tip-meta">
-                  {trip.category && <span className="tip-category">{trip.category}</span>}
-                  {trip.created_at && (
-                    <span className="tip-date"><Clock size={12} /> {new Date(trip.created_at).toLocaleDateString()}</span>
-                  )}
+              )}
+            </div>
+          </div>
+
+          {error && <div className="alert alert-error">{error}</div>}
+
+          <button className="btn btn-primary btn-block btn-calculate" onClick={handleCalculate} disabled={calculating || !originConfirmed || !destConfirmed}>
+            {calculating ? <><Loader size={18} className="spin" /> Calculating Route...</> : <><Navigation size={18} /> Calculate Route</>}
+          </button>
+
+          {route && (
+            <div className="route-result-card">
+              <div className="route-stats-row">
+                <div className="route-stat-box">
+                  <MapPin size={20} />
+                  <span className="stat-val">{route.distance}</span>
+                  <span className="stat-lbl">Distance</span>
+                </div>
+                <div className="route-stat-box">
+                  <Clock size={20} />
+                  <span className="stat-val">{route.duration}</span>
+                  <span className="stat-lbl">Travel Time</span>
                 </div>
               </div>
-            ))}
+              <button className="btn btn-outline btn-block" onClick={openInGoogleMaps}>
+                <ExternalLink size={16} /> Open in Google Maps
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="trips-tips-section" id="travel-tips">
+          <div className="section-header">
+            <h2>Travel Tips</h2>
+            <p>Helpful information for your trip</p>
           </div>
-        )}
-      </div>
+
+          {loading ? (
+            <div className={`loading ${styles.tripsLoading}`}>Loading tips...</div>
+          ) : trips.length === 0 ? (
+            <div className={`empty-state ${styles.tripsEmpty}`}>
+              <BookOpen size={32} />
+              <p>No tips available yet. Check back soon!</p>
+            </div>
+          ) : (
+            <div className="tips-grid">
+              {trips.slice(0, 6).map(trip => (
+                <div key={trip.id} className="tip-card">
+                  <div className="tip-card-header">
+                    <Lightbulb size={20} className="tip-icon" />
+                    <h3>{trip.title}</h3>
+                  </div>
+                  {trip.image_url && <Image src={getImageUrl(trip.image_url)} alt={trip.title} width={640} height={360} className="trip-image" />}
+                  <p className="tip-content">{trip.content}</p>
+                  <div className="tip-meta">
+                    {trip.category && <span className="tip-category">{trip.category}</span>}
+                    {trip.created_at && (
+                      <span className="tip-date"><Clock size={12} /> {new Date(trip.created_at).toLocaleDateString()}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
