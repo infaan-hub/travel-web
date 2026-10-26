@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/components/ToastProvider";
-import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
+import { ArrowLeft, CheckCircle, KeyRound, Palmtree, Shield } from "@/components/icons";
+import styles from "./auth-page.module.css";
+import type { ChangeEvent, FormEvent } from "react";
 
 export default function ForgotPasswordPage() {
   const toast = useToast();
@@ -11,7 +13,7 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setBusy(true);
     try {
@@ -32,41 +34,58 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="page auth-page">
-      <div className="auth-container">
-        <div className="auth-card glass-card">
-          <div className="auth-header">
-            <h1>Reset your password</h1>
-            <p>We verify every reset in person before a code is issued</p>
+    <div className={styles.page}>
+      <div className={`${styles.shell} ${styles.shellForgot}`}>
+        <div className={styles.formCard}>
+          <div className={styles.forgotTop}>
+            <Link href="/" className={styles.brand}>
+              <span className={styles.brandMark}><Palmtree size={18} /></span>
+              Travel.
+            </Link>
+            <span className={styles.secureChip}><Shield size={13} /> Secure request</span>
+          </div>
+
+          <div className={styles.header}>
+            <span className={styles.kicker}>Account recovery</span>
+            <h1 className={styles.title}>Reset your password</h1>
+            <p className={styles.subtitle}>We verify every reset in person before a code is issued.</p>
           </div>
 
           {sent ? (
-            <div className="auth-success">
-              If that email is registered, a reset has been requested. Our team will verify you
-              in person and hand you a reset code, which is valid for 30 minutes.
+            <div className={styles.sentPanel} role="status">
+              <span className={styles.sentIcon}><CheckCircle size={26} /></span>
+              <h2 className={styles.sentTitle}>Request received</h2>
+              <p className={styles.sentText}>
+                If that email is registered, a reset has been requested. Our team will verify you
+                in person and hand you a reset code, which is valid for 30 minutes.
+              </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="auth-form">
-              <div className="form-group">
-                <label htmlFor="reset-email">Email</label>
+            <form onSubmit={handleSubmit} className={styles.form} aria-busy={busy}>
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor="reset-email">Email</label>
                 <input
                   id="reset-email"
                   type="email"
                   name="email"
                   value={email}
-                  onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setEmail(event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
                   required
                   autoComplete="email"
+                  placeholder="you@example.com"
+                  aria-describedby="reset-email-hint"
                 />
+                <p className={styles.hint} id="reset-email-hint">Use the email address linked to your Travel. account.</p>
               </div>
-              <button type="submit" className="btn btn-primary btn-block" disabled={busy}>
-                {busy ? "Requesting..." : "Request a reset code"}
+              <button type="submit" className={styles.submit} disabled={busy}>
+                <span>{busy ? "Requesting..." : "Request a reset code"}</span>
+                <span className={styles.submitIcon} aria-hidden="true"><KeyRound size={17} /></span>
               </button>
             </form>
           )}
 
-          <div className="auth-footer">
-            <Link href="/login/">Back to sign in</Link>
+          <div className={styles.forgotFooter}>
+            <Link href="/login/" className={styles.backLink}><ArrowLeft size={15} /> Back to sign in</Link>
           </div>
         </div>
       </div>

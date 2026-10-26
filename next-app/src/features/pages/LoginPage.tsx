@@ -4,7 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { KeyRound, Palmtree, Compass, Map, Star } from '@/components/icons';
+import { AlertCircle, ArrowRight, CheckCircle, Palmtree, Compass, Map, Star, Sparkles } from '@/components/icons';
+import styles from './auth-page.module.css';
 import type { ChangeEvent, FormEvent } from "react";
 
 export default function LoginPage() {
@@ -41,22 +42,38 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="page auth-page auth-page-redesign">
-      <div className="auth-container auth-layout-redesign">
-        <div className="auth-card glass-card auth-card-redesign">
-          <div className="auth-header">
-            <Link href="/" className="auth-brand"><span><Palmtree size={19} /></span> Travel.</Link>
-            <span className="auth-kicker">YOUR NEXT JOURNEY STARTS HERE</span>
-            <h1>Welcome back</h1>
-            <p>Sign in to pick up where your travels left off.</p>
+    <div className={styles.page}>
+      <div className={styles.shell}>
+        <div className={styles.formCard}>
+          <div className={styles.brandRow}>
+            <Link href="/" className={styles.brand}>
+              <span className={styles.brandMark}><Palmtree size={18} /></span>
+              Travel.
+            </Link>
           </div>
 
-          {registered && <div className="auth-success">Account created successfully. Please sign in.</div>}
-          {error && <div className="auth-error">{error}</div>}
+          <div className={styles.header}>
+            <span className={styles.kicker}>Your next journey starts here</span>
+            <h1 className={styles.title}>Welcome back</h1>
+            <p className={styles.subtitle}>Sign in to pick up where your travels left off.</p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group">
-              <label htmlFor="login-username">Username</label>
+          {registered && (
+            <div className={`${styles.notice} ${styles.noticeSuccess}`} role="status">
+              <CheckCircle size={18} />
+              <span>Account created successfully. Please sign in.</span>
+            </div>
+          )}
+          {error && (
+            <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
+              <AlertCircle size={18} />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="login-username">Username</label>
               <input
                 id="login-username"
                 type="text"
@@ -70,11 +87,11 @@ export default function LoginPage() {
                 placeholder="Enter your username"
               />
               {fieldErrors.username ? (
-                <span className="field-error" id="username-error">{fieldErrors.username[0]}</span>
+                <span className={styles.fieldError} id="username-error">{fieldErrors.username[0]}</span>
               ) : null}
             </div>
-            <div className="form-group">
-              <label htmlFor="login-password">Password</label>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="login-password">Password</label>
               <input
                 id="login-password"
                 type="password"
@@ -88,31 +105,41 @@ export default function LoginPage() {
                 placeholder="Enter your password"
               />
               {fieldErrors.password ? (
-                <span className="field-error" id="password-error">{fieldErrors.password[0]}</span>
+                <span className={styles.fieldError} id="password-error">{fieldErrors.password[0]}</span>
               ) : null}
             </div>
-            <button type="submit" className="btn btn-primary btn-block">
-              Sign in <span aria-hidden="true">→</span>
+            <button type="submit" className={styles.submit}>
+              <span>Sign in</span>
+              <span className={styles.submitIcon} aria-hidden="true"><ArrowRight size={17} /></span>
             </button>
           </form>
 
-          <div className="auth-footer">
-            <Link href="/forgot-password/">Forgot your password?</Link>
-            <Link href="/verify-email/">Verify your email</Link>
-            <p>Don&apos;t have an account? <Link href="/register">Create one</Link></p>
+          <div className={styles.footer}>
+            <div className={styles.footerLinks}>
+              <Link href="/forgot-password/" className={styles.footerLink}>Forgot your password?</Link>
+              <span className={styles.footerDot} aria-hidden="true" />
+              <Link href="/verify-email/" className={styles.footerLink}>Verify your email</Link>
+            </div>
+            <p className={styles.footerMuted}>
+              Don&apos;t have an account? <Link href="/register" className={styles.footerStrong}>Create one</Link>
+            </p>
           </div>
         </div>
 
-        <div className="auth-banner auth-banner-redesign">
-          <div className="auth-banner-content">
-            <span className="auth-visual-label">A MARKETPLACE FOR MEANINGFUL TRAVEL</span>
-            <h2>Meet the people<br />behind the place.</h2>
-            <p>Explore experiences from independent tourism companies, compare the details, and send a request directly to the provider.</p>
-            <div className="auth-banner-features">
-              <span><Palmtree size={18} /> Local experiences</span>
-              <span><Compass size={18} /> Tours & safaris</span>
-              <span><Map size={18} /> Provider profiles</span>
-              <span><Star size={18} fill="currentColor" className="text-yellow-500" /> Request-based bookings</span>
+        <div className={styles.banner}>
+          <div className={styles.bannerTop}>
+            <span className={styles.bannerBadge}><Sparkles size={14} /> Handpicked travel</span>
+            <span className={styles.bannerMeta}>Zanzibar · TZ</span>
+          </div>
+          <div className={styles.bannerBody}>
+            <span className={styles.bannerLabel}>A marketplace for meaningful travel</span>
+            <h2 className={styles.bannerTitle}>Meet the people<br />behind the place.</h2>
+            <p className={styles.bannerText}>Explore experiences from independent tourism companies, compare the details, and send a request directly to the provider.</p>
+            <div className={styles.bannerFeatures}>
+              <span className={styles.bannerFeature}><Palmtree size={17} /> Local experiences</span>
+              <span className={styles.bannerFeature}><Compass size={17} /> Tours &amp; safaris</span>
+              <span className={styles.bannerFeature}><Map size={17} /> Provider profiles</span>
+              <span className={styles.bannerFeature}><Star size={17} fill="currentColor" className={styles.bannerStar} /> Request-based bookings</span>
             </div>
           </div>
         </div>

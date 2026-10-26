@@ -1,0 +1,849 @@
+/* -------------------------------------------------------------------------
+   Auth pages — scoped blue-glass treatment shared by sign in, account
+   creation and password recovery. Kept out of the global auth primitives so
+   reset-password / verify-email and any admin auth screens keep their
+   existing layout.
+   ------------------------------------------------------------------------- */
+
+.page {
+  --auth-blue: #08428c;
+  --auth-blue-deep: #063a78;
+  --auth-blue-soft: rgba(8, 66, 140, 0.68);
+  --auth-line: rgba(8, 66, 140, 0.12);
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  width: 100%;
+  min-height: calc(100dvh - 66px);
+  place-items: center;
+  padding: clamp(24px, 4vw, 52px) clamp(16px, 3.5vw, 44px);
+  overflow: hidden;
+  background:
+    radial-gradient(1000px 620px at 0% -10%, rgba(8, 66, 140, 0.16), transparent 60%),
+    radial-gradient(880px 600px at 100% 2%, rgba(82, 125, 100, 0.14), transparent 58%),
+    radial-gradient(1000px 700px at 48% 112%, rgba(8, 66, 140, 0.12), transparent 62%),
+    linear-gradient(155deg, #f7f4f1 0%, #edf3f8 46%, #f3f0ec 100%);
+  color: var(--auth-blue);
+  box-sizing: border-box;
+}
+
+/* Faint rings keep the wide background from reading as an empty colour
+   field without competing with the glass surfaces. */
+.page::before,
+.page::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border: 1px solid rgba(8, 66, 140, 0.07);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.page::before {
+  top: -300px;
+  right: -200px;
+  width: 660px;
+  height: 660px;
+  box-shadow:
+    0 0 0 90px rgba(255, 255, 255, 0.1),
+    0 0 0 180px rgba(255, 255, 255, 0.06);
+}
+
+.page::after {
+  bottom: -360px;
+  left: -220px;
+  width: 720px;
+  height: 720px;
+  box-shadow:
+    0 0 0 80px rgba(8, 66, 140, 0.035),
+    0 0 0 160px rgba(255, 255, 255, 0.06);
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 1120px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 26px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.4), rgba(236, 245, 253, 0.16));
+  box-shadow:
+    0 30px 80px rgba(8, 66, 140, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  backdrop-filter: blur(26px) saturate(150%);
+  box-sizing: border-box;
+  animation: authRise 0.55s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+.formCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: clamp(28px, 4.2vw, 48px);
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.65), transparent 55%),
+    linear-gradient(158deg, rgba(255, 255, 255, 0.76) 0%, rgba(241, 247, 252, 0.62) 52%, rgba(229, 240, 250, 0.52) 100%);
+  box-shadow:
+    0 18px 46px rgba(8, 66, 140, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-sizing: border-box;
+}
+
+.brandRow {
+  margin-bottom: 26px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  color: var(--auth-blue);
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  transition: opacity 180ms ease;
+}
+
+.brand:hover {
+  opacity: 0.76;
+}
+
+.brand:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.3);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.brandMark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--auth-blue);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 7px 16px rgba(8, 66, 140, 0.08);
+}
+
+.header {
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(8, 66, 140, 0.1);
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(8, 66, 140, 0.64);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.kicker::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: rgba(8, 66, 140, 0.36);
+}
+
+.title {
+  margin: 10px 0 8px;
+  color: var(--auth-blue);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.4vw, 2.55rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.subtitle {
+  max-width: 42ch;
+  margin: 0;
+  color: rgba(8, 66, 140, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 13px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.notice svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.noticeSuccess {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(14, 124, 90, 0.1);
+  color: #0b6b4f;
+}
+
+.noticeError {
+  border: 1px solid rgba(178, 58, 52, 0.18);
+  background: rgba(178, 58, 52, 0.08);
+  color: #9f342e;
+}
+
+.form {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.label {
+  color: rgba(8, 66, 140, 0.72);
+  font-size: 0.71rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+/* The shared glacier treatment is intentionally forceful (!important, high
+   specificity), so the auth controls carry the full app-shell prefix to win
+   the cascade without editing the global stylesheet. */
+:global(.app-layout .app-shell .main-content) .page .field input {
+  width: 100% !important;
+  height: 56px !important;
+  min-height: 56px !important;
+  padding: 0 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: var(--auth-blue) !important;
+  font-size: 1rem !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 6px 16px rgba(8, 66, 140, 0.045) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-sizing: border-box;
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+}
+
+:global(.app-layout .app-shell .main-content) .page .field input::placeholder {
+  color: rgba(8, 66, 140, 0.4) !important;
+  font-size: 0.92rem !important;
+  opacity: 1 !important;
+}
+
+:global(.app-layout .app-shell .main-content) .page .field input:hover {
+  border-color: rgba(255, 255, 255, 1) !important;
+  background: rgba(255, 255, 255, 0.84) !important;
+}
+
+:global(.app-layout .app-shell .main-content) .page .field input:focus {
+  border-color: rgba(8, 66, 140, 0.34) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  outline: none !important;
+  box-shadow:
+    0 0 0 4px rgba(8, 66, 140, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98) !important;
+}
+
+:global(.app-layout .app-shell .main-content) .page .field input:focus-visible {
+  outline: none !important;
+}
+
+:global(.app-layout .app-shell .main-content) .page .field input[aria-invalid="true"] {
+  border-color: rgba(178, 58, 52, 0.46) !important;
+}
+
+:global(.app-layout .app-shell .main-content) .page .field input[aria-invalid="true"]:focus {
+  border-color: rgba(178, 58, 52, 0.58) !important;
+  box-shadow:
+    0 0 0 4px rgba(178, 58, 52, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98) !important;
+}
+
+.fieldError {
+  color: #a33a34;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.hint {
+  margin: 0;
+  color: rgba(8, 66, 140, 0.55);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+:global(.app-layout .app-shell .main-content) .page .submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 58px;
+  margin-top: 6px;
+  padding: 0 10px 0 20px;
+  border: 1px solid rgba(255, 255, 255, 0.98) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(232, 240, 242, 0.78)) !important;
+  color: var(--auth-blue) !important;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+  text-align: left;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 14px 30px rgba(8, 66, 140, 0.12) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  backdrop-filter: blur(18px) saturate(120%);
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease !important;
+}
+
+:global(.app-layout .app-shell .main-content) .page .submit:hover:not(:disabled) {
+  background: linear-gradient(145deg, #fff, rgba(240, 246, 250, 0.9)) !important;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 17px 34px rgba(8, 66, 140, 0.16) !important;
+  transform: translateY(-1px);
+}
+
+:global(.app-layout .app-shell .main-content) .page .submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+:global(.app-layout .app-shell .main-content) .page .submit:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.28) !important;
+  outline-offset: 3px;
+}
+
+:global(.app-layout .app-shell .main-content) .page .submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submitIcon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 11px;
+  background: linear-gradient(145deg, #0a52ad, var(--auth-blue-deep));
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    0 6px 14px rgba(8, 66, 140, 0.22);
+}
+
+.footer {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(8, 66, 140, 0.1);
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.footerLink {
+  color: rgba(8, 66, 140, 0.78);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.footerLink:hover {
+  color: var(--auth-blue-deep);
+  text-decoration: underline;
+}
+
+.footerLink:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.24);
+  outline-offset: 3px;
+  border-radius: 5px;
+}
+
+.footerDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(8, 66, 140, 0.3);
+}
+
+.footerMuted {
+  margin: 0;
+  color: rgba(8, 66, 140, 0.62);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.footerStrong {
+  color: var(--auth-blue);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.footerStrong:hover {
+  text-decoration: underline;
+}
+
+.footerStrong:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.24);
+  outline-offset: 3px;
+  border-radius: 5px;
+}
+
+/* -------------------------------------------------------------------------
+   Photography panel
+   ------------------------------------------------------------------------- */
+
+.banner {
+  --auth-banner: url("/uploads/home/Zanzibar_trip.jpg");
+
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  padding: clamp(24px, 3vw, 36px);
+  overflow: hidden;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(4, 20, 40, 0.08) 0%, rgba(4, 30, 60, 0.38) 44%, rgba(4, 28, 58, 0.88) 100%),
+    linear-gradient(135deg, rgba(8, 66, 140, 0.18), rgba(5, 40, 88, 0.28)),
+    var(--auth-banner) center 48% / cover,
+    linear-gradient(145deg, #0a4c9c, var(--auth-blue-deep));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 18px 40px rgba(8, 66, 140, 0.18);
+  isolation: isolate;
+  box-sizing: border-box;
+}
+
+.bannerRegister {
+  --auth-banner: url("/uploads/home/IMG-20250730-WA0044.jpg");
+}
+
+.banner::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 15px;
+  background: linear-gradient(130deg, rgba(255, 255, 255, 0.12), transparent 54%);
+  pointer-events: none;
+}
+
+.bannerTop,
+.bannerBody {
+  position: relative;
+  z-index: 1;
+}
+
+.bannerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bannerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+
+.bannerBadge svg {
+  flex: 0 0 auto;
+}
+
+.bannerMeta {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.64rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bannerBody {
+  max-width: 440px;
+  color: #fff;
+}
+
+.bannerLabel {
+  display: block;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.64rem;
+  font-weight: 750;
+  letter-spacing: 0.17em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.bannerTitle {
+  margin: 12px 0 14px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 3.6vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1.03;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 24px rgba(5, 20, 40, 0.24);
+  text-wrap: balance;
+}
+
+.bannerText {
+  max-width: 38ch;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.83);
+  font-size: 0.9rem;
+  line-height: 1.68;
+  text-wrap: pretty;
+}
+
+.bannerFeatures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.bannerFeature {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.73rem;
+  line-height: 1.2;
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+
+.bannerFeature svg {
+  flex: 0 0 auto;
+}
+
+.bannerStar {
+  color: #f5c96b;
+}
+
+/* -------------------------------------------------------------------------
+   Password recovery: one centred card using the same glass language.
+   ------------------------------------------------------------------------- */
+
+.shellForgot {
+  max-width: 640px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shellForgot .formCard {
+  padding: clamp(28px, 5vw, 46px);
+}
+
+.forgotTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.secureChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.46);
+  color: rgba(8, 66, 140, 0.65);
+  font-size: 0.64rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.sentPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.62), rgba(224, 241, 233, 0.38));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 12px 28px rgba(8, 66, 140, 0.06);
+}
+
+.sentIcon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 15px;
+  background: rgba(14, 124, 90, 0.12);
+  color: #0b6b4f;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 22px rgba(8, 66, 140, 0.06);
+}
+
+.sentTitle {
+  margin: 2px 0 0;
+  color: var(--auth-blue);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+}
+
+.sentText {
+  margin: 0;
+  color: rgba(8, 66, 140, 0.68);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.forgotFooter {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(8, 66, 140, 0.1);
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  color: var(--auth-blue);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.backLink:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.24);
+  outline-offset: 3px;
+  border-radius: 5px;
+}
+
+@keyframes authRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------------- */
+
+@media (max-width: 980px) {
+  .page {
+    padding: 28px 16px 40px;
+  }
+
+  .shell {
+    max-width: 640px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .banner {
+    min-height: 300px;
+  }
+
+  .bannerBody {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    min-height: calc(100dvh - 60px);
+    padding: 18px 14px 28px;
+  }
+
+  .shell {
+    gap: 10px;
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  .formCard {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+
+  .shellForgot .formCard {
+    padding: 24px 20px;
+  }
+
+  .brandRow,
+  .forgotTop {
+    margin-bottom: 20px;
+  }
+
+  .header {
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+  }
+
+  .title {
+    font-size: clamp(1.8rem, 8vw, 2.15rem);
+  }
+
+  .subtitle {
+    font-size: 0.88rem;
+  }
+
+  .form {
+    gap: 14px;
+  }
+
+  :global(.app-layout .app-shell .main-content) .page .field input {
+    height: 54px !important;
+    min-height: 54px !important;
+  }
+
+  :global(.app-layout .app-shell .main-content) .page .submit {
+    min-height: 56px;
+  }
+
+  .banner {
+    min-height: 250px;
+    padding: 22px 20px;
+    border-radius: 16px;
+  }
+
+  .bannerTop {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .bannerTitle {
+    font-size: clamp(2rem, 8.5vw, 2.55rem);
+  }
+
+  .bannerText {
+    font-size: 0.84rem;
+  }
+
+  .bannerFeature {
+    padding: 7px 10px;
+    font-size: 0.68rem;
+  }
+
+  .footer,
+  .forgotFooter {
+    margin-top: 18px;
+    padding-top: 15px;
+  }
+
+  .sentPanel {
+    padding: 20px;
+  }
+}
+
+/* Narrow phones wrap the footer links, which would leave the separator dot
+   stranded at the end of the first line. */
+@media (max-width: 360px) {
+  .footerDot {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell {
+    animation: none;
+  }
+
+  .submit,
+  .brand,
+  .footerLink,
+  .field input {
+    transition: none !important;
+  }
+}
