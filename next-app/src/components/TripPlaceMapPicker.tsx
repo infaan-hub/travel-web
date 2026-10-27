@@ -111,6 +111,15 @@ const ROUTE_END_COLOR = "#0f172a";
 const ROUTE_GREEN = "#16a34a";
 const ROUTE_CASING = "#064e3b";
 
+const GROUP_ICON: Record<PlaceGroupId, IconSvgObject> = {
+  attractions: LandmarkIcon,
+  activities: ActivityIcon,
+  food: RestaurantIcon,
+  stays: KeyRoundIcon,
+  shopping: ShoppingBagIcon,
+  wellness: WellnessIcon,
+  services: CarIcon,
+};
 const CATEGORY_ICON: Record<TripPlaceCategory, IconSvgObject> = {
   Attraction: LandmarkIcon,
   "Bar": RestaurantIcon,
@@ -1350,7 +1359,7 @@ if (!routeMode) {
               {legendGroups.map((item) => (
                 <span key={item.id} className={styles.legendItem}>
                   <HugeiconsIcon
-                    icon={Location01Icon as never}
+                    icon={(GROUP_ICON[item.id as PlaceGroupId] ?? LandmarkIcon) as never}
                     size={10}
                     color={GROUP_COLORS[item.id as PlaceGroupId]}
                     aria-hidden="true"
