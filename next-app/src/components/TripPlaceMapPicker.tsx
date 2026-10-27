@@ -3,7 +3,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { KeyRoundIcon, Location01Icon } from "@hugeicons/core-free-icons";
+import {
+  ActivityIcon,
+  BeachIcon,
+  CafeIcon,
+  CarIcon,
+  CompassIcon,
+  HospitalIcon,
+  KeyRoundIcon,
+  LandmarkIcon,
+  Location01Icon,
+  PlantIcon,
+  RestaurantIcon,
+  ShoppingBagIcon,
+  TurtleIcon,
+  WellnessIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ExternalLink,
   KeyRound,
@@ -97,8 +113,25 @@ const ROUTE_END_COLOR = "#0f172a";
 const ROUTE_GREEN = "#16a34a";
 const ROUTE_CASING = "#064e3b";
 
+const CATEGORY_ICON: Record<TripPlaceCategory, IconSvgObject> = {
+  Attraction: LandmarkIcon,
+  "Bar": RestaurantIcon,
+  "Beach / Sandbank": BeachIcon,
+  "Cafe": CafeIcon,
+  "Health / Pharmacy": HospitalIcon,
+  "Hotel": KeyRoundIcon,
+  "Kitesurf School": CompassIcon,
+  "Restaurant": RestaurantIcon,
+  "Shop / Market": ShoppingBagIcon,
+  "Spa / Wellness": WellnessIcon,
+  "Spice Farm": PlantIcon,
+  "Tour / Activity": ActivityIcon,
+  "Transport": CarIcon,
+  "Wildlife / Turtles": TurtleIcon,
+};
+
 const HUGEICON_PATHS = {
-  location: Location01Icon,
+  location: LandmarkIcon,
   key: KeyRoundIcon,
 } as const;
 
@@ -231,13 +264,10 @@ function locationGlyphMarkup(color: string, size: number) {
 
 function placeMarkerHtml(place: TripPlace) {
   const color = markerColor(place.category);
-  const isStay = place.category === "Hotel";
-  if (isStay) {
-    return `<span class="${styles.placeMarkerGlyph} ${styles.placeMarkerStay}" style="--marker-color:${color}">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPathMarkup(HUGEICON_PATHS.key, color, 2)}</svg>
-    </span>`;
-  }
-  return `<span class="${styles.placeMarkerGlyph}" style="--marker-color:${color}">${locationGlyphMarkup(color, 28)}</span>`;
+  const icon = CATEGORY_ICON[place.category] ?? LandmarkIcon;
+  return `<span class="${styles.placeMarkerGlyph}" style="--marker-color:${color}">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPathMarkup(icon, "#ffffff", 2.6)}${iconPathMarkup(icon, color, 2)}</svg>
+  </span>`;
 }
 
 function customPinHtml() {
@@ -276,6 +306,12 @@ function pointCardHtml(place: TripPlace) {
       <div><dt>Coordinates</dt><dd>${place.latitude.toFixed(5)}, ${place.longitude.toFixed(5)}</dd></div>
     </dl>
     <a class="${styles.pointCardLink}" href="${tripPlaceMapsUrl(place)}" target="_blank" rel="noopener noreferrer">Open in Google Maps <span aria-hidden="true">↗</span></a>
+    <button
+      class="${styles.pointCardRouteButton}"
+      type="button"
+    >
+      Select point
+    </button>
   </div>`;
 }
 
@@ -742,14 +778,32 @@ export default function TripPlaceMapPicker({
           onSelectRef.current(place);
         });
 
-      if (!routeMode) {
-        marker.bindPopup(() => pointCardHtml(place), {
-          className: styles.pointPopup,
-          maxWidth: 300,
-          minWidth: 236,
-          offset: isStay ? [0, -14] : [0, -26],
-          autoPanPadding: [18, 18],
-        });
+if (!routeMode) {
+        marker.bindPopup(
+          () => {
+            const container = document.createElement("div");
+            container.innerHTML = pointCardHtml(place);
+            const button = container.querySelector<HTMLButtonElement>(
+              `.${styles.pointCardRouteButton}`,
+            );
+            button?.addEventListener("click", () => {
+              setRouteMode(true);
+              addRoutePointRef.current({
+                lat: place.latitude,
+                lng: place.longitude,
+                label: `${place.name}, ${place.area}`,
+              });
+            });
+            return container;
+          },
+          {
+            className: styles.pointPopup,
+            maxWidth: 300,
+            minWidth: 236,
+            offset: [0, -26],
+            autoPanPadding: [18, 18],
+          },
+        );
       }
 
       marker.addTo(layer);
@@ -1444,11 +1498,11 @@ export default function TripPlaceMapPicker({
                           style={{ color: markerColor(place.category) }}
                           aria-hidden="true"
                         >
-                          {place.category === "Hotel" ? (
-                            <KeyRound size={13} />
-                          ) : (
-                            <Location01 size={13} />
-                          )}
+                          <HugeiconsIcon
+                            icon={CATEGORY_ICON[place.category] as never}
+                            size={13}
+                            strokeWidth={2}
+                          />
                         </span>
                         <span className={styles.placeMain}>
                           <span className={styles.placeName}>{place.name}</span>

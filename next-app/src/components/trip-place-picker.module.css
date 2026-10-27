@@ -345,8 +345,21 @@
   text-decoration: none;
 }
 
-.pointCardLink:hover {
-  text-decoration: underline;
+.pointCardRouteButton {
+  margin-top: 4px;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border: 1px solid rgba(8, 66, 140, 0.24);
+  border-radius: 999px;
+  background: #08428c;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pointCardRouteButton:hover {
+  background: #0a52ad;
 }
 
 /* Zanzibar land overlay above the OSM tiles. */
@@ -1262,4 +1275,12 @@
   .clear {
     transition: none;
   }
+}
+
+.pointCardLink:hover {
+  text-decoration: underline;
+}
+
+.pointCardRouteButton:hover {
+  background: #0a52ad;
 }
