@@ -7,6 +7,7 @@ import { ToastProvider } from "@/components/ToastProvider";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { RealtimeProvider } from "@/context/RealtimeContext";
 import { PushPrompt } from "@/components/PushPrompt";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { ModalA11y } from "@/components/ModalA11y";
 import { VisitorTracker } from "@/components/VisitorTracker";
 import { Geist, Inter, Playfair_Display } from "next/font/google";
@@ -44,7 +45,20 @@ export const metadata: Metadata = {
     title: "Travel.",
     description: "Explore experiences from tourism companies across multiple destinations.",
   },
-  icons: { icon: "/travel.logo.jpeg", apple: "/travel.logo.jpeg" },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Travel.",
+  },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
@@ -68,6 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <VisitorTracker />
             <AppFrame>{children}</AppFrame>
             <PushPrompt />
+            <ServiceWorkerRegister />
             <ModalA11y />
           </ToastProvider>
            </RealtimeProvider>
