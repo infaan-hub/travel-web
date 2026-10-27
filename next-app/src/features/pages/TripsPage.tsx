@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
+import Link from "next/link";
 import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { BookOpen, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from '@/components/icons';
@@ -9,8 +10,7 @@ import { getImageUrl } from '@/lib/utils/image-url';
 
 import type {  Tour, CompanyTrip  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
-import { PageHero } from "@/components/PageHero";
-import styles from "@/features/pages/trips-page.module.css";
+import styles from "@/features/pages/company-trips.module.css";
 export default function TripsPage() {
   const [trips, setTrips] = useState<CompanyTrip[]>(() => readClientCache<CompanyTrip[]>("travel.trips.all") ?? []);
   const [tours, setTours] = useState<Tour[]>(() => readClientCache<Tour[]>("travel.tours.all") ?? []);
@@ -143,21 +143,21 @@ export default function TripsPage() {
   const destConfirmed = destCoords !== null;
 
   return (
-    <div className={`page trips-page ${styles.tripsPageRoot}`}>
-      <PageHero
-        title="Trips"
-        subtitle="Discover trips posted by our travel companies."
-        backgroundImageKey="zanzibar"
-        patternImageKey="more1"
-        chips={["Route estimator", "Posted trips", "Getting around"]}
-        onChipClick={(chip) => {
-          const target = chip === "Route estimator" ? "route-estimator" : "posted-trips";
-          document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }}
-      />
+    <div id="trips-workspace" className={styles.tripsRoot}>
+      <header className={styles.tripsMasthead}>
+        <div className={styles.tripsMastheadText}>
+          <nav className={styles.tripsBreadcrumb} aria-label="Breadcrumb">
+            <Link href="/">Home</Link>
+            <span className={styles.tripsBreadcrumbSep} aria-hidden="true">/</span>
+            <span className={styles.tripsBreadcrumbCurrent}>Trips</span>
+          </nav>
+          <p className={styles.tripsEyebrow}>Discover</p>
+          <h1 className={styles.tripsTitle}>Trips</h1>
+          <p className={styles.tripsLead}>Discover trips posted by our travel companies and estimate routes between destinations.</p>
+        </div>
+      </header>
 
-      <div className={styles.content}>
-        <div className="route-estimator-card" id="route-estimator">
+      <div className="route-estimator-card" id="route-estimator">
           <div className="route-estimator-grid">
             <div className="route-estimator-field">
               <label>Origin</label>
@@ -253,9 +253,10 @@ export default function TripsPage() {
               ))}
             </div>
           ) : trips.length === 0 ? (
-            <div className={`empty-state ${styles.tripsEmpty}`}>
-              <BookOpen size={32} />
-              <p>No trips posted yet. Check back soon!</p>
+            <div className={styles.tripsState}>
+              <span className={styles.tripsStateIcon}><BookOpen size={22} /></span>
+              <h2 className={styles.tripsStateTitle}>No trips posted yet</h2>
+              <p className={styles.tripsStateCopy}>Check back soon for new trips from travel companies.</p>
             </div>
           ) : (
             <div className="trips-grid">
@@ -289,7 +290,6 @@ export default function TripsPage() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }
