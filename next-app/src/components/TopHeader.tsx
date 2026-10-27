@@ -42,11 +42,12 @@ export default function TopHeader() {
           <Image
             src="/travel.logo.jpeg"
             alt="Travel."
-            width={128}
-            height={48}
+            width={40}
+            height={40}
             style={{ height: 34, width: "auto", objectFit: "contain" }}
             priority
           />
+          <span className="top-header-wordmark brand-wordmark">Travel.</span>
         </Link>
       </div>
     </header>

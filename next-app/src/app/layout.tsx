@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     title: "Travel.",
     description: "Explore experiences from tourism companies across multiple destinations.",
   },
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/travel.logo.jpeg", apple: "/travel.logo.jpeg" },
 };
 
 export const viewport: Viewport = {
