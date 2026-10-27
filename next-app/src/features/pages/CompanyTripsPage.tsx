@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Image as ImageIcon,
   Loader,
+  Locate,
   MapPin,
   Pencil,
   Plus,
@@ -29,7 +30,10 @@ import {
   X,
 } from "@/components/icons";
 import { useToast } from "@/components/ToastProvider";
+import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
 import { companyAPI } from "@/lib/api/client";
+import { findTripPlace, type TripPlace } from "@/lib/trips";
+import { isInZanzibar } from "@/lib/zanzibar";
 import styles from "@/features/pages/company-trips.module.css";
 
 const PAGE_SIZE = 12;
@@ -47,6 +51,8 @@ type CompanyTrip = {
   id: number;
   title: string;
   place: string;
+  latitude?: number | null;
+  longitude?: number | null;
   description: string;
   price: string | null;
   image_url: string | null;
@@ -59,6 +65,8 @@ type TripForm = {
   place: string;
   description: string;
   price: string;
+  latitude: string;
+  longitude: string;
 };
 
 const EMPTY_FORM: TripForm = {
@@ -66,12 +74,21 @@ const EMPTY_FORM: TripForm = {
   place: "",
   description: "",
   price: "",
+  latitude: "",
+  longitude: "",
 };
 
 function priceValue(value: string | null) {
   if (value === null || value.trim() === "") return null;
   const amount = Number(value);
   return Number.isFinite(amount) ? amount : null;
+}
+
+function coordinateValue(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function formatPrice(value: string | null) {
@@ -294,12 +311,19 @@ export default function CompanyTripsPage() {
 
   const editTrip = (trip: CompanyTrip) => {
     releasePreviewUrl();
+    const datasetPlace =
+      findTripPlace(trip.place) ??
+      findTripPlace(trip.place.split(",")[0] ?? "");
+    const latitude = trip.latitude ?? datasetPlace?.latitude ?? null;
+    const longitude = trip.longitude ?? datasetPlace?.longitude ?? null;
     setEditing(trip);
     setForm({
       title: trip.title,
       place: trip.place,
       description: trip.description ?? "",
       price: trip.price ?? "",
+      latitude: latitude === null ? "" : latitude.toFixed(6),
+      longitude: longitude === null ? "" : longitude.toFixed(6),
     });
     setImage(null);
     setPreview(trip.image_url);
@@ -307,6 +331,36 @@ export default function CompanyTripsPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
     focusComposer();
   };
+
+  const selectTripPlace = useCallback((place: TripPlace) => {
+    const label = place.name.toLowerCase().includes(place.area.toLowerCase())
+      ? place.name
+      : `${place.name}, ${place.area}`;
+    setForm((current) => ({
+      ...current,
+      place: label,
+      latitude: place.latitude.toFixed(6),
+      longitude: place.longitude.toFixed(6),
+    }));
+    setFormError(null);
+  }, []);
+
+  const pickTripPoint = useCallback((latitude: number, longitude: number) => {
+    setForm((current) => ({
+      ...current,
+      latitude: latitude.toFixed(6),
+      longitude: longitude.toFixed(6),
+    }));
+    setFormError(null);
+  }, []);
+
+  const clearTripPoint = useCallback(() => {
+    setForm((current) => ({
+      ...current,
+      latitude: "",
+      longitude: "",
+    }));
+  }, []);
 
   const onImage = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
@@ -354,6 +408,22 @@ export default function CompanyTripsPage() {
       setFormError("Enter a valid price of 0 or more.");
       return;
     }
+
+    const latitude = coordinateValue(form.latitude);
+    const longitude = coordinateValue(form.longitude);
+    if ((latitude === null) !== (longitude === null)) {
+      setFormError("Pick the trip location again on the map.");
+      return;
+    }
+    if (
+      latitude !== null &&
+      longitude !== null &&
+      !isInZanzibar(latitude, longitude)
+    ) {
+      setFormError("The map pin must be inside Zanzibar.");
+      return;
+    }
+
     if (!editing && !image) {
       setFormError("Choose a JPG, PNG or WebP image for this trip.");
       fileInputRef.current?.focus();
@@ -369,6 +439,14 @@ export default function CompanyTripsPage() {
       data.append("place", place);
       data.append("description", description);
       data.append("price", String(price));
+      if (latitude !== null && longitude !== null) {
+        data.append("latitude", String(latitude));
+        data.append("longitude", String(longitude));
+      } else if (editing) {
+        // Explicit empty values clear a previously saved pin.
+        data.append("latitude", "");
+        data.append("longitude", "");
+      }
       if (image) data.append("image", image);
 
       if (editing) {
@@ -643,6 +721,25 @@ export default function CompanyTripsPage() {
                 placeholder="What makes this place worth visiting?"
                 rows={3}
                 maxLength={5000}
+              />
+            </div>
+
+            <div className={`${styles.tripsField} ${styles.tripsMapField}`}>
+              <div className={styles.tripsFieldHead}>
+                <span className={styles.tripsFieldLabel}>
+                  <MapPin size={14} aria-hidden="true" /> Zanzibar location map
+                </span>
+                <span className={styles.tripsFieldHint}>
+                  Pick a place to fill the place name and coordinates
+                </span>
+              </div>
+              <TripPlaceMapPicker
+                latitude={coordinateValue(form.latitude)}
+                longitude={coordinateValue(form.longitude)}
+                disabled={saving}
+                onSelectPlace={selectTripPlace}
+                onPickPoint={pickTripPoint}
+                onClearPoint={clearTripPoint}
               />
             </div>
 
@@ -981,6 +1078,21 @@ export default function CompanyTripsPage() {
                           <MapPin size={13} aria-hidden="true" />
                           <span>{trip.place || "No place"}</span>
                         </span>
+                        {trip.latitude != null && trip.longitude != null ? (
+                          <a
+                            className={`${styles.tripsMetaItem} ${styles.tripsMetaLink}`}
+                            href={`https://www.google.com/maps/search/?api=1&query=${trip.latitude},${trip.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Open saved coordinates in Google Maps"
+                          >
+                            <Locate size={13} aria-hidden="true" />
+                            <span>
+                              {trip.latitude.toFixed(5)},{" "}
+                              {trip.longitude.toFixed(5)}
+                            </span>
+                          </a>
+                        ) : null}
                         <span className={styles.tripsMetaItem}>
                           <CalendarDays size={13} aria-hidden="true" />
                           <span>{formatDate(trip.created_at, "Added")}</span>

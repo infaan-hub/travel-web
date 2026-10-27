@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import DestinationCard from "@/components/DestinationCard";
+import ZanzibarAttractions from "@/components/ZanzibarAttractions";
 import Link from "next/link";
 import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
@@ -232,6 +233,8 @@ export default function TripsPage() {
             </div>
           )}
         </div>
+
+        <ZanzibarAttractions />
 
         <div className="trips-posted-section" id="posted-trips">
           <div className="section-header">

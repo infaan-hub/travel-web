@@ -6,6 +6,7 @@ import {
   companyTourCreateSchema,
   companyTourUpdateSchema,
   companyTripCreateSchema,
+  companyTripUpdateSchema,
   companyUpdateSchema,
   companyWorkspaceProfileUpdateSchema,
 } from "@/lib/validation/company";
@@ -194,6 +195,47 @@ describe("company validation", () => {
         price: "-5",
       }).success,
     ).toBe(false);
+  });
+
+  it("stores a map coordinate pair on a company trip", () => {
+    const located = companyTripCreateSchema.safeParse({
+      title: "Paje Beach Day",
+      place: "Paje Beach, Paje",
+      price: "45",
+      latitude: "-6.265000",
+      longitude: "39.532000",
+    });
+    expect(located.success).toBe(true);
+    if (located.success) {
+      expect(located.data.latitude).toBe(-6.265);
+      expect(located.data.longitude).toBe(39.532);
+    }
+
+    expect(
+      companyTripCreateSchema.safeParse({
+        title: "Half a pin",
+        place: "Paje",
+        price: "45",
+        latitude: "-6.265",
+      }).success,
+    ).toBe(false);
+
+    const cleared = companyTripUpdateSchema.safeParse({
+      latitude: "",
+      longitude: "",
+    });
+    expect(cleared.success).toBe(true);
+    if (cleared.success) {
+      expect(cleared.data.latitude).toBeNull();
+      expect(cleared.data.longitude).toBeNull();
+    }
+
+    const untouched = companyTripUpdateSchema.safeParse({ title: "Renamed" });
+    expect(untouched.success).toBe(true);
+    if (untouched.success) {
+      expect(untouched.data.latitude).toBeUndefined();
+      expect(untouched.data.longitude).toBeUndefined();
+    }
   });
 
   it("validates company tour publication and itinerary payloads", () => {

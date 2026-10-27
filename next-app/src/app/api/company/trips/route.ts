@@ -51,6 +51,8 @@ export async function POST(request: NextRequest) {
         companyId: context.company.id,
         title: body.title,
         place: body.place,
+        latitude: body.latitude ?? null,
+        longitude: body.longitude ?? null,
         description: body.description,
         price: body.price,
         image,

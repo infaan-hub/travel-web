@@ -1,0 +1,327 @@
+﻿id,name,category,area,latitude,longitude,rating,reviews
+1,Emerson on Hurumzi,Hotel,Stone Town,-6.161013,39.191056,4.5,764
+2,Dhow Palace Hotel,Hotel,Stone Town,-6.164179,39.187576,4.2,719
+3,Balcony House Zanzibar,Hotel,Stone Town,-6.165023,39.18786,4.0,165
+4,Tembo House Hotel,Hotel,Stone Town,-6.161958,39.187236,4.3,2905
+5,Tarawanda House,Hotel,Stone Town,-6.164313,39.188688,4.4,58
+6,The Seyyida Hotel & Spa,Hotel,Stone Town,-6.16001,39.191181,4.1,393
+7,Mizingani Seafront Hotel,Hotel,Stone Town,-6.159045,39.191633,4.3,1294
+8,Shoki Shoki Hotel Stone Town,Hotel,Stone Town,-6.162023,39.188061,4.2,239
+9,The Island Stone Town Hotel,Hotel,Stone Town,-6.159688,39.194063,3.9,213
+10,Stonetown Tides Hotel,Hotel,Stone Town,-6.157111,39.193759,3.3,18
+11,Zanzibar Serena Hotel,Hotel,Stone Town,-6.163399,39.18605,4.5,1033
+12,Park Hyatt Zanzibar,Hotel,Stone Town,-6.162499,39.186213,4.6,1684
+13,Africa House Hotel,Hotel,Stone Town,-6.16442,39.18704,4.0,670
+14,Forodhani Park Hotel,Hotel,Stone Town,-6.161657,39.188357,4.2,473
+15,Kholle House Boutique Hotel,Hotel,Stone Town,-6.158421,39.192626,4.4,339
+16,Maru Maru Hotel,Hotel,Stone Town,-6.161663,39.189562,4.3,1987
+17,Upendo House,Hotel,Stone Town,-6.161167,39.19044,4.4,378
+18,The Rooftop Stone Town (homestay),Hotel,Stone Town,-6.164338,39.189063,5.0,1
+19,Makofi Zanzibar,Hotel,Nungwi,-5.731197,39.292716,4.5,649
+20,Sandies Nungwi Beach,Hotel,Nungwi,-5.731544,39.29114,4.6,51
+21,Canary Hotel & Spa,Hotel,Nungwi,-5.730122,39.292617,4.6,599
+22,Double A Nungwi Beach Hotel,Hotel,Nungwi,-5.725468,39.293149,4.1,112
+23,The Z Hotel,Hotel,Nungwi,-5.730597,39.291611,4.5,1082
+24,Amaan Beach Bungalows,Hotel,Nungwi,-5.729886,39.291485,3.9,2185
+25,Mnarani Beach Cottages,Hotel,Nungwi,-5.72285,39.304298,4.3,505
+26,Turaco Nungwi Resort (Tribute Portfolio),Hotel,Nungwi,-5.724343,39.29508,4.3,445
+27,Golden Hotel Nungwi,Hotel,Nungwi,-5.729975,39.294504,4.5,743
+28,Nungwi Garden Boutique Hotel,Hotel,Nungwi,-5.730688,39.292727,4.4,161
+29,Royal Zanzibar Beach Resort,Hotel,Nungwi,-5.736937,39.29242,4.5,2193
+30,Essque Zalu Zanzibar,Hotel,Nungwi,-5.724689,39.306553,4.4,935
+31,SafiraBlu Luxury Resort & Villas,Hotel,Nungwi,-5.766796,39.338296,4.9,158
+32,Sunny House Paje,Hotel,Paje,-6.265746,39.53527,4.6,59
+33,Rafiki Zanzibar Residence,Hotel,Paje,-6.262144,39.532069,4.6,32
+34,The 5th Element Boutique Hotel,Hotel,Paje,-6.263221,39.53483,4.9,42
+35,Saba House 24 Zanzibar,Hotel,Paje,-6.263835,39.535092,4.1,19
+36,Dhow Inn Boutique Hotel,Hotel,Paje,-6.262477,39.534809,4.4,551
+37,Paje By Night Yoga & Kitesurfing Hotel,Hotel,Paje,-6.268719,39.534981,4.2,221
+38,Zula Zanzibar,Hotel,Paje,-6.2673,39.536416,4.3,255
+39,Summer Beach Hotel,Hotel,Paje,-6.263942,39.536219,4.5,330
+40,Mambo Leo Hostel,Hotel,Paje,-6.264117,39.534818,4.4,24
+41,Zanzibella Hotel & Spa,Hotel,Kiwengwa,-6.00309,39.383339,4.7,653
+42,Imara Beach Resort,Hotel,Kiwengwa,-5.969628,39.372583,4.6,119
+43,Kuwa Zanzibar,Hotel,Kiwengwa,-5.993165,39.379004,4.7,85
+44,Zanzibar Tropical Sunset,Hotel,Kiwengwa,-5.993529,39.376593,4.6,94
+45,Mvuvi Boutique Resort,Hotel,Kiwengwa,-5.992487,39.379773,4.7,241
+46,Surfescape Zanzibar,Hotel,Kiwengwa,-5.99584,39.381145,3.9,137
+47,Sultan Sands Island Resort & Spa,Hotel,Kiwengwa,-5.976026,39.374371,4.5,1052
+48,Kiwengwa Beach Resort,Hotel,Kiwengwa,-5.991469,39.378562,4.5,2114
+49,Bluebay Beach Resort & Spa,Hotel,Kiwengwa,-5.977997,39.374945,4.6,1632
+50,SeaShore Beach Hotel & Bungalow,Hotel,Kiwengwa,-5.998404,39.381754,4.6,192
+51,Melia Zanzibar,Hotel,Kiwengwa,-5.953767,39.367156,4.7,2009
+52,Zanzibar Bahari Villas,Hotel,Matemwe,-5.875973,39.352724,3.8,228
+53,Zanzibar Sunrise at Bandas,Hotel,Matemwe,-5.88251,39.352981,4.6,500
+54,Kena Beach Hotel,Hotel,Matemwe,-5.862322,39.354939,4.5,342
+55,Marafiki Beach Hotel & Spa,Hotel,Matemwe,-5.880672,39.352987,4.9,275
+56,Zanzibar Magic Boutique Hotel,Hotel,Matemwe,-5.889832,39.353793,4.5,200
+57,Salama & Mbuyuni Oasis,Hotel,Matemwe,-5.875197,39.346553,4.9,216
+58,Alladin Beach Hotel & Spa,Hotel,Matemwe,-5.857214,39.355446,4.8,170
+59,Villa Kiva Boutique Hotel,Hotel,Matemwe,-5.872577,39.353166,4.6,558
+60,SeVi Boutique Hotel Zanzibar,Hotel,Matemwe,-5.851025,39.356454,4.4,368
+61,La Perla Beach Resort,Hotel,Matemwe,-5.918688,39.356438,4.6,96
+62,The Loop Beach Resort,Hotel,Jambiani,-6.321069,39.548309,4.7,629
+63,Spice Island Hotel & Resort,Hotel,Jambiani,-6.295808,39.540343,4.2,405
+64,Mwezi Boutique Resort,Hotel,Jambiani,-6.300551,39.541684,4.7,739
+65,Visitor's Inn Hotel Zanzibar,Hotel,Jambiani,-6.327001,39.551185,3.6,303
+66,Fun Beach Hotel,Hotel,Jambiani,-6.296862,39.540216,4.4,592
+67,Sharazad Oasis Retreat,Hotel,Jambiani,-6.298885,39.541414,4.8,80
+68,Coral Rocks Zanzibar,Hotel,Jambiani,-6.341392,39.556897,4.3,835
+69,Belvedere Resort Zanzibar,Hotel,Jambiani,-6.319642,39.547874,4.5,255
+70,Ifa Beach Resort,Hotel,Jambiani,-6.302968,39.542373,3.9,277
+71,Kendwa Beach Bungalows,Hotel,Kendwa,-5.755347,39.287857,4.0,82
+72,Sunset Kendwa,Hotel,Kendwa,-5.751179,39.288559,4.2,1377
+73,Kendwa Breeze Bungalows,Hotel,Kendwa,-5.749961,39.2933,4.6,56
+74,Mocco Beach Villa,Hotel,Kendwa,-5.754958,39.287978,3.7,395
+75,Kendwa Rocks Beach Hotel,Hotel,Kendwa,-5.752008,39.289778,4.3,4742
+76,Daeli Zanzibar Apartment,Hotel,Kendwa,-5.752761,39.291029,4.7,18
+77,Sand and Sunset Hotel JGM,Hotel,Kendwa,-5.752999,39.290786,4.8,113
+78,Canary Kendwa Beach Resort,Hotel,Kendwa,-5.754641,39.291041,4.4,1033
+79,Kendwa Rasta Style,Hotel,Kendwa,-5.75845,39.293889,4.5,46
+80,Palumbo Waves,Hotel,Kendwa,-5.756903,39.291118,4.5,443
+81,Lala Salama Kendwa Villa,Hotel,Kendwa,-5.753448,39.291193,3.6,23
+82,Varadero Hotel,Hotel,Kendwa,-5.753376,39.290647,3.6,21
+83,Cactus Lodge Zanzibar,Hotel,Kendwa,-5.740562,39.299154,4.6,47
+84,Indigo Beach Zanzibar,Hotel,Bwejuu,-6.233179,39.533607,4.3,374
+85,Protels La Plage,Hotel,Bwejuu,-6.22587,39.532805,4.5,79
+86,Diamonds Bijoux,Hotel,Bwejuu,-6.21278,39.530818,4.9,144
+87,Amani Beach Villa,Hotel,Bwejuu,-6.22802,39.533038,5.0,31
+88,Unguja Lodge,Hotel,Kizimkazi,-6.449418,39.466752,4.5,57
+89,Bella Vista Resort Zanzibar,Hotel,Kizimkazi,-6.437938,39.462508,4.0,267
+90,Mandarin Resort Zanzibar,Hotel,Kizimkazi,-6.455761,39.473806,4.7,385
+91,L'Oasis Beach Hotel Kizimkazi,Hotel,Kizimkazi,-6.442911,39.463654,5.0,1
+92,Tunu Beach Zanzibar,Hotel,Kizimkazi,-6.444599,39.463988,4.5,11
+93,Kwanza Resort,Hotel,Kizimkazi,-6.442393,39.4645,4.5,840
+94,Salida Beach Zanzibar,Hotel,Kizimkazi,-6.46003,39.477625,4.7,36
+95,Aya Beach Resort,Hotel,Kizimkazi,-6.455685,39.474278,4.3,359
+96,Fruit & Spice Wellness Resort,Hotel,Kizimkazi,-6.403836,39.444551,4.4,600
+97,Kusini Beach Bungalows,Hotel,Kizimkazi,-6.444816,39.464134,4.3,72
+98,Zanzibar Bay Resort & Spa,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.13455,39.424659,4.2,755
+99,AVO Boutique Hotel Zanzibar,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.100716,39.42603,4.8,101
+100,Dream of Zanzibar,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.099497,39.425667,4.9,919
+101,Blackstone Beach Resort,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.096652,39.424781,4.6,117
+102,MANOLO Beach Resort,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.108769,39.427028,4.6,58
+103,Legendary Zanzibar Beach Resort,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.126374,39.505535,4.5,173
+104,Zanzibar Vera Beach Hotel,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.101688,39.426166,4.5,11
+105,Antonio Beach,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.157351,39.436298,4.4,164
+106,Maharaja Boutique Hotel,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.116179,39.425901,4.8,152
+107,Pongwe Beach Hotel,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.035566,39.407215,4.5,332
+108,Pongwe Bay Resort,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.045564,39.405762,4.7,548
+109,Mtende Beach Bungalow,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.462178,39.539211,3.5,20
+110,Kae Funk,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.144212,39.489553,4.2,329
+111,Fumba Beach Lodge,Hotel,Uroa / Chwaka / Pongwe / Michamvi / Fumba,-6.315732,39.274709,4.4,272
+112,The Secret Garden at Emerson Spice,Restaurant,Stone Town,-6.16116,39.192074,4.4,675
+113,Breadfruit Restaurant & Cafe,Restaurant,Stone Town,-6.162579,39.187286,4.5,123
+114,Lukmaan Swahili Restaurant,Restaurant,Stone Town,-6.163443,39.191583,4.2,5813
+115,Cape Town Fish Market Zanzibar,Restaurant,Stone Town,-6.16044,39.18854,4.5,3986
+116,Beach House Zanzibar,Restaurant,Stone Town,-6.164245,39.186537,4.4,1725
+117,The 5th Restaurant,Restaurant,Stone Town,-6.161179,39.190482,4.6,137
+118,Anadolu-Anatolia Turkish Restaurant,Restaurant,Stone Town,-6.163561,39.192179,4.8,923
+119,Archipelago Waterfront Cafe,Restaurant,Stone Town,-6.164005,39.186351,4.4,717
+120,Out of Afrika,Restaurant,Stone Town,-6.161289,39.188225,4.7,978
+121,6 Degrees South,Restaurant,Stone Town,-6.164266,39.186846,4.3,2039
+122,ZAFA Swahili Dishes,Restaurant,Stone Town,-6.163514,39.191551,5.0,97
+123,Lazuli Cafe,Restaurant,Stone Town,-6.163002,39.187916,4.6,294
+124,Ala-Nnoor Restaurant (Airport Rd),Restaurant,Stone Town,-6.198489,39.216649,4.2,242
+125,Ala-Nnoor Restaurant Darajani,Restaurant,Stone Town,-6.161273,39.193823,4.1,323
+126,Zanzi Cafe,Restaurant,Stone Town,-6.163646,39.192293,4.6,85
+127,7 Spice Restaurant,Restaurant,Stone Town,-6.1634,39.191389,4.4,301
+128,Bibi's Kitchen,Restaurant,Stone Town,-6.09697,39.216877,4.5,68
+129,Annex of Lukmaan Restaurant,Restaurant,Stone Town,-6.160342,39.193497,4.4,144
+130,Floating Bar,Bar,Stone Town,-6.160273,39.188647,4.6,56
+131,Patamu (Tatu),Bar,Stone Town,-6.164106,39.186792,3.9,501
+132,Hidden Gem Cafe,Cafe,Stone Town,-6.162745,39.189615,4.9,60
+133,The Spice Route Cafe,Cafe,Stone Town,-6.162275,39.189596,4.7,214
+134,Zanzibar Coffee House,Cafe,Stone Town,-6.161644,39.192257,4.6,1425
+135,Puzzle Coffee Shop,Cafe,Stone Town,-6.163851,39.18691,4.6,462
+136,Stone Town Cafe,Cafe,Stone Town,-6.163318,39.187846,4.3,1036
+137,Karafuu Coffee House,Cafe,Stone Town,-6.162047,39.187741,4.5,464
+138,Pink Sugar LDN Cafe & Brunch,Cafe,Stone Town,-6.164416,39.187558,4.4,264
+139,Zenji Garden Cafe,Cafe,Stone Town,-6.160336,39.188796,4.3,147
+140,Sugar Sukari Cafe,Cafe,Stone Town,-6.163808,39.192651,4.6,56
+141,Mama Mia,Restaurant,Nungwi,-5.728103,39.291637,4.3,3423
+142,Fish Market Local Restaurant,Restaurant,Nungwi,-5.723167,39.298106,4.7,1557
+143,Mahi Mahi Beach Bar & Restaurant,Restaurant,Nungwi,-5.723026,39.300521,4.7,471
+144,197 Restaurant & Bar,Restaurant,Nungwi,-5.731973,39.294668,4.8,624
+145,Terrace Nungwi,Restaurant,Nungwi,-5.728525,39.291504,4.3,402
+146,Maisha Beach Seafood & Cocktails,Restaurant,Nungwi,-5.722341,39.30252,4.6,527
+147,Papaya Restaurant,Restaurant,Nungwi,-5.730739,39.293557,4.7,69
+148,MIZIZI Restaurant,Restaurant,Nungwi,-5.735319,39.293932,4.8,116
+149,Malkia Emmy Restaurant,Restaurant,Nungwi,-5.729632,39.293192,4.8,186
+150,Passion & Thyme,Cafe,Nungwi,-5.727236,39.293575,4.8,545
+151,Secret Garden Coffee Shop Nungwi,Cafe,Nungwi,-5.728187,39.293993,4.8,172
+152,JF Kili Coffee House,Cafe,Nungwi,-5.72993,39.297828,5.0,375
+153,Tiki Cafe,Cafe,Nungwi,-5.734484,39.294101,4.9,61
+154,Kasuku Cafe,Cafe,Nungwi,-5.724357,39.295006,4.4,19
+155,Cafe Dodoki,Cafe,Nungwi,-5.723203,39.301554,4.6,282
+156,MJ Cafe Nungwi,Cafe,Nungwi,-5.728293,39.293031,4.2,907
+157,My Blue Sunset Beach Bar,Bar,Nungwi,-5.734829,39.290421,3.2,34
+158,Kibanda Beach Club,Bar,Nungwi,-5.723848,39.295795,4.3,302
+159,ZeeBar,Bar,Nungwi,-5.724219,39.295063,4.6,54
+160,Hello Capitano Zanzibar,Restaurant,Paje,-6.265913,39.536335,4.8,2500
+161,The Garten,Restaurant,Paje,-6.26844,39.532161,4.7,1131
+162,Shanga Restaurant Paje,Restaurant,Paje,-6.266388,39.536326,4.3,1331
+163,Mr. Kahawa Cafe-Restaurant,Restaurant,Paje,-6.269165,39.536307,4.4,1591
+164,Nomad Beach Restaurant,Restaurant,Paje,-6.270574,39.536401,4.4,121
+165,Ratatouille Zanzibar,Restaurant,Paje,-6.268859,39.533488,4.6,396
+166,ZanziBarista,Restaurant,Paje,-6.267629,39.536313,4.7,764
+167,Ocean Restaurant Paje,Restaurant,Paje,-6.266541,39.536295,4.4,396
+168,Chamu Restaurant,Restaurant,Paje,-6.263311,39.534591,4.8,781
+169,al Casbah,Restaurant,Paje,-6.263206,39.532886,4.8,1389
+170,Mawimbi Zanzibar,Restaurant,Paje,-6.272839,39.532905,4.8,96
+171,BOMWA! Bistrot Local,Restaurant,Jambiani / Dongwe,-6.337191,39.553423,5.0,157
+172,Jambiani Coco Restaurant,Restaurant,Jambiani / Dongwe,-6.310445,39.541265,4.8,116
+173,Pompetti Restaurant,Restaurant,Jambiani / Dongwe,-6.305236,39.539586,4.7,588
+174,Zawadi Jambiani Restaurant,Restaurant,Jambiani / Dongwe,-6.313723,39.544679,4.7,117
+175,ZAD-EAST,Restaurant,Jambiani / Dongwe,-6.333791,39.553413,4.7,224
+176,Fisherman Restaurant Jambiani,Restaurant,Jambiani / Dongwe,-6.315684,39.546915,4.8,112
+177,ISHI Restaurant Jambiani,Restaurant,Jambiani / Dongwe,-6.311891,39.544803,4.8,238
+178,Gerezani,Restaurant,Jambiani / Dongwe,-6.336979,39.553447,4.8,279
+179,Sharazad The View Restaurant,Restaurant,Jambiani / Dongwe,-6.299607,39.542095,4.5,271
+180,The Restaurant @ The Bali Resort,Restaurant,Jambiani / Dongwe,-6.179529,39.527786,4.9,163
+181,Tiki Beach Club Zanzibar,Bar,Bwejuu,-6.239665,39.534736,4.5,29
+182,Kilimani Kwetu Beach Restaurant,Bar,Bwejuu,-6.229646,39.533257,4.7,97
+183,Ocean Breeze Bar & Restaurant,Bar,Bwejuu,-6.245477,39.53482,4.6,39
+184,Leo Bar and Restaurant @ The African Paradise,Bar,Bwejuu,-6.239154,39.53426,4.9,139
+185,Matlai Restaurant,Restaurant,Michamvi / Pingwe,-6.144564,39.516266,4.8,240
+186,The View of Zanzibar,Restaurant,Michamvi / Pingwe,-6.151815,39.518324,4.6,97
+187,The Rock Restaurant Zanzibar,Restaurant,Michamvi / Pingwe,-6.152066,39.519409,4.4,9691
+188,Mia Hakka Restaurant,Restaurant,Michamvi / Pingwe,-6.144368,39.516322,4.9,35
+189,Migomba Restaurant,Restaurant,Michamvi / Pingwe,-6.141577,39.493669,4.9,190
+190,Boho Social Zanzibar,Restaurant,Michamvi / Pingwe,-6.152938,39.518688,4.5,179
+191,Furahia Restaurant,Restaurant,Michamvi / Pingwe,-6.146691,39.514882,4.7,101
+192,Baladin Zanzibar Restaurant,Restaurant,Michamvi / Pingwe,-6.146802,39.516804,4.7,32
+193,Duyen Vietnamese Homecooking,Restaurant,Michamvi / Pingwe,-6.144549,39.51629,4.8,203
+194,Essence Restaurant,Restaurant,Kendwa,-5.754557,39.287788,4.5,465
+195,Sunbird Seafood Cafe,Restaurant,Kendwa,-5.753382,39.290654,4.8,154
+196,The Fisherman Lounge,Restaurant,Kendwa,-5.754335,39.290973,4.5,195
+197,SkyBar Restaurant-Bar Kendwa,Restaurant,Kendwa,-5.756133,39.287984,4.7,231
+198,La Fontana Restaurant & Bungalows,Restaurant,Kendwa,-5.751168,39.290931,4.4,321
+199,Furaha Beach Bar & Restaurant,Restaurant,Kendwa,-5.75562,39.287789,4.6,543
+200,Shashlik Mashlik Kendwa,Restaurant,Kendwa,-5.756132,39.288661,4.4,294
+201,Organzibar,Restaurant,Kendwa,-5.754894,39.291404,4.8,184
+202,Maisha Siri Restaurant,Restaurant,Kendwa,-5.75565,39.288855,4.8,108
+203,Gold Beach Restaurant,Restaurant,Kendwa,-5.753494,39.287839,4.5,150
+204,Zamani Village Restaurant,Restaurant,Kiwengwa / Matemwe,-5.880087,39.352218,4.8,151
+205,MOYO Restaurant & Bar,Restaurant,Kiwengwa / Matemwe,-6.003188,39.384063,4.7,187
+206,Marlin Local Restaurant,Restaurant,Kiwengwa / Matemwe,-5.878444,39.352192,4.9,808
+207,La Palma Local Restaurant,Restaurant,Kiwengwa / Matemwe,-5.866039,39.354261,4.9,146
+208,Yellow Coco Local Restaurant,Restaurant,Kiwengwa / Matemwe,-5.877813,39.352188,4.9,210
+209,The Beach Lounge Kiwengwa,Restaurant,Kiwengwa / Matemwe,-5.993918,39.380294,4.7,144
+210,Nakupenda Local Restaurant,Restaurant,Kiwengwa / Matemwe,-5.875156,39.34801,4.8,161
+211,Bin Jabir Restaurant Matemwe,Restaurant,Kiwengwa / Matemwe,-5.864705,39.354475,4.6,231
+212,Zanzibar Queen Restaurant,Restaurant,Kiwengwa / Matemwe,-5.861836,39.354804,4.7,51
+213,La Capannina Zanzibar,Restaurant,Kiwengwa / Matemwe,-5.971399,39.371469,4.9,309
+214,Portobello Fumba Beach,Restaurant,Fumba,-6.316328,39.284877,4.1,22
+215,Membe Kayak Club Restaurant,Restaurant,Fumba,-6.318331,39.278397,4.9,123
+216,Kumi Gifts & Treats,Shop / Market,Stone Town,-6.16311,39.187655,4.8,17
+217,Darajani Bazaar,Shop / Market,Stone Town,-6.16219,39.193695,4.2,2598
+218,Aromas of Zanzibar,Shop / Market,Stone Town,-6.162504,39.189569,5.0,86
+219,Amali Concept Store,Shop / Market,Stone Town,-6.163555,39.186412,4.9,82
+220,Memories of Zanzibar,Shop / Market,Stone Town,-6.162806,39.187576,4.1,628
+221,Zanzibar Curio Shop,Shop / Market,Stone Town,-6.161387,39.190279,4.3,92
+222,Om Namah Shivai Gift & Souvenir,Shop / Market,Stone Town,-6.1614,39.190363,4.8,26
+223,The Coins Shop,Shop / Market,Stone Town,-6.162121,39.189534,4.6,49
+224,Kitabwalla Bags Stationery & Toys,Shop / Market,Stone Town,-6.162783,39.192257,5.0,50
+225,Zanzibar Quality Shop,Shop / Market,Stone Town,-6.16013,39.194144,4.2,86
+226,Baraza Super Market,Shop / Market,Stone Town,-6.206845,39.214873,4.1,142
+227,Zanzibar Spice Community Shop,Shop / Market,Stone Town,-6.162009,39.193805,4.1,4222
+228,The Town Supermarket,Shop / Market,Stone Town,-6.182831,39.205716,4.2,394
+229,Michenzani Mall,Shop / Market,Stone Town,-6.164932,39.199632,4.3,1589
+230,Supermarket Mini Market,Shop / Market,Stone Town,-6.162321,39.188281,3.9,34
+231,Fahud Supermarket,Shop / Market,Stone Town,-6.178682,39.203932,4.3,209
+232,Martin Culture Shop,Shop / Market,Nungwi,-5.727486,39.29366,5.0,26
+233,Nungwi Crafts,Shop / Market,Nungwi,-5.74292,39.299048,5.0,11
+234,Jaw's Corner,Attraction,Stone Town,-6.163318,39.189766,4.3,147
+235,Stone Town Old Town (UNESCO),Attraction,Stone Town,-6.163082,39.186015,4.0,26
+236,Old Fort (Ngome Kongwe),Attraction,Stone Town,-6.16135,39.189057,4.3,4807
+237,Shangani Public Beach,Attraction,Stone Town,-6.162214,39.186068,4.3,51
+238,Hamam Persian Baths,Attraction,Stone Town,-6.162619,39.190877,3.7,137
+239,Peace Memorial Museum,Attraction,Stone Town,-6.168009,39.191261,4.1,342
+240,Slave Market Exhibition Museum,Attraction,Stone Town,-6.16284,39.19255,4.4,533
+241,Zanzibar Stone Town Heritage Society,Attraction,Stone Town,-6.159087,39.191393,4.6,49
+242,Old Dispensary,Attraction,Stone Town,-6.158241,39.192525,4.4,312
+243,Forodhani Gardens (night food market),Attraction,Stone Town,-6.160341,39.189003,4.4,929
+244,Freddie Mercury Museum,Attraction,Stone Town,-6.162378,39.187756,4.0,1045
+245,House of Wonders (Beit al-Ajaib),Attraction,Stone Town,-6.160959,39.189563,3.6,313
+246,Mtoni Palace Ruins,Attraction,Around Unguja,-6.135494,39.213507,4.2,66
+247,Maruhubi Palace Ruins,Attraction,Around Unguja,-6.144147,39.208945,3.9,107
+248,Kibweni Palace Museum,Attraction,Around Unguja,-6.112223,39.21314,4.1,14
+249,Mangapwani Slave Chamber,Attraction,Around Unguja,-5.987016,39.185666,4.4,100
+250,Fukuchani Ruins & Cave,Attraction,Around Unguja,-5.829394,39.29188,4.1,148
+251,Historic House of Bi Khole,Attraction,Around Unguja,-6.262849,39.334564,4.4,13
+252,Changuu (Prison) Island,Attraction,Around Unguja,-6.119532,39.166397,4.3,1447
+253,Kuza Cave,Attraction,Around Unguja,-6.303449,39.533965,4.3,1271
+254,Jozani Chwaka Bay Forest (National Park),Attraction,Around Unguja,-6.241557,39.41395,4.2,3586
+255,Nakupenda Sandbank (approx.),Beach / Sandbank,Around Unguja,-6.172089,39.148942,4.6,468
+256,Kwale Sandbank,Beach / Sandbank,Around Unguja,-6.36549,39.284819,4.5,355
+257,Pungume Sandbank,Beach / Sandbank,Around Unguja,-6.408775,39.318277,4.8,146
+258,Mtende Beach,Beach / Sandbank,Around Unguja,-6.461721,39.539505,4.7,1870
+259,Mtende Rock,Beach / Sandbank,Around Unguja,-6.460781,39.540393,4.7,61
+260,Pingwe Beach,Beach / Sandbank,Around Unguja,-6.151015,39.51836,4.3,63
+261,Pongwe Beach,Beach / Sandbank,Around Unguja,-6.050757,39.409403,4.5,29
+262,Matemwe Beach,Beach / Sandbank,Around Unguja,-5.931032,39.360906,4.3,53
+263,Zanzibar Aquarium (Nungwi),Wildlife / Turtles,Nungwi,-5.723262,39.303322,4.6,104
+264,Nungwi Mnarani Aquarium,Wildlife / Turtles,Nungwi,-5.722141,39.30316,4.2,1232
+265,Nungwi Marine Turtles Mnarani,Wildlife / Turtles,Nungwi,-5.722396,39.302697,4.1,234
+266,Baraka Natural Aquarium,Wildlife / Turtles,Nungwi,-5.724079,39.303756,4.0,318
+267,Nungwi Aquarium & Bungalows,Wildlife / Turtles,Nungwi,-5.725202,39.303052,4.9,15
+268,Nungwi Aquarium Adventures,Wildlife / Turtles,Nungwi,-5.723726,39.299144,4.4,54
+269,Swim with Turtles Sanctuary,Wildlife / Turtles,Nungwi,-5.723932,39.303829,4.1,547
+270,The Lagoons Zanzibar,Wildlife / Turtles,Nungwi,-5.725711,39.302958,4.5,132
+271,To The Hill Kidichi Spice Farm,Spice Farm,Around Unguja,-6.089911,39.237256,4.9,311
+272,SISO Spice Farm,Spice Farm,Around Unguja,-6.090783,39.241354,4.6,476
+273,Jozani Spice Farm,Spice Farm,Around Unguja,-6.285125,39.416,4.6,189
+274,KV Spice Farm,Spice Farm,Around Unguja,-6.23172,39.355087,4.9,226
+275,Bilal Responsible Village Tours,Spice Farm,Around Unguja,-5.978114,39.312956,4.9,312
+276,Mussa Abasi Village Spice Farm,Spice Farm,Around Unguja,-5.977519,39.313486,5.0,254
+277,Tangawizi Spice Farm,Spice Farm,Around Unguja,-6.106931,39.252088,4.6,682
+278,Bwamzee Spice Farm,Spice Farm,Around Unguja,-6.064302,39.33319,4.9,255
+279,Village Green Spice Farm,Spice Farm,Around Unguja,-6.067841,39.332088,5.0,588
+280,Big Body Spice Farm,Spice Farm,Around Unguja,-6.086318,39.248545,4.5,394
+281,Nakupenda Island Beach Tours,Tour / Activity,Various,-6.161791,39.187889,4.4,90
+282,Popo Tours and Safaris,Tour / Activity,Various,-6.163835,39.186524,4.9,39
+283,Rafiki Tours Zanzibar,Tour / Activity,Various,-6.445293,39.469038,4.9,150
+284,Zanzibar Day Excursion with Captain Mofasa,Tour / Activity,Various,-6.408571,39.448054,5.0,22
+285,The Mnemba Island Tours (Matemwe),Tour / Activity,Various,-5.814465,39.355232,4.8,39
+286,Zanzibar Dolphins and Snorkeling Tours,Tour / Activity,Various,-6.437705,39.462389,4.6,23
+287,Fins Zanzibar Dolphins Tours,Tour / Activity,Various,-6.437127,39.461917,4.6,94
+288,Enjoy Kizimkazi with Mr Happy,Tour / Activity,Various,-6.449255,39.469494,4.9,25
+289,Damian Dolphin Tour,Tour / Activity,Various,-6.461355,39.478244,4.8,51
+290,Dolphin Tour and Snorkeling Kizimkazi,Tour / Activity,Various,-6.453716,39.471776,4.3,101
+291,Mnemba Island Snorkeling Tours,Tour / Activity,Various,-5.80949,39.358531,4.6,105
+292,Tour Guide Momba Zanzibar,Tour / Activity,Various,-5.8111,39.355057,5.0,107
+293,Fins Zanzibar Snorkeling and Sandbank,Tour / Activity,Various,-6.419033,39.332505,4.6,26
+294,Zanzibar Kitesurfing (Paje & Jambiani),Kitesurf School,Paje,-6.267547,39.536331,4.9,76
+295,Hakuna Matata Kite Surfing School,Kitesurf School,Paje,-6.268513,39.536443,4.8,35
+296,Zanzibar Kite Paradise,Kitesurf School,Paje,-6.280154,39.53695,4.9,144
+297,Bkite Zanzibar,Kitesurf School,Paje,-6.282626,39.537408,5.0,151
+298,Paje Kitesurf School (Olkutati),Kitesurf School,Paje,-6.261386,39.536458,5.0,94
+299,Kite Centre Zanzibar,Kitesurf School,Paje,-6.269055,39.536378,4.9,797
+300,Paje By Kite,Kitesurf School,Paje,-6.270588,39.536371,4.9,55
+301,Kite N Surf Zanzibar,Kitesurf School,Paje,-6.266045,39.536413,5.0,432
+302,Aquaholics Kite & Surf Center,Kitesurf School,Paje,-6.26666,39.536366,4.9,394
+303,B4 Kitesurf Zanzibar,Kitesurf School,Paje,-6.273794,39.536189,5.0,867
+304,Uzima Space Yoga & Wellness,Spa / Wellness,Various,-6.16591,39.189027,4.6,28
+305,Bamboo Elements Spa & Wellness,Spa / Wellness,Various,-6.347226,39.560135,5.0,27
+306,Shanti Yoga & Massage Zanzibar,Spa / Wellness,Various,-6.296626,39.53641,4.7,13
+307,Sharazad Yoga Shala & Wellness,Spa / Wellness,Various,-6.299482,39.542125,5.0,24
+308,Hammam Zanzibar,Spa / Wellness,Various,-6.162829,39.189277,5.0,558
+309,Anza Spa and Wellness,Spa / Wellness,Various,-6.22993,39.533314,5.0,23
+310,Cinnamon Spa & Hammam,Spa / Wellness,Various,-6.162313,39.187313,4.8,830
+311,Aloevera Spa,Spa / Wellness,Various,-6.307923,39.543702,4.9,103
+312,NURU Spa & Wellness,Spa / Wellness,Various,-6.246455,39.534669,4.6,76
+313,Angelly Rooftop Spa & Beauty,Spa / Wellness,Various,-5.937334,39.362964,5.0,136
+314,Zanzibar Ferry Terminal,Transport,Stone Town / Airport,-6.15791,39.191998,4.0,457
+315,Zanzibar Harbour,Transport,Stone Town / Airport,-6.154539,39.19261,4.1,114
+316,Abeid Amani Karume International Airport,Transport,Stone Town / Airport,-6.218534,39.221379,3.6,4613
+317,Mnazi Mmoja Hospital,Health / Pharmacy,Stone Town,-6.16795,39.190093,3.7,83
+318,Shamshu & Sons Pharmacy,Health / Pharmacy,Stone Town,-6.161974,39.193008,4.6,51
+319,Izmir Pharmacy,Health / Pharmacy,Stone Town,-6.162482,39.19346,4.0,8
+320,Reliance Medical Clinic,Health / Pharmacy,Stone Town,-5.939223,39.360473,5.0,56
+321,AmpolaTasakhtaa Hospital,Health / Pharmacy,Stone Town,-6.166266,39.190734,4.7,2010
+322,Life Pharma Ltd,Health / Pharmacy,Stone Town,-6.163536,39.191142,3.8,14
+323,Bapumia Health Services Pharmacy,Health / Pharmacy,Stone Town,-6.16417,39.191584,4.8,15
+324,Dr. Mehta's Hospital,Health / Pharmacy,Stone Town,-6.165101,39.188439,4.6,88
+325,Al Rahma Hospital,Health / Pharmacy,Stone Town,-6.177914,39.204202,3.6,61
+326,Kembo Pharmacy,Health / Pharmacy,Stone Town,-6.162493,39.187626,1.5,26

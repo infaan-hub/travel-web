@@ -796,6 +796,8 @@ export function companyTripSerializer(trip: CompanyTrip & { company?: { name: st
     company_slug: trip.company?.slug ?? null,
     title: trip.title,
     place: trip.place,
+    latitude: trip.latitude,
+    longitude: trip.longitude,
     description: trip.description,
     image_url: publicImageUrl(trip.image),
     price: decimal(trip.price),

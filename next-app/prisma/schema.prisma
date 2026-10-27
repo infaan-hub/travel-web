@@ -183,6 +183,8 @@ model CompanyTrip {
   companyId   Int      @map("company_id")
   title       String
   place       String
+  latitude    Float?
+  longitude   Float?
   description String   @default("")
   image       String
   price       Decimal  @db.Decimal(12, 2)

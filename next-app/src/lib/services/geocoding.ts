@@ -3,6 +3,7 @@ import { ApiError } from "@/lib/api/http";
 import { cacheGet, cacheSet } from "@/lib/cache";
 import { env } from "@/lib/env";
 import { reportError } from "@/lib/logging";
+import { ZANZIBAR_BOUNDS, isInZanzibar } from "@/lib/zanzibar";
 
 type GeocodeResult = {
   lat: number;
@@ -22,7 +23,7 @@ export async function geocodeLocation(rawLocation: string): Promise<GeocodeResul
   const location = rawLocation.trim();
   if (!location) throw new ApiError(400, "Location parameter required");
 
-  const key = `geocode:${location.toLowerCase()}, tanzania`;
+  const key = `geocode:${location.toLowerCase()}, zanzibar`;
   const cached = await cacheGet<GeocodeResult>(key);
   if (cached && Date.now() - (cached.cached_at ?? 0) < CACHE_TTL_MS) {
     return cached;
@@ -30,9 +31,13 @@ export async function geocodeLocation(rawLocation: string): Promise<GeocodeResul
 
   const config = env();
   const url = new URL("/search", config.NOMINATIM_BASE_URL);
-  url.searchParams.set("q", `${location}, Tanzania`);
+  url.searchParams.set("q", `${location}, Zanzibar, Tanzania`);
   url.searchParams.set("format", "json");
   url.searchParams.set("limit", "1");
+  url.searchParams.set("countrycodes", "tz");
+  const [[south, west], [north, east]] = ZANZIBAR_BOUNDS;
+  url.searchParams.set("viewbox", `${west},${north},${east},${south}`);
+  url.searchParams.set("bounded", "1");
 
   let response: Response;
   try {
@@ -60,9 +65,15 @@ export async function geocodeLocation(rawLocation: string): Promise<GeocodeResul
     throw new ApiError(404, "Location not found");
   }
 
+  const lat = Number(data[0].lat);
+  const lng = Number(data[0].lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !isInZanzibar(lat, lng)) {
+    throw new ApiError(404, "Location not found in Zanzibar");
+  }
+
   const result: GeocodeResult = {
-    lat: Number(data[0].lat),
-    lng: Number(data[0].lon),
+    lat,
+    lng,
     display_name: data[0].display_name ?? location,
     cached_at: Date.now(),
   };

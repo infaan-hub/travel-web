@@ -1,0 +1,462 @@
+/* Zanzibar attractions map on /trips */
+
+.section {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(16px, 2.2vw, 26px);
+  background: var(--trips-surface, #ffffff);
+  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
+  border-radius: var(--trips-radius-xl, 22px);
+  box-shadow: var(--trips-shadow, 0 14px 34px rgba(8, 66, 140, 0.07));
+  margin-bottom: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.headerCopy {
+  min-width: 0;
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: var(--trips-accent, #08428c);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0 0 6px;
+  color: var(--trips-ink, #12223a);
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  margin: 0;
+  color: var(--trips-ink-2, #44546c);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-height: 32px;
+  padding: 5px 12px;
+  color: var(--trips-accent, #08428c);
+  background: var(--trips-accent-soft, #e7eef9);
+  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.filterButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 11px;
+  color: var(--trips-ink-2, #44546c);
+  background: var(--trips-surface-soft, #f2f2f2);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.filterButton:hover {
+  color: var(--trips-accent, #08428c);
+  background: var(--trips-accent-soft, #e7eef9);
+}
+
+.filterButton:focus-visible {
+  outline: 2px solid var(--trips-accent, #08428c);
+  outline-offset: 2px;
+}
+
+.filterActive,
+.filterActive:hover {
+  color: #ffffff;
+  background: var(--trips-accent, #08428c);
+  border-color: var(--trips-accent, #08428c);
+}
+
+.filterCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding-inline: 5px;
+  color: inherit;
+  background: rgba(18, 34, 58, 0.08);
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.filterActive .filterCount {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(260px, 0.85fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.mapCard {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
+  border-radius: 18px;
+  background: #e9eff4;
+}
+
+.map {
+  width: 100%;
+  height: 520px;
+  z-index: 0;
+  background:
+    radial-gradient(700px 340px at 50% 20%, rgba(255, 255, 255, 0.8), transparent 70%),
+    #dbe7ea;
+}
+
+.map :global(.leaflet-container) {
+  font: inherit;
+}
+
+.map :global(.leaflet-control-attribution) {
+  font-size: 10px;
+}
+
+.map :global(.leaflet-popup-content-wrapper) {
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(18, 34, 58, 0.22);
+}
+
+.map :global(.leaflet-popup-content) {
+  margin: 12px 14px;
+  line-height: 1.4;
+}
+
+.mapStatus {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--trips-ink-2, #44546c);
+  background: rgba(243, 247, 249, 0.86);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.legend {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 500;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(18, 34, 58, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(18, 34, 58, 0.1);
+  pointer-events: none;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #334155;
+  font-size: 0.65rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.selectedCard,
+.emptyCard {
+  padding: 15px;
+  background: linear-gradient(145deg, #f4f8fd, #ffffff);
+  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
+  border-radius: 14px;
+}
+
+.categoryPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.selectedName {
+  margin: 9px 0 3px;
+  color: var(--trips-ink, #12223a);
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+
+.selectedArea {
+  margin: 0;
+  color: var(--trips-ink-2, #44546c);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.selectedMeta {
+  margin: 7px 0 0;
+  color: var(--trips-ink-3, #5c6a82);
+  font-size: 0.74rem;
+}
+
+.mapsLink {
+  display: inline-flex;
+  margin-top: 11px;
+  color: var(--trips-accent, #08428c);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.mapsLink:hover {
+  text-decoration: underline;
+}
+
+.emptyCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--trips-ink-2, #44546c);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.emptyCard p {
+  margin: 0;
+}
+
+.emptyIcon {
+  color: var(--trips-accent, #08428c);
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.listTitle {
+  margin: 0 0 8px;
+  color: var(--trips-ink, #12223a);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.topList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.topButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  color: var(--trips-ink, #12223a);
+  background: var(--trips-surface-soft, #f2f2f2);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
+}
+
+.topButton:hover {
+  background: var(--trips-accent-soft, #e7eef9);
+}
+
+.topButton:focus-visible {
+  outline: 2px solid var(--trips-accent, #08428c);
+  outline-offset: 2px;
+}
+
+.topButtonActive {
+  background: var(--trips-accent-soft, #e7eef9);
+  border-color: var(--trips-line-strong, rgba(8, 66, 140, 0.3));
+}
+
+.topName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.topRating {
+  flex: none;
+  color: var(--trips-ink-2, #44546c);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+/* Leaflet popup content */
+.popup {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 180px;
+  color: #12223a;
+}
+
+.popupCategory {
+  align-self: flex-start;
+  padding: 2px 7px;
+  color: var(--popup-accent, #0f6b6b);
+  background: color-mix(in srgb, var(--popup-accent, #0f6b6b) 12%, white);
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.popupTitle {
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.popupArea {
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.popupMeta {
+  color: #64748b;
+  font-size: 0.7rem;
+}
+
+.popupLink {
+  margin-top: 5px;
+  color: #08428c;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.popupLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map {
+    height: 440px;
+  }
+
+  .aside {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .map {
+    height: 380px;
+  }
+
+  .aside {
+    grid-template-columns: 1fr;
+  }
+
+  .legend {
+    gap: 6px 9px;
+  }
+
+  .legendItem {
+    font-size: 0.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filterButton,
+  .topButton {
+    transition: none;
+  }
+}

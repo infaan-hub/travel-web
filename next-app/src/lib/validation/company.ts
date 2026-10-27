@@ -196,14 +196,36 @@ export const companyWorkspaceProfileUpdateSchema = companyBaseSchema
     remove_cover: booleanishSchema.optional(),
   });
 
-export const companyTripCreateSchema = z.object({
+const companyTripFields = z.object({
   title: z.string().trim().min(1, "Trip name is required.").max(200),
   place: z.string().trim().min(1, "Place is required.").max(200),
   description: z.string().trim().max(5000).optional().default(""),
   price: z.coerce.number().nonnegative("Price cannot be negative."),
+  latitude: nullableCoordinate(-90, 90),
+  longitude: nullableCoordinate(-180, 180),
 });
 
-export const companyTripUpdateSchema = companyTripCreateSchema.partial();
+function refineTripCoordinates(
+  value: { latitude?: number | null; longitude?: number | null },
+  context: z.RefinementCtx,
+) {
+  const issue = coordinatePairIssue(value.latitude, value.longitude);
+  if (issue) {
+    context.addIssue({
+      code: "custom",
+      path: ["latitude"],
+      message: issue,
+    });
+  }
+}
+
+export const companyTripCreateSchema = companyTripFields.superRefine(
+  refineTripCoordinates,
+);
+
+export const companyTripUpdateSchema = companyTripFields
+  .partial()
+  .superRefine(refineTripCoordinates);
 
 export const companyListQuerySchema = z.object({
   search: z.string().trim().max(120).optional().default(""),

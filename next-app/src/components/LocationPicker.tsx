@@ -3,7 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import { openStreetMapUrl } from "@/lib/company-domain";
+import {
+  ZANZIBAR_BOUNDS,
+  ZANZIBAR_CENTER,
+  ZANZIBAR_PLACES,
+  isInZanzibar,
+} from "@/lib/zanzibar";
 import styles from "@/features/pages/admin-companies.module.css";
+
+export { ZANZIBAR_BOUNDS, ZANZIBAR_CENTER, ZANZIBAR_PLACES, isInZanzibar };
 
 type LocationPickerProps = {
   latitude: number | null;
@@ -11,9 +19,8 @@ type LocationPickerProps = {
   onChange: (latitude: number, longitude: number) => void;
   disabled?: boolean;
   label?: string;
+  showPlaces?: boolean;
 };
-
-const TANZANIA_CENTER: [number, number] = [-6.369, 34.8888];
 
 function validCoordinates(latitude: number | null, longitude: number | null) {
   return (
@@ -28,16 +35,45 @@ function validCoordinates(latitude: number | null, longitude: number | null) {
   );
 }
 
+function placeDotStyle(type: string) {
+  switch (type) {
+    case "region":
+      return { radius: 9, color: "#0F6B6B", fillColor: "#0F6B6B", fillOpacity: 0.12, weight: 2 };
+    case "district":
+      return { radius: 7, color: "#0F6B6B", fillColor: "#0F6B6B", fillOpacity: 0.18, weight: 1.5 };
+    case "island":
+      return { radius: 4.5, color: "#0369A1", fillColor: "#38BDF8", fillOpacity: 0.7, weight: 1 };
+    case "neighbourhood":
+      return { radius: 3.2, color: "#B45309", fillColor: "#F59E0B", fillOpacity: 0.72, weight: 1 };
+    case "locality":
+      return { radius: 3, color: "#7C3AED", fillColor: "#A78BFA", fillOpacity: 0.7, weight: 1 };
+    default:
+      return { radius: 2.2, color: "#0F766E", fillColor: "#14B8A6", fillOpacity: 0.65, weight: 0.5 };
+  }
+}
+
+function townIcon(leaflet: typeof Leaflet, size: number) {
+  return leaflet.divIcon({
+    className: "",
+    html: `<span style="display:block;width:${size}px;height:${size}px;border-radius:50%;background:#0F6B6B;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></span>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
 export default function LocationPicker({
   latitude,
   longitude,
   onChange,
   disabled = false,
   label = "Company location map",
+  showPlaces = true,
 }: LocationPickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Leaflet.Map | null>(null);
   const markerRef = useRef<Leaflet.Marker | null>(null);
+  const placesLayerRef = useRef<Leaflet.LayerGroup | null>(null);
+  const villagesLayerRef = useRef<Leaflet.LayerGroup | null>(null);
   const leafletRef = useRef<typeof Leaflet | null>(null);
   const onChangeRef = useRef(onChange);
   const disabledRef = useRef(disabled);
@@ -58,9 +94,12 @@ export default function LocationPicker({
         if (cancelled || !containerRef.current || mapRef.current) return;
         const hasPoint = validCoordinates(latitude, longitude);
         const map = leaflet.map(containerRef.current, {
-          center: hasPoint ? [latitude as number, longitude as number] : TANZANIA_CENTER,
-          zoom: hasPoint ? 13 : 6,
+          center: hasPoint ? [latitude as number, longitude as number] : ZANZIBAR_CENTER,
+          zoom: hasPoint ? 13 : 9,
           scrollWheelZoom: false,
+          maxBounds: ZANZIBAR_BOUNDS,
+          maxBoundsViscosity: 1.0,
+          minZoom: 8,
         });
         leaflet
           .tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -70,12 +109,68 @@ export default function LocationPicker({
           })
           .addTo(map);
 
+        // Every Zanzibar place is available on the map. Villages are drawn as
+        // lightweight canvas dots and appear once the user zooms in, while
+        // towns and administrative centres stay visible at the island scale.
+        if (showPlaces) {
+          const renderer = leaflet.canvas({ padding: 0.5 });
+          const placesLayer = leaflet.layerGroup().addTo(map);
+          const villagesLayer = leaflet.layerGroup();
+          const addPlace = (place: (typeof ZANZIBAR_PLACES)[number]) => {
+            const isVillage = place.type === "village" || place.type === "locality";
+            const layer = isVillage ? villagesLayer : placesLayer;
+            const tooltip = `${place.name} (${place.type})`;
+
+            if (place.type === "city" || place.type === "town") {
+              const marker = leaflet
+                .marker([place.latitude, place.longitude], {
+                  title: place.name,
+                  alt: place.name,
+                  icon: townIcon(leaflet, place.type === "city" ? 16 : 13),
+                })
+                .bindTooltip(tooltip, { direction: "top", offset: [0, -8] })
+                .on("click", () => {
+                  if (!disabledRef.current) onChangeRef.current(place.latitude, place.longitude);
+                });
+              marker.addTo(layer);
+              return;
+            }
+
+            const dot = leaflet
+              .circleMarker([place.latitude, place.longitude], {
+                ...placeDotStyle(place.type),
+                renderer,
+              })
+              .bindTooltip(tooltip, { direction: "top", offset: [0, -4] })
+              .on("click", () => {
+                if (!disabledRef.current) onChangeRef.current(place.latitude, place.longitude);
+              });
+            dot.addTo(layer);
+          };
+
+          for (const place of ZANZIBAR_PLACES) addPlace(place);
+
+          const updateVillages = () => {
+            if (map.getZoom() >= 11) {
+              if (!map.hasLayer(villagesLayer)) villagesLayer.addTo(map);
+            } else if (map.hasLayer(villagesLayer)) {
+              map.removeLayer(villagesLayer);
+            }
+          };
+          updateVillages();
+          map.on("zoomend", updateVillages);
+
+          placesLayerRef.current = placesLayer;
+          villagesLayerRef.current = villagesLayer;
+        }
+
         map.on("click", (event: Leaflet.LeafletMouseEvent) => {
           if (disabledRef.current) return;
-          onChangeRef.current(
-            Math.round(event.latlng.lat * 1_000_000) / 1_000_000,
-            Math.round(event.latlng.lng * 1_000_000) / 1_000_000,
-          );
+          const lat = Math.round(event.latlng.lat * 1_000_000) / 1_000_000;
+          const lng = Math.round(event.latlng.lng * 1_000_000) / 1_000_000;
+          // Keep locations inside Zanzibar only.
+          if (!isInZanzibar(lat, lng)) return;
+          onChangeRef.current(lat, lng);
         });
 
         leafletRef.current = leaflet;
@@ -89,6 +184,8 @@ export default function LocationPicker({
     return () => {
       cancelled = true;
       markerRef.current = null;
+      placesLayerRef.current = null;
+      villagesLayerRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
       leafletRef.current = null;
@@ -125,10 +222,10 @@ export default function LocationPicker({
         .addTo(map);
       marker.on("dragend", () => {
         const next = marker.getLatLng();
-        onChangeRef.current(
-          Math.round(next.lat * 1_000_000) / 1_000_000,
-          Math.round(next.lng * 1_000_000) / 1_000_000,
-        );
+        const lat = Math.round(next.lat * 1_000_000) / 1_000_000;
+        const lng = Math.round(next.lng * 1_000_000) / 1_000_000;
+        if (!isInZanzibar(lat, lng)) return;
+        onChangeRef.current(lat, lng);
       });
       markerRef.current = marker;
     } else {
@@ -163,8 +260,8 @@ export default function LocationPicker({
       <div className={styles.mapHint} id="company-map-help">
         <span>
           {hasPoint
-            ? "Click the map or drag the marker to adjust the pin."
-            : "Click the map to set a location. You can also enter coordinates manually."}
+            ? "Click the map, a town dot, or drag the marker to adjust the pin."
+            : "Click the map or a town dot to set a location. Village dots appear as you zoom in."}
         </span>
         {osmUrl && (
           <a href={osmUrl} target="_blank" rel="noopener noreferrer" className={styles.mapLink}>

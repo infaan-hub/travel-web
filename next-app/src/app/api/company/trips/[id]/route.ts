@@ -30,6 +30,8 @@ async function update(request: NextRequest, context: Context) {
       data: {
         ...(body.title !== undefined ? { title: body.title } : {}),
         ...(body.place !== undefined ? { place: body.place } : {}),
+        ...(body.latitude !== undefined ? { latitude: body.latitude } : {}),
+        ...(body.longitude !== undefined ? { longitude: body.longitude } : {}),
         ...(body.description !== undefined
           ? { description: body.description }
           : {}),

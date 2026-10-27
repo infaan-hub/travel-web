@@ -876,6 +876,21 @@
   opacity: 0.85;
 }
 
+.tripsMetaLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.tripsMetaLink:hover span {
+  text-decoration: underline;
+}
+
+.tripsMetaLink:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--trips-accent);
+  outline-offset: 2px;
+}
+
 .tripsCopy {
   display: -webkit-box;
   margin: 0;
@@ -1350,6 +1365,10 @@
 }
 
 .tripsMediaField {
+  grid-column: 1 / -1;
+}
+
+.tripsMapField {
   grid-column: 1 / -1;
 }
 
@@ -1831,7 +1850,8 @@
 
   .tripsFieldTitle,
   .tripsFieldWide,
-  .tripsMediaField {
+  .tripsMediaField,
+  .tripsMapField {
     grid-column: auto;
   }
 

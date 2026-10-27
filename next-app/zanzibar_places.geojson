@@ -1,0 +1,5873 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191056,
+     -6.161013
+    ]
+   },
+   "properties": {
+    "id": 1,
+    "name": "Emerson on Hurumzi",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.5,
+    "reviews": 764
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187576,
+     -6.164179
+    ]
+   },
+   "properties": {
+    "id": 2,
+    "name": "Dhow Palace Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.2,
+    "reviews": 719
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.18786,
+     -6.165023
+    ]
+   },
+   "properties": {
+    "id": 3,
+    "name": "Balcony House Zanzibar",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.0,
+    "reviews": 165
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187236,
+     -6.161958
+    ]
+   },
+   "properties": {
+    "id": 4,
+    "name": "Tembo House Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 2905
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.188688,
+     -6.164313
+    ]
+   },
+   "properties": {
+    "id": 5,
+    "name": "Tarawanda House",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 58
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191181,
+     -6.16001
+    ]
+   },
+   "properties": {
+    "id": 6,
+    "name": "The Seyyida Hotel & Spa",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.1,
+    "reviews": 393
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191633,
+     -6.159045
+    ]
+   },
+   "properties": {
+    "id": 7,
+    "name": "Mizingani Seafront Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 1294
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.188061,
+     -6.162023
+    ]
+   },
+   "properties": {
+    "id": 8,
+    "name": "Shoki Shoki Hotel Stone Town",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.2,
+    "reviews": 239
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.194063,
+     -6.159688
+    ]
+   },
+   "properties": {
+    "id": 9,
+    "name": "The Island Stone Town Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 3.9,
+    "reviews": 213
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.193759,
+     -6.157111
+    ]
+   },
+   "properties": {
+    "id": 10,
+    "name": "Stonetown Tides Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 3.3,
+    "reviews": 18
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.18605,
+     -6.163399
+    ]
+   },
+   "properties": {
+    "id": 11,
+    "name": "Zanzibar Serena Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.5,
+    "reviews": 1033
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186213,
+     -6.162499
+    ]
+   },
+   "properties": {
+    "id": 12,
+    "name": "Park Hyatt Zanzibar",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 1684
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.18704,
+     -6.16442
+    ]
+   },
+   "properties": {
+    "id": 13,
+    "name": "Africa House Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.0,
+    "reviews": 670
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.188357,
+     -6.161657
+    ]
+   },
+   "properties": {
+    "id": 14,
+    "name": "Forodhani Park Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.2,
+    "reviews": 473
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.192626,
+     -6.158421
+    ]
+   },
+   "properties": {
+    "id": 15,
+    "name": "Kholle House Boutique Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 339
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189562,
+     -6.161663
+    ]
+   },
+   "properties": {
+    "id": 16,
+    "name": "Maru Maru Hotel",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 1987
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.19044,
+     -6.161167
+    ]
+   },
+   "properties": {
+    "id": 17,
+    "name": "Upendo House",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 378
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189063,
+     -6.164338
+    ]
+   },
+   "properties": {
+    "id": 18,
+    "name": "The Rooftop Stone Town (homestay)",
+    "category": "Hotel",
+    "area": "Stone Town",
+    "rating": 5.0,
+    "reviews": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.292716,
+     -5.731197
+    ]
+   },
+   "properties": {
+    "id": 19,
+    "name": "Makofi Zanzibar",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.5,
+    "reviews": 649
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.29114,
+     -5.731544
+    ]
+   },
+   "properties": {
+    "id": 20,
+    "name": "Sandies Nungwi Beach",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.6,
+    "reviews": 51
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.292617,
+     -5.730122
+    ]
+   },
+   "properties": {
+    "id": 21,
+    "name": "Canary Hotel & Spa",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.6,
+    "reviews": 599
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.293149,
+     -5.725468
+    ]
+   },
+   "properties": {
+    "id": 22,
+    "name": "Double A Nungwi Beach Hotel",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.1,
+    "reviews": 112
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291611,
+     -5.730597
+    ]
+   },
+   "properties": {
+    "id": 23,
+    "name": "The Z Hotel",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.5,
+    "reviews": 1082
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291485,
+     -5.729886
+    ]
+   },
+   "properties": {
+    "id": 24,
+    "name": "Amaan Beach Bungalows",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 3.9,
+    "reviews": 2185
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.304298,
+     -5.72285
+    ]
+   },
+   "properties": {
+    "id": 25,
+    "name": "Mnarani Beach Cottages",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.3,
+    "reviews": 505
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.29508,
+     -5.724343
+    ]
+   },
+   "properties": {
+    "id": 26,
+    "name": "Turaco Nungwi Resort (Tribute Portfolio)",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.3,
+    "reviews": 445
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.294504,
+     -5.729975
+    ]
+   },
+   "properties": {
+    "id": 27,
+    "name": "Golden Hotel Nungwi",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.5,
+    "reviews": 743
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.292727,
+     -5.730688
+    ]
+   },
+   "properties": {
+    "id": 28,
+    "name": "Nungwi Garden Boutique Hotel",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.4,
+    "reviews": 161
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.29242,
+     -5.736937
+    ]
+   },
+   "properties": {
+    "id": 29,
+    "name": "Royal Zanzibar Beach Resort",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.5,
+    "reviews": 2193
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.306553,
+     -5.724689
+    ]
+   },
+   "properties": {
+    "id": 30,
+    "name": "Essque Zalu Zanzibar",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.4,
+    "reviews": 935
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.338296,
+     -5.766796
+    ]
+   },
+   "properties": {
+    "id": 31,
+    "name": "SafiraBlu Luxury Resort & Villas",
+    "category": "Hotel",
+    "area": "Nungwi",
+    "rating": 4.9,
+    "reviews": 158
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.53527,
+     -6.265746
+    ]
+   },
+   "properties": {
+    "id": 32,
+    "name": "Sunny House Paje",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.6,
+    "reviews": 59
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.532069,
+     -6.262144
+    ]
+   },
+   "properties": {
+    "id": 33,
+    "name": "Rafiki Zanzibar Residence",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.6,
+    "reviews": 32
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.53483,
+     -6.263221
+    ]
+   },
+   "properties": {
+    "id": 34,
+    "name": "The 5th Element Boutique Hotel",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.9,
+    "reviews": 42
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.535092,
+     -6.263835
+    ]
+   },
+   "properties": {
+    "id": 35,
+    "name": "Saba House 24 Zanzibar",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.1,
+    "reviews": 19
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.534809,
+     -6.262477
+    ]
+   },
+   "properties": {
+    "id": 36,
+    "name": "Dhow Inn Boutique Hotel",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.4,
+    "reviews": 551
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.534981,
+     -6.268719
+    ]
+   },
+   "properties": {
+    "id": 37,
+    "name": "Paje By Night Yoga & Kitesurfing Hotel",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.2,
+    "reviews": 221
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536416,
+     -6.2673
+    ]
+   },
+   "properties": {
+    "id": 38,
+    "name": "Zula Zanzibar",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.3,
+    "reviews": 255
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536219,
+     -6.263942
+    ]
+   },
+   "properties": {
+    "id": 39,
+    "name": "Summer Beach Hotel",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.5,
+    "reviews": 330
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.534818,
+     -6.264117
+    ]
+   },
+   "properties": {
+    "id": 40,
+    "name": "Mambo Leo Hostel",
+    "category": "Hotel",
+    "area": "Paje",
+    "rating": 4.4,
+    "reviews": 24
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.383339,
+     -6.00309
+    ]
+   },
+   "properties": {
+    "id": 41,
+    "name": "Zanzibella Hotel & Spa",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.7,
+    "reviews": 653
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.372583,
+     -5.969628
+    ]
+   },
+   "properties": {
+    "id": 42,
+    "name": "Imara Beach Resort",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.6,
+    "reviews": 119
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.379004,
+     -5.993165
+    ]
+   },
+   "properties": {
+    "id": 43,
+    "name": "Kuwa Zanzibar",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.7,
+    "reviews": 85
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.376593,
+     -5.993529
+    ]
+   },
+   "properties": {
+    "id": 44,
+    "name": "Zanzibar Tropical Sunset",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.6,
+    "reviews": 94
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.379773,
+     -5.992487
+    ]
+   },
+   "properties": {
+    "id": 45,
+    "name": "Mvuvi Boutique Resort",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.7,
+    "reviews": 241
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.381145,
+     -5.99584
+    ]
+   },
+   "properties": {
+    "id": 46,
+    "name": "Surfescape Zanzibar",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 3.9,
+    "reviews": 137
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.374371,
+     -5.976026
+    ]
+   },
+   "properties": {
+    "id": 47,
+    "name": "Sultan Sands Island Resort & Spa",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.5,
+    "reviews": 1052
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.378562,
+     -5.991469
+    ]
+   },
+   "properties": {
+    "id": 48,
+    "name": "Kiwengwa Beach Resort",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.5,
+    "reviews": 2114
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.374945,
+     -5.977997
+    ]
+   },
+   "properties": {
+    "id": 49,
+    "name": "Bluebay Beach Resort & Spa",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.6,
+    "reviews": 1632
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.381754,
+     -5.998404
+    ]
+   },
+   "properties": {
+    "id": 50,
+    "name": "SeaShore Beach Hotel & Bungalow",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.6,
+    "reviews": 192
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.367156,
+     -5.953767
+    ]
+   },
+   "properties": {
+    "id": 51,
+    "name": "Melia Zanzibar",
+    "category": "Hotel",
+    "area": "Kiwengwa",
+    "rating": 4.7,
+    "reviews": 2009
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.352724,
+     -5.875973
+    ]
+   },
+   "properties": {
+    "id": 52,
+    "name": "Zanzibar Bahari Villas",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 3.8,
+    "reviews": 228
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.352981,
+     -5.88251
+    ]
+   },
+   "properties": {
+    "id": 53,
+    "name": "Zanzibar Sunrise at Bandas",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.6,
+    "reviews": 500
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.354939,
+     -5.862322
+    ]
+   },
+   "properties": {
+    "id": 54,
+    "name": "Kena Beach Hotel",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.5,
+    "reviews": 342
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.352987,
+     -5.880672
+    ]
+   },
+   "properties": {
+    "id": 55,
+    "name": "Marafiki Beach Hotel & Spa",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.9,
+    "reviews": 275
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.353793,
+     -5.889832
+    ]
+   },
+   "properties": {
+    "id": 56,
+    "name": "Zanzibar Magic Boutique Hotel",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.5,
+    "reviews": 200
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.346553,
+     -5.875197
+    ]
+   },
+   "properties": {
+    "id": 57,
+    "name": "Salama & Mbuyuni Oasis",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.9,
+    "reviews": 216
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.355446,
+     -5.857214
+    ]
+   },
+   "properties": {
+    "id": 58,
+    "name": "Alladin Beach Hotel & Spa",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.8,
+    "reviews": 170
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.353166,
+     -5.872577
+    ]
+   },
+   "properties": {
+    "id": 59,
+    "name": "Villa Kiva Boutique Hotel",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.6,
+    "reviews": 558
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.356454,
+     -5.851025
+    ]
+   },
+   "properties": {
+    "id": 60,
+    "name": "SeVi Boutique Hotel Zanzibar",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.4,
+    "reviews": 368
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.356438,
+     -5.918688
+    ]
+   },
+   "properties": {
+    "id": 61,
+    "name": "La Perla Beach Resort",
+    "category": "Hotel",
+    "area": "Matemwe",
+    "rating": 4.6,
+    "reviews": 96
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.548309,
+     -6.321069
+    ]
+   },
+   "properties": {
+    "id": 62,
+    "name": "The Loop Beach Resort",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 4.7,
+    "reviews": 629
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.540343,
+     -6.295808
+    ]
+   },
+   "properties": {
+    "id": 63,
+    "name": "Spice Island Hotel & Resort",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 4.2,
+    "reviews": 405
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.541684,
+     -6.300551
+    ]
+   },
+   "properties": {
+    "id": 64,
+    "name": "Mwezi Boutique Resort",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 4.7,
+    "reviews": 739
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.551185,
+     -6.327001
+    ]
+   },
+   "properties": {
+    "id": 65,
+    "name": "Visitor's Inn Hotel Zanzibar",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 3.6,
+    "reviews": 303
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.540216,
+     -6.296862
+    ]
+   },
+   "properties": {
+    "id": 66,
+    "name": "Fun Beach Hotel",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 4.4,
+    "reviews": 592
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.541414,
+     -6.298885
+    ]
+   },
+   "properties": {
+    "id": 67,
+    "name": "Sharazad Oasis Retreat",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 4.8,
+    "reviews": 80
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.556897,
+     -6.341392
+    ]
+   },
+   "properties": {
+    "id": 68,
+    "name": "Coral Rocks Zanzibar",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 4.3,
+    "reviews": 835
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.547874,
+     -6.319642
+    ]
+   },
+   "properties": {
+    "id": 69,
+    "name": "Belvedere Resort Zanzibar",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 4.5,
+    "reviews": 255
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.542373,
+     -6.302968
+    ]
+   },
+   "properties": {
+    "id": 70,
+    "name": "Ifa Beach Resort",
+    "category": "Hotel",
+    "area": "Jambiani",
+    "rating": 3.9,
+    "reviews": 277
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.287857,
+     -5.755347
+    ]
+   },
+   "properties": {
+    "id": 71,
+    "name": "Kendwa Beach Bungalows",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.0,
+    "reviews": 82
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.288559,
+     -5.751179
+    ]
+   },
+   "properties": {
+    "id": 72,
+    "name": "Sunset Kendwa",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.2,
+    "reviews": 1377
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.2933,
+     -5.749961
+    ]
+   },
+   "properties": {
+    "id": 73,
+    "name": "Kendwa Breeze Bungalows",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.6,
+    "reviews": 56
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.287978,
+     -5.754958
+    ]
+   },
+   "properties": {
+    "id": 74,
+    "name": "Mocco Beach Villa",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 3.7,
+    "reviews": 395
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.289778,
+     -5.752008
+    ]
+   },
+   "properties": {
+    "id": 75,
+    "name": "Kendwa Rocks Beach Hotel",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.3,
+    "reviews": 4742
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291029,
+     -5.752761
+    ]
+   },
+   "properties": {
+    "id": 76,
+    "name": "Daeli Zanzibar Apartment",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.7,
+    "reviews": 18
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.290786,
+     -5.752999
+    ]
+   },
+   "properties": {
+    "id": 77,
+    "name": "Sand and Sunset Hotel JGM",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.8,
+    "reviews": 113
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291041,
+     -5.754641
+    ]
+   },
+   "properties": {
+    "id": 78,
+    "name": "Canary Kendwa Beach Resort",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.4,
+    "reviews": 1033
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.293889,
+     -5.75845
+    ]
+   },
+   "properties": {
+    "id": 79,
+    "name": "Kendwa Rasta Style",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.5,
+    "reviews": 46
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291118,
+     -5.756903
+    ]
+   },
+   "properties": {
+    "id": 80,
+    "name": "Palumbo Waves",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.5,
+    "reviews": 443
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291193,
+     -5.753448
+    ]
+   },
+   "properties": {
+    "id": 81,
+    "name": "Lala Salama Kendwa Villa",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 3.6,
+    "reviews": 23
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.290647,
+     -5.753376
+    ]
+   },
+   "properties": {
+    "id": 82,
+    "name": "Varadero Hotel",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 3.6,
+    "reviews": 21
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.299154,
+     -5.740562
+    ]
+   },
+   "properties": {
+    "id": 83,
+    "name": "Cactus Lodge Zanzibar",
+    "category": "Hotel",
+    "area": "Kendwa",
+    "rating": 4.6,
+    "reviews": 47
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.533607,
+     -6.233179
+    ]
+   },
+   "properties": {
+    "id": 84,
+    "name": "Indigo Beach Zanzibar",
+    "category": "Hotel",
+    "area": "Bwejuu",
+    "rating": 4.3,
+    "reviews": 374
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.532805,
+     -6.22587
+    ]
+   },
+   "properties": {
+    "id": 85,
+    "name": "Protels La Plage",
+    "category": "Hotel",
+    "area": "Bwejuu",
+    "rating": 4.5,
+    "reviews": 79
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.530818,
+     -6.21278
+    ]
+   },
+   "properties": {
+    "id": 86,
+    "name": "Diamonds Bijoux",
+    "category": "Hotel",
+    "area": "Bwejuu",
+    "rating": 4.9,
+    "reviews": 144
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.533038,
+     -6.22802
+    ]
+   },
+   "properties": {
+    "id": 87,
+    "name": "Amani Beach Villa",
+    "category": "Hotel",
+    "area": "Bwejuu",
+    "rating": 5.0,
+    "reviews": 31
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.466752,
+     -6.449418
+    ]
+   },
+   "properties": {
+    "id": 88,
+    "name": "Unguja Lodge",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.5,
+    "reviews": 57
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.462508,
+     -6.437938
+    ]
+   },
+   "properties": {
+    "id": 89,
+    "name": "Bella Vista Resort Zanzibar",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.0,
+    "reviews": 267
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.473806,
+     -6.455761
+    ]
+   },
+   "properties": {
+    "id": 90,
+    "name": "Mandarin Resort Zanzibar",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.7,
+    "reviews": 385
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.463654,
+     -6.442911
+    ]
+   },
+   "properties": {
+    "id": 91,
+    "name": "L'Oasis Beach Hotel Kizimkazi",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 5.0,
+    "reviews": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.463988,
+     -6.444599
+    ]
+   },
+   "properties": {
+    "id": 92,
+    "name": "Tunu Beach Zanzibar",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.5,
+    "reviews": 11
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.4645,
+     -6.442393
+    ]
+   },
+   "properties": {
+    "id": 93,
+    "name": "Kwanza Resort",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.5,
+    "reviews": 840
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.477625,
+     -6.46003
+    ]
+   },
+   "properties": {
+    "id": 94,
+    "name": "Salida Beach Zanzibar",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.7,
+    "reviews": 36
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.474278,
+     -6.455685
+    ]
+   },
+   "properties": {
+    "id": 95,
+    "name": "Aya Beach Resort",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.3,
+    "reviews": 359
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.444551,
+     -6.403836
+    ]
+   },
+   "properties": {
+    "id": 96,
+    "name": "Fruit & Spice Wellness Resort",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.4,
+    "reviews": 600
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.464134,
+     -6.444816
+    ]
+   },
+   "properties": {
+    "id": 97,
+    "name": "Kusini Beach Bungalows",
+    "category": "Hotel",
+    "area": "Kizimkazi",
+    "rating": 4.3,
+    "reviews": 72
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.424659,
+     -6.13455
+    ]
+   },
+   "properties": {
+    "id": 98,
+    "name": "Zanzibar Bay Resort & Spa",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.2,
+    "reviews": 755
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.42603,
+     -6.100716
+    ]
+   },
+   "properties": {
+    "id": 99,
+    "name": "AVO Boutique Hotel Zanzibar",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.8,
+    "reviews": 101
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.425667,
+     -6.099497
+    ]
+   },
+   "properties": {
+    "id": 100,
+    "name": "Dream of Zanzibar",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.9,
+    "reviews": 919
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.424781,
+     -6.096652
+    ]
+   },
+   "properties": {
+    "id": 101,
+    "name": "Blackstone Beach Resort",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.6,
+    "reviews": 117
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.427028,
+     -6.108769
+    ]
+   },
+   "properties": {
+    "id": 102,
+    "name": "MANOLO Beach Resort",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.6,
+    "reviews": 58
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.505535,
+     -6.126374
+    ]
+   },
+   "properties": {
+    "id": 103,
+    "name": "Legendary Zanzibar Beach Resort",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.5,
+    "reviews": 173
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.426166,
+     -6.101688
+    ]
+   },
+   "properties": {
+    "id": 104,
+    "name": "Zanzibar Vera Beach Hotel",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.5,
+    "reviews": 11
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.436298,
+     -6.157351
+    ]
+   },
+   "properties": {
+    "id": 105,
+    "name": "Antonio Beach",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.4,
+    "reviews": 164
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.425901,
+     -6.116179
+    ]
+   },
+   "properties": {
+    "id": 106,
+    "name": "Maharaja Boutique Hotel",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.8,
+    "reviews": 152
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.407215,
+     -6.035566
+    ]
+   },
+   "properties": {
+    "id": 107,
+    "name": "Pongwe Beach Hotel",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.5,
+    "reviews": 332
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.405762,
+     -6.045564
+    ]
+   },
+   "properties": {
+    "id": 108,
+    "name": "Pongwe Bay Resort",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.7,
+    "reviews": 548
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.539211,
+     -6.462178
+    ]
+   },
+   "properties": {
+    "id": 109,
+    "name": "Mtende Beach Bungalow",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 3.5,
+    "reviews": 20
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.489553,
+     -6.144212
+    ]
+   },
+   "properties": {
+    "id": 110,
+    "name": "Kae Funk",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.2,
+    "reviews": 329
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.274709,
+     -6.315732
+    ]
+   },
+   "properties": {
+    "id": 111,
+    "name": "Fumba Beach Lodge",
+    "category": "Hotel",
+    "area": "Uroa / Chwaka / Pongwe / Michamvi / Fumba",
+    "rating": 4.4,
+    "reviews": 272
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.192074,
+     -6.16116
+    ]
+   },
+   "properties": {
+    "id": 112,
+    "name": "The Secret Garden at Emerson Spice",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 675
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187286,
+     -6.162579
+    ]
+   },
+   "properties": {
+    "id": 113,
+    "name": "Breadfruit Restaurant & Cafe",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.5,
+    "reviews": 123
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191583,
+     -6.163443
+    ]
+   },
+   "properties": {
+    "id": 114,
+    "name": "Lukmaan Swahili Restaurant",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.2,
+    "reviews": 5813
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.18854,
+     -6.16044
+    ]
+   },
+   "properties": {
+    "id": 115,
+    "name": "Cape Town Fish Market Zanzibar",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.5,
+    "reviews": 3986
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186537,
+     -6.164245
+    ]
+   },
+   "properties": {
+    "id": 116,
+    "name": "Beach House Zanzibar",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 1725
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.190482,
+     -6.161179
+    ]
+   },
+   "properties": {
+    "id": 117,
+    "name": "The 5th Restaurant",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 137
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.192179,
+     -6.163561
+    ]
+   },
+   "properties": {
+    "id": 118,
+    "name": "Anadolu-Anatolia Turkish Restaurant",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.8,
+    "reviews": 923
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186351,
+     -6.164005
+    ]
+   },
+   "properties": {
+    "id": 119,
+    "name": "Archipelago Waterfront Cafe",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 717
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.188225,
+     -6.161289
+    ]
+   },
+   "properties": {
+    "id": 120,
+    "name": "Out of Afrika",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.7,
+    "reviews": 978
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186846,
+     -6.164266
+    ]
+   },
+   "properties": {
+    "id": 121,
+    "name": "6 Degrees South",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 2039
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191551,
+     -6.163514
+    ]
+   },
+   "properties": {
+    "id": 122,
+    "name": "ZAFA Swahili Dishes",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 5.0,
+    "reviews": 97
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187916,
+     -6.163002
+    ]
+   },
+   "properties": {
+    "id": 123,
+    "name": "Lazuli Cafe",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 294
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.216649,
+     -6.198489
+    ]
+   },
+   "properties": {
+    "id": 124,
+    "name": "Ala-Nnoor Restaurant (Airport Rd)",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.2,
+    "reviews": 242
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.193823,
+     -6.161273
+    ]
+   },
+   "properties": {
+    "id": 125,
+    "name": "Ala-Nnoor Restaurant Darajani",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.1,
+    "reviews": 323
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.192293,
+     -6.163646
+    ]
+   },
+   "properties": {
+    "id": 126,
+    "name": "Zanzi Cafe",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 85
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191389,
+     -6.1634
+    ]
+   },
+   "properties": {
+    "id": 127,
+    "name": "7 Spice Restaurant",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 301
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.216877,
+     -6.09697
+    ]
+   },
+   "properties": {
+    "id": 128,
+    "name": "Bibi's Kitchen",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.5,
+    "reviews": 68
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.193497,
+     -6.160342
+    ]
+   },
+   "properties": {
+    "id": 129,
+    "name": "Annex of Lukmaan Restaurant",
+    "category": "Restaurant",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 144
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.188647,
+     -6.160273
+    ]
+   },
+   "properties": {
+    "id": 130,
+    "name": "Floating Bar",
+    "category": "Bar",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 56
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186792,
+     -6.164106
+    ]
+   },
+   "properties": {
+    "id": 131,
+    "name": "Patamu (Tatu)",
+    "category": "Bar",
+    "area": "Stone Town",
+    "rating": 3.9,
+    "reviews": 501
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189615,
+     -6.162745
+    ]
+   },
+   "properties": {
+    "id": 132,
+    "name": "Hidden Gem Cafe",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.9,
+    "reviews": 60
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189596,
+     -6.162275
+    ]
+   },
+   "properties": {
+    "id": 133,
+    "name": "The Spice Route Cafe",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.7,
+    "reviews": 214
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.192257,
+     -6.161644
+    ]
+   },
+   "properties": {
+    "id": 134,
+    "name": "Zanzibar Coffee House",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 1425
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.18691,
+     -6.163851
+    ]
+   },
+   "properties": {
+    "id": 135,
+    "name": "Puzzle Coffee Shop",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 462
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187846,
+     -6.163318
+    ]
+   },
+   "properties": {
+    "id": 136,
+    "name": "Stone Town Cafe",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 1036
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187741,
+     -6.162047
+    ]
+   },
+   "properties": {
+    "id": 137,
+    "name": "Karafuu Coffee House",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.5,
+    "reviews": 464
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187558,
+     -6.164416
+    ]
+   },
+   "properties": {
+    "id": 138,
+    "name": "Pink Sugar LDN Cafe & Brunch",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 264
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.188796,
+     -6.160336
+    ]
+   },
+   "properties": {
+    "id": 139,
+    "name": "Zenji Garden Cafe",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 147
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.192651,
+     -6.163808
+    ]
+   },
+   "properties": {
+    "id": 140,
+    "name": "Sugar Sukari Cafe",
+    "category": "Cafe",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 56
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291637,
+     -5.728103
+    ]
+   },
+   "properties": {
+    "id": 141,
+    "name": "Mama Mia",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.3,
+    "reviews": 3423
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.298106,
+     -5.723167
+    ]
+   },
+   "properties": {
+    "id": 142,
+    "name": "Fish Market Local Restaurant",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.7,
+    "reviews": 1557
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.300521,
+     -5.723026
+    ]
+   },
+   "properties": {
+    "id": 143,
+    "name": "Mahi Mahi Beach Bar & Restaurant",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.7,
+    "reviews": 471
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.294668,
+     -5.731973
+    ]
+   },
+   "properties": {
+    "id": 144,
+    "name": "197 Restaurant & Bar",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.8,
+    "reviews": 624
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291504,
+     -5.728525
+    ]
+   },
+   "properties": {
+    "id": 145,
+    "name": "Terrace Nungwi",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.3,
+    "reviews": 402
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.30252,
+     -5.722341
+    ]
+   },
+   "properties": {
+    "id": 146,
+    "name": "Maisha Beach Seafood & Cocktails",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.6,
+    "reviews": 527
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.293557,
+     -5.730739
+    ]
+   },
+   "properties": {
+    "id": 147,
+    "name": "Papaya Restaurant",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.7,
+    "reviews": 69
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.293932,
+     -5.735319
+    ]
+   },
+   "properties": {
+    "id": 148,
+    "name": "MIZIZI Restaurant",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.8,
+    "reviews": 116
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.293192,
+     -5.729632
+    ]
+   },
+   "properties": {
+    "id": 149,
+    "name": "Malkia Emmy Restaurant",
+    "category": "Restaurant",
+    "area": "Nungwi",
+    "rating": 4.8,
+    "reviews": 186
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.293575,
+     -5.727236
+    ]
+   },
+   "properties": {
+    "id": 150,
+    "name": "Passion & Thyme",
+    "category": "Cafe",
+    "area": "Nungwi",
+    "rating": 4.8,
+    "reviews": 545
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.293993,
+     -5.728187
+    ]
+   },
+   "properties": {
+    "id": 151,
+    "name": "Secret Garden Coffee Shop Nungwi",
+    "category": "Cafe",
+    "area": "Nungwi",
+    "rating": 4.8,
+    "reviews": 172
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.297828,
+     -5.72993
+    ]
+   },
+   "properties": {
+    "id": 152,
+    "name": "JF Kili Coffee House",
+    "category": "Cafe",
+    "area": "Nungwi",
+    "rating": 5.0,
+    "reviews": 375
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.294101,
+     -5.734484
+    ]
+   },
+   "properties": {
+    "id": 153,
+    "name": "Tiki Cafe",
+    "category": "Cafe",
+    "area": "Nungwi",
+    "rating": 4.9,
+    "reviews": 61
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.295006,
+     -5.724357
+    ]
+   },
+   "properties": {
+    "id": 154,
+    "name": "Kasuku Cafe",
+    "category": "Cafe",
+    "area": "Nungwi",
+    "rating": 4.4,
+    "reviews": 19
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.301554,
+     -5.723203
+    ]
+   },
+   "properties": {
+    "id": 155,
+    "name": "Cafe Dodoki",
+    "category": "Cafe",
+    "area": "Nungwi",
+    "rating": 4.6,
+    "reviews": 282
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.293031,
+     -5.728293
+    ]
+   },
+   "properties": {
+    "id": 156,
+    "name": "MJ Cafe Nungwi",
+    "category": "Cafe",
+    "area": "Nungwi",
+    "rating": 4.2,
+    "reviews": 907
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.290421,
+     -5.734829
+    ]
+   },
+   "properties": {
+    "id": 157,
+    "name": "My Blue Sunset Beach Bar",
+    "category": "Bar",
+    "area": "Nungwi",
+    "rating": 3.2,
+    "reviews": 34
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.295795,
+     -5.723848
+    ]
+   },
+   "properties": {
+    "id": 158,
+    "name": "Kibanda Beach Club",
+    "category": "Bar",
+    "area": "Nungwi",
+    "rating": 4.3,
+    "reviews": 302
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.295063,
+     -5.724219
+    ]
+   },
+   "properties": {
+    "id": 159,
+    "name": "ZeeBar",
+    "category": "Bar",
+    "area": "Nungwi",
+    "rating": 4.6,
+    "reviews": 54
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536335,
+     -6.265913
+    ]
+   },
+   "properties": {
+    "id": 160,
+    "name": "Hello Capitano Zanzibar",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.8,
+    "reviews": 2500
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.532161,
+     -6.26844
+    ]
+   },
+   "properties": {
+    "id": 161,
+    "name": "The Garten",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.7,
+    "reviews": 1131
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536326,
+     -6.266388
+    ]
+   },
+   "properties": {
+    "id": 162,
+    "name": "Shanga Restaurant Paje",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.3,
+    "reviews": 1331
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536307,
+     -6.269165
+    ]
+   },
+   "properties": {
+    "id": 163,
+    "name": "Mr. Kahawa Cafe-Restaurant",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.4,
+    "reviews": 1591
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536401,
+     -6.270574
+    ]
+   },
+   "properties": {
+    "id": 164,
+    "name": "Nomad Beach Restaurant",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.4,
+    "reviews": 121
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.533488,
+     -6.268859
+    ]
+   },
+   "properties": {
+    "id": 165,
+    "name": "Ratatouille Zanzibar",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.6,
+    "reviews": 396
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536313,
+     -6.267629
+    ]
+   },
+   "properties": {
+    "id": 166,
+    "name": "ZanziBarista",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.7,
+    "reviews": 764
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536295,
+     -6.266541
+    ]
+   },
+   "properties": {
+    "id": 167,
+    "name": "Ocean Restaurant Paje",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.4,
+    "reviews": 396
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.534591,
+     -6.263311
+    ]
+   },
+   "properties": {
+    "id": 168,
+    "name": "Chamu Restaurant",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.8,
+    "reviews": 781
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.532886,
+     -6.263206
+    ]
+   },
+   "properties": {
+    "id": 169,
+    "name": "al Casbah",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.8,
+    "reviews": 1389
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.532905,
+     -6.272839
+    ]
+   },
+   "properties": {
+    "id": 170,
+    "name": "Mawimbi Zanzibar",
+    "category": "Restaurant",
+    "area": "Paje",
+    "rating": 4.8,
+    "reviews": 96
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.553423,
+     -6.337191
+    ]
+   },
+   "properties": {
+    "id": 171,
+    "name": "BOMWA! Bistrot Local",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 5.0,
+    "reviews": 157
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.541265,
+     -6.310445
+    ]
+   },
+   "properties": {
+    "id": 172,
+    "name": "Jambiani Coco Restaurant",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.8,
+    "reviews": 116
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.539586,
+     -6.305236
+    ]
+   },
+   "properties": {
+    "id": 173,
+    "name": "Pompetti Restaurant",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.7,
+    "reviews": 588
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.544679,
+     -6.313723
+    ]
+   },
+   "properties": {
+    "id": 174,
+    "name": "Zawadi Jambiani Restaurant",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.7,
+    "reviews": 117
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.553413,
+     -6.333791
+    ]
+   },
+   "properties": {
+    "id": 175,
+    "name": "ZAD-EAST",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.7,
+    "reviews": 224
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.546915,
+     -6.315684
+    ]
+   },
+   "properties": {
+    "id": 176,
+    "name": "Fisherman Restaurant Jambiani",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.8,
+    "reviews": 112
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.544803,
+     -6.311891
+    ]
+   },
+   "properties": {
+    "id": 177,
+    "name": "ISHI Restaurant Jambiani",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.8,
+    "reviews": 238
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.553447,
+     -6.336979
+    ]
+   },
+   "properties": {
+    "id": 178,
+    "name": "Gerezani",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.8,
+    "reviews": 279
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.542095,
+     -6.299607
+    ]
+   },
+   "properties": {
+    "id": 179,
+    "name": "Sharazad The View Restaurant",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.5,
+    "reviews": 271
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.527786,
+     -6.179529
+    ]
+   },
+   "properties": {
+    "id": 180,
+    "name": "The Restaurant @ The Bali Resort",
+    "category": "Restaurant",
+    "area": "Jambiani / Dongwe",
+    "rating": 4.9,
+    "reviews": 163
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.534736,
+     -6.239665
+    ]
+   },
+   "properties": {
+    "id": 181,
+    "name": "Tiki Beach Club Zanzibar",
+    "category": "Bar",
+    "area": "Bwejuu",
+    "rating": 4.5,
+    "reviews": 29
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.533257,
+     -6.229646
+    ]
+   },
+   "properties": {
+    "id": 182,
+    "name": "Kilimani Kwetu Beach Restaurant",
+    "category": "Bar",
+    "area": "Bwejuu",
+    "rating": 4.7,
+    "reviews": 97
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.53482,
+     -6.245477
+    ]
+   },
+   "properties": {
+    "id": 183,
+    "name": "Ocean Breeze Bar & Restaurant",
+    "category": "Bar",
+    "area": "Bwejuu",
+    "rating": 4.6,
+    "reviews": 39
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.53426,
+     -6.239154
+    ]
+   },
+   "properties": {
+    "id": 184,
+    "name": "Leo Bar and Restaurant @ The African Paradise",
+    "category": "Bar",
+    "area": "Bwejuu",
+    "rating": 4.9,
+    "reviews": 139
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.516266,
+     -6.144564
+    ]
+   },
+   "properties": {
+    "id": 185,
+    "name": "Matlai Restaurant",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.8,
+    "reviews": 240
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.518324,
+     -6.151815
+    ]
+   },
+   "properties": {
+    "id": 186,
+    "name": "The View of Zanzibar",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.6,
+    "reviews": 97
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.519409,
+     -6.152066
+    ]
+   },
+   "properties": {
+    "id": 187,
+    "name": "The Rock Restaurant Zanzibar",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.4,
+    "reviews": 9691
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.516322,
+     -6.144368
+    ]
+   },
+   "properties": {
+    "id": 188,
+    "name": "Mia Hakka Restaurant",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.9,
+    "reviews": 35
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.493669,
+     -6.141577
+    ]
+   },
+   "properties": {
+    "id": 189,
+    "name": "Migomba Restaurant",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.9,
+    "reviews": 190
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.518688,
+     -6.152938
+    ]
+   },
+   "properties": {
+    "id": 190,
+    "name": "Boho Social Zanzibar",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.5,
+    "reviews": 179
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.514882,
+     -6.146691
+    ]
+   },
+   "properties": {
+    "id": 191,
+    "name": "Furahia Restaurant",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.7,
+    "reviews": 101
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.516804,
+     -6.146802
+    ]
+   },
+   "properties": {
+    "id": 192,
+    "name": "Baladin Zanzibar Restaurant",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.7,
+    "reviews": 32
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.51629,
+     -6.144549
+    ]
+   },
+   "properties": {
+    "id": 193,
+    "name": "Duyen Vietnamese Homecooking",
+    "category": "Restaurant",
+    "area": "Michamvi / Pingwe",
+    "rating": 4.8,
+    "reviews": 203
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.287788,
+     -5.754557
+    ]
+   },
+   "properties": {
+    "id": 194,
+    "name": "Essence Restaurant",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.5,
+    "reviews": 465
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.290654,
+     -5.753382
+    ]
+   },
+   "properties": {
+    "id": 195,
+    "name": "Sunbird Seafood Cafe",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.8,
+    "reviews": 154
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.290973,
+     -5.754335
+    ]
+   },
+   "properties": {
+    "id": 196,
+    "name": "The Fisherman Lounge",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.5,
+    "reviews": 195
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.287984,
+     -5.756133
+    ]
+   },
+   "properties": {
+    "id": 197,
+    "name": "SkyBar Restaurant-Bar Kendwa",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.7,
+    "reviews": 231
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.290931,
+     -5.751168
+    ]
+   },
+   "properties": {
+    "id": 198,
+    "name": "La Fontana Restaurant & Bungalows",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.4,
+    "reviews": 321
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.287789,
+     -5.75562
+    ]
+   },
+   "properties": {
+    "id": 199,
+    "name": "Furaha Beach Bar & Restaurant",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.6,
+    "reviews": 543
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.288661,
+     -5.756132
+    ]
+   },
+   "properties": {
+    "id": 200,
+    "name": "Shashlik Mashlik Kendwa",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.4,
+    "reviews": 294
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.291404,
+     -5.754894
+    ]
+   },
+   "properties": {
+    "id": 201,
+    "name": "Organzibar",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.8,
+    "reviews": 184
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.288855,
+     -5.75565
+    ]
+   },
+   "properties": {
+    "id": 202,
+    "name": "Maisha Siri Restaurant",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.8,
+    "reviews": 108
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.287839,
+     -5.753494
+    ]
+   },
+   "properties": {
+    "id": 203,
+    "name": "Gold Beach Restaurant",
+    "category": "Restaurant",
+    "area": "Kendwa",
+    "rating": 4.5,
+    "reviews": 150
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.352218,
+     -5.880087
+    ]
+   },
+   "properties": {
+    "id": 204,
+    "name": "Zamani Village Restaurant",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.8,
+    "reviews": 151
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.384063,
+     -6.003188
+    ]
+   },
+   "properties": {
+    "id": 205,
+    "name": "MOYO Restaurant & Bar",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.7,
+    "reviews": 187
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.352192,
+     -5.878444
+    ]
+   },
+   "properties": {
+    "id": 206,
+    "name": "Marlin Local Restaurant",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.9,
+    "reviews": 808
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.354261,
+     -5.866039
+    ]
+   },
+   "properties": {
+    "id": 207,
+    "name": "La Palma Local Restaurant",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.9,
+    "reviews": 146
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.352188,
+     -5.877813
+    ]
+   },
+   "properties": {
+    "id": 208,
+    "name": "Yellow Coco Local Restaurant",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.9,
+    "reviews": 210
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.380294,
+     -5.993918
+    ]
+   },
+   "properties": {
+    "id": 209,
+    "name": "The Beach Lounge Kiwengwa",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.7,
+    "reviews": 144
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.34801,
+     -5.875156
+    ]
+   },
+   "properties": {
+    "id": 210,
+    "name": "Nakupenda Local Restaurant",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.8,
+    "reviews": 161
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.354475,
+     -5.864705
+    ]
+   },
+   "properties": {
+    "id": 211,
+    "name": "Bin Jabir Restaurant Matemwe",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.6,
+    "reviews": 231
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.354804,
+     -5.861836
+    ]
+   },
+   "properties": {
+    "id": 212,
+    "name": "Zanzibar Queen Restaurant",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.7,
+    "reviews": 51
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.371469,
+     -5.971399
+    ]
+   },
+   "properties": {
+    "id": 213,
+    "name": "La Capannina Zanzibar",
+    "category": "Restaurant",
+    "area": "Kiwengwa / Matemwe",
+    "rating": 4.9,
+    "reviews": 309
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.284877,
+     -6.316328
+    ]
+   },
+   "properties": {
+    "id": 214,
+    "name": "Portobello Fumba Beach",
+    "category": "Restaurant",
+    "area": "Fumba",
+    "rating": 4.1,
+    "reviews": 22
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.278397,
+     -6.318331
+    ]
+   },
+   "properties": {
+    "id": 215,
+    "name": "Membe Kayak Club Restaurant",
+    "category": "Restaurant",
+    "area": "Fumba",
+    "rating": 4.9,
+    "reviews": 123
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187655,
+     -6.16311
+    ]
+   },
+   "properties": {
+    "id": 216,
+    "name": "Kumi Gifts & Treats",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.8,
+    "reviews": 17
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.193695,
+     -6.16219
+    ]
+   },
+   "properties": {
+    "id": 217,
+    "name": "Darajani Bazaar",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.2,
+    "reviews": 2598
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189569,
+     -6.162504
+    ]
+   },
+   "properties": {
+    "id": 218,
+    "name": "Aromas of Zanzibar",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 5.0,
+    "reviews": 86
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186412,
+     -6.163555
+    ]
+   },
+   "properties": {
+    "id": 219,
+    "name": "Amali Concept Store",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.9,
+    "reviews": 82
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187576,
+     -6.162806
+    ]
+   },
+   "properties": {
+    "id": 220,
+    "name": "Memories of Zanzibar",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.1,
+    "reviews": 628
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.190279,
+     -6.161387
+    ]
+   },
+   "properties": {
+    "id": 221,
+    "name": "Zanzibar Curio Shop",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 92
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.190363,
+     -6.1614
+    ]
+   },
+   "properties": {
+    "id": 222,
+    "name": "Om Namah Shivai Gift & Souvenir",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.8,
+    "reviews": 26
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189534,
+     -6.162121
+    ]
+   },
+   "properties": {
+    "id": 223,
+    "name": "The Coins Shop",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 49
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.192257,
+     -6.162783
+    ]
+   },
+   "properties": {
+    "id": 224,
+    "name": "Kitabwalla Bags Stationery & Toys",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 5.0,
+    "reviews": 50
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.194144,
+     -6.16013
+    ]
+   },
+   "properties": {
+    "id": 225,
+    "name": "Zanzibar Quality Shop",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.2,
+    "reviews": 86
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.214873,
+     -6.206845
+    ]
+   },
+   "properties": {
+    "id": 226,
+    "name": "Baraza Super Market",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.1,
+    "reviews": 142
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.193805,
+     -6.162009
+    ]
+   },
+   "properties": {
+    "id": 227,
+    "name": "Zanzibar Spice Community Shop",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.1,
+    "reviews": 4222
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.205716,
+     -6.182831
+    ]
+   },
+   "properties": {
+    "id": 228,
+    "name": "The Town Supermarket",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.2,
+    "reviews": 394
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.199632,
+     -6.164932
+    ]
+   },
+   "properties": {
+    "id": 229,
+    "name": "Michenzani Mall",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 1589
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.188281,
+     -6.162321
+    ]
+   },
+   "properties": {
+    "id": 230,
+    "name": "Supermarket Mini Market",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 3.9,
+    "reviews": 34
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.203932,
+     -6.178682
+    ]
+   },
+   "properties": {
+    "id": 231,
+    "name": "Fahud Supermarket",
+    "category": "Shop / Market",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 209
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.29366,
+     -5.727486
+    ]
+   },
+   "properties": {
+    "id": 232,
+    "name": "Martin Culture Shop",
+    "category": "Shop / Market",
+    "area": "Nungwi",
+    "rating": 5.0,
+    "reviews": 26
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.299048,
+     -5.74292
+    ]
+   },
+   "properties": {
+    "id": 233,
+    "name": "Nungwi Crafts",
+    "category": "Shop / Market",
+    "area": "Nungwi",
+    "rating": 5.0,
+    "reviews": 11
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189766,
+     -6.163318
+    ]
+   },
+   "properties": {
+    "id": 234,
+    "name": "Jaw's Corner",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 147
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186015,
+     -6.163082
+    ]
+   },
+   "properties": {
+    "id": 235,
+    "name": "Stone Town Old Town (UNESCO)",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.0,
+    "reviews": 26
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189057,
+     -6.16135
+    ]
+   },
+   "properties": {
+    "id": 236,
+    "name": "Old Fort (Ngome Kongwe)",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 4807
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186068,
+     -6.162214
+    ]
+   },
+   "properties": {
+    "id": 237,
+    "name": "Shangani Public Beach",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.3,
+    "reviews": 51
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.190877,
+     -6.162619
+    ]
+   },
+   "properties": {
+    "id": 238,
+    "name": "Hamam Persian Baths",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 3.7,
+    "reviews": 137
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191261,
+     -6.168009
+    ]
+   },
+   "properties": {
+    "id": 239,
+    "name": "Peace Memorial Museum",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.1,
+    "reviews": 342
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.19255,
+     -6.16284
+    ]
+   },
+   "properties": {
+    "id": 240,
+    "name": "Slave Market Exhibition Museum",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 533
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191393,
+     -6.159087
+    ]
+   },
+   "properties": {
+    "id": 241,
+    "name": "Zanzibar Stone Town Heritage Society",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 49
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.192525,
+     -6.158241
+    ]
+   },
+   "properties": {
+    "id": 242,
+    "name": "Old Dispensary",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 312
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189003,
+     -6.160341
+    ]
+   },
+   "properties": {
+    "id": 243,
+    "name": "Forodhani Gardens (night food market)",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.4,
+    "reviews": 929
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187756,
+     -6.162378
+    ]
+   },
+   "properties": {
+    "id": 244,
+    "name": "Freddie Mercury Museum",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 4.0,
+    "reviews": 1045
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189563,
+     -6.160959
+    ]
+   },
+   "properties": {
+    "id": 245,
+    "name": "House of Wonders (Beit al-Ajaib)",
+    "category": "Attraction",
+    "area": "Stone Town",
+    "rating": 3.6,
+    "reviews": 313
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.213507,
+     -6.135494
+    ]
+   },
+   "properties": {
+    "id": 246,
+    "name": "Mtoni Palace Ruins",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 4.2,
+    "reviews": 66
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.208945,
+     -6.144147
+    ]
+   },
+   "properties": {
+    "id": 247,
+    "name": "Maruhubi Palace Ruins",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 3.9,
+    "reviews": 107
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.21314,
+     -6.112223
+    ]
+   },
+   "properties": {
+    "id": 248,
+    "name": "Kibweni Palace Museum",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 4.1,
+    "reviews": 14
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.185666,
+     -5.987016
+    ]
+   },
+   "properties": {
+    "id": 249,
+    "name": "Mangapwani Slave Chamber",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 4.4,
+    "reviews": 100
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.29188,
+     -5.829394
+    ]
+   },
+   "properties": {
+    "id": 250,
+    "name": "Fukuchani Ruins & Cave",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 4.1,
+    "reviews": 148
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.334564,
+     -6.262849
+    ]
+   },
+   "properties": {
+    "id": 251,
+    "name": "Historic House of Bi Khole",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 4.4,
+    "reviews": 13
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.166397,
+     -6.119532
+    ]
+   },
+   "properties": {
+    "id": 252,
+    "name": "Changuu (Prison) Island",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 4.3,
+    "reviews": 1447
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.533965,
+     -6.303449
+    ]
+   },
+   "properties": {
+    "id": 253,
+    "name": "Kuza Cave",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 4.3,
+    "reviews": 1271
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.41395,
+     -6.241557
+    ]
+   },
+   "properties": {
+    "id": 254,
+    "name": "Jozani Chwaka Bay Forest (National Park)",
+    "category": "Attraction",
+    "area": "Around Unguja",
+    "rating": 4.2,
+    "reviews": 3586
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.148942,
+     -6.172089
+    ]
+   },
+   "properties": {
+    "id": 255,
+    "name": "Nakupenda Sandbank (approx.)",
+    "category": "Beach / Sandbank",
+    "area": "Around Unguja",
+    "rating": 4.6,
+    "reviews": 468
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.284819,
+     -6.36549
+    ]
+   },
+   "properties": {
+    "id": 256,
+    "name": "Kwale Sandbank",
+    "category": "Beach / Sandbank",
+    "area": "Around Unguja",
+    "rating": 4.5,
+    "reviews": 355
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.318277,
+     -6.408775
+    ]
+   },
+   "properties": {
+    "id": 257,
+    "name": "Pungume Sandbank",
+    "category": "Beach / Sandbank",
+    "area": "Around Unguja",
+    "rating": 4.8,
+    "reviews": 146
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.539505,
+     -6.461721
+    ]
+   },
+   "properties": {
+    "id": 258,
+    "name": "Mtende Beach",
+    "category": "Beach / Sandbank",
+    "area": "Around Unguja",
+    "rating": 4.7,
+    "reviews": 1870
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.540393,
+     -6.460781
+    ]
+   },
+   "properties": {
+    "id": 259,
+    "name": "Mtende Rock",
+    "category": "Beach / Sandbank",
+    "area": "Around Unguja",
+    "rating": 4.7,
+    "reviews": 61
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.51836,
+     -6.151015
+    ]
+   },
+   "properties": {
+    "id": 260,
+    "name": "Pingwe Beach",
+    "category": "Beach / Sandbank",
+    "area": "Around Unguja",
+    "rating": 4.3,
+    "reviews": 63
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.409403,
+     -6.050757
+    ]
+   },
+   "properties": {
+    "id": 261,
+    "name": "Pongwe Beach",
+    "category": "Beach / Sandbank",
+    "area": "Around Unguja",
+    "rating": 4.5,
+    "reviews": 29
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.360906,
+     -5.931032
+    ]
+   },
+   "properties": {
+    "id": 262,
+    "name": "Matemwe Beach",
+    "category": "Beach / Sandbank",
+    "area": "Around Unguja",
+    "rating": 4.3,
+    "reviews": 53
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.303322,
+     -5.723262
+    ]
+   },
+   "properties": {
+    "id": 263,
+    "name": "Zanzibar Aquarium (Nungwi)",
+    "category": "Wildlife / Turtles",
+    "area": "Nungwi",
+    "rating": 4.6,
+    "reviews": 104
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.30316,
+     -5.722141
+    ]
+   },
+   "properties": {
+    "id": 264,
+    "name": "Nungwi Mnarani Aquarium",
+    "category": "Wildlife / Turtles",
+    "area": "Nungwi",
+    "rating": 4.2,
+    "reviews": 1232
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.302697,
+     -5.722396
+    ]
+   },
+   "properties": {
+    "id": 265,
+    "name": "Nungwi Marine Turtles Mnarani",
+    "category": "Wildlife / Turtles",
+    "area": "Nungwi",
+    "rating": 4.1,
+    "reviews": 234
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.303756,
+     -5.724079
+    ]
+   },
+   "properties": {
+    "id": 266,
+    "name": "Baraka Natural Aquarium",
+    "category": "Wildlife / Turtles",
+    "area": "Nungwi",
+    "rating": 4.0,
+    "reviews": 318
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.303052,
+     -5.725202
+    ]
+   },
+   "properties": {
+    "id": 267,
+    "name": "Nungwi Aquarium & Bungalows",
+    "category": "Wildlife / Turtles",
+    "area": "Nungwi",
+    "rating": 4.9,
+    "reviews": 15
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.299144,
+     -5.723726
+    ]
+   },
+   "properties": {
+    "id": 268,
+    "name": "Nungwi Aquarium Adventures",
+    "category": "Wildlife / Turtles",
+    "area": "Nungwi",
+    "rating": 4.4,
+    "reviews": 54
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.303829,
+     -5.723932
+    ]
+   },
+   "properties": {
+    "id": 269,
+    "name": "Swim with Turtles Sanctuary",
+    "category": "Wildlife / Turtles",
+    "area": "Nungwi",
+    "rating": 4.1,
+    "reviews": 547
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.302958,
+     -5.725711
+    ]
+   },
+   "properties": {
+    "id": 270,
+    "name": "The Lagoons Zanzibar",
+    "category": "Wildlife / Turtles",
+    "area": "Nungwi",
+    "rating": 4.5,
+    "reviews": 132
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.237256,
+     -6.089911
+    ]
+   },
+   "properties": {
+    "id": 271,
+    "name": "To The Hill Kidichi Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 4.9,
+    "reviews": 311
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.241354,
+     -6.090783
+    ]
+   },
+   "properties": {
+    "id": 272,
+    "name": "SISO Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 4.6,
+    "reviews": 476
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.416,
+     -6.285125
+    ]
+   },
+   "properties": {
+    "id": 273,
+    "name": "Jozani Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 4.6,
+    "reviews": 189
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.355087,
+     -6.23172
+    ]
+   },
+   "properties": {
+    "id": 274,
+    "name": "KV Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 4.9,
+    "reviews": 226
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.312956,
+     -5.978114
+    ]
+   },
+   "properties": {
+    "id": 275,
+    "name": "Bilal Responsible Village Tours",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 4.9,
+    "reviews": 312
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.313486,
+     -5.977519
+    ]
+   },
+   "properties": {
+    "id": 276,
+    "name": "Mussa Abasi Village Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 5.0,
+    "reviews": 254
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.252088,
+     -6.106931
+    ]
+   },
+   "properties": {
+    "id": 277,
+    "name": "Tangawizi Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 4.6,
+    "reviews": 682
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.33319,
+     -6.064302
+    ]
+   },
+   "properties": {
+    "id": 278,
+    "name": "Bwamzee Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 4.9,
+    "reviews": 255
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.332088,
+     -6.067841
+    ]
+   },
+   "properties": {
+    "id": 279,
+    "name": "Village Green Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 5.0,
+    "reviews": 588
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.248545,
+     -6.086318
+    ]
+   },
+   "properties": {
+    "id": 280,
+    "name": "Big Body Spice Farm",
+    "category": "Spice Farm",
+    "area": "Around Unguja",
+    "rating": 4.5,
+    "reviews": 394
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187889,
+     -6.161791
+    ]
+   },
+   "properties": {
+    "id": 281,
+    "name": "Nakupenda Island Beach Tours",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.4,
+    "reviews": 90
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.186524,
+     -6.163835
+    ]
+   },
+   "properties": {
+    "id": 282,
+    "name": "Popo Tours and Safaris",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.9,
+    "reviews": 39
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.469038,
+     -6.445293
+    ]
+   },
+   "properties": {
+    "id": 283,
+    "name": "Rafiki Tours Zanzibar",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.9,
+    "reviews": 150
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.448054,
+     -6.408571
+    ]
+   },
+   "properties": {
+    "id": 284,
+    "name": "Zanzibar Day Excursion with Captain Mofasa",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 5.0,
+    "reviews": 22
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.355232,
+     -5.814465
+    ]
+   },
+   "properties": {
+    "id": 285,
+    "name": "The Mnemba Island Tours (Matemwe)",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.8,
+    "reviews": 39
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.462389,
+     -6.437705
+    ]
+   },
+   "properties": {
+    "id": 286,
+    "name": "Zanzibar Dolphins and Snorkeling Tours",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.6,
+    "reviews": 23
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.461917,
+     -6.437127
+    ]
+   },
+   "properties": {
+    "id": 287,
+    "name": "Fins Zanzibar Dolphins Tours",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.6,
+    "reviews": 94
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.469494,
+     -6.449255
+    ]
+   },
+   "properties": {
+    "id": 288,
+    "name": "Enjoy Kizimkazi with Mr Happy",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.9,
+    "reviews": 25
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.478244,
+     -6.461355
+    ]
+   },
+   "properties": {
+    "id": 289,
+    "name": "Damian Dolphin Tour",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.8,
+    "reviews": 51
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.471776,
+     -6.453716
+    ]
+   },
+   "properties": {
+    "id": 290,
+    "name": "Dolphin Tour and Snorkeling Kizimkazi",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.3,
+    "reviews": 101
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.358531,
+     -5.80949
+    ]
+   },
+   "properties": {
+    "id": 291,
+    "name": "Mnemba Island Snorkeling Tours",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.6,
+    "reviews": 105
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.355057,
+     -5.8111
+    ]
+   },
+   "properties": {
+    "id": 292,
+    "name": "Tour Guide Momba Zanzibar",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 5.0,
+    "reviews": 107
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.332505,
+     -6.419033
+    ]
+   },
+   "properties": {
+    "id": 293,
+    "name": "Fins Zanzibar Snorkeling and Sandbank",
+    "category": "Tour / Activity",
+    "area": "Various",
+    "rating": 4.6,
+    "reviews": 26
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536331,
+     -6.267547
+    ]
+   },
+   "properties": {
+    "id": 294,
+    "name": "Zanzibar Kitesurfing (Paje & Jambiani)",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 4.9,
+    "reviews": 76
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536443,
+     -6.268513
+    ]
+   },
+   "properties": {
+    "id": 295,
+    "name": "Hakuna Matata Kite Surfing School",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 4.8,
+    "reviews": 35
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.53695,
+     -6.280154
+    ]
+   },
+   "properties": {
+    "id": 296,
+    "name": "Zanzibar Kite Paradise",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 4.9,
+    "reviews": 144
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.537408,
+     -6.282626
+    ]
+   },
+   "properties": {
+    "id": 297,
+    "name": "Bkite Zanzibar",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 5.0,
+    "reviews": 151
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536458,
+     -6.261386
+    ]
+   },
+   "properties": {
+    "id": 298,
+    "name": "Paje Kitesurf School (Olkutati)",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 5.0,
+    "reviews": 94
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536378,
+     -6.269055
+    ]
+   },
+   "properties": {
+    "id": 299,
+    "name": "Kite Centre Zanzibar",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 4.9,
+    "reviews": 797
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536371,
+     -6.270588
+    ]
+   },
+   "properties": {
+    "id": 300,
+    "name": "Paje By Kite",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 4.9,
+    "reviews": 55
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536413,
+     -6.266045
+    ]
+   },
+   "properties": {
+    "id": 301,
+    "name": "Kite N Surf Zanzibar",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 5.0,
+    "reviews": 432
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536366,
+     -6.26666
+    ]
+   },
+   "properties": {
+    "id": 302,
+    "name": "Aquaholics Kite & Surf Center",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 4.9,
+    "reviews": 394
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.536189,
+     -6.273794
+    ]
+   },
+   "properties": {
+    "id": 303,
+    "name": "B4 Kitesurf Zanzibar",
+    "category": "Kitesurf School",
+    "area": "Paje",
+    "rating": 5.0,
+    "reviews": 867
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189027,
+     -6.16591
+    ]
+   },
+   "properties": {
+    "id": 304,
+    "name": "Uzima Space Yoga & Wellness",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 4.6,
+    "reviews": 28
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.560135,
+     -6.347226
+    ]
+   },
+   "properties": {
+    "id": 305,
+    "name": "Bamboo Elements Spa & Wellness",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 5.0,
+    "reviews": 27
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.53641,
+     -6.296626
+    ]
+   },
+   "properties": {
+    "id": 306,
+    "name": "Shanti Yoga & Massage Zanzibar",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 4.7,
+    "reviews": 13
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.542125,
+     -6.299482
+    ]
+   },
+   "properties": {
+    "id": 307,
+    "name": "Sharazad Yoga Shala & Wellness",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 5.0,
+    "reviews": 24
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.189277,
+     -6.162829
+    ]
+   },
+   "properties": {
+    "id": 308,
+    "name": "Hammam Zanzibar",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 5.0,
+    "reviews": 558
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.533314,
+     -6.22993
+    ]
+   },
+   "properties": {
+    "id": 309,
+    "name": "Anza Spa and Wellness",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 5.0,
+    "reviews": 23
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187313,
+     -6.162313
+    ]
+   },
+   "properties": {
+    "id": 310,
+    "name": "Cinnamon Spa & Hammam",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 4.8,
+    "reviews": 830
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.543702,
+     -6.307923
+    ]
+   },
+   "properties": {
+    "id": 311,
+    "name": "Aloevera Spa",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 4.9,
+    "reviews": 103
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.534669,
+     -6.246455
+    ]
+   },
+   "properties": {
+    "id": 312,
+    "name": "NURU Spa & Wellness",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 4.6,
+    "reviews": 76
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.362964,
+     -5.937334
+    ]
+   },
+   "properties": {
+    "id": 313,
+    "name": "Angelly Rooftop Spa & Beauty",
+    "category": "Spa / Wellness",
+    "area": "Various",
+    "rating": 5.0,
+    "reviews": 136
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191998,
+     -6.15791
+    ]
+   },
+   "properties": {
+    "id": 314,
+    "name": "Zanzibar Ferry Terminal",
+    "category": "Transport",
+    "area": "Stone Town / Airport",
+    "rating": 4.0,
+    "reviews": 457
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.19261,
+     -6.154539
+    ]
+   },
+   "properties": {
+    "id": 315,
+    "name": "Zanzibar Harbour",
+    "category": "Transport",
+    "area": "Stone Town / Airport",
+    "rating": 4.1,
+    "reviews": 114
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.221379,
+     -6.218534
+    ]
+   },
+   "properties": {
+    "id": 316,
+    "name": "Abeid Amani Karume International Airport",
+    "category": "Transport",
+    "area": "Stone Town / Airport",
+    "rating": 3.6,
+    "reviews": 4613
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.190093,
+     -6.16795
+    ]
+   },
+   "properties": {
+    "id": 317,
+    "name": "Mnazi Mmoja Hospital",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 3.7,
+    "reviews": 83
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.193008,
+     -6.161974
+    ]
+   },
+   "properties": {
+    "id": 318,
+    "name": "Shamshu & Sons Pharmacy",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 51
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.19346,
+     -6.162482
+    ]
+   },
+   "properties": {
+    "id": 319,
+    "name": "Izmir Pharmacy",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 4.0,
+    "reviews": 8
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.360473,
+     -5.939223
+    ]
+   },
+   "properties": {
+    "id": 320,
+    "name": "Reliance Medical Clinic",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 5.0,
+    "reviews": 56
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.190734,
+     -6.166266
+    ]
+   },
+   "properties": {
+    "id": 321,
+    "name": "AmpolaTasakhtaa Hospital",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 4.7,
+    "reviews": 2010
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191142,
+     -6.163536
+    ]
+   },
+   "properties": {
+    "id": 322,
+    "name": "Life Pharma Ltd",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 3.8,
+    "reviews": 14
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.191584,
+     -6.16417
+    ]
+   },
+   "properties": {
+    "id": 323,
+    "name": "Bapumia Health Services Pharmacy",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 4.8,
+    "reviews": 15
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.188439,
+     -6.165101
+    ]
+   },
+   "properties": {
+    "id": 324,
+    "name": "Dr. Mehta's Hospital",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 4.6,
+    "reviews": 88
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.204202,
+     -6.177914
+    ]
+   },
+   "properties": {
+    "id": 325,
+    "name": "Al Rahma Hospital",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 3.6,
+    "reviews": 61
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.187626,
+     -6.162493
+    ]
+   },
+   "properties": {
+    "id": 326,
+    "name": "Kembo Pharmacy",
+    "category": "Health / Pharmacy",
+    "area": "Stone Town",
+    "rating": 1.5,
+    "reviews": 26
+   }
+  }
+ ]
+}
