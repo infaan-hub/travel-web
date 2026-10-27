@@ -1,5 +1,5 @@
 /* Service worker for PWA installability and web push notifications. */
-const CACHE_NAME = "travel-pwa-v1";
+const CACHE_NAME = "travel-pwa-v2";
 const PRECACHE_URLS = ["/", "/manifest.json", "/favicon.svg"];
 
 self.addEventListener("install", (event) => {
