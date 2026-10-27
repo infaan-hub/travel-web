@@ -3,7 +3,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { ExternalLink, Locate, MapPin, Search, X } from "@/components/icons";
+import { KeyRoundIcon, Location01Icon } from "@hugeicons/core-free-icons";
+import {
+  ExternalLink,
+  KeyRound,
+  Locate,
+  Location01,
+  MapPin,
+  Navigation,
+  Search,
+  X,
+} from "@/components/icons";
 import {
   TRIP_PLACE_GROUPS,
   ZANZIBAR_TRIP_PLACES,
@@ -13,6 +23,11 @@ import {
   type TripPlaceCategory,
   type TripPlaceGroupId,
 } from "@/lib/trips";
+import {
+  formatDistanceKm,
+  describeGeoPoint,
+  type GeoContext,
+} from "@/lib/geo-context";
 import {
   ZANZIBAR_BOUNDS,
   ZANZIBAR_CENTER,
@@ -49,12 +64,63 @@ for (const group of TRIP_PLACE_GROUPS) {
   }
 }
 
+const CATEGORY_NOTES: Record<TripPlaceCategory, string> = {
+  Attraction: "Landmark, heritage site or viewpoint worth a stop.",
+  Bar: "Drinks, music and an easy evening atmosphere.",
+  "Beach / Sandbank": "Sand, swimming and Indian Ocean views.",
+  Cafe: "Coffee, snacks and a relaxed pause.",
+  "Health / Pharmacy": "Medical help and everyday supplies.",
+  Hotel: "A place to check in and stay overnight.",
+  "Kitesurf School": "Kitesurf lessons and water-sports gear.",
+  Restaurant: "Local or international food and drink.",
+  "Shop / Market": "Souvenirs, spices and local shopping.",
+  "Spa / Wellness": "Treatments, massage and relaxation.",
+  "Spice Farm": "Spice-growing tours, tastings and gardens.",
+  "Tour / Activity": "A guided experience or excursion.",
+  Transport: "Ferry, airport or local transport hub.",
+  "Wildlife / Turtles": "Wildlife encounter and conservation site.",
+};
+
 const PLACE_BY_ID = new Map(ZANZIBAR_TRIP_PLACES.map((place) => [place.id, place]));
 
 const LEGEND_GROUPS = TRIP_PLACE_GROUPS.filter(
   (group): group is (typeof TRIP_PLACE_GROUPS)[number] & { id: PlaceGroupId } =>
     group.id !== "all",
 );
+
+const MINOR_ROAD_ZOOM = 12;
+const ROAD_ATTRIBUTION =
+  'Road overlay © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors (ODbL)';
+
+const ROUTE_START_COLOR = "#15803d";
+const ROUTE_END_COLOR = "#0f172a";
+const ROUTE_GREEN = "#16a34a";
+const ROUTE_CASING = "#064e3b";
+
+const HUGEICON_PATHS = {
+  location: Location01Icon,
+  key: KeyRoundIcon,
+} as const;
+
+type IconSvgObject = readonly (readonly [
+  string,
+  Readonly<Record<string, string | number>>,
+])[];
+
+type RouteEndpoint = {
+  lat: number;
+  lng: number;
+  label: string;
+};
+
+type RouteSource = "osrm" | "estimate";
+
+type RouteResult = {
+  distanceKm: number;
+  durationMins: number;
+  geometry: [number, number][];
+  source: RouteSource;
+};
 
 function markerColor(category: TripPlaceCategory) {
   return GROUP_COLORS[CATEGORY_GROUP.get(category) ?? "attractions"];
@@ -86,6 +152,153 @@ function ratingLabel(place: TripPlace) {
   return `${place.rating.toFixed(1)} / 5 · ${place.reviews.toLocaleString("en-US")} reviews`;
 }
 
+function starString(rating: number | null) {
+  if (rating === null) return "";
+  const filled = Math.max(0, Math.min(5, Math.round(rating)));
+  return `${"★".repeat(filled)}${"☆".repeat(5 - filled)}`;
+}
+
+function uniqueJoin(values: (string | null | undefined)[]) {
+  const seen = new Set<string>();
+  const parts: string[] = [];
+  for (const value of values) {
+    const part = value?.trim();
+    if (!part || seen.has(part)) continue;
+    seen.add(part);
+    parts.push(part);
+  }
+  return parts.join(" · ");
+}
+
+function nearestSummary(context: GeoContext | null) {
+  const nearest = context?.nearest;
+  if (!nearest) return "";
+  if (nearest.distanceKm < 0.12) return `At ${nearest.name}`;
+  return `${nearest.name} · ${formatDistanceKm(nearest.distanceKm)}`;
+}
+
+function formatRouteKm(value: number) {
+  if (!Number.isFinite(value)) return "0.0";
+  return value >= 100 ? Math.round(value).toString() : value.toFixed(1);
+}
+
+function formatDriveTime(minutes: number) {
+  const safe = Math.max(1, Math.round(minutes));
+  if (safe < 60) return `${safe} min`;
+  const hours = Math.floor(safe / 60);
+  const rest = safe % 60;
+  return rest ? `${hours} h ${rest} min` : `${hours} h`;
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function iconPathMarkup(
+  icon: IconSvgObject,
+  stroke: string,
+  strokeWidth: number,
+) {
+  return icon
+    .map(([tag, attributes]) => {
+      const parts = [`stroke="${stroke}"`, `stroke-width="${strokeWidth}"`];
+      for (const [key, value] of Object.entries(attributes)) {
+        if (key === "key" || key === "stroke" || key === "strokeWidth") continue;
+        const attribute = key.replace(
+          /[A-Z]/g,
+          (letter) => `-${letter.toLowerCase()}`,
+        );
+        parts.push(`${attribute}="${value}"`);
+      }
+      return `<${tag} ${parts.join(" ")} />`;
+    })
+    .join("");
+}
+
+function locationGlyphMarkup(color: string, size: number) {
+  // A tight white halo keeps the pin legible over the dark road overlay
+  // without washing out the category colour.
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    ${iconPathMarkup(HUGEICON_PATHS.location, "#ffffff", 3.2)}
+    ${iconPathMarkup(HUGEICON_PATHS.location, color, 2.4)}
+  </svg>`;
+}
+
+function placeMarkerHtml(place: TripPlace) {
+  const color = markerColor(place.category);
+  const isStay = place.category === "Hotel";
+  if (isStay) {
+    return `<span class="${styles.placeMarkerGlyph} ${styles.placeMarkerStay}" style="--marker-color:${color}">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPathMarkup(HUGEICON_PATHS.key, color, 2)}</svg>
+    </span>`;
+  }
+  return `<span class="${styles.placeMarkerGlyph}" style="--marker-color:${color}">${locationGlyphMarkup(color, 28)}</span>`;
+}
+
+function customPinHtml() {
+  return `<span class="${styles.customPinGlyph}">${locationGlyphMarkup("#08428c", 34)}</span>`;
+}
+
+function routeBadgeHtml(label: "A" | "B") {
+  const color = label === "A" ? ROUTE_START_COLOR : ROUTE_END_COLOR;
+  return `<span class="${styles.routeBadge}" style="--route-badge:${color}">${label}</span>`;
+}
+
+function pointCardHtml(place: TripPlace) {
+  const color = markerColor(place.category);
+  const context = describeGeoPoint(place.latitude, place.longitude);
+  const group = TRIP_PLACE_GROUPS.find(
+    (item) => item.id === CATEGORY_GROUP.get(place.category),
+  );
+  const nearest = nearestSummary(context) || context.region || "Zanzibar";
+  const stars = starString(place.rating);
+
+  return `<div class="${styles.pointCard}" style="--marker-color:${color}">
+    <div class="${styles.pointCardHead}">
+      <span class="${styles.pointCardGroup}">${escapeHtml(group?.label ?? "Place")}</span>
+      <span class="${styles.pointCardCategory}">${escapeHtml(place.category)}</span>
+    </div>
+    <strong class="${styles.pointCardName}">${escapeHtml(place.name)}</strong>
+    <span class="${styles.pointCardArea}">${escapeHtml(uniqueJoin([place.area, context.region]))}</span>
+    <span class="${styles.pointCardRating}">
+      <span class="${styles.pointCardStars}" aria-hidden="true">${stars || "Not rated"}</span>
+      ${place.rating === null ? "" : `<strong>${place.rating.toFixed(1)}</strong>`}
+      <span>${place.reviews.toLocaleString("en-US")} reviews</span>
+    </span>
+    <p class="${styles.pointCardNote}">${escapeHtml(CATEGORY_NOTES[place.category])}</p>
+    <dl class="${styles.pointCardFacts}">
+      <div><dt>Nearest</dt><dd>${escapeHtml(nearest)}</dd></div>
+      <div><dt>Coordinates</dt><dd>${place.latitude.toFixed(5)}, ${place.longitude.toFixed(5)}</dd></div>
+    </dl>
+    <a class="${styles.pointCardLink}" href="${tripPlaceMapsUrl(place)}" target="_blank" rel="noopener noreferrer">Open in Google Maps <span aria-hidden="true">↗</span></a>
+  </div>`;
+}
+
+function isRouteGeometry(value: unknown): value is [number, number][] {
+  return (
+    Array.isArray(value) &&
+    value.length >= 2 &&
+    value.every(
+      (point) =>
+        Array.isArray(point) &&
+        point.length === 2 &&
+        typeof point[0] === "number" &&
+        Number.isFinite(point[0]) &&
+        point[0] >= -90 &&
+        point[0] <= 90 &&
+        typeof point[1] === "number" &&
+        Number.isFinite(point[1]) &&
+        point[1] >= -180 &&
+        point[1] <= 180,
+    )
+  );
+}
+
 type TripPlaceMapPickerProps = {
   latitude: number | null;
   longitude: number | null;
@@ -106,21 +319,35 @@ export default function TripPlaceMapPicker({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Leaflet.Map | null>(null);
   const leafletRef = useRef<typeof Leaflet | null>(null);
+  const routeRendererRef = useRef<Leaflet.Canvas | null>(null);
   const layerRef = useRef<Leaflet.LayerGroup | null>(null);
-  const rendererRef = useRef<Leaflet.Canvas | null>(null);
-  const markersRef = useRef<Map<number, Leaflet.CircleMarker>>(new Map());
+  const markersRef = useRef<Map<number, Leaflet.Marker>>(new Map());
   const pinRef = useRef<Leaflet.Marker | null>(null);
   const lastPointRef = useRef<[number, number] | null>(null);
+  const routeLayerRef = useRef<Leaflet.LayerGroup | null>(null);
   const initialFitRef = useRef(false);
   const disabledRef = useRef(disabled);
+  const routeModeRef = useRef(false);
   const onSelectRef = useRef<(place: TripPlace) => void>(() => {});
   const onPickRef = useRef<(lat: number, lng: number) => void>(() => {});
+  const addRoutePointRef = useRef<(point: RouteEndpoint) => void>(() => {});
 
   const [ready, setReady] = useState(false);
   const [mapError, setMapError] = useState(false);
   const [group, setGroup] = useState<TripPlaceGroupId>("all");
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"islands" | "places">("islands");
+  const [routeMode, setRouteMode] = useState(false);
+  const [routeStops, setRouteStops] = useState<RouteEndpoint[]>([]);
+  const [route, setRoute] = useState<RouteResult | null>(null);
+  const [routeError, setRouteError] = useState<string | null>(null);
+  const [routeAttempt, setRouteAttempt] = useState(0);
+
+  const routeLoading =
+    routeMode &&
+    routeStops.length === 2 &&
+    route === null &&
+    routeError === null;
 
   const hasPoint = validPoint(latitude, longitude);
 
@@ -134,6 +361,14 @@ export default function TripPlaceMapPicker({
       ) ?? null
     );
   }, [hasPoint, latitude, longitude]);
+
+  const pointContext = useMemo(
+    () =>
+      hasPoint
+        ? describeGeoPoint(latitude as number, longitude as number)
+        : null,
+    [hasPoint, latitude, longitude],
+  );
 
   const filteredPlaces = useMemo(() => {
     const rows =
@@ -153,6 +388,43 @@ export default function TripPlaceMapPicker({
       ? LEGEND_GROUPS
       : LEGEND_GROUPS.filter((item) => item.id === group);
 
+  const addRoutePoint = useCallback((point: RouteEndpoint) => {
+    setRoute(null);
+    setRouteError(null);
+    setRouteStops((stops) =>
+      stops.length >= 2 ? [point] : [...stops, point],
+    );
+  }, []);
+
+  const exitRouteMode = useCallback(() => {
+    setRouteMode(false);
+    setRouteStops([]);
+    setRoute(null);
+    setRouteError(null);
+  }, []);
+
+  const resetRoute = useCallback(() => {
+    setRouteStops([]);
+    setRoute(null);
+    setRouteError(null);
+  }, []);
+
+  const swapRouteStops = useCallback(() => {
+    setRoute(null);
+    setRouteError(null);
+    setRouteStops((stops) =>
+      stops.length === 2 ? [stops[1], stops[0]] : stops,
+    );
+  }, []);
+
+  const startRouteFrom = useCallback((lat: number, lng: number, label: string) => {
+    if (disabledRef.current) return;
+    setRouteMode(true);
+    setRouteStops([{ lat, lng, label }]);
+    setRoute(null);
+    setRouteError(null);
+  }, []);
+
   useEffect(() => {
     onSelectRef.current = (place) => {
       onSelectPlace(place);
@@ -171,10 +443,17 @@ export default function TripPlaceMapPicker({
   }, [disabled, onPickPoint, onSelectPlace]);
 
   useEffect(() => {
+    routeModeRef.current = routeMode;
+    addRoutePointRef.current = addRoutePoint;
+  }, [addRoutePoint, routeMode]);
+
+  useEffect(() => {
     let cancelled = false;
     const container = containerRef.current;
     const markers = markersRef.current;
     if (!container) return;
+
+    const roadsController = new AbortController();
 
     void import("leaflet")
       .then((leaflet) => {
@@ -198,7 +477,22 @@ export default function TripPlaceMapPicker({
           })
           .addTo(map);
 
-        // Zanzibar land overlay sits above the OSM tiles and below the place
+        // Custom overlays use their own panes so the drawing order is fixed:
+        // islands, then roads, then the route, then the markers.
+        const roadsPane = map.createPane("trip-roads");
+        roadsPane.style.zIndex = "410";
+        roadsPane.style.pointerEvents = "none";
+        const routePane = map.createPane("trip-route");
+        routePane.style.zIndex = "430";
+        routePane.style.pointerEvents = "none";
+
+        const roadsRenderer = leaflet.canvas({ padding: 0.5, pane: "trip-roads" });
+        const routeRenderer = leaflet.canvas({ padding: 0.5, pane: "trip-route" });
+        roadsRenderer.addTo(map);
+        routeRenderer.addTo(map);
+        routeRendererRef.current = routeRenderer;
+
+        // Full Zanzibar land overlay above the OSM tiles and below the place
         // markers, so the whole archipelago reads as one map.
         const islandLayer = leaflet.layerGroup().addTo(map);
         for (const island of ZANZIBAR_ISLANDS) {
@@ -242,16 +536,106 @@ export default function TripPlaceMapPicker({
         map.on("zoomend", syncIslandLabels);
         syncIslandLabels();
 
+        // Main roads are always drawn. Minor streets load lazily and only
+        // appear at neighbourhood zoom levels so the overview stays legible.
+        let minorRoad: Leaflet.Polyline | null = null;
+        let minorRoadLoading = false;
+
+        const addMainRoads = async () => {
+          try {
+            const response = await fetch("/data/zanzibar-roads-main.json", {
+              signal: roadsController.signal,
+            });
+            if (!response.ok || cancelled) return;
+            const payload = (await response.json()) as {
+              roads?: [number, number][][];
+            };
+            const roads = payload.roads ?? [];
+            if (!roads.length || cancelled) return;
+            leaflet
+              .polyline(roads as Leaflet.LatLngExpression[][], {
+                pane: "trip-roads",
+                renderer: roadsRenderer,
+                color: "#000000",
+                weight: 5,
+                opacity: 0.9,
+                lineCap: "round",
+                lineJoin: "round",
+                interactive: false,
+                smoothFactor: 1.1,
+              })
+              .addTo(map);
+            map.attributionControl.addAttribution(ROAD_ATTRIBUTION);
+          } catch {
+            // Roads are an enhancement; the OSM tiles still work without them.
+          }
+        };
+
+        const syncMinorRoads = () => {
+          if (map.getZoom() < MINOR_ROAD_ZOOM) {
+            if (minorRoad && map.hasLayer(minorRoad)) map.removeLayer(minorRoad);
+            return;
+          }
+          if (minorRoad) {
+            if (!map.hasLayer(minorRoad)) minorRoad.addTo(map);
+            return;
+          }
+          if (minorRoadLoading || cancelled) return;
+          minorRoadLoading = true;
+          void fetch("/data/zanzibar-roads-minor.json", {
+            signal: roadsController.signal,
+          })
+            .then((response) => (response.ok ? response.json() : null))
+            .then(
+              (payload: { roads?: [number, number][][] } | null) => {
+                if (cancelled || !payload?.roads?.length) return;
+                minorRoad = leaflet.polyline(
+                  payload.roads as Leaflet.LatLngExpression[][],
+                  {
+                    pane: "trip-roads",
+                    renderer: roadsRenderer,
+                    color: "#000000",
+                    weight: 1.1,
+                    opacity: 0.5,
+                    lineCap: "round",
+                    lineJoin: "round",
+                    interactive: false,
+                    smoothFactor: 1.2,
+                  },
+                );
+                if (map.getZoom() >= MINOR_ROAD_ZOOM) minorRoad.addTo(map);
+              },
+            )
+            .catch(() => {
+              // No minor roads; main roads and the base map remain.
+            })
+            .finally(() => {
+              minorRoadLoading = false;
+            });
+        };
+
+        void addMainRoads();
+        map.on("zoomend", syncMinorRoads);
+        syncMinorRoads();
+
         map.on("click", (event: Leaflet.LeafletMouseEvent) => {
           if (disabledRef.current) return;
           const lat = roundCoordinate(event.latlng.lat);
           const lng = roundCoordinate(event.latlng.lng);
           // Every pin must stay on Zanzibar land, not just inside the viewport.
           if (!isInZanzibar(lat, lng)) return;
+          if (routeModeRef.current) {
+            const context = describeGeoPoint(lat, lng);
+            const label =
+              context.nearest && context.nearest.distanceKm <= 2
+                ? `Near ${context.nearest.name}`
+                : `Pin ${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+            addRoutePointRef.current({ lat, lng, label });
+            return;
+          }
           onPickRef.current(lat, lng);
         });
 
-        rendererRef.current = leaflet.canvas({ padding: 0.5 });
         leafletRef.current = leaflet;
         mapRef.current = map;
         setReady(true);
@@ -263,10 +647,12 @@ export default function TripPlaceMapPicker({
 
     return () => {
       cancelled = true;
+      roadsController.abort();
       markers.clear();
       pinRef.current = null;
       layerRef.current = null;
-      rendererRef.current = null;
+      routeLayerRef.current = null;
+      routeRendererRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
       leafletRef.current = null;
@@ -313,7 +699,6 @@ export default function TripPlaceMapPicker({
   useEffect(() => {
     const map = mapRef.current;
     const leaflet = leafletRef.current;
-    const renderer = rendererRef.current;
     if (!map || !leaflet || !ready) return;
 
     layerRef.current?.remove();
@@ -322,29 +707,57 @@ export default function TripPlaceMapPicker({
     const layer = leaflet.layerGroup().addTo(map);
 
     for (const place of filteredPlaces) {
+      const isStay = place.category === "Hotel";
       const marker = leaflet
-        .circleMarker([place.latitude, place.longitude], {
-          radius: 4,
-          color: "#ffffff",
-          weight: 1.2,
-          fillColor: markerColor(place.category),
-          fillOpacity: 0.9,
-          bubblingMouseEvents: false,
-          renderer: renderer ?? undefined,
+        .marker([place.latitude, place.longitude], {
+          icon: leaflet.divIcon({
+            className: styles.placeMarker,
+            html: placeMarkerHtml(place),
+            iconSize: isStay ? [26, 26] : [28, 28],
+            iconAnchor: isStay ? [13, 13] : [14, 26],
+            tooltipAnchor: isStay ? [0, -16] : [0, -23],
+          }),
+          title: `${place.name} — ${place.area}`,
+          alt: `${place.name}, ${place.category} in ${place.area}`,
+          keyboard: true,
+          riseOnHover: true,
+          // While measuring a route, fade the place pins so the green road
+          // line and the A/B markers stay readable.
+          opacity: routeMode ? 0.25 : 1,
         })
         .bindTooltip(`${place.name} · ${place.area}`, {
           direction: "top",
-          offset: [0, -4],
+          offset: [0, 0],
           opacity: 0.95,
         })
-        .on("click", () => onSelectRef.current(place));
+        .on("click", () => {
+          if (routeModeRef.current) {
+            addRoutePointRef.current({
+              lat: place.latitude,
+              lng: place.longitude,
+              label: `${place.name}, ${place.area}`,
+            });
+            return;
+          }
+          onSelectRef.current(place);
+        });
+
+      if (!routeMode) {
+        marker.bindPopup(() => pointCardHtml(place), {
+          className: styles.pointPopup,
+          maxWidth: 300,
+          minWidth: 236,
+          offset: isStay ? [0, -14] : [0, -26],
+          autoPanPadding: [18, 18],
+        });
+      }
 
       marker.addTo(layer);
       markersRef.current.set(place.id, marker);
     }
 
     layerRef.current = layer;
-  }, [filteredPlaces, ready]);
+  }, [filteredPlaces, ready, routeMode]);
 
   useEffect(() => {
     if (!ready) return;
@@ -363,24 +776,16 @@ export default function TripPlaceMapPicker({
     markersRef.current.forEach((marker, id) => {
       const place = PLACE_BY_ID.get(id);
       if (!place) return;
-      if (id === selectedId) {
-        marker.setStyle({
-          radius: 7,
-          color: "#ffffff",
-          weight: 3,
-          fillColor: "#063a78",
-          fillOpacity: 1,
-        });
-        marker.bringToFront();
-      } else {
-        marker.setStyle({
-          radius: 4,
-          color: "#ffffff",
-          weight: 1.2,
-          fillColor: markerColor(place.category),
-          fillOpacity: 0.9,
-        });
+      const glyph = marker
+        .getElement()
+        ?.querySelector<HTMLElement>(`.${styles.placeMarkerGlyph}`);
+      if (glyph) {
+        glyph.classList.toggle(
+          styles.placeMarkerSelected,
+          id === selectedId,
+        );
       }
+      marker.setZIndexOffset(id === selectedId ? 1000 : 0);
     });
   }, [filteredPlaces, ready, selectedPlace]);
 
@@ -405,12 +810,14 @@ export default function TripPlaceMapPicker({
           autoPan: true,
           zIndexOffset: 1000,
           icon: leaflet.divIcon({
-            className: "",
-            html:
-              '<span style="display:block;width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#08428c;border:3px solid #fff;box-shadow:0 3px 10px rgba(8,66,140,.45)"></span>',
-            iconSize: [26, 26],
-            iconAnchor: [13, 26],
+            className: styles.customPin,
+            html: customPinHtml(),
+            iconSize: [34, 34],
+            iconAnchor: [17, 31],
+            tooltipAnchor: [0, -28],
           }),
+          title: "Trip location pin",
+          alt: "Selected trip location",
         })
         .addTo(map);
 
@@ -440,10 +847,190 @@ export default function TripPlaceMapPicker({
     }
   }, [disabled, hasPoint, latitude, longitude, ready]);
 
+  useEffect(() => {
+    if (!routeMode || routeStops.length < 2) return;
+
+    const [start, end] = routeStops;
+    const controller = new AbortController();
+    let active = true;
+
+    void fetch("/api/route/calculate/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        origin_lat: start.lat,
+        origin_lng: start.lng,
+        destination_lat: end.lat,
+        destination_lng: end.lng,
+      }),
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const payload = (await response.json().catch(() => null)) as {
+          message?: unknown;
+          distance_km?: unknown;
+          estimated_time_mins?: unknown;
+          geometry?: unknown;
+          source?: unknown;
+        } | null;
+        if (!response.ok) {
+          throw new Error(
+            typeof payload?.message === "string"
+              ? payload.message
+              : "The route service is unavailable.",
+          );
+        }
+        if (
+          typeof payload?.distance_km !== "number" ||
+          !Number.isFinite(payload.distance_km) ||
+          !isRouteGeometry(payload.geometry)
+        ) {
+          throw new Error("The route service returned an unexpected result.");
+        }
+        return {
+          distanceKm: payload.distance_km,
+          durationMins:
+            typeof payload.estimated_time_mins === "number"
+              ? payload.estimated_time_mins
+              : Math.max(1, Math.round((payload.distance_km / 40) * 60)),
+          geometry: payload.geometry,
+          source: payload.source === "osrm" ? "osrm" : "estimate",
+        } satisfies RouteResult;
+      })
+      .then((result) => {
+        if (!active) return;
+        setRoute(result);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        if (error instanceof Error && error.name === "AbortError") return;
+        setRouteError(
+          error instanceof Error
+            ? error.message
+            : "Could not calculate the route.",
+        );
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [routeAttempt, routeMode, routeStops]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const leaflet = leafletRef.current;
+    if (!map || !leaflet || !ready) return;
+
+    routeLayerRef.current?.remove();
+    routeLayerRef.current = null;
+    if (!routeMode) return;
+
+    const layer = leaflet.layerGroup().addTo(map);
+    routeLayerRef.current = layer;
+
+    routeStops.forEach((stop, index) => {
+      leaflet
+        .marker([stop.lat, stop.lng], {
+          icon: leaflet.divIcon({
+            className: styles.routeMarker,
+            html: routeBadgeHtml(index === 0 ? "A" : "B"),
+            iconSize: [26, 26],
+            iconAnchor: [13, 13],
+          }),
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: 1500 + index,
+        })
+        .addTo(layer);
+    });
+
+    if (!route || route.geometry.length < 2) return;
+
+    if (route.source === "osrm") {
+      leaflet
+        .polyline(route.geometry, {
+          pane: "trip-route",
+          renderer: routeRendererRef.current ?? undefined,
+          color: ROUTE_CASING,
+          weight: 10,
+          opacity: 0.9,
+          lineCap: "round",
+          lineJoin: "round",
+          interactive: false,
+        })
+        .addTo(layer);
+    }
+
+    const routeLine = leaflet.polyline(route.geometry, {
+      pane: "trip-route",
+      renderer: routeRendererRef.current ?? undefined,
+      color: ROUTE_GREEN,
+      weight: 7,
+      opacity: 1,
+      dashArray: route.source === "osrm" ? undefined : "8 10",
+      lineCap: "round",
+      lineJoin: "round",
+      interactive: false,
+    });
+    routeLine.addTo(layer);
+
+    map.fitBounds(routeLine.getBounds(), {
+      padding: [40, 40],
+      maxZoom: 14,
+      animate: true,
+    });
+  }, [ready, route, routeMode, routeStops]);
+
+  const toggleRouteMode = useCallback(() => {
+    if (routeMode) {
+      exitRouteMode();
+      return;
+    }
+    if (disabledRef.current) return;
+    setRouteMode(true);
+    setRouteError(null);
+    setRoute(null);
+    setRouteStops(
+      hasPoint
+        ? [
+            {
+              lat: latitude as number,
+              lng: longitude as number,
+              label: selectedPlace?.name ?? "Current trip pin",
+            },
+          ]
+        : [],
+    );
+  }, [
+    exitRouteMode,
+    hasPoint,
+    latitude,
+    longitude,
+    routeMode,
+    selectedPlace?.name,
+  ]);
+
   const handleClear = useCallback(() => {
     setQuery("");
     onClearPoint();
   }, [onClearPoint]);
+
+  const selectedGroup = selectedPlace
+    ? TRIP_PLACE_GROUPS.find(
+        (item) => item.id === CATEGORY_GROUP.get(selectedPlace.category),
+      )
+    : undefined;
+  const selectedAreaLine = selectedPlace
+    ? uniqueJoin([selectedPlace.area, pointContext?.region])
+    : uniqueJoin([pointContext?.district, pointContext?.region]);
+  const selectedNearest = nearestSummary(pointContext);
+
+  let routeInstruction = "Tap any place or the map to set the start.";
+  if (routeStops.length === 1) routeInstruction = "Now tap the destination.";
+  else if (routeStops.length === 2)
+    routeInstruction = "Pick another point to start a new route.";
+  if (routeLoading) routeInstruction = "Calculating the road route…";
 
   return (
     <div className={styles.picker}>
@@ -503,6 +1090,20 @@ export default function TripPlaceMapPicker({
           <MapPin size={13} aria-hidden="true" />
           {filteredPlaces.length} mapped
         </span>
+
+        <button
+          className={`${styles.routeToggle} ${
+            routeMode ? styles.routeToggleActive : ""
+          }`}
+          type="button"
+          onClick={toggleRouteMode}
+          disabled={disabled}
+          aria-pressed={routeMode}
+          title="Measure a road route between two points"
+        >
+          <Navigation size={13} aria-hidden="true" />
+          {routeMode ? "Routing on" : "Route"}
+        </button>
       </div>
 
       <div className={styles.body}>
@@ -554,17 +1155,112 @@ export default function TripPlaceMapPicker({
               </div>
             </div>
           ) : null}
+
+          {ready && routeMode ? (
+            <div className={styles.routePanel} role="status" aria-live="polite">
+              <div className={styles.routePanelHead}>
+                <span className={styles.routePanelTitle}>
+                  <Navigation size={13} aria-hidden="true" /> Road route
+                </span>
+                <button
+                  className={styles.routePanelClose}
+                  type="button"
+                  onClick={exitRouteMode}
+                  aria-label="Close route planner"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+
+              {route ? (
+                <>
+                  <div className={styles.routeSummary}>
+                    <span className={styles.routeDistance}>
+                      {formatRouteKm(route.distanceKm)}
+                      <em>km</em>
+                    </span>
+                    <span className={styles.routeDuration}>
+                      {formatDriveTime(route.durationMins)}
+                    </span>
+                  </div>
+                  <span
+                    className={`${styles.routeSource} ${
+                      route.source === "estimate"
+                        ? styles.routeSourceEstimate
+                        : ""
+                    }`}
+                  >
+                    {route.source === "osrm"
+                      ? "Following roads · OSRM"
+                      : "Straight-line estimate"}
+                  </span>
+                  <div className={styles.routeStops}>
+                    {routeStops.map((stop, index) => (
+                      <span key={`${index}-${stop.lat}-${stop.lng}`}>
+                        <b>{index === 0 ? "A" : "B"}</b>
+                        {stop.label}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className={styles.routeInstruction}>{routeInstruction}</p>
+              )}
+
+              {routeError ? (
+                <span className={styles.routeError} role="alert">
+                  {routeError}
+                </span>
+              ) : null}
+
+              <div className={styles.routePanelActions}>
+                {routeError ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRoute(null);
+                      setRouteError(null);
+                      setRouteAttempt((value) => value + 1);
+                    }}
+                  >
+                    Retry
+                  </button>
+                ) : null}
+                {routeStops.length === 2 ? (
+                  <button type="button" onClick={swapRouteStops}>
+                    Swap
+                  </button>
+                ) : null}
+                {routeStops.length > 0 ? (
+                  <button type="button" onClick={resetRoute}>
+                    Clear route
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
           {ready ? (
             <div className={styles.legend} aria-hidden="true">
               {legendGroups.map((item) => (
                 <span key={item.id} className={styles.legendItem}>
-                  <i
-                    className={styles.legendDot}
-                    style={{ background: GROUP_COLORS[item.id as PlaceGroupId] }}
+                  <Location01
+                    size={12}
+                    style={{ color: GROUP_COLORS[item.id as PlaceGroupId] }}
                   />
                   {item.label}
                 </span>
               ))}
+              <span className={styles.legendItem}>
+                <i
+                  className={`${styles.legendLine} ${styles.legendLineMain}`}
+                />
+                Main road
+              </span>
+              <span className={styles.legendItem}>
+                <i className={styles.legendLine} />
+                Minor road
+              </span>
             </div>
           ) : null}
         </div>
@@ -573,36 +1269,79 @@ export default function TripPlaceMapPicker({
           <div className={styles.selection}>
             {selectedPlace ? (
               <>
-                <span
-                  className={styles.pill}
-                  style={{
-                    background: `${markerColor(selectedPlace.category)}16`,
-                    color: markerColor(selectedPlace.category),
-                  }}
-                >
-                  {selectedPlace.category}
-                </span>
+                <div className={styles.selectionHead}>
+                  <span
+                    className={styles.pill}
+                    style={{
+                      background: `${markerColor(selectedPlace.category)}16`,
+                      color: markerColor(selectedPlace.category),
+                    }}
+                  >
+                    {selectedPlace.category}
+                  </span>
+                  <span className={styles.selectionGroup}>
+                    {selectedGroup?.label ?? "Zanzibar place"}
+                  </span>
+                </div>
                 <span className={styles.selectionName}>
                   {selectedPlace.name}
                 </span>
                 <span className={styles.selectionMeta}>
-                  {selectedPlace.area} · {ratingLabel(selectedPlace)}
+                  <MapPin size={12} aria-hidden="true" />
+                  {selectedAreaLine || selectedPlace.area}
                 </span>
+                <div className={styles.selectionRating}>
+                  <span className={styles.stars} aria-hidden="true">
+                    {starString(selectedPlace.rating) || "Not rated"}
+                  </span>
+                  {selectedPlace.rating === null ? null : (
+                    <strong>{selectedPlace.rating.toFixed(1)}</strong>
+                  )}
+                  <span>
+                    {selectedPlace.reviews.toLocaleString("en-US")} reviews
+                  </span>
+                </div>
+                <p className={styles.selectionNote}>
+                  {CATEGORY_NOTES[selectedPlace.category]}
+                </p>
+                {selectedNearest ? (
+                  <span className={styles.selectionFact}>
+                    Nearest · {selectedNearest}
+                  </span>
+                ) : null}
               </>
             ) : hasPoint ? (
               <>
-                <span className={styles.pill}>Custom pin</span>
+                <div className={styles.selectionHead}>
+                  <span className={styles.pill}>Custom pin</span>
+                  <span className={styles.selectionGroup}>
+                    {pointContext?.region || "Zanzibar"}
+                  </span>
+                </div>
                 <span className={styles.selectionName}>
-                  Custom map location
+                  {pointContext?.nearest
+                    ? `Near ${pointContext.nearest.name}`
+                    : "Custom map location"}
                 </span>
                 <span className={styles.selectionMeta}>
-                  Pick a place below to use its name.
+                  <MapPin size={12} aria-hidden="true" />
+                  {selectedAreaLine || "Dropped on the map"}
                 </span>
+                {selectedNearest ? (
+                  <span className={styles.selectionFact}>
+                    Nearest · {selectedNearest}
+                  </span>
+                ) : (
+                  <span className={styles.selectionFact}>
+                    Pick a place below to use its name and details.
+                  </span>
+                )}
               </>
             ) : (
               <span className={styles.hint}>
                 Pick a place to fill the trip location and its coordinates, or
-                click the map to drop a custom pin.
+                click the map to drop a custom pin. Use Route to measure a road
+                route between any two points.
               </span>
             )}
 
@@ -629,8 +1368,22 @@ export default function TripPlaceMapPicker({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <ExternalLink size={14} /> Open in Google Maps
+                  <ExternalLink size={14} /> Google Maps
                 </a>
+                <button
+                  className={styles.routeFrom}
+                  type="button"
+                  onClick={() =>
+                    startRouteFrom(
+                      latitude as number,
+                      longitude as number,
+                      selectedPlace?.name ?? "Current trip pin",
+                    )
+                  }
+                  disabled={disabled}
+                >
+                  <Navigation size={13} /> Route from here
+                </button>
                 <button
                   className={styles.clear}
                   type="button"
@@ -673,16 +1426,30 @@ export default function TripPlaceMapPicker({
                         type="button"
                         onClick={() => {
                           if (disabled) return;
+                          if (routeMode) {
+                            addRoutePoint({
+                              lat: place.latitude,
+                              lng: place.longitude,
+                              label: `${place.name}, ${place.area}`,
+                            });
+                            return;
+                          }
                           onSelectRef.current(place);
                         }}
                         disabled={disabled}
                         aria-pressed={active}
                       >
                         <span
-                          className={styles.placeDot}
-                          style={{ background: markerColor(place.category) }}
+                          className={styles.placeIcon}
+                          style={{ color: markerColor(place.category) }}
                           aria-hidden="true"
-                        />
+                        >
+                          {place.category === "Hotel" ? (
+                            <KeyRound size={13} />
+                          ) : (
+                            <Location01 size={13} />
+                          )}
+                        </span>
                         <span className={styles.placeMain}>
                           <span className={styles.placeName}>{place.name}</span>
                           <span className={styles.placeMeta}>

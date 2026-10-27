@@ -195,6 +195,160 @@
   border-top-color: rgba(18, 34, 58, 0.12);
 }
 
+/* Rich point card shown when a place marker is clicked. */
+.map :global(.leaflet-popup-content-wrapper) {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.24);
+}
+
+.map :global(.leaflet-popup-content) {
+  width: auto !important;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.map :global(.leaflet-popup-tip) {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16);
+}
+
+.map :global(.leaflet-popup-close-button) {
+  top: 5px;
+  right: 5px;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  color: #64748b;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+.map :global(.leaflet-popup-close-button:hover) {
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+.pointCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 248px;
+  max-width: calc(100vw - 84px);
+  padding: 12px 12px 11px;
+  background: #ffffff;
+  border-top: 3px solid var(--marker-color, #08428c);
+}
+
+.pointCardHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 20px;
+}
+
+.pointCardGroup {
+  color: var(--marker-color, #08428c);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pointCardCategory {
+  margin-left: auto;
+  padding: 2px 6px;
+  color: #475569;
+  background: #f1f5f9;
+  border-radius: 999px;
+  font-size: 0.55rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pointCardName {
+  color: #12223a;
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.pointCardArea {
+  color: #5c6a82;
+  font-size: 0.66rem;
+}
+
+.pointCardRating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #44546c;
+  font-size: 0.62rem;
+}
+
+.pointCardStars {
+  color: #b45309;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.pointCardRating strong {
+  color: #12223a;
+}
+
+.pointCardNote {
+  margin: 2px 0;
+  color: #44546c;
+  font-size: 0.66rem;
+  line-height: 1.4;
+}
+
+.pointCardFacts {
+  display: grid;
+  gap: 3px;
+  margin: 2px 0 0;
+  padding: 6px 0 0;
+  border-top: 1px solid rgba(8, 66, 140, 0.08);
+}
+
+.pointCardFacts div {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 6px;
+}
+
+.pointCardFacts dt {
+  color: #5c6a82;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pointCardFacts dd {
+  margin: 0;
+  color: #12223a;
+  font-size: 0.62rem;
+  overflow-wrap: anywhere;
+}
+
+.pointCardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  color: var(--trips-accent, #08428c);
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.pointCardLink:hover {
+  text-decoration: underline;
+}
+
 /* Zanzibar land overlay above the OSM tiles. */
 .islandShape {
   filter: drop-shadow(0 1px 2px rgba(11, 95, 99, 0.25));
@@ -221,6 +375,93 @@
     0 1px 0 #ffffff;
   opacity: 0.78;
   white-space: nowrap;
+}
+
+/* Hugeicons place markers. General places use the Location01 glyph; hotels
+   use a white badge with the KeyRound glyph. */
+.placeMarker {
+  background: transparent;
+  border: 0;
+}
+
+.placeMarkerGlyph {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.35));
+  transform-origin: 50% 100%;
+  transition: transform 0.16s ease;
+}
+
+.placeMarkerGlyph > svg {
+  overflow: visible;
+}
+
+.placeMarkerStay {
+  width: 26px;
+  height: 26px;
+  background: #ffffff;
+  border: 2px solid var(--marker-color);
+  border-radius: 50%;
+  box-shadow: 0 2px 7px rgba(15, 23, 42, 0.28);
+  transform-origin: 50% 50%;
+}
+
+.placeMarker:hover .placeMarkerGlyph {
+  transform: scale(1.16);
+}
+
+.placeMarkerGlyph.placeMarkerSelected {
+  filter: drop-shadow(0 3px 7px rgba(15, 23, 42, 0.45));
+  transform: scale(1.42);
+}
+
+.placeMarkerStay.placeMarkerSelected {
+  transform: scale(1.3);
+}
+
+.customPin {
+  background: transparent;
+  border: 0;
+}
+
+.customPinGlyph {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  filter: drop-shadow(0 4px 7px rgba(8, 66, 140, 0.42));
+  transform-origin: 50% 100%;
+  transition: transform 0.16s ease;
+}
+
+.customPinGlyph > svg {
+  overflow: visible;
+}
+
+.customPin:hover .customPinGlyph {
+  transform: scale(1.08);
+}
+
+.routeMarker {
+  background: transparent;
+  border: 0;
+}
+
+.routeBadge {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  color: #ffffff;
+  background: var(--route-badge, #15803d);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 7px rgba(15, 23, 42, 0.42);
+  font-size: 0.64rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 /* Floating map-view switch over the top-right of the tiles. */
@@ -283,6 +524,208 @@
   cursor: not-allowed;
 }
 
+/* Route planner toggle in the toolbar and its floating map panel. */
+.routeToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  height: 32px;
+  padding: 0 11px;
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid rgba(21, 128, 61, 0.26);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.routeToggle:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #15803d;
+}
+
+.routeToggleActive,
+.routeToggleActive:hover:not(:disabled) {
+  color: #ffffff;
+  background: #15803d;
+  border-color: #15803d;
+}
+
+.routeToggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.routePanel {
+  position: absolute;
+  top: 80px;
+  left: 10px;
+  z-index: 640;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 238px;
+  padding: 9px 10px 8px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(18, 34, 58, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(18, 34, 58, 0.18);
+  backdrop-filter: blur(6px);
+}
+
+.routePanelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.routePanelTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #15803d;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.routePanelClose {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  padding: 0;
+  color: #64748b;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.routePanelClose:hover {
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+.routeSummary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.routeDistance {
+  color: #15803d;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.routeDistance em {
+  margin-left: 3px;
+  font-size: 0.66rem;
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+.routeDuration {
+  padding: 2px 7px;
+  color: #334155;
+  background: #f1f5f9;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.routeSource {
+  color: #15803d;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.routeSourceEstimate {
+  color: #b45309;
+}
+
+.routeStops {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.routeStops span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  color: #334155;
+  font-size: 0.64rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routeStops b {
+  display: grid;
+  width: 15px;
+  height: 15px;
+  place-items: center;
+  flex: none;
+  color: #ffffff;
+  background: #334155;
+  border-radius: 50%;
+  font-size: 0.52rem;
+}
+
+.routeInstruction {
+  margin: 1px 0;
+  color: #44546c;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.routeError {
+  padding: 5px 7px;
+  color: #b91c1c;
+  background: #fef2f2;
+  border-radius: 7px;
+  font-size: 0.64rem;
+  line-height: 1.35;
+}
+
+.routePanelActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 1px;
+}
+
+.routePanelActions button {
+  padding: 3px 7px;
+  color: #15803d;
+  background: transparent;
+  border: 1px solid rgba(21, 128, 61, 0.24);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.6rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.routePanelActions button:hover {
+  background: #f0fdf4;
+}
+
 .mapStatus {
   position: absolute;
   inset: 0;
@@ -334,6 +777,20 @@
   box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
 }
 
+.legendLine {
+  width: 16px;
+  height: 2px;
+  background: #000000;
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+.legendLineMain {
+  height: 4px;
+  background: #000000;
+  opacity: 0.8;
+}
+
 /* Right-hand panel */
 .side {
   display: flex;
@@ -380,9 +837,65 @@
 }
 
 .selectionMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--trips-ink-2, #44546c);
   font-size: 0.72rem;
   line-height: 1.4;
+}
+
+.selectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+}
+
+.selectionGroup {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--trips-ink-3, #5c6a82);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.selectionRating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--trips-ink-2, #44546c);
+  font-size: 0.66rem;
+}
+
+.selectionRating strong {
+  color: var(--trips-ink, #12223a);
+  font-size: 0.7rem;
+}
+
+.stars {
+  color: #b45309;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.selectionNote {
+  margin: 1px 0 0;
+  color: var(--trips-ink-2, #44546c);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.selectionFact {
+  color: var(--trips-ink-3, #5c6a82);
+  font-size: 0.65rem;
+  line-height: 1.35;
 }
 
 .hint {
@@ -444,6 +957,30 @@
 
 .mapsLink:hover {
   text-decoration: underline;
+}
+
+.routeFrom {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid rgba(21, 128, 61, 0.28);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.routeFrom:hover:not(:disabled) {
+  background: #dcfce7;
+}
+
+.routeFrom:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .clear {
@@ -569,14 +1106,27 @@
   border-color: rgba(8, 66, 140, 0.24);
 }
 
-.placeDot {
+.placeIcon {
   grid-area: dot;
-  width: 9px;
-  height: 9px;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   align-self: start;
-  margin-top: 4px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1.5px #ffffff;
+  margin-top: 1px;
+  color: var(--marker-color, #08428c);
+}
+
+.placeIcon > svg {
+  width: 13px;
+  height: 13px;
+}
+
+.placeDotStay {
+  box-shadow:
+    0 0 0 1.5px #ffffff,
+    0 0 0 3px rgba(29, 78, 216, 0.22);
 }
 
 .placeMain {
@@ -682,6 +1232,16 @@
 
   .count {
     align-self: flex-start;
+  }
+
+  .routeToggle {
+    align-self: flex-start;
+  }
+
+  .routePanel {
+    top: 80px;
+    left: 8px;
+    width: min(238px, calc(100% - 16px));
   }
 
   .body {

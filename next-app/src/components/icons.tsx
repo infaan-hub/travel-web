@@ -50,6 +50,7 @@ export const Hotel = iconComponent(H.Hotel);
 export const Hourglass = iconComponent(H.Hourglass);
 export const Image = iconComponent(H.Image);
 export const KeyRound = iconComponent(H.KeyRound);
+export const Location01 = iconComponent(H.Location01Icon);
 export const LayoutDashboard = iconComponent(H.LayoutDashboard);
 export const Lightbulb = iconComponent(H.Lightbulb);
 export const Loader = iconComponent(H.Loader);
