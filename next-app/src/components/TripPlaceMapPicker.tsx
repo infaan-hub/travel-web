@@ -12,7 +12,6 @@ import {
   HospitalIcon,
   KeyRoundIcon,
   LandmarkIcon,
-  Location01Icon,
   PlantIcon,
   RestaurantIcon,
   ShoppingBagIcon,
@@ -22,9 +21,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ExternalLink,
-  KeyRound,
   Locate,
-  Location01,
   MapPin,
   Navigation,
   Search,
@@ -265,13 +262,14 @@ function locationGlyphMarkup(color: string, size: number) {
 function placeMarkerHtml(place: TripPlace) {
   const color = markerColor(place.category);
   const icon = CATEGORY_ICON[place.category] ?? LandmarkIcon;
-  return `<span class="${styles.placeMarkerGlyph}" style="--marker-color:${color}">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPathMarkup(icon, "#ffffff", 2.6)}${iconPathMarkup(icon, color, 2)}</svg>
+  const stayClass = place.category === "Hotel" ? ` ${styles.placeMarkerStay}` : "";
+  return `<span class="${styles.placeMarkerGlyph}${stayClass}" style="--marker-color:${color}">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPathMarkup(icon, "#ffffff", 2.6)}${iconPathMarkup(icon, color, 2)}</svg>
   </span>`;
 }
 
 function customPinHtml() {
-  return `<span class="${styles.customPinGlyph}">${locationGlyphMarkup("#08428c", 34)}</span>`;
+  return `<span class="${styles.customPinGlyph}">${locationGlyphMarkup("#08428c", 23)}</span>`;
 }
 
 function routeBadgeHtml(label: "A" | "B") {
@@ -378,6 +376,8 @@ export default function TripPlaceMapPicker({
   const [route, setRoute] = useState<RouteResult | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
   const [routeAttempt, setRouteAttempt] = useState(0);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const routeLoading =
     routeMode &&
@@ -749,17 +749,15 @@ export default function TripPlaceMapPicker({
           icon: leaflet.divIcon({
             className: styles.placeMarker,
             html: placeMarkerHtml(place),
-            iconSize: isStay ? [26, 26] : [28, 28],
-            iconAnchor: isStay ? [13, 13] : [14, 26],
-            tooltipAnchor: isStay ? [0, -16] : [0, -23],
+            iconSize: [20, 20],
+            iconAnchor: isStay ? [10, 10] : [10, 19],
+            tooltipAnchor: isStay ? [0, -13] : [0, -18],
           }),
           title: `${place.name} — ${place.area}`,
           alt: `${place.name}, ${place.category} in ${place.area}`,
           keyboard: true,
           riseOnHover: true,
-          // While measuring a route, fade the place pins so the green road
-          // line and the A/B markers stay readable.
-          opacity: routeMode ? 0.25 : 1,
+          opacity: 1,
         })
         .bindTooltip(`${place.name} · ${place.area}`, {
           direction: "top",
@@ -847,7 +845,7 @@ if (!routeMode) {
     const map = mapRef.current;
     const leaflet = leafletRef.current;
     if (!map || !leaflet || !ready) return;
-    if (!hasPoint) {
+    if (!hasPoint || selectedPlace) {
       pinRef.current?.remove();
       pinRef.current = null;
       lastPointRef.current = null;
@@ -866,9 +864,9 @@ if (!routeMode) {
           icon: leaflet.divIcon({
             className: styles.customPin,
             html: customPinHtml(),
-            iconSize: [34, 34],
-            iconAnchor: [17, 31],
-            tooltipAnchor: [0, -28],
+            iconSize: [24, 24],
+            iconAnchor: [12, 22],
+            tooltipAnchor: [0, -21],
           }),
           title: "Trip location pin",
           alt: "Selected trip location",
@@ -899,7 +897,7 @@ if (!routeMode) {
     } else if (map.getZoom() < 10) {
       map.setView(point, 12, { animate: false });
     }
-  }, [disabled, hasPoint, latitude, longitude, ready]);
+  }, [disabled, hasPoint, latitude, longitude, ready, selectedPlace]);
 
   useEffect(() => {
     if (!routeMode || routeStops.length < 2) return;
@@ -989,8 +987,8 @@ if (!routeMode) {
           icon: leaflet.divIcon({
             className: styles.routeMarker,
             html: routeBadgeHtml(index === 0 ? "A" : "B"),
-            iconSize: [26, 26],
-            iconAnchor: [13, 13],
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
           }),
           interactive: false,
           keyboard: false,
@@ -1067,8 +1065,45 @@ if (!routeMode) {
 
   const handleClear = useCallback(() => {
     setQuery("");
+    setLocationError(null);
     onClearPoint();
   }, [onClearPoint]);
+
+  const locateCurrentPosition = useCallback(() => {
+    if (disabled || locating) return;
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError("Location access is not available in this browser.");
+      return;
+    }
+
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = roundCoordinate(position.coords.latitude);
+        const lng = roundCoordinate(position.coords.longitude);
+        if (!isInZanzibar(lat, lng)) {
+          setLocationError("Your current location is outside Zanzibar.");
+          setLocating(false);
+          return;
+        }
+        onPickPoint(lat, lng);
+        setLocating(false);
+      },
+      (error) => {
+        setLocationError(
+          error.code === error.PERMISSION_DENIED
+            ? "Allow location access in your browser and try again."
+            : error.code === error.POSITION_UNAVAILABLE
+              ? "Your current location could not be determined."
+              : "Location request timed out. Please try again.",
+        );
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  }, [disabled, locating, onPickPoint]);
 
   const selectedGroup = selectedPlace
     ? TRIP_PLACE_GROUPS.find(
@@ -1158,7 +1193,22 @@ if (!routeMode) {
           <Navigation size={13} aria-hidden="true" />
           {routeMode ? "Routing on" : "Route"}
         </button>
+        <button
+          className={styles.currentLocation}
+          type="button"
+          onClick={locateCurrentPosition}
+          disabled={disabled || locating}
+          title="Use your current location"
+        >
+          <Locate size={13} aria-hidden="true" />
+          {locating ? "Locating…" : "My location"}
+        </button>
       </div>
+      {locationError ? (
+        <p className={styles.locationError} role="alert">
+          {locationError}
+        </p>
+      ) : null}
 
       <div className={styles.body}>
         <div className={styles.mapWrap}>
@@ -1295,16 +1345,44 @@ if (!routeMode) {
           ) : null}
 
           {ready ? (
-            <div className={styles.legend} aria-hidden="true">
+            <div className={styles.legend} role="group" aria-label="Map key">
               {legendGroups.map((item) => (
                 <span key={item.id} className={styles.legendItem}>
-                  <Location01
-                    size={12}
-                    style={{ color: GROUP_COLORS[item.id as PlaceGroupId] }}
+                  <i
+                    className={styles.legendDot}
+                    style={{
+                      backgroundColor: GROUP_COLORS[item.id as PlaceGroupId],
+                    }}
+                    aria-hidden="true"
                   />
                   {item.label}
                 </span>
               ))}
+              {hasPoint && !selectedPlace ? (
+                <span className={styles.legendItem}>
+                  <i
+                    className={`${styles.legendDot} ${styles.legendPin}`}
+                    aria-hidden="true"
+                  />
+                  Trip pin
+                </span>
+              ) : null}
+              {routeMode ? (
+                <>
+                  <span className={styles.legendItem}>
+                    <i className={styles.legendRouteStart} aria-hidden="true">
+                      A
+                    </i>
+                    Start
+                  </span>
+                  <span className={styles.legendItem}>
+                    <i className={styles.legendRouteEnd} aria-hidden="true">
+                      B
+                    </i>
+                    Destination
+                  </span>
+                </>
+              ) : null}
               <span className={styles.legendItem}>
                 <i
                   className={`${styles.legendLine} ${styles.legendLineMain}`}
