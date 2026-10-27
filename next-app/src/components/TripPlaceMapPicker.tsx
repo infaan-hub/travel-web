@@ -18,6 +18,11 @@ import {
   ZANZIBAR_CENTER,
   isInZanzibar,
 } from "@/lib/zanzibar";
+import {
+  ZANZIBAR_ARCHIPELAGO_BOUNDS,
+  ZANZIBAR_ISLAND_LABELS,
+  ZANZIBAR_ISLANDS,
+} from "@/lib/zanzibar-outline";
 import styles from "@/components/trip-place-picker.module.css";
 
 type PlaceGroupId = Exclude<TripPlaceGroupId, "all">;
@@ -106,6 +111,7 @@ export default function TripPlaceMapPicker({
   const markersRef = useRef<Map<number, Leaflet.CircleMarker>>(new Map());
   const pinRef = useRef<Leaflet.Marker | null>(null);
   const lastPointRef = useRef<[number, number] | null>(null);
+  const initialFitRef = useRef(false);
   const disabledRef = useRef(disabled);
   const onSelectRef = useRef<(place: TripPlace) => void>(() => {});
   const onPickRef = useRef<(lat: number, lng: number) => void>(() => {});
@@ -114,6 +120,7 @@ export default function TripPlaceMapPicker({
   const [mapError, setMapError] = useState(false);
   const [group, setGroup] = useState<TripPlaceGroupId>("all");
   const [query, setQuery] = useState("");
+  const [view, setView] = useState<"islands" | "places">("islands");
 
   const hasPoint = validPoint(latitude, longitude);
 
@@ -191,6 +198,50 @@ export default function TripPlaceMapPicker({
           })
           .addTo(map);
 
+        // Zanzibar land overlay sits above the OSM tiles and below the place
+        // markers, so the whole archipelago reads as one map.
+        const islandLayer = leaflet.layerGroup().addTo(map);
+        for (const island of ZANZIBAR_ISLANDS) {
+          leaflet
+            .polygon(island.coordinates, {
+              color: "#0b5f63",
+              weight: island.name === "Islet" ? 1 : 1.8,
+              opacity: 0.85,
+              fillColor: "#0f766e",
+              fillOpacity: 0.16,
+              interactive: false,
+              className: styles.islandShape,
+            })
+            .addTo(islandLayer);
+        }
+        const islandLabels: Leaflet.Marker[] = [];
+        for (const label of ZANZIBAR_ISLAND_LABELS) {
+          islandLabels.push(
+            leaflet
+              .marker(label.at, {
+                interactive: false,
+                keyboard: false,
+                icon: leaflet.divIcon({
+                  className: styles.islandLabel,
+                  html: `<span>${label.name}</span>`,
+                  iconSize: [120, 18],
+                  iconAnchor: [60, 9],
+                }),
+              })
+              .addTo(islandLayer),
+          );
+        }
+
+        // Only the archipelago overview needs the big island names; once
+        // zoomed in, OSM labels name the districts and the text crowds the
+        // place markers.
+        const syncIslandLabels = () => {
+          const opacity = map.getZoom() < 9.5 ? 1 : 0;
+          for (const label of islandLabels) label.setOpacity(opacity);
+        };
+        map.on("zoomend", syncIslandLabels);
+        syncIslandLabels();
+
         map.on("click", (event: Leaflet.LeafletMouseEvent) => {
           if (disabledRef.current) return;
           const lat = roundCoordinate(event.latlng.lat);
@@ -241,9 +292,23 @@ export default function TripPlaceMapPicker({
         maxZoom: 11,
         animate,
       });
+      setView("places");
     },
     [group],
   );
+
+  const fitIslands = useCallback((animate: boolean) => {
+    const map = mapRef.current;
+    const leaflet = leafletRef.current;
+    if (!map || !leaflet) return;
+    map.invalidateSize();
+    map.fitBounds(leaflet.latLngBounds(ZANZIBAR_ARCHIPELAGO_BOUNDS), {
+      padding: [24, 24],
+      maxZoom: 10,
+      animate,
+    });
+    setView("islands");
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -259,7 +324,7 @@ export default function TripPlaceMapPicker({
     for (const place of filteredPlaces) {
       const marker = leaflet
         .circleMarker([place.latitude, place.longitude], {
-          radius: 5,
+          radius: 4,
           color: "#ffffff",
           weight: 1.2,
           fillColor: markerColor(place.category),
@@ -283,8 +348,13 @@ export default function TripPlaceMapPicker({
 
   useEffect(() => {
     if (!ready) return;
+    if (!initialFitRef.current) {
+      initialFitRef.current = true;
+      fitIslands(false);
+      return;
+    }
     fitGroup(false);
-  }, [fitGroup, ready]);
+  }, [fitGroup, fitIslands, ready]);
 
   useEffect(() => {
     if (!ready) return;
@@ -295,7 +365,7 @@ export default function TripPlaceMapPicker({
       if (!place) return;
       if (id === selectedId) {
         marker.setStyle({
-          radius: 8,
+          radius: 7,
           color: "#ffffff",
           weight: 3,
           fillColor: "#063a78",
@@ -304,7 +374,7 @@ export default function TripPlaceMapPicker({
         marker.bringToFront();
       } else {
         marker.setStyle({
-          radius: 5,
+          radius: 4,
           color: "#ffffff",
           weight: 1.2,
           fillColor: markerColor(place.category),
@@ -452,6 +522,39 @@ export default function TripPlaceMapPicker({
             </div>
           ) : null}
           {ready ? (
+            <div className={styles.mapTop}>
+              <span className={styles.mapTopKicker}>Zanzibar</span>
+              <div
+                className={styles.mapTopActions}
+                role="group"
+                aria-label="Map view"
+              >
+                <button
+                  className={`${styles.mapViewButton} ${
+                    view === "islands" ? styles.mapViewButtonActive : ""
+                  }`}
+                  type="button"
+                  onClick={() => fitIslands(true)}
+                  disabled={disabled}
+                  aria-pressed={view === "islands"}
+                >
+                  Full Zanzibar
+                </button>
+                <button
+                  className={`${styles.mapViewButton} ${
+                    view === "places" ? styles.mapViewButtonActive : ""
+                  }`}
+                  type="button"
+                  onClick={() => fitGroup(true)}
+                  disabled={disabled}
+                  aria-pressed={view === "places"}
+                >
+                  Places
+                </button>
+              </div>
+            </div>
+          ) : null}
+          {ready ? (
             <div className={styles.legend} aria-hidden="true">
               {legendGroups.map((item) => (
                 <span key={item.id} className={styles.legendItem}>
@@ -552,7 +655,7 @@ export default function TripPlaceMapPicker({
               onClick={() => fitGroup(true)}
               disabled={!ready || disabled}
             >
-              <Locate size={13} /> Fit Zanzibar
+              <Locate size={13} /> Fit list
             </button>
           </div>
 

@@ -195,6 +195,94 @@
   border-top-color: rgba(18, 34, 58, 0.12);
 }
 
+/* Zanzibar land overlay above the OSM tiles. */
+.islandShape {
+  filter: drop-shadow(0 1px 2px rgba(11, 95, 99, 0.25));
+}
+
+.islandLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  pointer-events: none;
+}
+
+.islandLabel span {
+  color: #0b5f63;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 3px #ffffff,
+    0 0 6px #ffffff,
+    0 1px 0 #ffffff;
+  opacity: 0.78;
+  white-space: nowrap;
+}
+
+/* Floating map-view switch over the top-right of the tiles. */
+.mapTop {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 650;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 4px 4px 10px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(18, 34, 58, 0.1);
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(18, 34, 58, 0.14);
+  backdrop-filter: blur(4px);
+}
+
+.mapTopKicker {
+  color: #0b5f63;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mapTopActions {
+  display: flex;
+  gap: 3px;
+}
+
+.mapViewButton {
+  padding: 4px 9px;
+  color: #44546c;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mapViewButton:hover:not(:disabled) {
+  color: #08428c;
+  background: rgba(8, 66, 140, 0.08);
+}
+
+.mapViewButtonActive,
+.mapViewButtonActive:hover:not(:disabled) {
+  color: #ffffff;
+  background: #08428c;
+}
+
+.mapViewButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .mapStatus {
   position: absolute;
   inset: 0;

@@ -5275,6 +5275,9 @@ button,
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { overflow-x: clip; }
 img, video, canvas, svg { max-width: 100%; height: auto; }
+/* Leaflet sizes its own map canvases inline; the max-width above collapses
+   them to the zero-width overlay pane and hides every canvas marker. */
+.leaflet-container canvas { max-width: none; }
 input, textarea, select { font-size: 16px; }
 .btn, button, .nav-item, .icon-btn { min-height: 44px; min-width: 44px; }
 @media (max-width: 1024px) {

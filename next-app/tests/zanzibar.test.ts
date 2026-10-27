@@ -10,6 +10,11 @@ import {
   isInZanzibar,
   zanzibarPlacesInRegion,
 } from "@/lib/zanzibar";
+import {
+  ZANZIBAR_ARCHIPELAGO_BOUNDS,
+  ZANZIBAR_ISLAND_LABELS,
+  ZANZIBAR_ISLANDS,
+} from "@/lib/zanzibar-outline";
 
 const DISTRICT_REGION: Record<string, string> = {
   "Kaskazini A District": "Unguja North Region",
@@ -58,6 +63,52 @@ describe("Zanzibar map bounds", () => {
       expect(boxNorth).toBeLessThanOrEqual(north);
       expect(boxWest).toBeGreaterThanOrEqual(west);
       expect(boxEast).toBeLessThanOrEqual(east);
+    }
+  });
+});
+
+describe("Zanzibar land overlay", () => {
+  it("covers Unguja and Pemba with closed rings", () => {
+    const names = ZANZIBAR_ISLANDS.map((island) => island.name);
+    expect(names).toContain("Unguja");
+    expect(names).toContain("Pemba");
+
+    for (const island of ZANZIBAR_ISLANDS) {
+      expect(island.coordinates.length, `${island.id} ring size`).toBeGreaterThan(4);
+      const first = island.coordinates[0];
+      const last = island.coordinates[island.coordinates.length - 1];
+      expect(first, `${island.id} ring is closed`).toEqual(last);
+      for (const [lat, lng] of island.coordinates) {
+        expect(Number.isFinite(lat), `${island.id} latitude`).toBe(true);
+        expect(Number.isFinite(lng), `${island.id} longitude`).toBe(true);
+        expect(isInZanzibar(lat, lng), `${island.id} point in Zanzibar`).toBe(true);
+      }
+    }
+  });
+
+  it("keeps the archipelago view inside the map bounds", () => {
+    const [[south, west], [north, east]] = ZANZIBAR_BOUNDS;
+    const [[overlaySouth, overlayWest], [overlayNorth, overlayEast]] =
+      ZANZIBAR_ARCHIPELAGO_BOUNDS;
+    expect(overlaySouth).toBeGreaterThanOrEqual(south);
+    expect(overlayNorth).toBeLessThanOrEqual(north);
+    expect(overlayWest).toBeGreaterThanOrEqual(west);
+    expect(overlayEast).toBeLessThanOrEqual(east);
+
+    for (const island of ZANZIBAR_ISLANDS) {
+      for (const [lat, lng] of island.coordinates) {
+        expect(lat).toBeGreaterThanOrEqual(overlaySouth);
+        expect(lat).toBeLessThanOrEqual(overlayNorth);
+        expect(lng).toBeGreaterThanOrEqual(overlayWest);
+        expect(lng).toBeLessThanOrEqual(overlayEast);
+      }
+    }
+
+    for (const label of ZANZIBAR_ISLAND_LABELS) {
+      expect(label.at[0]).toBeGreaterThanOrEqual(overlaySouth);
+      expect(label.at[0]).toBeLessThanOrEqual(overlayNorth);
+      expect(label.at[1]).toBeGreaterThanOrEqual(overlayWest);
+      expect(label.at[1]).toBeLessThanOrEqual(overlayEast);
     }
   });
 });
