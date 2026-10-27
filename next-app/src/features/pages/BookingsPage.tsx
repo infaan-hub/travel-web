@@ -9,6 +9,7 @@ import { ClipboardList, MapPin, Users, DollarSign, CalendarDays, CheckCircle, Na
 import { getImageUrl } from '@/lib/utils/image-url';
 
 import { useToast } from "@/components/ToastProvider";
+import styles from "@/features/pages/company-bookings.module.css";
 
 import type {  Booking  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
@@ -101,22 +102,36 @@ export default function BookingsPage() {
   };
 
   return (
-    <div className="page bookings-page">
-      <div className="page-header">
-        <h1>My booking requests</h1>
-        <p>Track requests sent to tourism companies and review their current status.</p>
-      </div>
+    <div id="bookings-workspace" className={styles.bookingsRoot}>
+      <header className={styles.bookingsMasthead}>
+        <div className={styles.bookingsMastheadText}>
+          <nav className={styles.bookingsBreadcrumb} aria-label="Breadcrumb">
+            <Link href="/">Home</Link>
+            <span className={styles.bookingsBreadcrumbSep}>/</span>
+            <span className={styles.bookingsBreadcrumbCurrent}>My bookings</span>
+          </nav>
+          <p className={styles.bookingsEyebrow}>Customer bookings</p>
+          <h1 className={styles.bookingsTitle}>My booking requests</h1>
+          <p className={styles.bookingsLead}>Track requests sent to tourism companies and review their current status.</p>
+        </div>
+      </header>
 
       {loading ? (
-        <div className="loading">Loading your bookings...</div>
+        <div className={styles.bookingsState}>
+          <span className={styles.bookingsStateIcon}><ClipboardList size={22} /></span>
+          <h2 className={styles.bookingsStateTitle}>Loading your bookings</h2>
+          <p className={styles.bookingsStateCopy}>Please wait while we fetch your booking requests.</p>
+        </div>
       ) : bookings.length === 0 ? (
-        <div className="empty-state">
-          <span className="empty-icon"><ClipboardList size={24} /></span>
-          <h3>No requests yet</h3>
-          <p>Your booking requests will appear here after you send one to an experience provider.</p>
-          <button className="btn btn-primary" onClick={() => router.push('/tours/')}>
-            Explore experiences
-          </button>
+        <div className={styles.bookingsState}>
+          <span className={styles.bookingsStateIcon}><ClipboardList size={22} /></span>
+          <h2 className={styles.bookingsStateTitle}>No requests yet</h2>
+          <p className={styles.bookingsStateCopy}>Your booking requests will appear here after you send one to an experience provider.</p>
+          <div className={styles.bookingsStateActions}>
+            <button className="btn btn-primary" onClick={() => router.push('/tours/')}>
+              Explore experiences
+            </button>
+          </div>
         </div>
       ) : (
         <div className="bookings-list">

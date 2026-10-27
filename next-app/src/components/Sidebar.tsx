@@ -135,6 +135,7 @@ export default function Sidebar() {
     { to: "/tours", label: "Experiences", icon: Globe, exact: true },
     { to: "/companies", label: "Companies", icon: Building2 },
     { to: "/trips", label: "Trip", icon: Map },
+    { to: "/bookings", label: "Bookings", icon: ClipboardList },
     { to: "/contact", label: "Support", icon: Mail },
   ];
 
