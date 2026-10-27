@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import Image from "next/image";
+import DestinationCard from "@/components/DestinationCard";
 import Link from "next/link";
 import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
@@ -259,33 +259,22 @@ export default function TripsPage() {
               <p className={styles.tripsStateCopy}>Check back soon for new trips from travel companies.</p>
             </div>
           ) : (
-            <div className="trips-grid">
+            <div className="destinations-grid">
               {trips.map((trip) => (
-                <article key={trip.id} className="trip-card">
-                  {trip.image_url && (
-                    <Image
-                      src={getImageUrl(trip.image_url)}
-                      alt={trip.title}
-                      width={640}
-                      height={360}
-                      className="trip-image"
-                    />
-                  )}
-                  <div className="trip-card-body">
-                    <h3>{trip.title}</h3>
-                    {trip.company_name && <p className="trip-company">{trip.company_name}</p>}
-                    <p className="trip-place">{trip.place}</p>
-                    {trip.description && <p className="trip-content">{trip.description}</p>}
-                    <div className="trip-meta">
-                      {trip.price && <span className="trip-price">${trip.price}</span>}
-                      {trip.created_at && (
-                        <span className="trip-date">
-                          <Clock size={12} /> {new Date(trip.created_at).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </article>
+                <DestinationCard
+                  key={trip.id}
+                  image={trip.image_url ? getImageUrl(trip.image_url) : undefined}
+                  title={trip.title}
+                  location={trip.place}
+                  description={trip.description || (trip.company_name ? `Posted by ${trip.company_name}` : "Trip posted by a travel company.")}
+                  badges={trip.company_name ? [trip.company_name] : undefined}
+                  stats={[
+                    { value: trip.price ? `$${trip.price}` : "On request", label: "Price" },
+                    { value: trip.created_at ? new Date(trip.created_at).toLocaleDateString() : "Recently", label: "Posted" },
+                  ]}
+                  hideCta
+                  hideLike
+                />
               ))}
             </div>
           )}
