@@ -4610,7 +4610,7 @@ input[type="radio"] {
   z-index: 9999;
   display: grid;
   place-items: center;
-  background: #0F6B6B;
+  background: #08428C;
   color: #fff;
   transition: opacity 0.4s ease;
 }
@@ -4712,6 +4712,13 @@ input[type="radio"] {
 }
 @media (prefers-color-scheme: dark) {
   .pwa-bottom-nav__item { color: #e2e8f0; }
+/* Onboarding uses company-side blue */
+.onboarding-account-primary { background: linear-gradient(135deg,#08428C,#063a78) !important; }
+.onboarding-slides-redesign .onboarding-cta { background: linear-gradient(135deg,#08428C,#063a78) !important; }
+.onboarding-slides-redesign .onboarding-dash.active { background: #08428C !important; }
+.onboarding-step-label { color: #08428C !important; }
+.onboarding-back { color: #08428C !important; border-color: rgba(8,66,140,.18) !important; }
+
   .pwa-bottom-nav__item.is-active { color: #5eead4; background: rgba(94, 234, 212, 0.12); }
 }
 

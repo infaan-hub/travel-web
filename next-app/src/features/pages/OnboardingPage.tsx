@@ -31,23 +31,23 @@ const SLIDES = [
   {
     src: "/uploads/home/Definitely_add_this_to_your__must_do__list_when_you_come_visit_us_here_at_The_Sands.jpg",
     alt: "Traveller looking at the sea",
-    title: "Explore The World",
+    title: "Welcome — first time here?",
     subtitle:
-      "Browse tours, safaris and local activities published by independent tourism companies.",
+      "This is your first visit. Explore tours, safaris and local experiences from independent tourism companies, compare providers, and plan your trip with confidence.",
   },
   {
     src: "/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg",
     alt: "Sunset over the Serengeti",
-    title: "Compare providers with confidence",
+    title: "How booking works",
     subtitle:
-      "See who runs each experience, what is included, and where it takes place before you reach out.",
+      "Browse experiences, compare what is included and who runs them, then send a booking request to the right company. The provider follows up with the details.",
   },
   {
     src: "/uploads/home/Zanzibar_trip.jpg",
     alt: "Zanzibar coastline",
-    title: "Send a request to the right company",
+    title: "Enable notifications & location",
     subtitle:
-      "Choose an experience and request a booking from its provider. The company follows up with the details.",
+      "Allow notifications for booking updates and location for nearby recommendations. You will be asked to allow each permission next.",
   },
 ];
 
@@ -70,8 +70,24 @@ export function OnboardingFlow() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const finish = useCallback(() => {
-    router.push("/register/");
+  const finish = useCallback(async () => {
+    try {
+      if ("Notification" in window && Notification.permission === "default") {
+        await Notification.requestPermission();
+      }
+    } catch {
+      // Ignore permission errors and continue.
+    }
+    try {
+      if ("geolocation" in navigator) {
+        await new Promise<void>((resolve) => {
+          navigator.geolocation.getCurrentPosition(() => resolve(), () => resolve());
+        });
+      }
+    } catch {
+      // Ignore permission errors and continue.
+    }
+    router.push("/login/");
   }, [router]);
 
   const continueWith = useCallback(
@@ -176,7 +192,7 @@ export function OnboardingFlow() {
             className="onboarding-cta"
             onClick={() => (isLast ? finish() : setSlide((index) => index + 1))}
           >
-            {isLast ? "Create an account →" : "Continue →"}
+            {isLast ? "Continue to sign in →" : "Continue →"}
           </button>
         </div>
       </div>
