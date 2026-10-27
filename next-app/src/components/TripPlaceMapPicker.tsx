@@ -274,7 +274,7 @@ function customPinHtml() {
 
 function routeBadgeHtml(label: "A" | "B") {
   const color = label === "A" ? ROUTE_START_COLOR : ROUTE_END_COLOR;
-  return `<span class="${styles.routeBadge}" style="--route-badge:${color}">${label}</span>`;
+  return `<span class="${styles.routeBadge}" style="--route-badge:${color}"></span>`;
 }
 
 function pointCardHtml(place: TripPlace) {
@@ -1348,11 +1348,10 @@ if (!routeMode) {
             <div className={styles.legend} role="group" aria-label="Map key">
               {legendGroups.map((item) => (
                 <span key={item.id} className={styles.legendItem}>
-                  <i
-                    className={styles.legendDot}
-                    style={{
-                      backgroundColor: GROUP_COLORS[item.id as PlaceGroupId],
-                    }}
+                  <HugeiconsIcon
+                    icon={Location01Icon as never}
+                    size={10}
+                    color={GROUP_COLORS[item.id as PlaceGroupId]}
                     aria-hidden="true"
                   />
                   {item.label}
@@ -1578,7 +1577,7 @@ if (!routeMode) {
                         >
                           <HugeiconsIcon
                             icon={CATEGORY_ICON[place.category] as never}
-                            size={13}
+                            size={11}
                             strokeWidth={2}
                           />
                         </span>
