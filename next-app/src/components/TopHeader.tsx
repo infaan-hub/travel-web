@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "@/components/icons";
@@ -37,8 +38,15 @@ export default function TopHeader() {
           {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
         </button>
 
-        <Link href="/" className="top-header-brand" aria-label="Travel. home">
-          <span className="top-header-wordmark brand-wordmark">Travel.</span>
+        <Link href="/" className="top-header-brand" aria-label="Travel. home" style={{ marginLeft: "auto" }}>
+          <Image
+            src="/travel.logo.jpeg"
+            alt="Travel."
+            width={128}
+            height={48}
+            style={{ height: 34, width: "auto", objectFit: "contain" }}
+            priority
+          />
         </Link>
       </div>
     </header>

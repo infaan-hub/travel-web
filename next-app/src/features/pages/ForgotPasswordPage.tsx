@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useToast } from "@/components/ToastProvider";
 import { ArrowLeft, CheckCircle, KeyRound, Palmtree, Shield } from "@/components/icons";
 import styles from "./auth-page.module.css";
@@ -39,8 +40,7 @@ export default function ForgotPasswordPage() {
         <div className={styles.formCard}>
           <div className={styles.forgotTop}>
             <Link href="/" className={styles.brand}>
-              <span className={styles.brandMark}><Palmtree size={18} /></span>
-              Travel.
+              <Image src="/travel.logo.jpeg" alt="Travel." width={120} height={42} style={{ height: 30, width: "auto", objectFit: "contain" }} />
             </Link>
             <span className={styles.secureChip}><Shield size={13} /> Secure request</span>
           </div>

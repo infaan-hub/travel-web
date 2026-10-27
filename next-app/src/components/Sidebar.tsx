@@ -266,8 +266,14 @@ const profileHref = isAdmin
       >
         <div className={styles.header}>
           <Link href="/" className={styles.brand} onClick={closeAll}>
-            <span className={styles.brandMark}><Palmtree size={20} /></span>
-            <span className={styles.wordmark}>Travel<span>.</span></span>
+            <NextImage
+              src="/travel.logo.jpeg"
+              alt="Travel."
+              width={150}
+              height={52}
+              style={{ height: 34, width: "auto", objectFit: "contain" }}
+              priority
+            />
           </Link>
           <button
             type="button"

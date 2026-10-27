@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { AlertCircle, ArrowRight, CheckCircle, Palmtree, Compass, Map, Star, Sparkles } from '@/components/icons';
@@ -58,8 +59,7 @@ export default function LoginPage() {
         <div className={styles.formCard}>
           <div className={styles.brandRow}>
             <Link href="/" className={styles.brand}>
-              <span className={styles.brandMark}><Palmtree size={18} /></span>
-              Travel.
+              <Image src="/travel.logo.jpeg" alt="Travel." width={120} height={42} style={{ height: 30, width: "auto", objectFit: "contain" }} />
             </Link>
           </div>
 
