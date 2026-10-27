@@ -49,6 +49,11 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
 self.addEventListener("push", (event) => {
   let payload = { title: "Travel.", body: "You have a new notification.", url: "/" };
   try {

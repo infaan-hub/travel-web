@@ -10,6 +10,7 @@ import { PushPrompt } from "@/components/PushPrompt";
 import PwaSplash from "@/components/PwaSplash";
 import PwaPermissionPopups from "@/components/PwaPermissionPopups";
 import PwaBottomNav from "@/components/PwaBottomNav";
+import PwaUpdatePrompt from "@/components/PwaUpdatePrompt";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { ModalA11y } from "@/components/ModalA11y";
 import { VisitorTracker } from "@/components/VisitorTracker";
@@ -89,6 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PwaSplash />
             <PwaPermissionPopups />
             <PwaBottomNav />
+            <PwaUpdatePrompt />
             <ServiceWorkerRegister />
             <ModalA11y />
           </ToastProvider>
