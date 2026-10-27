@@ -38,7 +38,7 @@ export default function TopHeader() {
           {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
         </button>
 
-        <Link href="/" className="top-header-brand" aria-label="Travel. home" style={{ marginLeft: "auto" }}>
+        <Link href="/" className="top-header-brand" aria-label="Travel. home">
           <Image
             src="/travel.logo.jpeg"
             alt="Travel."
