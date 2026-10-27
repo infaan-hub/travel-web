@@ -4718,6 +4718,56 @@ input[type="radio"] {
 .onboarding-slides-redesign .onboarding-dash.active { background: #08428C !important; }
 .onboarding-step-label { color: #08428C !important; }
 .onboarding-back { color: #08428C !important; border-color: rgba(8,66,140,.18) !important; }
+/* Onboarding slides use the splash blue background, not glassy */
+.onboarding-shell,
+.onboarding-frame,
+.onboarding-screen,
+.onboarding-slides,
+.onboarding-slides-redesign {
+  background: #08428C !important;
+  color: #ffffff !important;
+}
+.onboarding-frame {
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.onboarding-title,
+.onboarding-subtitle,
+.onboarding-step-label,
+.onboarding-steps-list,
+.onboarding-steps-list li,
+.onboarding-info-card,
+.onboarding-cta,
+.onboarding-account-primary {
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+
+.onboarding-info-card h3,
+.onboarding-info-card p {
+  color: #ffffff !important;
+}
+.onboarding-info-card {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 16px;
+  padding: 12px;
+}
+.onboarding-back {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+.onboarding-dash {
+  background: rgba(255, 255, 255, 0.35) !important;
+}
+.onboarding-dash.active {
+  background: #ffffff !important;
+}
+
 
   .pwa-bottom-nav__item.is-active { color: #5eead4; background: rgba(94, 234, 212, 0.12); }
 }
