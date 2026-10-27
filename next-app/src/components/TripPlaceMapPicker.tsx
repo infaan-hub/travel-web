@@ -12,6 +12,7 @@ import {
   HospitalIcon,
   KeyRoundIcon,
   LandmarkIcon,
+  Location01Icon,
   PlantIcon,
   RestaurantIcon,
   ShoppingBagIcon,
