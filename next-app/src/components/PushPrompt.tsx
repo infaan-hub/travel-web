@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { publicEnv } from "@/lib/env-public";
+import { usePwa } from "@/hooks/usePwa";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -20,6 +21,7 @@ type PermissionState = "unsupported" | "default" | "granted" | "denied";
 /** Registers the service worker and lets the user opt in to push notifications. */
 export function PushPrompt() {
   const { isAuthenticated } = useAuth();
+  const { isStandalone } = usePwa();
   const [permission, setPermission] = useState<PermissionState>(() => {
     if (typeof window === "undefined") return "default";
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return "unsupported";
@@ -64,6 +66,8 @@ export function PushPrompt() {
       setBusy(false);
     }
   }, []);
+
+  if (isStandalone) return null;
 
   if (!isAuthenticated || permission === "unsupported" || permission === "granted" || dismissed) {
     return null;

@@ -4603,6 +4603,118 @@ input[type="radio"] {
 .splash-glass-mark { z-index: 1; width: 92px; height: 92px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.94); border-radius: 30px; background: rgba(255,255,255,.62); box-shadow: 0 20px 56px rgba(31,41,55,.12), inset 0 1px white; backdrop-filter: blur(22px); animation: splash-float 1.8s ease-in-out infinite; }
 .splash-glass-mark span { font: 700 2.2rem/1 var(--font-display); letter-spacing: -.08em; }
 .splash-wordmark { z-index: 1; margin: 22px 0 5px; font: 650 1.4rem/1 var(--font-body); letter-spacing: -.04em; }
+/* PWA splash screen: blue, centered logo, 2s */
+.pwa-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: #0F6B6B;
+  color: #fff;
+  transition: opacity 0.4s ease;
+}
+.pwa-splash.pwa-splash--fading { opacity: 0; pointer-events: none; }
+.pwa-splash__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: pwa-splash-pop 0.6s ease;
+}
+.pwa-splash__logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
+}
+.pwa-splash__wordmark {
+  font: 700 1.6rem/1 var(--font-body, system-ui);
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+.pwa-splash__wordmark span { color: #93c5fd; }
+.pwa-splash__caption { margin: 0; font-size: 0.95rem; opacity: 0.9; }
+@keyframes pwa-splash-pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pwa-splash__card { animation: none; }
+}
+
+/* PWA permission popups */
+.pwa-permission-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.pwa-permission-card {
+  width: min(100%, 360px);
+  padding: 24px;
+  border-radius: 24px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+}
+.pwa-permission-icon { font-size: 2.4rem; margin-bottom: 8px; }
+.pwa-permission-title { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; color: #0f172a; }
+.pwa-permission-text { margin: 0 0 16px; font-size: 0.92rem; color: #334155; line-height: 1.45; }
+.pwa-permission-message { margin: 0 0 12px; font-size: 0.85rem; color: #b91c1c; }
+.pwa-permission-actions { display: flex; gap: 10px; justify-content: center; }
+
+/* Glassy transparent bottom nav for PWA mobile/tablet */
+.pwa-bottom-nav {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 60;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  padding: 10px 8px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+@media (prefers-color-scheme: dark) {
+  .pwa-bottom-nav { background: rgba(15, 23, 42, 0.45); border-color: rgba(255, 255, 255, 0.18); }
+}
+.pwa-bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 16px;
+  color: #334155;
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.pwa-bottom-nav__item.is-active {
+  color: #0F6B6B;
+  background: rgba(15, 107, 107, 0.12);
+}
+@media (prefers-color-scheme: dark) {
+  .pwa-bottom-nav__item { color: #e2e8f0; }
+  .pwa-bottom-nav__item.is-active { color: #5eead4; background: rgba(94, 234, 212, 0.12); }
+}
+
 .splash-wordmark span { color: #8995a5; }
 .splash-caption { z-index: 1; margin: 8px 0 26px; color: #5b6779; font-size: .85rem; }
 .splash-progress { z-index: 1; width: 128px; height: 3px; overflow: hidden; border-radius: 9px; background: rgba(100,116,139,.15); }

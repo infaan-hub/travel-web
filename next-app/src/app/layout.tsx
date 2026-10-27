@@ -7,6 +7,9 @@ import { ToastProvider } from "@/components/ToastProvider";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { RealtimeProvider } from "@/context/RealtimeContext";
 import { PushPrompt } from "@/components/PushPrompt";
+import PwaSplash from "@/components/PwaSplash";
+import PwaPermissionPopups from "@/components/PwaPermissionPopups";
+import PwaBottomNav from "@/components/PwaBottomNav";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { ModalA11y } from "@/components/ModalA11y";
 import { VisitorTracker } from "@/components/VisitorTracker";
@@ -83,6 +86,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <VisitorTracker />
             <AppFrame>{children}</AppFrame>
             <PushPrompt />
+            <PwaSplash />
+            <PwaPermissionPopups />
+            <PwaBottomNav />
             <ServiceWorkerRegister />
             <ModalA11y />
           </ToastProvider>

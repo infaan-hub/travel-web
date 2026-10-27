@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePwa } from "@/hooks/usePwa";
 import Link from "next/link";
 import { Mail, Star } from "@/components/icons";
 
@@ -52,8 +53,16 @@ const SLIDES = [
 
 export function OnboardingFlow() {
   const router = useRouter();
+  const { isStandalone } = usePwa();
   const [screen, setScreen] = useState<"splash" | "welcome" | "slides">("splash");
   const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (!isStandalone) router.replace("/");
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [isStandalone, router]);
 
   useEffect(() => {
     window.localStorage.setItem("travel_onboarding_seen", "true");

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
+import { usePwa } from "@/hooks/usePwa";
 
 /**
  * Application chrome. The onboarding flow is a standalone, full-screen
@@ -12,6 +13,7 @@ import TopHeader from "@/components/TopHeader";
  */
 export default function AppFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { isAppLike } = usePwa();
   const isBare = pathname === "/onboarding" || pathname === "/onboarding/";
 
   if (isBare) {
@@ -27,7 +29,7 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="app-shell">
         <TopHeader />
-        <main className="main-content" id="main-content">
+<main className="main-content" id="main-content" style={isAppLike ? { paddingBottom: "calc(108px + env(safe-area-inset-bottom))" } : undefined}>
           {children}
         </main>
       </div>
