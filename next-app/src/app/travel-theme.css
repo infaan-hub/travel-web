@@ -1,5 +1,5 @@
-/* ==========================================================================
-   TRAVEL. — PREMIUM AQUA GLASSMORPHISM DESIGN SYSTEM
+﻿/* ==========================================================================
+   TRAVEL. â€” PREMIUM AQUA GLASSMORPHISM DESIGN SYSTEM
    Centralised tokens, themes, glass component library and responsive rules.
    Imported after the base stylesheet so it always wins.
    ========================================================================== */
@@ -1204,7 +1204,7 @@ select:focus,
 }
 
 /* ==========================================================================
-   9. HERO — full-bleed media hero (image/video) with centered headline and
+   9. HERO â€” full-bleed media hero (image/video) with centered headline and
    up to two call-to-action buttons. Responsive: iOS / Android / desktop.
    Falls back to a dark-teal brand gradient when no media is supplied.
    ========================================================================== */
@@ -3532,7 +3532,7 @@ svg {
 }
 
 /* iOS and Android zoom the whole page when a focused control is under 16px.
-   The rule is intentionally strong: several legacy scopes still force 14–15px. */
+   The rule is intentionally strong: several legacy scopes still force 14â€“15px. */
 @media (max-width: 900px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
   select,
@@ -3853,7 +3853,7 @@ svg {
 }
 
 /* ================================================================
-   Crystal glass system — shared visual direction across the app
+   Crystal glass system â€” shared visual direction across the app
    ================================================================ */
 :root {
   --brand: #334155;
@@ -4932,9 +4932,52 @@ body {
   .onboarding-card { width: min(100%, 300px); }
   .onboarding-title { font-size: clamp(24px, 7vw, 30px); }
 }
+/* Company-side glassy onboarding overrides */
+.onboarding-shell,
+.onboarding-screen {
+  background: #F2F0EF !important;
+}
+.onboarding-primary-button {
+  background: #08428C !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(8, 66, 140, 0.35) !important;
+}
+.onboarding-primary-button:hover {
+  background: #063a78 !important;
+}
+.onboarding-back {
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: #08428C !important;
+  border: 1px solid rgba(8, 66, 140, 0.18) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.onboarding-info-card {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid rgba(8, 66, 140, 0.12) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.onboarding-info-card h3,
+.onboarding-info-card p {
+  color: #08428C !important;
+}
+.onboarding-title,
+.onboarding-description {
+  color: #ffffff !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35) !important;
+}
+.pwa-permission-card .btn-primary,
+.pwa-update-prompt .btn-primary {
+  background: #08428C !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(8, 66, 140, 0.35) !important;
+}
+.pwa-permission-card .btn-primary:hover,
+.pwa-update-prompt .btn-primary:hover {
+  background: #063a78 !important;
+}
 
-/* End */
-  border-color: rgba(255,255,255,.88) !important;
   box-shadow: 0 10px 30px rgba(15,55,55,.08), inset 0 1px rgba(255,255,255,.92) !important;
 }
 .top-header-inner { display: flex; gap: clamp(12px,2vw,28px); }
