@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { Bell, MapPin, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
@@ -99,7 +100,7 @@ function OnboardingCard({
       <div className="onboarding-topbar">
         {showBack && onBack ? (
           <button type="button" className="onboarding-back-button" onClick={onBack} aria-label="Go back">
-            ← Back
+            <ArrowLeft size={18} />
           </button>
         ) : (
           <span aria-hidden="true" />
@@ -387,7 +388,7 @@ export function OnboardingFlow() {
             showSkip={false}
             showProgress={false}
           >
-            <div className="onboarding-icon-row">🔔 <span>Travel Updates</span></div>
+            <div className="onboarding-icon-row"><Bell size={18} /> <span>Travel Updates</span></div>
             {notifState === "denied" ? (
               <p className="onboarding-description">Notifications were denied. You can enable them later in your browser or device settings.</p>
             ) : null}
@@ -395,15 +396,9 @@ export function OnboardingFlow() {
               <p className="onboarding-description">This browser does not support notifications. You can continue.</p>
             ) : null}
             {message ? <p className="onboarding-description">{message}</p> : null}
-            {notifState === "default" || notifState === "dismissed" || notifState === "denied" ? (
-              <button type="button" className="onboarding-back" onClick={notNowNotifications} disabled={busy} style={{ position: "relative", marginTop: 8 }}>
-                Not Now
-              </button>
-            ) : (
-              <button type="button" className="onboarding-back" onClick={() => setStep("location")} style={{ position: "relative", marginTop: 8 }}>
+            <button type="button" className="onboarding-back" onClick={() => setStep("location")} style={{ position: "relative", marginTop: 8 }}>
                 Continue
               </button>
-            )}
           </OnboardingCard>
         </motion.div>
       )}
@@ -427,7 +422,7 @@ export function OnboardingFlow() {
             showSkip={false}
             showProgress={false}
           >
-            <div className="onboarding-icon-row">📍 <span>Nearby Discovery</span></div>
+            <div className="onboarding-icon-row"><MapPin size={18} /> <span>Nearby Discovery</span></div>
             {locState === "denied" ? (
               <p className="onboarding-description">Location was denied. You can enable it later in your browser settings.</p>
             ) : null}
@@ -435,21 +430,17 @@ export function OnboardingFlow() {
               <p className="onboarding-description">This browser does not support location. You can continue.</p>
             ) : null}
             {message ? <p className="onboarding-description">{message}</p> : null}
-            {locState === "default" || locState === "dismissed" || locState === "denied" || locState === "error" ? (
-              <button type="button" className="onboarding-back" onClick={notNowLocation} disabled={busy} style={{ position: "relative", marginTop: 8 }}>
-                Not Now
-              </button>
-            ) : (
-              <button type="button" className="onboarding-back" onClick={completeOnboarding} style={{ position: "relative", marginTop: 8 }}>
+            <button type="button" className="onboarding-back" onClick={completeOnboarding} style={{ position: "relative", marginTop: 8 }}>
                 Continue to sign in
               </button>
-            )}
           </OnboardingCard>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
+
+
 
 
 
