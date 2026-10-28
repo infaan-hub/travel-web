@@ -9,7 +9,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import LocationPicker from "@/components/LocationPicker";
+import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
 import OpeningHoursEditor from "@/components/OpeningHoursEditor";
 import {
   Building2,
@@ -816,10 +816,22 @@ export default function CompanyProfilePage() {
                   className={`${styles.profileField} ${styles.profileFieldFull} ${styles.profileMapField}`}
                 >
                   <span className={styles.profileMapLabel}>Location map</span>
-                  <LocationPicker
+                  <TripPlaceMapPicker
                     latitude={form.latitude ? Number(form.latitude) : null}
                     longitude={form.longitude ? Number(form.longitude) : null}
-                    onChange={(latitude, longitude) =>
+                    disabled={!canUpdate}
+                    onSelectPlace={(place) =>
+                      setForm((current) =>
+                        current
+                          ? {
+                              ...current,
+                              latitude: String(place.latitude),
+                              longitude: String(place.longitude),
+                            }
+                          : current,
+                      )
+                    }
+                    onPickPoint={(latitude, longitude) =>
                       setForm((current) =>
                         current
                           ? {
@@ -830,8 +842,7 @@ export default function CompanyProfilePage() {
                           : current,
                       )
                     }
-                    disabled={!canUpdate}
-                    label="Company location map"
+                    onClearPoint={() => {}}
                   />
                   <p className={styles.profileHint}>
                     Select the company location on the map. Clear both fields

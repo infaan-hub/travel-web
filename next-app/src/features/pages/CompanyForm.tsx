@@ -6,7 +6,7 @@ import Image from "next/image";
 import { companiesAPI, geocodeAPI } from "@/lib/api/client";
 import { useToast } from "@/components/ToastProvider";
 import { getImageUrl } from "@/lib/utils/image-url";
-import LocationPicker from "@/components/LocationPicker";
+import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
 import OpeningHoursEditor from "@/components/OpeningHoursEditor";
 import {
   openingHoursForEditor,
@@ -562,10 +562,12 @@ export default function CompanyForm({
                 {reverseLoading ? "Looking up…" : "Find address from coordinates"}
               </button>
             </div>
-            <LocationPicker
+            <TripPlaceMapPicker
               latitude={mapLatitude}
               longitude={mapLongitude}
-              onChange={handleMapChange}
+              onSelectPlace={(place) => handleMapChange(place.latitude, place.longitude)}
+              onPickPoint={handleMapChange}
+              onClearPoint={() => {}}
             />
             {reverseError && <p className={styles.inlineError}>{reverseError}</p>}
             {suggestedAddress && (

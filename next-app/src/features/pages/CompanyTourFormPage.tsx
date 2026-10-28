@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import LocationPicker from "@/components/LocationPicker";
+import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
 import {
   ArrowLeft,
   Globe,
@@ -551,17 +551,24 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
               <div className={styles.formGrid} style={{ marginTop: 14 }}>
                 <div className={`${styles.formField} ${styles.formFieldFull}`}>
                   <label>Destination map</label>
-                  <LocationPicker
+                  <TripPlaceMapPicker
                     latitude={form.latitude ? Number(form.latitude) : null}
                     longitude={form.longitude ? Number(form.longitude) : null}
-                    onChange={(latitude, longitude) =>
+                    onSelectPlace={(place) =>
+                      setForm((current) => ({
+                        ...current,
+                        latitude: String(place.latitude),
+                        longitude: String(place.longitude),
+                      }))
+                    }
+                    onPickPoint={(latitude, longitude) =>
                       setForm((current) => ({
                         ...current,
                         latitude: String(latitude),
                         longitude: String(longitude),
                       }))
                     }
-                    label="Tour destination map"
+                    onClearPoint={() => {}}
                   />
                   <p className={styles.formHint}>
                     Optional. Select the destination on the map so the public
