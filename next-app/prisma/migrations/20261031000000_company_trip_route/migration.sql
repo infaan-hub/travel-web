@@ -1,0 +1,1 @@
+ALTER TABLE "company_trips" ADD COLUMN "origin_latitude" DOUBLE PRECISION, ADD COLUMN "origin_longitude" DOUBLE PRECISION, ADD COLUMN "destination_latitude" DOUBLE PRECISION, ADD COLUMN "destination_longitude" DOUBLE PRECISION, ADD COLUMN "distance_km" DOUBLE PRECISION, ADD COLUMN "duration_mins" INTEGER;

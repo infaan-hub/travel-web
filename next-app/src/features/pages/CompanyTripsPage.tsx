@@ -53,6 +53,12 @@ type CompanyTrip = {
   place: string;
   latitude?: number | null;
   longitude?: number | null;
+  origin_latitude?: number | null;
+  origin_longitude?: number | null;
+  destination_latitude?: number | null;
+  destination_longitude?: number | null;
+  distance_km?: number | null;
+  duration_mins?: number | null;
   description: string;
   price: string | null;
   image_url: string | null;
@@ -67,6 +73,12 @@ type TripForm = {
   price: string;
   latitude: string;
   longitude: string;
+  origin_latitude: string;
+  origin_longitude: string;
+  destination_latitude: string;
+  destination_longitude: string;
+  distance_km: string;
+  duration_mins: string;
 };
 
 const EMPTY_FORM: TripForm = {
@@ -76,6 +88,12 @@ const EMPTY_FORM: TripForm = {
   price: "",
   latitude: "",
   longitude: "",
+  origin_latitude: "",
+  origin_longitude: "",
+  destination_latitude: "",
+  destination_longitude: "",
+  distance_km: "",
+  duration_mins: "",
 };
 
 function priceValue(value: string | null) {
@@ -324,6 +342,12 @@ export default function CompanyTripsPage() {
       price: trip.price ?? "",
       latitude: latitude === null ? "" : latitude.toFixed(6),
       longitude: longitude === null ? "" : longitude.toFixed(6),
+      origin_latitude: trip.origin_latitude == null ? "" : trip.origin_latitude.toFixed(6),
+      origin_longitude: trip.origin_longitude == null ? "" : trip.origin_longitude.toFixed(6),
+      destination_latitude: trip.destination_latitude == null ? "" : trip.destination_latitude.toFixed(6),
+      destination_longitude: trip.destination_longitude == null ? "" : trip.destination_longitude.toFixed(6),
+      distance_km: trip.distance_km == null ? "" : String(trip.distance_km),
+      duration_mins: trip.duration_mins == null ? "" : String(trip.duration_mins),
     });
     setImage(null);
     setPreview(trip.image_url);
@@ -346,11 +370,14 @@ export default function CompanyTripsPage() {
   }, []);
 
   const pickTripPoint = useCallback((latitude: number, longitude: number) => {
-    setForm((current) => ({
-      ...current,
-      latitude: latitude.toFixed(6),
-      longitude: longitude.toFixed(6),
-    }));
+    setForm((current) => {
+      const lat = latitude.toFixed(6);
+      const lng = longitude.toFixed(6);
+      if (!current.origin_latitude || !current.origin_longitude) {
+        return { ...current, origin_latitude: lat, origin_longitude: lng, latitude: lat, longitude: lng };
+      }
+      return { ...current, destination_latitude: lat, destination_longitude: lng };
+    });
     setFormError(null);
   }, []);
 
@@ -447,6 +474,22 @@ export default function CompanyTripsPage() {
         data.append("latitude", "");
         data.append("longitude", "");
       }
+
+      const originLat = coordinateValue(form.origin_latitude);
+      const originLng = coordinateValue(form.origin_longitude);
+      const destLat = coordinateValue(form.destination_latitude);
+      const destLng = coordinateValue(form.destination_longitude);
+      if (originLat !== null && originLng !== null) {
+        data.append("origin_latitude", String(originLat));
+        data.append("origin_longitude", String(originLng));
+      }
+      if (destLat !== null && destLng !== null) {
+        data.append("destination_latitude", String(destLat));
+        data.append("destination_longitude", String(destLng));
+      }
+      if (form.distance_km.trim()) data.append("distance_km", form.distance_km.trim());
+      if (form.duration_mins.trim()) data.append("duration_mins", form.duration_mins.trim());
+
       if (image) data.append("image", image);
 
       if (editing) {

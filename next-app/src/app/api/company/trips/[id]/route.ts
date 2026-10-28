@@ -32,6 +32,12 @@ async function update(request: NextRequest, context: Context) {
         ...(body.place !== undefined ? { place: body.place } : {}),
         ...(body.latitude !== undefined ? { latitude: body.latitude } : {}),
         ...(body.longitude !== undefined ? { longitude: body.longitude } : {}),
+        ...(body.origin_latitude !== undefined ? { originLatitude: body.origin_latitude } : {}),
+        ...(body.origin_longitude !== undefined ? { originLongitude: body.origin_longitude } : {}),
+        ...(body.destination_latitude !== undefined ? { destinationLatitude: body.destination_latitude } : {}),
+        ...(body.destination_longitude !== undefined ? { destinationLongitude: body.destination_longitude } : {}),
+        ...(body.distance_km !== undefined ? { distanceKm: body.distance_km } : {}),
+        ...(body.duration_mins !== undefined ? { durationMins: body.duration_mins } : {}),
         ...(body.description !== undefined
           ? { description: body.description }
           : {}),

@@ -179,17 +179,23 @@ model Company {
 }
 
 model CompanyTrip {
-  id          Int      @id @default(autoincrement())
-  companyId   Int      @map("company_id")
-  title       String
-  place       String
-  latitude    Float?
-  longitude   Float?
-  description String   @default("")
-  image       String
-  price       Decimal  @db.Decimal(12, 2)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                    Int      @id @default(autoincrement())
+  companyId             Int      @map("company_id")
+  title                 String
+  place                 String
+  latitude              Float?
+  longitude             Float?
+  originLatitude        Float?   @map("origin_latitude")
+  originLongitude       Float?   @map("origin_longitude")
+  destinationLatitude   Float?   @map("destination_latitude")
+  destinationLongitude  Float?   @map("destination_longitude")
+  distanceKm            Float?   @map("distance_km")
+  durationMins          Int?     @map("duration_mins")
+  description           String   @default("")
+  image                 String
+  price                 Decimal  @db.Decimal(12, 2)
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 

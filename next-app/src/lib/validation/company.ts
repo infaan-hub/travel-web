@@ -203,6 +203,12 @@ const companyTripFields = z.object({
   price: z.coerce.number().nonnegative("Price cannot be negative."),
   latitude: nullableCoordinate(-90, 90),
   longitude: nullableCoordinate(-180, 180),
+  origin_latitude: nullableCoordinate(-90, 90),
+  origin_longitude: nullableCoordinate(-180, 180),
+  destination_latitude: nullableCoordinate(-90, 90),
+  destination_longitude: nullableCoordinate(-180, 180),
+  distance_km: z.coerce.number().nonnegative().optional().nullable(),
+  duration_mins: z.coerce.number().int().nonnegative().optional().nullable(),
 });
 
 function refineTripCoordinates(
