@@ -30,6 +30,7 @@ export default function LoginPage() {
   const [error, setError] = useState(() => {
     const oauthError = searchParams.get('error');
     if (oauthError === 'google_sign_in_failed') return 'Google sign-in failed. Please try again.';
+    if (oauthError === 'google_email_failed') return 'We could not send the verification email. Check SMTP configuration and try again.';
     if (oauthError === 'google_not_configured') return 'Google sign-in is not configured.';
     return '';
   });
