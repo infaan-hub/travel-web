@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -23,7 +23,7 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
   const isBare = pathname === "/onboarding" || pathname === "/onboarding/";
 
   useEffect(() => {
-    if (pathname !== "/" || loading || isAuthenticated || isOnboardingComplete()) return;
+    if (pathname !== "/" || loading || isAuthenticated || isOnboardingComplete() || !isAppLike) return;
     router.replace("/onboarding/?from=%2F");
   }, [isAuthenticated, loading, pathname, router]);
 
@@ -47,3 +47,4 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
