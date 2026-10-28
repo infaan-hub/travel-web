@@ -18,7 +18,7 @@ import {
   loginPath,
 } from "@/lib/onboarding";
 
-type Step = "slide1" | "slide2" | "slide3" | "notif" | "location";
+type Step = "slide1" | "slide2" | "notif" | "location";
 
 type Slide = {
   id: string;
@@ -166,8 +166,8 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<Step>(() => {
     if (typeof window === "undefined") return "slide1";
     const stored = window.sessionStorage.getItem(ONBOARDING_STEP_KEY) as Step | null;
-    return stored && ["slide1", "slide2", "slide3", "notif", "location"].includes(stored)
-      ? stored
+    return stored && ["slide1", "slide2", "notif", "location"].includes(stored)
+      ? (stored as Step)
       : "slide1";
   });
 
@@ -235,8 +235,7 @@ export function OnboardingFlow() {
   const goBack = useCallback(() => {
     setStep((prev) => {
       if (prev === "slide2") return "slide1";
-      if (prev === "slide3") return "slide2";
-      if (prev === "notif") return "slide3";
+            if (prev === "notif") return "slide2";
       if (prev === "location") return "notif";
       return prev;
     });
@@ -339,8 +338,8 @@ export function OnboardingFlow() {
 
   const notifSlide: Slide = {
     id: "notif",
-    image: slides[2].image,
-    imageAlt: slides[2].imageAlt,
+    image: slides[1].image,
+    imageAlt: slides[1].imageAlt,
     heading: ["Enable", "Travel", "Updates"],
     description: "Allow notifications to receive relevant booking updates and other supported travel alerts.",
     buttonLabel: busy ? "Requesting…" : notifState !== "unsupported" ? "Allow Notifications" : "Continue",
@@ -359,9 +358,8 @@ export function OnboardingFlow() {
 
   return (
     <AnimatePresence mode="wait">
-      {step === "slide1" && renderSlide(slides[0], 0, () => setStep("slide3"))}
-      {step === "slide2" && renderSlide(slides[1], 1, () => setStep("slide3"))}
-      {step === "slide3" && renderSlide(slides[2], 2, () => setStep("notif"), true)}
+      {step === "slide1" && renderSlide(slides[0], 0, () => setStep("slide2"))}
+      {step === "slide2" && renderSlide(slides[1], 1, () => setStep("notif"), true)}
 
       {step === "notif" && (
         <motion.div
@@ -433,6 +431,10 @@ export function OnboardingFlow() {
     </AnimatePresence>
   );
 }
+
+
+
+
 
 
 
