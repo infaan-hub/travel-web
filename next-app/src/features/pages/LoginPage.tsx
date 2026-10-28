@@ -175,8 +175,6 @@ export default function LoginPage() {
           <div className={styles.footer}>
             <div className={styles.footerLinks}>
               <Link href="/forgot-password/" className={styles.footerLink}>Forgot your password?</Link>
-              <span className={styles.footerDot} aria-hidden="true" />
-              <Link href="/verify-email/" className={styles.footerLink}>Verify your email</Link>
             </div>
             <p className={styles.footerMuted}>
               Don&apos;t have an account? <Link href="/register" className={styles.footerStrong}>Create one</Link>
