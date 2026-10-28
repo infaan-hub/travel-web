@@ -10,7 +10,7 @@ import {
   CarIcon,
   CompassIcon,
   HospitalIcon,
-  KeyRoundIcon,
+  House01Icon,
   LandmarkIcon,
   Location01Icon,
   PlantIcon,
@@ -115,7 +115,7 @@ const GROUP_ICON: Record<PlaceGroupId, IconSvgObject> = {
   attractions: LandmarkIcon,
   activities: ActivityIcon,
   food: RestaurantIcon,
-  stays: KeyRoundIcon,
+  stays: House01Icon,
   shopping: ShoppingBagIcon,
   wellness: WellnessIcon,
   services: CarIcon,
@@ -126,7 +126,7 @@ const CATEGORY_ICON: Record<TripPlaceCategory, IconSvgObject> = {
   "Beach / Sandbank": BeachIcon,
   "Cafe": CafeIcon,
   "Health / Pharmacy": HospitalIcon,
-  "Hotel": KeyRoundIcon,
+  "Hotel": House01Icon,
   "Kitesurf School": CompassIcon,
   "Restaurant": RestaurantIcon,
   "Shop / Market": ShoppingBagIcon,
@@ -139,7 +139,7 @@ const CATEGORY_ICON: Record<TripPlaceCategory, IconSvgObject> = {
 
 const HUGEICON_PATHS = {
   location: LandmarkIcon,
-  key: KeyRoundIcon,
+  key: House01Icon,
 } as const;
 
 type IconSvgObject = readonly (readonly [
@@ -279,7 +279,7 @@ function placeMarkerHtml(place: TripPlace) {
 }
 
 function customPinHtml() {
-  return `<span class="${styles.customPinGlyph}">${locationGlyphMarkup("#08428c", 23)}</span>`;
+  return `<span class="${styles.customPinGlyph}" style="width:16px;height:16px;border-radius:50%;background:#dc2626;border:2px solid #ffffff;box-shadow:0 0 0 2px #dc262655;display:inline-block;"></span>`;
 }
 
 function routeBadgeHtml(label: "A" | "B") {
