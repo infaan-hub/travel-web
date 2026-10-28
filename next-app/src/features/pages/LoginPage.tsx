@@ -63,8 +63,8 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     try {
-      const user = await login(form.username, form.password);
-      router.replace(postLoginPath(user, from));
+      await login(form.username, form.password);
+      router.push(`/verify-email/?from=${encodeURIComponent(from)}`);
     } catch (err: any) {
       setError(err.response?.data?.detail || err.response?.data?.message || 'Invalid username or password');
       setFieldErrors(err.fieldErrors || {});

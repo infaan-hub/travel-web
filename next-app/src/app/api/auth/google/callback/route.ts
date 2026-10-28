@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { signAccessToken, signRefreshToken } from "@/lib/auth/tokens";
-import { setSessionCookies } from "@/lib/auth/session";
+import { issueLoginChallenge, LOGIN_CHALLENGE_COOKIE } from "@/lib/services/verification";
+import { clientIp } from "@/lib/security/rate-limit";
 import {
   exchangeGoogleCode,
   findOrCreateGoogleCustomer,
@@ -41,11 +41,13 @@ export async function GET(request: NextRequest) {
     const { id_token } = await exchangeGoogleCode(code, redirectUriCookie || getGoogleRedirectUri(request.nextUrl.origin));
     const profile = await verifyGoogleIdToken(id_token);
     const user = await findOrCreateGoogleCustomer(profile);
-    const access = await signAccessToken(user);
-    const refresh = await signRefreshToken(user);
-    await setSessionCookies(access, refresh);
+    const challenge = await issueLoginChallenge(user.id, clientIp(request));
+    const jar2 = await cookies();
+    jar2.set(LOGIN_CHALLENGE_COOKIE, challenge.challengeToken, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 10 * 60 });
     const from = safeRedirectPath(fromCookie);
-    return NextResponse.redirect(new URL(from, request.url));
+    const url = new URL("/verify-email/", request.url);
+    url.searchParams.set("from", from);
+    return NextResponse.redirect(url);
   } catch {
     return loginErrorRedirect(request, "google_sign_in_failed");
   }

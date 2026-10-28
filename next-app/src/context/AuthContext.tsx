@@ -31,10 +31,16 @@ export type AuthUser = {
   active_company_id?: number | null;
 };
 
+export type LoginChallengeInfo = {
+  requiresVerification: true;
+  maskedEmail: string;
+  expiresAt: string;
+};
+
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<AuthUser>;
+  login: (username: string, password: string) => Promise<LoginChallengeInfo>;
   register: (username: string, email: string, password: string) => Promise<unknown>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -67,11 +73,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
-    // The token response also sets HTTP-only cookies; no token is stored in JS.
-    await api.post("/token/", { username, password });
-    const response = await authAPI.getUser();
-    setUser(response.data);
-    return response.data as AuthUser;
+    // Credentials are validated server-side; a verification challenge is issued
+    // and the final session is only established after the email code is verified.
+    const response = await api.post("/token/", { username, password });
+    const data = response.data ?? {};
+    return {
+      requiresVerification: true,
+      maskedEmail: data.masked_email ?? "",
+      expiresAt: data.expires_at ?? "",
+    } as LoginChallengeInfo;
   }, []);
 
   const register = useCallback(async (username: string, email: string, password: string) => {
