@@ -1,5 +1,5 @@
-/* -------------------------------------------------------------------------
-   Auth pages — scoped blue-glass treatment shared by sign in, account
+﻿/* -------------------------------------------------------------------------
+   Auth pages â€” scoped blue-glass treatment shared by sign in, account
    creation and password recovery. Kept out of the global auth primitives so
    reset-password / verify-email and any admin auth screens keep their
    existing layout.
@@ -799,6 +799,10 @@
 }
 
 @media (max-width: 600px) {
+  .banner {
+    display: none;
+  }
+
   .page {
     min-height: calc(100dvh - 60px);
     padding: 18px 14px 28px;
@@ -905,3 +909,4 @@
     transition: none !important;
   }
 }
+
