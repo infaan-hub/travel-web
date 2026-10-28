@@ -18,7 +18,7 @@ import {
   loginPath,
 } from "@/lib/onboarding";
 
-type Step = "slide1" | "slide2" | "notif" | "location";
+type Step = "slide1" | "slide2" | "notif";
 
 type Slide = {
   id: string;
@@ -166,16 +166,13 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<Step>(() => {
     if (typeof window === "undefined") return "slide1";
     const stored = window.sessionStorage.getItem(ONBOARDING_STEP_KEY) as Step | null;
-    return stored && ["slide1", "slide2", "notif", "location"].includes(stored)
+    return stored && ["slide1", "slide2", "notif"].includes(stored)
       ? (stored as Step)
       : "slide1";
   });
 
   const [notifState, setNotifState] = useState<string>(() =>
     typeof window === "undefined" ? "default" : readOnboardingValue("local", NOTIFICATION_PERMISSION_KEY) || "default",
-  );
-  const [locState, setLocState] = useState<string>(() =>
-    typeof window === "undefined" ? "default" : readOnboardingValue("local", LOCATION_PERMISSION_KEY) || "default",
   );
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -209,19 +206,12 @@ export function OnboardingFlow() {
     if (Notification.permission === "granted") {
       const t = setTimeout(() => {
         setNotifState("granted");
-        setStep("location");
+        completeOnboarding();
       }, 0);
       return () => clearTimeout(t);
     }
   }, [step]);
 
-  useEffect(() => {
-    if (step !== "location" || typeof window === "undefined") return;
-    if (!("geolocation" in navigator)) {
-      const t = setTimeout(() => setLocState("unsupported"), 0);
-      return () => clearTimeout(t);
-    }
-  }, [step]);
 
   const completeOnboarding = useCallback(() => {
     markOnboardingComplete();
@@ -236,7 +226,6 @@ export function OnboardingFlow() {
     setStep((prev) => {
       if (prev === "slide2") return "slide1";
             if (prev === "notif") return "slide2";
-      if (prev === "location") return "notif";
       return prev;
     });
   }, []);
@@ -244,7 +233,7 @@ export function OnboardingFlow() {
   const allowNotifications = useCallback(async () => {
     if (typeof window === "undefined" || !("Notification" in window)) {
       setNotifState("unsupported");
-      setStep("location");
+      completeOnboarding();
       return;
     }
     setBusy(true);
@@ -258,48 +247,17 @@ export function OnboardingFlow() {
       writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, "denied");
     } finally {
       setBusy(false);
-      setStep("location");
+      completeOnboarding();
     }
   }, []);
 
   const notNowNotifications = useCallback(() => {
     if (typeof window !== "undefined") writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, "dismissed");
     setNotifState("dismissed");
-    setStep("location");
+    completeOnboarding();
   }, []);
 
-  const allowLocation = useCallback(() => {
-    if (typeof window === "undefined" || !("geolocation" in navigator)) {
-      setLocState("unsupported");
-      if (typeof window !== "undefined") writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "unsupported");
-      completeOnboarding();
-      return;
-    }
-    setBusy(true);
-    setMessage("");
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        setLocState("granted");
-        if (typeof window !== "undefined") writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "granted");
-        setBusy(false);
-        completeOnboarding();
-      },
-      (error) => {
-        const value = error.code === 1 ? "denied" : "error";
-        setLocState(value);
-        if (typeof window !== "undefined") writeOnboardingValue("local", LOCATION_PERMISSION_KEY, value);
-        setBusy(false);
-        completeOnboarding();
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
-    );
-  }, [completeOnboarding]);
 
-  const notNowLocation = useCallback(() => {
-    if (typeof window !== "undefined") writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "dismissed");
-    setLocState("dismissed");
-    completeOnboarding();
-  }, [completeOnboarding]);
 
   if (loading) {
     return (
@@ -346,15 +304,6 @@ export function OnboardingFlow() {
     imagePosition: "center",
   };
 
-  const locationSlide: Slide = {
-    id: "location",
-    image: slides[0].image,
-    imageAlt: slides[0].imageAlt,
-    heading: ["Discover", "Experiences", "Near You"],
-    description: "Allow location access to help find nearby attractions, tours, and travel services.",
-    buttonLabel: busy ? "Requesting…" : locState !== "unsupported" ? "Allow Location" : "Continue to sign in",
-    imagePosition: "center",
-  };
 
   return (
     <AnimatePresence mode="wait">
@@ -374,7 +323,7 @@ export function OnboardingFlow() {
             slide={notifSlide}
             currentIndex={1}
             totalSlides={2}
-            onContinue={notifState !== "unsupported" ? allowNotifications : () => setStep("location")}
+            onContinue={notifState !== "unsupported" ? allowNotifications : completeOnboarding}
             onBack={goBack}
             showBack={true}
             showSkip={false}
@@ -388,49 +337,19 @@ export function OnboardingFlow() {
               <p className="onboarding-description">This browser does not support notifications. You can continue.</p>
             ) : null}
             {message ? <p className="onboarding-description">{message}</p> : null}
-            <button type="button" className="onboarding-back" onClick={() => setStep("location")} style={{ position: "relative", marginTop: 8 }}>
+            <button type="button" className="onboarding-back" onClick={completeOnboarding} style={{ position: "relative", marginTop: 8 }}>
                 Continue
               </button>
           </OnboardingCard>
         </motion.div>
       )}
 
-      {step === "location" && (
-        <motion.div
-          key="location"
-          initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: reduceMotion ? 0 : -12 }}
-          transition={transition}
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
-        >
-          <OnboardingCard
-            slide={locationSlide}
-            currentIndex={1}
-            totalSlides={2}
-            onContinue={locState !== "unsupported" ? allowLocation : completeOnboarding}
-            onBack={goBack}
-            showBack={true}
-            showSkip={false}
-            showProgress={false}
-          >
-            <div className="onboarding-icon-row"><MapPin size={18} /> <span>Nearby Discovery</span></div>
-            {locState === "denied" ? (
-              <p className="onboarding-description">Location was denied. You can enable it later in your browser settings.</p>
-            ) : null}
-            {locState === "unsupported" ? (
-              <p className="onboarding-description">This browser does not support location. You can continue.</p>
-            ) : null}
-            {message ? <p className="onboarding-description">{message}</p> : null}
-            <button type="button" className="onboarding-back" onClick={completeOnboarding} style={{ position: "relative", marginTop: 8 }}>
-                Continue to sign in
-              </button>
-          </OnboardingCard>
-        </motion.div>
-      )}
     </AnimatePresence>
   );
 }
+
+
+
 
 
 
