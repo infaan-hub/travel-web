@@ -1,9 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
+import { useAuth } from "@/context/AuthContext";
 import { usePwa } from "@/hooks/usePwa";
+import { isOnboardingComplete } from "@/lib/onboarding";
 
 /**
  * Application chrome. The onboarding flow is a standalone, full-screen
@@ -13,8 +17,15 @@ import { usePwa } from "@/hooks/usePwa";
  */
 export default function AppFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated, loading } = useAuth();
   const { isAppLike } = usePwa();
   const isBare = pathname === "/onboarding" || pathname === "/onboarding/";
+
+  useEffect(() => {
+    if (pathname !== "/" || loading || isAuthenticated || isOnboardingComplete()) return;
+    router.replace("/onboarding/?from=%2F");
+  }, [isAuthenticated, loading, pathname, router]);
 
   if (isBare) {
     return (

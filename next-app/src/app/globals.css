@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@source inline("onboarding-shell onboarding-frame onboarding-screen onboarding-slides onboarding-slides-redesign onboarding-copy onboarding-cta onboarding-back onboarding-dash onboarding-dashes onboarding-step-label onboarding-title onboarding-subtitle onboarding-info-card onboarding-info-sections onboarding-steps-list onboarding-permission-copy onboarding-permission-icon onboarding-permission-secondary onboarding-permission-message onboarding-slide-skip onboarding-slide-actions onboarding-splash onboarding-account-primary onboarding-account-secondary onboarding-welcome-redesign onboarding-welcome-kicker");
+
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================

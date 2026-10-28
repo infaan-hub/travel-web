@@ -4575,7 +4575,7 @@ input[type="radio"] {
 }
 
 /* Welcome, three-slide onboarding, and the 3 second branded splash. */
-.onboarding-shell { min-height: 100dvh; padding: 20px; background: radial-gradient(ellipse at 20% 8%, #fff 0, transparent 42%), linear-gradient(145deg,#edf1f6,#dfe6ef 58%,#f4f6f9); }
+.onboarding-shell { min-height: 100dvh; padding: 20px; }
 .onboarding-frame { width: min(100%, 1000px); max-width: 1000px; min-height: min(760px, calc(100dvh - 40px)); border: 1px solid rgba(255,255,255,.82); border-radius: 32px; background: rgba(255,255,255,.34); box-shadow: 0 28px 90px rgba(31,41,55,.16), inset 0 1px white; backdrop-filter: blur(26px) saturate(150%); }
 .onboarding-screen { min-height: min(760px, calc(100dvh - 40px)); padding: 24px; }
 .onboarding-welcome-redesign { display: grid; grid-template-columns: 1fr .92fr; align-items: center; gap: 20px; }
@@ -4598,7 +4598,7 @@ input[type="radio"] {
 .onboarding-slides-redesign .onboarding-title { font-size: clamp(1.8rem,4vw,2.6rem); }
 .onboarding-slides-redesign .onboarding-dash { padding: 0; border: 0; cursor: pointer; transition: width .22s ease, background .22s ease; }
 .onboarding-slides-redesign .onboarding-dash.active { width: 48px; background: #334155; }
-.onboarding-slides-redesign .onboarding-cta { display: block; width: min(100%,680px); margin: 8px auto 0; padding-inline: 20px; background: linear-gradient(135deg,#334155,#1e293b); }
+.onboarding-slides-redesign .onboarding-cta { display: block; width: min(100%,680px); margin: 8px auto 0; padding-inline: 20px; background: #08428C !important; background-image: none !important; color: #ffffff !important; border: 1px solid #08428C !important; }
 .onboarding-splash { position: relative; min-height: min(760px, calc(100dvh - 40px)); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; color: #26354b; background: radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.9),rgba(255,255,255,.26) 42%,transparent 68%); }
 .splash-glass-mark { z-index: 1; width: 92px; height: 92px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.94); border-radius: 30px; background: rgba(255,255,255,.62); box-shadow: 0 20px 56px rgba(31,41,55,.12), inset 0 1px white; backdrop-filter: blur(22px); animation: splash-float 1.8s ease-in-out infinite; }
 .splash-glass-mark span { font: 700 2.2rem/1 var(--font-display); letter-spacing: -.08em; }
@@ -4712,63 +4712,6 @@ input[type="radio"] {
 }
 @media (prefers-color-scheme: dark) {
   .pwa-bottom-nav__item { color: #e2e8f0; }
-/* Onboarding uses company-side blue */
-.onboarding-account-primary { background: linear-gradient(135deg,#08428C,#063a78) !important; }
-.onboarding-slides-redesign .onboarding-cta { background: linear-gradient(135deg,#08428C,#063a78) !important; }
-.onboarding-slides-redesign .onboarding-dash.active { background: #08428C !important; }
-.onboarding-step-label { color: #08428C !important; }
-.onboarding-back { color: #08428C !important; border-color: rgba(8,66,140,.18) !important; }
-/* Onboarding slides use the splash blue background, not glassy */
-.onboarding-shell,
-.onboarding-frame,
-.onboarding-screen,
-.onboarding-slides,
-.onboarding-slides-redesign {
-  background: #08428C !important;
-  color: #ffffff !important;
-}
-.onboarding-frame {
-  border: 0 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-.onboarding-title,
-.onboarding-subtitle,
-.onboarding-step-label,
-.onboarding-steps-list,
-.onboarding-steps-list li,
-.onboarding-info-card,
-.onboarding-cta,
-.onboarding-account-primary {
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
-}
-
-.onboarding-info-card h3,
-.onboarding-info-card p {
-  color: #ffffff !important;
-}
-.onboarding-info-card {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 1px solid rgba(255, 255, 255, 0.24) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 16px;
-  padding: 12px;
-}
-.onboarding-back {
-  background: rgba(255, 255, 255, 0.18) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
-}
-.onboarding-dash {
-  background: rgba(255, 255, 255, 0.35) !important;
-}
-.onboarding-dash.active {
-  background: #ffffff !important;
-}
-
-
   .pwa-bottom-nav__item.is-active { color: #5eead4; background: rgba(94, 234, 212, 0.12); }
 }
 
@@ -4851,6 +4794,7 @@ body {
 
 .top-header.glass-header {
   background: #F2F0EF !important;
+/* End */
   border-color: rgba(255,255,255,.88) !important;
   box-shadow: 0 10px 30px rgba(15,55,55,.08), inset 0 1px rgba(255,255,255,.92) !important;
 }
@@ -5021,6 +4965,86 @@ label { color: var(--text-primary); }
 .onboarding-slides-redesign .onboarding-slide-actions .onboarding-cta { width: auto; min-width: 190px; margin: 0; }
 .onboarding-back { min-height: 48px; padding: 0 18px; border: 1px solid rgba(82, 125, 100,.18); border-radius: 14px; background: rgba(255,255,255,.66); color: var(--brand-strong); font: inherit; font-weight: 750; cursor: pointer; }
 .onboarding-back:hover { background: rgba(15,23,42,.06); }
+.onboarding-back:disabled,
+.onboarding-cta:disabled { cursor: wait; opacity: .7; transform: none; }
+.onboarding-permission-copy { width: min(100%,680px); align-self: center; }
+.onboarding-permission-icon { color: var(--travel-primary); }
+.onboarding-permission-secondary { margin-top: 10px; }
+.onboarding-permission-message { margin: 0 0 16px; color: var(--travel-text-secondary); line-height: 1.5; }
+.onboarding-info-sections { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 18px 0; text-align: left; }
+.onboarding-info-card { padding: 14px; border: 1px solid var(--travel-border); border-radius: var(--travel-radius-lg); background: var(--travel-surface-soft); }
+.onboarding-info-card h2 { margin: 0 0 6px; color: var(--travel-text-primary); font-size: .98rem; }
+.onboarding-info-card p { margin: 0; color: var(--travel-text-secondary); line-height: 1.45; }
+.onboarding-steps-list { display: grid; gap: 8px; margin: 16px 0; padding-left: 22px; color: var(--travel-text-secondary); text-align: left; line-height: 1.45; }
+.onboarding-steps-list strong { color: var(--travel-text-primary); }
+.onboarding-shell { background: #08428C !important; }
+.onboarding-frame {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.onboarding-screen,
+.onboarding-slides,
+.onboarding-slides-redesign { background: transparent !important; }
+.onboarding-slides-redesign .onboarding-copy {
+  border: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.onboarding-slides-redesign .onboarding-cta,
+.onboarding-slides-redesign .onboarding-back {
+  border: 1px solid #08428C !important;
+  background: #08428C !important;
+  color: #ffffff !important;
+}
+.onboarding-slides-redesign .onboarding-cta:hover,
+.onboarding-slides-redesign .onboarding-back:hover {
+  border-color: #08428C !important;
+  background: #08428C !important;
+  color: #ffffff !important;
+}
+.onboarding-slides-redesign .onboarding-cta:focus-visible,
+.onboarding-slides-redesign .onboarding-back:focus-visible {
+  outline: 3px solid rgba(8,66,140,.35);
+  outline-offset: 3px;
+}
+.onboarding-dashes {
+  width: max-content;
+  margin-inline: auto;
+  padding: 8px 12px;
+  border-radius: var(--travel-radius-pill);
+  background: #ffffff;
+}
+.onboarding-slides-redesign .onboarding-dash { background: var(--travel-border-strong); }
+.onboarding-slides-redesign .onboarding-dash.active { background: #08428C !important; }
+.onboarding-info-card { background: var(--travel-surface-soft); }
+.onboarding-info-card h2 { color: var(--travel-text-primary); }
+.onboarding-info-card p { color: var(--travel-text-secondary); }
+.onboarding-permission-message { color: var(--travel-text-secondary); }
+.tour-detail-sidebar .booking-card .btn-primary {
+  background: #08428C !important;
+  border-color: #08428C !important;
+  color: #ffffff !important;
+}
+.tour-detail-sidebar .booking-card .btn-primary:hover {
+  background: #08428C !important;
+  border-color: #08428C !important;
+  color: #ffffff !important;
+}
+@media (max-width: 600px) {
+  .onboarding-info-sections { grid-template-columns: minmax(0,1fr); }
+  .onboarding-slide-actions { align-items: stretch; }
+  .onboarding-slide-actions .onboarding-back { padding-inline: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-slides-redesign .onboarding-dash,
+  .onboarding-slides-redesign .onboarding-cta { transition: none; }
+  .onboarding-slides-redesign .onboarding-cta:hover { transform: none; }
+}
 .onboarding-splash { color: var(--text-primary) !important; background: radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.96),rgba(244,245,247,.82) 48%,transparent 70%) !important; }
 .splash-glass-mark { color: var(--brand) !important; border-color: rgba(255,255,255,.92) !important; background: rgba(255,255,255,.82) !important; }
 .splash-wordmark span { color: var(--brand-accent) !important; }
@@ -5030,6 +5054,7 @@ label { color: var(--text-primary); }
 .splash-orbit { border-color: rgba(82, 125, 100,.18) !important; }
 .admin-auth-card .auth-brand b {color: var(--brand-strong) !important;border-color: rgba(82, 125, 100,.14) !important;background: rgba(241,245,249,.9) !important;}
 .admin-password-toggle { color: var(--brand) !important; }
+.onboarding-cta-blue-test { background: #08428C !important; }
 .admin-password-toggle:focus-visible { outline-color: rgba(82, 125, 100,.48) !important; }
 .admin-auth-banner { background: linear-gradient(180deg,rgba(5,54,54,.08) 8%,rgba(5,54,54,.86) 100%),url('/uploads/home/Zanzibar_trip.jpg') center 42% / cover,linear-gradient(145deg,#416A53,#345842) !important; }
 
@@ -5326,7 +5351,7 @@ body.nav-drawer-open {
 }
 
 /* Keep the shared glass controls ahead of legacy page and component rules. */
-html body :is(.app-layout .main-content .page, .app-layout .app-shell, .app-bare .onboarding-screen)
+html body :is(.app-layout .main-content .page, .app-layout .app-shell)
   :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
     a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]) {
   color: #263b41 !important;
@@ -5337,7 +5362,7 @@ html body :is(.app-layout .main-content .page, .app-layout .app-shell, .app-bare
   -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
 }
 
-html body :is(.app-layout .main-content .page, .app-layout .app-shell, .app-bare .onboarding-screen)
+html body :is(.app-layout .main-content .page, .app-layout .app-shell)
   :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
     a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):hover:not(:disabled) {
   color: #172f35 !important;
@@ -5346,7 +5371,7 @@ html body :is(.app-layout .main-content .page, .app-layout .app-shell, .app-bare
   transform: translateY(-1px);
 }
 
-html body :is(.app-layout .main-content .page, .app-layout .app-shell, .app-bare .onboarding-screen)
+html body :is(.app-layout .main-content .page, .app-layout .app-shell)
   :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
     a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):focus-visible {
   outline: 3px solid rgba(145,169,174,.48) !important;

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: process.cwd(),
+  },
   // The legacy clients call every API path with a trailing slash.
   trailingSlash: true,
   poweredByHeader: false,

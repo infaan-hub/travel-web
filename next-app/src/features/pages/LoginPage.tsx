@@ -3,16 +3,30 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { AlertCircle, ArrowRight, CheckCircle, Palmtree, Compass, Map, Star, Sparkles } from '@/components/icons';
 import styles from './auth-page.module.css';
 import type { ChangeEvent, FormEvent } from "react";
+import {
+  isOnboardingComplete,
+  postLoginPath,
+  safeInternalPath,
+} from "@/lib/onboarding";
+
+const subscribeToOnboarding = () => () => {};
+const onboardingServerSnapshot = () => false;
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { login, user, isAuthenticated, loading: authLoading } = useAuth();
   const [form, setForm] = useState<{ username: string; password: string }>({ username: '', password: '' });
+  const savedOnboardingComplete = useSyncExternalStore(
+    subscribeToOnboarding,
+    isOnboardingComplete,
+    onboardingServerSnapshot,
+  );
   const [error, setError] = useState(() => {
     const oauthError = searchParams.get('error');
     if (oauthError === 'google_sign_in_failed') return 'Google sign-in failed. Please try again.';
@@ -21,15 +35,27 @@ export default function LoginPage() {
   });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  const { login } = useAuth();
   const registered = searchParams.get('registered');
-  const requested = searchParams.get('from');
-  const normalizedRequested =
-    requested === '/dashboard' || requested === '/dashboard/' || requested?.startsWith('/dashboard/')
-      ? '/'
-      : requested;
-  const from = normalizedRequested && normalizedRequested.startsWith('/') && !normalizedRequested.startsWith('//') ? normalizedRequested : '/';
+  const requestedFrom = safeInternalPath(searchParams.get('from'));
+  const from =
+    requestedFrom === "/dashboard" ||
+    requestedFrom === "/dashboard/" ||
+    requestedFrom.startsWith("/dashboard/")
+      ? "/"
+      : requestedFrom;
+  const onboardingComplete = searchParams.get("onboarding") === "complete";
 
+  useEffect(() => {
+    if (authLoading) return;
+    if (isAuthenticated) {
+      router.replace(postLoginPath(user, from));
+      return;
+    }
+    if (!onboardingComplete && !isOnboardingComplete()) {
+      router.replace(`/onboarding/?from=${encodeURIComponent(from)}`);
+      return;
+    }
+  }, [authLoading, from, isAuthenticated, onboardingComplete, router, user]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -38,20 +64,20 @@ export default function LoginPage() {
     setError('');
     try {
       const user = await login(form.username, form.password);
-      if (user.is_staff) {
-        router.replace("/admin/dashboard");
-        return;
-      }
-      router.replace(
-        user.account_type === "TOUR_COMPANY" && from === "/"
-          ? "/tour-company/dashboard"
-          : from,
-      );
+      router.replace(postLoginPath(user, from));
     } catch (err: any) {
       setError(err.response?.data?.detail || err.response?.data?.message || 'Invalid username or password');
       setFieldErrors(err.fieldErrors || {});
     }
   };
+
+  if (
+    authLoading ||
+    isAuthenticated ||
+    (!onboardingComplete && !savedOnboardingComplete)
+  ) {
+    return <div className={styles.page} role="status" aria-live="polite">Preparing sign in…</div>;
+  }
 
   return (
     <div className={styles.page}>
