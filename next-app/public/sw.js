@@ -1,6 +1,6 @@
 ﻿/* Service worker for PWA installability and web push notifications. */
-const CACHE_NAME = "travel-pwa-v3";
-const PRECACHE_URLS = ["/", "/manifest.json", "/favicon.svg"];
+const CACHE_NAME = "travel-pwa-v4";
+const PRECACHE_URLS = ["/manifest.json", "/favicon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -22,15 +22,16 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  // Never cache API or auth-related requests.
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // Navigation requests: network first, no stale cache.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          return response;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match("/"))),
+      fetch(request).catch(() => caches.match("/")),
     );
     return;
   }
@@ -54,6 +55,7 @@ self.addEventListener("message", (event) => {
     self.skipWaiting();
   }
 });
+
 self.addEventListener("push", (event) => {
   let payload = { title: "Travel.", body: "You have a new notification.", url: "/" };
   try {
@@ -91,4 +93,3 @@ self.addEventListener("notificationclick", (event) => {
     }),
   );
 });
-
