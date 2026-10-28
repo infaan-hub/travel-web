@@ -1136,6 +1136,16 @@ export default function CompanyTripsPage() {
                             </span>
                           </a>
                         ) : null}
+                        {trip.origin_latitude != null && trip.origin_longitude != null && trip.destination_latitude != null && trip.destination_longitude != null ? (
+                          <span className={styles.tripsMetaItem}>
+                            <MapPin size={13} aria-hidden="true" />
+                            <span>
+                              {trip.origin_latitude.toFixed(5)}, {trip.origin_longitude.toFixed(5)} → {trip.destination_latitude.toFixed(5)}, {trip.destination_longitude.toFixed(5)}
+                              {trip.distance_km != null ? ` · ${trip.distance_km.toFixed(1)} km` : ""}
+                              {trip.duration_mins != null ? ` · ${trip.duration_mins} min` : ""}
+                            </span>
+                          </span>
+                        ) : null}
                         <span className={styles.tripsMetaItem}>
                           <CalendarDays size={13} aria-hidden="true" />
                           <span>{formatDate(trip.created_at, "Added")}</span>
