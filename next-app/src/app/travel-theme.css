@@ -5733,3 +5733,220 @@ html body .app-layout .main-content .page
   min-height: 0;
   aspect-ratio: 4 / 3;
 }
+
+/* ---------- Onboarding redesign (reference card) ---------- */
+.onboarding-topbar {
+  width: 100%;
+  max-width: 520px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.onboarding-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: min(100%, 340px);
+  aspect-ratio: 0.49;
+  max-height: calc(100dvh - 120px);
+  border-radius: 26px;
+  background: #e4ece9;
+  box-shadow: 0 12px 28px rgba(15, 40, 38, 0.16);
+}
+
+.onboarding-card-image,
+.onboarding-image-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.onboarding-card-image {
+  z-index: -2;
+  display: block;
+  object-fit: cover;
+  border: 0;
+}
+
+.onboarding-image-overlay {
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.02) 20%,
+    rgba(0, 35, 38, 0.08) 42%,
+    rgba(0, 35, 38, 0.42) 100%
+  );
+}
+
+.onboarding-card-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 29% 7% 8%;
+  position: relative;
+  z-index: 2;
+}
+
+.onboarding-copy {
+  color: #fff;
+  text-align: left;
+}
+
+.onboarding-copy h1 {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: clamp(27px, 5vw, 34px);
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: #fff;
+}
+
+.onboarding-copy h1 span {
+  display: block;
+}
+
+.onboarding-copy p {
+  max-width: 95%;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.onboarding-primary-button {
+  align-self: center;
+  flex-shrink: 0;
+  min-height: 48px;
+  width: min(100%, 220px);
+  padding: 0 28px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #16302e;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.onboarding-primary-button:hover {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+}
+
+.onboarding-primary-button:active {
+  transform: scale(0.97);
+}
+
+.onboarding-primary-button:focus-visible {
+  outline: 3px solid #08428C;
+  outline-offset: 3px;
+}
+
+.onboarding-progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  padding: 18px 0 4px;
+}
+
+.onboarding-progress-item {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #cbd5d1;
+  transition: width 180ms ease;
+}
+
+.onboarding-progress-item.is-active {
+  width: 24px;
+  background: #08428C;
+}
+
+.onboarding-skip {
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: #08428C;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.onboarding-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #ffffff;
+}
+
+.onboarding-back {
+  background: rgba(255, 255, 255, 0.72);
+  color: #08428C;
+  border: 1px solid rgba(8, 66, 140, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.onboarding-description {
+  /* already styled via .onboarding-copy p */
+}
+
+@media (min-width: 768px) {
+  .onboarding-card {
+    width: min(42vw, 360px);
+    aspect-ratio: 0.52;
+  }
+}
+
+@media (max-width: 360px) {
+  .onboarding-card {
+    width: min(100%, 300px);
+    aspect-ratio: 0.48;
+  }
+  .onboarding-card-content {
+    padding-top: 28%;
+  }
+  .onboarding-copy h1 {
+    font-size: 27px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-primary-button {
+    transition: none;
+  }
+  .onboarding-progress-item {
+    transition: none;
+  }
+}
+
+/* Override legacy onboarding background */
+.onboarding-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background: #ffffff !important;
+  color: #111111 !important;
+  overflow: hidden;
+}
