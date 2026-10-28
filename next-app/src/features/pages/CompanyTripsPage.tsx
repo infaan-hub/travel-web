@@ -461,9 +461,18 @@ export default function CompanyTripsPage() {
     setFormError(null);
 
     try {
+      const originLat = coordinateValue(form.origin_latitude);
+      const originLng = coordinateValue(form.origin_longitude);
+      const destLat = coordinateValue(form.destination_latitude);
+      const destLng = coordinateValue(form.destination_longitude);
+      const derivedPlace =
+        place.trim() ||
+        (originLat !== null && originLng !== null && destLat !== null && destLng !== null
+          ? `${originLat.toFixed(5)}, ${originLng.toFixed(5)} to ${destLat.toFixed(5)}, ${destLng.toFixed(5)}`
+          : "Route");
       const data = new FormData();
       data.append("title", title);
-      data.append("place", place);
+      data.append("place", derivedPlace);
       data.append("description", description);
       data.append("price", String(price));
       if (latitude !== null && longitude !== null) {
@@ -475,10 +484,6 @@ export default function CompanyTripsPage() {
         data.append("longitude", "");
       }
 
-      const originLat = coordinateValue(form.origin_latitude);
-      const originLng = coordinateValue(form.origin_longitude);
-      const destLat = coordinateValue(form.destination_latitude);
-      const destLng = coordinateValue(form.destination_longitude);
       if (originLat !== null && originLng !== null) {
         data.append("origin_latitude", String(originLat));
         data.append("origin_longitude", String(originLng));
@@ -694,24 +699,10 @@ export default function CompanyTripsPage() {
             </div>
 
             <div className={styles.tripsField}>
-              <label className={styles.tripsFieldLabel} htmlFor="trip-place">
-                Place{" "}
-                <span className={styles.tripsRequired} aria-hidden="true">
-                  *
-                </span>
-              </label>
-              <input
-                id="trip-place"
-                className={styles.tripsInput}
-                value={form.place}
-                onChange={(event) =>
-                  setForm({ ...form, place: event.target.value })
-                }
-                placeholder="e.g. Bali, Indonesia"
-                autoComplete="off"
-                maxLength={200}
-                required
-              />
+              <span className={styles.tripsFieldLabel}>Route</span>
+              <span className={styles.tripsHint}>
+                Pick the start point, then the destination on the map. The place name is generated from those points.
+              </span>
             </div>
 
             <div className={styles.tripsField}>
