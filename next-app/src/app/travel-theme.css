@@ -6084,6 +6084,12 @@ html body .app-layout .main-content .page
   color: #fff;
   text-align: left;
   margin-bottom: 0;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
 }
 
 .onboarding-copy h1 {
@@ -6215,4 +6221,16 @@ html body .app-layout .main-content .page
     display: none;
   }
 }
+
+
+
+.onboarding-copy {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
+}
+
 
