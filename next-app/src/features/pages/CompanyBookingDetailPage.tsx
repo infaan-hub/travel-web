@@ -159,7 +159,7 @@ export default function CompanyBookingDetailPage({
 
   if (loading) {
     return (
-      <div className={`page ${styles.pageStack}`}>
+      <div className={`page ${styles.pageStack} ${styles.bookingDetailTheme}`}>
         <div className={styles.loading} role="status">
           Loading company booking...
         </div>
@@ -169,7 +169,7 @@ export default function CompanyBookingDetailPage({
 
   if (!booking || error) {
     return (
-      <div className={`page ${styles.pageStack}`}>
+      <div className={`page ${styles.pageStack} ${styles.bookingDetailTheme}`}>
         <div className={styles.empty} role="alert">
           <span className={styles.emptyIcon}>
             <Building2 size={20} />
@@ -200,7 +200,7 @@ export default function CompanyBookingDetailPage({
     : [];
 
   return (
-    <div className={`page ${styles.pageStack}`}>
+    <div className={`page ${styles.pageStack} ${styles.bookingDetailTheme}`}>
       <div className={styles.pageHead}>
         <div className={styles.pageTitleWrap}>
           <Link className={styles.panelLink} href="/company/bookings/">

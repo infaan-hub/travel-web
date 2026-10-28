@@ -1,5 +1,57 @@
-/* Phase 6 company operations. Scoped to the company workspace and built on the
-   existing glass, typography, spacing and control tokens. */
+.bookingDetailTheme {
+  --aqua-strong: #08428C;
+  --aqua-subtle: rgba(8, 66, 140, 0.1);
+  --glass-bg: #D3D3D3;
+  --glass-bg-soft: #D3D3D3;
+  --glass-bg-elevated: #D3D3D3;
+  --glass-border: rgba(8, 66, 140, 0.22);
+  --glass-border-strong: rgba(8, 66, 140, 0.32);
+  --text-primary: #08428C;
+  --text-secondary: #2F2F2F;
+  --text-muted: #4A4A4A;
+  --text-light: #4A4A4A;
+  --line: rgba(8, 66, 140, 0.18);
+  --border: rgba(8, 66, 140, 0.18);
+}
+
+.bookingDetailTheme .glass-card,
+.bookingDetailTheme .panel {
+  background: #D3D3D3;
+  border: 1px solid rgba(8, 66, 140, 0.22);
+  border-radius: 18px;
+  box-shadow: 0 14px 32px rgba(8, 66, 140, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.bookingDetailTheme .panelHead,
+.bookingDetailTheme .hero,
+.bookingDetailTheme .detailGrid > *,
+.bookingDetailTheme .summaryGrid > * {
+  background: rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(8, 66, 140, 0.16);
+  border-radius: 14px;
+}
+
+.bookingDetailTheme .panelTitle,
+.bookingDetailTheme .pageTitle,
+.bookingDetailTheme .heroTitle,
+.bookingDetailTheme .factLabel {
+  color: #08428C;
+}
+
+.bookingDetailTheme .pageLead,
+.bookingDetailTheme .panelCopy,
+.bookingDetailTheme .factValue {
+  color: #2F2F2F;
+}
+
+.bookingDetailTheme .badgePending,
+.bookingDetailTheme .badgeConfirmed,
+.bookingDetailTheme .badgeCancelled {
+  background: rgba(8, 66, 140, 0.12);
+  color: #08428C;
+  border: 1px solid rgba(8, 66, 140, 0.24);
+}
+
 
 .shellHeader {
   max-width: var(--content-max-width);
