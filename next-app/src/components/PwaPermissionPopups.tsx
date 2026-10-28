@@ -1,16 +1,16 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { publicEnv } from "@/lib/env-public";
 import { usePwa } from "@/hooks/usePwa";
 import {
-  LOCATION_PERMISSION_KEY,
   NOTIFICATION_PERMISSION_KEY,
   NOTIFICATION_PROMPT_DISMISSED_KEY,
   readOnboardingValue,
   writeOnboardingValue,
 } from "@/lib/onboarding";
+import { Bell } from "lucide-react";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -20,10 +20,11 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   for (let i = 0; i < rawData.length; i += 1) outputArray[i] = rawData.charCodeAt(i);
   return outputArray;
 }
+
 export default function PwaPermissionPopups() {
   const { isStandalone } = usePwa();
   const { user, isAuthenticated } = useAuth();
-  const [current, setCurrent] = useState<"loc" | "notif" | null>(null);
+  const [current, setCurrent] = useState<"notif" | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [notificationPermission, setNotificationPermission] = useState<
@@ -67,67 +68,26 @@ export default function PwaPermissionPopups() {
   useEffect(() => {
     if (!isStandalone) return;
     const timer = window.setTimeout(() => {
-      const locStatus = readOnboardingValue("local", LOCATION_PERMISSION_KEY);
-      if (!locStatus) setCurrent("loc");
-      else tryShowNotifications();
-    }, 2400);
+      tryShowNotifications();
+    }, 1200);
     return () => window.clearTimeout(timer);
   }, [isStandalone, tryShowNotifications]);
 
-  const closeLocation = useCallback((next?: () => void) => {
-    setCurrent(null);
-    window.setTimeout(() => (next ? next() : tryShowNotifications()), 400);
-  }, [tryShowNotifications]);
-
-  const allowLocation = useCallback(() => {
-    if (!("geolocation" in navigator)) {
-      writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "unsupported");
-      closeLocation();
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      () => { writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "granted"); closeLocation(); },
-      (error) => {
-        writeOnboardingValue("local", LOCATION_PERMISSION_KEY, error.code === 1 ? "denied" : "unavailable");
-        closeLocation();
-      },
-    );
-  }, [closeLocation]);
-
-  const dismissLocation = useCallback(() => {
-    writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "dismissed");
-    closeLocation();
-  }, [closeLocation]);
-
   const enableNotifications = useCallback(async () => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
     setBusy(true);
     setMessage("");
     try {
-      if (!("Notification" in window)) {
-        setNotificationPermission("unsupported");
-        setMessage("This browser does not support push notifications.");
-        return;
-      }
       let permission = Notification.permission;
       if (permission === "default") permission = await Notification.requestPermission();
       setNotificationPermission(permission);
       writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, permission);
       if (permission !== "granted") {
-        setMessage(
-          permission === "denied"
-            ? "Notifications are blocked. You can enable them later in your browser or device settings."
-            : "Notifications were not enabled. You can try again later.",
-        );
-        return;
-      }
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        setNotificationPermission("unsupported");
-        setMessage("This browser does not support push subscriptions.");
+        setMessage(permission === "denied" ? "Notifications are blocked. You can enable them later." : "Notifications were not enabled.");
         return;
       }
       const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
       const keyResponse = await fetch("/api/push/key/");
-      if (!keyResponse.ok) throw new Error("We could not load notification setup. Please try again.");
       const keyPayload = (await keyResponse.json()) as { publicKey?: string };
       const publicKey = keyPayload.publicKey || publicEnv.vapidPublicKey;
       if (!publicKey) throw new Error("Push notifications are not configured yet.");
@@ -142,7 +102,7 @@ export default function PwaPermissionPopups() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(subscription.toJSON()),
       });
-      if (!response.ok) throw new Error("We could not enable notifications. Please try again.");
+      if (!response.ok) throw new Error("We could not enable notifications.");
       if (registeredKey) writeOnboardingValue("local", registeredKey, "true");
       writeOnboardingValue("local", NOTIFICATION_PROMPT_DISMISSED_KEY, "true");
       writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, "granted");
@@ -164,39 +124,23 @@ export default function PwaPermissionPopups() {
   return (
     <div className="pwa-permission-overlay" role="dialog" aria-modal="true">
       <div className="pwa-permission-card glass-card">
-        {current === "loc" ? (
-          <>
-            <div className="pwa-permission-icon" aria-hidden="true"><span>📍</span></div>
-            <h2 className="pwa-permission-title">Allow location access?</h2>
-            <p className="pwa-permission-text">
-              Travel. uses your current location to show nearby tours and better recommendations.
-            </p>
-            <div className="pwa-permission-actions">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={dismissLocation}>Not now</button>
-              <button type="button" className="btn btn-primary btn-sm" onClick={allowLocation}>Allow</button>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="pwa-permission-icon" aria-hidden="true"><span>🔔</span></div>
-            <h2 className="pwa-permission-title">
-              {notificationPermission === "granted" ? "Finish enabling notifications" : "Allow notifications?"}
-            </h2>
-            <p className="pwa-permission-text">Get instant booking updates, confirmations and status changes.</p>
-            {message ? <p className="pwa-permission-message">{message}</p> : null}
-            <div className="pwa-permission-actions">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={dismissNotifications} disabled={busy}>Later</button>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={notificationPermission === "denied" || notificationPermission === "unsupported" ? dismissNotifications : enableNotifications}
-                disabled={busy}
-              >
-                {busy ? "Enabling..." : notificationPermission === "denied" || notificationPermission === "unsupported" ? "Continue" : notificationPermission === "granted" ? "Finish setup" : "Allow"}
-              </button>
-            </div>
-          </>
-        )}
+        <div className="pwa-permission-icon" aria-hidden="true"><Bell size={24} /></div>
+        <h2 className="pwa-permission-title">
+          {notificationPermission === "granted" ? "Finish enabling notifications" : "Allow notifications?"}
+        </h2>
+        <p className="pwa-permission-text">Get instant booking updates, confirmations and status changes.</p>
+        {message ? <p className="pwa-permission-message">{message}</p> : null}
+        <div className="pwa-permission-actions">
+          <button type="button" className="btn btn-ghost btn-sm" onClick={dismissNotifications} disabled={busy}>Later</button>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={notificationPermission === "denied" || notificationPermission === "unsupported" ? dismissNotifications : enableNotifications}
+            disabled={busy}
+          >
+            {busy ? "Enabling..." : notificationPermission === "denied" || notificationPermission === "unsupported" ? "Continue" : notificationPermission === "granted" ? "Finish setup" : "Allow"}
+          </button>
+        </div>
       </div>
     </div>
   );

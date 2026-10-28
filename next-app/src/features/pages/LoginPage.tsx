@@ -1,10 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { usePwa } from '@/hooks/usePwa';
+import { MapPin } from 'lucide-react';
+import { LOCATION_PERMISSION_KEY, readOnboardingValue, writeOnboardingValue } from '@/lib/onboarding';
 import { AlertCircle, ArrowRight, CheckCircle, Palmtree, Compass, Map, Star, Sparkles } from '@/components/icons';
 import styles from './auth-page.module.css';
 import type { ChangeEvent, FormEvent } from "react";
@@ -19,6 +22,7 @@ const onboardingServerSnapshot = () => false;
 
 export default function LoginPage() {
   const router = useRouter();
+  const { isStandalone } = usePwa();
   const searchParams = useSearchParams();
   const { login, user, isAuthenticated, loading: authLoading } = useAuth();
   const [form, setForm] = useState<{ username: string; password: string }>({ username: '', password: '' });
@@ -35,6 +39,8 @@ export default function LoginPage() {
   });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [locState, setLocState] = useState(() => (typeof window === "undefined" ? "default" : readOnboardingValue("local", LOCATION_PERMISSION_KEY) || "default"));
+  const [locBusy, setLocBusy] = useState(false);
   const registered = searchParams.get('registered');
   const requestedFrom = safeInternalPath(searchParams.get('from'));
   const from =
@@ -71,18 +77,51 @@ export default function LoginPage() {
     }
   };
 
+  const allowLocation = () => {
+    if (typeof window === "undefined" || !("geolocation" in navigator)) {
+      writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "unsupported");
+      setLocState("unsupported");
+      return;
+    }
+    setLocBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      () => { writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "granted"); setLocState("granted"); setLocBusy(false); },
+      (error) => { const value = error.code === 1 ? "denied" : "unavailable"; writeOnboardingValue("local", LOCATION_PERMISSION_KEY, value); setLocState(value); setLocBusy(false); },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+    );
+  };
+  const dismissLocation = () => {
+    writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "dismissed");
+    setLocState("dismissed");
+  };
   if (
     authLoading ||
     isAuthenticated ||
     (!onboardingComplete && !savedOnboardingComplete)
   ) {
-    return <div className={styles.page} role="status" aria-live="polite">Preparing sign in…</div>;
+    return <div className={styles.page} role="status" aria-live="polite">Preparing sign inâ€¦</div>;
   }
 
   return (
     <div className={styles.page}>
       <div className={styles.shell}>
-        <div className={styles.formCard}>
+              {isStandalone && (locState === "default") ? (
+        <div style={{ background: "linear-gradient(135deg, #08428C, #0a5a9e)", borderRadius: 20, padding: 20, color: "#fff", marginBottom: 16, boxShadow: "0 10px 30px rgba(8,66,140,0.25)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <MapPin size={22} />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Allow location access?</h3>
+              <p style={{ margin: "4px 0 0", fontSize: 13, opacity: 0.9 }}>Travel. uses your location to show nearby tours and better recommendations.</p>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button type="button" onClick={dismissLocation} style={{ background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 999, padding: "8px 16px", fontWeight: 600, cursor: "pointer" }}>Not now</button>
+            <button type="button" onClick={allowLocation} disabled={locBusy} style={{ background: "#fff", color: "#08428C", border: 0, borderRadius: 999, padding: "8px 18px", fontWeight: 700, cursor: "pointer" }}>{locBusy ? "Requesting..." : "Allow"}</button>
+          </div>
+        </div>
+      ) : null}      <div className={styles.formCard}>
           <div className={styles.brandRow}>
             <Link href="/" className={styles.brand}>
               <Image src="/travel.logo.jpeg" alt="Travel." width={120} height={42} style={{ height: 30, width: "auto", objectFit: "contain" }} />
@@ -186,7 +225,7 @@ export default function LoginPage() {
         <div className={styles.banner}>
           <div className={styles.bannerTop}>
             <span className={styles.bannerBadge}><Sparkles size={14} /> Handpicked travel</span>
-            <span className={styles.bannerMeta}>Zanzibar · TZ</span>
+            <span className={styles.bannerMeta}>Zanzibar Â· TZ</span>
           </div>
           <div className={styles.bannerBody}>
             <span className={styles.bannerLabel}>A marketplace for meaningful travel</span>
@@ -204,3 +243,6 @@ export default function LoginPage() {
     </div>
   );
 }
+
+
+
