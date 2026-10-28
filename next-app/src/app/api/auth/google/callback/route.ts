@@ -48,7 +48,12 @@ export async function GET(request: NextRequest) {
     const url = new URL("/verify-email/", request.url);
     url.searchParams.set("from", from);
     return NextResponse.redirect(url);
-  } catch {
-    return loginErrorRedirect(request, "google_sign_in_failed");
+  } catch (error) {
+    console.error("google callback failed", error);
+    const message = error instanceof Error ? error.message : String(error);
+    const reason = /verification email|SMTP|email delivery/i.test(message)
+      ? "google_email_failed"
+      : "google_sign_in_failed";
+    return loginErrorRedirect(request, reason);
   }
 }
