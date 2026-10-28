@@ -6001,3 +6001,208 @@ html body .app-layout .main-content .page
     padding: 32% 7% 10%;
   }
 }
+
+/* ---------- Full-screen mobile onboarding override ---------- */
+.onboarding-screen {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 0 !important;
+  margin: 0;
+  background: #08428C !important;
+  display: block !important;
+}
+
+.onboarding-card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #08428C;
+}
+
+.onboarding-card-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.onboarding-image-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.02) 28%,
+    rgba(0, 30, 35, 0.12) 55%,
+    rgba(0, 25, 30, 0.48) 100%
+  );
+}
+
+.onboarding-topbar {
+  position: absolute;
+  z-index: 5;
+  top: max(12px, env(safe-area-inset-top));
+  left: 20px;
+  right: 20px;
+  width: auto;
+  max-width: none !important;
+  min-height: 44px;
+}
+
+.onboarding-card-content {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding:
+    max(100px, calc(env(safe-area-inset-top) + 90px))
+    24px
+    max(72px, calc(env(safe-area-inset-bottom) + 60px));
+}
+
+.onboarding-copy {
+  max-width: 440px;
+  color: #fff;
+  text-align: left;
+  margin-bottom: 0;
+}
+
+.onboarding-copy h1 {
+  margin: 0;
+  font-size: clamp(34px, 9vw, 48px);
+  font-weight: 750;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: #fff;
+}
+
+.onboarding-copy p {
+  max-width: 330px;
+  margin-top: 14px;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.onboarding-primary-button {
+  align-self: center;
+  width: min(100%, 280px);
+  min-height: 52px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.92);
+  color: #16302e;
+  backdrop-filter: blur(16px) saturate(145%);
+  -webkit-backdrop-filter: blur(16px) saturate(145%);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.onboarding-back-button {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
+  padding: 8px 12px;
+}
+
+.onboarding-skip {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
+  padding: 8px 12px;
+}
+
+.onboarding-progress {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  pointer-events: none;
+}
+
+.onboarding-progress-item {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.onboarding-progress-item.is-active {
+  background: #08428C;
+}
+
+/* Desktop: restore centered portrait card */
+@media (min-width: 1024px) {
+  .onboarding-screen {
+    padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)) !important;
+    background: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .onboarding-card {
+    position: relative !important;
+    inset: auto !important;
+    width: min(42vw, 360px) !important;
+    height: auto !important;
+    max-height: calc(100dvh - 120px) !important;
+    aspect-ratio: 0.52 !important;
+    border-radius: 26px !important;
+    box-shadow: 0 12px 28px rgba(15, 40, 38, 0.16) !important;
+    background: #e4ece9 !important;
+  }
+  .onboarding-card-content {
+    position: absolute;
+    inset: 0;
+    padding: 29% 7% 8%;
+  }
+  .onboarding-copy h1 {
+    font-size: clamp(27px, 5vw, 34px);
+    line-height: 1.08;
+  }
+  .onboarding-copy p {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .onboarding-primary-button {
+    width: min(100%, 220px);
+    min-height: 48px;
+  }
+  .onboarding-progress {
+    position: static !important;
+    margin-top: 18px;
+    pointer-events: auto;
+  }
+  .onboarding-topbar {
+    position: static !important;
+    margin-bottom: 10px;
+  }
+  .onboarding-back-button,
+  .onboarding-skip {
+    color: #08428C;
+    background: transparent;
+  }
+}
