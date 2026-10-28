@@ -813,7 +813,7 @@ export default function CompanyProfilePage() {
                 </div>
 
                 <div
-                  className={`${styles.profileField} ${styles.profileFieldFull} ${styles.profileMapField}`}
+                  className={`${styles.profileField} ${styles.profileFieldFull} ${styles.profileMapField} ${styles.profileMapNoRoute}`}
                 >
                   <span className={styles.profileMapLabel}>Location map</span>
                   <TripPlaceMapPicker
@@ -825,6 +825,8 @@ export default function CompanyProfilePage() {
                         current
                           ? {
                               ...current,
+                              address: place.name,
+                              locality: place.area,
                               latitude: String(place.latitude),
                               longitude: String(place.longitude),
                             }

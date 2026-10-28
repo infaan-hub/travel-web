@@ -1,3 +1,7 @@
+.profileMapNoRoute [title="Measure a road route between two points"] {
+  display: none !important;
+}
+
 .bookingDetailTheme {
   --aqua-strong: #08428C;
   --aqua-subtle: rgba(8, 66, 140, 0.1);
