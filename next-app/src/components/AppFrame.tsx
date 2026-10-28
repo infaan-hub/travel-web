@@ -19,11 +19,11 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
-  const { isAppLike } = usePwa();
+  const { isStandalone, isAppLike } = usePwa();
   const isBare = pathname === "/onboarding" || pathname === "/onboarding/";
 
   useEffect(() => {
-    if (pathname !== "/" || loading || isAuthenticated || isOnboardingComplete() || !isAppLike) return;
+    if (pathname !== "/" || loading || isAuthenticated || isOnboardingComplete() || !isStandalone) return;
     router.replace("/onboarding/?from=%2F");
   }, [isAuthenticated, loading, pathname, router]);
 
@@ -47,4 +47,5 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
 
