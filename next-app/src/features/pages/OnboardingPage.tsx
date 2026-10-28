@@ -163,17 +163,18 @@ export function OnboardingFlow() {
   const { user, isAuthenticated, loading } = useAuth();
   const reduceMotion = useReducedMotion();
 
-  const [step, setStep] = useState<Step>(() => {
-    if (typeof window === "undefined") return "slide1";
+  const [step, setStep] = useState<Step>("slide1");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     const stored = window.sessionStorage.getItem(ONBOARDING_STEP_KEY) as Step | null;
-    return stored && ["slide1", "slide2", "notif"].includes(stored)
-      ? (stored as Step)
-      : "slide1";
-  });
+    if (stored && ["slide1", "slide2", "notif"].includes(stored)) setStep(stored as Step);
+  }, []);
 
-  const [notifState, setNotifState] = useState<string>(() =>
-    typeof window === "undefined" ? "default" : readOnboardingValue("local", NOTIFICATION_PERMISSION_KEY) || "default",
-  );
+  const [notifState, setNotifState] = useState<string>("default");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setNotifState(readOnboardingValue("local", NOTIFICATION_PERMISSION_KEY) || "default");
+  }, []);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -347,6 +348,7 @@ export function OnboardingFlow() {
     </AnimatePresence>
   );
 }
+
 
 
 
