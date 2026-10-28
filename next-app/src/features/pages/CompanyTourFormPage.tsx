@@ -396,7 +396,7 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
   );
 
   return (
-    <div className={`page ${styles.pageStack}`}>
+    <div className={`page ${styles.pageStack} ${styles.bookingDetailTheme}`}>
       <div className={styles.pageHead}>
         <div className={styles.pageTitleWrap}>
           <Link className={styles.panelLink} href="/company/tours/">
