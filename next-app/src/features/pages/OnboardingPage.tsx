@@ -77,6 +77,7 @@ type OnboardingCardProps = {
   showBack?: boolean;
   showProgress?: boolean;
   showSkip?: boolean;
+  mobileHideCopy?: boolean;
   children?: React.ReactNode;
 };
 
@@ -90,6 +91,7 @@ function OnboardingCard({
   showBack = false,
   showProgress = true,
   showSkip = true,
+  mobileHideCopy = false,
   children,
 }: OnboardingCardProps) {
   return (
@@ -114,7 +116,7 @@ function OnboardingCard({
         )}
       </div>
 
-      <article className="onboarding-card" aria-label={slide.heading.join(" ")}>
+      <article className={`onboarding-card${mobileHideCopy ? " onboarding-no-copy-mobile" : ""}`} aria-label={slide.heading.join(" ")}> 
         <img
           className="onboarding-card-image"
           src={slide.image}
@@ -322,7 +324,7 @@ export function OnboardingFlow() {
     ? { duration: 0 }
     : { duration: 0.24, ease: [0.22, 1, 0.36, 1] as any };
 
-  const renderSlide = (s: Slide, idx: number, onContinue: () => void) => (
+  const renderSlide = (s: Slide, idx: number, onContinue: () => void, mobileHideCopy = false) => (
     <motion.div
       key={s.id}
       initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
@@ -339,6 +341,7 @@ export function OnboardingFlow() {
         onSkip={skipIntro}
         onBack={goBack}
         showBack={idx > 0}
+        mobileHideCopy={mobileHideCopy}
       />
     </motion.div>
   );
@@ -367,7 +370,7 @@ export function OnboardingFlow() {
     <AnimatePresence mode="wait">
       {step === "slide1" && renderSlide(slides[0], 0, () => setStep("slide2"))}
       {step === "slide2" && renderSlide(slides[1], 1, () => setStep("slide3"))}
-      {step === "slide3" && renderSlide(slides[2], 2, () => setStep("notif"))}
+      {step === "slide3" && renderSlide(slides[2], 2, () => setStep("notif"), true)}
 
       {step === "notif" && (
         <motion.div
@@ -439,6 +442,10 @@ export function OnboardingFlow() {
     </AnimatePresence>
   );
 }
+
+
+
+
 
 
 

@@ -6206,3 +6206,9 @@ html body .app-layout .main-content .page
     background: transparent;
   }
 }
+
+@media (max-width: 767px) {
+  .onboarding-card.onboarding-no-copy-mobile .onboarding-copy {
+    display: none;
+  }
+}
