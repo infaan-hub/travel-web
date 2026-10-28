@@ -32,9 +32,19 @@ import {
 import { useToast } from "@/components/ToastProvider";
 import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
 import { companyAPI, routeAPI } from "@/lib/api/client";
-import { findTripPlace, type TripPlace } from "@/lib/trips";
+import { findTripPlace, type TripPlace, ZANZIBAR_TRIP_PLACES } from "@/lib/trips";
 import { isInZanzibar } from "@/lib/zanzibar";
 import styles from "@/features/pages/company-trips.module.css";
+
+function placeNameForCoords(lat: string, lng: string) {
+  const la = Number(lat);
+  const lo = Number(lng);
+  if (!Number.isFinite(la) || !Number.isFinite(lo)) return null;
+  const match = ZANZIBAR_TRIP_PLACES.find(
+    (place) => Math.abs(place.latitude - la) < 0.0005 && Math.abs(place.longitude - lo) < 0.0005,
+  );
+  return match ? match.name : null;
+}
 
 const PAGE_SIZE = 12;
 
@@ -749,7 +759,7 @@ export default function CompanyTripsPage() {
                   <span className={styles.tripsRouteLabel}>Start</span>
                   <span className={styles.tripsRouteValue}>
                     {form.origin_latitude && form.origin_longitude
-                      ? `${form.origin_latitude}, ${form.origin_longitude}`
+                      ? placeNameForCoords(form.origin_latitude, form.origin_longitude) || `${form.origin_latitude}, ${form.origin_longitude}`
                       : "Pick start point on map"}
                   </span>
                 </div>
@@ -757,7 +767,7 @@ export default function CompanyTripsPage() {
                   <span className={styles.tripsRouteLabel}>Destination</span>
                   <span className={styles.tripsRouteValue}>
                     {form.destination_latitude && form.destination_longitude
-                      ? `${form.destination_latitude}, ${form.destination_longitude}`
+                      ? placeNameForCoords(form.destination_latitude, form.destination_longitude) || `${form.destination_latitude}, ${form.destination_longitude}`
                       : "Pick destination on map"}
                   </span>
                 </div>
