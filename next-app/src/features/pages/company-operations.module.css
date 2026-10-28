@@ -1,3 +1,7 @@
+.tourMapNoRoute [title="Measure a road route between two points"] {
+  display: none !important;
+}
+
 .profileMapNoRoute [title="Measure a road route between two points"] {
   display: none !important;
 }
