@@ -31,7 +31,7 @@ import {
 } from "@/components/icons";
 import { useToast } from "@/components/ToastProvider";
 import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
-import { companyAPI } from "@/lib/api/client";
+import { companyAPI, routeAPI } from "@/lib/api/client";
 import { findTripPlace, type TripPlace } from "@/lib/trips";
 import { isInZanzibar } from "@/lib/zanzibar";
 import styles from "@/features/pages/company-trips.module.css";
@@ -214,6 +214,7 @@ export default function CompanyTripsPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [routeLoading, setRouteLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const composerRef = useRef<HTMLElement | null>(null);
@@ -380,6 +381,36 @@ export default function CompanyTripsPage() {
     });
     setFormError(null);
   }, []);
+  const createRoute = useCallback(async () => {
+    const originLat = coordinateValue(form.origin_latitude);
+    const originLng = coordinateValue(form.origin_longitude);
+    const destLat = coordinateValue(form.destination_latitude);
+    const destLng = coordinateValue(form.destination_longitude);
+    if (originLat === null || originLng === null || destLat === null || destLng === null) {
+      setFormError("Pick both a start point and a destination on the map first.");
+      return;
+    }
+    setRouteLoading(true);
+    setFormError(null);
+    try {
+      const res = await routeAPI.calculate({
+        origin_lat: originLat,
+        origin_lng: originLng,
+        destination_lat: destLat,
+        destination_lng: destLng,
+      });
+      const data = res.data ?? {};
+      setForm((current) => ({
+        ...current,
+        distance_km: data.distance_km != null ? String(data.distance_km) : current.distance_km,
+        duration_mins: data.estimated_time_mins != null ? String(data.estimated_time_mins) : current.duration_mins,
+      }));
+    } catch (err: any) {
+      setFormError(err?.response?.data?.message || "Could not calculate the route.");
+    } finally {
+      setRouteLoading(false);
+    }
+  }, [form.origin_latitude, form.origin_longitude, form.destination_latitude, form.destination_longitude]);
 
   const clearTripPoint = useCallback(() => {
     setForm((current) => ({
@@ -700,9 +731,39 @@ export default function CompanyTripsPage() {
 
             <div className={styles.tripsField}>
               <span className={styles.tripsFieldLabel}>Route</span>
-              <span className={styles.tripsHint}>
-                Pick the start point, then the destination on the map. The place name is generated from those points.
-              </span>
+              <div className={styles.tripsRouteGrid}>
+                <div className={styles.tripsRoutePoint}>
+                  <span className={styles.tripsRouteLabel}>Start</span>
+                  <span className={styles.tripsRouteValue}>
+                    {form.origin_latitude && form.origin_longitude
+                      ? `${form.origin_latitude}, ${form.origin_longitude}`
+                      : "Pick start point on map"}
+                  </span>
+                </div>
+                <div className={styles.tripsRoutePoint}>
+                  <span className={styles.tripsRouteLabel}>Destination</span>
+                  <span className={styles.tripsRouteValue}>
+                    {form.destination_latitude && form.destination_longitude
+                      ? `${form.destination_latitude}, ${form.destination_longitude}`
+                      : "Pick destination on map"}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => void createRoute()}
+                disabled={routeLoading || !form.origin_latitude || !form.destination_latitude}
+              >
+                {routeLoading ? "Calculating…" : "Create route"}
+              </button>
+              {form.distance_km || form.duration_mins ? (
+                <span className={styles.tripsHint}>
+                  Route: {form.distance_km ? `${form.distance_km} km` : ""}
+                  {form.distance_km && form.duration_mins ? " · " : ""}
+                  {form.duration_mins ? `${form.duration_mins} min` : ""}
+                </span>
+              ) : null}
             </div>
 
             <div className={styles.tripsField}>
