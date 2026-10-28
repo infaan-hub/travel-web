@@ -1,5 +1,5 @@
 ﻿/* Service worker for PWA installability and web push notifications. */
-const CACHE_NAME = "travel-pwa-v4";
+const CACHE_NAME = "travel-pwa-v5";
 const PRECACHE_URLS = ["/manifest.json", "/favicon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -24,14 +24,14 @@ self.addEventListener("fetch", (event) => {
 
   // Never cache API or auth-related requests.
   if (url.pathname.startsWith("/api/")) {
-    event.respondWith(fetch(request));
+    event.respondWith(fetch(request).catch(() => new Response(JSON.stringify({ detail: "Network error" }), { status: 503, headers: { "Content-Type": "application/json" } })));
     return;
   }
 
   // Navigation requests: network first, no stale cache.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(() => caches.match("/")),
+      fetch(request).catch(() => caches.match("/").then((cached) => cached || new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain" } }))),
     );
     return;
   }
@@ -45,7 +45,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
         }
         return response;
-      });
+      }).catch(() => new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain" } }));
     }),
   );
 });
@@ -93,3 +93,5 @@ self.addEventListener("notificationclick", (event) => {
     }),
   );
 });
+
+
