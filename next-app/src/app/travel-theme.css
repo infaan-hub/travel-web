@@ -6199,6 +6199,9 @@ html body .app-layout .main-content .page
   .onboarding-topbar {
     position: static !important;
     margin-bottom: 10px;
+    width: min(42vw, 360px);
+    max-width: 360px;
+    align-self: center;
   }
   .onboarding-back-button,
   .onboarding-skip {
@@ -6212,3 +6215,4 @@ html body .app-layout .main-content .page
     display: none;
   }
 }
+
