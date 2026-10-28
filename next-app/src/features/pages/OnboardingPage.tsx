@@ -1,563 +1,154 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { MapPin, MessageSquare } from "@/components/icons";
-import {
-  LOCATION_PERMISSION_KEY,
-  NOTIFICATION_PERMISSION_KEY,
-  NOTIFICATION_PROMPT_DISMISSED_KEY,
-  ONBOARDING_STEP_KEY,
-  isOnboardingComplete,
-  loginPath,
-  markOnboardingComplete,
-  postLoginPath,
-  readOnboardingValue,
-  removeOnboardingValue,
-  safeInternalPath,
-  writeOnboardingValue,
-} from "@/lib/onboarding";
+import { MessageSquare, MapPin } from "@/components/icons";
+
+const ONBOARDING_KEY = "travel_onboarding_seen";
+const STEP_KEY = "travel_onboarding_step";
+const NOTIF_KEY = "travel_notification_permission";
+const LOC_KEY = "travel_location_permission";
 
 type Step = "slide1" | "slide2" | "slide3" | "notif" | "location";
-type NotificationState =
-  | NotificationPermission
-  | "unsupported"
-  | "unavailable"
-  | "dismissed";
-type LocationState =
-  | "default"
-  | "granted"
-  | "denied"
-  | "unavailable"
-  | "timeout"
-  | "unsupported"
-  | "dismissed";
 
-const STEPS: Step[] = ["slide1", "slide2", "slide3", "notif", "location"];
-
-const SLIDE_META = {
-  slide1: {
-    title: "Discover Your Next Adventure",
-    description:
-      "Explore tours, safaris, destinations, and unforgettable experiences offered by different tourism companies.",
-  },
-  slide2: {
-    title: "Your Journey Starts Here",
-    description:
-      "Find an experience that suits you, explore its details, and send a booking request directly through Travel.",
-  },
-  slide3: {
-    title: "Stay Updated and Discover Nearby",
-    description:
-      "Receive relevant updates about your booking requests and, when you choose to share your location, discover tourism experiences and services near you.",
-  },
-} as const;
-
-function storedStep(): Step {
-  const value = readOnboardingValue("session", ONBOARDING_STEP_KEY);
-  return value && STEPS.includes(value as Step) ? (value as Step) : "slide1";
+function safeInternalPath(value: string | null): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
+  return value;
 }
-
-function storedNotificationState(): NotificationState {
-  const value = readOnboardingValue("local", NOTIFICATION_PERMISSION_KEY);
-  if (
-    value === "granted" ||
-    value === "denied" ||
-    value === "default" ||
-    value === "unsupported" ||
-    value === "unavailable" ||
-    value === "dismissed"
-  ) {
-    return value;
-  }
-  return "default";
+function homeForUser(user: { is_staff: boolean; account_type: string } | null, from: string): string {
+  if (!user) return from || "/";
+  if (user.is_staff) return "/admin/dashboard";
+  if (user.account_type === "TOUR_COMPANY" && from === "/") return "/tour-company/dashboard";
+  return from || "/";
 }
-
-function storedLocationState(): LocationState {
-  const value = readOnboardingValue("local", LOCATION_PERMISSION_KEY);
-  if (
-    value === "granted" ||
-    value === "denied" ||
-    value === "unavailable" ||
-    value === "timeout" ||
-    value === "unsupported" ||
-    value === "dismissed"
-  ) {
-    return value;
-  }
-  return "default";
+function Title({ text }: { text: string }) {
+  return <>{text.split("\n").map((line, index) => (<span key={`${line}-${index}`}>{index > 0 && <br />}{line}</span>))}</>;
 }
-
-function currentFromPath(): string {
-  if (typeof window === "undefined") return "/";
-  return safeInternalPath(new URLSearchParams(window.location.search).get("from"));
-}
-
-function notificationSupported(): boolean {
+function Card({ image, title, description, children, buttonLabel, onContinue }: { image: string; title: string; description: string; children?: React.ReactNode; buttonLabel: string; onContinue: () => void; }) {
   return (
-    typeof window !== "undefined" &&
-    "Notification" in window &&
-    "serviceWorker" in navigator &&
-    "PushManager" in window
+    <main className="onboarding-screen">
+      <section className="onboarding-card" aria-label={title.replace(/\n/g, " ")}>
+        <img className="onboarding-image" src={image} alt="" />
+        <div className="onboarding-image-overlay" aria-hidden="true" />
+        <div className="onboarding-progress-dots" aria-hidden="true"><span className="active" /><span /><span /></div>
+        <div className="onboarding-content">
+          <h1 className="onboarding-title"><Title text={title} /></h1>
+          <p className="onboarding-description">{description}</p>
+          {children}
+        </div>
+        <button type="button" className="onboarding-primary-button" onClick={onContinue}>{buttonLabel}</button>
+      </section>
+    </main>
   );
 }
 
 export function OnboardingFlow() {
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuth();
-  const [step, setStep] = useState<Step>(storedStep);
-  const [notificationState, setNotificationState] =
-    useState<NotificationState>(storedNotificationState);
-  const [locationState, setLocationState] =
-    useState<LocationState>(storedLocationState);
+  const [step, setStep] = useState<Step>(() => {
+    if (typeof window === "undefined") return "slide1";
+    const stored = window.sessionStorage.getItem(STEP_KEY) as Step | null;
+    return stored && ["slide1", "slide2", "slide3", "notif", "location"].includes(stored) ? stored : "slide1";
+  });
+  const [notifState, setNotifState] = useState<string>(() => typeof window === "undefined" ? "default" : (window.localStorage.getItem(NOTIF_KEY) || "default"));
+  const [locState, setLocState] = useState<string>(() => typeof window === "undefined" ? "default" : (window.localStorage.getItem(LOC_KEY) || "default"));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-  const fromPath = currentFromPath();
+  const fromPath = safeInternalPath(typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("from"));
 
-  const completeOnboarding = useCallback(() => {
-    markOnboardingComplete();
-    router.replace(loginPath(fromPath));
-  }, [fromPath, router]);
-
-  useEffect(() => {
-    if (loading) return;
-    if (isAuthenticated) {
-      router.replace(postLoginPath(user, fromPath));
-      return;
-    }
-    if (isOnboardingComplete()) router.replace(loginPath(fromPath));
-  }, [fromPath, isAuthenticated, loading, router, user]);
-
-  useEffect(() => {
-    writeOnboardingValue("session", ONBOARDING_STEP_KEY, step);
-  }, [step]);
-
+  useEffect(() => { if (loading) return; if (isAuthenticated) router.replace(homeForUser(user, fromPath)); }, [loading, isAuthenticated, user, fromPath, router]);
+  useEffect(() => { if (loading || isAuthenticated) return; if (typeof window === "undefined") return; if (window.localStorage.getItem(ONBOARDING_KEY) === "true") router.replace("/login/"); }, [loading, isAuthenticated, router]);
+  useEffect(() => { if (typeof window === "undefined") return; window.sessionStorage.setItem(STEP_KEY, step); }, [step]);
   useEffect(() => {
     if (step !== "notif" || typeof window === "undefined") return;
-    let active = true;
-    queueMicrotask(() => {
-      if (!active) return;
-      if (!notificationSupported()) {
-        setNotificationState("unsupported");
-        writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, "unsupported");
-        return;
-      }
-
-      const permission = Notification.permission;
-      setNotificationState(permission);
-      writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, permission);
-      if (permission === "granted") setStep("location");
-    });
-    return () => {
-      active = false;
-    };
+    if (!("Notification" in window)) { const t = setTimeout(() => setNotifState("unsupported"), 0); return () => clearTimeout(t); }
+    if (Notification.permission === "granted") { const t = setTimeout(() => { setNotifState("granted"); setStep("location"); }, 0); return () => clearTimeout(t); }
   }, [step]);
-
   useEffect(() => {
     if (step !== "location" || typeof window === "undefined") return;
-    let active = true;
-    if (!("geolocation" in navigator)) {
-      queueMicrotask(() => {
-        if (!active) return;
-        setLocationState("unsupported");
-        writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "unsupported");
-      });
-      return () => {
-        active = false;
-      };
-    }
+    if (!("geolocation" in navigator)) { const t = setTimeout(() => setLocState("unsupported"), 0); return () => clearTimeout(t); }
+  }, [step]);
 
-    const stored = readOnboardingValue("local", LOCATION_PERMISSION_KEY);
-    if (!("permissions" in navigator)) {
-      if (stored === "granted") {
-        completeOnboarding();
-      }
-      return () => {
-        active = false;
-      };
-    }
-
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((permission) => {
-        if (!active) return;
-        if (permission.state === "granted") {
-          setLocationState("granted");
-          writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "granted");
-          completeOnboarding();
-        } else if (permission.state === "denied") {
-          setLocationState("denied");
-          writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "denied");
-        } else {
-          setLocationState("default");
-        }
-      })
-      .catch((error: unknown) => {
-        console.warn("Travel. could not check location permission status.", error);
-        if (active && stored === "granted") {
-          setLocationState("granted");
-          completeOnboarding();
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [completeOnboarding, step]);
-
-  const skipIntroduction = useCallback(() => {
-    setStep("notif");
-  }, []);
+  const completeOnboarding = useCallback(() => { if (typeof window !== "undefined") { window.localStorage.setItem(ONBOARDING_KEY, "true"); window.sessionStorage.removeItem(STEP_KEY); } router.replace("/login/"); }, [router]);
+  const skipIntro = useCallback(() => { if (typeof window !== "undefined") { window.localStorage.setItem(ONBOARDING_KEY, "true"); window.sessionStorage.removeItem(STEP_KEY); } router.replace("/"); }, [router]);
 
   const allowNotifications = useCallback(async () => {
-    if (!notificationSupported()) {
-      setNotificationState("unsupported");
-      writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, "unsupported");
-      return;
-    }
-    if (Notification.permission === "denied") {
-      setNotificationState("denied");
-      writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, "denied");
-      return;
-    }
-    if (Notification.permission === "granted") {
-      setNotificationState("granted");
-      writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, "granted");
-      setStep("location");
-      return;
-    }
-
-    setBusy(true);
-    setMessage("");
-    try {
-      const permission = await Notification.requestPermission();
-      setNotificationState(permission);
-      writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, permission);
-      if (permission === "granted") {
-        setStep("location");
-      } else if (permission === "denied") {
-        setMessage("You can enable notifications later in your browser or device settings.");
-      } else {
-        setStep("location");
-      }
-    } catch (error) {
-      console.error("Travel. could not request notification permission.", error);
-      setNotificationState("unavailable");
-      setMessage("We could not request notification permission. You can try again or continue.");
-    } finally {
-      setBusy(false);
-    }
+    if (typeof window === "undefined" || !("Notification" in window)) { setNotifState("unsupported"); setStep("location"); return; }
+    setBusy(true); setMessage("");
+    try { const permission = await Notification.requestPermission(); setNotifState(permission); window.localStorage.setItem(NOTIF_KEY, permission); }
+    catch { setNotifState("denied"); window.localStorage.setItem(NOTIF_KEY, "denied"); }
+    finally { setBusy(false); setStep("location"); }
   }, []);
-
-  const notNowNotifications = useCallback(() => {
-    setNotificationState("dismissed");
-    writeOnboardingValue("local", NOTIFICATION_PERMISSION_KEY, "dismissed");
-    writeOnboardingValue("local", NOTIFICATION_PROMPT_DISMISSED_KEY, "true");
-    setStep("location");
-  }, []);
-
+  const notNowNotifications = useCallback(() => { if (typeof window !== "undefined") window.localStorage.setItem(NOTIF_KEY, "dismissed"); setNotifState("dismissed"); setStep("location"); }, []);
   const allowLocation = useCallback(() => {
-    if (!("geolocation" in navigator)) {
-      setLocationState("unsupported");
-      writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "unsupported");
-      return;
-    }
-
-    setBusy(true);
-    setMessage("");
+    if (typeof window === "undefined" || !("geolocation" in navigator)) { setLocState("unsupported"); if (typeof window !== "undefined") window.localStorage.setItem(LOC_KEY, "unsupported"); completeOnboarding(); return; }
+    setBusy(true); setMessage("");
     navigator.geolocation.getCurrentPosition(
-      () => {
-        setLocationState("granted");
-        writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "granted");
-        setBusy(false);
-      },
-      (error) => {
-        const state: LocationState =
-          error.code === error.PERMISSION_DENIED
-            ? "denied"
-            : error.code === error.TIMEOUT
-              ? "timeout"
-              : "unavailable";
-        setLocationState(state);
-        writeOnboardingValue("local", LOCATION_PERMISSION_KEY, state);
-        setBusy(false);
-      },
+      () => { setLocState("granted"); if (typeof window !== "undefined") window.localStorage.setItem(LOC_KEY, "granted"); setBusy(false); completeOnboarding(); },
+      (error) => { const value = error.code === 1 ? "denied" : "error"; setLocState(value); if (typeof window !== "undefined") window.localStorage.setItem(LOC_KEY, value); setBusy(false); completeOnboarding(); },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
     );
-  }, []);
-
-  const notNowLocation = useCallback(() => {
-    setLocationState("dismissed");
-    writeOnboardingValue("local", LOCATION_PERMISSION_KEY, "dismissed");
-    completeOnboarding();
   }, [completeOnboarding]);
+  const notNowLocation = useCallback(() => { if (typeof window !== "undefined") window.localStorage.setItem(LOC_KEY, "dismissed"); setLocState("dismissed"); completeOnboarding(); }, [completeOnboarding]);
 
-  if (loading || isAuthenticated || isOnboardingComplete()) {
+  if (loading) return <main className="onboarding-screen"><p style={{ color: "#fff" }}>Loading…</p></main>;
+  if (isAuthenticated) return null;
+
+  if (step === "slide1") {
     return (
-      <section className="onboarding-screen" aria-busy="true" role="status">
-        <p>Loading…</p>
-      </section>
+      <Card image="/uploads/home/Zanzibar_trip.jpg" title="Explore\nTravel\nInspire" description="Life is all about journeys. Find yours." buttonLabel="Get Started" onContinue={() => setStep("slide2")}>
+        <div className="onboarding-progress-dots" aria-hidden="true"><span className="active" /><span /><span /></div>
+      </Card>
     );
   }
-
-  if (step === "slide1" || step === "slide2" || step === "slide3") {
-    const meta = SLIDE_META[step];
-    const slideNumber = Number(step.slice(-1));
-    const image =
-      step === "slide1"
-        ? "/uploads/home/Zanzibar_trip.jpg"
-        : step === "slide2"
-          ? "/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg"
-          : "/uploads/home/Definitely_add_this_to_your__must_do__list_when_you_come_visit_us_here_at_The_Sands.jpg";
-    const imageAlt =
-      step === "slide1"
-        ? "Travel destinations"
-        : step === "slide2"
-          ? "Safari experience"
-          : "Travel discovery";
-
+  if (step === "slide2") {
     return (
-      <section
-        className="onboarding-screen onboarding-slides onboarding-slides-redesign"
-        aria-label={meta.title}
-        aria-live="polite"
-      >
-        <div className="onboarding-hero">
-          <Image
-            src={image}
-            alt={imageAlt}
-            width={1200}
-            height={800}
-            sizes="(max-width: 700px) 100vw, 1000px"
-            priority
-          />
-        </div>
-        <div
-          className="onboarding-dashes"
-          role="group"
-          aria-label={`Slide ${slideNumber} of 3`}
-        >
-          {([1, 2, 3] as const).map((number) => (
-            <button
-              key={number}
-              type="button"
-              className={`onboarding-dash${number <= slideNumber ? " active" : ""}`}
-              aria-current={number === slideNumber ? "step" : undefined}
-              aria-label={`Slide ${number}`}
-              onClick={() => setStep(`slide${number}` as Step)}
-            />
-          ))}
-        </div>
-        <div className="onboarding-copy">
-          <p className="onboarding-step-label">STEP {slideNumber} OF 3</p>
-          <h1 className="onboarding-title">{meta.title}</h1>
-          <p className="onboarding-subtitle">{meta.description}</p>
-          {step === "slide2" ? (
-            <ul className="onboarding-steps-list">
-              <li>
-                <strong>Explore</strong> — Browse tours and safaris from different tourism companies.
-              </li>
-              <li>
-                <strong>Choose</strong> — Review the destination, itinerary, duration, price, and provider information available.
-              </li>
-              <li>
-                <strong>Request a Booking</strong> — Submit your travel details and track the request through the existing booking workflow.
-              </li>
-            </ul>
-          ) : null}
-          {step === "slide3" ? (
-            <div className="onboarding-info-sections">
-              <div className="onboarding-info-card">
-                <h2>Notifications</h2>
-                <p>Receive relevant booking updates and other supported travel-related notifications.</p>
-              </div>
-              <div className="onboarding-info-card">
-                <h2>Location</h2>
-                <p>Help find nearby attractions, tours, services, and destinations where location-based discovery is supported.</p>
-              </div>
-            </div>
-          ) : null}
-          <div className="onboarding-slide-actions">
-            {step === "slide1" ? (
-              <>
-                <button
-                  type="button"
-                  className="onboarding-back"
-                  onClick={skipIntroduction}
-                >
-                  Skip Introduction
-                </button>
-                <button
-                  type="button"
-                  className="onboarding-cta"
-                  onClick={() => setStep("slide2")}
-                >
-                  Get Started
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  className="onboarding-back"
-                  onClick={() => setStep(step === "slide2" ? "slide1" : "slide2")}
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  className="onboarding-cta"
-                  onClick={() => setStep(step === "slide2" ? "slide3" : "notif")}
-                >
-                  Continue
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
+      <Card image="/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg" title="Find\nYour Perfect\nAdventure" description="Explore tours and safaris, choose your experience, and send a booking request with ease." buttonLabel="Continue" onContinue={() => setStep("slide3")}>
+        <ul className="onboarding-steps-list">
+          <li><strong>01 — Explore</strong> Discover tours, safaris, and excursions offered by different tourism companies.</li>
+          <li><strong>02 — Choose</strong> Review the destination, itinerary, duration, available pricing, and provider details.</li>
+          <li><strong>03 — Request</strong> Submit your booking request and track its progress through the existing booking workflow.</li>
+        </ul>
+      </Card>
     );
   }
-
+  if (step === "slide3") {
+    return (
+      <Card image="/uploads/home/Definitely_add_this_to_your__must_do__list_when_you_come_visit_us_here_at_The_Sands.jpg" title="Stay\nConnected\nExplore More" description="Get useful booking updates and discover nearby travel experiences when you choose to share your location." buttonLabel="Continue" onContinue={() => setStep("notif")}>
+        <div className="onboarding-info-sections">
+          <div className="onboarding-info-card"><h3>Travel Updates</h3><p>Receive relevant booking notifications and supported travel alerts.</p></div>
+          <div className="onboarding-info-card"><h3>Nearby Discovery</h3><p>Use your location to discover nearby attractions and tourism services where available.</p></div>
+        </div>
+      </Card>
+    );
+  }
   if (step === "notif") {
-    const canRequest = notificationState === "default" || notificationState === "unavailable";
     return (
-      <section
-        className="onboarding-screen onboarding-slides onboarding-slides-redesign"
-        aria-label="Enable Travel Updates"
-        aria-live="polite"
-      >
-        <div className="onboarding-copy onboarding-permission-copy">
-          <div className="pwa-permission-icon" aria-hidden="true">
-            <MessageSquare size={40} />
-          </div>
-          <p className="onboarding-step-label">NOTIFICATION PERMISSION</p>
-          <h1 className="onboarding-title">Enable Travel Updates</h1>
-          <p className="onboarding-subtitle">
-            Allow notifications to receive relevant booking updates and other supported alerts.
-          </p>
-          {notificationState === "denied" ? (
-            <p className="onboarding-permission-message" role="status">
-              Notifications are blocked. You can enable them later in your browser or device settings.
-            </p>
-          ) : null}
-          {notificationState === "unsupported" ? (
-            <p className="onboarding-permission-message" role="status">
-              This browser does not support push notifications. You can continue without them.
-            </p>
-          ) : null}
-          {message ? (
-            <p className="onboarding-permission-message" role="status">{message}</p>
-          ) : null}
-          <div className="onboarding-slide-actions">
-            <button
-              type="button"
-              className="onboarding-back"
-              onClick={() => setStep("slide3")}
-              disabled={busy}
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              className="onboarding-cta"
-              onClick={
-                canRequest
-                  ? allowNotifications
-                  : () => setStep("location")
-              }
-              disabled={busy}
-            >
-              {busy
-                ? "Requesting…"
-                : canRequest
-                  ? "Allow Notifications"
-                  : "Continue"}
-            </button>
-          </div>
-          {canRequest ? (
-            <button
-              type="button"
-              className="onboarding-back onboarding-permission-secondary"
-              onClick={notNowNotifications}
-              disabled={busy}
-            >
-              Not Now
-            </button>
-          ) : null}
-        </div>
-      </section>
+      <Card image="/uploads/home/Definitely_add_this_to_your__must_do__list_when_you_come_visit_us_here_at_The_Sands.jpg" title="Never Miss\nan Update" description="Allow notifications to receive relevant booking updates and other supported travel alerts." buttonLabel={busy ? "Requesting…" : (notifState !== "unsupported" ? "Allow Notifications" : "Continue")} onContinue={notifState !== "unsupported" ? allowNotifications : () => setStep("location")}>
+        <div className="onboarding-icon-row"><MessageSquare size={18} /> <span>Travel Updates</span></div>
+        {notifState === "denied" ? <p className="onboarding-description">Notifications were denied. You can enable them later in your browser or device settings.</p> : null}
+        {notifState === "unsupported" ? <p className="onboarding-description">This browser does not support notifications. You can continue.</p> : null}
+        {message ? <p className="onboarding-description">{message}</p> : null}
+        {notifState === "default" || notifState === "dismissed" || notifState === "denied" ? (
+          <button type="button" className="onboarding-back" onClick={notNowNotifications} disabled={busy} style={{ position: "relative", marginTop: 8 }}>Not Now</button>
+        ) : (
+          <button type="button" className="onboarding-back" onClick={() => setStep("location")} style={{ position: "relative", marginTop: 8 }}>Continue →</button>
+        )}
+      </Card>
     );
   }
-
-  const locationMessage = {
-    granted: "Location access is ready. Travel. does not continuously track your location.",
-    denied: "Location is blocked. You can enable it later in your browser or device settings.",
-    unavailable: "Your location is currently unavailable. You can continue without it.",
-    timeout: "The location request timed out. You can try again or continue without it.",
-    unsupported: "This browser does not support location access. You can continue without it.",
-    dismissed: "",
-    default: "",
-  }[locationState];
-  const canRequestLocation =
-    locationState === "default" || locationState === "unavailable" || locationState === "timeout";
-
   return (
-    <section
-      className="onboarding-screen onboarding-slides onboarding-slides-redesign"
-      aria-label="Discover Experiences Near You"
-      aria-live="polite"
-    >
-      <div className="onboarding-copy onboarding-permission-copy">
-        <div className="pwa-permission-icon" aria-hidden="true">
-          <MapPin size={40} />
-        </div>
-        <p className="onboarding-step-label">LOCATION PERMISSION</p>
-        <h1 className="onboarding-title">Discover Experiences Near You</h1>
-        <p className="onboarding-subtitle">
-          Share your location to help find nearby attractions, tours, and travel services when you use location-based discovery.
-        </p>
-        {locationMessage ? (
-          <p className="onboarding-permission-message" role="status">{locationMessage}</p>
-        ) : null}
-        {message ? (
-          <p className="onboarding-permission-message" role="alert">{message}</p>
-        ) : null}
-        <div className="onboarding-slide-actions">
-          <button
-            type="button"
-            className="onboarding-back"
-            onClick={() => setStep("notif")}
-            disabled={busy}
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            className="onboarding-cta"
-            onClick={canRequestLocation ? allowLocation : completeOnboarding}
-            disabled={busy}
-          >
-            {busy
-              ? "Requesting…"
-              : canRequestLocation
-                ? "Allow Location"
-                : "Continue to sign in"}
-          </button>
-        </div>
-        {canRequestLocation ? (
-          <button
-            type="button"
-            className="onboarding-back onboarding-permission-secondary"
-            onClick={notNowLocation}
-            disabled={busy}
-          >
-            Not Now
-          </button>
-        ) : null}
-      </div>
-    </section>
+    <Card image="/uploads/home/Zanzibar_trip.jpg" title="Discover\nWhat's Nearby" description="Allow location access to help find nearby attractions, tours, and travel services." buttonLabel={busy ? "Requesting…" : (locState !== "unsupported" ? "Allow Location" : "Continue to sign in")} onContinue={locState !== "unsupported" ? allowLocation : completeOnboarding}>
+      <div className="onboarding-icon-row"><MapPin size={18} /> <span>Nearby Discovery</span></div>
+      {locState === "denied" ? <p className="onboarding-description">Location was denied. You can enable it later in your browser settings.</p> : null}
+      {locState === "unsupported" ? <p className="onboarding-description">This browser does not support location. You can continue.</p> : null}
+      {message ? <p className="onboarding-description">{message}</p> : null}
+      {locState === "default" || locState === "dismissed" || locState === "denied" || locState === "error" ? (
+        <button type="button" className="onboarding-back" onClick={notNowLocation} disabled={busy} style={{ position: "relative", marginTop: 8 }}>Not Now</button>
+      ) : (
+        <button type="button" className="onboarding-back" onClick={completeOnboarding} style={{ position: "relative", marginTop: 8 }}>Continue to sign in →</button>
+      )}
+    </Card>
   );
 }

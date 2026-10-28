@@ -4794,6 +4794,145 @@ body {
 
 .top-header.glass-header {
   background: #F2F0EF !important;
+/* Reference-style onboarding card (overrides previous blue/glass onboarding) */
+.onboarding-shell {
+  min-height: 100dvh;
+  padding: 24px 16px;
+  background: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.onboarding-frame {
+  width: min(100%, 360px);
+  max-width: 360px;
+  min-height: auto;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
+}
+.onboarding-screen {
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: #ffffff !important;
+  color: #111111 !important;
+  overflow: hidden;
+}
+.onboarding-card {
+  position: relative;
+  width: min(100%, 320px);
+  aspect-ratio: 0.48 / 1;
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+  border: none;
+  border-radius: 30px;
+  background: #d8e4e0;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.08);
+  isolation: isolate;
+}
+.onboarding-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border: 0;
+  border-radius: inherit;
+  display: block;
+}
+.onboarding-image-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.03) 35%, rgba(0, 0, 0, 0.16) 100%);
+}
+.onboarding-content {
+  position: absolute;
+  z-index: 2;
+  left: 7%;
+  right: 7%;
+  top: 27%;
+  color: #ffffff;
+}
+.onboarding-title {
+  margin: 0;
+  max-width: 100%;
+  color: #ffffff !important;
+  font-size: clamp(26px, 8vw, 34px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.7px;
+  text-align: left;
+}
+.onboarding-description {
+  margin-top: 10px;
+  max-width: 90%;
+  color: #ffffff !important;
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+.onboarding-primary-button {
+  position: absolute;
+  z-index: 3;
+  left: 16%;
+  right: 16%;
+  bottom: 5%;
+  min-height: 44px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111111;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.onboarding-primary-button:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.14); }
+.onboarding-primary-button:active { transform: scale(0.98); }
+.onboarding-primary-button:focus-visible { outline: 3px solid #08428c; outline-offset: 3px; }
+.onboarding-steps-list {
+  margin: 12px 0 0;
+  padding-left: 16px;
+  color: #ffffff;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.onboarding-steps-list li { margin-bottom: 6px; }
+.onboarding-info-sections { margin-top: 10px; display: grid; gap: 8px; }
+.onboarding-info-card {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  padding: 8px;
+}
+.onboarding-info-card h3 { margin: 0 0 2px; font-size: 11px; font-weight: 700; color: #ffffff; }
+.onboarding-info-card p { margin: 0; font-size: 10px; line-height: 1.3; color: #ffffff; }
+.onboarding-icon-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #ffffff; }
+.onboarding-progress-dots { position: absolute; z-index: 2; top: 16px; right: 16px; display: flex; gap: 6px; }
+.onboarding-progress-dots span { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.45); }
+.onboarding-progress-dots span.active { background: #ffffff; width: 18px; }
+@media (max-width: 420px) {
+  .onboarding-card { width: min(100%, 300px); }
+  .onboarding-title { font-size: clamp(24px, 7vw, 30px); }
+}
+
 /* End */
   border-color: rgba(255,255,255,.88) !important;
   box-shadow: 0 10px 30px rgba(15,55,55,.08), inset 0 1px rgba(255,255,255,.92) !important;
