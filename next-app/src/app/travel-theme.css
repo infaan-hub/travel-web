@@ -5950,3 +5950,21 @@ html body .app-layout .main-content .page
   color: #111111 !important;
   overflow: hidden;
 }
+
+.onboarding-back-button {
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: #08428C;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.onboarding-card-content {
+  gap: 16px;
+}
+
+.onboarding-copy {
+  margin-bottom: 20px;
+}

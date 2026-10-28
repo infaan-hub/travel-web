@@ -72,6 +72,8 @@ type OnboardingCardProps = {
   totalSlides: number;
   onContinue: () => void;
   onSkip?: () => void;
+  onBack?: () => void;
+  showBack?: boolean;
   showProgress?: boolean;
   showSkip?: boolean;
   children?: React.ReactNode;
@@ -83,6 +85,8 @@ function OnboardingCard({
   totalSlides,
   onContinue,
   onSkip,
+  onBack,
+  showBack = false,
   showProgress = true,
   showSkip = true,
   children,
@@ -93,7 +97,13 @@ function OnboardingCard({
       aria-label={`Introduction ${currentIndex + 1} of ${totalSlides}`}
     >
       <div className="onboarding-topbar">
-        <span aria-hidden="true" />
+        {showBack && onBack ? (
+          <button type="button" className="onboarding-back-button" onClick={onBack} aria-label="Go back">
+            ← Back
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
         {showSkip && onSkip ? (
           <button type="button" className="onboarding-skip" onClick={onSkip}>
             Skip
@@ -228,6 +238,16 @@ export function OnboardingFlow() {
     setStep("notif");
   }, []);
 
+  const goBack = useCallback(() => {
+    setStep((prev) => {
+      if (prev === "slide2") return "slide1";
+      if (prev === "slide3") return "slide2";
+      if (prev === "notif") return "slide3";
+      if (prev === "location") return "notif";
+      return prev;
+    });
+  }, []);
+
   const allowNotifications = useCallback(async () => {
     if (typeof window === "undefined" || !("Notification" in window)) {
       setNotifState("unsupported");
@@ -316,6 +336,8 @@ export function OnboardingFlow() {
         totalSlides={3}
         onContinue={onContinue}
         onSkip={skipIntro}
+        onBack={goBack}
+        showBack={idx > 0}
       />
     </motion.div>
   );
@@ -360,6 +382,8 @@ export function OnboardingFlow() {
             currentIndex={2}
             totalSlides={3}
             onContinue={notifState !== "unsupported" ? allowNotifications : () => setStep("location")}
+            onBack={goBack}
+            showBack={true}
             showSkip={false}
             showProgress={false}
           >
@@ -398,6 +422,8 @@ export function OnboardingFlow() {
             currentIndex={2}
             totalSlides={3}
             onContinue={locState !== "unsupported" ? allowLocation : completeOnboarding}
+            onBack={goBack}
+            showBack={true}
             showSkip={false}
             showProgress={false}
           >
@@ -424,6 +450,8 @@ export function OnboardingFlow() {
     </AnimatePresence>
   );
 }
+
+
 
 
 
