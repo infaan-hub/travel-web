@@ -31,7 +31,7 @@ import {
 } from "@/components/icons";
 import { useToast } from "@/components/ToastProvider";
 import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
-import { companyAPI, routeAPI } from "@/lib/api/client";
+import { companyAPI, routeAPI, geocodeAPI } from "@/lib/api/client";
 import { findTripPlace, type TripPlace, ZANZIBAR_TRIP_PLACES } from "@/lib/trips";
 import { isInZanzibar } from "@/lib/zanzibar";
 import styles from "@/features/pages/company-trips.module.css";
@@ -225,6 +225,8 @@ export default function CompanyTripsPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
+  const [originName, setOriginName] = useState("");
+  const [destinationName, setDestinationName] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const composerRef = useRef<HTMLElement | null>(null);
@@ -373,6 +375,7 @@ export default function CompanyTripsPage() {
       : `${place.name}, ${place.area}`;
     const lat = place.latitude.toFixed(6);
     const lng = place.longitude.toFixed(6);
+    const isFirst = !form.origin_latitude || !form.origin_longitude;
     setForm((current) => {
       if (!current.origin_latitude || !current.origin_longitude) {
         return {
@@ -391,19 +394,38 @@ export default function CompanyTripsPage() {
       };
     });
     setFormError(null);
-  }, []);
+    geocodeAPI
+      .reverse(place.latitude, place.longitude)
+      .then((res) => {
+        const name = res.data?.display_name;
+        if (!name) return;
+        if (isFirst) setOriginName(name);
+        else setDestinationName(name);
+      })
+      .catch(() => {});
+  }, [form.origin_latitude, form.origin_longitude]);
 
   const pickTripPoint = useCallback((latitude: number, longitude: number) => {
+    const lat = latitude.toFixed(6);
+    const lng = longitude.toFixed(6);
+    const isFirst = !form.origin_latitude || !form.origin_longitude;
     setForm((current) => {
-      const lat = latitude.toFixed(6);
-      const lng = longitude.toFixed(6);
       if (!current.origin_latitude || !current.origin_longitude) {
         return { ...current, origin_latitude: lat, origin_longitude: lng, latitude: lat, longitude: lng };
       }
       return { ...current, destination_latitude: lat, destination_longitude: lng };
     });
     setFormError(null);
-  }, []);
+    geocodeAPI
+      .reverse(latitude, longitude)
+      .then((res) => {
+        const name = res.data?.display_name;
+        if (!name) return;
+        if (isFirst) setOriginName(name);
+        else setDestinationName(name);
+      })
+      .catch(() => {});
+  }, [form.origin_latitude, form.origin_longitude]);
   const createRoute = useCallback(async () => {
     const originLat = coordinateValue(form.origin_latitude);
     const originLng = coordinateValue(form.origin_longitude);
@@ -440,7 +462,15 @@ export default function CompanyTripsPage() {
       ...current,
       latitude: "",
       longitude: "",
+      origin_latitude: "",
+      origin_longitude: "",
+      destination_latitude: "",
+      destination_longitude: "",
+      distance_km: "",
+      duration_mins: "",
     }));
+    setOriginName("");
+    setDestinationName("");
   }, []);
 
   const onImage = (event: ChangeEvent<HTMLInputElement>) => {
@@ -759,7 +789,7 @@ export default function CompanyTripsPage() {
                   <span className={styles.tripsRouteLabel}>Start</span>
                   <span className={styles.tripsRouteValue}>
                     {form.origin_latitude && form.origin_longitude
-                      ? placeNameForCoords(form.origin_latitude, form.origin_longitude) || `${form.origin_latitude}, ${form.origin_longitude}`
+                      ? originName || placeNameForCoords(form.origin_latitude, form.origin_longitude) || `${form.origin_latitude}, ${form.origin_longitude}`
                       : "Pick start point on map"}
                   </span>
                 </div>
@@ -767,7 +797,7 @@ export default function CompanyTripsPage() {
                   <span className={styles.tripsRouteLabel}>Destination</span>
                   <span className={styles.tripsRouteValue}>
                     {form.destination_latitude && form.destination_longitude
-                      ? placeNameForCoords(form.destination_latitude, form.destination_longitude) || `${form.destination_latitude}, ${form.destination_longitude}`
+                      ? destinationName || placeNameForCoords(form.destination_latitude, form.destination_longitude) || `${form.destination_latitude}, ${form.destination_longitude}`
                       : "Pick destination on map"}
                   </span>
                 </div>

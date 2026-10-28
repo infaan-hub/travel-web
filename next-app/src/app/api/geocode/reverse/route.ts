@@ -1,13 +1,13 @@
 import type { NextRequest } from "next/server";
 import { handleApiError, ok } from "@/lib/api/http";
-import { requireStaff } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { reverseGeocodeQuerySchema } from "@/lib/validation/schemas";
 import { reverseGeocodeLocation } from "@/lib/services/geocoding";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireStaff(request);
+    await requireUser(request);
     await enforceRateLimit(request, "geocode-reverse", 30, 60 * 60 * 1000);
     const { searchParams } = new URL(request.url);
     const query = reverseGeocodeQuerySchema.parse({
