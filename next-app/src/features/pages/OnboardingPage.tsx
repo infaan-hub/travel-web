@@ -41,15 +41,6 @@ const slides: Slide[] = [
     imagePosition: "center",
   },
   {
-    id: "book",
-    image: "/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg",
-    imageAlt: "Travelers enjoying a guided safari experience",
-    heading: ["Discover", "Amazing", "Experiences"],
-    description: "Explore tours from different companies and request your next adventure.",
-    buttonLabel: "Continue",
-    imagePosition: "center",
-  },
-  {
     id: "nearby",
     image: "/uploads/home/Definitely_add_this_to_your__must_do__list_when_you_come_visit_us_here_at_The_Sands.jpg",
     imageAlt: "A traveler exploring a scenic destination",
@@ -336,7 +327,7 @@ export function OnboardingFlow() {
       <OnboardingCard
         slide={s}
         currentIndex={idx}
-        totalSlides={3}
+        totalSlides={2}
         onContinue={onContinue}
         onSkip={skipIntro}
         onBack={goBack}
@@ -368,7 +359,7 @@ export function OnboardingFlow() {
 
   return (
     <AnimatePresence mode="wait">
-      {step === "slide1" && renderSlide(slides[0], 0, () => setStep("slide2"))}
+      {step === "slide1" && renderSlide(slides[0], 0, () => setStep("slide3"))}
       {step === "slide2" && renderSlide(slides[1], 1, () => setStep("slide3"))}
       {step === "slide3" && renderSlide(slides[2], 2, () => setStep("notif"), true)}
 
@@ -383,8 +374,8 @@ export function OnboardingFlow() {
         >
           <OnboardingCard
             slide={notifSlide}
-            currentIndex={2}
-            totalSlides={3}
+            currentIndex={1}
+            totalSlides={2}
             onContinue={notifState !== "unsupported" ? allowNotifications : () => setStep("location")}
             onBack={goBack}
             showBack={true}
@@ -417,8 +408,8 @@ export function OnboardingFlow() {
         >
           <OnboardingCard
             slide={locationSlide}
-            currentIndex={2}
-            totalSlides={3}
+            currentIndex={1}
+            totalSlides={2}
             onContinue={locState !== "unsupported" ? allowLocation : completeOnboarding}
             onBack={goBack}
             showBack={true}
@@ -442,6 +433,7 @@ export function OnboardingFlow() {
     </AnimatePresence>
   );
 }
+
 
 
 
