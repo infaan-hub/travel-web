@@ -44,6 +44,41 @@
   color: #2F2F2F;
 }
 
+.bookingDetailTheme .pageHead,
+.bookingDetailTheme .hero,
+.bookingDetailTheme .detailGrid,
+.bookingDetailTheme .summaryGrid,
+.bookingDetailTheme .timeline,
+.bookingDetailTheme .factList,
+.bookingDetailTheme .transitionList {
+  background: rgba(255, 255, 255, 0.32);
+  border: 1px solid rgba(8, 66, 140, 0.16);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.bookingDetailTheme .pageHead {
+  background: linear-gradient(135deg, rgba(8, 66, 140, 0.12), rgba(211, 211, 211, 0.9));
+}
+
+.bookingDetailTheme .heroTitle,
+.bookingDetailTheme .detailTitle,
+.bookingDetailTheme .summaryLabel,
+.bookingDetailTheme .timelineTitle {
+  color: #08428C;
+}
+
+.bookingDetailTheme .summaryValue,
+.bookingDetailTheme .timelineMeta,
+.bookingDetailTheme .detailSub {
+  color: #2F2F2F;
+}
+
+.bookingDetailTheme .timelineDot {
+  background: #08428C;
+  box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.14);
+}
+
 .bookingDetailTheme .badgePending,
 .bookingDetailTheme .badgeConfirmed,
 .bookingDetailTheme .badgeCancelled {
@@ -51,6 +86,24 @@
   color: #08428C;
   border: 1px solid rgba(8, 66, 140, 0.24);
 }
+
+.bookingDetailTheme .transitionButton {
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.bookingDetailTheme .btn-success {
+  background: #08428C;
+  border-color: #08428C;
+  color: #FFFFFF;
+}
+
+.bookingDetailTheme .btn-danger {
+  background: #D3D3D3;
+  border-color: #08428C;
+  color: #08428C;
+}
+
 
 
 .shellHeader {
