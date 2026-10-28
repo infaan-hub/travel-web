@@ -361,12 +361,25 @@ export default function CompanyTripsPage() {
     const label = place.name.toLowerCase().includes(place.area.toLowerCase())
       ? place.name
       : `${place.name}, ${place.area}`;
-    setForm((current) => ({
-      ...current,
-      place: label,
-      latitude: place.latitude.toFixed(6),
-      longitude: place.longitude.toFixed(6),
-    }));
+    const lat = place.latitude.toFixed(6);
+    const lng = place.longitude.toFixed(6);
+    setForm((current) => {
+      if (!current.origin_latitude || !current.origin_longitude) {
+        return {
+          ...current,
+          place: label,
+          latitude: lat,
+          longitude: lng,
+          origin_latitude: lat,
+          origin_longitude: lng,
+        };
+      }
+      return {
+        ...current,
+        destination_latitude: lat,
+        destination_longitude: lng,
+      };
+    });
     setFormError(null);
   }, []);
 
