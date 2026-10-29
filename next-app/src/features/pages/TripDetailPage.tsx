@@ -46,7 +46,7 @@ export default function TripDetailPage() {
 
   if (loading) {
     return (
-      <div className={styles.tripsPageRoot}>
+      <div className={`${styles.tripsPageRoot} ${styles.tripDetailRoot}`}>
         <div className={styles.content}>
           <div className={styles.tripsLoading}>Loading trip…</div>
         </div>
@@ -56,7 +56,7 @@ export default function TripDetailPage() {
 
   if (!trip) {
     return (
-      <div className={styles.tripsPageRoot}>
+      <div className={`${styles.tripsPageRoot} ${styles.tripDetailRoot}`}>
         <div className={styles.content}>
           <div className={styles.tripsEmpty}>
             <h2>Trip not found</h2>
@@ -75,7 +75,6 @@ export default function TripDetailPage() {
   const destinationName = tripPlaceNameForCoords(trip.destination_latitude, trip.destination_longitude);
   const routeLabel =
     originName && destinationName ? `${originName} → ${destinationName}` : originName || destinationName || trip.place || "Trip";
-
   const distanceLabel =
     trip.distance_km != null && Number.isFinite(Number(trip.distance_km))
       ? `${Number(trip.distance_km).toFixed(1)} km`
@@ -85,92 +84,103 @@ export default function TripDetailPage() {
   const originLng = trip.origin_longitude ?? trip.longitude;
   const destLat = trip.destination_latitude;
   const destLng = trip.destination_longitude;
+  const hasRouteMap =
+    Number.isFinite(Number(originLat)) &&
+    Number.isFinite(Number(originLng)) &&
+    Number.isFinite(Number(destLat)) &&
+    Number.isFinite(Number(destLng));
 
   return (
-    <div className={styles.tripsPageRoot}>
-      <div className={styles.content}>
-        <Link href="/trips/" className="btn btn-outline btn-sm" style={{ marginBottom: 18, width: "fit-content" }}>
+    <div className={`${styles.tripsPageRoot} ${styles.tripDetailRoot}`}>
+      <div className={`${styles.content} ${styles.tripDetailContent}`}>
+        <Link href="/trips/" className={`${styles.tripBackLink} btn btn-outline btn-sm`}>
           <ArrowLeft size={16} /> Back to trips
         </Link>
 
-        <article
-          style={{
-            display: "grid",
-            gap: 22,
-            padding: 24,
-            borderRadius: 22,
-            background: "rgba(255,255,255,0.18)",
-            border: "1px solid rgba(255,255,255,0.55)",
-            boxShadow: "0 18px 44px rgba(8,66,140,0.09)",
-            backdropFilter: "blur(18px) saturate(160%)",
-          }}
-        >
+        <article className={styles.tripDetailCard}>
           {trip.image_url ? (
-            <div style={{ position: "relative", width: "100%", height: 320, borderRadius: 16, overflow: "hidden" }}>
-              <Image
-                src={getImageUrl(trip.image_url)}
-                alt={trip.title}
-                fill
-                sizes="100vw"
-                style={{ objectFit: "cover" }}
-              />
+            <div className={styles.tripDetailImage}>
+              <Image src={getImageUrl(trip.image_url)} alt={trip.title} fill sizes="(max-width: 760px) 100vw, 1100px" priority style={{ objectFit: "cover" }} />
+              <div className={styles.tripImageShade} aria-hidden="true" />
+              <div className={styles.tripImageCaption}>
+                <span className={styles.tripImageEyebrow}>Trip overview</span>
+                <h1>{trip.title}</h1>
+                <p><MapPin size={16} /> {routeLabel}</p>
+              </div>
             </div>
-          ) : null}
+          ) : (
+            <header className={styles.tripDetailHeader}>
+              <span className={styles.tripDetailEyebrow}>Trip overview</span>
+              <h1>{trip.title}</h1>
+              <p className={styles.tripDetailRoute}><MapPin size={17} /> {routeLabel}</p>
+            </header>
+          )}
 
-          <div style={{ display: "grid", gap: 10 }}>
-            <h1 style={{ margin: 0, fontSize: "1.8rem", color: "#08428c" }}>{trip.title}</h1>
-            <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 6, color: "rgba(8,66,140,0.72)", fontWeight: 600 }}>
-              <MapPin size={16} /> {routeLabel}
-            </p>
-            {trip.description ? (
-              <p style={{ margin: 0, color: "rgba(8,66,140,0.72)", lineHeight: 1.65 }}>{trip.description}</p>
+          <div className={styles.tripDetailBody}>
+            <section className={styles.tripInfoSection} aria-label="Trip information">
+              <div className={styles.tripSectionHeading}>
+                <span className={styles.tripSectionIcon}><MapPin size={18} /></span>
+                <div>
+                  <span className={styles.tripDetailEyebrow}>Your journey</span>
+                  <h2>Trip details</h2>
+                </div>
+              </div>
+              <p className={styles.tripDescription}>{trip.description || "Explore the route and trip details below."}</p>
+              <div className={styles.tripStatsGrid}>
+                <div className={`${styles.tripStatCard} ${styles.tripPriceCard}`}>
+                  <span className={styles.tripStatLabel}>Trip price</span>
+                  <strong>{trip.price ? `$${trip.price}` : "On request"}</strong>
+                </div>
+                {distanceLabel ? (
+                  <div className={styles.tripStatCard}>
+                    <span className={styles.tripStatLabel}>Distance</span>
+                    <strong>{distanceLabel}</strong>
+                  </div>
+                ) : null}
+                {durationLabel ? (
+                  <div className={styles.tripStatCard}>
+                    <span className={styles.tripStatLabel}>Travel time</span>
+                    <strong><Clock size={16} /> {durationLabel}</strong>
+                  </div>
+                ) : null}
+              </div>
+            </section>
+
+            {hasRouteMap ? (
+              <section className={styles.tripMapSection} aria-label="Route map">
+                <div className={styles.tripSectionHeading}>
+                  <span className={styles.tripSectionIcon}><MapPin size={18} /></span>
+                  <div>
+                    <span className={styles.tripDetailEyebrow}>On the map</span>
+                    <h2>Route</h2>
+                  </div>
+                </div>
+                <div className={styles.tripMapCard}>
+                  <TripRouteMap
+                    originLat={Number(originLat)}
+                    originLng={Number(originLng)}
+                    destinationLat={Number(destLat)}
+                    destinationLng={Number(destLng)}
+                  />
+                </div>
+              </section>
+            ) : null}
+
+            {trip.company_name ? (
+              <section className={styles.tripOperatorCard} aria-label="Trip operator">
+                <span className={styles.tripOperatorIcon}><Building2 size={20} /></span>
+                <div className={styles.tripOperatorCopy}>
+                  <span className={styles.tripDetailEyebrow}>Your travel provider</span>
+                  <strong>{trip.company_name}</strong>
+                </div>
+                {trip.company_slug ? (
+                  <Link href={`/company/${trip.company_slug}/`} className={styles.tripOperatorLink}>
+                    View company <ArrowLeft size={15} />
+                  </Link>
+                ) : null}
+              </section>
             ) : null}
           </div>
-
-          {Number.isFinite(Number(originLat)) &&
-          Number.isFinite(Number(originLng)) &&
-          Number.isFinite(Number(destLat)) &&
-          Number.isFinite(Number(destLng)) ? (
-            <TripRouteMap
-              originLat={Number(originLat)}
-              originLng={Number(originLng)}
-              destinationLat={Number(destLat)}
-              destinationLng={Number(destLng)}
-            />
-          ) : null}
-
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <span
-              style={{
-                padding: "8px 14px",
-                borderRadius: 999,
-                background: "rgba(8,66,140,0.09)",
-                color: "#08428c",
-                fontWeight: 700,
-              }}
-            >
-              {trip.price ? `$${trip.price}` : "On request"}
-            </span>
-            {distanceLabel ? (
-              <span style={{ padding: "8px 14px", borderRadius: 999, background: "rgba(8,66,140,0.06)", color: "#08428c", fontWeight: 600 }}>
-                {distanceLabel}
-              </span>
-            ) : null}
-            {durationLabel ? (
-              <span style={{ padding: "8px 14px", borderRadius: 999, background: "rgba(8,66,140,0.06)", color: "#08428c", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
-                <Clock size={14} /> {durationLabel}
-              </span>
-            ) : null}
-          </div>
-
-          {trip.company_name ? (
-            <Link
-              href={trip.company_slug ? `/company/${trip.company_slug}/` : "#"}
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#08428c", fontWeight: 600, width: "fit-content" }}
-            >
-              <Building2 size={16} /> Operated by {trip.company_name}
-            </Link>
-          ) : null}
         </article>
       </div>
     </div>
