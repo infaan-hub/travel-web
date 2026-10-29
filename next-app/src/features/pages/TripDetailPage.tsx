@@ -146,7 +146,7 @@ export default function TripDetailPage() {
               </div>
             </section>
 
-            {hasRouteMap ? (
+            {
               <section className={styles.tripMapSection} aria-label="Route map">
                 <div className={styles.tripSectionHeading}>
                   <span className={styles.tripSectionIcon}><MapPin size={18} /></span>
@@ -186,6 +186,7 @@ export default function TripDetailPage() {
     </div>
   );
 }
+
 
 
 
