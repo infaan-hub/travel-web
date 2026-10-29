@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -9,7 +9,7 @@ import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { ArrowLeft, MapPin, Clock, Building2 } from "@/components/icons";
 import { tripPlaceNameForCoords } from "@/lib/trips";
-import TripRouteMap from "@/components/TripRouteMap";
+import TripRouteMap from "@/components/TripRouteOverlayMap";
 import type { CompanyTrip } from "@/features/pages/types";
 import styles from "@/features/pages/trips-page.module.css";
 
@@ -47,7 +47,7 @@ export default function TripDetailPage() {
   if (loading) {
     return (
       <div className={`${styles.tripsPageRoot} ${styles.tripDetailRoot}`}>
-        <div className={styles.content}>
+        <div className={styles.tripDetailContent}>
           <div className={styles.tripsLoading}>Loading trip…</div>
         </div>
       </div>
@@ -57,11 +57,11 @@ export default function TripDetailPage() {
   if (!trip) {
     return (
       <div className={`${styles.tripsPageRoot} ${styles.tripDetailRoot}`}>
-        <div className={styles.content}>
+        <div className={styles.tripDetailContent}>
           <div className={styles.tripsEmpty}>
-            <h2>Trip not found</h2>
-            <p>Check back soon for new trips from travel companies.</p>
-            <Link href="/trips/" className="btn btn-outline btn-sm">
+            <h2 className={styles.tripsStateTitle}>Trip not found</h2>
+            <p className={styles.tripsStateCopy}>Check back soon for new trips from travel companies.</p>
+            <Link href="/trips/" className={styles.tripBackLink}>
               Back to trips
             </Link>
           </div>
@@ -74,7 +74,7 @@ export default function TripDetailPage() {
     trip.place || tripPlaceNameForCoords(trip.origin_latitude ?? trip.latitude, trip.origin_longitude ?? trip.longitude);
   const destinationName = tripPlaceNameForCoords(trip.destination_latitude, trip.destination_longitude);
   const routeLabel =
-    originName && destinationName ? `${originName} → ${destinationName}` : originName || destinationName || trip.place || "Trip";
+    originName && destinationName ? `${originName} â†’ ${destinationName}` : originName || destinationName || trip.place || "Trip";
   const distanceLabel =
     trip.distance_km != null && Number.isFinite(Number(trip.distance_km))
       ? `${Number(trip.distance_km).toFixed(1)} km`
@@ -92,8 +92,8 @@ export default function TripDetailPage() {
 
   return (
     <div className={`${styles.tripsPageRoot} ${styles.tripDetailRoot}`}>
-      <div className={`${styles.content} ${styles.tripDetailContent}`}>
-        <Link href="/trips/" className={`${styles.tripBackLink} btn btn-outline btn-sm`}>
+      <div className={`${styles.tripDetailContent}`}>
+        <Link href="/trips/" className={`${styles.tripBackLink}`}>
           <ArrowLeft size={16} /> Back to trips
         </Link>
 
@@ -186,3 +186,12 @@ export default function TripDetailPage() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+

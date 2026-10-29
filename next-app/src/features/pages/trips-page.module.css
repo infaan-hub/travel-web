@@ -419,10 +419,49 @@
 }
 
 /* Trip detail -------------------------------------------------------------- */
+.tripDetailHero {
+  display: grid;
+  gap: 0;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid var(--detail-line);
+  box-shadow: var(--detail-shadow);
+  background: var(--detail-white);
+}
+
+.tripImageWrap {
+  position: relative;
+  min-height: 300px;
+  height: clamp(300px, 42vw, 470px);
+  overflow: hidden;
+  background: var(--detail-glacier);
+}
+
+.tripImageWrap img {
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tripDetailCard:hover .tripImageWrap img {
+  transform: scale(1.025);
+}
+
+.tripDetailTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.5vw, 3.55rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: var(--detail-blue);
+}
 .tripDetailRoot {
   --detail-blue: #08428c;
   --detail-primary: #d3d3d3;
-  --detail-glacier: #eaf4fb;
+  --detail-glacier: #D3D3D3;
   --detail-white: #fff;
   --detail-line: rgba(8, 66, 140, 0.14);
   --detail-muted: #52647b;
