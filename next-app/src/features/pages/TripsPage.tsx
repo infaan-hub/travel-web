@@ -8,10 +8,25 @@ import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { BookOpen, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
+import { ZANZIBAR_TRIP_PLACES } from "@/lib/trips";
+import { nearestZanzibarPlace } from "@/lib/geo-context";
 
 import type {  Tour, CompanyTrip  } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import styles from "@/features/pages/company-trips.module.css";
+
+function tripPlaceName(latitude: unknown, longitude: unknown): string | null {
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  const exact = ZANZIBAR_TRIP_PLACES.find(
+    (place) => Math.abs(place.latitude - lat) < 0.0005 && Math.abs(place.longitude - lng) < 0.0005,
+  );
+  if (exact) return exact.name;
+  const nearest = nearestZanzibarPlace(lat, lng);
+  if (nearest && nearest.distanceKm < 50) return nearest.name;
+  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+}
 export default function TripsPage() {
   const [trips, setTrips] = useState<CompanyTrip[]>(() => readClientCache<CompanyTrip[]>("travel.trips.all") ?? []);
   const [tours, setTours] = useState<Tour[]>(() => readClientCache<Tour[]>("travel.tours.all") ?? []);
@@ -268,7 +283,24 @@ export default function TripsPage() {
                   key={trip.id}
                   image={trip.image_url ? getImageUrl(trip.image_url) : undefined}
                   title={trip.title}
-                  location={trip.place}
+                  location={
+                    (() => {
+                      const originName =
+                        trip.place ||
+                        tripPlaceName(
+                          trip.origin_latitude ?? trip.latitude,
+                          trip.origin_longitude ?? trip.longitude,
+                        );
+                      const destinationName = tripPlaceName(
+                        trip.destination_latitude,
+                        trip.destination_longitude,
+                      );
+                      if (originName && destinationName) {
+                        return `${originName} → ${destinationName}`;
+                      }
+                      return originName || destinationName || trip.place || "Trip";
+                    })()
+                  }
                   description={trip.description || (trip.company_name ? `Posted by ${trip.company_name}` : "Trip posted by a travel company.")}
                   badges={trip.company_name ? [trip.company_name] : undefined}
                   stats={[

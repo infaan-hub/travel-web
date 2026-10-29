@@ -46,6 +46,12 @@ export type CompanyTrip = {
   company_slug?: string | null;
   title: string;
   place: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  origin_latitude?: number | null;
+  origin_longitude?: number | null;
+  destination_latitude?: number | null;
+  destination_longitude?: number | null;
   description: string;
   price: string | null;
   image_url: string | null;
