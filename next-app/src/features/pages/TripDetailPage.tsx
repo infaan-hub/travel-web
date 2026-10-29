@@ -9,7 +9,7 @@ import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { ArrowLeft, MapPin, Clock, Building2 } from "@/components/icons";
 import { tripPlaceNameForCoords } from "@/lib/trips";
-import TripRouteMap from "@/components/TripRouteOverlayMap";
+import TripRouteOverlayMap from "@/components/TripRouteOverlayMap";
 import type { CompanyTrip } from "@/features/pages/types";
 import styles from "@/features/pages/trips-page.module.css";
 
@@ -156,7 +156,7 @@ export default function TripDetailPage() {
                   </div>
                 </div>
                 <div className={styles.tripMapCard}>
-                  <TripRouteMap
+                  <TripRouteOverlayMap
                     originLat={Number(originLat)}
                     originLng={Number(originLng)}
                     destinationLat={Number(destLat)}
@@ -186,6 +186,7 @@ export default function TripDetailPage() {
     </div>
   );
 }
+
 
 
 

@@ -23,6 +23,11 @@ const ROUTE_GREEN = "#15803d";
 const ROUTE_BLUE = "#08428c";
 const MINOR_ROAD_ZOOM = 12;
 
+// Symbol sizes and styles
+const SYMBOL_SIZE = 12;
+const SYMBOL_BORDER = 3;
+const SYMBOL_GAP = 6;
+
 export default function TripRouteOverlayMap({
   originLat,
   originLng,
@@ -200,25 +205,61 @@ export default function TripRouteOverlayMap({
       syncMinorRoads();
 
       if (isInZanzibar(originLat, originLng)) {
-        originMarkerRef.current = L.circleMarker([originLat, originLng], {
-          radius: 8,
-          color: "#15803d",
-          fillColor: "#15803d",
-          fillOpacity: 0.9,
-          weight: 2,
+        originMarkerRef.current = L.marker([originLat, originLng], {
+          icon: L.divIcon({
+            className: "trip-symbol trip-symbol-origin",
+            html: `
+              <div style="
+                width: ${SYMBOL_SIZE * 2 + SYMBOL_BORDER}px;
+                height: ${SYMBOL_SIZE * 2 + SYMBOL_BORDER}px;
+                background: #15803d;
+                border: ${SYMBOL_BORDER}px solid #fff;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: ${SYMBOL_SIZE / 2 + SYMBOL_BORDER}px;
+                color: #fff;
+                font-weight: bold;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              ">
+                <span>S</span>
+              </div>
+            `,
+            iconSize: [SYMBOL_SIZE * 2 + SYMBOL_BORDER, SYMBOL_SIZE * 2 + SYMBOL_BORDER],
+            iconAnchor: [SYMBOL_SIZE + SYMBOL_BORDER, SYMBOL_SIZE + SYMBOL_BORDER],
+          }),
         }).addTo(map);
-        originMarkerRef.current.bindTooltip("Origin").addTo(map);
+        originMarkerRef.current.bindTooltip("Origin Start").addTo(map);
       }
 
       if (isInZanzibar(destinationLat, destinationLng)) {
-        destMarkerRef.current = L.circleMarker([destinationLat, destinationLng], {
-          radius: 8,
-          color: "#dc2626",
-          fillColor: "#dc2626",
-          fillOpacity: 0.9,
-          weight: 2,
+        destMarkerRef.current = L.marker([destinationLat, destinationLng], {
+          icon: L.divIcon({
+            className: "trip-symbol trip-symbol-destination",
+            html: `
+              <div style="
+                width: ${SYMBOL_SIZE * 2 + SYMBOL_BORDER}px;
+                height: ${SYMBOL_SIZE * 2 + SYMBOL_BORDER}px;
+                background: #dc2626;
+                border: ${SYMBOL_BORDER}px solid #fff;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: ${SYMBOL_SIZE / 2 + SYMBOL_BORDER}px;
+                color: #fff;
+                font-weight: bold;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              ">
+                <span>D</span>
+              </div>
+            `,
+            iconSize: [SYMBOL_SIZE * 2 + SYMBOL_BORDER, SYMBOL_SIZE * 2 + SYMBOL_BORDER],
+            iconAnchor: [SYMBOL_SIZE + SYMBOL_BORDER, SYMBOL_SIZE + SYMBOL_BORDER],
+          }),
         }).addTo(map);
-        destMarkerRef.current.bindTooltip("Destination").addTo(map);
+        destMarkerRef.current.bindTooltip("Destination End").addTo(map);
       }
 
       // Calculate and draw route automatically
