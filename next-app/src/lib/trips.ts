@@ -443,6 +443,21 @@ export function findTripPlace(name: string): TripPlace | undefined {
   return ZANZIBAR_TRIP_PLACES.find((place) => place.name.toLowerCase() === needle);
 }
 
+import { nearestZanzibarPlace } from "@/lib/geo-context";
+
 export function tripPlaceMapsUrl(place: TripPlace): string {
   return `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`;
+}
+
+export function tripPlaceNameForCoords(latitude: unknown, longitude: unknown): string | null {
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  const exact = ZANZIBAR_TRIP_PLACES.find(
+    (place) => Math.abs(place.latitude - lat) < 0.0005 && Math.abs(place.longitude - lng) < 0.0005,
+  );
+  if (exact) return exact.name;
+  const nearest = nearestZanzibarPlace(lat, lng);
+  if (nearest && nearest.distanceKm < 50) return nearest.name;
+  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
