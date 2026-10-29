@@ -298,6 +298,14 @@ export const companyTourCreateSchema = companyTourBaseSchema
       .default("DRAFT"),
   })
   .superRefine((value, context) => {
+    if (value.destination_lat === null || value.destination_lng === null) {
+      context.addIssue({
+        code: "custom",
+        path: ["destination_lat"],
+        message: "Select a map location before creating this tour.",
+      });
+      return;
+    }
     const issue = coordinatePairIssue(
       value.destination_lat,
       value.destination_lng,

@@ -1662,3 +1662,47 @@
     transition-duration: 0.01ms !important;
   }
 }
+/* Reuse the catalogue surface and palette on the company tour editor. */
+:global(#tours-workspace) {
+  min-height: 100dvh;
+  gap: 18px;
+  padding: clamp(20px, 2.6vw, 34px) clamp(16px, 2.6vw, 36px) 48px;
+  background:
+    radial-gradient(900px 480px at 6% -12%, rgba(8, 66, 140, 0.12), transparent 62%),
+    radial-gradient(760px 460px at 102% -4%, rgba(8, 66, 140, 0.08), transparent 58%),
+    #d3d3d3;
+  color: #12223a;
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+}
+
+:global(#tours-workspace) :global([class*="formStack"]) { gap: 18px; }
+:global(#tours-workspace) :global([class*="formSection"]) {
+  border: 1px solid rgba(8, 66, 140, 0.14);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(18, 34, 58, 0.04), 0 14px 34px rgba(8, 66, 140, 0.07);
+}
+:global(#tours-workspace) :global([class*="formSectionTitle"]) { color: #12223a; }
+:global(#tours-workspace) :global([class*="formSectionCopy"]),
+:global(#tours-workspace) :global([class*="formHint"]) { color: #5c6a82; }
+:global(#tours-workspace) :global([class*="pageHead"]) {
+  padding: 0 0 18px;
+  border: 0;
+  border-bottom: 1px solid rgba(8, 66, 140, 0.14);
+  border-radius: 0;
+  background: transparent;
+}
+:global(#tours-workspace) input,
+:global(#tours-workspace) select,
+:global(#tours-workspace) textarea {
+  border-color: rgba(8, 66, 140, 0.22);
+  border-radius: 11px;
+  background-color: #fff;
+  color: #12223a;
+}
+:global(#tours-workspace) input:focus,
+:global(#tours-workspace) select:focus,
+:global(#tours-workspace) textarea:focus {
+  border-color: #08428c;
+  box-shadow: 0 0 0 3px rgba(8, 66, 140, 0.12);
+}

@@ -20,6 +20,7 @@ import {
   TOUR_PUBLICATION_LABELS,
 } from "@/lib/company-operations";
 import styles from "@/features/pages/company-operations.module.css";
+import tourStyles from "@/features/pages/company-tours.module.css";
 
 const CATEGORIES = [
   { value: "zanzibar", label: "Zanzibar" },
@@ -289,6 +290,10 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!tourId && (!form.latitude || !form.longitude)) {
+      setError("Select one tour location on the map or use your current location.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -396,16 +401,19 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
   );
 
   return (
-    <div className={`page ${styles.pageStack} ${styles.bookingDetailTheme}`}>
+    <div
+      id="tours-workspace"
+      className={`${tourStyles.toursRoot} page ${styles.pageStack} ${styles.bookingDetailTheme}`}
+    >
       <div className={styles.pageHead}>
         <div className={styles.pageTitleWrap}>
-          <Link className={styles.panelLink} href="/company/tours/">
+          <Link className={tourStyles.toursBreadcrumb} href="/company/tours/">
             <ArrowLeft size={15} /> Back to tours
           </Link>
-          <h1 className={styles.pageTitle}>
+          <h1 className={tourStyles.toursTitle}>
             {tourId ? "Edit tour" : "Create tour"}
           </h1>
-          <p className={styles.pageLead}>
+          <p className={tourStyles.toursLead}>
             This tour belongs only to your active company. Publishing makes it
             eligible for the public catalogue; availability controls booking
             independently.
@@ -550,7 +558,7 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
               </div>
               <div className={styles.formGrid} style={{ marginTop: 14 }}>
                 <div className={`${styles.formField} ${styles.formFieldFull}`}>
-                  <label>Destination map</label>
+                  <label>Tour location</label>
                   <div className={styles.tourMapNoRoute}>
                     <TripPlaceMapPicker
                       latitude={form.latitude ? Number(form.latitude) : null}
@@ -563,19 +571,23 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
                           longitude: String(place.longitude),
                         }))
                       }
-                      onPickPoint={(latitude, longitude) =>
+                      onPickPoint={(latitude, longitude, source) =>
                         setForm((current) => ({
                           ...current,
+                          destination:
+                            current.destination ||
+                            (source === "current" ? "Current location" : "Map location"),
                           latitude: String(latitude),
                           longitude: String(longitude),
                         }))
                       }
                       onClearPoint={() => {}}
+                      singleLocation={!tourId}
                     />
                   </div>
                   <p className={styles.formHint}>
-                    Optional. Select the destination on the map so the public
-                    listing can show an accurate location.
+                    Choose one mapped place or use your current location. Its
+                    coordinates are saved with this company tour.
                   </p>
                   {(form.latitude || form.longitude) && (
                     <button

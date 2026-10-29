@@ -348,8 +348,9 @@ type TripPlaceMapPickerProps = {
   longitude: number | null;
   disabled?: boolean;
   onSelectPlace: (place: TripPlace) => void;
-  onPickPoint: (latitude: number, longitude: number) => void;
+  onPickPoint: (latitude: number, longitude: number, source?: "map" | "current") => void;
   onClearPoint: () => void;
+  singleLocation?: boolean;
 };
 
 export default function TripPlaceMapPicker({
@@ -359,6 +360,7 @@ export default function TripPlaceMapPicker({
   onSelectPlace,
   onPickPoint,
   onClearPoint,
+  singleLocation = false,
 }: TripPlaceMapPickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Leaflet.Map | null>(null);
@@ -373,7 +375,7 @@ export default function TripPlaceMapPicker({
   const disabledRef = useRef(disabled);
   const routeModeRef = useRef(false);
   const onSelectRef = useRef<(place: TripPlace) => void>(() => {});
-  const onPickRef = useRef<(lat: number, lng: number) => void>(() => {});
+  const onPickRef = useRef<(lat: number, lng: number, source?: "map" | "current") => void>(() => {});
   const addRoutePointRef = useRef<(point: RouteEndpoint) => void>(() => {});
 
   const [ready, setReady] = useState(false);
@@ -510,8 +512,7 @@ export default function TripPlaceMapPicker({
           minZoom: 8,
           maxZoom: 18,
           zoomSnap: 0.25,
-          maxBounds: ZANZIBAR_BOUNDS,
-          maxBoundsViscosity: 1,
+        ...(singleLocation ? {} : { maxBounds: ZANZIBAR_BOUNDS, maxBoundsViscosity: 1 }),
           scrollWheelZoom: false,
         });
 
@@ -660,16 +661,18 @@ export default function TripPlaceMapPicker({
             });
         };
 
-        void addMainRoads();
-        map.on("zoomend", syncMinorRoads);
-        syncMinorRoads();
+        if (!singleLocation) {
+          void addMainRoads();
+          map.on("zoomend", syncMinorRoads);
+          syncMinorRoads();
+        }
 
         map.on("click", (event: Leaflet.LeafletMouseEvent) => {
-          if (disabledRef.current) return;
+          if (disabledRef.current || singleLocation) return;
           const lat = roundCoordinate(event.latlng.lat);
           const lng = roundCoordinate(event.latlng.lng);
           // Every pin must stay on Zanzibar land, not just inside the viewport.
-          if (!isInZanzibar(lat, lng)) return;
+          if (!singleLocation && !isInZanzibar(lat, lng)) return;
           if (routeModeRef.current) {
             const context = describeGeoPoint(lat, lng);
             const label =
@@ -679,7 +682,7 @@ export default function TripPlaceMapPicker({
             addRoutePointRef.current({ lat, lng, label });
             return;
           }
-          onPickRef.current(lat, lng);
+          onPickRef.current(lat, lng, "map");
         });
 
         leafletRef.current = leaflet;
@@ -703,7 +706,7 @@ export default function TripPlaceMapPicker({
       mapRef.current = null;
       leafletRef.current = null;
     };
-  }, []);
+  }, [singleLocation]);
 
   const fitGroup = useCallback(
     (animate: boolean) => {
@@ -868,7 +871,7 @@ if (!routeMode) {
     if (!pinRef.current) {
       const pin = leaflet
         .marker(point, {
-          draggable: !disabled,
+          draggable: !disabled && !singleLocation,
           autoPan: true,
           zIndexOffset: 1000,
           icon: leaflet.divIcon({
@@ -887,7 +890,7 @@ if (!routeMode) {
         const next = pin.getLatLng();
         const lat = roundCoordinate(next.lat);
         const lng = roundCoordinate(next.lng);
-        if (!isInZanzibar(lat, lng)) {
+        if (!singleLocation && !isInZanzibar(lat, lng)) {
           if (lastPointRef.current) pin.setLatLng(lastPointRef.current);
           return;
         }
@@ -899,7 +902,7 @@ if (!routeMode) {
       pinRef.current.setLatLng(point);
     }
 
-    if (disabled) pinRef.current.dragging?.disable();
+    if (disabled || singleLocation) pinRef.current.dragging?.disable();
     else pinRef.current.dragging?.enable();
 
     if (!map.getBounds().contains(point)) {
@@ -907,7 +910,7 @@ if (!routeMode) {
     } else if (map.getZoom() < 10) {
       map.setView(point, 12, { animate: false });
     }
-  }, [disabled, hasPoint, latitude, longitude, ready, selectedPlace]);
+  }, [disabled, hasPoint, latitude, longitude, ready, selectedPlace, singleLocation]);
 
   useEffect(() => {
     if (!routeMode || routeStops.length < 2) return;
@@ -1093,12 +1096,13 @@ if (!routeMode) {
       (position) => {
         const lat = roundCoordinate(position.coords.latitude);
         const lng = roundCoordinate(position.coords.longitude);
-        if (!isInZanzibar(lat, lng)) {
+        if (!singleLocation && !isInZanzibar(lat, lng)) {
           setLocationError("Your current location is outside Zanzibar.");
           setLocating(false);
           return;
         }
-        onPickPoint(lat, lng);
+        onPickPoint(lat, lng, "current");
+        mapRef.current?.flyTo([lat, lng], 13, { animate: true, duration: 0.8 });
         setLocating(false);
       },
       (error) => {
@@ -1113,7 +1117,7 @@ if (!routeMode) {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
-  }, [disabled, locating, onPickPoint]);
+  }, [disabled, locating, onPickPoint, singleLocation]);
 
   const selectedGroup = selectedPlace
     ? TRIP_PLACE_GROUPS.find(
@@ -1190,7 +1194,7 @@ if (!routeMode) {
           {filteredPlaces.length} mapped
         </span>
 
-        <button
+        {!singleLocation ? <button
           className={`${styles.routeToggle} ${
             routeMode ? styles.routeToggleActive : ""
           }`}
@@ -1202,7 +1206,7 @@ if (!routeMode) {
         >
           <Navigation size={13} aria-hidden="true" />
           {routeMode ? "Routing on" : "Route"}
-        </button>
+        </button> : null}
         <button
           className={styles.currentLocation}
           type="button"
@@ -1270,7 +1274,7 @@ if (!routeMode) {
             </div>
           ) : null}
 
-          {ready && routeMode ? (
+          {!singleLocation && ready && routeMode ? (
             <div className={styles.routePanel} role="status" aria-live="polite">
               <div className={styles.routePanelHead}>
                 <span className={styles.routePanelTitle}>
@@ -1376,7 +1380,7 @@ if (!routeMode) {
                   Trip pin
                 </span>
               ) : null}
-              {routeMode ? (
+              {!singleLocation && routeMode ? (
                 <>
                   <span className={styles.legendItem}>
                     <i className={styles.legendRouteStart} aria-hidden="true">
@@ -1480,9 +1484,9 @@ if (!routeMode) {
               </>
             ) : (
               <span className={styles.hint}>
-                Pick a place to fill the trip location and its coordinates, or
-                click the map to drop a custom pin. Use Route to measure a road
-                route between any two points.
+                {singleLocation
+                  ? "Choose one mapped place from the list or use your current location."
+                  : "Pick a place to fill the trip location and its coordinates, or click the map to drop a custom pin. Use Route to measure a road route between any two points."}
               </span>
             )}
 
@@ -1511,7 +1515,7 @@ if (!routeMode) {
                 >
                   <ExternalLink size={14} /> Google Maps
                 </a>
-                <button
+                {!singleLocation ? <button
                   className={styles.routeFrom}
                   type="button"
                   onClick={() =>
@@ -1524,7 +1528,7 @@ if (!routeMode) {
                   disabled={disabled}
                 >
                   <Navigation size={13} /> Route from here
-                </button>
+                </button> : null}
                 <button
                   className={styles.clear}
                   type="button"
