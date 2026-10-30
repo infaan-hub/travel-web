@@ -162,17 +162,36 @@ type RouteResult = {
   source: RouteSource;
 };
 
-function viewerRouteStops(route: TripMapViewerRoute): RouteEndpoint[] {
+type ViewerStop = RouteEndpoint & {
+  key: "A" | "B";
+  place: TripPlace | null;
+};
+
+function placeAtCoords(latitude: number, longitude: number) {
+  return (
+    ZANZIBAR_TRIP_PLACES.find(
+      (place) =>
+        Math.abs(place.latitude - latitude) < 1e-5 &&
+        Math.abs(place.longitude - longitude) < 1e-5,
+    ) ?? null
+  );
+}
+
+function viewerRouteStops(route: TripMapViewerRoute): ViewerStop[] {
   return [
     {
+      key: "A",
       lat: route.originLat,
       lng: route.originLng,
       label: route.originLabel?.trim() || "Trip start",
+      place: placeAtCoords(route.originLat, route.originLng),
     },
     {
+      key: "B",
       lat: route.destinationLat,
       lng: route.destinationLng,
       label: route.destinationLabel?.trim() || "Trip destination",
+      place: placeAtCoords(route.destinationLat, route.destinationLng),
     },
   ];
 }
@@ -428,14 +447,10 @@ export default function TripPlaceMapPicker({
 
   const selectedPlace = useMemo(() => {
     if (!hasPoint) return null;
-    return (
-      ZANZIBAR_TRIP_PLACES.find(
-        (place) =>
-          Math.abs(place.latitude - (latitude as number)) < 1e-5 &&
-          Math.abs(place.longitude - (longitude as number)) < 1e-5,
-      ) ?? null
-    );
+    return placeAtCoords(latitude as number, longitude as number);
   }, [hasPoint, latitude, longitude]);
+
+  const viewerStops = readOnly && viewerRoute ? viewerRouteStops(viewerRoute) : [];
 
   const pointContext = useMemo(
     () =>
@@ -771,6 +786,25 @@ export default function TripPlaceMapPicker({
     });
     setView("islands");
   }, []);
+
+  const fitViewerRoute = (animate: boolean) => {
+    const map = mapRef.current;
+    const leaflet = leafletRef.current;
+    if (!map || !leaflet) return;
+    const points: [number, number][] =
+      route && route.geometry.length > 1
+        ? route.geometry
+        : viewerStops.map((stop) => [stop.lat, stop.lng] as [number, number]);
+    if (points.length === 0) return;
+    map.invalidateSize();
+    map.fitBounds(leaflet.latLngBounds(points), {
+      paddingTopLeft: [28, 64],
+      paddingBottomRight: [28, 84],
+      maxZoom: 14,
+      animate,
+    });
+    setView("places");
+  };
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1524,7 +1558,7 @@ export default function TripPlaceMapPicker({
             ) : (
               <span className={styles.hint}>
                 {readOnly
-                  ? "Explore the mapped places and open any pin for its details and coordinates. The trip route is drawn automatically."
+                  ? "The trip starts at A and ends at B. Explore all mapped places on the map, or open a trip stop below for details and coordinates."
                   : singleLocation
                     ? "Choose one mapped place from the list or use your current location."
                     : "Pick a place to fill the trip location and its coordinates, or click the map to drop a custom pin. Use Route to measure a road route between any two points."}
@@ -1584,86 +1618,172 @@ export default function TripPlaceMapPicker({
             ) : null}
           </div>
 
-          <div className={styles.listHead}>
-            <span className={styles.listTitle}>
-              {filteredPlaces.length} place
-              {filteredPlaces.length === 1 ? "" : "s"}
-              {query.trim() ? ` for “${query.trim()}”` : ""}
-            </span>
-            <button
-              className={styles.fitButton}
-              type="button"
-              onClick={() => fitGroup(true)}
-              disabled={!ready || disabled}
-            >
-              <Locate size={13} /> Fit list
-            </button>
-          </div>
+          {readOnly && viewerRoute ? (
+            <>
+              <div className={styles.listHead}>
+                <span className={styles.listTitle}>
+                  {viewerStops.length} trip stop
+                  {viewerStops.length === 1 ? "" : "s"}
+                </span>
+                <button
+                  className={styles.fitButton}
+                  type="button"
+                  onClick={() => fitViewerRoute(true)}
+                  disabled={!ready || disabled}
+                >
+                  <Locate size={13} /> Fit route
+                </button>
+              </div>
 
-          <div className={styles.list}>
-            {filteredPlaces.length > 0 ? (
-              <ul className={styles.listItems}>
-                {filteredPlaces.map((place) => {
-                  const active = selectedPlace?.id === place.id;
-                  return (
-                    <li key={place.id}>
-                      <button
-                        className={`${styles.placeButton} ${
-                          active ? styles.placeButtonActive : ""
-                        }`}
-                        type="button"
-                        onClick={() => {
-                          if (disabled) return;
-                          if (routeMode && !readOnly) {
-                            addRoutePoint({
-                              lat: place.latitude,
-                              lng: place.longitude,
-                              label: `${place.name}, ${place.area}`,
+              <div className={styles.list}>
+                <ul className={styles.listItems}>
+                  {viewerStops.map((stop) => {
+                    const place = stop.place;
+                    const badgeColor =
+                      stop.key === "A" ? ROUTE_START_COLOR : ROUTE_END_COLOR;
+                    return (
+                      <li key={stop.key}>
+                        <button
+                          className={`${styles.placeButton} ${styles.stopButton}`}
+                          type="button"
+                          onClick={() => {
+                            if (place) {
+                              onSelectRef.current(place);
+                              return;
+                            }
+                            mapRef.current?.flyTo([stop.lat, stop.lng], 13, {
+                              animate: true,
+                              duration: 0.45,
                             });
-                            return;
-                          }
-                          onSelectRef.current(place);
-                        }}
-                        disabled={disabled}
-                        aria-pressed={active}
-                      >
-                        <span
-                          className={styles.placeIcon}
-                          style={{ color: markerColor(place.category) }}
-                          aria-hidden="true"
+                          }}
+                          disabled={disabled}
                         >
-                          <HugeiconsIcon
-                            icon={CATEGORY_ICON[place.category] as never}
-                            size={11}
-                            strokeWidth={2}
-                          />
-                        </span>
-                        <span className={styles.placeMain}>
-                          <span className={styles.placeName}>{place.name}</span>
-                          <span className={styles.placeMeta}>
-                            {place.area} · {place.category}
+                          <span
+                            className={`${styles.placeIcon} ${styles.stopIcon}`}
+                            aria-hidden="true"
+                          >
+                            <span
+                              className={`${styles.routeBadge} ${styles.stopBadge}`}
+                              style={{ background: badgeColor }}
+                            >
+                              {stop.key}
+                            </span>
                           </span>
-                        </span>
-                        <span className={styles.placeCoords}>
-                          {place.latitude.toFixed(5)},{" "}
-                          {place.longitude.toFixed(5)}
-                        </span>
-                        <span className={styles.placeRating}>
-                          {place.rating === null
-                            ? "—"
-                            : `${place.rating.toFixed(1)} ★`}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className={styles.listEmpty}>
-                No place matches “{query.trim()}”.
-              </p>
-            )}
-          </div>
+                          <span className={styles.placeMain}>
+                            <span className={styles.placeName}>
+                              {place?.name ?? stop.label}
+                            </span>
+                            <span className={styles.placeMeta}>
+                              {place
+                                ? `${place.area} · ${place.category}`
+                                : stop.key === "A"
+                                  ? "Trip start"
+                                  : "Trip destination"}
+                            </span>
+                          </span>
+                          <span className={styles.placeCoords}>
+                            {stop.lat.toFixed(5)}, {stop.lng.toFixed(5)}
+                          </span>
+                          <span className={styles.placeRating}>
+                            {place
+                              ? place.rating === null
+                                ? "—"
+                                : `${place.rating.toFixed(1)} ★`
+                              : ""}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.listHead}>
+                <span className={styles.listTitle}>
+                  {filteredPlaces.length} place
+                  {filteredPlaces.length === 1 ? "" : "s"}
+                  {query.trim() ? ` for “${query.trim()}”` : ""}
+                </span>
+                <button
+                  className={styles.fitButton}
+                  type="button"
+                  onClick={() => fitGroup(true)}
+                  disabled={!ready || disabled}
+                >
+                  <Locate size={13} /> Fit list
+                </button>
+              </div>
+
+              <div className={styles.list}>
+                {filteredPlaces.length > 0 ? (
+                  <ul className={styles.listItems}>
+                    {filteredPlaces.map((place) => {
+                      const active = selectedPlace?.id === place.id;
+                      return (
+                        <li key={place.id}>
+                          <button
+                            className={`${styles.placeButton} ${
+                              active ? styles.placeButtonActive : ""
+                            }`}
+                            type="button"
+                            onClick={() => {
+                              if (disabled) return;
+                              if (routeMode && !readOnly) {
+                                addRoutePoint({
+                                  lat: place.latitude,
+                                  lng: place.longitude,
+                                  label: `${place.name}, ${place.area}`,
+                                });
+                                return;
+                              }
+                              onSelectRef.current(place);
+                            }}
+                            disabled={disabled}
+                            aria-pressed={active}
+                          >
+                            <span
+                              className={styles.placeIcon}
+                              style={{ color: markerColor(place.category) }}
+                              aria-hidden="true"
+                            >
+                              <HugeiconsIcon
+                                icon={CATEGORY_ICON[place.category] as never}
+                                size={11}
+                                strokeWidth={2}
+                              />
+                            </span>
+                            <span className={styles.placeMain}>
+                              <span className={styles.placeName}>
+                                {place.name}
+                              </span>
+                              <span className={styles.placeMeta}>
+                                {place.area} · {place.category}
+                              </span>
+                            </span>
+                            <span className={styles.placeCoords}>
+                              {place.latitude.toFixed(5)},{" "}
+                              {place.longitude.toFixed(5)}
+                            </span>
+                            <span className={styles.placeRating}>
+                              {place.rating === null
+                                ? "—"
+                                : `${place.rating.toFixed(1)} ★`}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className={styles.listEmpty}>
+                    No place matches “{query.trim()}”.
+                  </p>
+                )}
+              </div>
+            </>
+          )}
         </aside>
       </div>
     </div>
