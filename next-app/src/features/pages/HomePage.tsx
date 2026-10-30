@@ -403,7 +403,7 @@ export default function HomePage() {
                   return (
                     <Link
                       key={`${trip.company_id}-${trip.id}`}
-                      href={trip.company_public_path}
+                      href={`/trips/${trip.id}/`}
                       className={styles.matchCard}
                       data-distance={distance}
                       style={{
