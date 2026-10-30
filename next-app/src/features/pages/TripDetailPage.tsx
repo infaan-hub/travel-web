@@ -28,20 +28,29 @@ export default function TripDetailPage() {
   const [trip, setTrip] = useState<CompanyTrip | null>(() =>
     id ? readClientCache<CompanyTrip>(`travel.trip.${id}`) ?? null : null,
   );
-  const [loading, setLoading] = useState<boolean>(() => !trip);
+  const [resolvedId, setResolvedId] = useState<string | null>(() =>
+    id && readClientCache<CompanyTrip>(`travel.trip.${id}`) ? id : null,
+  );
+  const loading = Boolean(id) && resolvedId !== id;
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
+    let cancelled = false;
     tripsAPI
       .getById(id)
       .then((res) => {
+        if (cancelled) return;
         const next = res.data?.results || res.data;
         setTrip(next);
         writeClientCache(`travel.trip.${id}`, next);
       })
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setResolvedId(id);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   if (loading) {
@@ -74,7 +83,7 @@ export default function TripDetailPage() {
     trip.place || tripPlaceNameForCoords(trip.origin_latitude ?? trip.latitude, trip.origin_longitude ?? trip.longitude);
   const destinationName = tripPlaceNameForCoords(trip.destination_latitude, trip.destination_longitude);
   const routeLabel =
-    originName && destinationName ? `${originName} â†’ ${destinationName}` : originName || destinationName || trip.place || "Trip";
+    originName && destinationName ? `${originName} → ${destinationName}` : originName || destinationName || trip.place || "Trip";
   const distanceLabel =
     trip.distance_km != null && Number.isFinite(Number(trip.distance_km))
       ? `${Number(trip.distance_km).toFixed(1)} km`
@@ -146,7 +155,7 @@ export default function TripDetailPage() {
               </div>
             </section>
 
-            {
+            {hasRouteMap ? (
               <section className={styles.tripMapSection} aria-label="Route map">
                 <div className={styles.tripSectionHeading}>
                   <span className={styles.tripSectionIcon}><MapPin size={18} /></span>
@@ -157,10 +166,13 @@ export default function TripDetailPage() {
                 </div>
                 <div className={styles.tripMapCard}>
                   <TripRouteOverlayMap
+                    key={`${originLat}:${originLng}:${destLat}:${destLng}`}
                     originLat={Number(originLat)}
                     originLng={Number(originLng)}
                     destinationLat={Number(destLat)}
                     destinationLng={Number(destLng)}
+                    originLabel={originName || undefined}
+                    destinationLabel={destinationName || undefined}
                   />
                 </div>
               </section>

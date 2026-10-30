@@ -162,6 +162,21 @@ type RouteResult = {
   source: RouteSource;
 };
 
+function viewerRouteStops(route: TripMapViewerRoute): RouteEndpoint[] {
+  return [
+    {
+      lat: route.originLat,
+      lng: route.originLng,
+      label: route.originLabel?.trim() || "Trip start",
+    },
+    {
+      lat: route.destinationLat,
+      lng: route.destinationLng,
+      label: route.destinationLabel?.trim() || "Trip destination",
+    },
+  ];
+}
+
 function markerColor(category: TripPlaceCategory) {
   return GROUP_COLORS[CATEGORY_GROUP.get(category) ?? "attractions"];
 }
@@ -284,10 +299,10 @@ function customPinHtml() {
 
 function routeBadgeHtml(label: "A" | "B") {
   const color = label === "A" ? ROUTE_START_COLOR : ROUTE_END_COLOR;
-  return `<span class="${styles.routeBadge}" style="--route-badge:${color}"></span>`;
+  return `<span class="${styles.routeBadge}" style="--route-badge:${color}">${label}</span>`;
 }
 
-function pointCardHtml(place: TripPlace) {
+function pointCardHtml(place: TripPlace, showAction = true) {
   const color = markerColor(place.category);
   const context = describeGeoPoint(place.latitude, place.longitude);
   const group = TRIP_PLACE_GROUPS.find(
@@ -314,12 +329,7 @@ function pointCardHtml(place: TripPlace) {
       <div><dt>Coordinates</dt><dd>${place.latitude.toFixed(5)}, ${place.longitude.toFixed(5)}</dd></div>
     </dl>
     <a class="${styles.pointCardLink}" href="${tripPlaceMapsUrl(place)}" target="_blank" rel="noopener noreferrer">Open in Google Maps <span aria-hidden="true">↗</span></a>
-    <button
-      class="${styles.pointCardRouteButton}"
-      type="button"
-    >
-      Select point
-    </button>
+    ${showAction ? `<button class="${styles.pointCardRouteButton}" type="button">Select point</button>` : ""}
   </div>`;
 }
 
@@ -343,6 +353,15 @@ function isRouteGeometry(value: unknown): value is [number, number][] {
   );
 }
 
+export type TripMapViewerRoute = {
+  originLat: number;
+  originLng: number;
+  destinationLat: number;
+  destinationLng: number;
+  originLabel?: string;
+  destinationLabel?: string;
+};
+
 type TripPlaceMapPickerProps = {
   latitude: number | null;
   longitude: number | null;
@@ -351,6 +370,10 @@ type TripPlaceMapPickerProps = {
   onPickPoint: (latitude: number, longitude: number, source?: "map" | "current") => void;
   onClearPoint: () => void;
   singleLocation?: boolean;
+  /** Read-only customer view: no pin dropping, routing controls or editing actions. */
+  readOnly?: boolean;
+  /** Fixed trip route to draw automatically in read-only mode. */
+  viewerRoute?: TripMapViewerRoute | null;
 };
 
 export default function TripPlaceMapPicker({
@@ -361,6 +384,8 @@ export default function TripPlaceMapPicker({
   onPickPoint,
   onClearPoint,
   singleLocation = false,
+  readOnly = false,
+  viewerRoute = null,
 }: TripPlaceMapPickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Leaflet.Map | null>(null);
@@ -383,8 +408,10 @@ export default function TripPlaceMapPicker({
   const [group, setGroup] = useState<TripPlaceGroupId>("all");
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"islands" | "places">("islands");
-  const [routeMode, setRouteMode] = useState(false);
-  const [routeStops, setRouteStops] = useState<RouteEndpoint[]>([]);
+  const [routeMode, setRouteMode] = useState(() => Boolean(readOnly && viewerRoute));
+  const [routeStops, setRouteStops] = useState<RouteEndpoint[]>(() =>
+    readOnly && viewerRoute ? viewerRouteStops(viewerRoute) : [],
+  );
   const [route, setRoute] = useState<RouteResult | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
   const [routeAttempt, setRouteAttempt] = useState(0);
@@ -668,7 +695,7 @@ export default function TripPlaceMapPicker({
         }
 
         map.on("click", (event: Leaflet.LeafletMouseEvent) => {
-          if (disabledRef.current || singleLocation) return;
+          if (disabledRef.current || singleLocation || readOnly) return;
           const lat = roundCoordinate(event.latlng.lat);
           const lng = roundCoordinate(event.latlng.lng);
           // Every pin must stay on Zanzibar land, not just inside the viewport.
@@ -706,7 +733,7 @@ export default function TripPlaceMapPicker({
       mapRef.current = null;
       leafletRef.current = null;
     };
-  }, [singleLocation]);
+  }, [readOnly, singleLocation]);
 
   const fitGroup = useCallback(
     (animate: boolean) => {
@@ -778,7 +805,7 @@ export default function TripPlaceMapPicker({
           opacity: 0.95,
         })
         .on("click", () => {
-          if (routeModeRef.current) {
+          if (routeModeRef.current && !readOnly) {
             addRoutePointRef.current({
               lat: place.latitude,
               lng: place.longitude,
@@ -789,22 +816,26 @@ export default function TripPlaceMapPicker({
           onSelectRef.current(place);
         });
 
-if (!routeMode) {
+      // Customers can inspect every mapped place. The route-picking action is
+      // only rendered inside the company editor.
+      if (!routeMode || readOnly) {
         marker.bindPopup(
           () => {
             const container = document.createElement("div");
-            container.innerHTML = pointCardHtml(place);
-            const button = container.querySelector<HTMLButtonElement>(
-              `.${styles.pointCardRouteButton}`,
-            );
-            button?.addEventListener("click", () => {
-              setRouteMode(true);
-              addRoutePointRef.current({
-                lat: place.latitude,
-                lng: place.longitude,
-                label: `${place.name}, ${place.area}`,
+            container.innerHTML = pointCardHtml(place, !readOnly);
+            if (!readOnly) {
+              const button = container.querySelector<HTMLButtonElement>(
+                `.${styles.pointCardRouteButton}`,
+              );
+              button?.addEventListener("click", () => {
+                setRouteMode(true);
+                addRoutePointRef.current({
+                  lat: place.latitude,
+                  lng: place.longitude,
+                  label: `${place.name}, ${place.area}`,
+                });
               });
-            });
+            }
             return container;
           },
           {
@@ -822,7 +853,7 @@ if (!routeMode) {
     }
 
     layerRef.current = layer;
-  }, [filteredPlaces, ready, routeMode]);
+  }, [filteredPlaces, readOnly, ready, routeMode]);
 
   useEffect(() => {
     if (!ready) return;
@@ -858,7 +889,7 @@ if (!routeMode) {
     const map = mapRef.current;
     const leaflet = leafletRef.current;
     if (!map || !leaflet || !ready) return;
-    if (!hasPoint || selectedPlace) {
+    if (readOnly || !hasPoint || selectedPlace) {
       pinRef.current?.remove();
       pinRef.current = null;
       lastPointRef.current = null;
@@ -910,7 +941,7 @@ if (!routeMode) {
     } else if (map.getZoom() < 10) {
       map.setView(point, 12, { animate: false });
     }
-  }, [disabled, hasPoint, latitude, longitude, ready, selectedPlace, singleLocation]);
+  }, [disabled, hasPoint, latitude, longitude, readOnly, ready, selectedPlace, singleLocation]);
 
   useEffect(() => {
     if (!routeMode || routeStops.length < 2) return;
@@ -1041,7 +1072,9 @@ if (!routeMode) {
     routeLine.addTo(layer);
 
     map.fitBounds(routeLine.getBounds(), {
-      padding: [40, 40],
+      // Keep the A/B badges clear of the top view switch and bottom legend.
+      paddingTopLeft: [28, 64],
+      paddingBottomRight: [28, 84],
       maxZoom: 14,
       animate: true,
     });
@@ -1136,7 +1169,7 @@ if (!routeMode) {
   if (routeLoading) routeInstruction = "Calculating the road route…";
 
   return (
-    <div className={styles.picker}>
+    <div className={`${styles.picker} ${readOnly ? styles.pickerReadOnly : ""}`}>
       <div className={styles.toolbar}>
         <div className={styles.searchWrap}>
           <span className={styles.searchIcon} aria-hidden="true">
@@ -1194,29 +1227,33 @@ if (!routeMode) {
           {filteredPlaces.length} mapped
         </span>
 
-        {!singleLocation ? <button
-          className={`${styles.routeToggle} ${
-            routeMode ? styles.routeToggleActive : ""
-          }`}
-          type="button"
-          onClick={toggleRouteMode}
-          disabled={disabled}
-          aria-pressed={routeMode}
-          title="Measure a road route between two points"
-        >
-          <Navigation size={13} aria-hidden="true" />
-          {routeMode ? "Routing on" : "Route"}
-        </button> : null}
-        <button
-          className={styles.currentLocation}
-          type="button"
-          onClick={locateCurrentPosition}
-          disabled={disabled || locating}
-          title="Use your current location"
-        >
-          <Locate size={13} aria-hidden="true" />
-          {locating ? "Locating…" : "My location"}
-        </button>
+        {!singleLocation && !readOnly ? (
+          <button
+            className={`${styles.routeToggle} ${
+              routeMode ? styles.routeToggleActive : ""
+            }`}
+            type="button"
+            onClick={toggleRouteMode}
+            disabled={disabled}
+            aria-pressed={routeMode}
+            title="Measure a road route between two points"
+          >
+            <Navigation size={13} aria-hidden="true" />
+            {routeMode ? "Routing on" : "Route"}
+          </button>
+        ) : null}
+        {!readOnly ? (
+          <button
+            className={styles.currentLocation}
+            type="button"
+            onClick={locateCurrentPosition}
+            disabled={disabled || locating}
+            title="Use your current location"
+          >
+            <Locate size={13} aria-hidden="true" />
+            {locating ? "Locating…" : "My location"}
+          </button>
+        ) : null}
       </div>
       {locationError ? (
         <p className={styles.locationError} role="alert">
@@ -1280,14 +1317,16 @@ if (!routeMode) {
                 <span className={styles.routePanelTitle}>
                   <Navigation size={13} aria-hidden="true" /> Road route
                 </span>
-                <button
-                  className={styles.routePanelClose}
-                  type="button"
-                  onClick={exitRouteMode}
-                  aria-label="Close route planner"
-                >
-                  <X size={13} />
-                </button>
+                {!readOnly ? (
+                  <button
+                    className={styles.routePanelClose}
+                    type="button"
+                    onClick={exitRouteMode}
+                    aria-label="Close route planner"
+                  >
+                    <X size={13} />
+                  </button>
+                ) : null}
               </div>
 
               {route ? (
@@ -1344,12 +1383,12 @@ if (!routeMode) {
                     Retry
                   </button>
                 ) : null}
-                {routeStops.length === 2 ? (
+                {!readOnly && routeStops.length === 2 ? (
                   <button type="button" onClick={swapRouteStops}>
                     Swap
                   </button>
                 ) : null}
-                {routeStops.length > 0 ? (
+                {!readOnly && routeStops.length > 0 ? (
                   <button type="button" onClick={resetRoute}>
                     Clear route
                   </button>
@@ -1484,9 +1523,11 @@ if (!routeMode) {
               </>
             ) : (
               <span className={styles.hint}>
-                {singleLocation
-                  ? "Choose one mapped place from the list or use your current location."
-                  : "Pick a place to fill the trip location and its coordinates, or click the map to drop a custom pin. Use Route to measure a road route between any two points."}
+                {readOnly
+                  ? "Explore the mapped places and open any pin for its details and coordinates. The trip route is drawn automatically."
+                  : singleLocation
+                    ? "Choose one mapped place from the list or use your current location."
+                    : "Pick a place to fill the trip location and its coordinates, or click the map to drop a custom pin. Use Route to measure a road route between any two points."}
               </span>
             )}
 
@@ -1515,7 +1556,7 @@ if (!routeMode) {
                 >
                   <ExternalLink size={14} /> Google Maps
                 </a>
-                {!singleLocation ? <button
+                {!singleLocation && !readOnly ? <button
                   className={styles.routeFrom}
                   type="button"
                   onClick={() =>
@@ -1529,14 +1570,16 @@ if (!routeMode) {
                 >
                   <Navigation size={13} /> Route from here
                 </button> : null}
-                <button
-                  className={styles.clear}
-                  type="button"
-                  onClick={handleClear}
-                  disabled={disabled}
-                >
-                  <X size={14} /> Clear pin
-                </button>
+                {!readOnly ? (
+                  <button
+                    className={styles.clear}
+                    type="button"
+                    onClick={handleClear}
+                    disabled={disabled}
+                  >
+                    <X size={14} /> Clear pin
+                  </button>
+                ) : null}
               </span>
             ) : null}
           </div>
@@ -1571,7 +1614,7 @@ if (!routeMode) {
                         type="button"
                         onClick={() => {
                           if (disabled) return;
-                          if (routeMode) {
+                          if (routeMode && !readOnly) {
                             addRoutePoint({
                               lat: place.latitude,
                               lng: place.longitude,

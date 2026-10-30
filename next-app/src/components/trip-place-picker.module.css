@@ -1298,6 +1298,16 @@
     max-width: none;
   }
 
+  .searchWrap {
+    flex: none;
+  }
+
+  /* The customer page already shows distance/time above the map, so the
+     floating route card would only cover the small mobile map. */
+  .pickerReadOnly .routePanel {
+    display: none;
+  }
+
   .groupSelect {
     align-items: stretch;
     flex-direction: column;
@@ -1332,6 +1342,21 @@
 
   .side {
     max-height: 380px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mapTop {
+    padding-left: 4px;
+  }
+
+  .mapTopKicker {
+    display: none;
+  }
+
+  .mapViewButton {
+    padding: 4px 7px;
+    font-size: 0.62rem;
   }
 }
 
