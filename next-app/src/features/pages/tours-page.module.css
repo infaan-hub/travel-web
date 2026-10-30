@@ -26,3 +26,22 @@
   color: #08428C;
   border-radius: 20px;
 }
+
+/*
+ * The tours grid uses the shared image card. Keep the card copy white even
+ * though the page-level heading and glass-button themes set dark ink.
+ */
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.dc__title),
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.dc__loc),
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.dc__description),
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.dc__rating),
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.dc__rating b),
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.dc__rating span),
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.tour-company-link),
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.tour-company-link span) {
+  color: #fff !important;
+}
+
+:is(.toursPageRoot, .toursPageRootZanzibar) :global(.dc__cta) span {
+  color: #fff !important;
+}
