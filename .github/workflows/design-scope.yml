@@ -1,0 +1,54 @@
+name: Design scope
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: design-scope-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  classify:
+    name: Classify changed UI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: next-app
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run design scope gate
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          node scripts/design-gate.mjs --changed --base "$BASE_REF" | tee design-scope.txt
+          {
+            echo "## Design scope gate"
+            echo
+            echo 'Policy: `.github/skills/travel-ui-design/scope.json`'
+            echo
+            echo '```text'
+            cat design-scope.txt
+            echo '```'
+            echo
+            echo "This check is advisory. The PR template records the required critique/handoff."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload gate report
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-scope
+          path: next-app/design-scope.txt
+          if-no-files-found: error
+          retention-days: 7

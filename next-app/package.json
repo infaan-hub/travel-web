@@ -30,7 +30,10 @@
     "test:onboarding": "node scripts/onboarding-test.mjs",
     "audit:layout": "node scripts/layout-audit.mjs",
     "audit:spacing": "node scripts/spacing-audit.mjs",
-    "audit:theme": "node scripts/theme-audit.mjs"
+    "audit:theme": "node scripts/theme-audit.mjs",
+    "design:scope": "node scripts/design-gate.mjs",
+    "design:scope:changed": "node scripts/design-gate.mjs --changed",
+    "design:scope:strict": "node scripts/design-gate.mjs --changed --strict"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
