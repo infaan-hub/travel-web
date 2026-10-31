@@ -34,9 +34,7 @@ const CATEGORY_COLORS: Record<TripPlaceCategory, string> = {
   "Health / Pharmacy": "#ef4444",
 };
 
-// GROUP_COUNTS removed - displaying all 326 places(
-  TRIP_PLACE_GROUPS.map((group) => [group.id, tripPlacesForGroup(group.id).length]),
-);
+// GROUP_COUNTS removed - displaying all 326 places
 
 function ratingLabel(place: TripPlace) {
   if (place.rating === null) return "Not rated";
