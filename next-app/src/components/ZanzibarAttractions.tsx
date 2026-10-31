@@ -14,8 +14,7 @@ import {
   tripPlacesForGroup,
   type TripPlace,
   type TripPlaceCategory,
-  type TripPlaceGroupId,
-} from "@/lib/trips";
+  } from "@/lib/trips";
 import styles from "@/components/zanzibar-attractions.module.css";
 
 const CATEGORY_COLORS: Record<TripPlaceCategory, string> = {
@@ -35,7 +34,7 @@ const CATEGORY_COLORS: Record<TripPlaceCategory, string> = {
   "Health / Pharmacy": "#ef4444",
 };
 
-const GROUP_COUNTS = new Map<TripPlaceGroupId, number>(
+// GROUP_COUNTS removed - displaying all 326 places(
   TRIP_PLACE_GROUPS.map((group) => [group.id, tripPlacesForGroup(group.id).length]),
 );
 
