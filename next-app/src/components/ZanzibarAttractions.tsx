@@ -10,6 +10,7 @@ import {
 } from "@/lib/zanzibar";
 import {
   TRIP_PLACE_GROUPS,
+  ZANZIBAR_TRIP_PLACES,
   tripPlaceMapsUrl,
   tripPlacesForGroup,
   type TripPlace,
@@ -92,10 +93,10 @@ export default function ZanzibarAttractions() {
 
   const places = useMemo(
     () =>
-      tripPlacesForGroup(group).filter((place) =>
+      ZANZIBAR_TRIP_PLACES.filter((place) =>
         isInZanzibar(place.latitude, place.longitude),
       ),
-    [group],
+    [],
   );
 
   const selectedPlace = places.find((place) => place.id === selectedId) ?? null;
@@ -232,7 +233,7 @@ export default function ZanzibarAttractions() {
             data, each pinned with its real Zanzibar coordinates.
           </p>
         </div>
-        <span className={styles.count}>{places.length} places</span>
+        <span className={styles.count}>326 places</span>
       </div>
 
       <div className={styles.filters} role="tablist" aria-label="Place categories">
