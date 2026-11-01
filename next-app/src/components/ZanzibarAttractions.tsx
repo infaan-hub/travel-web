@@ -10,12 +10,12 @@ import {
 } from "@/lib/zanzibar";
 import {
   TRIP_PLACE_GROUPS,
-  ZANZIBAR_TRIP_PLACES,
   tripPlaceMapsUrl,
   tripPlacesForGroup,
   type TripPlace,
   type TripPlaceCategory,
-  } from "@/lib/trips";
+  type TripPlaceGroupId,
+} from "@/lib/trips";
 import styles from "@/components/zanzibar-attractions.module.css";
 
 const CATEGORY_COLORS: Record<TripPlaceCategory, string> = {
@@ -35,7 +35,9 @@ const CATEGORY_COLORS: Record<TripPlaceCategory, string> = {
   "Health / Pharmacy": "#ef4444",
 };
 
-// GROUP_COUNTS removed - displaying all 326 places
+const GROUP_COUNTS = new Map<TripPlaceGroupId, number>(
+  TRIP_PLACE_GROUPS.map((item) => [item.id, tripPlacesForGroup(item.id).length]),
+);
 
 function ratingLabel(place: TripPlace) {
   if (place.rating === null) return "Not rated";
@@ -88,15 +90,15 @@ export default function ZanzibarAttractions() {
   const markersRef = useRef<Map<number, Leaflet.CircleMarker>>(new Map());
   const [ready, setReady] = useState(false);
   const [mapError, setMapError] = useState(false);
-  const [group, setGroup] = useState<TripPlaceGroupId>("attractions");
+  const [group, setGroup] = useState<TripPlaceGroupId>("all");
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const places = useMemo(
     () =>
-      ZANZIBAR_TRIP_PLACES.filter((place) =>
+      tripPlacesForGroup(group).filter((place) =>
         isInZanzibar(place.latitude, place.longitude),
       ),
-    [],
+    [group],
   );
 
   const selectedPlace = places.find((place) => place.id === selectedId) ?? null;
@@ -233,7 +235,7 @@ export default function ZanzibarAttractions() {
             data, each pinned with its real Zanzibar coordinates.
           </p>
         </div>
-        <span className={styles.count}>326 places</span>
+        <span className={styles.count}>{places.length} places</span>
       </div>
 
       <div className={styles.filters} role="tablist" aria-label="Place categories">
