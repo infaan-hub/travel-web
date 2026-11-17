@@ -497,12 +497,8 @@
 }
 
 /* The notification prompt sits far above the drawer in the global z-index
-   order; while the drawer is open it would cover the account actions. */
-:global(body.nav-drawer-open) :global(.push-prompt) {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
+   order; while the drawer is open it would cover the account actions.
+   Moved to globals.css because CSS Modules requires a local selector. */
 
 .brand:focus-visible,
 .close:focus-visible,

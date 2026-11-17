@@ -6237,3 +6237,11 @@ html body .app-layout .main-content .page
 
 
 
+
+/* Hide push prompt while nav drawer is open */
+body.nav-drawer-open .push-prompt {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
