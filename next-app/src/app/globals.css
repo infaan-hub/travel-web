@@ -2548,6 +2548,7 @@ body {
 
   .tours-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .attractions-grid {
