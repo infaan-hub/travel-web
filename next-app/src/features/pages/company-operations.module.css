@@ -932,14 +932,17 @@
 .formStack {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
   min-width: 0;
 }
 
 .formStack .formSection {
   min-width: 0;
-  padding: clamp(18px, 2.5vw, 26px);
-  border: 1px solid rgba(82, 125, 100, 0.24);
+  padding: clamp(20px, 2.5vw, 28px);
+  border: 1px solid rgba(82, 125, 100, 0.22);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 24px rgba(16, 34, 28, 0.06);
 }
 
 .profileForm {
@@ -1162,12 +1165,12 @@
 .itineraryRow {
   display: grid;
   grid-template-columns: 80px minmax(0, 1fr) minmax(0, 1.4fr) 44px;
-  gap: 8px;
+  gap: 10px;
   align-items: start;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.4);
+  padding: 12px;
+  border: 1px solid rgba(82, 125, 100, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .itineraryRow textarea {
