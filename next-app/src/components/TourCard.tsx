@@ -2,11 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Star } from "@/components/icons";
+import {
+  CheckCircle,
+  Clock,
+  ExternalLink,
+  MapPin,
+  Star,
+} from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
-import "./DestinationCard.css";
+import tourStyles from "@/features/pages/company-tours.module.css";
 
 type Tour = {
   id: number;
@@ -39,92 +44,112 @@ export default function TourCard({ tour }: { tour: Tour }) {
   const uniqueImages = [...new Set(images)];
 
   const detailHref = `/tour/${tour.id}/`;
-  const router = useRouter();
-  const [liked, setLiked] = useState(false);
+  const [liked] = useState(false);
 
   const rating =
     tour.average_rating != null ? Number(tour.average_rating).toFixed(1) : null;
   const reviews = tour.review_count || 0;
+  const price = Number(tour.price) > 0 ? `$${Number(tour.price).toLocaleString()}` : null;
 
   return (
-    <article className="dc dc--linked">
-      {uniqueImages[0] ? (
-        <Image
-          className="dc__img"
-          src={uniqueImages[0]}
-          alt={`${tour.title}, ${tour.destination}`}
-          fill
-          sizes="(max-width: 768px) 100vw, 300px"
-          style={{ objectFit: "cover" }}
-        />
-      ) : (
-        <div className="dc__img" style={{ display: "grid", placeItems: "center" }}>
-          <span>Experience</span>
-        </div>
-      )}
-      <div className="dc__shade" />
-
-      <Link
-        href={detailHref}
-        className="dc__cover-link"
-        aria-label={`View tour: ${tour.title}`}
-      />
-
-      <button
-        className="dc__heart"
-        aria-label={liked ? "Remove from favourites" : "Add to favourites"}
-        aria-pressed={liked}
-        onClick={() => setLiked((v) => !v)}
-        type="button"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24"
-          fill={liked ? "#fff" : "none"} stroke="#fff" strokeWidth="2"
-          strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" />
-        </svg>
-      </button>
-
-      <div className="dc__info">
-        <div className="dc__info-row">
-          <h3 className="dc__title">{tour.title}</h3>
-          <p className="dc__loc">
-            {tour.destination}
-            {tour.duration ? ` · ${tour.duration}` : ""}
-          </p>
-        </div>
-        {rating ? (
-          <span className="dc__rating">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-              stroke="#fff" strokeWidth="2" strokeLinejoin="round">
-              <polygon points="12 2 15 9 22 9.3 16.5 14 18.2 21 12 17 5.8 21 7.5 14 2 9.3 9 9" />
-            </svg>
-            <b>{rating}</b>
-            <span>{reviews} reviews</span>
+    <article className={`${tourStyles.toursCard} tour-card-company`}>
+      <div className={tourStyles.toursMedia}>
+        {uniqueImages[0] ? (
+          <Image
+            className={tourStyles.toursMediaImg}
+            src={uniqueImages[0]}
+            alt={`${tour.title}, ${tour.destination}`}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw"
+          />
+        ) : (
+          <span className={tourStyles.toursMediaFallback} aria-hidden="true">
+            Experience
           </span>
+        )}
+        <span className={tourStyles.toursMediaShade} aria-hidden="true" />
+        <span className={tourStyles.toursCategory}>
+          {tour.category?.trim() || "Experience"}
+        </span>
+        <span className={`${tourStyles.toursStatus} ${tourStyles.toursAvailabilityOn}`}>
+          <span className={tourStyles.toursStatusDot} aria-hidden="true" />
+          Available
+        </span>
+      </div>
+
+      <div className={tourStyles.toursBody}>
+        <h3 className={tourStyles.toursCardTitle}>
+          <Link href={detailHref}>{tour.title}</Link>
+        </h3>
+        <p className={tourStyles.toursMeta}>
+          <span className={tourStyles.toursMetaItem}>
+            <MapPin size={13} aria-hidden="true" />
+            <span>{tour.destination || "No destination"}</span>
+          </span>
+          <span className={tourStyles.toursMetaItem}>
+            <Clock size={13} aria-hidden="true" />
+            <span>{tour.duration || "Flexible duration"}</span>
+          </span>
+        </p>
+        {tour.short_description?.trim() ? (
+          <p className={tourStyles.toursCopy}>{tour.short_description}</p>
         ) : null}
+        <div className={tourStyles.toursSignals}>
+          {rating !== null ? (
+            <span className={tourStyles.toursRating}>
+              <Star size={13} aria-hidden="true" />
+              {rating}
+              <span className={tourStyles.toursRatingMuted}>({reviews})</span>
+            </span>
+          ) : (
+            <span className={`${tourStyles.toursRating} ${tourStyles.toursRatingMuted}`}>
+              No reviews yet
+            </span>
+          )}
+          <span
+            className={`${tourStyles.toursAvailability} ${tourStyles.toursAvailabilityOn}`}
+          >
+            <CheckCircle size={12} aria-hidden="true" />
+            Available
+          </span>
+        </div>
+        <div className={tourStyles.toursFoot}>
+          <div className={tourStyles.toursPrice}>
+            <span className={tourStyles.toursPriceValue}>
+              {price ?? "Price on request"}
+            </span>
+            <span className={tourStyles.toursPriceHint}>
+              {price ? "per person" : "No price set"}
+            </span>
+          </div>
+          {tour.company_name && tour.company_public_path ? (
+            <Link
+              href={tour.company_public_path}
+              className={tourStyles.toursIconAction}
+              aria-label={`View ${tour.company_name}`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <Star size={14} />
+            </Link>
+          ) : null}
+        </div>
+      </div>
+
+      <div className={tourStyles.toursCardActions}>
+        <Link className="btn btn-primary btn-sm" href={detailHref}>
+          View details
+        </Link>
         {tour.company_name && tour.company_public_path ? (
           <Link
+            className={tourStyles.toursIconAction}
             href={tour.company_public_path}
-            className="tour-company-link"
             aria-label={`View ${tour.company_name}`}
             onClick={(event) => event.stopPropagation()}
           >
-            <Star size={12} />
-            <span>{tour.company_name}</span>
+            <ExternalLink size={15} />
           </Link>
         ) : null}
       </div>
-
-      <button className="dc__cta" onClick={() => router.push(detailHref)} type="button">
-        <span>See more</span>
-        <i className="dc__chev" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="#0a2a4a" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 6 15 12 9 18" />
-          </svg>
-        </i>
-      </button>
     </article>
   );
 }
-

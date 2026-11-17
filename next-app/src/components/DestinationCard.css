@@ -432,3 +432,71 @@
 @media (prefers-reduced-motion: reduce) {
   .dc__heart, .dc__cta { transition: none; }
 }
+
+
+.tour-card-company {
+  /* palette ------------------------------------------------------------- */
+  --tours-primary: #d3d3d3;
+  --tours-secondary: #08428c;
+  --tours-accent: #08428c;
+  --tours-accent-hover: #0a52ad;
+  --tours-accent-deep: #063a78;
+  --tours-accent-soft: #e7eef9;
+  --tours-accent-soft-2: #d6e2f5;
+  --tours-surface: #ffffff;
+  --tours-surface-soft: #f2f2f2;
+  --tours-surface-sunken: #e6e6e6;
+  --tours-ink: #12223a;
+  --tours-ink-2: #44546c;
+  --tours-ink-3: #5c6a82;
+  --tours-line: rgba(8, 66, 140, 0.14);
+  --tours-line-soft: rgba(8, 66, 140, 0.08);
+  --tours-line-strong: rgba(8, 66, 140, 0.3);
+
+  --tours-ok: #0e7c5a;
+  --tours-ok-soft: #e4f4ee;
+  --tours-warn: #8a5a00;
+  --tours-warn-soft: #fbf0da;
+  --tours-danger: #b23a34;
+  --tours-danger-soft: #fae9e7;
+
+  --tours-radius-xl: 22px;
+  --tours-radius-lg: 18px;
+  --tours-radius-md: 14px;
+  --tours-radius-sm: 11px;
+  --tours-shadow:
+  --tours-shadow-hover:
+
+  /* remap shared tokens so nested components follow this theme ---------- */
+  --text-primary: var(--tours-ink);
+  --text-secondary: var(--tours-ink-2);
+  --text-light: var(--tours-ink-3);
+  --line: var(--tours-line);
+  --glass-bg: var(--tours-surface);
+  --glass-bg-elevated: var(--tours-surface);
+  --glass-bg-soft: var(--tours-surface-soft);
+  --glass-border: var(--tours-line);
+  --glass-border-strong: var(--tours-line-strong);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: var(--tours-shadow);
+  --glass-shadow-elevated: var(--tours-shadow-hover);
+  --glass-blur-md: 0px;
+  --glass-radius: var(--tours-radius-xl);
+  --aqua-strong: var(--tours-accent);
+  --aqua-deep: var(--tours-accent-deep);
+  --aqua-subtle: var(--tours-accent-soft);
+  --brand: var(--tours-accent);
+  --brand-strong: var(--tours-accent-hover);
+  --brand-accent: var(--tours-accent);
+  --brand-soft: var(--tours-accent-soft);
+  --success-bg: var(--tours-ok-soft);
+  --success-text: var(--tours-ok);
+  --warning-bg: var(--tours-warn-soft);
+  --warning-text: var(--tours-warn);
+  --danger-bg: var(--tours-danger-soft);
+  --danger-text: var(--tours-danger);
+
+  /* shell --------------------------------------------------------------- */
+  color: var(--tours-ink);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+}
