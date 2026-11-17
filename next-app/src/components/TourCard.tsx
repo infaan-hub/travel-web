@@ -85,25 +85,23 @@ export default function TourCard({ tour }: { tour: Tour }) {
       </button>
 
       <div className="dc__info">
-        <h3 className="dc__title">{tour.title}</h3>
-        <p className="dc__loc">
-          {tour.destination}
-          {tour.duration ? ` · ${tour.duration}` : ""}
-        </p>
-        <span className="dc__rating">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-            stroke="#fff" strokeWidth="2" strokeLinejoin="round">
-            <polygon points="12 2 15 9 22 9.3 16.5 14 18.2 21 12 17 5.8 21 7.5 14 2 9.3 9 9" />
-          </svg>
-          {rating ? (
-            <>
-              <b>{rating}</b>
-              <span>{reviews} reviews</span>
-            </>
-          ) : (
-            <span>No reviews</span>
-          )}
-        </span>
+        <div className="dc__info-row">
+          <h3 className="dc__title">{tour.title}</h3>
+          <p className="dc__loc">
+            {tour.destination}
+            {tour.duration ? ` · ${tour.duration}` : ""}
+          </p>
+        </div>
+        {rating ? (
+          <span className="dc__rating">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+              stroke="#fff" strokeWidth="2" strokeLinejoin="round">
+              <polygon points="12 2 15 9 22 9.3 16.5 14 18.2 21 12 17 5.8 21 7.5 14 2 9.3 9 9" />
+            </svg>
+            <b>{rating}</b>
+            <span>{reviews} reviews</span>
+          </span>
+        ) : null}
         {tour.company_name && tour.company_public_path ? (
           <Link
             href={tour.company_public_path}
@@ -115,11 +113,6 @@ export default function TourCard({ tour }: { tour: Tour }) {
             <span>{tour.company_name}</span>
           </Link>
         ) : null}
-        <span className="dc__price">
-          {Number(tour.price) > 0
-            ? `From $${Number(tour.price).toLocaleString()}`
-            : "Price on request"}
-        </span>
       </div>
 
       <button className="dc__cta" onClick={() => router.push(detailHref)} type="button">
