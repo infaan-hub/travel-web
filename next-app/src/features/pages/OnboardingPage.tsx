@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Bell, MapPin, ArrowLeft } from "lucide-react";
 import Image from "next/image";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   ONBOARDING_STEP_KEY,
   NOTIFICATION_PERMISSION_KEY,

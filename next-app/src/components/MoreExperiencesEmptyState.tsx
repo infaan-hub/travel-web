@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "framer-motion";
 import styles from "./MoreExperiencesEmptyState.module.css";
 
 type MoreExperiencesEmptyStateProps = {

@@ -1301,26 +1301,9 @@
   }
 }
 
-/* --------------------------------------------------------------------------
-   Focus and legacy control overrides
-   -------------------------------------------------------------------------- */
-:global(#settings-workspace) a:focus-visible,
-:global(#settings-workspace) button:focus-visible,
-:global(#settings-workspace) input:focus-visible,
-:global(#settings-workspace) textarea:focus-visible,
-:global(#settings-workspace) [tabindex]:focus-visible {
-  outline: 3px solid rgba(8, 66, 140, 0.42);
-  outline-offset: 2px;
-}
-
 :global(#settings-workspace) .settingsInput:focus-visible,
 :global(#settings-workspace) .settingsTextarea:focus-visible {
   outline: none;
-}
-
-:global(#settings-workspace) button,
-:global(#settings-workspace) a {
-  -webkit-tap-highlight-color: transparent;
 }
 
 .settingsSrOnly {

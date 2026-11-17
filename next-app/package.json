@@ -50,6 +50,7 @@
     "embla-carousel-autoplay": "8.6.0",
     "embla-carousel-react": "8.6.0",
     "file-type": "22.2.0",
+    "framer-motion": "^14.14.0",
     "jose": "6.2.12",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.63.0",
