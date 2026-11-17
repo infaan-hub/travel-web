@@ -142,6 +142,7 @@ export const reviewUserUpdateSchema = z.object({
 
 const bookingBaseSchema = z.object({
   tour: idSchema,
+  departure_id: optionalNullableInt,
   full_name: z.string().trim().min(1, "Full name is required.").max(200),
   email: z.string().trim().email("Enter a valid email address.").max(254),
   phone: z.string().trim().min(1, "Phone number is required.").max(20),

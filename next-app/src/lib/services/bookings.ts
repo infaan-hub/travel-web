@@ -1,6 +1,7 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { ApiError } from "@/lib/api/http";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/db/prisma";
 import type { AuthUser } from "@/lib/auth/session";
 import type { BookingCreateInput } from "@/lib/validation/schemas";
@@ -33,7 +34,20 @@ export async function createBooking(user: AuthUser | null, input: BookingCreateI
   }
   const tourId = tour.id;
 
-  const travelDate = new Date(`${input.travel_date}T00:00:00.000Z`);
+  const departureId = input.departure_id ?? null;
+  let departure: { id: number; date: Date; capacity: number; price: Prisma.Decimal | null } | null = null;
+  if (departureId) {
+    const found = await prisma.tourDeparture.findFirst({
+      where: { id: departureId, tourId, status: "scheduled" },
+      select: { id: true, date: true, capacity: true, price: true },
+    });
+    if (!found) throw new ApiError(404, "Departure not found.");
+    departure = found;
+  }
+
+  const travelDate = departure
+    ? new Date(departure.date)
+    : new Date(`${input.travel_date}T00:00:00.000Z`);
   if (Number.isNaN(travelDate.getTime())) {
     throw new ApiError(400, "Enter a valid travel date.");
   }
@@ -58,26 +72,48 @@ export async function createBooking(user: AuthUser | null, input: BookingCreateI
         }
         const attribution = deriveBookingAttribution(currentTour);
 
-        const booked = await tx.booking.aggregate({
-          where: {
-            tourId: currentTour.id,
-            travelDate,
-            status: { not: "cancelled" },
-          },
-          _sum: { travelers: true },
-        });
-        const alreadyBooked = booked._sum.travelers ?? 0;
-        if (alreadyBooked + input.travelers > currentTour.maxTravelers) {
-          throw new ApiError(
-            400,
-            `Only ${Math.max(0, currentTour.maxTravelers - alreadyBooked)} place(s) remain for ${input.travel_date}.`,
-          );
+        const unitPrice = departure?.price ?? currentTour.price;
+
+        if (departure) {
+          await tx.$queryRaw`SELECT id FROM "tour_departures" WHERE id = ${departure.id} FOR UPDATE`;
+          const currentDeparture = await tx.tourDeparture.findFirst({
+            where: { id: departure.id, tourId: currentTour.id, status: "scheduled" },
+          });
+          if (!currentDeparture) throw new ApiError(404, "Departure not found.");
+          const remaining = currentDeparture.capacity - currentDeparture.bookedCount;
+          if (input.travelers > remaining) {
+            throw new ApiError(
+              400,
+              `Only ${Math.max(0, remaining)} place(s) remain for this departure.`,
+            );
+          }
+          await tx.tourDeparture.update({
+            where: { id: currentDeparture.id },
+            data: { bookedCount: { increment: input.travelers } },
+          });
+        } else {
+          const booked = await tx.booking.aggregate({
+            where: {
+              tourId: currentTour.id,
+              travelDate,
+              status: { not: "cancelled" },
+            },
+            _sum: { travelers: true },
+          });
+          const alreadyBooked = booked._sum.travelers ?? 0;
+          if (alreadyBooked + input.travelers > currentTour.maxTravelers) {
+            throw new ApiError(
+              400,
+              `Only ${Math.max(0, currentTour.maxTravelers - alreadyBooked)} place(s) remain for ${input.travel_date}.`,
+            );
+          }
         }
 
         return tx.booking.create({
           data: {
             userId: user?.id ?? null,
             tourId: currentTour.id,
+            departureId: departure ? departure.id : null,
             ...attribution,
             reference,
             fullName: input.full_name,
@@ -85,8 +121,8 @@ export async function createBooking(user: AuthUser | null, input: BookingCreateI
             phone: input.phone,
             address: input.address,
             travelers: input.travelers,
-            unitPriceAtBooking: currentTour.price,
-            totalPriceAtBooking: currentTour.price.mul(input.travelers),
+            unitPriceAtBooking: unitPrice,
+            totalPriceAtBooking: unitPrice.mul(input.travelers),
             travelDate,
             notes: input.notes,
             userLat: input.user_lat,
@@ -264,12 +300,16 @@ export async function updateBooking(
     update.estimatedTimeMins = data.estimated_time_mins;
   }
   if (data.google_maps_url !== undefined) update.googleMapsUrl = data.google_maps_url;
+  if (data.departure_id !== undefined) update.departureId = data.departure_id;
   if (data.status !== undefined) update.status = data.status;
 
+  const departureChanged =
+    data.departure_id !== undefined && data.departure_id !== booking.departureId;
   const capacityChanged =
     (data.travelers !== undefined && data.travelers !== booking.travelers) ||
     (data.travel_date !== undefined &&
-      requestedTravelDate.getTime() !== booking.travelDate.getTime());
+      requestedTravelDate.getTime() !== booking.travelDate.getTime()) ||
+    departureChanged;
   const statusChanged = data.status !== undefined && data.status !== booking.status;
   // Customers may only edit pending bookings. Lock and re-check that condition
   // even for a notes-only edit so a concurrent confirmation cannot slip through.
@@ -295,7 +335,8 @@ export async function updateBooking(
             assertStatusTransition(current.status, data.status, user);
           }
 
-          if (capacityChanged && (data.status ?? current.status) !== "cancelled") {
+          const newStatusForCheck = (data.status ?? current.status) as BookingStatus;
+          if (capacityChanged && newStatusForCheck !== "cancelled") {
             const tour = await tx.tour.findFirst({
               where: { id: current.tourId, deletedAt: null, AND: [PUBLIC_TOUR_VISIBILITY] },
             });
@@ -305,23 +346,68 @@ export async function updateBooking(
             }
 
             const targetTravelers = data.travelers ?? current.travelers;
-            const targetDate =
-              data.travel_date !== undefined ? requestedTravelDate : current.travelDate;
-            const booked = await tx.booking.aggregate({
-              where: {
-                tourId: current.tourId,
-                travelDate: targetDate,
-                status: { not: "cancelled" },
-                id: { not: id },
-              },
-              _sum: { travelers: true },
-            });
-            const alreadyBooked = booked._sum.travelers ?? 0;
-            if (alreadyBooked + targetTravelers > tour.maxTravelers) {
-              throw new ApiError(
-                400,
-                `Only ${Math.max(0, tour.maxTravelers - alreadyBooked)} place(s) remain for ${targetDate.toISOString().slice(0, 10)}.`,
-              );
+            const newDepartureId =
+              data.departure_id !== undefined ? data.departure_id : current.departureId;
+
+            if (newDepartureId) {
+              const dep = await tx.tourDeparture.findFirst({
+                where: { id: newDepartureId, tourId: current.tourId, status: "scheduled" },
+              });
+              if (!dep) throw new ApiError(404, "Departure not found.");
+              const credit = current.departureId === newDepartureId ? current.travelers : 0;
+              const remaining = dep.capacity - dep.bookedCount + credit;
+              if (targetTravelers > remaining) {
+                throw new ApiError(
+                  400,
+                  `Only ${Math.max(0, remaining)} place(s) remain for this departure.`,
+                );
+              }
+            } else {
+              const targetDate =
+                data.travel_date !== undefined ? requestedTravelDate : current.travelDate;
+              const booked = await tx.booking.aggregate({
+                where: {
+                  tourId: current.tourId,
+                  travelDate: targetDate,
+                  status: { not: "cancelled" },
+                  id: { not: id },
+                },
+                _sum: { travelers: true },
+              });
+              const alreadyBooked = booked._sum.travelers ?? 0;
+              if (alreadyBooked + targetTravelers > tour.maxTravelers) {
+                throw new ApiError(
+                  400,
+                  `Only ${Math.max(0, tour.maxTravelers - alreadyBooked)} place(s) remain for ${targetDate.toISOString().slice(0, 10)}.`,
+                );
+              }
+            }
+          }
+
+          const oldDepartureId = current.departureId;
+          const newDepartureId =
+            data.departure_id !== undefined ? data.departure_id : current.departureId;
+          const newStatus = (data.status ?? current.status) as BookingStatus;
+          const targetTravelers = data.travelers ?? current.travelers;
+          const shouldAdjust = capacityChanged || statusChanged;
+          if (shouldAdjust) {
+            if (oldDepartureId && (newStatus === "cancelled" || oldDepartureId !== newDepartureId)) {
+              await tx.tourDeparture.update({
+                where: { id: oldDepartureId },
+                data: { bookedCount: { decrement: current.travelers } },
+              });
+            }
+            if (newDepartureId && newStatus !== "cancelled") {
+              const delta =
+                oldDepartureId === newDepartureId
+                  ? targetTravelers - current.travelers
+                  : targetTravelers;
+              if (delta !== 0) {
+                await tx.tourDeparture.update({
+                  where: { id: newDepartureId },
+                  data: { bookedCount: { increment: delta } },
+                });
+              }
             }
           }
 
@@ -384,6 +470,12 @@ export async function deleteBooking(id: number, user: AuthUser) {
   assertBookingAccess(booking, user);
   if (!user.isStaff && booking.status !== "pending") {
     throw new ApiError(400, "Only pending bookings can be deleted.");
+  }
+  if (booking.departureId && booking.status !== "cancelled") {
+    await prisma.tourDeparture.update({
+      where: { id: booking.departureId },
+      data: { bookedCount: { decrement: booking.travelers } },
+    });
   }
   await prisma.booking.delete({ where: { id } });
   await recordAudit({
