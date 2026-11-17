@@ -664,6 +664,22 @@ body {
   border-color: var(--travel-primary);
 }
 
+.btn-blue {
+  background: #08428c;
+  color: #FFFFFF;
+  border-color: #08428c;
+}
+
+.btn-blue:hover {
+  background: #0a52ad;
+  border-color: #0a52ad;
+}
+
+.btn-blue:active {
+  background: #063a78;
+  border-color: #063a78;
+}
+
 .btn-primary:hover {
   background: var(--travel-primary-hover);
   border-color: var(--travel-primary-hover);

@@ -4,9 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import {
+  Building2,
   CheckCircle,
   Clock,
-  ExternalLink,
   MapPin,
   Star,
 } from "@/components/icons";
@@ -129,14 +129,14 @@ export default function TourCard({ tour }: { tour: Tour }) {
               aria-label={`View ${tour.company_name}`}
               onClick={(event) => event.stopPropagation()}
             >
-              <Star size={14} />
+              <Building2 size={14} />
             </Link>
           ) : null}
         </div>
       </div>
 
       <div className={tourStyles.toursCardActions}>
-        <Link className="btn btn-primary btn-sm" href={detailHref}>
+        <Link className="btn btn-blue btn-sm" href={detailHref}>
           View details
         </Link>
         {tour.company_name && tour.company_public_path ? (
@@ -146,7 +146,7 @@ export default function TourCard({ tour }: { tour: Tour }) {
             aria-label={`View ${tour.company_name}`}
             onClick={(event) => event.stopPropagation()}
           >
-            <ExternalLink size={15} />
+            <Building2 size={15} />
           </Link>
         ) : null}
       </div>
