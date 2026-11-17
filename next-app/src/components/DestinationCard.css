@@ -465,7 +465,11 @@
   --tours-radius-md: 14px;
   --tours-radius-sm: 11px;
   --tours-shadow:
+    0 1px 2px rgba(18, 34, 58, 0.04),
+    0 14px 34px rgba(8, 66, 140, 0.07);
   --tours-shadow-hover:
+    0 2px 6px rgba(18, 34, 58, 0.06),
+    0 22px 48px rgba(8, 66, 140, 0.16);
 
   /* remap shared tokens so nested components follow this theme ---------- */
   --text-primary: var(--tours-ink);
@@ -499,4 +503,50 @@
   /* shell --------------------------------------------------------------- */
   color: var(--tours-ink);
   font-family: var(--font-inter), Inter, system-ui, sans-serif;
+}
+
+/*
+ * Customer-facing CTA. Kept as a card-level class so global button
+ * variants cannot repaint it, and so it always renders blue.
+ */
+.tour-card-company .tour-card-cta,
+.tour-card-company .tour-card-cta:link,
+.tour-card-company .tour-card-cta:visited {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #08428c;
+  border-radius: 11px;
+  background: #08428c;
+  color: #ffffff;
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+.tour-card-company .tour-card-cta:hover {
+  border-color: #0a52ad;
+  background: #0a52ad;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.tour-card-company .tour-card-cta:active {
+  border-color: #063a78;
+  background: #063a78;
+  transform: translateY(0);
+}
+
+.tour-card-company .tour-card-cta:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.35);
+  outline-offset: 2px;
 }

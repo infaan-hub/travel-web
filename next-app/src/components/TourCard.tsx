@@ -67,14 +67,6 @@ export default function TourCard({ tour }: { tour: Tour }) {
             Experience
           </span>
         )}
-        <span className={tourStyles.toursMediaShade} aria-hidden="true" />
-        <span className={tourStyles.toursCategory}>
-          {tour.category?.trim() || "Experience"}
-        </span>
-        <span className={`${tourStyles.toursStatus} ${tourStyles.toursAvailabilityOn}`}>
-          <span className={tourStyles.toursStatusDot} aria-hidden="true" />
-          Available
-        </span>
       </div>
 
       <div className={tourStyles.toursBody}>
@@ -95,17 +87,17 @@ export default function TourCard({ tour }: { tour: Tour }) {
           <p className={tourStyles.toursCopy}>{tour.short_description}</p>
         ) : null}
         <div className={tourStyles.toursSignals}>
-          {rating !== null ? (
-            <span className={tourStyles.toursRating}>
-              <Star size={13} aria-hidden="true" />
-              {rating}
-              <span className={tourStyles.toursRatingMuted}>({reviews})</span>
-            </span>
-          ) : (
-            <span className={`${tourStyles.toursRating} ${tourStyles.toursRatingMuted}`}>
-              No reviews yet
-            </span>
-          )}
+          <span className={tourStyles.toursRating}>
+            <Star size={13} aria-hidden="true" />
+            {rating !== null ? (
+              <>
+                {rating}
+                <span className={tourStyles.toursRatingMuted}>({reviews})</span>
+              </>
+            ) : (
+              <span className={tourStyles.toursRatingMuted}>No reviews yet</span>
+            )}
+          </span>
           <span
             className={`${tourStyles.toursAvailability} ${tourStyles.toursAvailabilityOn}`}
           >
@@ -136,7 +128,7 @@ export default function TourCard({ tour }: { tour: Tour }) {
       </div>
 
       <div className={tourStyles.toursCardActions}>
-        <Link className="btn btn-blue btn-sm" href={detailHref}>
+        <Link className="btn btn-sm tour-card-cta" href={detailHref}>
           View details
         </Link>
       </div>

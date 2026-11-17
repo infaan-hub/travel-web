@@ -4530,7 +4530,9 @@ input[type="radio"] {
 /* Two cards per row on Android and iOS: the tracks, the type and the
    padding all step down so a row stays readable at 160-180px. */
 @media (min-width: 360px) and (max-width: 768px) {
-  .tours-grid,
+  /* Explore experiences stays one card per row so its details remain legible. */
+  .tours-grid {grid-template-columns: minmax(0, 1fr);}
+
   .attractions-grid,
   .tips-grid,
   .home-attractions-grid,
