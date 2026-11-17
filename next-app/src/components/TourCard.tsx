@@ -139,16 +139,6 @@ export default function TourCard({ tour }: { tour: Tour }) {
         <Link className="btn btn-blue btn-sm" href={detailHref}>
           View details
         </Link>
-        {tour.company_name && tour.company_public_path ? (
-          <Link
-            className={tourStyles.toursIconAction}
-            href={tour.company_public_path}
-            aria-label={`View ${tour.company_name}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <Building2 size={15} />
-          </Link>
-        ) : null}
       </div>
     </article>
   );
