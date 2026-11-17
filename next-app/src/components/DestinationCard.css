@@ -187,6 +187,21 @@
 .dc__rating b { font-weight: 600; }
 .dc__rating span { opacity: 0.8; }
 
+.dc__price {
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(20, 163, 163, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(8px);
+}
+
 .dc--company {
   width: 100%;
   min-width: 0;

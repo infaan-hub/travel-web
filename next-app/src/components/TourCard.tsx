@@ -86,18 +86,10 @@ export default function TourCard({ tour }: { tour: Tour }) {
 
       <div className="dc__info">
         <h3 className="dc__title">{tour.title}</h3>
-        <p className="dc__loc">{tour.destination}</p>
-        {tour.company_name && tour.company_public_path ? (
-          <Link
-            href={tour.company_public_path}
-            className="tour-company-link"
-            aria-label={`View ${tour.company_name}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <Star size={12} />
-            <span>{tour.company_name}</span>
-          </Link>
-        ) : null}
+        <p className="dc__loc">
+          {tour.destination}
+          {tour.duration ? ` · ${tour.duration}` : ""}
+        </p>
         <span className="dc__rating">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
             stroke="#fff" strokeWidth="2" strokeLinejoin="round">
@@ -111,6 +103,22 @@ export default function TourCard({ tour }: { tour: Tour }) {
           ) : (
             <span>No reviews</span>
           )}
+        </span>
+        {tour.company_name && tour.company_public_path ? (
+          <Link
+            href={tour.company_public_path}
+            className="tour-company-link"
+            aria-label={`View ${tour.company_name}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Star size={12} />
+            <span>{tour.company_name}</span>
+          </Link>
+        ) : null}
+        <span className="dc__price">
+          {Number(tour.price) > 0
+            ? `From $${Number(tour.price).toLocaleString()}`
+            : "Price on request"}
         </span>
       </div>
 
