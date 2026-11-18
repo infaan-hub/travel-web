@@ -1,4 +1,4 @@
-# Travel. — tours, travel & safari marketplace
+# Travel. — tour transport platform (cars, rentals & driver jobs)
 
 This directory contains the unified Next.js App Router application migrated
 from the former Django REST API and React/Vite client.

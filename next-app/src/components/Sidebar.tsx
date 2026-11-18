@@ -24,6 +24,9 @@ import {
   MessageSquare,
   Building2,
   X,
+  Car,
+  User,
+  Sparkles,
 } from "@/components/icons";
 import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -154,10 +157,19 @@ export default function Sidebar() {
           permission: "dashboard:read",
         },
         {
-          to: "/company/tours/",
-          label: "Experiences",
-          icon: Globe,
-          permission: "tours:read",
+          to: "/company/private-hire/",
+          label: "Private Hire",
+          icon: Car,
+        },
+        {
+          to: "/company/private-driver/",
+          label: "Private Drivers",
+          icon: User,
+        },
+        {
+          to: "/company/private-service/",
+          label: "Private Services",
+          icon: Sparkles,
         },
         {
           to: "/company/trips/",

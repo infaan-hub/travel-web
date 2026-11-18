@@ -55,6 +55,24 @@ enum CompanyRole {
   TOUR_EDITOR
   FINANCE
   OPERATIONS_COORDINATOR
+  DRIVER
+}
+
+enum DriverIdType {
+  ZAN_ID
+  NIDA
+  PASSPORT
+}
+
+enum JoinRequestType {
+  COMPANY_REGISTRATION
+  PUBLIC_DRIVER_REGISTRATION
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum UserAccountType {
@@ -162,10 +180,13 @@ model Company {
   searchVector          Unsupported("tsvector")? @map("search_vector")
 
   createdBy     User?               @relation("CompanyCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  memberships   CompanyMembership[]
-  tours         Tour[]
-  trips         CompanyTrip[]
-  bookings      Booking[]
+  memberships         CompanyMembership[]
+  tours               Tour[]
+  trips               CompanyTrip[]
+  privateHireVehicles PrivateHireVehicle[]
+  privateHireDrivers  PrivateHireDriver[]
+  privateHireServices PrivateHireService[]
+  bookings            Booking[]
   auditLogs     AuditLog[]
   notifications Notification[]
 
@@ -715,4 +736,94 @@ model FunnelEvent {
   @@index([stage, createdAt])
   @@index([sessionId])
   @@map("funnel_events")
+}
+
+model PrivateHireVehicle {
+  id              Int      @id @default(autoincrement())
+  companyId       Int      @map("company_id")
+  name            String
+  plateNumber     String   @map("plate_number")
+  category        String   @default("Sedan")
+  capacity        Int      @default(4)
+  luggageCapacity Int      @default(2) @map("luggage_capacity")
+  description     String   @default("")
+  includes        Json     @default("[]")
+  excludes        Json     @default("[]")
+  frontImage      String   @map("front_image")
+  sideImage       String?  @map("side_image")
+  backImage       String?  @map("back_image")
+  isAvailable     Boolean  @default(true) @map("is_available")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  company  Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  services PrivateHireService[]
+
+  @@index([companyId, isAvailable])
+  @@map("private_hire_vehicles")
+}
+
+model PrivateHireDriver {
+  id            Int          @id @default(autoincrement())
+  companyId     Int          @map("company_id")
+  name          String
+  phone         String
+  email         String       @default("")
+  image         String?
+  licenseNumber String       @map("license_number")
+  idType        DriverIdType @default(ZAN_ID) @map("id_type")
+  idNumber      String       @map("id_number")
+  isActive      Boolean      @default(true) @map("is_active")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  company  Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  services PrivateHireService[]
+
+  @@index([companyId, isActive])
+  @@map("private_hire_drivers")
+}
+
+model PrivateHireService {
+  id          Int      @id @default(autoincrement())
+  companyId   Int      @map("company_id")
+  vehicleId   Int      @map("vehicle_id")
+  driverId    Int      @map("driver_id")
+  title       String
+  description String   @default("")
+  price       Decimal  @db.Decimal(10, 2)
+  pricingType String   @default("per_trip") @map("pricing_type")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  company Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle PrivateHireVehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver  PrivateHireDriver  @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, isActive])
+  @@index([vehicleId])
+  @@index([driverId])
+  @@map("private_hire_services")
+}
+
+model PartnerJoinRequest {
+  id            Int               @id @default(autoincrement())
+  type          JoinRequestType
+  status        JoinRequestStatus @default(PENDING)
+  fullName      String            @map("full_name")
+  email         String
+  phone         String
+  companyName   String?           @map("company_name")
+  idType        DriverIdType?     @map("id_type")
+  idNumber      String?           @map("id_number")
+  licenseNumber String?           @map("license_number")
+  details       Json              @default("{}")
+  adminNotes    String            @default("") @map("admin_notes")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  @@index([type, status])
+  @@index([createdAt])
+  @@map("partner_join_requests")
 }

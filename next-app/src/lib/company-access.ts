@@ -89,6 +89,11 @@ export const COMPANY_ROLE_PERMISSIONS: Readonly<
     "bookings:read",
     "bookings:update",
   ],
+  DRIVER: [
+    "company:read",
+    "dashboard:read",
+    "bookings:read",
+  ],
 };
 
 export const COMPANY_PERMISSION_LABELS: Readonly<
@@ -116,6 +121,7 @@ export const COMPANY_ROLE_LABELS: Readonly<Record<CompanyRole, string>> = {
   TOUR_EDITOR: "Tour Editor",
   FINANCE: "Finance",
   OPERATIONS_COORDINATOR: "Operations Coordinator",
+  DRIVER: "Driver",
 };
 
 export function companyRolePermissions(

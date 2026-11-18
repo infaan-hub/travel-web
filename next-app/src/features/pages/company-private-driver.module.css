@@ -1,0 +1,428 @@
+/* Company Private Hire Driver Stylesheet */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1320px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.topBar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .topBar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.titleArea h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f2d3d;
+  margin: 0 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titleArea p {
+  color: #5c6a82;
+  font-size: 14px;
+  margin: 0;
+}
+
+.actionsArea {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(20, 163, 163, 0.25);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 14px;
+  min-width: 240px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.searchBox input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  color: #12223a;
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #0f6b6b 0%, #14a3a3 100%);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(20, 163, 163, 0.25);
+}
+
+.primaryBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(20, 163, 163, 0.35);
+}
+
+.driversGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.driverCard {
+  background: #ffffff;
+  border: 1px solid rgba(20, 163, 163, 0.16);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(15, 45, 61, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.driverCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 45, 61, 0.08);
+}
+
+.driverCardHeader {
+  padding: 20px 20px 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(to bottom, #f0fdfa, #ffffff);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #14a3a3;
+  box-shadow: 0 4px 10px rgba(20, 163, 163, 0.15);
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.avatarFallback {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+  border: 2px solid #38bdf8;
+  flex-shrink: 0;
+}
+
+.driverMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.driverName {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f2d3d;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.statusActive {
+  background: #e4f4ee;
+  color: #0e7c5a;
+}
+
+.statusInactive {
+  background: #fae9e7;
+  color: #b23a34;
+}
+
+.driverCardBody {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  font-size: 13px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+}
+
+.infoRow svg {
+  color: #14a3a3;
+  flex-shrink: 0;
+}
+
+.idBadgeGroup {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.idItem {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.idLabel {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.idVal {
+  color: #0f172a;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.driverCardFooter {
+  padding: 12px 20px;
+  background: #fbfdfd;
+  border-top: 1px solid rgba(20, 163, 163, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+}
+
+.btnSecondary {
+  background: rgba(20, 163, 163, 0.1);
+  color: #0f6b6b;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btnDanger {
+  background: rgba(178, 58, 52, 0.08);
+  color: #b23a34;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Modal styles */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 45, 61, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.modalContent {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(20, 163, 163, 0.2);
+}
+
+.modalHeader {
+  padding: 18px 24px;
+  border-bottom: 1px solid #eef2f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f2d3d;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #5c6a82;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.formBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .formGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formField label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #12223a;
+}
+
+.requiredMark {
+  color: #b23a34;
+  margin-left: 2px;
+}
+
+.inputControl,
+.selectControl {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 14px;
+  background: #fbfdfd;
+  outline: none;
+  transition: border-color 0.2s;
+  color: #12223a;
+}
+
+.inputControl:focus,
+.selectControl:focus {
+  border-color: #14a3a3;
+  box-shadow: 0 0 0 3px rgba(20, 163, 163, 0.12);
+}
+
+.avatarUploadArea {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.uploadPreviewThumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #14a3a3;
+  background: #e2e8f0;
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  border-top: 1px solid #eef2f5;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #fafbfc;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.emptyState {
+  padding: 60px 20px;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px dashed rgba(20, 163, 163, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.emptyStateTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f2d3d;
+}
+
+.emptyStateSub {
+  font-size: 14px;
+  color: #64748b;
+  max-width: 440px;
+}

@@ -222,6 +222,40 @@ export const companyAPI = {
   booking: (id: string | number) => api.get(`/company/bookings/${id}/`),
   updateBookingStatus: (id: string | number, status: string) =>
     api.patch(`/company/bookings/${id}/`, { status }),
+
+  // Private Hire Vehicles
+  privateHireVehicles: (params?: Params) => api.get("/company/private-hire/", { params }),
+  privateHireVehicle: (id: string | number) => api.get(`/company/private-hire/${id}/`),
+  createPrivateHireVehicle: (data: FormData | Record<string, unknown>) =>
+    api.post("/company/private-hire/", data, formDataConfig(data)),
+  updatePrivateHireVehicle: (id: string | number, data: FormData | Record<string, unknown>) =>
+    api.put(`/company/private-hire/${id}/`, data, formDataConfig(data)),
+  deletePrivateHireVehicle: (id: string | number) =>
+    api.delete(`/company/private-hire/${id}/`),
+
+  // Private Hire Drivers
+  privateHireDrivers: (params?: Params) => api.get("/company/private-driver/", { params }),
+  privateHireDriver: (id: string | number) => api.get(`/company/private-driver/${id}/`),
+  createPrivateHireDriver: (data: FormData | Record<string, unknown>) =>
+    api.post("/company/private-driver/", data, formDataConfig(data)),
+  updatePrivateHireDriver: (id: string | number, data: FormData | Record<string, unknown>) =>
+    api.put(`/company/private-driver/${id}/`, data, formDataConfig(data)),
+  deletePrivateHireDriver: (id: string | number) =>
+    api.delete(`/company/private-driver/${id}/`),
+
+  // Private Hire Services
+  privateHireServices: (params?: Params) => api.get("/company/private-service/", { params }),
+  privateHireService: (id: string | number) => api.get(`/company/private-service/${id}/`),
+  createPrivateHireService: (data: FormData | Record<string, unknown>) =>
+    api.post("/company/private-service/", data, formDataConfig(data)),
+  updatePrivateHireService: (id: string | number, data: FormData | Record<string, unknown>) =>
+    api.put(`/company/private-service/${id}/`, data, formDataConfig(data)),
+  deletePrivateHireService: (id: string | number) =>
+    api.delete(`/company/private-service/${id}/`),
+};
+
+export const partnerRequestsAPI = {
+  submit: (data: Record<string, unknown>) => api.post("/partner-requests/", data),
 };
 
 export const analyticsAPI = {
@@ -255,6 +289,10 @@ export const travelVehiclesAPI = {
 export const publicCompaniesAPI = {
   getAll: (params?: Params) => api.get("/companies/", { params }),
   getBySlug: (slug: string) => api.get(`/companies/${slug}/`),
+};
+export const publicPrivateHireAPI = {
+  getAll: (params?: Params) => api.get("/private-services/", { params }),
+  getById: (id: string | number) => api.get(`/private-services/${id}/`),
 };
 export const workspacesAPI = {
   getAll: (params?: Params) => api.get("/workspaces/", { params }),
