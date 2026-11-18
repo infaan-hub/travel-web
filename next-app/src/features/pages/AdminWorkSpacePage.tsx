@@ -49,12 +49,11 @@ export default function AdminWorkSpacePage() {
     loadTemplates();
   };
 
-  const loadTouristBookings = async (userId: number) => {
+  const loadTouristBookings = async (userId: number, email?: string) => {
     try {
-      const res = await adminAPI.getAllBookings();
+      const res = await adminAPI.getAllBookings({ user_id: userId, email });
       const bookings = res.data?.results || res.data || [];
-      const userBookings = Array.isArray(bookings) ? bookings.filter(b => b.user === userId || b.email === selectedTourist?.email) : [];
-      setTouristBookings(userBookings);
+      setTouristBookings(Array.isArray(bookings) ? bookings : []);
     } catch {
       setTouristBookings([]);
     }
@@ -62,7 +61,7 @@ export default function AdminWorkSpacePage() {
 
   const selectTourist = (tourist: any) => {
     setSelectedTourist(tourist);
-    loadTouristBookings(tourist.id);
+    loadTouristBookings(tourist.id, tourist.email);
   };
 
   const startPlanning = () => {
@@ -79,9 +78,7 @@ export default function AdminWorkSpacePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await adminAPI.getAllUsers();
-      const users = res.data?.results || res.data || [];
-      const exists = Array.isArray(users) && users.find(u => u.email === registerForm.email);
+      const exists = tourists.find((user) => user.email.toLowerCase() === registerForm.email.trim().toLowerCase());
       if (exists) {
         toast.error('A user with this email already exists. Please select them from the list.');
         setShowRegisterForm(false);

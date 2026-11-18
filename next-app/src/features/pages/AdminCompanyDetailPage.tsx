@@ -341,7 +341,7 @@ export default function AdminCompanyDetailPage() {
             </div>
             <h1>{company.name}</h1>
             <p className={styles.detailSubtitle}>
-              /{company.slug}{company.region ? ` · ${company.region}` : ""}
+              /{company.slug}{company.region ? ` Â· ${company.region}` : ""}
             </p>
           </div>
         </div>
@@ -718,7 +718,7 @@ export default function AdminCompanyDetailPage() {
                   <input id="company-account-password" type="password" value={accountForm.password} onChange={(event) => setAccountForm((v) => ({ ...v, password: event.target.value }))} required minLength={8} autoComplete="new-password" />
                 </div>
                 <button className="btn btn-primary" disabled={creatingAccount}>
-                  {creatingAccount ? "Creating login…" : "Create company login"}
+                  {creatingAccount ? "Creating loginâ€¦" : "Create company login"}
                 </button>
               </form>
             )}

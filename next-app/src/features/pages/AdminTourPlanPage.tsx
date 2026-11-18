@@ -65,15 +65,13 @@ export default function AdminTourPlanPage() {
       const touristEmail = searchParams.get('email');
 
       if (touristId && isNew) {
-        const usersRes = await adminAPI.getAllUsers().catch(() => ({ data: [] }));
-        const users = usersRes.data?.results || usersRes.data || [];
-        const found = Array.isArray(users) ? users.find(u => u.id == touristId) : null;
+        const usersRes = await adminAPI.getUser(touristId).catch(() => null);
+        const found = usersRes?.data ?? null;
         if (found) {
           setTourist(found);
-          const bookingsRes = await adminAPI.getAllBookings().catch(() => ({ data: [] }));
+          const bookingsRes = await adminAPI.getAllBookings({ user_id: found.id, email: found.email }).catch(() => ({ data: [] }));
           const bookings = bookingsRes.data?.results || bookingsRes.data || [];
-          const userBookings = Array.isArray(bookings) ? bookings.filter(b => b.user === found.id || b.email === found.email) : [];
-          setTouristBookings(userBookings);
+          setTouristBookings(Array.isArray(bookings) ? bookings : []);
         } else {
           setTourist({ id: Number(touristId), username: touristName ?? '', email: touristEmail ?? '', is_staff: false } as Customer);
         }

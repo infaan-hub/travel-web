@@ -15,13 +15,9 @@ export async function GET(request: NextRequest) {
     await enforceRateLimit(request, "verify-email-status", 30, 60 * 1000);
     const jar = await cookies();
     const token = jar.get(LOGIN_CHALLENGE_COOKIE)?.value;
-    if (!token) {
-      throw new ApiError(401, "No active verification challenge. Please sign in again.");
-    }
+    if (!token) return ok({ pending: false });
     const challenge = await getLoginChallenge(token);
-    if (!challenge) {
-      throw new ApiError(401, "No active verification challenge. Please sign in again.");
-    }
+    if (!challenge) return ok({ pending: false });
     return ok({
       pending: true,
       masked_email: challenge.maskedEmail,

@@ -9,10 +9,17 @@ export async function GET(request: NextRequest) {
     await requireStaff(request);
     const { searchParams } = new URL(request.url);
     const tour = searchParams.get("tour");
+    const userIdParam = searchParams.get("user_id");
+    const parsedUserId = userIdParam ? Number(userIdParam) : undefined;
+    const limitParam = searchParams.get("limit");
+    const limit = limitParam ? Number(limitParam) : undefined;
     const bookings = await listAllBookings({
       status: searchParams.get("status") ?? undefined,
       tour: tour ? Number(tour) : undefined,
       search: searchParams.get("search") ?? undefined,
+      userId: Number.isInteger(parsedUserId) && parsedUserId! > 0 ? parsedUserId : undefined,
+      email: searchParams.get("email")?.trim() || undefined,
+      limit: Number.isInteger(limit) && limit! > 0 ? limit : undefined,
     });
     return ok(bookings.map(bookingSerializer));
   } catch (error) {

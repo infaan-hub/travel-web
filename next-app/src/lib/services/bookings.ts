@@ -491,22 +491,38 @@ export async function listAllBookings(filters: {
   status?: string;
   tour?: number;
   search?: string;
+  userId?: number;
+  email?: string;
+  limit?: number;
 }) {
-  const where: Record<string, unknown> = {};
+  const where: Prisma.BookingWhereInput = {};
   if (filters.status && ["pending", "confirmed", "cancelled"].includes(filters.status)) {
-    where.status = filters.status;
+    where.status = filters.status as BookingStatus;
   }
   if (filters.tour) where.tourId = filters.tour;
-  if (filters.search) {
-    where.OR = [
-      { fullName: { contains: filters.search, mode: "insensitive" } },
-      { email: { contains: filters.search, mode: "insensitive" } },
-    ];
+  const and: Prisma.BookingWhereInput[] = [];
+  if (filters.userId || filters.email) {
+    and.push({
+      OR: [
+        ...(filters.userId ? [{ userId: filters.userId }] : []),
+        ...(filters.email ? [{ email: { equals: filters.email, mode: "insensitive" as const } }] : []),
+      ],
+    });
   }
+  if (filters.search) {
+    and.push({
+      OR: [
+        { fullName: { contains: filters.search, mode: "insensitive" } },
+        { email: { contains: filters.search, mode: "insensitive" } },
+      ],
+    });
+  }
+  if (and.length) where.AND = and;
   return prisma.booking.findMany({
     where,
     include: BOOKING_INCLUDE,
     orderBy: { createdAt: "desc" },
+    ...(filters.limit ? { take: Math.min(100, Math.max(1, filters.limit)) } : {}),
   });
 }
 

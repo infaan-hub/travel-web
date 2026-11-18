@@ -138,7 +138,7 @@ export default function AdminCustomersPage() {
                   <td>
                     {u.company ? (
                       <span>{u.company.name}</span>
-                    ) : "—"}
+                    ) : "â€”"}
                   </td>
                   <td>
                     <span className={`role-badge ${u.is_active === false ? "" : "customer-role"}`}>

@@ -7,80 +7,62 @@ export async function dashboardStats() {
   const weekAgo = new Date(today.getTime() - 7 * 86400000);
   const monthAgo = new Date(today.getTime() - 30 * 86400000);
 
-  const [
-    totalTours,
-    totalBookings,
-    totalReviews,
-    totalUsers,
-    newUsersToday,
-    newUsersWeek,
-    newUsersMonth,
-    pendingBookings,
-    confirmedBookings,
-    cancelledBookings,
-    zanzibarTours,
-    tanzaniaTours,
-    totalVisitors,
-    uniqueVisitors,
-    loggedInVisitors,
-    guestVisitors,
-    visitorsToday,
-    visitorsWeek,
-    visitorsMonth,
-    totalWorkspaces,
-  ] = await Promise.all([
-    prisma.tour.count(),
-    prisma.booking.count(),
-    prisma.review.count(),
-    prisma.user.count(),
-    prisma.user.count({ where: { dateJoined: { gte: today } } }),
-    prisma.user.count({ where: { dateJoined: { gte: weekAgo } } }),
-    prisma.user.count({ where: { dateJoined: { gte: monthAgo } } }),
-    prisma.booking.count({ where: { status: "pending" } }),
-    prisma.booking.count({ where: { status: "confirmed" } }),
-    prisma.booking.count({ where: { status: "cancelled" } }),
-    prisma.tour.count({ where: { category: "zanzibar" } }),
-    prisma.tour.count({ where: { category: "tanzania" } }),
-    prisma.visitorTracking.count(),
-    prisma.visitorTracking.groupBy({ by: ["sessionId"] }).then((rows) => rows.length),
-    prisma.visitorTracking
-      .groupBy({ by: ["userId"], where: { isAuthenticated: true, userId: { not: null } } })
-      .then((rows) => rows.length),
-    prisma.visitorTracking
-      .groupBy({ by: ["sessionId"], where: { isAuthenticated: false } })
-      .then((rows) => rows.length),
-    prisma.visitorTracking
-      .groupBy({ by: ["sessionId"], where: { createdAt: { gte: today } } })
-      .then((rows) => rows.length),
-    prisma.visitorTracking
-      .groupBy({ by: ["sessionId"], where: { createdAt: { gte: weekAgo } } })
-      .then((rows) => rows.length),
-    prisma.visitorTracking
-      .groupBy({ by: ["sessionId"], where: { createdAt: { gte: monthAgo } } })
-      .then((rows) => rows.length),
-    prisma.workspace.count(),
-  ]);
+  const [tourRows, bookingRows, userRows, visitorRows, totalReviews, totalWorkspaces] =
+    await Promise.all([
+      prisma.$queryRaw<Array<{ totalTours: number; zanzibarTours: number; tanzaniaTours: number }>>`
+        SELECT COUNT(*)::int AS "totalTours",
+               COUNT(*) FILTER (WHERE category = 'zanzibar')::int AS "zanzibarTours",
+               COUNT(*) FILTER (WHERE category = 'tanzania')::int AS "tanzaniaTours"
+        FROM tours`,
+      prisma.$queryRaw<Array<{ totalBookings: number; pendingBookings: number; confirmedBookings: number; cancelledBookings: number }>>`
+        SELECT COUNT(*)::int AS "totalBookings",
+               COUNT(*) FILTER (WHERE status = 'pending')::int AS "pendingBookings",
+               COUNT(*) FILTER (WHERE status = 'confirmed')::int AS "confirmedBookings",
+               COUNT(*) FILTER (WHERE status = 'cancelled')::int AS "cancelledBookings"
+        FROM bookings`,
+      prisma.$queryRaw<Array<{ totalUsers: number; newUsersToday: number; newUsersWeek: number; newUsersMonth: number }>>`
+        SELECT COUNT(*)::int AS "totalUsers",
+               COUNT(*) FILTER (WHERE date_joined >= ${today})::int AS "newUsersToday",
+               COUNT(*) FILTER (WHERE date_joined >= ${weekAgo})::int AS "newUsersWeek",
+               COUNT(*) FILTER (WHERE date_joined >= ${monthAgo})::int AS "newUsersMonth"
+        FROM users`,
+      prisma.$queryRaw<Array<{ totalVisitors: number; uniqueVisitors: number; loggedInVisitors: number; guestVisitors: number; visitorsToday: number; visitorsWeek: number; visitorsMonth: number }>>`
+        SELECT COUNT(*)::int AS "totalVisitors",
+               COUNT(DISTINCT session_id)::int AS "uniqueVisitors",
+               COUNT(DISTINCT user_id) FILTER (WHERE is_authenticated AND user_id IS NOT NULL)::int AS "loggedInVisitors",
+               COUNT(DISTINCT session_id) FILTER (WHERE NOT is_authenticated)::int AS "guestVisitors",
+               COUNT(DISTINCT session_id) FILTER (WHERE created_at >= ${today})::int AS "visitorsToday",
+               COUNT(DISTINCT session_id) FILTER (WHERE created_at >= ${weekAgo})::int AS "visitorsWeek",
+               COUNT(DISTINCT session_id) FILTER (WHERE created_at >= ${monthAgo})::int AS "visitorsMonth"
+        FROM visitor_tracking`,
+      prisma.review.count(),
+      prisma.workspace.count(),
+    ]);
 
+  const tours = tourRows[0];
+  const bookings = bookingRows[0];
+  const users = userRows[0];
+  const visitors = visitorRows[0];
   return {
-    total_tours: totalTours,
-    total_bookings: totalBookings,
+    total_tours: tours.totalTours,
+    total_bookings: bookings.totalBookings,
     total_reviews: totalReviews,
-    total_users: totalUsers,
-    new_users_today: newUsersToday,
-    new_users_week: newUsersWeek,
-    new_users_month: newUsersMonth,
-    pending_bookings: pendingBookings,
-    confirmed_bookings: confirmedBookings,
-    cancelled_bookings: cancelledBookings,
-    zanzibar_tours: zanzibarTours,
-    tanzania_tours: tanzaniaTours,
-    total_visitors: totalVisitors,
-    unique_visitors: uniqueVisitors,
-    logged_in_visitors: loggedInVisitors,
-    guest_visitors: guestVisitors,
-    visitors_today: visitorsToday,
-    visitors_week: visitorsWeek,
-    visitors_month: visitorsMonth,
+    total_users: users.totalUsers,
+    new_users_today: users.newUsersToday,
+    new_users_week: users.newUsersWeek,
+    new_users_month: users.newUsersMonth,
+    pending_bookings: bookings.pendingBookings,
+    confirmed_bookings: bookings.confirmedBookings,
+    cancelled_bookings: bookings.cancelledBookings,
+    zanzibar_tours: tours.zanzibarTours,
+    tanzania_tours: tours.tanzaniaTours,
+    total_visitors: visitors.totalVisitors,
+    unique_visitors: visitors.uniqueVisitors,
+    logged_in_visitors: visitors.loggedInVisitors,
+    guest_visitors: visitors.guestVisitors,
+    visitors_today: visitors.visitorsToday,
+    visitors_week: visitors.visitorsWeek,
+    visitors_month: visitors.visitorsMonth,
     total_workspaces: totalWorkspaces,
   };
 }
@@ -91,7 +73,7 @@ export async function analytics() {
   const start = new Date(today.getTime() - 29 * 86400000);
   const userStart = new Date(today.getTime() - 29 * 86400000);
 
-  const [visitorsByDayRaw, newUsersByDayRaw, bookingsByMonthRaw, tourViews, loggedIn, guests, totalVisits, pageViews] =
+  const [visitorsByDayRaw, newUsersByDayRaw, bookingsByMonthRaw, tourViews, visitorMetricsRows, pageViews] =
     await Promise.all([
       prisma.$queryRaw<{ day: Date; count: number }[]>`
         SELECT date_trunc('day', created_at)::date AS day,
@@ -121,13 +103,12 @@ export async function analytics() {
         orderBy: { _count: { sessionId: "desc" } },
         take: 5,
       }),
-      prisma.visitorTracking
-        .groupBy({ by: ["sessionId"], where: { isAuthenticated: true } })
-        .then((rows) => rows.length),
-      prisma.visitorTracking
-        .groupBy({ by: ["sessionId"], where: { isAuthenticated: false } })
-        .then((rows) => rows.length),
-      prisma.visitorTracking.count(),
+      prisma.$queryRaw<Array<{ loggedIn: number; guests: number; totalVisits: number; uniqueVisitors: number }>>`
+        SELECT COUNT(DISTINCT session_id) FILTER (WHERE is_authenticated)::int AS "loggedIn",
+               COUNT(DISTINCT session_id) FILTER (WHERE NOT is_authenticated)::int AS "guests",
+               COUNT(*)::int AS "totalVisits",
+               COUNT(DISTINCT session_id)::int AS "uniqueVisitors"
+        FROM visitor_tracking`,
       prisma.$queryRaw<{ page: string; count: number }[]>`
         SELECT page_url AS page, COUNT(*)::int AS count
         FROM visitor_tracking
@@ -180,21 +161,19 @@ export async function analytics() {
   for (const row of pageViews) {
     pageViewsMap[row.page || "/"] = Number(row.count);
   }
-  const uniqueVisitors = await prisma.visitorTracking
-    .groupBy({ by: ["sessionId"] })
-    .then((rows) => rows.length);
+  const visitorMetrics = visitorMetricsRows[0];
 
   return {
     visitors_by_day,
     new_users_by_day,
     bookings_by_month,
     popular_tours,
-    logged_in_vs_guests: { logged_in: loggedIn, guests },
+    logged_in_vs_guests: { logged_in: visitorMetrics.loggedIn, guests: visitorMetrics.guests },
     // Extra metrics used by the admin UI.
-    total_visits: totalVisits,
-    unique_visitors: uniqueVisitors,
+    total_visits: visitorMetrics.totalVisits,
+    unique_visitors: visitorMetrics.uniqueVisitors,
     average_visits_per_user:
-      uniqueVisitors > 0 ? Math.round((totalVisits / uniqueVisitors) * 100) / 100 : 0,
+      visitorMetrics.uniqueVisitors > 0 ? Math.round((visitorMetrics.totalVisits / visitorMetrics.uniqueVisitors) * 100) / 100 : 0,
     page_views: pageViewsMap,
   };
 }

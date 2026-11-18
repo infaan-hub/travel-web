@@ -155,6 +155,30 @@ function updateData(input, existing, slug) {
     return data;
 }
 
+async function listAdminCompanies(filters: any = {}, pagination: any = null) {
+    const where = {};
+    if (filters.status) where.status = filters.status;
+    if (filters.region) where.region = { contains: filters.region, mode: "insensitive" };
+    if (filters.search) {
+        where.OR = [
+            { name: { contains: filters.search, mode: "insensitive" } },
+            { slug: { contains: filters.search, mode: "insensitive" } },
+            { contactEmail: { contains: filters.search, mode: "insensitive" } },
+            { region: { contains: filters.search, mode: "insensitive" } }
+        ];
+    }
+    const [companies, total] = await Promise.all([
+        prisma.company.findMany({
+            where,
+            include: COMPANY_LIST_INCLUDE,
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            skip: pagination?.skip ?? 0,
+            take: pagination?.take ?? 100
+        }),
+        prisma.company.count({ where })
+    ]);
+    return { companies, total };
+}
 async function getAdminCompany(id) {
     const company = await prisma.company.findUnique({
         where: {

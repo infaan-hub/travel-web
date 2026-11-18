@@ -82,7 +82,6 @@ export default async function CompanyProfilePage({ params }: Props) {
                     alt={`${company.name} logo`}
                     width={84}
                     height={84}
-                    priority
                     className={styles.logo}
                   />
                 ) : (

@@ -33,6 +33,10 @@ export default function VerifyEmailPage() {
       try {
         const res = await api.get("/auth/verify-email/");
         if (!active) return;
+        if (res.data?.pending === false) {
+          router.replace(`/login/?from=${encodeURIComponent(from)}`);
+          return;
+        }
         setMaskedEmail(res.data?.masked_email ?? "");
         setExpiresAt(res.data?.expires_at ?? "");
         setCooldown(res.data?.cooldown_remaining ?? 0);
