@@ -24,7 +24,7 @@ export type AuthUser = {
   username: string;
   email: string;
   is_staff: boolean;
-  account_type: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER";
+  account_type: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER" | "PRIVATE_HIRE_COMPANY";
   date_joined: string;
   profile_image_url?: string | null;
   companies?: AuthCompanyMembership[];

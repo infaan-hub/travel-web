@@ -41,7 +41,7 @@ export type AuthenticatedUser = {
   isStaff: boolean;
   isSuperuser: boolean;
   isActive: boolean;
-  accountType: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER";
+  accountType: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER" | "PRIVATE_HIRE_COMPANY";
   sessionVersion: number;
 };
 
@@ -104,7 +104,7 @@ export async function createTourCompanyOwner(input: {
       username,
       email,
       password: await hashPassword(input.password),
-      accountType: "TOUR_COMPANY",
+      accountType: "PRIVATE_HIRE_COMPANY",
       profile: { create: {} },
     },
     select: {

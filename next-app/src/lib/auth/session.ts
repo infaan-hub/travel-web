@@ -22,7 +22,7 @@ export type AuthUser = {
   isStaff: boolean;
   isSuperuser: boolean;
   isActive: boolean;
-  accountType: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER";
+  accountType: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER" | "PRIVATE_HIRE_COMPANY";
 };
 
 export type AuthContext = {
