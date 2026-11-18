@@ -73,7 +73,7 @@ describe("GET /api/token/refresh", () => {
     );
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("https://travel.test/tour-company/dashboard/");
+    expect(response.headers.get("location")).toBe("https://travel.test/company/dashboard/");
   });
 
   it("rejects a backslash-based external return URL", async () => {
@@ -82,6 +82,6 @@ describe("GET /api/token/refresh", () => {
     );
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("https://travel.test/tour-company/dashboard/");
+    expect(response.headers.get("location")).toBe("https://travel.test/company/dashboard/");
   });
 });

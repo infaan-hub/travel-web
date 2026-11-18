@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { POST } from "@/app/api/company/tours/[id]/gallery/route";
 
-const { transaction, transactionCall, requireCompanyMember, tourFindFirst, storeUpload, deleteImage } =
+const { transaction, transactionCall, requireCompanyAccount, tourFindFirst, storeUpload, deleteImage } =
   vi.hoisted(() => {
     const transaction = {
       tourGalleryImage: {
@@ -13,7 +13,7 @@ const { transaction, transactionCall, requireCompanyMember, tourFindFirst, store
     return {
       transaction,
       transactionCall: vi.fn(),
-      requireCompanyMember: vi.fn(),
+      requireCompanyAccount: vi.fn(),
       tourFindFirst: vi.fn(),
       storeUpload: vi.fn(),
       deleteImage: vi.fn(),
@@ -26,7 +26,7 @@ vi.mock("@/lib/db/prisma", () => ({
     $transaction: transactionCall,
   },
 }));
-vi.mock("@/lib/auth/company", () => ({ requireCompanyMember }));
+vi.mock("@/lib/auth/company-account", () => ({ requireCompanyAccount }));
 vi.mock("@/lib/api/body", () => ({
   readPayload: vi.fn(async () => ({ order: "5" })),
   storeUpload,
@@ -36,7 +36,7 @@ vi.mock("@/lib/storage/images", () => ({ deleteImage }));
 describe("company tour gallery capacity", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    requireCompanyMember.mockResolvedValue({
+    requireCompanyAccount.mockResolvedValue({
       company: { id: 10 },
       user: { id: 4 },
     });

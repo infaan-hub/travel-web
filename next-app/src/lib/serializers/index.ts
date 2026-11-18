@@ -549,6 +549,7 @@ export function adminCompanyListSerializer(company: any): Json {
     account: company.account
       ? { id: company.account.id, username: company.account.username, email: company.account.email }
       : null,
+    members_count: company.memberships?.length ?? company._count?.memberships ?? 0,
     tours_count: company._count?.tours ?? 0,
     bookings_count: company._count?.bookings ?? 0,
     created_at: iso(company.createdAt),

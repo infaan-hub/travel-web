@@ -81,12 +81,7 @@ describe("DELETE /api/admin/companies/[id]", () => {
       where: { companyId: 31 },
     });
     expect(transaction.notification.deleteMany).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          { companyId: 31 },
-          { tag: { in: ["company-membership-7"] } },
-        ],
-      },
+      where: { companyId: 31 },
     });
     expect(transaction.company.delete).toHaveBeenCalledWith({
       where: { id: 31 },

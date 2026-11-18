@@ -2,15 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const mocks = vi.hoisted(() => ({
-  requireCompanyMember: vi.fn(),
+  requireCompanyAccount: vi.fn(),
   requestAuditActor: vi.fn(),
   storeUpload: vi.fn(),
   deleteImage: vi.fn(),
   createCompanyTour: vi.fn(),
 }));
 
-vi.mock("@/lib/auth/company", () => ({
-  requireCompanyMember: mocks.requireCompanyMember,
+vi.mock("@/lib/auth/company-account", () => ({
+  requireCompanyAccount: mocks.requireCompanyAccount,
 }));
 vi.mock("@/lib/api/request-context", () => ({
   requestAuditActor: mocks.requestAuditActor,
@@ -35,7 +35,7 @@ import { POST } from "@/app/api/company/tours/route";
 describe("POST /api/company/tours", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.requireCompanyMember.mockResolvedValue({
+    mocks.requireCompanyAccount.mockResolvedValue({
       company: { id: 8 },
       user: { id: 17 },
     });
@@ -117,7 +117,7 @@ describe("POST /api/company/tours", () => {
     const body = await response.json();
 
     expect(response.status).toBe(201);
-    expect(mocks.requireCompanyMember).toHaveBeenCalledWith(request, {
+    expect(mocks.requireCompanyAccount).toHaveBeenCalledWith(request, {
       permission: "tours:write",
     });
     expect(mocks.createCompanyTour).toHaveBeenCalledWith(

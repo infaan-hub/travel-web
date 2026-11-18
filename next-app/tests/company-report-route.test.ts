@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  requireCompanyMember: vi.fn(),
+  requireCompanyAccount: vi.fn(),
   findMany: vi.fn(),
 }));
 
-vi.mock("@/lib/auth/company", () => ({
-  requireCompanyMember: mocks.requireCompanyMember,
+vi.mock("@/lib/auth/company-account", () => ({
+  requireCompanyAccount: mocks.requireCompanyAccount,
 }));
 
 vi.mock("@/lib/db/prisma", () => ({
@@ -24,7 +24,7 @@ function request(path = "/api/company/reports/bookings") {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.requireCompanyMember.mockResolvedValue({
+  mocks.requireCompanyAccount.mockResolvedValue({
     company: { id: 27, slug: "island-tours" },
   });
 });
@@ -52,7 +52,7 @@ describe("company booking financial export", () => {
     expect(response.headers.get("content-disposition")).toContain(
       "island-tours-booking-value-report.csv",
     );
-    expect(mocks.requireCompanyMember).toHaveBeenCalledWith(
+    expect(mocks.requireCompanyAccount).toHaveBeenCalledWith(
       expect.anything(),
       { permission: "reports:export" },
     );

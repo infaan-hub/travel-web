@@ -76,7 +76,9 @@ describe("POST /api/admin/companies", () => {
       isPublic: false,
       createdByUserId: 5,
     });
-    expect(prismaCompanyCreate.mock.calls[0][0]).not.toHaveProperty("include");
+    expect(prismaCompanyCreate.mock.calls[0][0].include).toEqual({
+      account: { select: { id: true, username: true, email: true } },
+    });
     expect(body).toMatchObject({
       id: 31,
       name: "Acme Safaris",
@@ -103,27 +105,19 @@ describe("POST /api/admin/companies", () => {
     expect(body).toMatchObject({
       id: 31,
       name: "Island Private Hire",
-      members_count: 1,
     });
     const createData = prismaCompanyCreate.mock.calls[0][0].data;
     expect(createData).toMatchObject({
       status: "PENDING",
       isPublic: false,
       createdBy: { connect: { id: 5 } },
-      memberships: {
+      account: {
         create: {
-          role: "OWNER",
-          status: "ACTIVE",
-          assignedBy: { connect: { id: 5 } },
-          user: {
-            create: {
-              username: "islandowner",
-              email: "owner@example.com",
-              password: "hashed:temporary-password",
-              accountType: "PRIVATE_HIRE_COMPANY",
-              profile: { create: {} },
-            },
-          },
+          username: "islandowner",
+          email: "owner@example.com",
+          password: "hashed:temporary-password",
+          accountType: "PRIVATE_HIRE_COMPANY",
+          profile: { create: {} },
         },
       },
     });

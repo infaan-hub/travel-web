@@ -79,7 +79,6 @@ describe("company tour operations", () => {
       "name",
       "slug",
       "registration_reference",
-      "business_type",
       "status",
       "is_public",
     ]);
