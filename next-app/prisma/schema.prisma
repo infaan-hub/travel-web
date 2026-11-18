@@ -288,7 +288,7 @@ model Tour {
   createdAt         DateTime                 @default(now()) @map("created_at")
   updatedAt         DateTime                 @updatedAt @map("updated_at")
 
-  company       Company?           @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  company       Company?           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   publishedBy   User?              @relation("TourPublishedBy", fields: [publishedByUserId], references: [id], onDelete: SetNull)
   galleryImages TourGalleryImage[]
   itinerary     ItineraryItem[]

@@ -1,0 +1,166 @@
+.driverForm {
+  display: grid;
+  gap: 18px;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--dash-ink-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.field > span {
+  color: var(--dash-ink-2);
+}
+
+.field b {
+  color: var(--dash-danger);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--dash-line-strong);
+  border-radius: 11px;
+  background: var(--dash-surface);
+  color: var(--dash-ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.field textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--dash-primary);
+  outline: 3px solid rgba(8, 66, 140, 0.14);
+}
+
+.fileGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.fileField {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  padding: 13px;
+  border: 1px dashed var(--dash-line-strong);
+  border-radius: 13px;
+  background: var(--dash-surface-soft);
+  color: var(--dash-ink-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.fileField input {
+  width: 100%;
+  min-width: 0;
+  color: var(--dash-ink-2);
+  font: inherit;
+  font-size: 0.74rem;
+}
+
+.fileField small {
+  overflow: hidden;
+  color: var(--dash-ink-3);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dash-line-soft);
+}
+
+.spinner {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.successState {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.successState > div {
+  flex: 1 1 280px;
+}
+
+.successState h2 {
+  margin: 0 0 4px;
+  color: var(--dash-ink);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.successState p {
+  margin: 0;
+  color: var(--dash-ink-2);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.successIcon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border: 1px solid rgba(14, 124, 90, 0.25);
+  border-radius: 15px;
+  background: var(--dash-ok-soft);
+  color: var(--dash-ok);
+}
+
+@media (max-width: 760px) {
+  .fieldGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fileGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .formActions,
+  .formActions :global(.btn) {
+    width: 100%;
+  }
+
+  .formActions :global(.btn) {
+    justify-content: center;
+  }
+}
+
