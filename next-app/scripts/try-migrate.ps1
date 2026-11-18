@@ -1,0 +1,1 @@
+param([string]$pgScript) = "E:\travel-web\nex? no. E:\travel-web\next-app\scripts\" + $pgScript; & powershell -NoProfile -command "& { Set-Location E:\travel-web\next-app; & tsx scripts/local-postgres.ts }" 2>&1 | Out-File C:\Users\Hp\AppData\Local\Temp\opencode\pg4.out; Start-Sleep 8; Get-Content C:\Users\Hp\AppData\Local\Temp\opencode\pg4.out | Select-Object -Last 5

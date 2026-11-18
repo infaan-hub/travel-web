@@ -94,7 +94,7 @@ export type Customer = {
   username: string;
   email: string;
   is_staff: boolean;
-  account_type?: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER";
+  account_type?: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER" | "PRIVATE_HIRE_COMPANY";
   is_active?: boolean;
   companies?: {
     id: number;
