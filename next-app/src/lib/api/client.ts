@@ -286,6 +286,7 @@ export const publicPrivateHireAPI = {
 export const transportBookingsAPI = {
   getAll: () => api.get("/transport-bookings/"),
   create: (data: Record<string, unknown>) => api.post("/transport-bookings/", data),
+  cancel: (id: string | number) => api.patch("/transport-bookings/" + id + "/", { status: "cancelled" }),
 };
 export const transportTripRequestsAPI = {
   getAll: () => api.get("/transport-trip-requests/"),

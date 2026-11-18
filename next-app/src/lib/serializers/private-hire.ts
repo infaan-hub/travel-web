@@ -3,6 +3,8 @@ import type {
   PrivateHireVehicle,
   PrivateHireDriver,
   PrivateHireService,
+  Company,
+  TransportBooking,
 } from "@prisma/client";
 
 export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
@@ -78,6 +80,7 @@ export function privateHireServiceSerializer(
   service: PrivateHireService & {
     vehicle?: PrivateHireVehicle;
     driver?: PrivateHireDriver;
+    company?: Pick<Company, "id" | "name" | "slug" | "contactPhone" | "contactEmail" | "logoImageKey"> | null;
   },
 ) {
   return {
@@ -94,5 +97,54 @@ export function privateHireServiceSerializer(
     updated_at: service.updatedAt.toISOString(),
     vehicle: service.vehicle ? privateHireVehicleSerializer(service.vehicle) : null,
     driver: service.driver ? privateHireDriverSerializer(service.driver) : null,
+    company: service.company ? {
+      id: service.company.id,
+      name: service.company.name,
+      slug: service.company.slug,
+      contact_phone: service.company.contactPhone,
+      contact_email: service.company.contactEmail,
+      logo_image_url: publicImageUrl(service.company.logoImageKey),
+    } : null,
+  };
+}
+
+export function transportBookingSerializer(
+  booking: TransportBooking & {
+    service?: (PrivateHireService & { vehicle?: PrivateHireVehicle; driver?: PrivateHireDriver; company?: Company | null }) | null;
+    vehicle?: PrivateHireVehicle | null;
+    driver?: PrivateHireDriver | null;
+    company?: Company | null;
+  },
+) {
+  return {
+    id: booking.id,
+    reference: booking.reference,
+    booking_type: booking.bookingType,
+    user_id: booking.userId,
+    service_id: booking.serviceId,
+    company_id: booking.companyId,
+    full_name: booking.fullName,
+    email: booking.email,
+    phone: booking.phone,
+    passengers: booking.passengers,
+    travel_date: booking.travelDate.toISOString(),
+    end_date: booking.endDate?.toISOString() ?? null,
+    pickup_time: booking.pickupTime,
+    total_price: booking.totalPrice?.toString() ?? null,
+    status: booking.status,
+    notes: booking.notes,
+    created_at: booking.createdAt.toISOString(),
+    updated_at: booking.updatedAt.toISOString(),
+    service: booking.service ? privateHireServiceSerializer(booking.service) : null,
+    vehicle: booking.vehicle ? privateHireVehicleSerializer(booking.vehicle) : null,
+    driver: booking.driver ? privateHireDriverSerializer(booking.driver) : null,
+    company: booking.company ? {
+      id: booking.company.id,
+      name: booking.company.name,
+      slug: booking.company.slug,
+      contact_phone: booking.company.contactPhone,
+      contact_email: booking.company.contactEmail,
+      logo_image_url: publicImageUrl(booking.company.logoImageKey),
+    } : null,
   };
 }

@@ -21,7 +21,7 @@ type Company = {
   region: string | null;
   country: string | null;
   public_path: string;
-  tours_count: number;
+  services_count: number;
   website: string | null;
 };
 
@@ -97,7 +97,7 @@ export default function CompaniesPage() {
             <span className={styles.listingKicker}>Provider directory</span>
             <h2 className={styles.listingTitle}>Published companies</h2>
             <p className={styles.listingLead}>
-              Browse public profiles, service areas and the experiences each provider has published.
+              Browse private-hire providers, their service areas and available vehicles.
             </p>
           </div>
           <span className={styles.listingCount} aria-live="polite">
@@ -188,7 +188,7 @@ export default function CompaniesPage() {
                     ) : null}
                     <div className={styles.stats}>
                       <span>
-                        <Globe size={14} /> {company.tours_count} published experiences
+                        <Globe size={14} /> {company.services_count} private-hire services
                       </span>
                       {company.website ? (
                         <a href={company.website} target="_blank" rel="noreferrer">

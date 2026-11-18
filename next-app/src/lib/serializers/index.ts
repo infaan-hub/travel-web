@@ -23,6 +23,7 @@ import type {
 import { publicImageUrl } from "@/lib/storage/images";
 import { publicCompanyPath } from "@/lib/company-domain";
 import { companyBookingTransitions } from "@/lib/company-operations";
+import { privateHireServiceSerializer } from "@/lib/serializers/private-hire";
 import {
   type CompanyPermission,
 } from "@/lib/company-account-access";
@@ -658,7 +659,7 @@ export function companyWorkspaceProfileSerializer(company: Company): Json {
 }
 
 export function companyPublicSerializer(
-  company: Company & { _count?: { tours: number; trips?: number } },
+  company: Company & { _count?: { privateHireServices?: number; trips?: number } },
 ): Json {
   return {
     id: company.id,
@@ -683,35 +684,26 @@ export function companyPublicSerializer(
       company.latitude !== null && company.longitude !== null
         ? `https://www.openstreetmap.org/?mlat=${company.latitude}&mlon=${company.longitude}#map=15/${company.latitude}/${company.longitude}`
         : null,
-    tours_count: company._count?.tours ?? 0,
+    services_count: company._count?.privateHireServices ?? 0,
     trips_count: company._count?.trips ?? 0,
   };
 }
 
 export function companyPublicDetailSerializer(
   company: Company & {
-    tours?: (Tour & {
-      reviews?: Array<Pick<Review, "rating" | "status">>;
-      galleryImages?: TourGalleryImage[];
-      company?: { name: string; slug: string } | null;
-    })[];
+    privateHireServices?: Array<Parameters<typeof privateHireServiceSerializer>[0]>;
     trips?: CompanyTrip[];
   },
   summary: { averageRating: number | null; reviewCount: number },
 ): Json {
   return {
     ...companyPublicSerializer(company),
-    tours_count: company.tours?.length ?? 0,
+    services_count: company.privateHireServices?.length ?? 0,
     social_links: company.socialLinks,
     opening_hours: company.openingHours,
     average_rating: summary.averageRating,
     review_count: summary.reviewCount,
-    tours: (company.tours ?? []).map((tour) => ({
-      ...tourListSerializer(tour),
-      company_id: tour.companyId,
-      publication_status: tour.publicationStatus,
-      available: tour.available,
-    })),
+    services: (company.privateHireServices ?? []).map(privateHireServiceSerializer),
     trips: (company.trips ?? []).map(companyTripSerializer),
   };
 }

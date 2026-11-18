@@ -62,7 +62,7 @@ export async function searchContent(query: string): Promise<{
     }),
     prisma.company.findMany({
       where: { id: { in: companyRows.map((row) => row.id) }, status: "ACTIVE", isPublic: true },
-      include: { _count: { select: { tours: { where: { publicationStatus: "PUBLISHED", deletedAt: null } } } } },
+      include: { _count: { select: { privateHireServices: { where: { isActive: true } } } } },
     }),
   ]);
 

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { getPublicCompany } from "@/lib/services/public-companies";
-import TourCard from "@/components/TourCard";
+import Link from "next/link";
 import {
   ArrowLeft,
   Building2,
@@ -28,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!company) return { title: "Company not found" };
   return {
     title: company.name,
-    description: company.description || `Tours operated by ${company.name}.`,
+    description: company.description || `Private hire services operated by ${company.name}.`,
   };
 }
 
@@ -37,7 +36,7 @@ export default async function CompanyProfilePage({ params }: Props) {
   const company = (await getPublicCompany(slug)) as any;
   if (!company) notFound();
 
-  const tours = Array.isArray(company.tours) ? company.tours : [];
+  const services = Array.isArray(company.services) ? company.services : [];
   const trips = Array.isArray(company.trips) ? company.trips : [];
   const companyHours = openingHoursEntries(company.opening_hours);
   const locationLabel = [
@@ -248,7 +247,7 @@ export default async function CompanyProfilePage({ params }: Props) {
 
         <section
           className={styles.sectionCard}
-          aria-labelledby="company-tours-title"
+          aria-labelledby="company-services-title"
         >
           <div className={styles.sectionHead}>
             <div className={styles.sectionTitle}>
@@ -256,26 +255,33 @@ export default async function CompanyProfilePage({ params }: Props) {
                 <Compass size={19} aria-hidden="true" />
               </span>
               <div>
-                <p className={styles.cardKicker}>Experiences</p>
-                <h2 id="company-tours-title">Published tours</h2>
+                <p className={styles.cardKicker}>Private hire</p>
+                <h2 id="company-services-title">Available services</h2>
               </div>
             </div>
             <p className={styles.countPill}>
-              {tours.length} available tour{tours.length === 1 ? "" : "s"}
+              {services.length} available service{services.length === 1 ? "" : "s"}
             </p>
           </div>
 
-          {tours.length === 0 ? (
+          {services.length === 0 ? (
             <div className={styles.empty}>
               <span>
                 <Building2 size={26} aria-hidden="true" />
               </span>
-              <p>This company has no published tours yet.</p>
+              <p>This company has no private-hire services listed yet.</p>
             </div>
           ) : (
             <div className={styles.toursGrid}>
-              {tours.map((tour: any) => (
-                <TourCard key={tour.id} tour={tour} />
+              {services.map((service: any) => (
+                <Link className={styles.tripCard} key={service.id} href={`/private-hire/${service.id}/`}>
+                  <div className={styles.tripBody}>
+                    <h3>{service.title}</h3>
+                    <p className={styles.tripPlace}>{service.vehicle?.name || "Private hire service"} · {service.vehicle?.capacity || 1} passengers</p>
+                    {service.description ? <p className={styles.tripDesc}>{service.description}</p> : null}
+                    <p className={styles.tripPrice}><span>From</span> ${Number(service.price).toLocaleString("en-US")} / {String(service.pricing_type || "trip").replace("_", " ")}</p>
+                  </div>
+                </Link>
               ))}
             </div>
           )}

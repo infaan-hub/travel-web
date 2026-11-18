@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     const services = await prisma.privateHireService.findMany({
-      where,
+      where: { ...where, OR: [{ companyId: null }, { company: { status: "ACTIVE", isPublic: true } }] },
       include: {
         vehicle: true,
         driver: true,

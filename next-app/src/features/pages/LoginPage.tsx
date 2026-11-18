@@ -190,10 +190,10 @@ export default function LoginPage() {
           <div className={styles.bannerBody}>
             <span className={styles.bannerLabel}>A marketplace for meaningful travel</span>
             <h2 className={styles.bannerTitle}>Meet the people<br />behind the place.</h2>
-            <p className={styles.bannerText}>Explore experiences from independent tourism companies, compare the details, and send a request directly to the provider.</p>
+            <p className={styles.bannerText}>Find private hire vehicles from local companies and request a driver for your journey.</p>
             <div className={styles.bannerFeatures}>
-              <span className={styles.bannerFeature}><Palmtree size={17} /> Local experiences</span>
-              <span className={styles.bannerFeature}><Compass size={17} /> Tours &amp; safaris</span>
+              <span className={styles.bannerFeature}><Palmtree size={17} /> Private hire services</span>
+              <span className={styles.bannerFeature}><Compass size={17} /> Drivers and vehicles</span>
               <span className={styles.bannerFeature}><Map size={17} /> Provider profiles</span>
               <span className={styles.bannerFeature}><Star size={17} fill="currentColor" className={styles.bannerStar} /> Request-based bookings</span>
             </div>

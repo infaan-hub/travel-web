@@ -30,7 +30,7 @@ export default function ContactPage() {
     full_name: "",
     phone: "",
     email: "",
-    business_type: "Tour Transport & Car Rental",
+    business_type: "Private Hire Services",
     registration_reference: "",
     depot_location: "",
     fleet_size: "1-5 Vehicles",
@@ -101,7 +101,7 @@ export default function ContactPage() {
         full_name: "",
         phone: "",
         email: "",
-        business_type: "Tour Transport & Car Rental",
+        business_type: "Private Hire Services",
         registration_reference: "",
         depot_location: "",
         fleet_size: "1-5 Vehicles",
@@ -150,7 +150,7 @@ export default function ContactPage() {
   return (
     <div className={`page contact-page ${styles.contactPageRoot}`}>
       <PageHero
-        eyebrow="Tour Transport & Mobility Platform"
+        eyebrow="Private Hire Transport Platform"
         title="Partner Registration & Support"
         subtitle="Register your transport company fleet, apply as a verified Public Hire Driver, or contact platform support."
         backgroundImageKey="thumb"
@@ -372,9 +372,9 @@ export default function ContactPage() {
                         value={companyForm.business_type}
                         onChange={handleCompanyChange}
                       >
-                        <option value="Tour Transport & Car Rental">Tour Transport & Car Rental</option>
+                        <option value="Private Hire Services">Private Hire Services</option>
                         <option value="Airport Transfer & VIP Chauffeur">Airport Transfer & VIP Chauffeur</option>
-                        <option value="Safari Fleet Operator">Safari Fleet Operator (4x4 Land Cruisers)</option>
+                        <option value="Private Hire Fleet Operator">Private Hire Fleet Operator</option>
                         <option value="Bus & Minivan Hire">Coaster Bus & Group Transit</option>
                       </select>
                     </div>
@@ -572,7 +572,7 @@ export default function ContactPage() {
                       name="notes"
                       value={driverForm.notes}
                       onChange={handleDriverChange}
-                      placeholder="Tell us about your driving experience with tourists, airport transfers, or safari circuits..."
+                      placeholder="Tell us about your driving experience with airport transfers, private journeys, or long-distance routes..."
                       rows={3}
                     />
                   </div>

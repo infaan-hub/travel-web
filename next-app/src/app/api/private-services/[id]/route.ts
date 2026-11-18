@@ -13,7 +13,7 @@ export async function GET(
     if (!Number.isInteger(id)) throw new ApiError(404, "Private Hire Service not found.");
 
     const service = await prisma.privateHireService.findFirst({
-      where: { id, isActive: true },
+      where: { id, isActive: true, OR: [{ companyId: null }, { company: { status: "ACTIVE", isPublic: true } }] },
       include: {
         vehicle: true,
         driver: true,

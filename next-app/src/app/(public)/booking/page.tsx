@@ -1,10 +1,2 @@
-import type { Metadata } from "next";
-import BookingPage from "@/features/pages/BookingPage";
-
-export const metadata: Metadata = {
-  title: 'Book a Tour',
-};
-
-export default function Page() {
-  return <BookingPage />;
-}
+import { redirect } from "next/navigation";
+export default function Page() { redirect("/transport/"); }

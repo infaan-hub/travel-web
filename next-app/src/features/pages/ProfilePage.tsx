@@ -348,12 +348,12 @@ const persistPreference = (key: string, value: string) => {
     );
   }
 
-  const isCompanyAccount = user?.account_type === "TOUR_COMPANY";
+  const isCompanyAccount = user?.account_type === "PRIVATE_HIRE_COMPANY";
   const accountLabel = user?.is_staff
     ? "Administrator"
     : isCompanyAccount
-      ? "Travel company"
-      : "Traveler";
+      ? "Private hire company"
+      : "Customer";
   const dashboardHref = user?.is_staff
     ? "/admin/dashboard/"
     : isCompanyAccount
@@ -992,7 +992,7 @@ const persistPreference = (key: string, value: string) => {
                 <p className={styles.settingsSectionCopy}>
                   {isCompanyAccount
                     ? "Manage your company presence from the dashboard."
-                    : "Keep track of bookings and explore new experiences."}
+                    : "Manage your details and follow your private hire requests."}
                 </p>
               </div>
             </div>

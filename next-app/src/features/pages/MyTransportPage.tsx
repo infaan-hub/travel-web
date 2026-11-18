@@ -3,11 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { transportBookingsAPI, transportTripRequestsAPI, transportReviewsAPI } from "@/lib/api/client";
 import { useToast } from "@/components/ToastProvider";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import { PageHero } from "@/components/PageHero";
 import { Car, ClipboardList, Loader } from "@/components/icons";
 
 export default function MyTransportPage() {
   const toast = useToast();
+  const router = useRouter();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +21,8 @@ export default function MyTransportPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const load = useCallback(async () => {
+    if (authLoading) return;
+    if (!isAuthenticated) { router.replace("/login/?from=%2Fmy-transport%2F"); return; }
     setLoading(true);
     try {
       const [bRes, rRes] = await Promise.all([
@@ -31,11 +37,21 @@ export default function MyTransportPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [authLoading, isAuthenticated, router, toast]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  const cancelBooking = async (id: number) => {
+    try {
+      await transportBookingsAPI.cancel(id);
+      setBookings((current) => current.map((booking) => booking.id === id ? { ...booking, status: "cancelled" } : booking));
+      toast.success("Booking request cancelled.");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Could not cancel this booking request.");
+    }
+  };
 
   const openReview = (id: number) => {
     setReviewBookingId(id);
@@ -100,6 +116,9 @@ export default function MyTransportPage() {
                     <span className="text-xs font-semibold px-3 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
                       {b.status}
                     </span>
+                    {b.status === "pending" && (
+                      <button type="button" className="text-xs text-rose-700 underline" onClick={() => void cancelBooking(b.id)}>Cancel request</button>
+                    )}
                     {b.status === "completed" && (
                       <button
                         type="button"

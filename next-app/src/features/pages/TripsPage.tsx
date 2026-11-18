@@ -4,19 +4,18 @@ import { useState, useEffect, useRef } from 'react';
 import DestinationCard from "@/components/DestinationCard";
 import ZanzibarAttractions from "@/components/ZanzibarAttractions";
 import Link from "next/link";
-import { tripsAPI, toursAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
+import { tripsAPI, geocodeAPI, routeAPI } from '@/lib/api/client';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { BookOpen, Clock, User, MapPin, Navigation, Locate, X, Loader, ExternalLink, Globe } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { tripPlaceNameForCoords } from "@/lib/trips";
 
-import type {  Tour, CompanyTrip  } from "@/features/pages/types";
+import type { CompanyTrip } from "@/features/pages/types";
 import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import styles from "@/features/pages/company-trips.module.css";
 export default function TripsPage() {
   const [trips, setTrips] = useState<CompanyTrip[]>(() => readClientCache<CompanyTrip[]>("travel.trips.all") ?? []);
-  const [tours, setTours] = useState<Tour[]>(() => readClientCache<Tour[]>("travel.tours.all") ?? []);
-  const [loading, setLoading] = useState<boolean>(() => !(readClientCache<CompanyTrip[]>("travel.trips.all") || readClientCache<Tour[]>("travel.tours.all")));
+  const [loading, setLoading] = useState<boolean>(() => !readClientCache<CompanyTrip[]>("travel.trips.all"));
 
   const [originInput, setOriginInput] = useState('');
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -25,7 +24,6 @@ export default function TripsPage() {
   const [destInput, setDestInput] = useState('');
   const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [destGeocoding, setDestGeocoding] = useState(false);
-  const [showTourDropdown, setShowTourDropdown] = useState(false);
 
   const [route, setRoute] = useState<{
     distance_km: number;
@@ -39,16 +37,10 @@ export default function TripsPage() {
   const destRef = useRef(null);
 
   useEffect(() => {
-    Promise.all([
-      tripsAPI.getAll(),
-      toursAPI.getAll(),
-    ]).then(([tripsRes, toursRes]) => {
+    tripsAPI.getAll().then((tripsRes) => {
       const nextTrips = tripsRes.data.results || tripsRes.data;
-      const nextTours = toursRes.data.results || toursRes.data;
       setTrips(nextTrips);
-      setTours(nextTours);
       writeClientCache("travel.trips.all", nextTrips);
-      writeClientCache("travel.tours.all", nextTours);
     }).catch(console.error)
     .finally(() => setLoading(false));
   }, []);
@@ -103,18 +95,6 @@ export default function TripsPage() {
       }
     } catch { setError('Failed to geocode destination'); }
     finally { setDestGeocoding(false); }
-  };
-
-  const selectTourDestination = (tour: Tour) => {
-    const dest = tour.destination || tour.title;
-    setDestInput(dest);
-    if (tour.destination_lat && tour.destination_lng) {
-      setDestCoords({ lat: tour.destination_lat, lng: tour.destination_lng });
-      setDestInput(`📍 ${dest} (${tour.destination_lat}, ${tour.destination_lng})`);
-    } else {
-      geocodeDestination();
-    }
-    setShowTourDropdown(false);
   };
 
   const handleCalculate = async () => {
@@ -186,25 +166,14 @@ export default function TripsPage() {
                 <input
                   type="text" placeholder="e.g. Zanzibar, Serengeti..."
                   value={destInput}
-                  onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setDestInput(e.target.value); setDestCoords(null); setRoute(null); setShowTourDropdown(false); }}
-                  onFocus={() => setShowTourDropdown(true)}
-                  onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') { geocodeDestination(); setShowTourDropdown(false); } }}
+                  onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => { setDestInput(e.target.value); setDestCoords(null); setRoute(null); }}
+                  onKeyDown={(e: KeyboardEvent<HTMLElement>) => { if (e.key === 'Enter') geocodeDestination(); }}
                 />
-                <button className="btn btn-sm btn-primary" onClick={() => { geocodeDestination(); setShowTourDropdown(false); }} disabled={destGeocoding || !destInput.trim()}>
+                <button className="btn btn-sm btn-primary" onClick={geocodeDestination} disabled={destGeocoding || !destInput.trim()}>
                   {destGeocoding ? <Loader size={14} className="spin" /> : <MapPin size={14} />}
                 </button>
               </div>
               {destConfirmed && <span className="coords-confirmed">Destination set ✓</span>}
-              {showTourDropdown && tours.length > 0 && (
-                <div className="tour-dest-dropdown">
-                  <div className="dropdown-label">Select a tour destination:</div>
-                  {tours.filter(t => t.destination).map(t => (
-                    <button key={t.id} className="dropdown-item" onClick={() => selectTourDestination(t)}>
-                      <Globe size={14} /> {t.destination} — {t.title}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI } from '@/lib/api/client';
-import TourCard from '@/components/TourCard';
 import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
@@ -14,7 +13,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
 import styles from "@/features/pages/home-page.module.css";
-import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 
 import DestinationCard from "@/components/DestinationCard";
 
@@ -30,7 +28,7 @@ type FeaturedCompany = {
   locality: string | null;
   region: string | null;
   public_path: string;
-  tours_count: number;
+  services_count: number;
   trips_count: number;
 };
 
@@ -277,46 +275,10 @@ export default function HomePage() {
         featuredTour={allTours.find((tour) => tour.featured) || allTours[0] || null}
       />
 
-      {!loading && allTours.length > 0 && (
-        <section className="all-tours-section">
-          <div className="section-header">
-            <h2>Explore experiences</h2>
-          </div>
-          <div className="tours-grid">
-            {allTours.slice(0, homeCardLimit).map((tour: Tour) => (
-              <TourCard key={tour.id} tour={tour} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="destinations-section">
-        <div className="section-header" style={{ textAlign: "center", alignItems: "center" }}>
-          <h2>Start with a place</h2>
-        </div>
-        <div className="destinations-grid">
-          <DestinationCard
-            image={getImageUrl(homeSettings?.zanzibar_image_url || allTours.find(t => t.category === 'zanzibar')?.image_url || '/uploads/home/Zanzibar_trip.jpg') || '/uploads/home/Zanzibar_trip.jpg'}
-            title="Zanzibar"
-            location="Zanzibar, Tanzania"
-            description="Pristine beaches, spice farms, and rich Swahili culture. Paradise on Earth."
-            stats={[]}
-            hideCta
-            hideLike
-            boldText
-            href="/tours/zanzibar/"
-          />
-          <DestinationCard
-            image={getImageUrl(homeSettings?.tanzania_image_url || allTours.find(t => t.category === 'tanzania')?.image_url || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg') || '/uploads/home/Sunset_at_Serengeti_National_Park_in_Tanzania__1.jpg'}
-            title="Tanzania Safaris"
-            location="Tanzania"
-            description="Serengeti, Kilimanjaro, Ngorongoro - Africa's greatest wildlife experiences with expert-guided tours and premium service."
-            stats={[]}
-            hideCta
-            hideLike
-            boldText
-            href="/tours/tanzania/"
-          />
+      <section className="all-tours-section">
+        <div className="section-header">
+          <h2>Private hire for your journey</h2>
+          <Link href="/transport/" className="btn btn-primary">Browse vehicles <ArrowRight size={16} /></Link>
         </div>
       </section>
 
@@ -476,10 +438,10 @@ export default function HomePage() {
                 key={company.id}
                 image={company.logo_image_url ? getImageUrl(company.logo_image_url) : undefined}
                 title={company.name}
-                location={[company.locality, company.region].filter(Boolean).join(", ") || "Tourism company"}
-                description={company.description || `${company.tours_count} published experiences`}
+                location={[company.locality, company.region].filter(Boolean).join(", ") || "Private hire provider"}
+                description={company.description || `${company.services_count} private-hire services`}
                 stats={[
-                  { value: String(company.tours_count), label: "Experiences" },
+                  { value: String(company.services_count), label: "Services" },
                   { value: "Local", label: "Provider" },
                   { value: "Verified", label: "Company" },
                 ]}
@@ -497,8 +459,8 @@ export default function HomePage() {
       {reviews.length > 0 && (
         <section className="testimonials-section">
           <div className="section-header">
-            <h2>Notes from other travelers</h2>
-            <p>Read feedback shared after real experiences.</p>
+            <h2>Notes from our customers</h2>
+            <p>Read feedback shared after private-hire journeys.</p>
           </div>
           <div className="testimonials-grid">
             {reviews.slice(0, 6).map(review => (
@@ -535,20 +497,6 @@ export default function HomePage() {
         </section>
       )}
 
-      {!loading && tourLoadError && (
-        <section className="home-discovery-empty glass-card" role="status">
-          <span className="section-kicker">Catalogue temporarily unavailable</span>
-          <h2>We could not load experiences right now.</h2>
-          <p>Browse company profiles in the meantime, or refresh this page to try again.</p>
-          <Link href="/companies/" className="btn btn-primary">Explore companies</Link>
-        </section>
-      )}
-
-      {!loading && (allTours.length === 0 || homeSettings?.more_experiences_image_urls?.some((image) => Boolean(image))) && (
-        <MoreExperiencesEmptyState
-          imageUrls={homeSettings?.more_experiences_image_urls?.slice(0, 5).map((image) => image ? getImageUrl(image) : null)}
-        />
-      )}
       {showReviewForm && (
         <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
           <div className="modal-content review-form-modal">

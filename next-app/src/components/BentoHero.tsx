@@ -26,7 +26,7 @@ export default function BentoHero({ mainImage, secondImage, featuredImage, thumb
             <img src={getImageUrl(thumbImage)} alt="" className={styles.copyBg} />
           ) : null}
           <h1 id="bento-hero-title">Find your<br />next trip</h1>
-          <p className={styles.tagline}>Tours, stays and local guides you can trust.</p>
+          <p className={styles.tagline}>Book trusted drivers and verified vehicles for airport transfers and local journeys across Tanzania.</p>
           <div className={styles.actions}>
             <Link className={styles.explore} href="/tours/">Explore</Link>
             <Link className={styles.companies} href="/companies/">Companies</Link>
@@ -53,16 +53,16 @@ export default function BentoHero({ mainImage, secondImage, featuredImage, thumb
 
         <Link
           className={`${styles.featured} ${featuredImage || featuredTour?.image_url ? styles.featuredHasImage : styles.featuredFallback}`}
-          href={featuredTour ? `/tour/${featuredTour.id}/` : "/tours/"}
+          href="/transport/"
         >
           {featuredImage || featuredTour?.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={getImageUrl(featuredImage || featuredTour?.image_url)} alt="" />
           ) : null}
           <span className={styles.featuredCopy}>
-            <span className={styles.featuredLabel}>A PLACE TO BEGIN</span>
-            <strong>{featuredTour?.title || "Find an experience"}</strong>
-            <span>{featuredTour?.destination || "Explore tours and safaris"}</span>
+            <span className={styles.featuredLabel}>PRIVATE HIRE SERVICE</span>
+            <strong>Book a private hire vehicle</strong>
+            <span>Choose a verified vehicle and driver for your journey.</span>
           </span>
           <span className={styles.arrow} aria-hidden="true">↗</span>
         </Link>

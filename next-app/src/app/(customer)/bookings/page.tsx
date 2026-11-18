@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import BookingsPage from "@/features/pages/BookingsPage";
+import MyTransportPage from "@/features/pages/MyTransportPage";
 
 export const metadata: Metadata = {
-  title: 'My Bookings',
+  title: 'My Private Hire Bookings',
 };
 
 export default function Page() {
-  return <BookingsPage />;
+  return <MyTransportPage />;
 }

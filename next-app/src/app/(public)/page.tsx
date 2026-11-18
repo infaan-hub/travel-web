@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import HomePage from "@/features/pages/HomePage";
 
 export const metadata: Metadata = {
-  title: "Tours, Safaris & Local Experiences",
+  title: "Private Hire Transport",
   description:
-    "Discover tours, safaris and local experiences from independent tourism companies. Compare providers and send booking requests through Travel.",
+    "Book private hire vehicles and drivers for airport transfers, local journeys, and longer trips with trusted transport providers.",
   alternates: { canonical: "/" },
 };
 
@@ -16,7 +16,7 @@ export default async function Page() {
     name: "Travel.",
     url: base,
     description:
-      "Discover tours, safaris and local experiences from independent tourism companies.",
+      "Book private hire vehicles and drivers for journeys across Tanzania.",
   };
 
   return (

@@ -45,7 +45,7 @@ export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
       include: {
         _count: {
           select: {
-            tours: { where: { publicationStatus: "PUBLISHED", deletedAt: null } },
+            privateHireServices: { where: { isActive: true } },
             trips: true,
           },
         },
@@ -66,13 +66,13 @@ export async function getPublicCompany(slug: string) {
   const company = await prisma.company.findFirst({
     where: { ...PUBLIC_COMPANY_WHERE, slug },
     include: {
-      tours: {
-        where: { publicationStatus: "PUBLISHED", deletedAt: null },
-        orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      privateHireServices: {
+        where: { isActive: true },
+        orderBy: [{ createdAt: "desc" }],
         include: {
-          reviews: { where: { status: "approved" }, select: { rating: true, status: true } },
-          galleryImages: { orderBy: { order: "asc" } },
-          company: { select: { name: true, slug: true } },
+          vehicle: true,
+          driver: true,
+          company: { select: { id: true, name: true, slug: true, contactPhone: true, contactEmail: true, logoImageKey: true } },
         },
       },
       trips: { orderBy: { updatedAt: "desc" } },
@@ -80,15 +80,8 @@ export async function getPublicCompany(slug: string) {
   });
   if (!company) return null;
 
-  const reviewAggregate = await prisma.review.aggregate({
-    where: { status: "approved", tour: { companyId: company.id, publicationStatus: "PUBLISHED", deletedAt: null },
-    },
-    _avg: { rating: true },
-    _count: { _all: true },
-  });
-
   return companyPublicDetailSerializer(company, {
-    averageRating: reviewAggregate._avg?.rating ?? null,
-    reviewCount: reviewAggregate._count?._all ?? 0,
+    averageRating: null,
+    reviewCount: 0,
   });
 }
