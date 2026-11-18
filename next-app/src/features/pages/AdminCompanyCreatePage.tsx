@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { ArrowLeft, Building2 } from "@/components/icons";
 import CompanyForm from "@/features/pages/CompanyForm";
 import type { Company } from "@/features/pages/types";
+import dashStyles from "@/features/pages/admin-dashboard.module.css";
+import styles from "@/features/pages/admin-company-create.module.css";
 
 export default function AdminCompanyCreatePage() {
   const router = useRouter();
@@ -19,32 +21,48 @@ export default function AdminCompanyCreatePage() {
 
   if (loading || !isAuthenticated || !isAdmin) {
     return (
-      <div className="page">
+      <div className={dashStyles.dashboardRoot}>
         <div className="loading">Checking access…</div>
       </div>
     );
   }
 
   return (
-    <div className="page admin-page">
-      <div className="page-header">
-        <h1>
-          <Building2 size={20} /> Add company
-        </h1>
-        <p>Create a company profile. It starts pending and private.</p>
-      </div>
+    <div className={dashStyles.dashboardRoot}>
+      <header className={dashStyles.dashMasthead}>
+        <div className={dashStyles.dashMastheadText}>
+          <p className={dashStyles.dashEyebrow}>Admin workspace · Companies</p>
+          <h1 className={dashStyles.dashTitle}><Building2 size={22} /> Add company</h1>
+          <p className={dashStyles.dashCopy}>
+            Create a company profile. New companies start pending and private.
+          </p>
+        </div>
+        <div className={dashStyles.dashActions}>
+          <Link href="/admin/companies" className="btn btn-outline">
+            <ArrowLeft size={16} /> Back to companies
+          </Link>
+        </div>
+      </header>
 
-      <Link href="/admin/companies" className="btn btn-outline btn-back">
-        <ArrowLeft size={16} /> Back to companies
-      </Link>
-
-      <div className="admin-content">
+      <section className={`${dashStyles.dashPanel} ${styles.companyCreate}`} aria-label="New company profile">
+        <div className={dashStyles.dashPanelHead}>
+          <div className={dashStyles.dashPanelHeadMain}>
+            <span className={dashStyles.dashPanelIcon} aria-hidden="true"><Building2 size={17} /></span>
+            <div>
+              <h2 className={dashStyles.dashPanelTitle}>Company profile</h2>
+              <p className={dashStyles.dashPanelCopy}>
+                Add identity, contact, location, branding, and public profile details.
+              </p>
+            </div>
+          </div>
+        </div>
         <CompanyForm
           onSaved={(company: Company) => {
             router.push(`/admin/companies/${company.id}`);
           }}
         />
-      </div>
+      </section>
     </div>
   );
 }
+

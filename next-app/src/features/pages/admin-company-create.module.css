@@ -1,0 +1,44 @@
+.companyCreate :global(.admin-form > section) {
+  border-top-color: var(--dash-line);
+}
+
+.companyCreate :global(.admin-form > section:first-of-type) {
+  padding-top: 4px;
+}
+
+.companyCreate :global(.admin-form .form-group label),
+.companyCreate :global(.admin-form .fieldLabel) {
+  color: var(--dash-ink-2);
+}
+
+.companyCreate :global(.admin-form .form-group input),
+.companyCreate :global(.admin-form .form-group select),
+.companyCreate :global(.admin-form .form-group textarea),
+.companyCreate :global(.admin-form .file-input) {
+  border-color: var(--dash-line-strong);
+  background-color: var(--dash-surface);
+  color: var(--dash-ink);
+}
+
+.companyCreate :global(.admin-form .form-group input:focus),
+.companyCreate :global(.admin-form .form-group select:focus),
+.companyCreate :global(.admin-form .form-group textarea:focus) {
+  border-color: var(--dash-primary);
+  outline: 3px solid rgba(8, 66, 140, 0.14);
+}
+
+.companyCreate :global(.admin-form .checkboxRow input) {
+  accent-color: var(--dash-primary);
+}
+
+.companyCreate :global(.admin-form .suggestedAddress) {
+  background: var(--dash-primary-soft);
+}
+
+@media (max-width: 640px) {
+  .companyCreate :global(.admin-form .formActionsSticky) {
+    position: static;
+    background: transparent;
+  }
+}
+
