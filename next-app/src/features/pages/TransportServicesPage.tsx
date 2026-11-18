@@ -298,51 +298,6 @@ export default function TransportServicesPage() {
         </div>
       </div>
 
-      {/* Overview Block */}
-      <section className={styles.overview}>
-        <div className={styles.overviewMain}>
-          <div className={styles.overviewHeading}>
-            <div className={styles.overviewIcon}>
-              <ShieldCheck size={26} />
-            </div>
-            <div>
-              <h2>Safe & verified island transport</h2>
-              <p>
-                Every private hire service pairs a registered, roadworthy vehicle with a verified in-house chauffeur.
-                Review complete vehicle specs and driver licensing before reserving.
-              </p>
-            </div>
-          </div>
-
-          <ul className={styles.stats}>
-            <li>
-              <span>Available Services</span>
-              <strong>{services.length}</strong>
-              <small>Verified listings online</small>
-            </li>
-            <li>
-              <span>Licensed Fleet</span>
-              <strong>100%</strong>
-              <small>Plate & document vetted</small>
-            </li>
-            <li>
-              <span>Drivers</span>
-              <strong>Professional</strong>
-              <small>ZanID, NIDA & License on file</small>
-            </li>
-          </ul>
-        </div>
-
-        <div className={styles.overviewAside}>
-          <span>Need Custom Booking?</span>
-          <strong>Airport & VIP</strong>
-          <p>Book airport meet & greet with your flight details or charter daily chauffeured transport.</p>
-          <Link href="/contact/" className={styles.primaryBtn}>
-            Partner Registration & Help
-          </Link>
-        </div>
-      </section>
-
       {/* Service Cards Grid */}
       {loading ? (
         <div className={styles.emptyState}>
@@ -516,6 +471,51 @@ export default function TransportServicesPage() {
           })}
         </div>
       )}
+
+      {/* Overview Block */}
+      <section className={styles.overview}>
+        <div className={styles.overviewMain}>
+          <div className={styles.overviewHeading}>
+            <div className={styles.overviewIcon}>
+              <ShieldCheck size={26} />
+            </div>
+            <div>
+              <h2>Safe & verified island transport</h2>
+              <p>
+                Every private hire service pairs a registered, roadworthy vehicle with a verified in-house chauffeur.
+                Review complete vehicle specs and driver licensing before reserving.
+              </p>
+            </div>
+          </div>
+
+          <ul className={styles.stats}>
+            <li>
+              <span>Available Services</span>
+              <strong>{services.length}</strong>
+              <small>Verified listings online</small>
+            </li>
+            <li>
+              <span>Licensed Fleet</span>
+              <strong>100%</strong>
+              <small>Plate & document vetted</small>
+            </li>
+            <li>
+              <span>Drivers</span>
+              <strong>Professional</strong>
+              <small>ZanID, NIDA & License on file</small>
+            </li>
+          </ul>
+        </div>
+
+        <div className={styles.overviewAside}>
+          <span>Need Custom Booking?</span>
+          <strong>Airport & VIP</strong>
+          <p>Book airport meet & greet with your flight details or charter daily chauffeured transport.</p>
+          <Link href="/contact/" className={styles.primaryBtn}>
+            Partner Registration & Help
+          </Link>
+        </div>
+      </section>
 
       {/* View Full Details Modal */}
       {selected && (
