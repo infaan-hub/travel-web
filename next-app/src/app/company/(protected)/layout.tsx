@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { requirePageCompanyMember } from "@/lib/auth/company";
+import { requirePageCompanyAccount } from "@/lib/auth/company-account";
 
 export const metadata: Metadata = {
   title: {
@@ -13,7 +13,7 @@ export default async function CompanyProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requirePageCompanyMember();
+  await requirePageCompanyAccount();
 
   return <>{children}</>;
 }

@@ -31,7 +31,6 @@ import {
 import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { profileAPI } from "@/lib/api/client";
-import { COMPANY_ROLE_LABELS } from "@/lib/company-access";
 import styles from "./sidebar.module.css";
 
 type NavItem = {
@@ -141,11 +140,9 @@ export default function Sidebar() {
     { to: "/contact", label: "Support", icon: Mail },
   ];
 
-  const activeCompany = user?.companies?.find(
-    (company) => company.id === user.active_company_id,
-  ) ?? (user?.companies?.length === 1 ? user.companies[0] : null);
-  const isTourCompany = user?.account_type === "TOUR_COMPANY";
-  const companyPermissions = new Set(activeCompany?.permissions ?? []);
+  const activeCompany = user?.company ?? null;
+  const isTourCompany = user?.account_type === "TOUR_COMPANY" || user?.account_type === "PRIVATE_HIRE_COMPANY";
+  const companyPermissions = new Set(["dashboard:read", "profile:read", "profile:update", "tours:read", "tours:write", "bookings:read", "bookings:update", "analytics:read"]);
   const companyNavItems: NavItem[] = activeCompany
     ? [
         {
@@ -225,36 +222,9 @@ const profileHref = isAdmin
               <span className={styles.label}>{item.label}</span>
             </Link>
           ))}
-          {(user?.companies?.length ?? 0) > 1 && (
-            <Link
-              href="/company/select/"
-              className={styles.item}
-              onClick={closeAll}
-            >
-              <span className={styles.icon}>
-                <NavIcon icon={Users} />
-              </span>
-              <span className={styles.label}>Switch company</span>
-            </Link>
-          )}
         </>
       ) : (
-        <Link
-          href={(user?.companies?.length ?? 0) > 1
-            ? "/company/select/"
-            : "/tour-company/dashboard"}
-          className={styles.item}
-          onClick={closeAll}
-        >
-          <span className={styles.icon}>
-            <NavIcon icon={(user?.companies?.length ?? 0) > 1 ? Users : LayoutDashboard} />
-          </span>
-          <span className={styles.label}>
-            {(user?.companies?.length ?? 0) > 1
-              ? "Select company"
-              : "Company application"}
-          </span>
-        </Link>
+        <span className={styles.item}>Company account is not assigned</span>
       )}
       <Link
         href="/settings/"
@@ -304,7 +274,7 @@ const profileHref = isAdmin
               ? "Platform workspace"
               : isTourCompany
                 ? activeCompany
-                  ? `Company (${COMPANY_ROLE_LABELS[activeCompany.role]})`
+                  ? "Company workspace"
                   : "Company workspace"
                 : "Discover"}
           </div>
@@ -342,7 +312,7 @@ const profileHref = isAdmin
                     {isAdmin && <span className={styles.badge}>Admin</span>}
                     {activeCompany && (
                       <span className={styles.badge}>
-                        {COMPANY_ROLE_LABELS[activeCompany.role]}
+                        "Company account"
                       </span>
                     )}
                   </span>

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { handleApiError, ok } from "@/lib/api/http";
 import { readPayload, storeUpload, stripFiles } from "@/lib/api/body";
 import { requestAuditActor } from "@/lib/api/request-context";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import { companyWorkspaceProfileSerializer } from "@/lib/serializers";
 import { deleteImage } from "@/lib/storage/images";
 import {
@@ -13,7 +13,7 @@ import { companyWorkspaceProfileUpdateSchema } from "@/lib/validation/company";
 
 export async function GET(request: NextRequest) {
   try {
-    const context = await requireCompanyMember(request, {
+    const context = await requireCompanyAccount(request, {
       permission: "profile:read",
     });
     const company = await getCompanyWorkspaceProfile(context.company.id);
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const context = await requireCompanyMember(request, {
+    const context = await requireCompanyAccount(request, {
       permission: "profile:update",
     });
     const before = await getCompanyWorkspaceProfile(context.company.id);

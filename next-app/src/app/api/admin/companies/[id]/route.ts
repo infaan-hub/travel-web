@@ -83,7 +83,6 @@ export async function DELETE(request: NextRequest, context: Context) {
       const existing = await transaction.company.findUnique({
         where: { id },
         include: {
-          memberships: { select: { id: true } },
           tours: {
             select: {
               id: true,
@@ -99,9 +98,7 @@ export async function DELETE(request: NextRequest, context: Context) {
       if (!existing) throw new ApiError(404, "Company not found.");
 
       const tourIds = existing.tours.map((tour) => tour.id);
-      const membershipNotificationTags = existing.memberships.map(
-        (membership) => `company-membership-${membership.id}`,
-      );
+
       await transaction.booking.deleteMany({
         where: {
           OR: [
@@ -128,14 +125,7 @@ export async function DELETE(request: NextRequest, context: Context) {
         },
       });
       await transaction.notification.deleteMany({
-        where: {
-          OR: [
-            { companyId: id },
-            ...(membershipNotificationTags.length
-              ? [{ tag: { in: membershipNotificationTags } }]
-              : []),
-          ],
-        },
+        where: { companyId: id },
       });
       await transaction.tour.deleteMany({ where: { companyId: id } });
       await transaction.company.delete({ where: { id } });

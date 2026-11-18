@@ -7,22 +7,6 @@ export const COMPANY_STATUSES = [
   "ARCHIVED",
   "REJECTED",
 ] as const;
-export const COMPANY_ROLES = [
-  "OWNER",
-  "MANAGER",
-  "STAFF",
-  "RESERVATIONS_AGENT",
-  "TOUR_EDITOR",
-  "FINANCE",
-  "OPERATIONS_COORDINATOR",
-] as const;
-export const COMPANY_BUSINESS_TYPES = [
-  "TRANSPORT_OPERATOR",
-  "CAR_RENTAL",
-  "SHUTTLE_OPERATOR",
-  "OTHER",
-] as const;
-
 export const COMPANY_LIFECYCLE_ACTIONS = [
   "activate",
   "suspend",

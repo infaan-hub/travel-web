@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { handleApiError, ok, parseId } from "@/lib/api/http";
 import { readPayload } from "@/lib/api/body";
 import { requestAuditActor } from "@/lib/api/request-context";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import { companyBookingDetailSerializer } from "@/lib/serializers";
 import { updateCompanyBookingStatus } from "@/lib/services/company-bookings";
 import {
@@ -15,7 +15,7 @@ type Context = { params: Promise<{ id: string }> };
 
 export async function GET(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, {
+    const company = await requireCompanyAccount(request, {
       permission: "bookings:read",
     });
     const bookingId = parseId((await context.params).id);
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest, context: Context) {
 
 export async function PATCH(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, {
+    const company = await requireCompanyAccount(request, {
       permission: "bookings:update",
     });
     const bookingId = parseId((await context.params).id);

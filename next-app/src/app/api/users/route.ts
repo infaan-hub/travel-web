@@ -9,27 +9,14 @@ export async function GET(request: NextRequest) {
     await requireStaff(request);
     const users = await prisma.user.findMany({
       where: { deletedAt: null },
-      include: {
-        companyMemberships: {
-          include: {
-            company: { select: { id: true, name: true, slug: true } },
-          },
-          orderBy: { createdAt: "desc" },
-        },
-      },
+      include: { companyAccount: { select: { id: true, name: true, slug: true } } },
       orderBy: { dateJoined: "desc" },
     });
     return ok(
       users.map((user) => ({
         ...userSerializer(user),
         is_active: user.isActive,
-        companies: user.companyMemberships.map((membership) => ({
-          id: membership.company.id,
-          name: membership.company.name,
-          slug: membership.company.slug,
-          role: membership.role,
-          status: membership.status,
-        })),
+        company: user.companyAccount,
       })),
     );
   } catch (error) {

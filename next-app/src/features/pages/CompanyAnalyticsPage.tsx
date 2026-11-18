@@ -17,7 +17,7 @@ import {
   XCircle,
 } from "@/components/icons";
 import type { CompanyAnalyticsData } from "@/lib/services/company-workspace";
-import type { CompanyContext } from "@/lib/auth/company";
+import type { CompanyContext } from "@/lib/auth/company-account";
 import CompanyAnalyticsCharts from "@/features/pages/CompanyAnalyticsClient";
 import styles from "@/features/pages/company-analytics.module.css";
 

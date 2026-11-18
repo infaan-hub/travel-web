@@ -16,7 +16,7 @@ import {
 } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { useToast } from "@/components/ToastProvider";
-import type { Company, CompanyBusinessType, CompanyStatus } from "@/features/pages/types";
+import type { Company, CompanyStatus } from "@/features/pages/types";
 import styles from "@/features/pages/admin-companies.module.css";
 import dashStyles from "@/features/pages/admin-dashboard.module.css";
 
@@ -28,13 +28,6 @@ const STATUS_LABELS: Record<CompanyStatus, string> = {
   SUSPENDED: "Suspended",
   ARCHIVED: "Archived",
   REJECTED: "Rejected",
-};
-
-const TYPE_LABELS: Record<CompanyBusinessType, string> = {
-  TRANSPORT_OPERATOR: "Transport operator",
-  CAR_RENTAL: "Car rental",
-  SHUTTLE_OPERATOR: "Shuttle operator",
-  OTHER: "Other",
 };
 
 const STATUS_CLASSES: Record<CompanyStatus, string> = {
@@ -57,7 +50,6 @@ export default function AdminCompaniesPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<CompanyStatus | "">("");
-  const [businessType, setBusinessType] = useState<CompanyBusinessType | "">("");
   const [region, setRegion] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +73,6 @@ export default function AdminCompaniesPage() {
           page,
           page_size: PAGE_SIZE,
           ...(status ? { status } : {}),
-          ...(businessType ? { business_type: businessType } : {}),
           ...(region.trim() ? { region: region.trim() } : {}),
         });
         if (cancelled) return;
@@ -117,20 +108,18 @@ export default function AdminCompaniesPage() {
     isAdmin,
     page,
     status,
-    businessType,
     region,
     reloadKey,
     toast,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const hasFilters = Boolean(status || businessType || region.trim());
+  const hasFilters = Boolean(status || region.trim());
   const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
   const resetFilters = () => {
     setStatus("");
-    setBusinessType("");
     setRegion("");
     setPage(1);
   };
@@ -178,26 +167,6 @@ export default function AdminCompaniesPage() {
             <option value="SUSPENDED">Suspended</option>
             <option value="ARCHIVED">Archived</option>
             <option value="REJECTED">Rejected</option>
-          </select>
-        </div>
-        <div className="filter-select-group">
-          <label className="sr-only" htmlFor="company-type-filter">
-            Filter by business type
-          </label>
-          <select
-            id="company-type-filter"
-            value={businessType}
-            onChange={(event) => {
-              setBusinessType(event.target.value as CompanyBusinessType | "");
-              setPage(1);
-            }}
-          >
-            <option value="">All business types</option>
-            {Object.entries(TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
           </select>
         </div>
         <div className="search-input-group">
@@ -285,10 +254,8 @@ export default function AdminCompaniesPage() {
                   <thead>
                     <tr>
                       <th scope="col">Company</th>
-                      <th scope="col">Type</th>
                       <th scope="col">Location</th>
                       <th scope="col">Status</th>
-                      <th scope="col">Team</th>
                       <th scope="col">Tours</th>
                       <th scope="col">Bookings</th>
                       <th scope="col">Actions</th>
@@ -326,9 +293,6 @@ export default function AdminCompaniesPage() {
                             </div>
                           </div>
                         </td>
-                        <td data-label="Type">
-                          {TYPE_LABELS[company.business_type] ?? company.business_type}
-                        </td>
                         <td data-label="Location">{locationLabel(company) || "—"}</td>
                         <td data-label="Status">
                           <span
@@ -337,7 +301,6 @@ export default function AdminCompaniesPage() {
                             {STATUS_LABELS[company.status] ?? company.status}
                           </span>
                         </td>
-                        <td data-label="Team">{company.members_count}</td>
                         <td data-label="Tours">{company.tours_count}</td>
                         <td data-label="Bookings">{company.bookings_count}</td>
                         <td data-label="Actions">

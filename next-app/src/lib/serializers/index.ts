@@ -2,9 +2,6 @@ import type {
   AuditLog,
   Booking,
   Company,
-  CompanyMembership,
-  CompanyMembershipStatus,
-  CompanyRole,
   CompanyTrip,
   ContactMessage,
   HomeSetting,
@@ -27,11 +24,8 @@ import { publicImageUrl } from "@/lib/storage/images";
 import { publicCompanyPath } from "@/lib/company-domain";
 import { companyBookingTransitions } from "@/lib/company-operations";
 import {
-  companyRolePermissions,
-  type CompanyAccessCompany,
-  type CompanyAccessMembership,
   type CompanyPermission,
-} from "@/lib/company-access";
+} from "@/lib/company-account-access";
 
 export type Json = Record<string, unknown>;
 
@@ -520,33 +514,6 @@ export function visitSerializer(visit: VisitorTracking): Json {
   };
 }
 
-type MembershipWithUser = CompanyMembership & {
-  user: User & { profile: Profile | null };
-  assignedBy?: { id: number; username: string } | null;
-};
-
-export function companyMembershipSerializer(membership: MembershipWithUser): Json {
-  return {
-    id: membership.id,
-    company: membership.companyId,
-    user: {
-      id: membership.user.id,
-      username: membership.user.username,
-      email: membership.user.email,
-      full_name: membership.user.profile?.fullName || membership.user.username,
-      profile_image_url: publicImageUrl(membership.user.profile?.image ?? null),
-    },
-    role: membership.role,
-    status: membership.status,
-    assigned_by: membership.assignedBy
-      ? { id: membership.assignedBy.id, username: membership.assignedBy.username }
-      : null,
-    created_at: iso(membership.createdAt),
-    updated_at: iso(membership.updatedAt),
-    revoked_at: iso(membership.revokedAt),
-  };
-}
-
 export function adminCompanyListSerializer(company: any): Json {
   return {
     id: company.id,
@@ -554,7 +521,6 @@ export function adminCompanyListSerializer(company: any): Json {
     slug: company.slug,
     description: company.description,
     registration_reference: company.registrationReference,
-    business_type: company.businessType,
     logo_image_key: company.logoImageKey,
     logo_image_url: publicImageUrl(company.logoImageKey),
     cover_image_key: company.coverImageKey,
@@ -579,7 +545,9 @@ export function adminCompanyListSerializer(company: any): Json {
     created_by: company.createdBy
       ? { id: company.createdBy.id, username: company.createdBy.username }
       : null,
-    members_count: company.memberships?.length ?? 0,
+    account: company.account
+      ? { id: company.account.id, username: company.account.username, email: company.account.email }
+      : null,
     tours_count: company._count?.tours ?? 0,
     bookings_count: company._count?.bookings ?? 0,
     created_at: iso(company.createdAt),
@@ -592,8 +560,6 @@ export function adminCompanyListSerializer(company: any): Json {
 export function adminCompanyDetailSerializer(data: any): Json {
   return {
     ...adminCompanyListSerializer(data.company),
-    members_count: data.stats.members_active,
-    members: data.company.memberships.map(companyMembershipSerializer),
     tours: data.tours.map((tour: any) => ({
       id: tour.id,
       title: tour.title,
@@ -630,48 +596,18 @@ export function adminCompanyDetailSerializer(data: any): Json {
   };
 }
 
-/**
- * Navigation-sized company memberships for `/api/user/`. Never include other
- * members, private contact data, or platform fields here.
- */
-export function userCompanyNavigationSerializer(
-  memberships: readonly CompanyAccessMembership[],
-  activeCompanyId: number | null,
-): Json {
-  return {
-    companies: memberships.map((membership) => ({
-      id: membership.company.id,
-      name: membership.company.name,
-      slug: membership.company.slug,
-      role: membership.role,
-      permissions: companyRolePermissions(membership.role),
-    })),
-    active_company_id: activeCompanyId,
-  };
-}
-
 export function companyWorkspaceContextSerializer(context: {
   user: { id: number; username: string };
-  company: CompanyAccessCompany;
-  membership: {
-    id: number;
-    role: CompanyRole;
-    status: CompanyMembershipStatus;
-  };
-  role: CompanyRole;
+  company: import("@/lib/company-account-access").CompanyAccount;
   permissions: readonly CompanyPermission[];
 }): Json {
   return {
-    user: {
-      id: context.user.id,
-      username: context.user.username,
-    },
+    user: { id: context.user.id, username: context.user.username },
     company: {
       id: context.company.id,
       name: context.company.name,
       slug: context.company.slug,
       description: context.company.description,
-      business_type: context.company.businessType,
       status: context.company.status,
       is_public: context.company.isPublic,
       logo_image_url: publicImageUrl(context.company.logoImageKey),
@@ -682,12 +618,6 @@ export function companyWorkspaceContextSerializer(context: {
       country: context.company.country,
       public_path: publicCompanyPath(context.company.slug),
     },
-    membership: {
-      id: context.membership.id,
-      role: context.membership.role,
-      status: context.membership.status,
-    },
-    role: context.role,
     permissions: context.permissions,
   };
 }
@@ -699,7 +629,6 @@ export function companyWorkspaceProfileSerializer(company: Company): Json {
     slug: company.slug,
     description: company.description,
     registration_reference: company.registrationReference,
-    business_type: company.businessType,
     logo_image_key: company.logoImageKey,
     logo_image_url: publicImageUrl(company.logoImageKey),
     cover_image_key: company.coverImageKey,
@@ -736,7 +665,6 @@ export function companyPublicSerializer(
     name: company.name,
     slug: company.slug,
     description: company.description,
-    business_type: company.businessType,
     logo_image_url: publicImageUrl(company.logoImageKey),
     cover_image_url: publicImageUrl(company.coverImageKey),
     address: company.address,

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   companyBookingStatusUpdateSchema,
   companyCreateSchema,
-  companyMemberAssignSchema,
   companyTourCreateSchema,
   companyTourUpdateSchema,
   companyTripCreateSchema,
@@ -70,7 +69,6 @@ describe("company validation", () => {
     expect(result.data.name).toBe("Acme Safaris");
     expect(result.data.contact_email).toBe("");
     expect(result.data.country).toBe("Tanzania");
-    expect(result.data.business_type).toBe("TOUR_OPERATOR");
     expect(result.data.latitude).toBe(-6.165917);
     expect(result.data.longitude).toBe(39.202641);
   });
@@ -146,17 +144,6 @@ describe("company validation", () => {
     expect(result.data.longitude).toBeUndefined();
   });
 
-  it("validates membership payloads", () => {
-    expect(companyMemberAssignSchema.safeParse({ user_id: "4", role: "MANAGER" }).success).toBe(
-      true,
-    );
-    expect(companyMemberAssignSchema.safeParse({ user_id: 0, role: "OWNER" }).success).toBe(
-      false,
-    );
-    expect(companyMemberAssignSchema.safeParse({ user_id: 4, role: "ADMIN" }).success).toBe(
-      false,
-    );
-  });
 
   it("strips platform-managed fields from workspace profile updates", () => {
     const result = companyWorkspaceProfileUpdateSchema.safeParse({
@@ -165,7 +152,6 @@ describe("company validation", () => {
       name: "Attempted rename",
       slug: "attempted-slug",
       registration_reference: "ATTEMPT",
-      business_type: "OTHER",
       status: "SUSPENDED",
       is_public: false,
     });

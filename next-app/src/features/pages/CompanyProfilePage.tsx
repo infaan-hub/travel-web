@@ -50,7 +50,6 @@ type CompanyProfile = {
   slug: string;
   description: string;
   registration_reference: string | null;
-  business_type: string;
   logo_image_url: string | null;
   cover_image_url: string | null;
   contact_email: string;
@@ -206,12 +205,7 @@ export default function CompanyProfilePage() {
   const [removeLogo, setRemoveLogo] = useState(false);
   const [removeCover, setRemoveCover] = useState(false);
 
-  const activeCompany =
-    user?.companies?.find(
-      (item) => item.id === user.active_company_id,
-    ) ?? (user?.companies?.length === 1 ? user.companies[0] : null);
-  const canUpdate =
-    activeCompany?.permissions.includes("profile:update") ?? false;
+  const canUpdate = Boolean(user && ["TOUR_COMPANY", "PRIVATE_HIRE_COMPANY"].includes(user.account_type));
 
   const load = useCallback(() => {
     companyAPI
@@ -397,7 +391,6 @@ export default function CompanyProfilePage() {
   const openDays = openDayCount(form);
   const channels = contactChannelCount(form);
   const linkedSocials = socialCount(form);
-  const businessType = humanize(company.business_type);
   const statusLabel = humanize(company.status);
   const aboveFormError = error && error !== LOAD_ERROR ? error : null;
 
@@ -488,8 +481,6 @@ export default function CompanyProfilePage() {
                 <h2 className={styles.profileHeroTitle}>{company.name}</h2>
                 <p className={styles.profileHeroMeta}>
                   <span>@{company.slug}</span>
-                  <span className={styles.profileMetaDot} aria-hidden="true" />
-                  <span>{businessType}</span>
                 </p>
                 <div className={styles.profileTagRow}>
                   <span className={styles.profileTag}>
@@ -944,10 +935,6 @@ export default function CompanyProfilePage() {
                   <dd className={styles.profileFactValue}>
                     {company.registration_reference || "Not recorded"}
                   </dd>
-                </div>
-                <div className={styles.profileFact}>
-                  <dt className={styles.profileFactLabel}>Business type</dt>
-                  <dd className={styles.profileFactValue}>{businessType}</dd>
                 </div>
                 <div className={styles.profileFact}>
                   <dt className={styles.profileFactLabel}>Status</dt>

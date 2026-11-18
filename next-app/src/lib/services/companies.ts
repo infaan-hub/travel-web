@@ -20,15 +20,7 @@ const COMPANY_LIST_INCLUDE = {
             username: true
         }
     },
-    memberships: {
-        where: {
-            status: "ACTIVE"
-        },
-        select: {
-            id: true,
-            role: true
-        }
-    },
+    account: { select: { id: true, username: true, email: true } },
     _count: {
         select: {
             tours: {
@@ -40,32 +32,7 @@ const COMPANY_LIST_INCLUDE = {
         }
     }
 };
-const COMPANY_DETAIL_INCLUDE = {
-    ...COMPANY_LIST_INCLUDE,
-    memberships: {
-        include: {
-            user: {
-                include: {
-                    profile: true
-                }
-            },
-            assignedBy: {
-                select: {
-                    id: true,
-                    username: true
-                }
-            }
-        },
-        orderBy: [
-            {
-                status: "asc"
-            },
-            {
-                createdAt: "desc"
-            }
-        ]
-    }
-};
+const COMPANY_DETAIL_INCLUDE = COMPANY_LIST_INCLUDE;
 function isUniqueConstraintError(error) {
     return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
 }
@@ -85,7 +52,6 @@ function companyAuditSnapshot(company) {
         slug: company.slug,
         description: company.description,
         registrationReference: company.registrationReference,
-        businessType: company.businessType,
         contactEmail: company.contactEmail,
         contactPhone: company.contactPhone,
         alternativePhone: company.alternativePhone,
@@ -112,7 +78,6 @@ function createData(input, slug) {
         slug,
         description: input.description,
         registrationReference: input.registration_reference ?? null,
-        businessType: input.business_type,
         contactEmail: input.contact_email,
         contactPhone: input.contact_phone,
         alternativePhone: input.alternative_phone ?? null,
@@ -142,7 +107,6 @@ function updateData(input, existing, slug) {
     if (input.registration_reference !== undefined) {
         data.registrationReference = input.registration_reference;
     }
-    if (input.business_type !== undefined) data.businessType = input.business_type;
     if (input.contact_email !== undefined) data.contactEmail = input.contact_email ?? "";
     if (input.contact_phone !== undefined) data.contactPhone = input.contact_phone ?? "";
     if (input.alternative_phone !== undefined) data.alternativePhone = input.alternative_phone;
@@ -191,81 +155,6 @@ function updateData(input, existing, slug) {
     return data;
 }
 
-async function listAdminCompanies(filters, pagination) {
-    const where = {};
-    if (filters.search) {
-        where.OR = [
-            {
-                name: {
-                    contains: filters.search,
-                    mode: "insensitive"
-                }
-            },
-            {
-                slug: {
-                    contains: filters.search,
-                    mode: "insensitive"
-                }
-            },
-            {
-                contactEmail: {
-                    contains: filters.search,
-                    mode: "insensitive"
-                }
-            },
-            {
-                registrationReference: {
-                    contains: filters.search,
-                    mode: "insensitive"
-                }
-            },
-            {
-                region: {
-                    contains: filters.search,
-                    mode: "insensitive"
-                }
-            },
-            {
-                district: {
-                    contains: filters.search,
-                    mode: "insensitive"
-                }
-            },
-            {
-                locality: {
-                    contains: filters.search,
-                    mode: "insensitive"
-                }
-            }
-        ];
-    }
-    if (filters.status) where.status = filters.status;
-    if (filters.business_type) where.businessType = filters.business_type;
-    if (filters.region) where.region = {
-        contains: filters.region,
-        mode: "insensitive"
-    };
-    const [total, companies] = await prisma.$transaction([
-        prisma.company.count({
-            where
-        }),
-        prisma.company.findMany({
-            where,
-            include: COMPANY_LIST_INCLUDE,
-            orderBy: {
-                createdAt: "desc"
-            },
-            ...pagination ? {
-                skip: pagination.skip,
-                take: pagination.take
-            } : {}
-        })
-    ]);
-    return {
-        companies,
-        total
-    };
-}
 async function getAdminCompany(id) {
     const company = await prisma.company.findUnique({
         where: {
@@ -383,7 +272,6 @@ async function getAdminCompany(id) {
         bookings,
         auditLogs,
         stats: {
-            members_active: company.memberships.filter((item)=>item.status === "ACTIVE").length,
             tours_total: toursTotal,
             tours_published: toursPublished,
             bookings_total: bookingCounts.reduce((sum, row)=>sum + row._count._all, 0),
@@ -459,6 +347,7 @@ async function createAdminCompany(input, actor, images = {}, ownerInput) {
         const slug = (0, companySlugCandidate)(baseSlug, attempt);
         try {
             company = await prisma.company.create({
+                include: { account: { select: { id: true, username: true, email: true } } },
                 data: {
                     ...createData(input, slug),
                     status: "PENDING",
@@ -471,39 +360,18 @@ async function createAdminCompany(input, actor, images = {}, ownerInput) {
                                 id: actor.id
                             }
                         },
-                        memberships: {
+                        account: {
                             create: {
-                                role: "OWNER",
-                                status: "ACTIVE",
-                                assignedBy: {
-                                    connect: {
-                                        id: actor.id
-                                    }
-                                },
-                                user: {
-                                    create: {
-                                        ...ownerData,
-                                        accountType: "PRIVATE_HIRE_COMPANY",
-                                        profile: {
-                                            create: {}
-                                        }
-                                    }
-                                }
+                                ...ownerData,
+                                accountType: "PRIVATE_HIRE_COMPANY",
+                                profile: { create: {} }
                             }
                         }
                     } : {
                         createdByUserId: actor.id
                     }
                 },
-                ...ownerData ? {
-                    include: {
-                        memberships: {
-                            select: {
-                                id: true
-                            }
-                        }
-                    }
-                } : {}
+
             });
             break;
         } catch (error) {
@@ -711,336 +579,26 @@ async function transitionCompany(id, action, actor) {
         ipAddress: actor.ipAddress,
         userAgent: actor.userAgent
     });
-    const companyOwners = await prisma.companyMembership.findMany({
-      where: { companyId: id, status: "ACTIVE", role: { in: ["OWNER", "MANAGER"] } },
-      select: { userId: true },
+    const companyAccount = await prisma.company.findUnique({
+      where: { id }, select: { account: { select: { id: true } } },
     });
-    await Promise.all(
-      [...new Set(companyOwners.map((membership) => membership.userId))].map((userId) =>
-        prisma.notification.create({
-          data: {
-            userId,
-            title: `Company ${action}`,
-            body: `Company ${id} is now ${nextStatus.toLowerCase()}.`,
-            url: "/company/select/",
-            tag: `company-lifecycle-${id}-${nextStatus}`,
-          },
-        }).catch(() => undefined),
-      ),
-    );
+    if (companyAccount?.account?.id) {
+      await prisma.notification.create({
+        data: {
+          userId: companyAccount.account.id,
+          title: `Company ${action}`,
+          body: `Company ${id} is now ${nextStatus.toLowerCase()}.`,
+          url: "/company/dashboard/",
+          tag: `company-lifecycle-${id}-${nextStatus}`,
+        },
+      }).catch(() => undefined);
+    }
     return getAdminCompany(id);
 }
-async function assignCompanyMembership(companyId, input, actor) {
-    const company = await prisma.company.findUnique({
-        where: {
-            id: companyId
-        },
-        select: {
-            id: true,
-            status: true,
-            name: true,
-            slug: true
-        }
-    });
-    if (!company) throw new ApiError(404, "Company not found.");
-    if (company.status === "ARCHIVED") {
-        throw new ApiError(409, "Archived companies cannot receive new members.");
-    }
-    const user = await prisma.user.findFirst({
-        where: {
-            id: input.user_id,
-            isActive: true,
-            deletedAt: null
-        },
-        select: {
-            id: true,
-            username: true,
-            email: true
-        }
-    });
-    if (!user) throw new ApiError(400, "Select an active user account.");
-    const existing = await prisma.companyMembership.findFirst({
-        where: {
-            companyId,
-            userId: input.user_id,
-            status: {
-                in: [
-                    "ACTIVE",
-                    "INVITED"
-                ]
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        }
-    });
-    let membership;
-    let action;
-    let before = null;
-    if (existing) {
-        if (existing.status === "ACTIVE" && existing.role === input.role) {
-            const membership = await prisma.companyMembership.findUniqueOrThrow({
-                where: {
-                    id: existing.id
-                },
-                include: {
-                    user: {
-                        include: {
-                            profile: true
-                        }
-                    },
-                    assignedBy: {
-                        select: {
-                            id: true,
-                            username: true
-                        }
-                    }
-                }
-            });
-            await prisma.user.update({
-                where: { id: input.user_id },
-                data: { accountType: "TOUR_COMPANY" }
-            });
-            return membership;
-        }
-        before = {
-            status: existing.status,
-            role: existing.role
-        };
-        membership = await prisma.companyMembership.update({
-            where: {
-                id: existing.id
-            },
-            data: {
-                role: input.role,
-                status: "ACTIVE",
-                revokedAt: null,
-                assignedByUserId: actor.id
-            },
-            include: {
-                user: {
-                    include: {
-                        profile: true
-                    }
-                },
-                assignedBy: {
-                    select: {
-                        id: true,
-                        username: true
-                    }
-                }
-            }
-        });
-        action = existing.status === "ACTIVE" ? "company.membership.role_change" : "company.membership.assign";
-    } else {
-        try {
-            membership = await prisma.companyMembership.create({
-                data: {
-                    companyId,
-                    userId: input.user_id,
-                    role: input.role,
-                    status: "ACTIVE",
-                    assignedByUserId: actor.id
-                },
-                include: {
-                    user: {
-                        include: {
-                            profile: true
-                        }
-                    },
-                    assignedBy: {
-                        select: {
-                            id: true,
-                            username: true
-                        }
-                    }
-                }
-            });
-            action = "company.membership.assign";
-        } catch (error) {
-            if (isUniqueConstraintError(error)) {
-                throw new ApiError(409, "This user already has an active membership.");
-            }
-            throw error;
-        }
-    }
-    await prisma.user.update({
-        where: { id: input.user_id },
-        data: { accountType: "TOUR_COMPANY" }
-    });
-    await (0, recordAudit)({
-        actorId: actor.id,
-        companyId,
-        action,
-        entity: "company_membership",
-        entityId: membership.id,
-        before,
-        after: {
-            membershipId: membership.id,
-            userId: membership.userId,
-            role: membership.role,
-            status: membership.status
-        },
-        ipAddress: actor.ipAddress,
-        userAgent: actor.userAgent
-    });
-    await prisma.notification.create({
-      data: {
-        userId: membership.userId,
-        title: "Company membership updated",
-        body: `Your membership for company ${companyId} is now ${membership.role}.`,
-        url: "/company/select/",
-        tag: `company-membership-${membership.id}`,
-      },
-    }).catch(() => undefined);
-    return membership;
-}
-async function updateCompanyMembershipRole(companyId, membershipId, role, actor) {
-    const membership = await prisma.companyMembership.findFirst({
-        where: {
-            id: membershipId,
-            companyId
-        },
-        include: {
-            user: {
-                include: {
-                    profile: true
-                }
-            },
-            assignedBy: {
-                select: {
-                    id: true,
-                    username: true
-                }
-            }
-        }
-    });
-    if (!membership) throw new ApiError(404, "Membership not found.");
-    if (membership.status !== "ACTIVE") {
-        throw new ApiError(409, "Only active memberships can change role.");
-    }
-    if (membership.role === role) return membership;
-    const updated = await prisma.companyMembership.update({
-        where: {
-            id: membership.id
-        },
-        data: {
-            role,
-            assignedByUserId: actor.id
-        },
-        include: {
-            user: {
-                include: {
-                    profile: true
-                }
-            },
-            assignedBy: {
-                select: {
-                    id: true,
-                    username: true
-                }
-            }
-        }
-    });
-    await (0, recordAudit)({
-        actorId: actor.id,
-        companyId,
-        action: "company.membership.role_change",
-        entity: "company_membership",
-        entityId: updated.id,
-        before: {
-            role: membership.role
-        },
-        after: {
-            role: updated.role
-        },
-        ipAddress: actor.ipAddress,
-        userAgent: actor.userAgent
-    });
-    return updated;
-}
-async function revokeCompanyMembership(companyId, membershipId, actor) {
-    const membership = await prisma.companyMembership.findFirst({
-        where: {
-            id: membershipId,
-            companyId
-        },
-        include: {
-            user: {
-                include: {
-                    profile: true
-                }
-            },
-            assignedBy: {
-                select: {
-                    id: true,
-                    username: true
-                }
-            }
-        }
-    });
-    if (!membership) throw new ApiError(404, "Membership not found.");
-    if (membership.status === "REVOKED") return membership;
-    const revoked = await prisma.companyMembership.update({
-        where: {
-            id: membership.id
-        },
-        data: {
-            status: "REVOKED",
-            revokedAt: new Date(),
-            assignedByUserId: actor.id
-        },
-        include: {
-            user: {
-                include: {
-                    profile: true
-                }
-            },
-            assignedBy: {
-                select: {
-                    id: true,
-                    username: true
-                }
-            }
-        }
-    });
-    await (0, recordAudit)({
-        actorId: actor.id,
-        companyId,
-        action: "company.membership.revoke",
-        entity: "company_membership",
-        entityId: revoked.id,
-        before: {
-            status: membership.status,
-            role: membership.role
-        },
-        after: {
-            status: revoked.status,
-            role: revoked.role
-        },
-        ipAddress: actor.ipAddress,
-        userAgent: actor.userAgent
-    });
-    await prisma.notification.create({
-      data: {
-        userId: revoked.userId,
-        title: "Company membership revoked",
-        body: `Your membership for company ${companyId} has been revoked.`,
-        url: "/",
-        tag: `company-membership-${revoked.id}`,
-      },
-    }).catch(() => undefined);
-    return revoked;
-}
-
-
 export {
   listAdminCompanies,
   getAdminCompany,
   createAdminCompany,
   updateAdminCompany,
   transitionCompany,
-  assignCompanyMembership,
-  updateCompanyMembershipRole,
-  revokeCompanyMembership,
 };

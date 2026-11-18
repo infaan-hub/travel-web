@@ -14,7 +14,7 @@ import {
 } from "@/lib/company-opening-hours";
 import { ArrowLeft, Loader, MapPin, Save, X } from "@/components/icons";
 import { isFile } from "@/features/pages/types";
-import type { Company, CompanyBusinessType } from "@/features/pages/types";
+import type { Company } from "@/features/pages/types";
 import styles from "@/features/pages/admin-companies.module.css";
 
 type CompanyFormProps = {
@@ -36,7 +36,6 @@ type FormState = {
   slug: string;
   description: string;
   registration_reference: string;
-  business_type: CompanyBusinessType;
   contact_email: string;
   contact_phone: string;
   alternative_phone: string;
@@ -70,7 +69,6 @@ function initialForm(company?: Company | null): FormState {
     slug: company?.slug ?? "",
     description: company?.description ?? "",
     registration_reference: company?.registration_reference ?? "",
-    business_type: company?.business_type ?? "TRANSPORT_OPERATOR",
     contact_email: company?.contact_email ?? "",
     contact_phone: company?.contact_phone ?? "",
     alternative_phone: company?.alternative_phone ?? "",
@@ -286,7 +284,6 @@ export default function CompanyForm({
     payload.append("slug", form.slug.trim());
     payload.append("description", form.description.trim());
     payload.append("registration_reference", form.registration_reference.trim());
-    payload.append("business_type", form.business_type);
     if (!createWithOwner) {
       payload.append("contact_email", form.contact_email.trim());
       payload.append("contact_phone", form.contact_phone.trim());
@@ -484,21 +481,6 @@ export default function CompanyForm({
                 {errorText("slug")}
               </span>
             )}
-          </div>
-          <div className="form-group">
-            <label htmlFor="company-business-type">Business type</label>
-            <select
-              id="company-business-type"
-              value={form.business_type}
-              onChange={(event) =>
-                update("business_type", event.target.value as CompanyBusinessType)
-              }
-            >
-              <option value="TRANSPORT_OPERATOR">Transport operator</option>
-              <option value="CAR_RENTAL">Car rental</option>
-              <option value="SHUTTLE_OPERATOR">Shuttle operator</option>
-              <option value="OTHER">Other</option>
-            </select>
           </div>
           <div className="form-group">
             <label htmlFor="company-registration">Registration reference</label>

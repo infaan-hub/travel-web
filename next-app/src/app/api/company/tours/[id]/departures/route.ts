@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { handleApiError, ok, parseId } from "@/lib/api/http";
 import { requestAuditActor } from "@/lib/api/request-context";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import {
   createCompanyDeparture,
   listCompanyDepartures,
@@ -11,7 +11,7 @@ type Context = { params: Promise<{ id: string }> };
 
 export async function GET(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, { permission: "tours:read" });
+    const company = await requireCompanyAccount(request, { permission: "tours:read" });
     const tourId = parseId((await context.params).id);
     const departures = await listCompanyDepartures(company.company.id, tourId);
     return ok(departures);
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest, context: Context) {
 
 export async function POST(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, { permission: "tours:write" });
+    const company = await requireCompanyAccount(request, { permission: "tours:write" });
     const tourId = parseId((await context.params).id);
     const body = await request.json();
     const departure = await createCompanyDeparture(

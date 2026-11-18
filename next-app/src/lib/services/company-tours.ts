@@ -5,7 +5,7 @@ import { recordAudit } from "@/lib/audit";
 import prisma from "@/lib/db/prisma";
 import { deleteImage } from "@/lib/storage/images";
 import { getCompanyTour } from "@/lib/services/company-workspace";
-import { notifyCompanyMembersByRole } from "@/lib/services/notifications";
+import { notifyCompanyAccount } from "@/lib/services/notifications";
 import type {
   CompanyTourCreateInput,
   CompanyTourUpdateInput,
@@ -240,9 +240,8 @@ export async function updateCompanyTour(
   });
 
   if (input.publication_status && input.publication_status !== existing.publicationStatus) {
-    await notifyCompanyMembersByRole(
+    await notifyCompanyAccount(
       companyId,
-      ["OWNER", "MANAGER"],
       {
         title:
           input.publication_status === "PUBLISHED"

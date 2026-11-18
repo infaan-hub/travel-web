@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { CompanyContext } from "@/lib/auth/company";
-import type { CompanySwitcherOption } from "@/components/CompanySwitcher";
-import CompanySwitcher from "@/components/CompanySwitcher";
+import type { CompanyContext } from "@/lib/auth/company-account";
 import CompanyDashboardCharts from "@/features/pages/CompanyDashboardChartsClient";
 import {
   Activity,
@@ -17,12 +15,8 @@ import {
   MessageSquare,
   Plus,
   Shield,
-  Users,
 } from "@/components/icons";
-import {
-  COMPANY_PERMISSION_LABELS,
-  COMPANY_ROLE_LABELS,
-} from "@/lib/company-access";
+import { COMPANY_PERMISSION_LABELS } from "@/lib/company-account-access";
 import type { CompanyDashboardData } from "@/lib/services/company-workspace";
 import { publicImageUrl } from "@/lib/storage/images";
 import styles from "@/features/pages/company-dashboard.module.css";
@@ -32,13 +26,6 @@ const STATUS_LABELS: Record<string, string> = {
   ACTIVE: "Active",
   SUSPENDED: "Suspended",
   ARCHIVED: "Archived",
-};
-
-const BUSINESS_LABELS: Record<string, string> = {
-  TRANSPORT_OPERATOR: "Transport operator",
-  CAR_RENTAL: "Car rental",
-  SHUTTLE_OPERATOR: "Shuttle operator",
-  OTHER: "Travel business",
 };
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -150,11 +137,9 @@ function PanelHead({
 
 export default function CompanyWorkspacePage({
   context,
-  companies,
   data,
 }: {
   context: CompanyContext;
-  companies: CompanySwitcherOption[];
   data: CompanyDashboardData;
 }) {
   const can = (permission: string) =>
@@ -207,13 +192,6 @@ export default function CompanyWorkspacePage({
         </div>
       </header>
 
-      {companies.length > 1 && (
-        <CompanySwitcher
-          companies={companies}
-          activeCompanyId={context.company.id}
-        />
-      )}
-
       <section className={styles.dashHero} aria-label="Company identity">
         <div className={styles.dashHeroMain}>
           <div className={styles.dashIdentity}>
@@ -242,19 +220,11 @@ export default function CompanyWorkspacePage({
           </p>
 
           <ul className={styles.dashMetaRow}>
-            <li className={styles.dashPill}>
-              <Building2 size={13} />
-              {BUSINESS_LABELS[context.company.businessType] ??
-                context.company.businessType}
-            </li>
             {location && (
               <li className={styles.dashPill}>
                 <MapPin size={13} /> {location}
               </li>
             )}
-            <li className={styles.dashPill}>
-              <Users size={13} /> {COMPANY_ROLE_LABELS[context.role]}
-            </li>
           </ul>
 
           <div className={styles.dashActions}>
@@ -523,12 +493,12 @@ export default function CompanyWorkspacePage({
           <section className={styles.dashPanel}>
             <PanelHead
               icon={<Shield size={17} />}
-              title="What this role can do"
-              copy={`${COMPANY_ROLE_LABELS[context.role]} role at this company.`}
+              title="Company account access"
+              copy="This login has authority for this company only. It cannot access another company."
             />
             {context.permissions.length === 0 ? (
               <p className={styles.dashEmpty}>
-                No permissions are assigned to this workspace role.
+                This company account has no available permissions.
               </p>
             ) : (
               <>
@@ -542,8 +512,7 @@ export default function CompanyWorkspacePage({
                 </ul>
                 {context.permissions.length > 6 && (
                   <p className={styles.dashPermMore}>
-                    +{context.permissions.length - 6} more permissions for this
-                    role
+                    +{context.permissions.length - 6} more company account permissions
                   </p>
                 )}
               </>

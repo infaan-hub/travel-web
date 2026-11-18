@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
 
     const result = await listPublicCompanies({
       search: searchParams.get("search") || searchParams.get("q") || undefined,
-      business_type: searchParams.get("business_type") || undefined,
       region: searchParams.get("region") || undefined,
       locality: searchParams.get("locality") || undefined,
       page: Number.isFinite(page) ? page : 1,

@@ -678,7 +678,7 @@
   text-decoration: underline;
 }
 
-/* Members */
+/* Lifecycle and company account */
 .lifecycleStatus {
   display: flex;
   align-items: center;
@@ -736,154 +736,25 @@
   line-height: 1.4;
 }
 
-.memberList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.memberRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px solid var(--glass-border);
-}
-
-.memberAvatar,
-.memberAvatarFallback {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  flex: 0 0 40px;
-  object-fit: cover;
-}
-
-.memberAvatarFallback {
-  display: grid;
-  place-items: center;
-  background: var(--aqua-subtle);
-  color: var(--aqua-strong);
-  font-weight: 700;
-}
-
-.memberIdentity {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
-}
-
-.memberIdentity strong {
-  color: var(--text-primary);
-  font-size: 0.83rem;
-  overflow-wrap: anywhere;
-}
-
-.memberIdentity span {
-  color: var(--text-light);
-  font-size: 0.72rem;
-  overflow-wrap: anywhere;
-}
-
-.memberActions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.memberActions select {
-  min-height: 44px;
-  max-width: 126px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-solid);
-  color: var(--text-primary);
-  font-size: 0.8rem;
-}
-
-.memberForm {
+.companyAccountForm {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid var(--glass-border);
 }
 
-.memberFormRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(110px, 0.7fr);
-  gap: 10px;
-  margin-bottom: 10px;
-}
 
-.memberForm :global(.form-group) {
+.companyAccountForm :global(.form-group) {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.memberForm :global(.form-group label) {
+.companyAccountForm :global(.form-group label) {
   color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 600;
 }
 
-.memberForm :global(.form-group select) {
-  width: 100%;
-  min-height: 44px;
-  padding: 9px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-solid);
-  color: var(--text-primary);
-  font-size: 0.82rem;
-}
-
-.revokedMembers {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-}
-
-.revokedMembers summary {
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
-
-.revokedMembers ul {
-  list-style: none;
-  margin: 6px 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.revokedMembers li {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px dashed var(--glass-border);
-}
-
-.revokedMembers li span:last-child {
-  color: var(--text-light);
-  font-size: 0.72rem;
-  text-align: right;
-}
 
 /* Audit */
 .auditList {
@@ -968,7 +839,7 @@
   .overviewGrid,
   .imageGrid,
   .detailSide,
-  .memberFormRow {
+  .companyAccountFormRow {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -978,21 +849,6 @@
 
   .fullWidth {
     grid-column: auto;
-  }
-
-  .memberRow {
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .memberActions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .memberActions select {
-    flex: 1;
-    max-width: none;
   }
 
   .map {

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok } from "@/lib/api/http";
 import { listResponse, paginatedResponse, paginationFrom } from "@/lib/api/pagination";
 import { readPayload, storeUpload, stripFiles } from "@/lib/api/body";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import { companyTripSerializer } from "@/lib/serializers";
 import prisma from "@/lib/db/prisma";
 import { deleteImage } from "@/lib/storage/images";
@@ -12,7 +12,7 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    const context = await requireCompanyMember(request, {
+    const context = await requireCompanyAccount(request, {
       permission: "tours:read",
     });
     const pagination = paginationFrom(new URL(request.url).searchParams);
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   let image: string | null = null;
   let committed = false;
   try {
-    const context = await requireCompanyMember(request, {
+    const context = await requireCompanyAccount(request, {
       permission: "tours:write",
     });
     const payload = await readPayload(request);

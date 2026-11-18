@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
     const filters = companyListQuerySchema.parse({
       search: searchParams.get("search") || undefined,
       status: searchParams.get("status") || undefined,
-      business_type: searchParams.get("business_type") || undefined,
       region: searchParams.get("region") || undefined,
     });
     const { companies, total } = await listAdminCompanies(filters, pagination);
@@ -48,14 +47,7 @@ export async function POST(request: NextRequest) {
     const user = await requireStaff(request);
     const payload = await readPayload(request);
     const body = companyCreateSchema.parse(stripFiles(payload));
-    const hasOwnerCredentials = [
-      "owner_username",
-      "owner_email",
-      "owner_password",
-    ].some((key) => key in payload);
-    const ownerCredentials = hasOwnerCredentials
-      ? adminCompanyOwnerCredentialsSchema.parse(payload)
-      : null;
+    const ownerCredentials = adminCompanyOwnerCredentialsSchema.parse(payload);
     logoImageKey = await storeUpload(payload, "logo_image", "companies");
     coverImageKey = await storeUpload(payload, "cover_image", "companies/covers");
     const actor = requestAuditActor(request, user);

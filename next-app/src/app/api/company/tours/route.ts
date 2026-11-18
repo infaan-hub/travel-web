@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok } from "@/lib/api/http";
 import { readPayload, storeUpload, stripFiles } from "@/lib/api/body";
 import { requestAuditActor } from "@/lib/api/request-context";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import {
   companyTourSerializer,
   companyTourDetailSerializer,
@@ -17,7 +17,7 @@ const TOUR_IMAGE_FIELDS = ["image", "image2", "image3"] as const;
 
 export async function GET(request: NextRequest) {
   try {
-    const context = await requireCompanyMember(request, {
+    const context = await requireCompanyAccount(request, {
       permission: "tours:read",
     });
     const { searchParams } = new URL(request.url);
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   const uploadedKeys: string[] = [];
   let committed = false;
   try {
-    const context = await requireCompanyMember(request, {
+    const context = await requireCompanyAccount(request, {
       permission: "tours:write",
     });
     const payload = await readPayload(request);

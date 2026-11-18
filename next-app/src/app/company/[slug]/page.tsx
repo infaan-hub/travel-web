@@ -95,7 +95,7 @@ export default async function CompanyProfilePage({ params }: Props) {
               <div className={styles.identityMain}>
                 <p className={styles.eyebrow}>
                   <Building2 size={13} aria-hidden="true" />
-                  {company.business_type.replace(/_/g, " ")}
+                  Company profile
                 </p>
                 <h1 id="company-profile-title" className={styles.title}>
                   {company.name}

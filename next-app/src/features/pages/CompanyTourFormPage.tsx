@@ -766,7 +766,7 @@ export default function CompanyTourFormPage({ tourId }: { tourId?: number }) {
                     ))}
                   </select>
                   <p className={styles.formHint}>
-                    Company members can choose draft, published or archived.
+                    The company account can choose draft, published or archived.
                     Moderation states remain with the platform.
                   </p>
                 </div>

@@ -31,7 +31,7 @@ export function isCompanyBookingTransitionAllowed(
 }
 
 /**
- * Company members may move a tour between these publication states directly.
+ * The company account may move a tour between these publication states directly.
  * PENDING_REVIEW and REJECTED are moderation outcomes controlled by the
  * platform, not company-side operations.
  */
@@ -58,7 +58,6 @@ export const COMPANY_PLATFORM_MANAGED_FIELDS = [
   "name",
   "slug",
   "registration_reference",
-  "business_type",
   "status",
   "is_public",
 ] as const;

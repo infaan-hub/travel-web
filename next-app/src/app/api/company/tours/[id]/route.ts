@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { handleApiError, ok, parseId } from "@/lib/api/http";
 import { readPayload, storeUpload, stripFiles } from "@/lib/api/body";
 import { requestAuditActor } from "@/lib/api/request-context";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import { companyTourDetailSerializer } from "@/lib/serializers";
 import {
   deleteCompanyTour,
@@ -15,7 +15,7 @@ type Context = { params: Promise<{ id: string }> };
 
 export async function GET(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, {
+    const company = await requireCompanyAccount(request, {
       permission: "tours:read",
     });
     const tourId = parseId((await context.params).id);
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, context: Context) {
 }
 
 async function update(request: NextRequest, context: Context) {
-  const company = await requireCompanyMember(request, {
+  const company = await requireCompanyAccount(request, {
     permission: "tours:write",
   });
   const tourId = parseId((await context.params).id);
@@ -72,7 +72,7 @@ export async function PATCH(request: NextRequest, context: Context) {
 
 export async function DELETE(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, {
+    const company = await requireCompanyAccount(request, {
       permission: "tours:write",
     });
     const tourId = parseId((await context.params).id);

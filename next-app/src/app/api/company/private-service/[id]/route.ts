@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok } from "@/lib/api/http";
 import { readPayload } from "@/lib/api/body";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 import { privateHireServiceSerializer } from "@/lib/serializers/private-hire";
 import { Prisma } from "@prisma/client";
@@ -11,7 +11,7 @@ export async function GET(
   props: { params: Promise<{ id: string }> },
 ) {
   try {
-    const context = await requireCompanyMember(request);
+    const context = await requireCompanyAccount(request);
     const { id: rawId } = await props.params;
     const id = parseInt(rawId, 10);
     if (!Number.isInteger(id)) throw new ApiError(404, "Service not found.");
@@ -36,7 +36,7 @@ export async function PUT(
   props: { params: Promise<{ id: string }> },
 ) {
   try {
-    const context = await requireCompanyMember(request);
+    const context = await requireCompanyAccount(request);
     const { id: rawId } = await props.params;
     const id = parseInt(rawId, 10);
     if (!Number.isInteger(id)) throw new ApiError(404, "Service not found.");
@@ -118,7 +118,7 @@ export async function DELETE(
   props: { params: Promise<{ id: string }> },
 ) {
   try {
-    const context = await requireCompanyMember(request);
+    const context = await requireCompanyAccount(request);
     const { id: rawId } = await props.params;
     const id = parseInt(rawId, 10);
     if (!Number.isInteger(id)) throw new ApiError(404, "Service not found.");

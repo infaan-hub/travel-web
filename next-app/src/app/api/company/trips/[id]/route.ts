@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok, parseId } from "@/lib/api/http";
 import { readPayload, storeUpload, stripFiles } from "@/lib/api/body";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import { companyTripSerializer } from "@/lib/serializers";
 import prisma from "@/lib/db/prisma";
 import { deleteImage } from "@/lib/storage/images";
@@ -10,7 +10,7 @@ import { companyTripUpdateSchema } from "@/lib/validation/company";
 type Context = { params: Promise<{ id: string }> };
 
 async function update(request: NextRequest, context: Context) {
-  const company = await requireCompanyMember(request, {
+  const company = await requireCompanyAccount(request, {
     permission: "tours:write",
   });
   const id = parseId((await context.params).id);
@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest, context: Context) {
 
 export async function DELETE(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, {
+    const company = await requireCompanyAccount(request, {
       permission: "tours:write",
     });
     const id = parseId((await context.params).id);

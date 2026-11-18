@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, parseId } from "@/lib/api/http";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 import { deleteImage } from "@/lib/storage/images";
 
@@ -8,7 +8,7 @@ type Context = { params: Promise<{ id: string; imageId: string }> };
 
 export async function DELETE(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, {
+    const company = await requireCompanyAccount(request, {
       permission: "tours:write",
     });
     const params = await context.params;

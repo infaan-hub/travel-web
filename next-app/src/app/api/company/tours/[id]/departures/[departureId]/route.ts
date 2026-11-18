@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { handleApiError, ok, parseId } from "@/lib/api/http";
 import { requestAuditActor } from "@/lib/api/request-context";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import {
   deleteCompanyDeparture,
   updateCompanyDeparture,
@@ -11,7 +11,7 @@ type Context = { params: Promise<{ id: string; departureId: string }> };
 
 export async function PATCH(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, { permission: "tours:write" });
+    const company = await requireCompanyAccount(request, { permission: "tours:write" });
     const tourId = parseId((await context.params).id);
     const departureId = parseId((await context.params).departureId);
     const body = await request.json();
@@ -35,7 +35,7 @@ export async function PATCH(request: NextRequest, context: Context) {
 
 export async function DELETE(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, { permission: "tours:write" });
+    const company = await requireCompanyAccount(request, { permission: "tours:write" });
     const tourId = parseId((await context.params).id);
     const departureId = parseId((await context.params).departureId);
     await deleteCompanyDeparture(

@@ -12,7 +12,7 @@ export default function CompanyForbidden() {
         <p className={styles.forbiddenCode}>403</p>
         <h1 className={styles.forbiddenTitle}>Company access unavailable</h1>
         <p className={styles.forbiddenCopy}>
-          This company workspace is suspended, archived, or your membership is
+          This company workspace is suspended, archived, or the company login is
           no longer active. Company data and operations are unavailable.
         </p>
         <Link className={styles.forbiddenLink} href="/">

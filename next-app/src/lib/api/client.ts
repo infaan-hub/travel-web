@@ -169,10 +169,6 @@ export const geocodeAPI = {
 };
 
 export const companiesAPI = {
-  createOwner: (data: { username: string; email: string; password: string }) =>
-    api.post("/admin/tour-company-owners/", data),
-  createApplication: (data: FormData | Record<string, unknown>) =>
-    api.post("/tour-company/application/", data, formDataConfig(data)),
   list: (params?: Params) => api.get("/admin/companies/", { params }),
   get: (id: string | number) => api.get(`/admin/companies/${id}/`),
   create: (data: FormData | Record<string, unknown>) =>
@@ -184,18 +180,7 @@ export const companiesAPI = {
   delete: (id: string | number) => api.delete(`/admin/companies/${id}/`),
   transition: (id: string | number, action: string) =>
     api.post(`/admin/companies/${id}/lifecycle/`, { action }),
-  addMember: (id: string | number, data: { user_id: number; role: string }) =>
-    api.post(`/admin/companies/${id}/members/`, data),
-  updateMember: (id: string | number, membershipId: string | number, role: string) =>
-    api.patch(`/admin/companies/${id}/members/${membershipId}/`, { role }),
-  revokeMember: (id: string | number, membershipId: string | number) =>
-    api.delete(`/admin/companies/${id}/members/${membershipId}/`),
-};
-
-export const companyAPI = {
   context: () => api.get("/company/context/"),
-  switchCompany: (companyId: number) =>
-    api.post("/company/switch/", { company_id: companyId }),
   dashboard: () => api.get("/company/dashboard/"),
   analytics: () => api.get("/company/analytics/"),
   profile: () => api.get("/company/profile/"),
@@ -255,6 +240,8 @@ export const companyAPI = {
   deletePrivateHireService: (id: string | number) =>
     api.delete(`/company/private-service/${id}/`),
 };
+
+export const companyAPI = companiesAPI;
 
 export const partnerRequestsAPI = {
   submit: (data: Record<string, unknown>) => api.post("/partner-requests/", data),

@@ -1,13 +1,13 @@
 import type { NextRequest } from "next/server";
 import { handleApiError } from "@/lib/api/http";
 import { listResponse, paginatedResponse, paginationFrom } from "@/lib/api/pagination";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import { listCompanyBookings } from "@/lib/services/company-workspace";
 import { companyBookingListQuerySchema } from "@/lib/validation/company";
 
 export async function GET(request: NextRequest) {
   try {
-    const context = await requireCompanyMember(request, {
+    const context = await requireCompanyAccount(request, {
       permission: "bookings:read",
     });
     const { searchParams } = new URL(request.url);

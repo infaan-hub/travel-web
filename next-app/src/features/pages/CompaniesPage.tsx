@@ -14,7 +14,6 @@ type Company = {
   name: string;
   slug: string;
   description: string | null;
-  business_type: string;
   logo_image_url: string | null;
   cover_image_url: string | null;
   locality: string | null;
@@ -26,17 +25,9 @@ type Company = {
   website: string | null;
 };
 
-const BUSINESS_TYPES = [
-  "TRANSPORT_OPERATOR",
-  "CAR_RENTAL",
-  "SHUTTLE_OPERATOR",
-  "OTHER",
-];
-
 export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
-  const [businessType, setBusinessType] = useState("");
   const [region, setRegion] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -44,7 +35,6 @@ export default function CompaniesPage() {
 
   const load = useCallback(async () => {
     const params: Record<string, string | number> = { page, page_size: pageSize };
-    if (businessType) params.business_type = businessType;
     if (region.trim()) params.region = region.trim();
     const cacheKey = `travel.companies.${JSON.stringify(params)}`;
     const cached = readClientCache<{ companies: Company[]; total: number }>(cacheKey);
@@ -70,14 +60,14 @@ export default function CompaniesPage() {
     } finally {
       setLoading(false);
     }
-  }, [businessType, region, page]);
+  }, [region, page]);
 
   useEffect(() => {
     void load(); // eslint-disable-line react-hooks/set-state-in-effect
   }, [load]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const hasFilters = Boolean(businessType || region.trim());
+  const hasFilters = Boolean(region.trim());
 
   return (
     <div className={`page ${styles.page} ${styles.listingRoot}`}>
@@ -89,21 +79,6 @@ export default function CompaniesPage() {
         patternImageKey="thumb"
       >
         <div className={styles.filters}>
-          <select
-            value={businessType}
-            onChange={(event) => {
-              setPage(1);
-              setBusinessType(event.target.value);
-            }}
-            aria-label="Business type"
-          >
-            <option value="">All business types</option>
-            {BUSINESS_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type.toLowerCase().replace(/_/g, " ").replace(/(^|\s)\S/g, (letter) => letter.toUpperCase())}
-              </option>
-            ))}
-          </select>
           <input
             value={region}
             onChange={(event) => {
@@ -159,7 +134,7 @@ export default function CompaniesPage() {
             <h2>{hasFilters ? "No companies match these filters" : "No companies are listed yet"}</h2>
             <p>{hasFilters ? "Try clearing the filters to see all listed providers." : "Published company profiles will appear here when providers join the marketplace."}</p>
             {hasFilters ? (
-              <button className="btn btn-secondary" type="button" onClick={() => { setBusinessType(""); setRegion(""); setPage(1); }}>
+              <button className="btn btn-secondary" type="button" onClick={() => { setRegion(""); setPage(1); }}>
                 Clear filters
               </button>
             ) : null}
@@ -202,12 +177,9 @@ export default function CompaniesPage() {
                       <div className={styles.identityCopy}>
                         <h2 className={styles.cardTitle}>{company.name}</h2>
                         <p className={styles.cardMeta}>
-                          {company.business_type.replace(/_/g, " ")}
-                          {company.locality || company.region
-                            ? ` · ${[company.locality, company.region, company.country]
-                                .filter(Boolean)
-                                .join(", ")}`
-                            : ""}
+                          {[company.locality, company.region, company.country]
+                            .filter(Boolean)
+                            .join(", ") || "Company profile"}
                         </p>
                       </div>
                     </div>

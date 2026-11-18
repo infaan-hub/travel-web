@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError } from "@/lib/api/http";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 
 const MAX_EXPORT_ROWS = 10_000;
@@ -26,7 +26,7 @@ function parseReportDate(value: string | null, field: string) {
 
 export async function GET(request: NextRequest) {
   try {
-    const context = await requireCompanyMember(request, {
+    const context = await requireCompanyAccount(request, {
       permission: "reports:export",
     });
     const from = parseReportDate(request.nextUrl.searchParams.get("from"), "from");

@@ -66,7 +66,7 @@ beforeEach(() => {
 });
 
 describe("POST /api/admin/tour-company-owners", () => {
-  it("creates an owner using staff authorization and returns credentials metadata", async () => {
+  it("does not allow standalone owner creation", async () => {
     const request = new NextRequest(
       "http://localhost/api/admin/tour-company-owners",
       {
@@ -82,22 +82,11 @@ describe("POST /api/admin/tour-company-owners", () => {
 
     const response = await createOwnerPost(request);
 
-    expect(response.status).toBe(201);
-    expect(await response.json()).toMatchObject({
-      id: 22,
-      username: "islandowner",
-      accountType: "PRIVATE_HIRE_COMPANY",
-    });
-    expect(mocks.requireStaff).toHaveBeenCalledOnce();
-    expect(mocks.createOwner).toHaveBeenCalledWith({
-      username: "islandowner",
-      email: "owner@example.com",
-      password: "secure-password",
-    });
+    expect(response.status).toBe(403);
+    expect(mocks.createOwner).not.toHaveBeenCalled();
   });
 
   it("does not create an owner when staff authorization fails", async () => {
-    mocks.requireStaff.mockRejectedValueOnce(new ApiError(403, "Not authorized."));
     const request = new NextRequest(
       "http://localhost/api/admin/tour-company-owners",
       {
@@ -119,7 +108,7 @@ describe("POST /api/admin/tour-company-owners", () => {
 });
 
 describe("POST /api/tour-company/application", () => {
-  it("creates a pending, private application for an authenticated Tour Company user", async () => {
+  it("does not allow self-service company applications", async () => {
     const request = new NextRequest(
       "http://localhost/api/tour-company/application",
       {
@@ -131,18 +120,8 @@ describe("POST /api/tour-company/application", () => {
 
     const response = await submitApplicationPost(request);
 
-    expect(response.status).toBe(201);
-    expect(await response.json()).toMatchObject({
-      id: 31,
-      name: "Island Tours",
-      status: "PENDING",
-      isPublic: false,
-    });
-    expect(mocks.createApplication).toHaveBeenCalledWith(
-      expect.objectContaining({ name: "Island Tours" }),
-      { id: 17 },
-      { logoImageKey: null, coverImageKey: null },
-    );
+    expect(response.status).toBe(403);
+    expect(mocks.createApplication).not.toHaveBeenCalled();
   });
 
   it("rejects customer accounts before creating an application", async () => {

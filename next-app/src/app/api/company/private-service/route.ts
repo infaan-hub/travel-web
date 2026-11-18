@@ -1,14 +1,14 @@
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok } from "@/lib/api/http";
 import { readPayload } from "@/lib/api/body";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 import { privateHireServiceSerializer } from "@/lib/serializers/private-hire";
 import { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
-    const context = await requireCompanyMember(request);
+    const context = await requireCompanyAccount(request);
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search")?.trim() || "";
 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const context = await requireCompanyMember(request);
+    const context = await requireCompanyAccount(request);
     const payload = await readPayload(request);
 
     const title = String(payload.title || "").trim();

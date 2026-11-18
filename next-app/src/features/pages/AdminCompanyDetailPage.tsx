@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { adminAPI, companiesAPI } from "@/lib/api/client";
+import { companiesAPI } from "@/lib/api/client"
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ToastProvider";
 import {
@@ -23,21 +23,16 @@ import {
   RefreshCw,
   Shield,
   Trash2,
-  UserPlus,
-  Users,
   XCircle,
 } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
-import { COMPANY_ROLES, hasCompleteCoordinates, openStreetMapUrl } from "@/lib/company-domain";
+import { hasCompleteCoordinates, openStreetMapUrl } from "@/lib/company-domain";
 import { openingHoursEntries } from "@/lib/company-opening-hours";
-import { COMPANY_ROLE_LABELS } from "@/lib/company-access";
 import CompanyForm from "@/features/pages/CompanyForm";
 import type {
   Company,
   CompanyAuditEntry,
-  CompanyRole,
   CompanyStatus,
-  Customer,
 } from "@/features/pages/types";
 import type { CompanyLifecycleAction } from "@/lib/company-domain";
 import styles from "@/features/pages/admin-companies.module.css";
@@ -63,7 +58,7 @@ const LIFECYCLE_LABELS: Record<CompanyLifecycleAction, string> = {
   suspend: "Suspend",
   reactivate: "Reactivate",
   archive: "Archive",
-  reject: "Reject application",
+  reject: "Reject company",
 };
 
 function formatDate(value?: string | null) {
@@ -134,16 +129,13 @@ export default function AdminCompanyDetailPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const companyId = Number(params?.id);
   const [company, setCompany] = useState<Company | null>(null);
-  const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [lifecycleBusy, setLifecycleBusy] = useState<CompanyLifecycleAction | null>(null);
   const [deletingCompany, setDeletingCompany] = useState(false);
-  const [memberUserId, setMemberUserId] = useState("");
-  const [memberRole, setMemberRole] = useState<CompanyRole>("MANAGER");
-  const [memberBusy, setMemberBusy] = useState<number | null>(null);
-  const [addingMember, setAddingMember] = useState(false);
+  const [accountForm, setAccountForm] = useState({ username: "", email: "", password: "" });
+  const [creatingAccount, setCreatingAccount] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -181,27 +173,19 @@ export default function AdminCompanyDetailPage() {
     return () => window.clearTimeout(timer);
   }, [authLoading, isAuthenticated, isAdmin, loadCompany]);
 
-  useEffect(() => {
-    if (authLoading || !isAuthenticated || !isAdmin) return;
-    adminAPI
-      .getAllUsers()
-      .then((response) => setUsers((response.data ?? []) as Customer[]))
-      .catch(() => setUsers([]));
-  }, [authLoading, isAuthenticated, isAdmin]);
-
   const handleLifecycle = async (action: CompanyLifecycleAction) => {
     if (!company) return;
     if (
       action === "archive" &&
       !window.confirm(
-        "Archive this company? Private hire services and bookings are retained, but the company can no longer be public or receive members.",
+        "Archive this company? Private hire services and bookings are retained, but the company can no longer be public.",
       )
     ) {
       return;
     }
     if (
       action === "reject" &&
-      !window.confirm("Reject this application? The owner will be unable to use this company workspace.")
+      !window.confirm("Reject this company? The owner will be unable to use this company workspace.")
     ) {
       return;
     }
@@ -221,7 +205,7 @@ export default function AdminCompanyDetailPage() {
           : action === "suspend"
             ? "Company suspended and removed from public view."
             : action === "reject"
-              ? "Company application rejected."
+              ? "Company rejected."
             : action === "reactivate"
               ? "Company reactivated. It remains private until you publish it."
               : "Company archived. Historical bookings were retained.",
@@ -233,10 +217,38 @@ export default function AdminCompanyDetailPage() {
     }
   };
 
+  const handleCreateAccount = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!company) return;
+    setCreatingAccount(true);
+    try {
+      await fetch(`/api/admin/companies/${company.id}/account/`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          owner_username: accountForm.username,
+          owner_email: accountForm.email,
+          owner_password: accountForm.password,
+        }),
+      }).then(async (response) => {
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.message || "Could not create company login.");
+      });
+      setAccountForm({ username: "", email: "", password: "" });
+      await loadCompany(false);
+      toast.success("Company login created.");
+    } catch (caught) {
+      toast.error(readApiError(caught, caught instanceof Error ? caught.message : "Could not create company login."));
+    } finally {
+      setCreatingAccount(false);
+    }
+  };
+
   const handleDeleteCompany = async () => {
     if (!company) return;
     const confirmed = window.confirm(
-      `Permanently delete ${company.name}? This also deletes its private hire services, bookings, memberships, company audit history, and images. This action cannot be undone.`,
+      `Permanently delete ${company.name}? This also deletes its private hire services, bookings, company login, company audit history, and images. This action cannot be undone.`,
     );
     if (!confirmed) return;
     setDeletingCompany(true);
@@ -247,57 +259,6 @@ export default function AdminCompanyDetailPage() {
     } catch (caught) {
       toast.error(readApiError(caught, "Could not delete this company."));
       setDeletingCompany(false);
-    }
-  };
-
-  const handleAddMember = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!company || !memberUserId) {
-      toast.error("Select a user to assign.");
-      return;
-    }
-    setAddingMember(true);
-    try {
-      await companiesAPI.addMember(company.id, {
-        user_id: Number(memberUserId),
-        role: memberRole,
-      });
-      setMemberUserId("");
-      await loadCompany(false);
-      toast.success("Membership assigned.");
-    } catch (caught) {
-      toast.error(readApiError(caught, "Could not assign this membership."));
-    } finally {
-      setAddingMember(false);
-    }
-  };
-
-  const handleRoleChange = async (membershipId: number, role: CompanyRole) => {
-    if (!company) return;
-    setMemberBusy(membershipId);
-    try {
-      await companiesAPI.updateMember(company.id, membershipId, role);
-      await loadCompany(false);
-      toast.success("Member role updated.");
-    } catch (caught) {
-      toast.error(readApiError(caught, "Could not update this role."));
-    } finally {
-      setMemberBusy(null);
-    }
-  };
-
-  const handleRevoke = async (membershipId: number, username: string) => {
-    if (!company) return;
-    if (!window.confirm(`Revoke ${username}'s access to this company?`)) return;
-    setMemberBusy(membershipId);
-    try {
-      await companiesAPI.revokeMember(company.id, membershipId);
-      await loadCompany(false);
-      toast.success("Membership revoked.");
-    } catch (caught) {
-      toast.error(readApiError(caught, "Could not revoke this membership."));
-    } finally {
-      setMemberBusy(null);
     }
   };
 
@@ -341,15 +302,8 @@ export default function AdminCompanyDetailPage() {
 
   const companyHours = openingHoursEntries(company.opening_hours);
   const stats = company.stats;
-  const activeMembers = (company.members ?? []).filter((member) => member.status === "ACTIVE");
-  const revokedMembers = (company.members ?? []).filter(
-    (member) => member.status === "REVOKED",
-  );
-  const activeMemberIds = new Set(activeMembers.map((member) => member.user.id));
-  const availableUsers = users.filter((user) => !activeMemberIds.has(user.id));
   const hasCoordinates = hasCompleteCoordinates(company.latitude, company.longitude);
   const actions = lifecycleActions(company.status);
-  const canAddMembers = company.status !== "ARCHIVED";
 
   return (
     <div className="page admin-page">
@@ -387,8 +341,7 @@ export default function AdminCompanyDetailPage() {
             </div>
             <h1>{company.name}</h1>
             <p className={styles.detailSubtitle}>
-              /{company.slug} · {company.business_type.replaceAll("_", " ").toLowerCase()}
-              {company.region ? ` · ${company.region}` : ""}
+              /{company.slug}{company.region ? ` � ${company.region}` : ""}
             </p>
           </div>
         </div>
@@ -463,13 +416,6 @@ export default function AdminCompanyDetailPage() {
             </div>
             <div className="stat-value">{stats.bookings_confirmed}</div>
             <div className="stat-label">Confirmed bookings</div>
-          </div>
-          <div className="dashboard-stat-card">
-            <div className="stat-icon">
-              <Users size={20} />
-            </div>
-            <div className="stat-value">{stats.members_active}</div>
-            <div className="stat-label">Active members</div>
           </div>
           <div className="dashboard-stat-card">
             <div className="stat-icon">
@@ -747,6 +693,40 @@ export default function AdminCompanyDetailPage() {
           <section className="admin-content">
             <div className={styles.panelHeader}>
               <div>
+                <h2>Company login</h2>
+                <p>One sign-in with authority for this company only.</p>
+              </div>
+            </div>
+            {company.account ? (
+              <dl className={styles.lifecycleDates}>
+                <div><dt>Username</dt><dd>{company.account.username}</dd></div>
+                <div><dt>Email</dt><dd>{company.account.email}</dd></div>
+              </dl>
+            ) : (
+              <form className={styles.companyAccountForm} onSubmit={handleCreateAccount}>
+                <p className={styles.help}>No login is assigned. Create one for this company.</p>
+                <div className="form-group">
+                  <label htmlFor="company-account-username">Username</label>
+                  <input id="company-account-username" value={accountForm.username} onChange={(event) => setAccountForm((v) => ({ ...v, username: event.target.value }))} required minLength={3} autoComplete="off" />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="company-account-email">Email</label>
+                  <input id="company-account-email" type="email" value={accountForm.email} onChange={(event) => setAccountForm((v) => ({ ...v, email: event.target.value }))} required autoComplete="off" />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="company-account-password">Temporary password</label>
+                  <input id="company-account-password" type="password" value={accountForm.password} onChange={(event) => setAccountForm((v) => ({ ...v, password: event.target.value }))} required minLength={8} autoComplete="new-password" />
+                </div>
+                <button className="btn btn-primary" disabled={creatingAccount}>
+                  {creatingAccount ? "Creating login�" : "Create company login"}
+                </button>
+              </form>
+            )}
+          </section>
+
+          <section className="admin-content">
+            <div className={styles.panelHeader}>
+              <div>
                 <h2>Lifecycle</h2>
                 <p>Status changes are explicit and audited. Deletion permanently removes company data.</p>
               </div>
@@ -814,131 +794,7 @@ export default function AdminCompanyDetailPage() {
             </button>
           </section>
 
-          <section className="admin-content">
-            <div className={styles.panelHeader}>
-              <div>
-                <h2>Members</h2>
-                <p>Only platform administrators can assign or revoke access.</p>
-              </div>
-              <span className={styles.panelMeta}>{activeMembers.length} active</span>
-            </div>
 
-            {activeMembers.length > 0 ? (
-              <ul className={styles.memberList}>
-                {activeMembers.map((member) => (
-                  <li key={member.id} className={styles.memberRow}>
-                    {member.user.profile_image_url ? (
-                      <Image
-                        src={getImageUrl(member.user.profile_image_url)}
-                        alt=""
-                        width={40}
-                        height={40}
-                        className={styles.memberAvatar}
-                      />
-                    ) : (
-                      <span className={styles.memberAvatarFallback} aria-hidden="true">
-                        {member.user.full_name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <div className={styles.memberIdentity}>
-                      <strong>{member.user.full_name}</strong>
-                      <span>{member.user.email || `@${member.user.username}`}</span>
-                    </div>
-                    <div className={styles.memberActions}>
-                      <label className="sr-only" htmlFor={`role-${member.id}`}>
-                        Role for {member.user.full_name}
-                      </label>
-                      <select
-                        id={`role-${member.id}`}
-                        value={member.role}
-                        onChange={(event) =>
-                          handleRoleChange(member.id, event.target.value as CompanyRole)
-                        }
-                        disabled={memberBusy !== null}
-                      >
-                        {COMPANY_ROLES.map((role) => (
-                          <option key={role} value={role}>{COMPANY_ROLE_LABELS[role]}</option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleRevoke(member.id, member.user.full_name)}
-                        disabled={memberBusy !== null}
-                        aria-label={`Revoke access for ${member.user.full_name}`}
-                        title="Revoke access"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className={styles.emptyPanel}>
-                <Users size={24} />
-                <p>No active members. Assign an owner or manager to delegate access.</p>
-              </div>
-            )}
-
-            {canAddMembers && (
-              <form className={styles.memberForm} onSubmit={handleAddMember}>
-                <div className={styles.memberFormRow}>
-                  <div className="form-group">
-                    <label htmlFor="member-user">Add a user</label>
-                    <select
-                      id="member-user"
-                      value={memberUserId}
-                      onChange={(event) => setMemberUserId(event.target.value)}
-                    >
-                      <option value="">Select a user…</option>
-                      {availableUsers.map((user) => (
-                        <option key={user.id} value={user.id}>
-                          {user.username}
-                          {user.email ? ` — ${user.email}` : ""}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="member-role">Role</label>
-                    <select
-                      id="member-role"
-                      value={memberRole}
-                      onChange={(event) => setMemberRole(event.target.value as CompanyRole)}
-                    >
-                      {COMPANY_ROLES.map((role) => (
-                        <option key={role} value={role}>{COMPANY_ROLE_LABELS[role]}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  className="btn btn-sm btn-primary"
-                  disabled={addingMember || !memberUserId}
-                >
-                  <UserPlus size={14} /> {addingMember ? "Assigning…" : "Assign member"}
-                </button>
-              </form>
-            )}
-
-            {revokedMembers.length > 0 && (
-              <details className={styles.revokedMembers}>
-                <summary>{revokedMembers.length} revoked historic membership{revokedMembers.length === 1 ? "" : "s"}</summary>
-                <ul>
-                  {revokedMembers.map((member) => (
-                    <li key={member.id}>
-                      <span>{member.user.full_name}</span>
-                      <span>
-                        {COMPANY_ROLE_LABELS[member.role]} · revoked {formatDate(member.revoked_at)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-          </section>
         </aside>
       </div>
     </div>

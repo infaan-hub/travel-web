@@ -46,21 +46,16 @@ export function buildWhatsAppUrl(data: {
   )}`;
 }
 
-export async function notifyCompanyMembersByRole(
+export async function notifyCompanyAccount(
   companyId: number | null | undefined,
-  roles: string[] | undefined,
   payload: { title: string; body: string; url: string; tag: string },
 ): Promise<void> {
   if (!companyId) return;
-  const memberships = await prisma.companyMembership.findMany({
-    where: {
-      companyId,
-      status: "ACTIVE",
-      ...(roles?.length ? { role: { in: roles as any } } : {}),
-    },
-    select: { userId: true },
+  const account = await prisma.company.findUnique({
+    where: { id: companyId },
+    select: { account: { select: { id: true } } },
   });
-  const userIds = [...new Set(memberships.map((membership) => membership.userId))];
+  const userIds = account?.account?.id ? [account.account.id] : [];
   if (userIds.length === 0) return;
 
   await Promise.all(
@@ -95,7 +90,7 @@ export async function notifyBookingCreated(booking: BookingNotificationInput): P
     tag: `booking-${booking.id}`,
   });
 
-  await notifyCompanyMembersByRole(booking.companyId, undefined, {
+  await notifyCompanyAccount(booking.companyId, {
     title: "New booking request",
     body: `${booking.fullName} - ${summary}`,
     url: "/company/bookings/",
@@ -151,7 +146,7 @@ export async function notifyBookingStatusChanged(
     });
   }
 
-  await notifyCompanyMembersByRole(booking.companyId, undefined, {
+  await notifyCompanyAccount(booking.companyId, {
     title: `Booking ${label.toLowerCase()}`,
     body: `${booking.fullName} - ${body}`,
     url: "/company/bookings/",

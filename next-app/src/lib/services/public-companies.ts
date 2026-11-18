@@ -7,7 +7,6 @@ import {
 
 export type PublicCompanyFilters = {
   search?: string;
-  business_type?: string;
   region?: string;
   locality?: string;
   page?: number;
@@ -25,7 +24,6 @@ export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
   const search = filters.search?.trim();
 
   const where: any = { ...PUBLIC_COMPANY_WHERE };
-  if (filters.business_type) where.businessType = filters.business_type;
   if (filters.region) where.region = { contains: filters.region, mode: "insensitive" };
   if (filters.locality) where.locality = { contains: filters.locality, mode: "insensitive" };
   if (search) {

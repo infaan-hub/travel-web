@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok, parseId } from "@/lib/api/http";
 import { readPayload, storeUpload } from "@/lib/api/body";
-import { requireCompanyMember } from "@/lib/auth/company";
+import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 import { galleryImageSerializer } from "@/lib/serializers";
 import { galleryImageSchema } from "@/lib/validation/gallery";
@@ -21,7 +21,7 @@ async function companyTour(companyId: number, tourId: number) {
 
 export async function GET(request: NextRequest, context: Context) {
   try {
-    const company = await requireCompanyMember(request, {
+    const company = await requireCompanyAccount(request, {
       permission: "tours:read",
     });
     const tourId = parseId((await context.params).id);
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, context: Context) {
   let image: string | null = null;
   let committed = false;
   try {
-    const company = await requireCompanyMember(request, {
+    const company = await requireCompanyAccount(request, {
       permission: "tours:write",
     });
     const tourId = parseId((await context.params).id);

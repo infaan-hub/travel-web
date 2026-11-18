@@ -9,15 +9,8 @@ import {
   type ReactNode,
 } from "react";
 import api, { authAPI } from "@/lib/api/client";
-import type { CompanyRole } from "@prisma/client";
 
-export type AuthCompanyMembership = {
-  id: number;
-  name: string;
-  slug: string;
-  role: CompanyRole;
-  permissions: string[];
-};
+export type AuthCompanyAccount = { id: number; name: string; slug: string };
 
 export type AuthUser = {
   id: number;
@@ -27,8 +20,7 @@ export type AuthUser = {
   account_type: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER" | "PRIVATE_HIRE_COMPANY";
   date_joined: string;
   profile_image_url?: string | null;
-  companies?: AuthCompanyMembership[];
-  active_company_id?: number | null;
+  company?: AuthCompanyAccount | null;
 };
 
 export type LoginChallengeInfo = {

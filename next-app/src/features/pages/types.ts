@@ -4,8 +4,8 @@
  * fields coming from the server.
  */
 import type { CompanyOpeningHours } from "@/lib/company-opening-hours";
-import type { CompanyRole, CompanyStatus } from "@prisma/client";
-export type { CompanyRole, CompanyStatus } from "@prisma/client";
+import type { CompanyStatus } from "@prisma/client";
+export type { CompanyStatus } from "@prisma/client";
 
 export type ImageUrl = string | null;
 
@@ -96,13 +96,7 @@ export type Customer = {
   is_staff: boolean;
   account_type?: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER" | "PRIVATE_HIRE_COMPANY";
   is_active?: boolean;
-  companies?: {
-    id: number;
-    name: string;
-    slug: string;
-    role: string;
-    status: "ACTIVE" | "INVITED" | "REVOKED";
-  }[];
+  company?: { id: number; name: string; slug: string } | null;
   email_verified?: boolean;
   profile_image_url?: ImageUrl;
   date_joined?: string;
@@ -219,37 +213,12 @@ export type HomeSettings = {
   [key: string]: any;
 };
 
-export type CompanyBusinessType =
-  | "TRANSPORT_OPERATOR"
-  | "CAR_RENTAL"
-  | "SHUTTLE_OPERATOR"
-  | "OTHER";
-
-export type CompanyMembership = {
-  id: number;
-  company: number;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    full_name: string;
-    profile_image_url?: ImageUrl;
-  };
-  role: CompanyRole;
-  status: "INVITED" | "ACTIVE" | "REVOKED";
-  assigned_by?: { id: number; username: string } | null;
-  created_at?: string;
-  updated_at?: string;
-  revoked_at?: string | null;
-};
-
 export type Company = {
   id: number;
   name: string;
   slug: string;
   description: string;
   registration_reference?: string | null;
-  business_type: CompanyBusinessType;
   logo_image_key?: string | null;
   logo_image_url?: ImageUrl;
   cover_image_key?: string | null;
@@ -272,14 +241,13 @@ export type Company = {
   is_public: boolean;
   public_path: string;
   created_by?: { id: number; username: string } | null;
-  members_count: number;
   tours_count: number;
   bookings_count: number;
   created_at?: string;
   updated_at?: string;
   suspended_at?: string | null;
   archived_at?: string | null;
-  members?: CompanyMembership[];
+  account?: { id: number; username: string; email: string } | null;
   tours?: CompanyTourSummary[];
   bookings?: CompanyBookingSummary[];
   stats?: CompanyStats;
@@ -288,7 +256,6 @@ export type Company = {
 };
 
 export type CompanyStats = {
-  members_active: number;
   tours_total: number;
   tours_published: number;
   bookings_total: number;

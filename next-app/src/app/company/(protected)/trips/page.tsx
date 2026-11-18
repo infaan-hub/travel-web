@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { requirePageCompanyMember } from "@/lib/auth/company";
+import { requirePageCompanyAccount } from "@/lib/auth/company-account";
 import CompanyTripsPage from "@/features/pages/CompanyTripsPage";
 
 export const metadata: Metadata = {
@@ -7,6 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default async function CompanyTripsRoute() {
-  await requirePageCompanyMember({ permission: "tours:read" });
+  await requirePageCompanyAccount({ permission: "tours:read" });
   return <CompanyTripsPage />;
 }
