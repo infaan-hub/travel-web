@@ -88,7 +88,7 @@ export default function MyTransportPage() {
                   <div>
                     <div className="font-semibold text-slate-900">{b.service?.title || "Transport booking"}</div>
                     <div className="text-xs text-slate-500">
-                      {b.travel_date ? new Date(b.travel_date).toLocaleDateString() : ""} • {b.passengers} pax • ${b.total_price}
+                      {b.travel_date ? new Date(b.travel_date).toISOString().slice(0, 10) : ""} • {b.passengers} pax • ${b.total_price}
                     </div>
                     {b.service?.vehicle && (
                       <div className="text-xs text-slate-600 mt-1">
@@ -129,7 +129,7 @@ export default function MyTransportPage() {
                   <div>
                     <div className="font-semibold text-slate-900">{r.origin} → {r.destination}</div>
                     <div className="text-xs text-slate-500">
-                      {r.travel_date ? new Date(r.travel_date).toLocaleDateString() : ""} • {r.passengers} pax
+                      {r.travel_date ? new Date(r.travel_date).toISOString().slice(0, 10) : ""} • {r.passengers} pax
                     </div>
                   </div>
                   <span className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
