@@ -294,6 +294,17 @@ export const publicPrivateHireAPI = {
   getAll: (params?: Params) => api.get("/private-services/", { params }),
   getById: (id: string | number) => api.get(`/private-services/${id}/`),
 };
+export const transportBookingsAPI = {
+  getAll: () => api.get("/transport-bookings/"),
+  create: (data: Record<string, unknown>) => api.post("/transport-bookings/", data),
+};
+export const transportTripRequestsAPI = {
+  getAll: () => api.get("/transport-trip-requests/"),
+  create: (data: Record<string, unknown>) => api.post("/transport-trip-requests/", data),
+};
+export const transportReviewsAPI = {
+  create: (data: Record<string, unknown>) => api.post("/transport-reviews/", data),
+};
 export const workspacesAPI = {
   getAll: (params?: Params) => api.get("/workspaces/", { params }),
   getById: (id: string | number) => api.get(`/workspaces/${id}/`),

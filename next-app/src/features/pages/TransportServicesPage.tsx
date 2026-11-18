@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { publicPrivateHireAPI } from "@/lib/api/client";
+import { publicPrivateHireAPI, transportBookingsAPI } from "@/lib/api/client";
 import { PageHero } from "@/components/PageHero";
-import { Car, UserCheck, Phone, Mail, Users, Briefcase, Sparkles } from "@/components/icons";
-import { X, Loader } from "lucide-react";
+import { useToast } from "@/components/ToastProvider";
+import { Car, Users, Briefcase, Sparkles } from "@/components/icons";
+import { UserCheck, Phone, Mail, X, Loader } from "lucide-react";
 
 type Vehicle = {
   id: number;
@@ -57,10 +58,25 @@ const PRICING_LABELS: Record<string, string> = {
 };
 
 export default function TransportServicesPage() {
+  const toast = useToast();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Service | null>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingService, setBookingService] = useState<Service | null>(null);
+  const [bookingForm, setBookingForm] = useState({
+    booking_type: "transport",
+    full_name: "",
+    email: "",
+    phone: "",
+    passengers: "1",
+    travel_date: "",
+    end_date: "",
+    pickup_time: "",
+    notes: "",
+  });
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -77,6 +93,41 @@ export default function TransportServicesPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const openBooking = (svc: Service) => {
+    setBookingService(svc);
+    setBookingForm({
+      booking_type: "transport",
+      full_name: "",
+      email: "",
+      phone: "",
+      passengers: "1",
+      travel_date: "",
+      end_date: "",
+      pickup_time: "",
+      notes: "",
+    });
+    setBookingOpen(true);
+  };
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bookingService) return;
+    try {
+      setBookingSubmitting(true);
+      await transportBookingsAPI.create({
+        service_id: bookingService.id,
+        ...bookingForm,
+      });
+      toast.success("Booking request submitted! The company will confirm shortly.");
+      setBookingOpen(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to submit booking";
+      alert(msg);
+    } finally {
+      setBookingSubmitting(false);
+    }
+  };
 
   return (
     <div className="page">
@@ -271,21 +322,122 @@ export default function TransportServicesPage() {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between pt-2 gap-3">
               <span className="text-lg font-bold text-teal-700">
                 ${selected.price} <span className="text-xs font-normal text-slate-500">/{PRICING_LABELS[selected.pricing_type] || selected.pricing_type}</span>
               </span>
-              {selected.company?.contact_phone && (
-                <a
-                  href={`https://wa.me/${selected.company.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi, I'd like to book ${selected.title}`)}`}
-                  target="_blank"
-                  rel="noreferrer"
+              <div className="flex gap-2">
+                <button
+                  type="button"
                   className="glass-button-primary px-5 py-2.5 rounded-xl text-sm font-semibold"
+                  onClick={() => openBooking(selected)}
                 >
-                  Book via WhatsApp
-                </a>
-              )}
+                  Book now
+                </button>
+                {selected.company?.contact_phone && (
+                  <a
+                    href={`https://wa.me/${selected.company.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi, I'd like to book ${selected.title}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="glass-button-secondary px-4 py-2.5 rounded-xl text-sm"
+                  >
+                    WhatsApp
+                  </a>
+                )}
+              </div>
             </div>
+          </div>
+        </div>
+      )}
+      {bookingOpen && bookingService && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setBookingOpen(false)}>
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-slate-900">Book {bookingService.title}</h2>
+              <button onClick={() => setBookingOpen(false)}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleBookingSubmit} className="flex flex-col gap-3">
+              <input
+                required
+                placeholder="Full name"
+                value={bookingForm.full_name}
+                onChange={(e) => setBookingForm({ ...bookingForm, full_name: e.target.value })}
+                className="glass-input px-4 py-2 rounded-xl text-sm"
+              />
+              <input
+                required
+                type="email"
+                placeholder="Email"
+                value={bookingForm.email}
+                onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
+                className="glass-input px-4 py-2 rounded-xl text-sm"
+              />
+              <input
+                required
+                type="tel"
+                placeholder="Phone"
+                value={bookingForm.phone}
+                onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
+                className="glass-input px-4 py-2 rounded-xl text-sm"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <select
+                  value={bookingForm.booking_type}
+                  onChange={(e) => setBookingForm({ ...bookingForm, booking_type: e.target.value })}
+                  className="glass-input px-4 py-2 rounded-xl text-sm"
+                >
+                  <option value="transport">Transport (one trip)</option>
+                  <option value="rental">Rental (date range)</option>
+                </select>
+                <input
+                  required
+                  type="date"
+                  value={bookingForm.travel_date}
+                  onChange={(e) => setBookingForm({ ...bookingForm, travel_date: e.target.value })}
+                  className="glass-input px-4 py-2 rounded-xl text-sm"
+                  placeholder="Start date"
+                />
+              </div>
+              {bookingForm.booking_type === "rental" && (
+                <input
+                  type="date"
+                  value={bookingForm.end_date}
+                  onChange={(e) => setBookingForm({ ...bookingForm, end_date: e.target.value })}
+                  className="glass-input px-4 py-2 rounded-xl text-sm"
+                  placeholder="End date"
+                />
+              )}
+              <input
+                required
+                type="number"
+                min="1"
+                placeholder="Passengers"
+                value={bookingForm.passengers}
+                onChange={(e) => setBookingForm({ ...bookingForm, passengers: e.target.value })}
+                className="glass-input px-4 py-2 rounded-xl text-sm"
+              />
+              <input
+                placeholder="Pickup time (optional)"
+                value={bookingForm.pickup_time}
+                onChange={(e) => setBookingForm({ ...bookingForm, pickup_time: e.target.value })}
+                className="glass-input px-4 py-2 rounded-xl text-sm"
+              />
+              <textarea
+                placeholder="Notes (optional)"
+                rows={3}
+                value={bookingForm.notes}
+                onChange={(e) => setBookingForm({ ...bookingForm, notes: e.target.value })}
+                className="glass-input px-4 py-2 rounded-xl text-sm"
+              />
+              <div className="flex justify-end gap-2 mt-2">
+                <button type="button" className="glass-button-secondary px-4 py-2 rounded-xl text-sm" onClick={() => setBookingOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={bookingSubmitting} className="glass-button-primary px-5 py-2 rounded-xl text-sm font-semibold">
+                  {bookingSubmitting ? "Submitting..." : "Submit booking"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
