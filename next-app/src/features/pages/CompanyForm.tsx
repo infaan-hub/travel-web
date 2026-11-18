@@ -287,34 +287,36 @@ export default function CompanyForm({
     payload.append("description", form.description.trim());
     payload.append("registration_reference", form.registration_reference.trim());
     payload.append("business_type", form.business_type);
-    payload.append("contact_email", form.contact_email.trim());
-    payload.append("contact_phone", form.contact_phone.trim());
-    payload.append("alternative_phone", form.alternative_phone.trim());
-    payload.append("whatsapp_number", form.whatsapp_number.trim());
-    payload.append("address", form.address.trim());
-    payload.append("locality", form.locality.trim());
-    payload.append("district", form.district.trim());
-    payload.append("region", form.region.trim());
-    payload.append("country", form.country.trim() || "Tanzania");
-    payload.append("latitude", latitude === null ? "" : String(latitude));
-    payload.append("longitude", longitude === null ? "" : String(longitude));
-    payload.append("website", form.website.trim());
-    if (!company || form.legacy_opening_hours === null) {
-      payload.append("opening_hours", JSON.stringify(form.opening_hours));
-    }
+    if (!createWithOwner) {
+      payload.append("contact_email", form.contact_email.trim());
+      payload.append("contact_phone", form.contact_phone.trim());
+      payload.append("alternative_phone", form.alternative_phone.trim());
+      payload.append("whatsapp_number", form.whatsapp_number.trim());
+      payload.append("address", form.address.trim());
+      payload.append("locality", form.locality.trim());
+      payload.append("district", form.district.trim());
+      payload.append("region", form.region.trim());
+      payload.append("country", form.country.trim() || "Tanzania");
+      payload.append("latitude", latitude === null ? "" : String(latitude));
+      payload.append("longitude", longitude === null ? "" : String(longitude));
+      payload.append("website", form.website.trim());
+      if (!company || form.legacy_opening_hours === null) {
+        payload.append("opening_hours", JSON.stringify(form.opening_hours));
+      }
 
-    const social = {
-      facebook: form.social_facebook.trim(),
-      instagram: form.social_instagram.trim(),
-      x: form.social_x.trim(),
-      linkedin: form.social_linkedin.trim(),
-      youtube: form.social_youtube.trim(),
-      tripadvisor: form.social_tripadvisor.trim(),
-    };
-    payload.append(
-      "social_links",
-      JSON.stringify(Object.fromEntries(Object.entries(social).filter(([, value]) => value))),
-    );
+      const social = {
+        facebook: form.social_facebook.trim(),
+        instagram: form.social_instagram.trim(),
+        x: form.social_x.trim(),
+        linkedin: form.social_linkedin.trim(),
+        youtube: form.social_youtube.trim(),
+        tripadvisor: form.social_tripadvisor.trim(),
+      };
+      payload.append(
+        "social_links",
+        JSON.stringify(Object.fromEntries(Object.entries(social).filter(([, value]) => value))),
+      );
+    }
 
     if (createWithOwner && !company) {
       payload.append("owner_username", ownerForm.username);
@@ -322,8 +324,8 @@ export default function CompanyForm({
       payload.append("owner_password", ownerForm.password);
     }
     if (company) payload.append("is_public", form.is_public ? "true" : "false");
-    if (isFile(logoFile)) payload.append("logo_image", logoFile);
-    if (isFile(coverFile)) payload.append("cover_image", coverFile);
+    if (!createWithOwner && isFile(logoFile)) payload.append("logo_image", logoFile);
+    if (!createWithOwner && isFile(coverFile)) payload.append("cover_image", coverFile);
 
     setSaving(true);
     try {
@@ -523,6 +525,8 @@ export default function CompanyForm({
         </div>
       </section>
 
+      {!createWithOwner && (
+        <>
       <section className={styles.formSection}>
         <div className={styles.sectionHeading}>
           <h2>Contact</h2>
@@ -876,6 +880,8 @@ export default function CompanyForm({
           </p>
         )}
       </section>
+        </>
+      )}
 
       <div className={styles.formActionsSticky}>
         {onCancel && (
@@ -883,7 +889,7 @@ export default function CompanyForm({
             <X size={16} /> Cancel
           </button>
         )}
-        {!company && (
+        {!company && !createWithOwner && (
           <Link href="/admin/companies" className="btn btn-outline">
             <ArrowLeft size={16} /> Back to companies
           </Link>

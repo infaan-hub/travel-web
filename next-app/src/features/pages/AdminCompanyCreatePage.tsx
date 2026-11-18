@@ -53,8 +53,7 @@ export default function AdminCompanyCreatePage() {
             <div>
               <h2 className={dashStyles.dashPanelTitle}>Company profile and owner</h2>
               <p className={dashStyles.dashPanelCopy}>
-                Add the owner account and the company’s identity, contact, location, branding,
-                and public profile details in one submission.
+                Create the owner account and enter the company’s identity details in one submission.
               </p>
             </div>
           </div>
