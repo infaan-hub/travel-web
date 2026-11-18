@@ -125,7 +125,6 @@ export default function Sidebar() {
     { to: "/admin/home-editor", label: "Home Editor", icon: Image },
     { to: "/admin/users", label: "Users", icon: Users },
     { to: "/admin/companies", label: "Companies", icon: Building2 },
-    { to: "/admin/tours", label: "Experiences", icon: Globe },
     { to: "/admin/bookings", label: "Bookings", icon: ClipboardList },
 
     { to: "/admin/reviews", label: "Reviews", icon: Star },
@@ -135,7 +134,6 @@ export default function Sidebar() {
 
   const customerNavItems: NavItem[] = [
     { to: "/", label: "Home", icon: Home, exact: true },
-    { to: "/tours", label: "Experiences", icon: Globe, exact: true },
     { to: "/companies", label: "Companies", icon: Building2 },
     { to: "/trips", label: "Trip", icon: Map },
     { to: "/bookings", label: "Bookings", icon: ClipboardList },
