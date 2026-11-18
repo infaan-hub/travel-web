@@ -5,7 +5,11 @@ import { listResponse, paginatedResponse, paginationFrom } from "@/lib/api/pagin
 import { requestAuditActor } from "@/lib/api/request-context";
 import { requireStaff } from "@/lib/auth/session";
 import { deleteImage } from "@/lib/storage/images";
-import { companyCreateSchema, companyListQuerySchema } from "@/lib/validation/company";
+import {
+  adminCompanyOwnerCredentialsSchema,
+  companyCreateSchema,
+  companyListQuerySchema,
+} from "@/lib/validation/company";
 import {
   createAdminCompany,
   listAdminCompanies,
@@ -44,12 +48,29 @@ export async function POST(request: NextRequest) {
     const user = await requireStaff(request);
     const payload = await readPayload(request);
     const body = companyCreateSchema.parse(stripFiles(payload));
+    const hasOwnerCredentials = [
+      "owner_username",
+      "owner_email",
+      "owner_password",
+    ].some((key) => key in payload);
+    const ownerCredentials = hasOwnerCredentials
+      ? adminCompanyOwnerCredentialsSchema.parse(payload)
+      : null;
     logoImageKey = await storeUpload(payload, "logo_image", "companies");
     coverImageKey = await storeUpload(payload, "cover_image", "companies/covers");
-    const company = await createAdminCompany(body, requestAuditActor(request, user), {
-      logoImageKey,
-      coverImageKey,
-    });
+    const actor = requestAuditActor(request, user);
+    const company = await createAdminCompany(
+      body,
+      actor,
+      { logoImageKey, coverImageKey },
+      ownerCredentials
+        ? {
+            username: ownerCredentials.owner_username,
+            email: ownerCredentials.owner_email,
+            password: ownerCredentials.owner_password,
+          }
+        : undefined,
+    );
     committed = true;
     return ok(adminCompanyListSerializer(company));
   } catch (error) {

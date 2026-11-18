@@ -5,67 +5,6 @@
   max-width: none;
 }
 
-.ownerAccountPanel {
-  display: grid;
-  gap: 14px;
-  border: 1px solid rgba(8, 66, 140, 0.24);
-}
-
-.ownerAccountPanel h2 {
-  margin: 0 0 4px;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-}
-
-.ownerAccountPanel p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.84rem;
-}
-
-.ownerAccountError {
-  color: var(--danger-text) !important;
-}
-
-.ownerAccountForm {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-  align-items: end;
-  gap: 12px;
-}
-
-.ownerAccountForm label {
-  display: grid;
-  gap: 6px;
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.ownerAccountForm input {
-  width: 100%;
-  min-width: 0;
-  min-height: 42px;
-  padding: 9px 11px;
-  border: 1px solid rgba(8, 66, 140, 0.28);
-  border-radius: 10px;
-  background: rgba(211, 211, 211, 0.86);
-  color: var(--text-primary);
-  font: inherit;
-}
-
-@media (max-width: 900px) {
-  .ownerAccountForm {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 560px) {
-  .ownerAccountForm {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 @media (max-width: 1200px) {
   .companyToolbar {
     display: grid;

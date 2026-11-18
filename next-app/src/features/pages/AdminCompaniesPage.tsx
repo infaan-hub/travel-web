@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { companiesAPI } from "@/lib/api/client";
 import { useAuth } from "@/context/AuthContext";
+import CompanyForm from "@/features/pages/CompanyForm";
 import {
   Building2,
   ChevronLeft,
@@ -62,14 +63,8 @@ export default function AdminCompaniesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-  const [ownerForm, setOwnerForm] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
-  const [creatingOwner, setCreatingOwner] = useState(false);
+  const [ownerFormKey, setOwnerFormKey] = useState(0);
   const [ownerMessage, setOwnerMessage] = useState<string | null>(null);
-  const [ownerError, setOwnerError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -143,27 +138,6 @@ export default function AdminCompaniesPage() {
     setPage(1);
   };
 
-  const createOwner = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setCreatingOwner(true);
-    setOwnerMessage(null);
-    setOwnerError(null);
-    try {
-      await companiesAPI.createOwner(ownerForm);
-      setOwnerMessage(
-        `Private Hire Company account @${ownerForm.username} created. They can sign in at /login and submit a company for review.`,
-      );
-      setOwnerForm({ username: "", email: "", password: "" });
-    } catch (caught) {
-      const failure = caught as { response?: { data?: { message?: string } } };
-      setOwnerError(
-        failure.response?.data?.message ?? "Could not create the Private Hire Company account.",
-      );
-    } finally {
-      setCreatingOwner(false);
-    }
-  };
-
   if (authLoading) {
     return (
       <div className={dashStyles.dashboardRoot}>
@@ -188,64 +162,34 @@ export default function AdminCompaniesPage() {
         </div>
       </header>
 
-      <section className={dashStyles.dashPanel} aria-label="Create Private Hire Company owner">
+      <section className={dashStyles.dashPanel} aria-label="Create Private Hire Company and owner">
         <div className={dashStyles.dashPanelHead}>
           <div className={dashStyles.dashPanelHeadMain}>
             <span className={dashStyles.dashPanelIcon} aria-hidden="true">
               <Building2 size={17} />
             </span>
             <div>
-              <h2 className={dashStyles.dashPanelTitle}>Create Private Hire Company owner</h2>
+              <h2 className={dashStyles.dashPanelTitle}>Create Private Hire Company with owner</h2>
               <p className={dashStyles.dashPanelCopy}>
-                Create signin credentials for an owner. They submit their company for review.
+                Create the owner login and full company profile together. The company will be
+                pending review and assigned to this owner.
               </p>
             </div>
           </div>
         </div>
         {ownerMessage ? <p role="status">{ownerMessage}</p> : null}
-        {ownerError ? <p className={styles.ownerAccountError} role="alert">{ownerError}</p> : null}
-        <form className={styles.ownerAccountForm} onSubmit={createOwner}>
-          <label>
-            Username
-            <input
-              required
-              minLength={3}
-              value={ownerForm.username}
-              onChange={(event) =>
-                setOwnerForm((current) => ({ ...current, username: event.target.value }))
-              }
-              autoComplete="off"
-            />
-          </label>
-          <label>
-            Email
-            <input
-              required
-              type="email"
-              value={ownerForm.email}
-              onChange={(event) =>
-                setOwnerForm((current) => ({ ...current, email: event.target.value }))
-              }
-              autoComplete="off"
-            />
-          </label>
-          <label>
-            Temporary password
-            <input
-              required
-              type="password"
-              minLength={8}
-              value={ownerForm.password}
-              onChange={(event) =>
-                setOwnerForm((current) => ({ ...current, password: event.target.value }))
-              }
-              autoComplete="new-password"
-            />
-          </label>
-          <button className="btn btn-primary" type="submit" disabled={creatingOwner}>
-            {creatingOwner ? "Creating account..." : "Create owner account"}
-          </button>
-        </form>
+        <CompanyForm
+          key={ownerFormKey}
+          createWithOwner
+          onCreate={(data) => companiesAPI.createWithOwner(data)}
+          onSaved={(company) => {
+            setOwnerMessage(
+              `Created the pending profile for ${company.name} and assigned it to the new owner.`,
+            );
+            setReloadKey((key) => key + 1);
+            setOwnerFormKey((key) => key + 1);
+          }}
+        />
       </section>
 
       <div className={`admin-toolbar ${styles.companyToolbar}`}>

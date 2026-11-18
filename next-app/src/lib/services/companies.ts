@@ -4,6 +4,7 @@ import prisma from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
 import { ApiError } from "@/lib/api/http";
 import { recordAudit } from "@/lib/audit";
+import { hashPassword } from "@/lib/auth/password";
 import {
   companySlugCandidate,
   nextCompanyStatus,
@@ -67,6 +68,10 @@ const COMPANY_DETAIL_INCLUDE = {
 };
 function isUniqueConstraintError(error) {
     return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+function uniqueConstraintTarget(error) {
+    const target = error?.meta?.target;
+    return Array.isArray(target) ? target.join(",").toLowerCase() : typeof target === "string" ? target.toLowerCase() : "";
 }
 function cleanSocialLinks(value) {
     if (!value) return Prisma.DbNull;
@@ -390,7 +395,7 @@ async function getAdminCompany(id) {
         publicPath: (0, publicCompanyPath)(company.slug)
     };
 }
-async function createAdminCompany(input, actor, images = {}) {
+async function createAdminCompany(input, actor, images = {}, ownerInput) {
     const requestedSlug = input.slug ? (0, normalizeCompanySlug)(input.slug) : null;
     if (input.slug && !requestedSlug) {
         throw new ApiError(400, "Enter a URL-safe slug.", {
@@ -407,6 +412,48 @@ async function createAdminCompany(input, actor, images = {}) {
             ]
         });
     }
+    let ownerData = null;
+    if (ownerInput) {
+        const username = ownerInput.username.trim();
+        const email = ownerInput.email.trim().toLowerCase();
+        const [existingUsername, existingEmail] = await Promise.all([
+            prisma.user.findUnique({
+                where: {
+                    username
+                },
+                select: {
+                    id: true
+                }
+            }),
+            prisma.user.findFirst({
+                where: {
+                    email
+                },
+                select: {
+                    id: true
+                }
+            })
+        ]);
+        if (existingUsername) {
+            throw new ApiError(400, "A user with that username already exists.", {
+                owner_username: [
+                    "A user with that username already exists."
+                ]
+            });
+        }
+        if (existingEmail) {
+            throw new ApiError(400, "A user with that email already exists.", {
+                owner_email: [
+                    "A user with that email already exists."
+                ]
+            });
+        }
+        ownerData = {
+            username,
+            email,
+            password: await hashPassword(ownerInput.password)
+        };
+    }
     let company = null;
     for(let attempt = 1; attempt <= 20; attempt += 1){
         const slug = (0, companySlugCandidate)(baseSlug, attempt);
@@ -416,14 +463,69 @@ async function createAdminCompany(input, actor, images = {}) {
                     ...createData(input, slug),
                     status: "PENDING",
                     isPublic: false,
-                    createdByUserId: actor.id,
                     logoImageKey: images.logoImageKey ?? null,
-                    coverImageKey: images.coverImageKey ?? null
-                }
+                    coverImageKey: images.coverImageKey ?? null,
+                    ...ownerData ? {
+                        createdBy: {
+                            connect: {
+                                id: actor.id
+                            }
+                        },
+                        memberships: {
+                            create: {
+                                role: "OWNER",
+                                status: "ACTIVE",
+                                assignedBy: {
+                                    connect: {
+                                        id: actor.id
+                                    }
+                                },
+                                user: {
+                                    create: {
+                                        ...ownerData,
+                                        accountType: "PRIVATE_HIRE_COMPANY",
+                                        profile: {
+                                            create: {}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } : {
+                        createdByUserId: actor.id
+                    }
+                },
+                ...ownerData ? {
+                    include: {
+                        memberships: {
+                            select: {
+                                id: true
+                            }
+                        }
+                    }
+                } : {}
             });
             break;
         } catch (error) {
             if (!isUniqueConstraintError(error)) throw error;
+            if (ownerData) {
+                const target = uniqueConstraintTarget(error);
+                if (target.includes("username")) {
+                    throw new ApiError(400, "A user with that username already exists.", {
+                        owner_username: [
+                            "A user with that username already exists."
+                        ]
+                    });
+                }
+                if (target.includes("email")) {
+                    throw new ApiError(400, "A user with that email already exists.", {
+                        owner_email: [
+                            "A user with that email already exists."
+                        ]
+                    });
+                }
+                if (!target.includes("slug")) throw error;
+            }
             if (requestedSlug) {
                 throw new ApiError(400, "This slug is already in use.", {
                     slug: [

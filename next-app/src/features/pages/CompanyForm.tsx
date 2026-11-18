@@ -22,6 +22,13 @@ type CompanyFormProps = {
   onSaved: (company: Company) => void;
   onCreate?: (data: FormData) => Promise<{ data: Company }>;
   onCancel?: () => void;
+  createWithOwner?: boolean;
+};
+
+type OwnerFormState = {
+  username: string;
+  email: string;
+  password: string;
 };
 
 type FormState = {
@@ -110,9 +117,15 @@ export default function CompanyForm({
   onSaved,
   onCreate,
   onCancel,
+  createWithOwner = false,
 }: CompanyFormProps) {
   const toast = useToast();
   const [form, setForm] = useState<FormState>(() => initialForm(company));
+  const [ownerForm, setOwnerForm] = useState<OwnerFormState>({
+    username: "",
+    email: "",
+    password: "",
+  });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(
@@ -143,6 +156,17 @@ export default function CompanyForm({
       if (!current[key]) return current;
       const next = { ...current };
       delete next[key];
+      return next;
+    });
+  };
+
+  const updateOwner = (key: keyof OwnerFormState, value: string) => {
+    setOwnerForm((current) => ({ ...current, [key]: value }));
+    setFieldErrors((current) => {
+      const errorKey = `owner_${key}`;
+      if (!current[errorKey]) return current;
+      const next = { ...current };
+      delete next[errorKey];
       return next;
     });
   };
@@ -224,6 +248,20 @@ export default function CompanyForm({
     if (form.name.trim().length < 2) {
       nextErrors.name = ["Company name must be at least 2 characters."];
     }
+    if (createWithOwner && !company) {
+      const username = ownerForm.username.trim();
+      if (username.length < 3) {
+        nextErrors.owner_username = ["Username must be at least 3 characters."];
+      } else if (!/^[\w.@+-]+$/.test(username)) {
+        nextErrors.owner_username = ["Username contains invalid characters."];
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerForm.email.trim())) {
+        nextErrors.owner_email = ["Enter a valid email address."];
+      }
+      if (ownerForm.password.length < 8) {
+        nextErrors.owner_password = ["Temporary password must be at least 8 characters."];
+      }
+    }
     if (latitude === undefined) {
       nextErrors.latitude = ["Enter a valid latitude between -90 and 90."];
     }
@@ -278,6 +316,11 @@ export default function CompanyForm({
       JSON.stringify(Object.fromEntries(Object.entries(social).filter(([, value]) => value))),
     );
 
+    if (createWithOwner && !company) {
+      payload.append("owner_username", ownerForm.username);
+      payload.append("owner_email", ownerForm.email);
+      payload.append("owner_password", ownerForm.password);
+    }
     if (company) payload.append("is_public", form.is_public ? "true" : "false");
     if (isFile(logoFile)) payload.append("logo_image", logoFile);
     if (isFile(coverFile)) payload.append("cover_image", coverFile);
@@ -289,7 +332,13 @@ export default function CompanyForm({
         : onCreate
           ? await onCreate(payload)
           : await companiesAPI.create(payload);
-      toast.success(company ? "Company changes saved." : "Company saved as pending.");
+      toast.success(
+        company
+          ? "Company changes saved."
+          : createWithOwner
+            ? "Company and owner created. Company is pending review."
+            : "Company saved as pending.",
+      );
       onSaved(response.data as Company);
     } catch (caught) {
       const failure = caught as ApiFailure;
@@ -319,6 +368,76 @@ export default function CompanyForm({
         <div className={styles.formError} role="alert">
           {error}
         </div>
+      )}
+
+      {createWithOwner && !company && (
+        <section className={styles.formSection}>
+          <div className={styles.sectionHeading}>
+            <h2>Owner sign-in credentials</h2>
+            <p>
+              The new owner account will be assigned to this company and can sign in
+              with these credentials.
+            </p>
+          </div>
+          <div className={styles.formGrid}>
+            <div className="form-group">
+              <label htmlFor="owner-username">Username *</label>
+              <input
+                id="owner-username"
+                type="text"
+                value={ownerForm.username}
+                onChange={(event) => updateOwner("username", event.target.value)}
+                minLength={3}
+                maxLength={150}
+                autoComplete="username"
+                required
+                {...errorProps("owner_username")}
+              />
+              {errorText("owner_username") && (
+                <span className={styles.fieldError} id="owner_username-error">
+                  {errorText("owner_username")}
+                </span>
+              )}
+            </div>
+            <div className="form-group">
+              <label htmlFor="owner-email">Email *</label>
+              <input
+                id="owner-email"
+                type="email"
+                value={ownerForm.email}
+                onChange={(event) => updateOwner("email", event.target.value)}
+                maxLength={254}
+                autoComplete="email"
+                required
+                {...errorProps("owner_email")}
+              />
+              {errorText("owner_email") && (
+                <span className={styles.fieldError} id="owner_email-error">
+                  {errorText("owner_email")}
+                </span>
+              )}
+            </div>
+            <div className="form-group">
+              <label htmlFor="owner-password">Temporary password *</label>
+              <input
+                id="owner-password"
+                type="password"
+                value={ownerForm.password}
+                onChange={(event) => updateOwner("password", event.target.value)}
+                minLength={8}
+                maxLength={128}
+                autoComplete="new-password"
+                required
+                {...errorProps("owner_password")}
+              />
+              {errorText("owner_password") && (
+                <span className={styles.fieldError} id="owner_password-error">
+                  {errorText("owner_password")}
+                </span>
+              )}
+            </div>
+          </div>
+        </section>
       )}
 
       <section className={styles.formSection}>
@@ -775,6 +894,8 @@ export default function CompanyForm({
             ? "Saving…"
             : company
               ? "Save changes"
+              : createWithOwner
+                ? "Create company and owner"
               : "Create company"}
         </button>
       </div>

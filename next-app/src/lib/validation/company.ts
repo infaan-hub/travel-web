@@ -255,6 +255,12 @@ export const tourCompanyOwnerCreateSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters.").max(128),
 });
 
+export const adminCompanyOwnerCredentialsSchema = z.object({
+  owner_username: tourCompanyOwnerCreateSchema.shape.username,
+  owner_email: tourCompanyOwnerCreateSchema.shape.email,
+  owner_password: tourCompanyOwnerCreateSchema.shape.password,
+});
+
 export const companyMemberAssignSchema = z.object({
   user_id: z.coerce.number().int().positive(),
   role: z.enum(COMPANY_ROLES),

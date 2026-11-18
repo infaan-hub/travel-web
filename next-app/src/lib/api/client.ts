@@ -177,6 +177,8 @@ export const companiesAPI = {
   get: (id: string | number) => api.get(`/admin/companies/${id}/`),
   create: (data: FormData | Record<string, unknown>) =>
     api.post("/admin/companies/", data, formDataConfig(data)),
+  createWithOwner: (data: FormData) =>
+    api.post("/admin/companies/", data, formDataConfig(data)),
   update: (id: string | number, data: FormData | Record<string, unknown>) =>
     api.patch(`/admin/companies/${id}/`, data, formDataConfig(data)),
   delete: (id: string | number) => api.delete(`/admin/companies/${id}/`),

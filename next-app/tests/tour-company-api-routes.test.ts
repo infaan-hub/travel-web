@@ -53,7 +53,7 @@ beforeEach(() => {
     id: 22,
     username: "islandowner",
     email: "owner@example.com",
-    accountType: "TOUR_COMPANY",
+    accountType: "PRIVATE_HIRE_COMPANY",
   });
   mocks.createApplication.mockResolvedValue({
     id: 31,
@@ -86,7 +86,7 @@ describe("POST /api/admin/tour-company-owners", () => {
     expect(await response.json()).toMatchObject({
       id: 22,
       username: "islandowner",
-      accountType: "TOUR_COMPANY",
+      accountType: "PRIVATE_HIRE_COMPANY",
     });
     expect(mocks.requireStaff).toHaveBeenCalledOnce();
     expect(mocks.createOwner).toHaveBeenCalledWith({
