@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { companyAPI } from "@/lib/api/client";
 import {
@@ -19,7 +20,6 @@ import {
   X,
   CheckCircle,
   AlertCircle,
-  Sparkles,
   ShieldCheck,
   Loader,
 } from "lucide-react";
@@ -206,12 +206,18 @@ export default function CompanyPrivateServicePage() {
       {/* Top Header */}
       <div className={styles.topBar}>
         <div className={styles.titleArea}>
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <Link href="/company/dashboard/">Company workspace</Link>
+            <span aria-hidden="true">/</span>
+            <span>Private services</span>
+          </nav>
+          <p className={styles.eyebrow}>Service management</p>
           <h1>
-            <Sparkles size={26} color="#14a3a3" />
+            <Briefcase size={22} aria-hidden="true" />
             Private Hire Services
           </h1>
           <p>
-            Pair your registered Private Hire Vehicles with Private Hire Drivers into complete bookable transport services for tourists.
+            Pair your registered vehicles and drivers into bookable private-hire services.
           </p>
         </div>
         <div className={styles.actionsArea}>
@@ -231,18 +237,41 @@ export default function CompanyPrivateServicePage() {
         </div>
       </div>
 
+      <section className={styles.overview} aria-label="Service catalogue overview">
+        <div className={styles.overviewMain}>
+          <div className={styles.overviewHeading}>
+            <span className={styles.overviewIcon} aria-hidden="true"><Briefcase size={21} /></span>
+            <div>
+              <h2>Service catalogue</h2>
+              <p>Build clear hire options from vehicles and drivers in your company fleet.</p>
+            </div>
+          </div>
+          <ul className={styles.stats}>
+            <li><span>Total services</span><strong>{services.length}</strong><small>In your catalogue</small></li>
+            <li><span>Active</span><strong>{services.filter((service) => service.is_active).length}</strong><small>Visible to customers</small></li>
+            <li><span>Fleet readiness</span><strong>{vehicles.length} / {drivers.length}</strong><small>Vehicles / drivers</small></li>
+          </ul>
+        </div>
+        <aside className={styles.overviewAside}>
+          <span>Bookable services</span>
+          <strong>{services.filter((service) => service.is_active).length.toLocaleString()}</strong>
+          <p>Active private-hire options</p>
+          <button type="button" onClick={openCreateModal}><Plus size={16} /> Create a service</button>
+        </aside>
+      </section>
+
       {/* Services List */}
       {loading ? (
         <div className={styles.emptyState}>
-          <Loader className="animate-spin" size={32} color="#14a3a3" />
+          <Loader className="animate-spin" size={32} color="#08428c" />
           <div className={styles.emptyStateSub}>Loading Private Hire Services...</div>
         </div>
       ) : services.length === 0 ? (
         <div className={styles.emptyState}>
-          <Sparkles size={48} color="#94a3b8" />
+          <Briefcase size={48} color="#94a3b8" />
           <div className={styles.emptyStateTitle}>No Private Hire Services Created Yet</div>
           <div className={styles.emptyStateSub}>
-            Combine a registered vehicle and driver to offer private airport transfers, day chauffeurs, or island tours.
+            Combine a registered vehicle and driver to offer airport transfers, day hire, or private island journeys.
           </div>
           <button className={styles.primaryBtn} onClick={openCreateModal}>
             <Plus size={18} /> Create Your First Service
@@ -488,10 +517,10 @@ export default function CompanyPrivateServicePage() {
                     id="svc_active_chk"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-4 h-4 text-teal-600 rounded"
+                    className="w-4 h-4 text-blue-600 rounded"
                   />
                   <label htmlFor="svc_active_chk" className="text-sm font-medium text-slate-700 cursor-pointer">
-                    Publish service active on the platform for tourist booking
+                    Publish this service for customer bookings
                   </label>
                 </div>
               </div>
@@ -525,14 +554,14 @@ export default function CompanyPrivateServicePage() {
         </div>
       )}
 
-      {/* Tourist Full Information Preview Modal */}
+      {/* Customer-facing service preview */}
       {previewService && (
         <div className={styles.modalBackdrop}>
           <div className={styles.previewContent}>
             <div className={styles.previewHeader}>
               <div>
-                <span className="text-xs uppercase tracking-wider text-teal-200 font-semibold">
-                  Tourist Booking View
+                <span className="text-xs uppercase tracking-wider text-blue-200 font-semibold">
+                  Customer booking view
                 </span>
                 <h2 className={styles.previewHeaderTitle}>{previewService.title}</h2>
               </div>
@@ -555,17 +584,17 @@ export default function CompanyPrivateServicePage() {
             <div className={styles.previewBody}>
               <div className={styles.touristCallout}>
                 <ShieldCheck size={20} />
-                <span>
-                  <strong>Full Verified Transport Information:</strong> Tourists booking this Private Hire Service see complete verified details of both the vehicle and assigned driver below.
+                  <span>
+                    <strong>Verified transport information:</strong> Customers booking this service can review the assigned vehicle and driver details below.
                 </span>
               </div>
 
               {/* 1. Vehicle Full Details */}
               {previewService.vehicle && (
-                <div className="border border-teal-100 rounded-xl p-4 bg-teal-50/30 flex flex-col gap-3">
+                <div className="border border-blue-100 rounded-xl p-4 bg-blue-50/30 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Car size={18} color="#0f6b6b" />
+                      <Car size={18} color="#08428c" />
                       <strong className="text-base text-slate-900">{previewService.vehicle.name}</strong>
                     </div>
                     <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2.5 py-1 rounded">
@@ -632,7 +661,7 @@ export default function CompanyPrivateServicePage() {
                   </div>
 
                   {/* Vehicle Capacities & Inclusions */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-teal-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-blue-100">
                     <div>
                       <span className="text-xs font-semibold text-slate-700 block mb-1">Capacity</span>
                       <div className="flex gap-4 text-xs text-slate-600">
@@ -643,12 +672,12 @@ export default function CompanyPrivateServicePage() {
 
                     <div>
                       <span className="text-xs font-semibold text-slate-700 block mb-1">Vehicle Category</span>
-                      <span className="text-xs text-teal-800 font-medium">{previewService.vehicle.category}</span>
+                      <span className="text-xs text-blue-800 font-medium">{previewService.vehicle.category}</span>
                     </div>
                   </div>
 
                   {/* Inclusions and Exclusions */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-teal-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-blue-100">
                     <div>
                       <span className="text-xs font-bold text-emerald-700 block mb-1 uppercase tracking-wide">
                         What&apos;s Included:

@@ -25,8 +25,8 @@ import {
   Building2,
   X,
   Car,
+  Briefcase,
   User,
-  Sparkles,
 } from "@/components/icons";
 import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -165,7 +165,7 @@ export default function Sidebar() {
         {
           to: "/company/private-service/",
           label: "Private Services",
-          icon: Sparkles,
+          icon: Briefcase,
         },
         {
           to: "/company/trips/",

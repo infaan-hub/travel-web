@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useState, useRef, type ChangeEvent, type FormEvent } from "react";
 import { companyAPI } from "@/lib/api/client";
 import {
@@ -184,11 +185,17 @@ export default function CompanyPrivateDriverPage() {
       {/* Top Header */}
       <div className={styles.topBar}>
         <div className={styles.titleArea}>
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <Link href="/company/dashboard/">Company workspace</Link>
+            <span aria-hidden="true">/</span>
+            <span>Private drivers</span>
+          </nav>
+          <p className={styles.eyebrow}>People management</p>
           <h1>
-            <UserCheck size={26} color="#14a3a3" />
+            <UserCheck size={22} aria-hidden="true" />
             Private Hire Drivers
           </h1>
-          <p>Register your company&apos;s verified in-house drivers with license and national ID details.</p>
+          <p>Maintain driver contact and identification details for your private-hire fleet.</p>
         </div>
         <div className={styles.actionsArea}>
           <div className={styles.searchBox}>
@@ -207,10 +214,33 @@ export default function CompanyPrivateDriverPage() {
         </div>
       </div>
 
+      <section className={styles.overview} aria-label="Driver overview">
+        <div className={styles.overviewMain}>
+          <div className={styles.overviewHeading}>
+            <span className={styles.overviewIcon} aria-hidden="true"><UserCheck size={21} /></span>
+            <div>
+              <h2>Driver directory</h2>
+              <p>Keep verified driver records organized and ready for service assignments.</p>
+            </div>
+          </div>
+          <ul className={styles.stats}>
+            <li><span>Total drivers</span><strong>{drivers.length}</strong><small>In your directory</small></li>
+            <li><span>Active</span><strong>{drivers.filter((driver) => driver.is_active).length}</strong><small>Available for assignment</small></li>
+            <li><span>Inactive</span><strong>{drivers.filter((driver) => !driver.is_active).length}</strong><small>Not currently assigned</small></li>
+          </ul>
+        </div>
+        <aside className={styles.overviewAside}>
+          <span>Driver records</span>
+          <strong>{drivers.length.toLocaleString()}</strong>
+          <p>{drivers.length === 1 ? "verified driver" : "verified drivers"}</p>
+          <button type="button" onClick={openCreateModal}><Plus size={16} /> Register a driver</button>
+        </aside>
+      </section>
+
       {/* Drivers Grid */}
       {loading ? (
         <div className={styles.emptyState}>
-          <Loader className="animate-spin" size={32} color="#14a3a3" />
+          <Loader className="animate-spin" size={32} color="#08428c" />
           <div className={styles.emptyStateSub}>Loading drivers...</div>
         </div>
       ) : drivers.length === 0 ? (
@@ -437,7 +467,7 @@ export default function CompanyPrivateDriverPage() {
                     id="driver_active_chk"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-4 h-4 text-teal-600 rounded"
+                    className="w-4 h-4 text-blue-600 rounded"
                   />
                   <label htmlFor="driver_active_chk" className="text-sm font-medium text-slate-700 cursor-pointer">
                     Driver is active and available for trip assignments

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useState, useRef, type ChangeEvent, type FormEvent } from "react";
 import { companyAPI } from "@/lib/api/client";
 import {
@@ -240,11 +241,17 @@ export default function CompanyPrivateHirePage() {
       {/* Top Header */}
       <div className={styles.topBar}>
         <div className={styles.titleArea}>
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <Link href="/company/dashboard/">Company workspace</Link>
+            <span aria-hidden="true">/</span>
+            <span>Private hire</span>
+          </nav>
+          <p className={styles.eyebrow}>Fleet management</p>
           <h1>
-            <Car size={26} color="#14a3a3" />
+            <Car size={22} aria-hidden="true" />
             Private Hire Vehicles
           </h1>
-          <p>Register and manage your fleet vehicles with plate numbers, images, inclusions, and capacities.</p>
+          <p>Maintain your vehicle catalogue, availability, passenger capacity and fleet details.</p>
         </div>
         <div className={styles.actionsArea}>
           <div className={styles.searchBox}>
@@ -263,10 +270,33 @@ export default function CompanyPrivateHirePage() {
         </div>
       </div>
 
+      <section className={styles.overview} aria-label="Fleet overview">
+        <div className={styles.overviewMain}>
+          <div className={styles.overviewHeading}>
+            <span className={styles.overviewIcon} aria-hidden="true"><Car size={21} /></span>
+            <div>
+              <h2>Fleet catalogue</h2>
+              <p>Manage the vehicles available for your private-hire services.</p>
+            </div>
+          </div>
+          <ul className={styles.stats}>
+            <li><span>Total vehicles</span><strong>{vehicles.length}</strong><small>In your fleet</small></li>
+            <li><span>Available</span><strong>{vehicles.filter((vehicle) => vehicle.is_available).length}</strong><small>Ready for hire</small></li>
+            <li><span>Unavailable</span><strong>{vehicles.filter((vehicle) => !vehicle.is_available).length}</strong><small>Currently inactive</small></li>
+          </ul>
+        </div>
+        <aside className={styles.overviewAside}>
+          <span>Fleet size</span>
+          <strong>{vehicles.length.toLocaleString()}</strong>
+          <p>{vehicles.length === 1 ? "vehicle registered" : "vehicles registered"}</p>
+          <button type="button" onClick={openCreateModal}><Plus size={16} /> Add a vehicle</button>
+        </aside>
+      </section>
+
       {/* Grid of Vehicles */}
       {loading ? (
         <div className={styles.emptyState}>
-          <Loader className="animate-spin" size={32} color="#14a3a3" />
+          <Loader className="animate-spin" size={32} color="#08428c" />
           <div className={styles.emptyStateSub}>Loading your fleet vehicles...</div>
         </div>
       ) : vehicles.length === 0 ? (
@@ -329,11 +359,11 @@ export default function CompanyPrivateHirePage() {
 
                 <div className={styles.specsRow}>
                   <div className={styles.specItem}>
-                    <Users size={15} color="#14a3a3" />
+                    <Users size={15} />
                     <span>{v.capacity} Passengers</span>
                   </div>
                   <div className={styles.specItem}>
-                    <Briefcase size={15} color="#14a3a3" />
+                    <Briefcase size={15} />
                     <span>{v.luggage_capacity} Bags</span>
                   </div>
                 </div>
@@ -502,7 +532,7 @@ export default function CompanyPrivateHirePage() {
                           unoptimized
                         />
                       ) : (
-                        <Upload size={24} color="#14a3a3" />
+                        <Upload size={24} color="#08428c" />
                       )}
                       <span className={styles.imageBoxTitle}>
                         Front View <span className={styles.requiredMark}>* (Must)</span>
@@ -611,7 +641,7 @@ export default function CompanyPrivateHirePage() {
                     id="is_available_chk"
                     checked={isAvailable}
                     onChange={(e) => setIsAvailable(e.target.checked)}
-                    className="w-4 h-4 text-teal-600 rounded"
+                    className="w-4 h-4 text-blue-800 rounded"
                   />
                   <label htmlFor="is_available_chk" className="text-sm font-medium text-slate-700 cursor-pointer">
                     Vehicle is currently active and available for hire
