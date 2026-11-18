@@ -220,9 +220,9 @@ export type HomeSettings = {
 };
 
 export type CompanyBusinessType =
-  | "TOUR_OPERATOR"
-  | "SAFARI_OPERATOR"
-  | "EXCURSION_PROVIDER"
+  | "TRANSPORT_OPERATOR"
+  | "CAR_RENTAL"
+  | "SHUTTLE_OPERATOR"
   | "OTHER";
 
 export type CompanyMembership = {

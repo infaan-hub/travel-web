@@ -63,7 +63,7 @@ function initialForm(company?: Company | null): FormState {
     slug: company?.slug ?? "",
     description: company?.description ?? "",
     registration_reference: company?.registration_reference ?? "",
-    business_type: company?.business_type ?? "TOUR_OPERATOR",
+    business_type: company?.business_type ?? "TRANSPORT_OPERATOR",
     contact_email: company?.contact_email ?? "",
     contact_phone: company?.contact_phone ?? "",
     alternative_phone: company?.alternative_phone ?? "",
@@ -373,9 +373,9 @@ export default function CompanyForm({
                 update("business_type", event.target.value as CompanyBusinessType)
               }
             >
-              <option value="TOUR_OPERATOR">Tour operator</option>
-              <option value="SAFARI_OPERATOR">Safari operator</option>
-              <option value="EXCURSION_PROVIDER">Excursion provider</option>
+              <option value="TRANSPORT_OPERATOR">Transport operator</option>
+              <option value="CAR_RENTAL">Car rental</option>
+              <option value="SHUTTLE_OPERATOR">Shuttle operator</option>
               <option value="OTHER">Other</option>
             </select>
           </div>

@@ -142,7 +142,7 @@ const companyBaseSchema = z.object({
 export const companyCreateSchema = companyBaseSchema.extend({
   name: z.string().trim().min(2, "Company name must be at least 2 characters.").max(200),
   description: z.preprocess(emptyToNull, z.string().max(5000).nullable().optional()).transform((value) => value ?? ""),
-  business_type: z.enum(COMPANY_BUSINESS_TYPES).optional().default("TOUR_OPERATOR"),
+  business_type: z.enum(COMPANY_BUSINESS_TYPES).optional().default("TRANSPORT_OPERATOR"),
   contact_email: optionalEmail.transform((value) => value ?? ""),
   contact_phone: optionalText(30).transform((value) => value ?? ""),
   address: optionalText(500).transform((value) => value ?? ""),

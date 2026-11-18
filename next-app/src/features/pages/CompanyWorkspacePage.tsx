@@ -35,9 +35,9 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const BUSINESS_LABELS: Record<string, string> = {
-  TOUR_OPERATOR: "Tour operator",
-  SAFARI_OPERATOR: "Safari operator",
-  EXCURSION_PROVIDER: "Excursion provider",
+  TRANSPORT_OPERATOR: "Transport operator",
+  CAR_RENTAL: "Car rental",
+  SHUTTLE_OPERATOR: "Shuttle operator",
   OTHER: "Travel business",
 };
 

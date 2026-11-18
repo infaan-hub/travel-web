@@ -31,9 +31,9 @@ const STATUS_LABELS: Record<CompanyStatus, string> = {
 };
 
 const TYPE_LABELS: Record<CompanyBusinessType, string> = {
-  TOUR_OPERATOR: "Private hire & transport",
-  SAFARI_OPERATOR: "Safari operator",
-  EXCURSION_PROVIDER: "Excursion provider",
+  TRANSPORT_OPERATOR: "Transport operator",
+  CAR_RENTAL: "Car rental",
+  SHUTTLE_OPERATOR: "Shuttle operator",
   OTHER: "Other",
 };
 

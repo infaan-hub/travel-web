@@ -41,9 +41,9 @@ enum CompanyStatus {
 }
 
 enum CompanyBusinessType {
-  TOUR_OPERATOR
-  SAFARI_OPERATOR
-  EXCURSION_PROVIDER
+  TRANSPORT_OPERATOR
+  CAR_RENTAL
+  SHUTTLE_OPERATOR
   OTHER
 }
 
@@ -157,7 +157,7 @@ model Company {
   slug                  String                   @unique
   description           String                   @default("")
   registrationReference String?                  @map("registration_reference")
-  businessType          CompanyBusinessType      @default(TOUR_OPERATOR) @map("business_type")
+  businessType          CompanyBusinessType      @default(TRANSPORT_OPERATOR) @map("business_type")
   logoImageKey          String?                  @map("logo_image_key")
   coverImageKey         String?                  @map("cover_image_key")
   contactEmail          String                   @default("") @map("contact_email")
