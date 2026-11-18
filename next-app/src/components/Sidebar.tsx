@@ -143,7 +143,7 @@ export default function Sidebar() {
 
   const driverNavItems: NavItem[] = [
     { to: "/driver/dashboard/", label: "Driver dashboard", icon: LayoutDashboard, exact: true },
-    { to: "/driver/dashboard/#trips", label: "Assigned trips", icon: Truck },
+    { to: "/driver/dashboard/trips/", label: "Trips", icon: Truck },
     { to: "/profile/", label: "Account profile", icon: User },
   ];
 

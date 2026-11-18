@@ -2,8 +2,50 @@ import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok, parseId } from "@/lib/api/http";
 import { requirePrivateHireDriver } from "@/lib/auth/private-hire-driver";
 import prisma from "@/lib/db/prisma";
+import { createInAppNotification, sendPushToUsers } from "@/lib/push";
+import { sendEmail } from "@/lib/email";
 
 type Context = { params: Promise<{ id: string }> };
+
+async function notifyCustomer(
+  request: {
+    id: number;
+    userId: number | null;
+    origin: string;
+    destination: string;
+    travelDate: Date;
+    contactName: string | null;
+    contactEmail: string | null;
+    contactPhone: string | null;
+  },
+  driver: { name: string; phone: string },
+) {
+  const date = request.travelDate.toISOString().slice(0, 10);
+  const body = `Your trip request from ${request.origin} to ${request.destination} on ${date} has been accepted by driver ${driver.name}${driver.phone ? ` (${driver.phone})` : ""}. They will contact you to arrange the pickup.`;
+  const payload = {
+    title: "Your trip request was accepted",
+    body,
+    url: "/my-transport/",
+    tag: `transport-trip-request-${request.id}`,
+  };
+
+  try {
+    if (request.userId) {
+      await createInAppNotification(request.userId, payload);
+      await sendPushToUsers([request.userId], payload);
+    }
+    const email = request.contactEmail;
+    if (email) {
+      await sendEmail({
+        to: email,
+        subject: "Your trip request was accepted",
+        text: `Hi ${request.contactName || "there"},\n\n${body}\n\nThank you for choosing our private hire service.\n`,
+      });
+    }
+  } catch (error) {
+    console.error("Could not notify customer about accepted trip request", error);
+  }
+}
 
 export async function PATCH(request: NextRequest, context: Context) {
   try {
@@ -21,6 +63,8 @@ export async function PATCH(request: NextRequest, context: Context) {
       where: { id, driverId: driver.id },
       include: { user: { select: { firstName: true, lastName: true, username: true, email: true } }, driver: { select: { name: true, phone: true, email: true } } },
     });
+    if (!tripRequest) throw new ApiError(404, "Trip request not found.");
+    await notifyCustomer(tripRequest, { name: driver.name, phone: driver.phone ?? tripRequest.driver?.phone ?? "" });
     return ok(tripRequest);
   } catch (error) {
     return handleApiError(error);

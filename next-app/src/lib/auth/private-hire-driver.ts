@@ -24,7 +24,7 @@ export async function requirePrivateHireDriver(request: Request) {
 
 export async function requirePagePrivateHireDriver(): Promise<{
   user: AuthUser;
-  driver: { id: number; name: string; company: { id: number; name: string } | null };
+  driver: { id: number; name: string; isPublic: boolean; company: { id: number; name: string } | null };
 }> {
   const user = await getServerUser();
   if (!user) redirect("/login/?from=%2Fdriver%2Fdashboard%2F");
@@ -35,7 +35,7 @@ export async function requirePagePrivateHireDriver(): Promise<{
       isActive: true,
       OR: [{ isPublic: true, companyId: null }, { company: { status: "ACTIVE" } }],
     },
-    select: { id: true, name: true, company: { select: { id: true, name: true } } },
+    select: { id: true, name: true, isPublic: true, company: { select: { id: true, name: true } } },
   });
   if (!driver) forbidden();
   return { user, driver };

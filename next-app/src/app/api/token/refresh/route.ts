@@ -7,14 +7,14 @@ import prisma from "@/lib/db/prisma";
 
 function safeNext(value: string | null, origin: string): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/tour-company/dashboard/";
+    return "/company/dashboard/";
   }
   try {
     const destination = new URL(value, origin);
-    if (destination.origin !== origin) return "/tour-company/dashboard/";
+    if (destination.origin !== origin) return "/company/dashboard/";
     return `${destination.pathname}${destination.search}${destination.hash}`;
   } catch {
-    return "/tour-company/dashboard/";
+    return "/company/dashboard/";
   }
 }
 

@@ -84,8 +84,11 @@ export function postLoginPath(
   if (!user) return safeInternalPath(from);
   if (user.is_staff) return "/admin/dashboard";
   if (user.account_type === "DRIVER") return "/driver/dashboard/";
-  if (user.account_type === "TOUR_COMPANY" && safeInternalPath(from) === "/") {
-    return "/tour-company/dashboard";
+  if (
+    (user.account_type === "TOUR_COMPANY" || user.account_type === "PRIVATE_HIRE_COMPANY") &&
+    safeInternalPath(from) === "/"
+  ) {
+    return "/company/dashboard/";
   }
   return safeInternalPath(from);
 }
