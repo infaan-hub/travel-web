@@ -353,13 +353,17 @@ const persistPreference = (key: string, value: string) => {
     ? "Administrator"
     : isCompanyAccount
       ? "Private hire company"
-      : "Customer";
+      : user?.account_type === "DRIVER"
+        ? "Private hire driver"
+        : "Customer";
   const dashboardHref = user?.is_staff
     ? "/admin/dashboard/"
     : isCompanyAccount
       ? "/company/dashboard/"
-      : "/bookings/";
-  const dashboardLabel = user?.is_staff || isCompanyAccount ? "Dashboard" : "Bookings";
+      : user?.account_type === "DRIVER"
+        ? "/driver/dashboard/"
+        : "/bookings/";
+  const dashboardLabel = user?.is_staff || isCompanyAccount || user?.account_type === "DRIVER" ? "Dashboard" : "Bookings";
   const username = user?.username || profile?.username || "account";
   const displayName = form.full_name.trim() || user?.username || "Your account";
   const avatarInitial = displayName.trim().charAt(0).toUpperCase() || "U";

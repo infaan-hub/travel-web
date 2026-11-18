@@ -1655,3 +1655,18 @@ a.bookingsContactItem:hover span {
     transition-duration: 0.01ms !important;
   }
 }
+.publicDispatch { width: 100%; max-width: 1440px; margin: 0 auto; padding: 20px; border: 1px solid var(--bookings-line, rgba(8,66,140,.14)); border-radius: 18px; background: #fff; box-shadow: 0 10px 28px rgba(8,66,140,.06); }
+.publicDispatchHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid rgba(8,66,140,.1); }
+.publicDispatchHead p { margin: 0 0 5px; color: #08428c; font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.publicDispatchHead h2 { margin: 0; color: #12223a; font-family: var(--font-display); font-size: 1.25rem; }
+.publicDispatchHead span { display: block; max-width: 75ch; margin-top: 5px; color: #52627a; font-size: .78rem; line-height: 1.5; }
+.publicDispatchRefresh { display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid rgba(8,66,140,.2); border-radius: 9px; background: #f3f6fa; color: #08428c; font-size: .72rem; font-weight: 750; cursor: pointer; }
+.publicDispatchRefresh:disabled { opacity: .6; cursor: wait; }
+.publicDispatchState { display: flex; min-height: 72px; align-items: center; justify-content: center; gap: 8px; color: #52627a; font-size: .8rem; }
+.publicDispatchList { display: grid; gap: 8px; padding-top: 12px; }
+.publicDispatchRow { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px; border: 1px solid rgba(8,66,140,.1); border-radius: 12px; background: #f8fafc; }
+.publicDispatchRow > div:first-child { display: grid; gap: 4px; min-width: 0; }.publicDispatchRow strong { color: #12223a; font-size: .83rem; }.publicDispatchRow > div:first-child span { color: #52627a; font-size: .72rem; overflow-wrap: anywhere; }
+.publicDispatchAction { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; flex: 0 0 auto; }
+.publicDispatchAction > span { padding: 5px 8px; border-radius: 999px; font-size: .65rem; font-weight: 800; }.publicDispatchOn { background: #e4f4ee; color: #0e7c5a; }.publicDispatchOff { background: #e7eef9; color: #08428c; }
+.publicDispatchAction button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid #08428c; border-radius: 9px; background: #08428c; color: #fff; font-size: .7rem; font-weight: 750; cursor: pointer; }.publicDispatchAction button:disabled { opacity: .55; cursor: not-allowed; }
+@media(max-width:720px) { .publicDispatch { padding: 15px; }.publicDispatchHead { flex-direction: column; }.publicDispatchRow { align-items: flex-start; flex-direction: column; }.publicDispatchAction { width: 100%; justify-content: space-between; } }

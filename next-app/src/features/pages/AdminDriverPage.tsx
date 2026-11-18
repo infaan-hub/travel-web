@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { CheckCircle2, CarFront, LoaderCircle, UserRound, BriefcaseBusiness } from "lucide-react";
+import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { CheckCircle2, CarFront, LoaderCircle, UserRound, BriefcaseBusiness, Check, RefreshCw, X } from "lucide-react";
 import { useToast } from "@/components/ToastProvider";
 import dashStyles from "@/features/pages/admin-dashboard.module.css";
 import styles from "@/features/pages/admin-driver.module.css";
@@ -26,6 +26,88 @@ const initialForm = {
   pricing_type: "per_trip",
   service_description: "",
 };
+
+type DriverApplication = {
+  id: number; full_name: string; email: string; phone: string; license_number: string | null;
+  id_type: string | null; id_number: string | null; username: string | null; submitted_at: string;
+  details: Record<string, unknown>;
+};
+
+function DriverApplicationsQueue() {
+  const toast = useToast();
+  const [applications, setApplications] = useState<DriverApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [reviewingId, setReviewingId] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/admin/driver-applications/", { credentials: "include" });
+      if (!response.ok) throw new Error("Could not load pending driver applications.");
+      const payload = await response.json();
+      setApplications(payload.results ?? []);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load driver applications.");
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const review = async (application: DriverApplication, status: "APPROVED" | "REJECTED") => {
+    setReviewingId(application.id);
+    try {
+      const response = await fetch(`/api/admin/driver-applications/${application.id}/`, {
+        method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "Could not update this application.");
+      toast.success(status === "APPROVED" ? "Driver approved. Login is now active." : "Driver application rejected.");
+      setApplications((current) => current.filter((item) => item.id !== application.id));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update this application.");
+    } finally {
+      setReviewingId(null);
+    }
+  };
+
+  return (
+    <section className={dashStyles.dashPanel} aria-labelledby="pending-driver-applications">
+      <div className={dashStyles.dashPanelHead}>
+        <div className={dashStyles.dashPanelHeadMain}>
+          <span className={dashStyles.dashPanelIcon} aria-hidden="true"><UserRound size={17} /></span>
+          <div><h2 className={dashStyles.dashPanelTitle} id="pending-driver-applications">Pending public driver applications</h2><p className={dashStyles.dashPanelCopy}>Review each application before enabling its driver login.</p></div>
+        </div>
+        <button className="btn btn-outline" type="button" onClick={() => void load()} disabled={loading}><RefreshCw size={15} /> Refresh</button>
+      </div>
+      {loading ? <div className={styles.applicationState}><LoaderCircle className={styles.spinner} size={20} /> Loading pending applications…</div>
+        : applications.length === 0 ? <div className={styles.applicationState}>There are no pending driver applications.</div>
+        : <div className={styles.applicationList}>{applications.map((application) => {
+          const detail = application.details ?? {};
+          return <article className={styles.applicationCard} key={application.id}>
+            <div className={styles.applicationHead}><div><h3>{application.full_name}</h3><span>Applied {new Date(application.submitted_at).toLocaleDateString()}</span></div><span className={styles.pendingPill}>Pending review</span></div>
+            <dl className={styles.applicationDetails}>
+              <div><dt>Login username</dt><dd>{application.username || "Not set"}</dd></div>
+              <div><dt>Email</dt><dd>{application.email}</dd></div>
+              <div><dt>Phone</dt><dd>{application.phone}</dd></div>
+              <div><dt>License</dt><dd>{application.license_number || "—"}</dd></div>
+              <div><dt>ID document</dt><dd>{application.id_type || "—"} · {application.id_number || "—"}</dd></div>
+              <div><dt>Experience</dt><dd>{String(detail.experience || "Not provided")}</dd></div>
+              <div><dt>Languages</dt><dd>{String(detail.languages || "Not provided")}</dd></div>
+              {detail.vehicle_info ? <div><dt>Vehicle</dt><dd>{String(detail.vehicle_info)}</dd></div> : null}
+              {detail.notes ? <div className={styles.applicationNotes}><dt>Applicant notes</dt><dd>{String(detail.notes)}</dd></div> : null}
+            </dl>
+            <div className={styles.applicationActions}>
+              <button className={styles.rejectApplication} type="button" disabled={reviewingId === application.id} onClick={() => void review(application, "REJECTED")}>{reviewingId === application.id ? <LoaderCircle className={styles.spinner} size={15} /> : <X size={15} />} Reject</button>
+              <button className={styles.approveApplication} type="button" disabled={reviewingId === application.id} onClick={() => void review(application, "APPROVED")}>{reviewingId === application.id ? <LoaderCircle className={styles.spinner} size={15} /> : <Check size={15} />} Approve and activate login</button>
+            </div>
+          </article>;
+        })}</div>}
+    </section>
+  );
+}
 
 export default function AdminDriverPage() {
   const toast = useToast();
@@ -91,6 +173,8 @@ export default function AdminDriverPage() {
           </p>
         </div>
       </header>
+
+      <DriverApplicationsQueue />
 
       {success ? (
         <section className={dashStyles.dashPanel} aria-live="polite">

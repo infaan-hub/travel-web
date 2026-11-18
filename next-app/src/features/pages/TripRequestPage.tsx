@@ -11,6 +11,9 @@ export default function TripRequestPage() {
   const [form, setForm] = useState({
     origin: "",
     destination: "",
+    contact_name: "",
+    contact_email: "",
+    contact_phone: "",
     travel_date: "",
     passengers: "1",
     luggage: "0",
@@ -25,7 +28,7 @@ export default function TripRequestPage() {
       setSubmitting(true);
       await transportTripRequestsAPI.create(form);
       setSuccess(true);
-      toast.success("Trip request submitted. Companies will send quotes.");
+      toast.success("Trip request submitted. Approved public hire drivers can now respond.");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to submit request";
       toast.error ? toast.error(msg) : alert(msg);
@@ -39,7 +42,7 @@ export default function TripRequestPage() {
       <PageHero
         eyebrow="Custom Trip Request"
         title="Request a custom transport trip"
-        subtitle="Tell us your route and dates. Transport companies will review and send you quotes."
+        subtitle="Tell us your route, dates, and contact details. Approved public hire drivers can accept your request directly."
         backgroundImageKey="feature"
         patternImageKey="thumb"
       />
@@ -48,7 +51,7 @@ export default function TripRequestPage() {
           <div className="text-center py-12">
             <CheckCircle size={48} color="#0e7c5a" />
             <h2 className="mt-4 text-xl font-bold text-slate-900">Request submitted</h2>
-            <p className="text-slate-500 mt-2">Companies will review your request and send quotes. You can track status in your bookings.</p>
+            <p className="text-slate-500 mt-2">Your request is available to approved public hire drivers. A driver will receive your contact details after accepting it. You can track it in My Transport.</p>
             <button className="glass-button-primary mt-6 px-6 py-2.5 rounded-xl text-sm font-semibold" onClick={() => setSuccess(false)}>
               Submit another request
             </button>
@@ -73,6 +76,11 @@ export default function TripRequestPage() {
               onChange={(e) => setForm({ ...form, destination: e.target.value })}
               className="glass-input px-4 py-2 rounded-xl text-sm"
             />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input required maxLength={160} placeholder="Your name" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} className="glass-input px-4 py-2 rounded-xl text-sm" />
+              <input required type="email" maxLength={254} placeholder="Email address" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} className="glass-input px-4 py-2 rounded-xl text-sm" />
+              <input required type="tel" minLength={5} maxLength={40} placeholder="Phone number" value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="glass-input px-4 py-2 rounded-xl text-sm" />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input
                 required

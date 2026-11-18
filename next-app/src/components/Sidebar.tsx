@@ -26,6 +26,7 @@ import {
   X,
   Car,
   Briefcase,
+  Truck,
   User,
 } from "@/components/icons";
 import NextImage from "next/image";
@@ -140,8 +141,15 @@ export default function Sidebar() {
     { to: "/contact", label: "Support", icon: Mail },
   ];
 
+  const driverNavItems: NavItem[] = [
+    { to: "/driver/dashboard/", label: "Driver dashboard", icon: LayoutDashboard, exact: true },
+    { to: "/driver/dashboard/#trips", label: "Assigned trips", icon: Truck },
+    { to: "/profile/", label: "Account profile", icon: User },
+  ];
+
   const activeCompany = user?.company ?? null;
   const isTourCompany = user?.account_type === "TOUR_COMPANY" || user?.account_type === "PRIVATE_HIRE_COMPANY";
+  const isDriver = user?.account_type === "DRIVER";
   const companyPermissions = new Set(["dashboard:read", "profile:read", "profile:update", "tours:read", "tours:write", "bookings:read", "bookings:update", "analytics:read"]);
   const companyNavItems: NavItem[] = activeCompany
     ? [
@@ -199,7 +207,7 @@ const profileHref = isAdmin
     : isTourCompany
       ? "/company/profile/"
       : "/profile/";
-  const navItems = isAdmin ? adminNavItems : isTourCompany ? [] : customerNavItems;
+  const navItems = isAdmin ? adminNavItems : isTourCompany ? [] : isDriver ? driverNavItems : customerNavItems;
   const isActive = (item: NavItem) => {
     if (item.exact) return pathname === item.to;
     return pathname === item.to || pathname.startsWith(item.to + "/");
@@ -276,7 +284,9 @@ const profileHref = isAdmin
                 ? activeCompany
                   ? "Company workspace"
                   : "Company workspace"
-                : "Discover"}
+                : isDriver
+                  ? "Driver workspace"
+                  : "Discover"}
           </div>
           {!isAdmin && isTourCompany && companySection}
           {navItems.map((item) => (

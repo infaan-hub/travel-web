@@ -164,3 +164,21 @@
   }
 }
 
+.applicationState { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 90px; color: #52627a; font-size: .84rem; }
+.applicationList { display: grid; gap: 12px; }
+.applicationCard { padding: 18px; border: 1px solid #dce4ee; border-radius: 15px; background: #fff; }
+.applicationHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.applicationHead h3 { margin: 0; color: #12223a; font-size: 1rem; }
+.applicationHead span { display: inline-block; margin-top: 4px; color: #64748b; font-size: .72rem; }
+.pendingPill { flex: 0 0 auto; padding: 5px 9px; border-radius: 999px; background: #fbf0da; color: #8a5a00!important; font-size: .68rem!important; font-weight: 800; text-transform: uppercase; }
+.applicationDetails { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 16px 0 0; }
+.applicationDetails > div { min-width: 0; padding: 10px 12px; border-radius: 10px; background: #f4f6f9; }
+.applicationDetails dt { margin-bottom: 4px; color: #64748b; font-size: .65rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.applicationDetails dd { margin: 0; color: #12223a; font-size: .79rem; overflow-wrap: anywhere; }
+.applicationDetails .applicationNotes { grid-column: 1/-1; }
+.applicationActions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 16px; }
+.applicationActions button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 12px; border: 1px solid transparent; border-radius: 9px; font-size: .76rem; font-weight: 750; cursor: pointer; }
+.applicationActions button:disabled { opacity: .6; cursor: wait; }
+.approveApplication { background: #08428c; color: #fff; }.rejectApplication { border-color: #f0d0cd!important; background: #fff7f6; color: #a52f2b; }
+@media(max-width:720px) { .applicationDetails { grid-template-columns: repeat(2,minmax(0,1fr)); }.applicationActions { flex-direction: column-reverse; }.applicationActions button { width: 100%; } }
+@media(max-width:460px) { .applicationDetails { grid-template-columns: 1fr; }.applicationDetails .applicationNotes { grid-column: auto; }.applicationHead { flex-direction: column; } }

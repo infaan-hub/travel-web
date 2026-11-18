@@ -150,6 +150,7 @@ export default function MyTransportPage() {
                     <div className="text-xs text-slate-500">
                       {r.travel_date ? new Date(r.travel_date).toISOString().slice(0, 10) : ""} • {r.passengers} pax
                     </div>
+                    {r.driver ? <div className="mt-2 text-xs text-slate-600">Accepted by {r.driver.name}{r.driver.phone ? <> · <a className="text-teal-700 underline" href={`tel:${r.driver.phone}`}>{r.driver.phone}</a></> : null}</div> : null}
                   </div>
                   <span className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
                     {r.status}

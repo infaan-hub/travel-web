@@ -5,6 +5,7 @@ import type {
   PrivateHireService,
   Company,
   TransportBooking,
+  User,
 } from "@prisma/client";
 
 export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
@@ -56,13 +57,16 @@ export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
   };
 }
 
-export function privateHireDriverSerializer(driver: PrivateHireDriver) {
+export function privateHireDriverSerializer(
+  driver: PrivateHireDriver & { user?: Pick<User, "username"> | null },
+) {
   return {
     id: driver.id,
     company_id: driver.companyId,
     name: driver.name,
     phone: driver.phone,
     email: driver.email,
+    login_username: driver.user?.username ?? null,
     image: driver.image,
     image_url: publicImageUrl(driver.image),
     license_number: driver.licenseNumber,
@@ -132,6 +136,7 @@ export function transportBookingSerializer(
     pickup_time: booking.pickupTime,
     total_price: booking.totalPrice?.toString() ?? null,
     status: booking.status,
+    is_public: booking.isPublic,
     notes: booking.notes,
     created_at: booking.createdAt.toISOString(),
     updated_at: booking.updatedAt.toISOString(),

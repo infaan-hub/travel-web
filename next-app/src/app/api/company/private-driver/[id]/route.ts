@@ -6,6 +6,7 @@ import prisma from "@/lib/db/prisma";
 import { privateHireDriverSerializer } from "@/lib/serializers/private-hire";
 import { DriverIdType } from "@prisma/client";
 import { deleteImage } from "@/lib/storage/images";
+import { hashPassword } from "@/lib/auth/password";
 
 export async function GET(
   request: NextRequest,
@@ -19,6 +20,7 @@ export async function GET(
 
     const driver = await prisma.privateHireDriver.findFirst({
       where: { id, companyId: context.company.id },
+      include: { user: { select: { id: true, username: true, accountType: true } } },
     });
     if (!driver) throw new ApiError(404, "Driver not found.");
 
@@ -40,6 +42,7 @@ export async function PUT(
 
     const existing = await prisma.privateHireDriver.findFirst({
       where: { id, companyId: context.company.id },
+      include: { user: { select: { id: true, username: true, accountType: true } } },
     });
     if (!existing) throw new ApiError(404, "Driver not found.");
 
@@ -47,7 +50,36 @@ export async function PUT(
 
     const name = payload.name !== undefined ? String(payload.name).trim() : existing.name;
     const phone = payload.phone !== undefined ? String(payload.phone).trim() : existing.phone;
-    const email = payload.email !== undefined ? String(payload.email).trim() : existing.email;
+    const email = payload.email !== undefined ? String(payload.email).trim().toLowerCase() : existing.email;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new ApiError(400, "A valid email address is required for driver sign-in.");
+    }
+    const username = payload.username !== undefined
+      ? String(payload.username).trim()
+      : existing.user?.username ?? "";
+    const password = payload.password === undefined ? "" : String(payload.password);
+    if (username.length < 3 || username.length > 64) {
+      throw new ApiError(400, "Username must be between 3 and 64 characters.");
+    }
+    if (!existing.user && (password.length < 12 || password.length > 128)) {
+      throw new ApiError(400, "Temporary password must be between 12 and 128 characters.");
+    }
+    if (password && (password.length < 12 || password.length > 128)) {
+      throw new ApiError(400, "Password must be between 12 and 128 characters.");
+    }
+    if (existing.user && existing.user.accountType !== "DRIVER") {
+      throw new ApiError(409, "The linked login is not a driver account.");
+    }
+    const [usernameOwner, emailOwner] = await Promise.all([
+      prisma.user.findUnique({ where: { username }, select: { id: true } }),
+      prisma.user.findFirst({ where: { email: { equals: email, mode: "insensitive" } }, select: { id: true } }),
+    ]);
+    if (usernameOwner && usernameOwner.id !== existing.user?.id) {
+      throw new ApiError(400, "That username is already in use.");
+    }
+    if (emailOwner && emailOwner.id !== existing.user?.id) {
+      throw new ApiError(400, "That email address is already in use.");
+    }
     const licenseNumber =
       payload.license_number !== undefined ? String(payload.license_number).trim() : existing.licenseNumber;
 
@@ -74,18 +106,42 @@ export async function PUT(
       image = payload.image.trim() || null;
     }
 
-    const updated = await prisma.privateHireDriver.update({
-      where: { id },
-      data: {
-        name,
-        phone,
-        email,
-        image,
-        licenseNumber,
-        idType,
-        idNumber,
-        isActive,
-      },
+    const [firstName, ...lastNameParts] = name.split(/\s+/);
+    const passwordHash = password ? await hashPassword(password) : undefined;
+    const updated = await prisma.$transaction(async (tx) => {
+      if (existing.user) {
+        await tx.user.update({
+          where: { id: existing.user.id },
+          data: {
+            username,
+            email,
+            firstName,
+            lastName: lastNameParts.join(" "),
+            isActive,
+            ...(passwordHash ? { password: passwordHash, sessionVersion: { increment: 1 } } : {}),
+            ...(!isActive ? { sessionVersion: { increment: 1 } } : {}),
+          },
+        });
+      } else {
+        const user = await tx.user.create({
+          data: {
+            username,
+            email,
+            password: passwordHash!,
+            accountType: "DRIVER",
+            isActive,
+            firstName,
+            lastName: lastNameParts.join(" "),
+            profile: { create: {} },
+          },
+        });
+        await tx.privateHireDriver.update({ where: { id }, data: { userId: user.id } });
+      }
+      return tx.privateHireDriver.update({
+        where: { id },
+        data: { name, phone, email, image, licenseNumber, idType, idNumber, isActive },
+        include: { user: { select: { username: true } } },
+      });
     });
 
     return ok(privateHireDriverSerializer(updated));
@@ -111,8 +167,14 @@ export async function DELETE(
 
     if (existing.image) await deleteImage(existing.image);
 
-    await prisma.privateHireDriver.delete({
-      where: { id },
+    await prisma.$transaction(async (tx) => {
+      if (existing.userId) {
+        await tx.user.updateMany({
+          where: { id: existing.userId, accountType: "DRIVER" },
+          data: { isActive: false, sessionVersion: { increment: 1 } },
+        });
+      }
+      await tx.privateHireDriver.delete({ where: { id } });
     });
 
     return ok({ success: true });

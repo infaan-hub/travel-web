@@ -5,6 +5,7 @@ import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 import { privateHireDriverSerializer } from "@/lib/serializers/private-hire";
 import { DriverIdType } from "@prisma/client";
+import { hashPassword } from "@/lib/auth/password";
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
 
     const drivers = await prisma.privateHireDriver.findMany({
       where,
+      include: { user: { select: { username: true } } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -49,7 +51,18 @@ export async function POST(request: NextRequest) {
     const phone = String(payload.phone || "").trim();
     if (!phone) throw new ApiError(400, "Driver phone number is required.");
 
-    const email = String(payload.email || "").trim();
+    const email = String(payload.email || "").trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new ApiError(400, "A valid email address is required for driver sign-in.");
+    }
+    const username = String(payload.username || "").trim();
+    if (username.length < 3 || username.length > 64) {
+      throw new ApiError(400, "Username must be between 3 and 64 characters.");
+    }
+    const password = String(payload.password || "");
+    if (password.length < 12 || password.length > 128) {
+      throw new ApiError(400, "Temporary password must be between 12 and 128 characters.");
+    }
 
     const licenseNumber = String(payload.license_number || "").trim();
     if (!licenseNumber) throw new ApiError(400, "Driver license number is required.");
@@ -65,23 +78,48 @@ export async function POST(request: NextRequest) {
 
     const isActive = payload.is_active !== false && payload.is_active !== "false";
 
+    const [existingUsername, existingEmail] = await Promise.all([
+      prisma.user.findUnique({ where: { username }, select: { id: true } }),
+      prisma.user.findFirst({ where: { email: { equals: email, mode: "insensitive" } }, select: { id: true } }),
+    ]);
+    if (existingUsername) throw new ApiError(400, "That username is already in use.");
+    if (existingEmail) throw new ApiError(400, "That email address is already in use.");
+
     // Driver image upload
     const uploadedImage = await storeUpload(payload, "image", "drivers");
     if (uploadedImage) uploadedKeys.push(uploadedImage);
     const image = uploadedImage || (typeof payload.image === "string" ? payload.image.trim() : null);
 
-    const driver = await prisma.privateHireDriver.create({
-      data: {
-        companyId: context.company.id,
-        name,
-        phone,
-        email,
-        image,
-        licenseNumber,
-        idType,
-        idNumber,
-        isActive,
-      },
+    const [firstName, ...lastNameParts] = name.split(/\s+/);
+    const passwordHash = await hashPassword(password);
+    const driver = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          username,
+          email,
+          password: passwordHash,
+          accountType: "DRIVER",
+          isActive,
+          firstName,
+          lastName: lastNameParts.join(" "),
+          profile: { create: {} },
+        },
+      });
+      return tx.privateHireDriver.create({
+        data: {
+          companyId: context.company.id,
+          userId: user.id,
+          name,
+          phone,
+          email,
+          image,
+          licenseNumber,
+          idType,
+          idNumber,
+          isActive,
+        },
+        include: { user: { select: { username: true } } },
+      });
     });
 
     return ok(privateHireDriverSerializer(driver), 201);

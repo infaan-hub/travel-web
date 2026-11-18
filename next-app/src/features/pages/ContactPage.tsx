@@ -192,14 +192,7 @@ export default function ContactPage() {
               </button>
             </div>
 
-            <div
-              className={`contact-info-card ${styles.infoCard}`}
-              style={{ cursor: "pointer" }}
-              onClick={() => {
-                setActiveTab("driver");
-                setSentMessage(null);
-              }}
-            >
+            <Link href="/request/driver/" className={`contact-info-card ${styles.infoCard}`}>
               <h3>
                 <span className={styles.infoIcon}>
                   <UserCheck size={18} />
@@ -207,19 +200,12 @@ export default function ContactPage() {
                 Join as Public Hire Driver
               </h3>
               <p>
-                Are you a licensed driver with ZanID, NIDA or Passport? Apply to be registered as a Public Hire Driver to receive on-demand trip broadcasts from companies.
+                Are you a licensed driver with ZanID, NIDA or Passport? After admin approval, receive direct customer requests and trips companies choose to share.
               </p>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setActiveTab("driver");
-                  setSentMessage(null);
-                }}
-              >
+              <span className="btn btn-secondary">
                 Apply as Driver
-              </button>
-            </div>
+              </span>
+            </Link>
 
             <div
               className={`contact-info-card ${styles.infoCard}`}
@@ -262,17 +248,6 @@ export default function ContactPage() {
                 }}
               >
                 <Building2 size={15} /> Company Registration
-              </button>
-
-              <button
-                type="button"
-                className={`${styles.tabBtn} ${activeTab === "driver" ? styles.tabBtnActive : ""}`}
-                onClick={() => {
-                  setActiveTab("driver");
-                  setSentMessage(null);
-                }}
-              >
-                <UserCheck size={15} /> Driver Application
               </button>
 
               <button

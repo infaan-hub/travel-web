@@ -27,6 +27,7 @@ type PrivateHireDriver = {
   name: string;
   phone: string;
   email: string;
+  login_username: string | null;
   image: string | null;
   image_url: string | null;
   license_number: string;
@@ -55,6 +56,8 @@ export default function CompanyPrivateDriverPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [idType, setIdType] = useState<"ZAN_ID" | "NIDA" | "PASSPORT">("ZAN_ID");
   const [idNumber, setIdNumber] = useState("");
@@ -87,6 +90,8 @@ export default function CompanyPrivateDriverPage() {
     setName("");
     setPhone("");
     setEmail("");
+    setUsername("");
+    setPassword("");
     setLicenseNumber("");
     setIdType("ZAN_ID");
     setIdNumber("");
@@ -101,6 +106,8 @@ export default function CompanyPrivateDriverPage() {
     setName(d.name);
     setPhone(d.phone);
     setEmail(d.email || "");
+    setUsername(d.login_username || "");
+    setPassword("");
     setLicenseNumber(d.license_number);
     setIdType(d.id_type);
     setIdNumber(d.id_number);
@@ -128,6 +135,22 @@ export default function CompanyPrivateDriverPage() {
       toast.error("Please enter the driver's phone number.");
       return;
     }
+    if (!email.trim()) {
+      toast.error("A valid email address is required for driver sign-in.");
+      return;
+    }
+    if (username.trim().length < 3) {
+      toast.error("Enter a username with at least 3 characters.");
+      return;
+    }
+    if ((!editingDriver || !editingDriver.login_username) && password.length < 12) {
+      toast.error("Enter a temporary password with at least 12 characters.");
+      return;
+    }
+    if (password && password.length < 12) {
+      toast.error("Password must be at least 12 characters.");
+      return;
+    }
     if (!licenseNumber.trim()) {
       toast.error("Please enter the driver's license number.");
       return;
@@ -143,6 +166,8 @@ export default function CompanyPrivateDriverPage() {
       formData.append("name", name.trim());
       formData.append("phone", phone.trim());
       formData.append("email", email.trim());
+      formData.append("username", username.trim());
+      if (password) formData.append("password", password);
       formData.append("license_number", licenseNumber.trim());
       formData.append("id_type", idType);
       formData.append("id_number", idNumber.trim());
@@ -287,6 +312,10 @@ export default function CompanyPrivateDriverPage() {
 
               <div className={styles.driverCardBody}>
                 <div className={styles.infoRow}>
+                  <UserCheck size={15} />
+                  <span>Login: {d.login_username || "Not set"}</span>
+                </div>
+                <div className={styles.infoRow}>
                   <Phone size={15} />
                   <span>{d.phone}</span>
                 </div>
@@ -339,6 +368,41 @@ export default function CompanyPrivateDriverPage() {
 
             <form onSubmit={handleSubmit}>
               <div className={styles.formBody}>
+                <div className={styles.formGrid}>
+                  <div className={styles.formField}>
+                    <label htmlFor="driver-login-username">Username <span className={styles.requiredMark}>*</span></label>
+                    <input
+                      id="driver-login-username"
+                      type="text"
+                      autoComplete="username"
+                      className={styles.inputControl}
+                      placeholder="e.g. ali.driver"
+                      value={username}
+                      onChange={(event) => setUsername(event.target.value)}
+                      minLength={3}
+                      maxLength={64}
+                      required
+                    />
+                  </div>
+                  <div className={styles.formField}>
+                    <label htmlFor="driver-login-password">
+                      {editingDriver?.login_username ? "New password (optional)" : <>Temporary password <span className={styles.requiredMark}>*</span></>}
+                    </label>
+                    <input
+                      id="driver-login-password"
+                      type="password"
+                      autoComplete="new-password"
+                      className={styles.inputControl}
+                      placeholder={editingDriver?.login_username ? "Leave blank to keep current password" : "At least 12 characters"}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      minLength={password ? 12 : undefined}
+                      maxLength={128}
+                      required={!editingDriver?.login_username}
+                    />
+                    <small className={styles.credentialHint}>The driver signs in at /login/ and is sent to their driver dashboard.</small>
+                  </div>
+                </div>
                 {/* Photo upload */}
                 <div className={styles.formField}>
                   <label>Driver Photo</label>
@@ -407,13 +471,14 @@ export default function CompanyPrivateDriverPage() {
                   </div>
 
                   <div className={styles.formField}>
-                    <label>Email Address</label>
+                    <label>Email Address <span className={styles.requiredMark}>*</span></label>
                     <input
                       type="email"
                       className={styles.inputControl}
                       placeholder="driver@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      required
                     />
                   </div>
 

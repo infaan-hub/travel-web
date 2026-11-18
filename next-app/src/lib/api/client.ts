@@ -288,6 +288,18 @@ export const transportBookingsAPI = {
   create: (data: Record<string, unknown>) => api.post("/transport-bookings/", data),
   cancel: (id: string | number) => api.patch("/transport-bookings/" + id + "/", { status: "cancelled" }),
 };
+export const driverAPI = {
+  getBookings: () => api.get("/driver/bookings/"),
+  getTripRequests: () => api.get("/driver/trip-requests/"),
+  updateBooking: (id: string | number, status: "confirmed" | "in_progress" | "completed") =>
+    api.patch(`/driver/bookings/${id}/`, { status }),
+  acceptTripRequest: (id: string | number) => api.patch(`/driver/trip-requests/${id}/`, { action: "accept" }),
+};
+export const companyTransportBookingsAPI = {
+  getAll: () => api.get("/company/transport-bookings/"),
+  setPublic: (id: string | number, isPublic: boolean) =>
+    api.patch(`/company/transport-bookings/${id}/`, { is_public: isPublic }),
+};
 export const transportTripRequestsAPI = {
   getAll: () => api.get("/transport-trip-requests/"),
   create: (data: Record<string, unknown>) => api.post("/transport-trip-requests/", data),

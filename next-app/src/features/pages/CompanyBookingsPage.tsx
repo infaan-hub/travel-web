@@ -20,6 +20,7 @@ import {
   X,
 } from "@/components/icons";
 import styles from "@/features/pages/company-bookings.module.css";
+import CompanyPublicDispatchPanel from "@/features/pages/CompanyPublicDispatchPanel";
 
 const PAGE_SIZE = 15;
 const SEARCH_DEBOUNCE = 300;
@@ -286,6 +287,8 @@ export default function CompanyBookingsPage() {
           </button>
         </div>
       </header>
+
+      <CompanyPublicDispatchPanel />
 
       <section className={styles.bookingsHero} aria-label="Booking queue overview">
         <div className={styles.bookingsHeroMain}>
