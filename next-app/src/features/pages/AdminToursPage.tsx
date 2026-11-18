@@ -306,7 +306,7 @@ export default function AdminToursPage() {
       resetForm();
       loadTours();
     } catch (err: any) {
-      toast.error('Failed to save tour');
+      toast.error('Failed to save private hire service');
     } finally {
       setSaving(false);
     }
@@ -338,7 +338,7 @@ export default function AdminToursPage() {
   const removeExclude = (item: string) => setExcludedItems(prev => prev.filter(i => i !== item));
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this tour?')) return;
+    if (!window.confirm('Delete this private hire service?')) return;
     try {
       await toursAPI.delete(id);
       setTours(tours.filter(t => t.id !== id));
@@ -356,11 +356,11 @@ export default function AdminToursPage() {
       <header className={dashStyles.dashMasthead}>
         <div className={dashStyles.dashMastheadText}>
           <p className={dashStyles.dashEyebrow}>Admin workspace</p>
-          <h1 className={dashStyles.dashTitle}>Manage Tours</h1>
-          <p className={dashStyles.dashLead}>{tours.length} tours total</p>
+          <h1 className={dashStyles.dashTitle}>Manage Private Hire Services</h1>
+          <p className={dashStyles.dashLead}>{tours.length} private hire services total</p>
         </div>
         <div className={dashStyles.dashActions}>
-          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}><Plus size={16} /> Add Tour</button>
+          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}><Plus size={16} /> Add Private Hire Service</button>
         </div>
       </header>
 
@@ -385,7 +385,7 @@ export default function AdminToursPage() {
       {showForm && (
         <div className="admin-form-overlay">
           <div className="admin-form-card glass-card admin-form-wide">
-            <h2>{editing ? 'Edit Tour' : 'Add New Tour'}</h2>
+            <h2>{editing ? 'Edit Private Hire Service' : 'Add New Private Hire Service'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
@@ -614,7 +614,7 @@ export default function AdminToursPage() {
               </div>
 
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : (editing ? 'Update Tour' : 'Create Tour')}</button>
+                <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : (editing ? 'Update Private Hire Service' : 'Create Private Hire Service')}</button>
                 <button type="button" className="btn btn-ghost" onClick={resetForm}>Cancel</button>
               </div>
             </form>
@@ -629,8 +629,8 @@ export default function AdminToursPage() {
               <Globe size={17} />
             </span>
             <div>
-              <h2 className={dashStyles.dashPanelTitle}>Tours</h2>
-              <p className={dashStyles.dashPanelCopy}>Manage the tour catalogue and pricing.</p>
+              <h2 className={dashStyles.dashPanelTitle}>Private Hire Services</h2>
+              <p className={dashStyles.dashPanelCopy}>Manage the private hire service catalogue and pricing.</p>
             </div>
           </div>
         </div>
@@ -651,7 +651,7 @@ export default function AdminToursPage() {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={8} className="empty-cell">No tours found</td></tr>
+                <tr><td colSpan={8} className="empty-cell">No private hire services found</td></tr>
               ) : filtered.map(t => (
                 <tr key={t.id}>
                   <td>#{t.id}</td>
@@ -673,7 +673,7 @@ export default function AdminToursPage() {
           </table></div>
           <div className="table-pagination" role="navigation" aria-label="Tours pagination">
             <span>
-              Page {page} of {totalPages} ({total} tours)
+              Page {page} of {totalPages} ({total} services)
             </span>
             <div className="table-pagination-actions">
               <button

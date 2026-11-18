@@ -31,7 +31,7 @@ const STATUS_LABELS: Record<CompanyStatus, string> = {
 };
 
 const TYPE_LABELS: Record<CompanyBusinessType, string> = {
-  TOUR_OPERATOR: "Tour operator",
+  TOUR_OPERATOR: "Private hire & transport",
   SAFARI_OPERATOR: "Safari operator",
   EXCURSION_PROVIDER: "Excursion provider",
   OTHER: "Other",
@@ -151,13 +151,13 @@ export default function AdminCompaniesPage() {
     try {
       await companiesAPI.createOwner(ownerForm);
       setOwnerMessage(
-        `Tour Company account @${ownerForm.username} created. They can sign in at /login and submit a company for review.`,
+        `Private Hire Company account @${ownerForm.username} created. They can sign in at /login and submit a company for review.`,
       );
       setOwnerForm({ username: "", email: "", password: "" });
     } catch (caught) {
       const failure = caught as { response?: { data?: { message?: string } } };
       setOwnerError(
-        failure.response?.data?.message ?? "Could not create the Tour Company account.",
+        failure.response?.data?.message ?? "Could not create the Private Hire Company account.",
       );
     } finally {
       setCreatingOwner(false);
@@ -188,14 +188,14 @@ export default function AdminCompaniesPage() {
         </div>
       </header>
 
-      <section className={dashStyles.dashPanel} aria-label="Create Tour Company owner">
+      <section className={dashStyles.dashPanel} aria-label="Create Private Hire Company owner">
         <div className={dashStyles.dashPanelHead}>
           <div className={dashStyles.dashPanelHeadMain}>
             <span className={dashStyles.dashPanelIcon} aria-hidden="true">
               <Building2 size={17} />
             </span>
             <div>
-              <h2 className={dashStyles.dashPanelTitle}>Create Tour Company owner</h2>
+              <h2 className={dashStyles.dashPanelTitle}>Create Private Hire Company owner</h2>
               <p className={dashStyles.dashPanelCopy}>
                 Create signin credentials for an owner. They submit their company for review.
               </p>
@@ -328,7 +328,7 @@ export default function AdminCompaniesPage() {
             <div>
               <h2 className={dashStyles.dashPanelTitle}>Companies</h2>
               <p className={dashStyles.dashPanelCopy}>
-                Manage tour company accounts, filters, and pagination.
+                Manage private hire company accounts, filters, and pagination.
               </p>
             </div>
           </div>
