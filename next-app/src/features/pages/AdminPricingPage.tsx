@@ -55,7 +55,7 @@ export default function AdminPricingPage() {
           <h1>Pricing</h1>
         </div>
         <div className="empty-state">
-          <p>No pricing data available. Please plan the tour first.</p>
+          <p>No pricing data available. Please plan the service first.</p>
           <button className="btn btn-primary" onClick={() => router.push('/admin/work-space')}>
             Go to Workspace
           </button>
@@ -82,10 +82,10 @@ export default function AdminPricingPage() {
     const tourList = selectedTours.map(t => `• ${t.title} - $${t.price}`).join('\n');
     const roomList = selectedRooms.map(r => `• ${r.name} - $${r.price}/night`).join('\n');
 
-    return `*Travel. - Tour Plan*\n\n` +
+    return `*Travel. - Private Hire Plan*\n\n` +
       `Dear ${tourist?.username || 'Guest'},\n\n` +
-      `Here is your personalized tour itinerary:\n\n` +
-      `*Selected Tours:*\n${tourList || 'N/A'}\n\n` +
+      `Here is your personalized transport itinerary:\n\n` +
+      `*Selected Services:*\n${tourList || 'N/A'}\n\n` +
       `*HotelType:* ${selectedHotel?.name || 'N/A'} (${selectedHotel?.location || ''})\n` +
       `*Rooms:*\n${roomList || 'N/A'}\n\n` +
       `*Travel Driver:* ${selectedTravelDriver?.name || 'N/A'} (${selectedTravelDriver?.phone || ''})\n` +
@@ -113,7 +113,7 @@ export default function AdminPricingPage() {
   };
 
   const handleSendEmail = () => {
-    const subject = encodeURIComponent('Your Tour Plan - Travel.');
+    const subject = encodeURIComponent('Your Transport Plan - Travel.');
     const body = encodeURIComponent(generateMessage());
     const email = tourist?.email;
     if (email) {
@@ -152,7 +152,7 @@ export default function AdminPricingPage() {
           </button>
           <div>
             <h1>Pricing & Send</h1>
-            <p>Review total price and send the tour plan to {tourist?.username}</p>
+            <p>Review total price and send the transport plan to {tourist?.username}</p>
           </div>
         </div>
       </div>

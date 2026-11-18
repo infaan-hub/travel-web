@@ -97,11 +97,11 @@ export default function AdminDashboardPage() {
               </span>
             </div>
             <p className={styles.dashCopy}>
-              Monitor tours, bookings, users, and platform health from one place.
+              Monitor private hire services, bookings, users, and platform health from one place.
             </p>
             <ul className={styles.dashMetaRow}>
               <li className={styles.dashPill}>
-                <Globe size={13} /> {stats.total_tours} tours
+                <Globe size={13} /> {stats.total_tours} services
               </li>
               <li className={styles.dashPill}>
                 <Users size={13} /> {stats.total_users} users
@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
           <ul className={styles.dashList}>
             <li className={styles.dashRow}>
               <div className={styles.dashRowMain}>
-                <span className={styles.dashRowTitle}>Tours</span>
+                <span className={styles.dashRowTitle}>Private Hire Services</span>
                 <span className={styles.dashRowSub}>Total experiences in the catalogue</span>
               </div>
               <div className={styles.dashRowEnd}>
@@ -200,7 +200,7 @@ export default function AdminDashboardPage() {
             </li>
             <li className={styles.dashRow}>
               <div className={styles.dashRowMain}>
-                <span className={styles.dashRowTitle}>Zanzibar Tours</span>
+                <span className={styles.dashRowTitle}>Zanzibar Services</span>
                 <span className={styles.dashRowSub}>Zanzibar experiences</span>
               </div>
               <div className={styles.dashRowEnd}>
@@ -209,7 +209,7 @@ export default function AdminDashboardPage() {
             </li>
             <li className={styles.dashRow}>
               <div className={styles.dashRowMain}>
-                <span className={styles.dashRowTitle}>Tanzania Tours</span>
+                <span className={styles.dashRowTitle}>Tanzania Services</span>
                 <span className={styles.dashRowSub}>Mainland experiences</span>
               </div>
               <div className={styles.dashRowEnd}>
@@ -272,7 +272,7 @@ export default function AdminDashboardPage() {
                     <div className={styles.dashRowMain}>
                       <span className={styles.dashRowTitle}>#{b.id} · {b.full_name}</span>
                       <span className={styles.dashRowSub}>
-                        {b.tour_title || 'Tour'} · {b.travelers} travelers · {new Date(b.travel_date).toLocaleDateString()} · ${b.total_price}
+                        {b.tour_title || 'Service'} · {b.travelers} travelers · {new Date(b.travel_date).toLocaleDateString()} · ${b.total_price}
                       </span>
                       <span className={styles.dashRowSub}>{b.email} · {b.phone}</span>
                     </div>

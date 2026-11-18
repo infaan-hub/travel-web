@@ -37,8 +37,8 @@ export default function AdminAnalyticsPage() {
   if (loading) return <div className="page"><div className="loading">Loading analytics...</div></div>;
 
   const tourData = stats ? [
-    { name: 'Zanzibar', tours: stats.zanzibar_tours || 0 },
-    { name: 'Tanzania', tours: stats.tanzania_tours || 0 },
+    { name: 'Private Hire', tours: stats.zanzibar_tours || 0 },
+    { name: 'Public Hire', tours: stats.tanzania_tours || 0 },
   ] : [];
 
   const bookingStatusData = stats ? [
@@ -77,7 +77,7 @@ export default function AdminAnalyticsPage() {
             <div className="dashboard-stat-card">
               <span className="stat-icon"><Globe size={24} /></span>
               <span className="stat-value">{stats.total_tours}</span>
-              <span className="stat-label">Total Tours</span>
+              <span className="stat-label">Total Services</span>
             </div>
           )}
         </div>

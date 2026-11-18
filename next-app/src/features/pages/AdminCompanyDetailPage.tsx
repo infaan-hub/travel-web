@@ -194,7 +194,7 @@ export default function AdminCompanyDetailPage() {
     if (
       action === "archive" &&
       !window.confirm(
-        "Archive this company? Tours and bookings are retained, but the company can no longer be public or receive members.",
+        "Archive this company? Private hire services and bookings are retained, but the company can no longer be public or receive members.",
       )
     ) {
       return;
@@ -236,7 +236,7 @@ export default function AdminCompanyDetailPage() {
   const handleDeleteCompany = async () => {
     if (!company) return;
     const confirmed = window.confirm(
-      `Permanently delete ${company.name}? This also deletes its tours, bookings, memberships, company audit history, and images. This action cannot be undone.`,
+      `Permanently delete ${company.name}? This also deletes its private hire services, bookings, memberships, company audit history, and images. This action cannot be undone.`,
     );
     if (!confirmed) return;
     setDeletingCompany(true);
@@ -441,14 +441,14 @@ export default function AdminCompanyDetailPage() {
               <Globe size={20} />
             </div>
             <div className="stat-value">{stats.tours_total}</div>
-            <div className="stat-label">Tours</div>
+            <div className="stat-label">Private Hire Services</div>
           </div>
           <div className="dashboard-stat-card">
             <div className="stat-icon">
               <CheckCircle size={20} />
             </div>
             <div className="stat-value">{stats.tours_published}</div>
-            <div className="stat-label">Published tours</div>
+            <div className="stat-label">Published services</div>
           </div>
           <div className="dashboard-stat-card">
             <div className="stat-icon">
@@ -611,8 +611,8 @@ export default function AdminCompanyDetailPage() {
           <section className="admin-content">
             <div className={styles.panelHeader}>
               <div>
-                <h2>Assigned tours</h2>
-                <p>Recent non-deleted tours owned by this company.</p>
+                <h2>Assigned private hire services</h2>
+                <p>Recent non-deleted private hire services owned by this company.</p>
               </div>
               <span className={styles.panelMeta}>{stats?.tours_total ?? company.tours_count} total</span>
             </div>
@@ -622,7 +622,7 @@ export default function AdminCompanyDetailPage() {
                   <table>
                     <thead>
                       <tr>
-                        <th scope="col">Tour</th>
+                        <th scope="col">Service</th>
                         <th scope="col">Publication</th>
                         <th scope="col">Availability</th>
                         <th scope="col">Bookings</th>
@@ -651,7 +651,7 @@ export default function AdminCompanyDetailPage() {
             ) : (
               <div className={styles.emptyPanel}>
                 <Globe size={24} />
-                <p>No tours are assigned to this company yet.</p>
+                <p>No private hire services are assigned to this company yet.</p>
               </div>
             )}
           </section>
@@ -672,7 +672,7 @@ export default function AdminCompanyDetailPage() {
                       <tr>
                         <th scope="col">Reference</th>
                         <th scope="col">Guest</th>
-                        <th scope="col">Tour</th>
+                        <th scope="col">Service</th>
                         <th scope="col">Travel date</th>
                         <th scope="col">Status</th>
                       </tr>
@@ -794,7 +794,7 @@ export default function AdminCompanyDetailPage() {
               </div>
             ) : (
               <p className={styles.help}>
-                Archived companies cannot be reactivated. Tours and bookings remain intact.
+                Archived companies cannot be reactivated. Private hire services and bookings remain intact.
               </p>
             )}
             {company.status === "ACTIVE" && !company.is_public && (

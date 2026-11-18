@@ -252,7 +252,7 @@ export default function AdminTourPlanPage() {
             <ArrowLeft size={16} /> Back
           </button>
           <div>
-            <h1>Tour Planning</h1>
+            <h1>Transport Planning</h1>
             <p>{tourist?.username || 'Tourist'} · {touristBookings.length} booking(s)</p>
           </div>
         </div>
@@ -273,7 +273,7 @@ export default function AdminTourPlanPage() {
 
       <div className="tour-plan-summary">
         <div className="summary-card">
-          <span className="summary-label">Tours</span>
+          <span className="summary-label">Services</span>
           <span className="summary-value">{selectedTours.length}</span>
         </div>
         <div className="summary-card">
@@ -300,7 +300,7 @@ export default function AdminTourPlanPage() {
 
       <div className="admin-tabs">
         <button className={`admin-tab ${activeSubTab === 'tours' ? 'active' : ''}`} onClick={() => setActiveSubTab('tours')}>
-          <Globe size={16} /> Tours
+          <Globe size={16} /> Services
         </button>
         <button className={`admin-tab ${activeSubTab === 'hotel' ? 'active' : ''}`} onClick={() => setActiveSubTab('hotel')}>
           <Hotel size={16} /> HotelType
@@ -317,10 +317,10 @@ export default function AdminTourPlanPage() {
         {activeSubTab === 'tours' && (
           <div className="sub-panel">
             <div className="panel-header">
-              <h3>Select Tours</h3>
+              <h3>Select Services</h3>
             </div>
             {allTours.length === 0 ? (
-              <p className="empty-text">No tours available</p>
+              <p className="empty-text">No services available</p>
             ) : (
               <div className="selection-grid">
                 {allTours.map(tour => {
@@ -346,7 +346,7 @@ export default function AdminTourPlanPage() {
             )}
             {selectedTours.length > 0 && (
               <div className="selected-summary">
-                <h4>Selected Tours ({selectedTours.length})</h4>
+                <h4>Selected Services ({selectedTours.length})</h4>
                 <div className="selected-list">
                   {selectedTours.map((tour: Tour, i: number) => (
                     <span key={i} className="selected-chip">

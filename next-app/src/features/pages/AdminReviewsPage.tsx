@@ -122,7 +122,7 @@ export default function AdminReviewsPage() {
                 <th>Author</th>
                 <th>Rating</th>
                 <th>Content</th>
-                <th>Tour</th>
+                <th>Service</th>
                 <th>Date</th>
                 <th>Status</th>
                 <th>Actions</th>

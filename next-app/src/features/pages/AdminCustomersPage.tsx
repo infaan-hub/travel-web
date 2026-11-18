@@ -130,7 +130,7 @@ export default function AdminCustomersPage() {
             </span>
             <div>
               <h2 className={styles.dashPanelTitle}>Registered users ({users.length})</h2>
-              <p className={styles.dashPanelCopy}>Customer, tour company, and admin accounts.</p>
+              <p className={styles.dashPanelCopy}>Customer, private hire company, and admin accounts.</p>
             </div>
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function AdminCustomersPage() {
                     {u.is_staff ? (
                       <span className="role-badge admin-role"><Shield size={12} /> Admin</span>
                     ) : u.account_type === "TOUR_COMPANY" ? (
-                      <span className="role-badge customer-role">Tour company</span>
+                      <span className="role-badge customer-role">Private hire company</span>
                     ) : (
                       <span className="role-badge customer-role"><User size={12} /> Customer</span>
                     )}

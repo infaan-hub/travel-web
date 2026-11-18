@@ -97,7 +97,7 @@ export default function AdminBookingsPage() {
               <tr>
                 <th>ID</th>
                 <th>Customer</th>
-                <th>Tour</th>
+                <th>Service</th>
                 <th>Travelers</th>
                 <th>Date</th>
                 <th>Total</th>

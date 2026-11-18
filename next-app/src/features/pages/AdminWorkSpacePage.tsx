@@ -122,7 +122,7 @@ export default function AdminWorkSpacePage() {
     <div className="page admin-page">
       <div className="page-header">
         <h1>Workspace</h1>
-        <p>Select a tourist to plan their tour itinerary</p>
+        <p>Select a tourist to plan their transport itinerary</p>
       </div>
 
       {templates.length > 0 && (
