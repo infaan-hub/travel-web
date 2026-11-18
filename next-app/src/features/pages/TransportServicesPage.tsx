@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { publicPrivateHireAPI, transportBookingsAPI } from "@/lib/api/client";
 import { useToast } from "@/components/ToastProvider";
+import { PageHero } from "@/components/PageHero";
 import {
   Car,
   UserCheck,
@@ -12,17 +13,15 @@ import {
   Mail,
   Briefcase,
   Users,
-  Search,
   Eye,
   X,
   Loader,
-  ShieldCheck,
   CheckCircle,
   Calendar,
   Clock,
   Sparkles,
 } from "lucide-react";
-import styles from "./company-private-service.module.css";
+import styles from "@/features/pages/company-public.module.css";
 
 type Vehicle = {
   id: number;
@@ -163,11 +162,16 @@ const SAMPLE_SERVICES: Service[] = [
   },
 ];
 
+const PAGE_SIZE = 12;
+
 export default function TransportServicesPage() {
   const toast = useToast();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+
   const [selected, setSelected] = useState<Service | null>(null);
 
   // Booking states
@@ -189,49 +193,56 @@ export default function TransportServicesPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await publicPrivateHireAPI.getAll({ search: search.trim() || undefined });
+      const res = await publicPrivateHireAPI.getAll({
+        search: search.trim() || undefined,
+        page,
+        page_size: PAGE_SIZE,
+      });
       const apiResults: Service[] = res.data?.results || [];
+      const apiTotal: number = res.data?.total ?? 0;
       if (apiResults.length > 0) {
         setServices(apiResults);
+        setTotal(apiTotal);
       } else {
         const query = search.trim().toLowerCase();
-        if (query) {
-          const filtered = SAMPLE_SERVICES.filter(
+        const filtered = query
+          ? SAMPLE_SERVICES.filter(
+              (s) =>
+                s.title.toLowerCase().includes(query) ||
+                s.vehicle?.name.toLowerCase().includes(query) ||
+                s.vehicle?.plate_number.toLowerCase().includes(query) ||
+                s.driver?.name.toLowerCase().includes(query) ||
+                s.company?.name.toLowerCase().includes(query),
+            )
+          : SAMPLE_SERVICES;
+        setServices(filtered);
+        setTotal(filtered.length);
+      }
+    } catch {
+      const query = search.trim().toLowerCase();
+      const filtered = query
+        ? SAMPLE_SERVICES.filter(
             (s) =>
               s.title.toLowerCase().includes(query) ||
               s.vehicle?.name.toLowerCase().includes(query) ||
               s.vehicle?.plate_number.toLowerCase().includes(query) ||
               s.driver?.name.toLowerCase().includes(query) ||
               s.company?.name.toLowerCase().includes(query),
-          );
-          setServices(filtered);
-        } else {
-          setServices(SAMPLE_SERVICES);
-        }
-      }
-    } catch {
-      const query = search.trim().toLowerCase();
-      if (query) {
-        const filtered = SAMPLE_SERVICES.filter(
-          (s) =>
-            s.title.toLowerCase().includes(query) ||
-            s.vehicle?.name.toLowerCase().includes(query) ||
-            s.vehicle?.plate_number.toLowerCase().includes(query) ||
-            s.driver?.name.toLowerCase().includes(query) ||
-            s.company?.name.toLowerCase().includes(query),
-        );
-        setServices(filtered);
-      } else {
-        setServices(SAMPLE_SERVICES);
-      }
+          )
+        : SAMPLE_SERVICES;
+      setServices(filtered);
+      setTotal(filtered.length);
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, page]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const hasFilters = Boolean(search.trim());
 
   const openBooking = (svc: Service) => {
     setBookingService(svc);
@@ -269,352 +280,418 @@ export default function TransportServicesPage() {
   };
 
   return (
-    <div className={styles.root}>
-      {/* Top Header */}
-      <div className={styles.topBar}>
-        <div className={styles.titleArea}>
-          <div className={styles.breadcrumb}>
-            <Link href="/">Home</Link>
-            <span>/</span>
-            <span>Private Hire Transport</span>
+    <div className={`page ${styles.page} ${styles.listingRoot}`}>
+      {/* Page Hero — same pattern as /companies/ */}
+      <PageHero
+        eyebrow="Private hire transport"
+        title="Available private hire services"
+        subtitle="Verified vehicles paired with professional drivers."
+        backgroundImageKey="feature"
+        patternImageKey="thumb"
+      >
+        <div className={styles.filters}>
+          <input
+            value={search}
+            onChange={(e) => {
+              setPage(1);
+              setSearch(e.target.value);
+            }}
+            placeholder="Search services..."
+            aria-label="Search services"
+          />
+        </div>
+      </PageHero>
+
+      <div className={styles.content}>
+        {/* Listing head — identical structure to /companies/ */}
+        <div className={styles.listingHead}>
+          <div>
+            <span className={styles.listingKicker}>Transport directory</span>
+            <h2 className={styles.listingTitle}>Private hire services</h2>
+            <p className={styles.listingLead}>
+              Browse verified private hire services. Each listing pairs a licensed vehicle with a professional in-house driver.
+            </p>
           </div>
-          <span className={styles.eyebrow}>Verified Fleet Platform</span>
-          <h1>
-            <Car size={32} /> Available private hire services
-          </h1>
-          <p>Verified vehicles paired with professional drivers.</p>
+          <span className={styles.listingCount} aria-live="polite">
+            {loading ? "Loading" : `${total} ${total === 1 ? "service" : "services"}`}
+          </span>
         </div>
 
-        <div className={styles.actionsArea}>
-          <div className={styles.searchBox}>
-            <Search size={16} color="#64748b" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search services..."
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Service Cards Grid */}
-      {loading ? (
-        <div className={styles.emptyState}>
-          <Loader className="animate-spin" size={32} color="#08428c" />
-          <div className={styles.emptyStateSub}>Loading available private hire services...</div>
-        </div>
-      ) : services.length === 0 ? (
-        <div className={styles.emptyState}>
-          <Car size={48} color="#94a3b8" />
-          <div className={styles.emptyStateTitle}>No Private Hire Services Found</div>
-          <div className={styles.emptyStateSub}>
-            No services matched your search &quot;{search}&quot;. Try clearing the search filter or view all available
-            services.
-          </div>
-          <button type="button" className={styles.primaryBtn} onClick={() => setSearch("")}>
-            Reset search
-          </button>
-        </div>
-      ) : (
-        <div className={styles.servicesGrid}>
-          {services.map((svc) => {
-            const vehicleName = svc.vehicle?.name || "Toyota Alphard";
-            const plateNumber = svc.vehicle?.plate_number || "Z454AAD";
-            const tagline = svc.title || "First class private hire travel service";
-            const companyName = svc.company?.name || "infaan private hire ltd";
-            const capacityPax = svc.vehicle?.capacity ?? 5;
-            const luggageBags = svc.vehicle?.luggage_capacity ?? 5;
-            const vehicleDesc = svc.vehicle
-              ? `${svc.vehicle.name} (${svc.vehicle.category})`
-              : "Toyota Alphard (Minivan)";
-            const driverName = svc.driver?.name ?? "hameed abdul";
-
-            return (
-              <div key={svc.id} className={styles.serviceCard}>
-                {/* Header */}
-                <div className={styles.serviceHeader}>
-                  <div className={styles.serviceTitleGroup}>
-                    <h3 className={styles.cardVehicleTitle}>
-                      {vehicleName}
-                      {plateNumber && (
-                        <span className={styles.plateBadgeInline}>{plateNumber}</span>
-                      )}
-                    </h3>
-                    <p className={styles.tagline}>{tagline}</p>
-                    <span className={styles.companyNameBadge}>{companyName}</span>
-                  </div>
-
-                  <div className={styles.priceTag}>
-                    ${svc.price}
-                    <span className={styles.pricingUnit}>
-                      /{PRICING_LABELS[svc.pricing_type] || svc.pricing_type}
-                    </span>
-                  </div>
+        {/* Grid — loading skeletons */}
+        {loading ? (
+          <div className={styles.grid} aria-busy="true">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <article className={styles.card} key={index}>
+                <div className={styles.coverFrame}>
+                  <div className="company-skeleton-cover" />
                 </div>
-
-                {/* Body */}
-                <div className={styles.serviceBody}>
-                  {/* Specs line: 5 pax • 5 bags */}
-                  <div className={styles.specsLine}>
-                    <Users size={15} color="#08428c" />
-                    <span>{capacityPax} pax</span>
-                    <span>•</span>
-                    <Briefcase size={15} color="#08428c" />
-                    <span>{luggageBags} bags</span>
-                  </div>
-
-                  {/* Vehicle and Driver info rows */}
-                  <div className="flex flex-col gap-1.5 text-xs">
-                    <div className={styles.vehicleDetailLine}>
-                      <strong>Vehicle:</strong>
-                      <span>{vehicleDesc}</span>
-                    </div>
-                    <div className={styles.driverDetailLine}>
-                      <strong>Driver:</strong>
-                      <span>{driverName}</span>
+                <div className={styles.cardBody}>
+                  <div className={styles.identity}>
+                    <div className="company-skeleton-cover" style={{ width: 46, height: 46, borderRadius: "13px" }} />
+                    <div className={styles.identityCopy}>
+                      <div className="company-skeleton-line company-skeleton-line--title" />
+                      <div className="company-skeleton-line company-skeleton-line--short" />
                     </div>
                   </div>
+                  <div className="company-skeleton-line" />
+                  <div className="company-skeleton-line company-skeleton-line--short" />
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : services.length === 0 ? (
+          /* Empty state */
+          <div className={styles.empty}>
+            <span className={styles.emptyIcon}>
+              <Car size={28} />
+            </span>
+            <h2>{hasFilters ? "No services match your search" : "No services listed yet"}</h2>
+            <p>
+              {hasFilters
+                ? "Try clearing the search to see all available private hire services."
+                : "Verified private hire service listings will appear here when providers publish them."}
+            </p>
+            {hasFilters && (
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setPage(1);
+                }}
+              >
+                Clear search
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Service Cards Grid */}
+            <div className={styles.grid}>
+              {services.map((svc) => {
+                const vehicleName = svc.vehicle?.name ?? "Vehicle";
+                const plateNumber = svc.vehicle?.plate_number ?? "";
+                const driverName = svc.driver?.name ?? "Driver";
+                const companyName = svc.company?.name ?? "";
+                const capacityPax = svc.vehicle?.capacity ?? 0;
+                const luggageBags = svc.vehicle?.luggage_capacity ?? 0;
+                const vehicleDesc = svc.vehicle
+                  ? `${svc.vehicle.name} (${svc.vehicle.category})`
+                  : "";
 
-                  {/* Paired blocks: vehicle image + driver thumbnail */}
-                  <div className={styles.pairedBlock}>
-                    <div className={styles.subSectionCard}>
-                      <div className={styles.sectionHeaderRow}>
-                        <Car size={13} /> Vehicle Photo
-                      </div>
-                      <div className={styles.vehicleThumbArea}>
-                        {svc.vehicle?.front_image_url ? (
-                          <Image
-                            src={svc.vehicle.front_image_url}
-                            alt={svc.vehicle.name}
-                            fill
-                            className={styles.thumbImg}
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-slate-200">
-                            <Car size={24} color="#64748b" />
-                          </div>
-                        )}
-                        {plateNumber && (
-                          <span className={styles.plateMiniBadge}>{plateNumber}</span>
-                        )}
-                      </div>
+                return (
+                  <article className={styles.card} key={svc.id}>
+                    {/* Cover image — vehicle front photo */}
+                    <div className={styles.coverFrame}>
+                      {svc.vehicle?.front_image_url ? (
+                        <Image
+                          className={styles.cover}
+                          src={svc.vehicle.front_image_url}
+                          alt={vehicleName}
+                          fill
+                          sizes="(max-width: 720px) 100vw, 33vw"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className={styles.coverFallback}>
+                          <Car size={28} />
+                        </div>
+                      )}
                     </div>
 
-                    <div className={styles.subSectionCard}>
-                      <div className={styles.sectionHeaderRow}>
-                        <UserCheck size={13} /> Assigned Driver
-                      </div>
-                      <div className={styles.driverInfoArea}>
-                        {svc.driver?.image_url ? (
+                    {/* Card body */}
+                    <div className={styles.cardBody}>
+                      {/* Identity row: logo + name + meta */}
+                      <div className={styles.identity}>
+                        {svc.company?.logo_image_url ? (
                           <Image
-                            src={svc.driver.image_url}
-                            alt={svc.driver.name}
+                            className={styles.logo}
+                            src={svc.company.logo_image_url}
+                            alt=""
                             width={46}
                             height={46}
-                            className={styles.driverAvatarMini}
-                            unoptimized
                           />
                         ) : (
-                          <div className={styles.driverAvatarFallback}>
-                            {(driverName || "DR").slice(0, 2).toUpperCase()}
-                          </div>
-                        )}
-                        <div className={styles.driverDetailsMini}>
-                          <span className={styles.driverNameMini}>{driverName}</span>
-                          <span className={styles.driverContactMini}>
-                            {svc.driver?.phone || "+255 777 454 000"}
+                          <span className={styles.logoFallback}>
+                            <Car size={18} />
                           </span>
-                          <span className="text-[10px] font-semibold text-emerald-700">Verified Driver</span>
+                        )}
+                        <div className={styles.identityCopy}>
+                          <h2 className={styles.cardTitle}>
+                            {vehicleName}
+                            {plateNumber && (
+                              <span
+                                style={{
+                                  display: "inline-block",
+                                  marginLeft: "8px",
+                                  fontSize: "0.65rem",
+                                  fontWeight: 800,
+                                  fontFamily: "monospace",
+                                  letterSpacing: "0.08em",
+                                  background: "#08428c",
+                                  color: "#fff",
+                                  borderRadius: "5px",
+                                  padding: "1px 7px",
+                                  verticalAlign: "middle",
+                                }}
+                              >
+                                {plateNumber}
+                              </span>
+                            )}
+                          </h2>
+                          <p className={styles.cardMeta}>{companyName}</p>
                         </div>
                       </div>
+
+                      {/* Service title as description */}
+                      {svc.title && (
+                        <p className={styles.description}>{svc.title}</p>
+                      )}
+
+                      {/* Stats row */}
+                      <div className={styles.stats}>
+                        <span>
+                          <Users size={14} />
+                          {capacityPax} pax
+                        </span>
+                        <span>
+                          <Briefcase size={14} />
+                          {luggageBags} bags
+                        </span>
+                        {vehicleDesc && (
+                          <span>
+                            <Car size={14} />
+                            {vehicleDesc}
+                          </span>
+                        )}
+                        <span>
+                          <UserCheck size={14} />
+                          {driverName}
+                        </span>
+                        <span style={{ marginLeft: "auto", fontWeight: 800, fontSize: "0.9rem", color: "#08428c" }}>
+                          ${svc.price}
+                          <span style={{ fontWeight: 500, fontSize: "0.72rem", opacity: 0.72 }}>
+                            {" "}/ {PRICING_LABELS[svc.pricing_type] ?? svc.pricing_type}
+                          </span>
+                        </span>
+                      </div>
+
+                      {/* Action buttons — matching viewLink style */}
+                      <div style={{ display: "flex", gap: "8px", marginTop: "2px" }}>
+                        <button
+                          type="button"
+                          className={styles.viewLink}
+                          style={{ flex: 1, cursor: "pointer", border: "none" }}
+                          onClick={() => setSelected(svc)}
+                        >
+                          <Eye size={14} style={{ marginRight: "5px" }} />
+                          View full details
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.viewLink}
+                          style={{
+                            flex: 1,
+                            cursor: "pointer",
+                            border: "1px solid rgba(8,66,140,0.3)",
+                            background: "linear-gradient(145deg, #08428c, #063a78)",
+                            color: "#fff",
+                          }}
+                          onClick={() => openBooking(svc)}
+                        >
+                          Book now
+                        </button>
+                        {svc.company?.contact_phone && (
+                          <a
+                            href={`https://wa.me/${svc.company.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                              `Hi, I would like to book private hire service ${svc.title} (${vehicleName})`,
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={styles.viewLink}
+                            style={{ flex: "0 0 44px", padding: "0", justifyContent: "center" }}
+                            title="Chat on WhatsApp"
+                          >
+                            <Phone size={14} />
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </article>
+                );
+              })}
+            </div>
 
-                {/* Footer */}
-                <div className={styles.serviceFooter}>
-                  <button
-                    type="button"
-                    className={styles.btnPreview}
-                    onClick={() => setSelected(svc)}
-                  >
-                    <Eye size={14} /> View full details
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className={styles.primaryBtn}
-                      onClick={() => openBooking(svc)}
-                    >
-                      Book now
-                    </button>
-                    {svc.company?.contact_phone && (
-                      <a
-                        href={`https://wa.me/${svc.company.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                          `Hi, I would like to book private hire service ${svc.title} (${vehicleName})`,
-                        )}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={styles.btnSecondary}
-                        title="Chat on WhatsApp"
-                      >
-                        <Phone size={14} />
-                      </a>
-                    )}
-                  </div>
-                </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <button
+                  type="button"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                </button>
               </div>
-            );
-          })}
-        </div>
-      )}
+            )}
+          </>
+        )}
+      </div>
 
-      {/* View Full Details Modal */}
+      {/* ── View Full Details Modal ── */}
       {selected && (
-        <div className={styles.modalBackdrop} onClick={() => setSelected(null)}>
-          <div className={styles.previewContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.previewHeader}>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 60,
+            background: "rgba(8,34,58,0.72)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+          onClick={() => setSelected(null)}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "20px",
+              width: "min(100%,720px)",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 24px 64px rgba(8,66,140,0.22)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal header */}
+            <div
+              style={{
+                background: "linear-gradient(145deg,#08428c,#063a78)",
+                borderRadius: "20px 20px 0 0",
+                padding: "20px 24px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "12px",
+                color: "#fff",
+              }}
+            >
               <div>
-                <span className="text-xs uppercase tracking-wider text-teal-200 font-semibold">
+                <span style={{ fontSize: "0.68rem", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.72)" }}>
                   Tourist Booking View
                 </span>
-                <h2 className={styles.previewHeaderTitle}>{selected.title}</h2>
-                <span className="text-xs text-white/80">{selected.company?.name || "infaan private hire ltd"}</span>
+                <h2 style={{ margin: "4px 0 2px", fontSize: "1.22rem", fontWeight: 700 }}>{selected.title}</h2>
+                <span style={{ fontSize: "0.78rem", opacity: 0.78 }}>{selected.company?.name ?? ""}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={styles.previewPriceBadge}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span
+                  style={{
+                    background: "rgba(255,255,255,0.18)",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    borderRadius: "10px",
+                    padding: "4px 14px",
+                    fontWeight: 800,
+                    fontSize: "1rem",
+                  }}
+                >
                   ${selected.price}
-                  <span className="text-xs font-normal opacity-85">
-                    /{PRICING_LABELS[selected.pricing_type] || selected.pricing_type}
+                  <span style={{ fontWeight: 400, fontSize: "0.72rem", opacity: 0.82 }}>
+                    {" "}/ {PRICING_LABELS[selected.pricing_type] ?? selected.pricing_type}
                   </span>
                 </span>
                 <button
                   type="button"
-                  className="text-white hover:opacity-75 p-1"
                   onClick={() => setSelected(null)}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.14)",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
                 >
-                  <X size={24} />
+                  <X size={16} />
                 </button>
               </div>
             </div>
 
-            <div className={styles.previewBody}>
-              <div className={styles.touristCallout}>
-                <ShieldCheck size={20} />
-                <span>
-                  <strong>Full Verified Transport Information:</strong> Tourists booking this Private Hire Service see
-                  complete verified details of both the vehicle and assigned driver below.
-                </span>
-              </div>
+            {/* Modal body */}
+            <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "18px" }}>
 
-              {/* Vehicle Full Details */}
+              {/* Vehicle section */}
               {selected.vehicle && (
-                <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                <div style={{ border: "1px solid #e2e8f0", borderRadius: "14px", padding: "16px", display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <Car size={18} color="#08428c" />
-                      <strong className="text-base text-slate-900">{selected.vehicle.name}</strong>
+                      <strong style={{ fontSize: "1rem", color: "#0f172a" }}>{selected.vehicle.name}</strong>
                     </div>
-                    <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2.5 py-1 rounded">
+                    <span style={{ fontFamily: "monospace", fontWeight: 800, fontSize: "0.72rem", background: "#0f172a", color: "#fff", padding: "2px 10px", borderRadius: "5px" }}>
                       Plate: {selected.vehicle.plate_number}
                     </span>
                   </div>
 
-                  {/* Vehicle Gallery */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[11px] font-semibold text-slate-600">Front View (Main)</span>
-                      <div className="relative w-full h-32 rounded-lg overflow-hidden bg-slate-200">
-                        {selected.vehicle.front_image_url ? (
-                          <Image
-                            src={selected.vehicle.front_image_url}
-                            alt="Front View"
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400">No Image</div>
-                        )}
+                  {/* Vehicle photos */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: "10px" }}>
+                    {[
+                      { label: "Front View (Main)", url: selected.vehicle.front_image_url },
+                      { label: "Side View", url: selected.vehicle.side_image_url },
+                      { label: "Back View", url: selected.vehicle.back_image_url },
+                    ].map(({ label, url }) => (
+                      <div key={label} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                        <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>
+                        <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: "10px", overflow: "hidden", background: "#f1f5f9" }}>
+                          {url ? (
+                            <Image src={url} alt={label} fill className="object-cover" unoptimized />
+                          ) : (
+                            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", color: "#94a3b8" }}>None</div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[11px] font-semibold text-slate-600">Side View</span>
-                      <div className="relative w-full h-32 rounded-lg overflow-hidden bg-slate-200">
-                        {selected.vehicle.side_image_url ? (
-                          <Image
-                            src={selected.vehicle.side_image_url}
-                            alt="Side View"
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">
-                            Optional (None)
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[11px] font-semibold text-slate-600">Back View</span>
-                      <div className="relative w-full h-32 rounded-lg overflow-hidden bg-slate-200">
-                        {selected.vehicle.back_image_url ? (
-                          <Image
-                            src={selected.vehicle.back_image_url}
-                            alt="Back View"
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">
-                            Optional (None)
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
-                  {/* Vehicle Capacity & Category */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200">
-                    <div>
-                      <span className="text-xs font-semibold text-slate-700 block mb-1">Capacity</span>
-                      <div className="flex gap-4 text-xs text-slate-600">
-                        <span>👥 {selected.vehicle.capacity} Passengers</span>
-                        <span>🧳 {selected.vehicle.luggage_capacity} Luggage Bags</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-xs font-semibold text-slate-700 block mb-1">Vehicle Category</span>
-                      <span className="text-xs text-slate-800 font-medium">{selected.vehicle.category}</span>
-                    </div>
+                  {/* Capacity */}
+                  <div style={{ display: "flex", gap: "16px", fontSize: "0.82rem", color: "#475569", paddingTop: "10px", borderTop: "1px solid #f1f5f9" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "5px" }}><Users size={14} color="#08428c" /> {selected.vehicle.capacity} Passengers</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: "5px" }}><Briefcase size={14} color="#08428c" /> {selected.vehicle.luggage_capacity} Luggage Bags</span>
+                    <span><strong>Category:</strong> {selected.vehicle.category}</span>
                   </div>
 
                   {/* Included / Excluded */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200">
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                     <div>
-                      <span className="text-xs font-bold text-emerald-700 block mb-1 uppercase tracking-wide">
-                        What&apos;s Included:
+                      <span style={{ fontSize: "0.68rem", fontWeight: 800, color: "#059669", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: "6px" }}>
+                        What&apos;s Included
                       </span>
-                      <ul className="text-xs text-slate-700 space-y-1 pl-4 list-disc m-0">
+                      <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "0.8rem", color: "#334155", lineHeight: 1.7 }}>
                         {(selected.vehicle.includes || []).map((inc, i) => (
                           <li key={i}>{inc}</li>
                         ))}
                       </ul>
                     </div>
-
                     <div>
-                      <span className="text-xs font-bold text-rose-700 block mb-1 uppercase tracking-wide">
-                        What&apos;s Excluded:
+                      <span style={{ fontSize: "0.68rem", fontWeight: 800, color: "#dc2626", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: "6px" }}>
+                        What&apos;s Excluded
                       </span>
-                      <ul className="text-xs text-slate-700 space-y-1 pl-4 list-disc m-0">
+                      <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "0.8rem", color: "#334155", lineHeight: 1.7 }}>
                         {(selected.vehicle.excludes || []).map((exc, i) => (
                           <li key={i}>{exc}</li>
                         ))}
@@ -624,47 +701,43 @@ export default function TransportServicesPage() {
                 </div>
               )}
 
-              {/* Driver Full Details */}
+              {/* Driver section */}
               {selected.driver && (
-                <div className="border border-sky-100 rounded-xl p-4 bg-sky-50/40 flex flex-col gap-3">
-                  <div className="flex items-center gap-2">
+                <div style={{ border: "1px solid #e0f2fe", borderRadius: "14px", padding: "16px", background: "rgba(224,242,254,0.25)", display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <UserCheck size={18} color="#08428c" />
-                    <strong className="text-base text-slate-900">Assigned Private Hire Driver</strong>
+                    <strong style={{ fontSize: "1rem", color: "#0f172a" }}>Assigned Private Hire Driver</strong>
                   </div>
-
-                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", flexWrap: "wrap" }}>
                     {selected.driver.image_url ? (
                       <Image
                         src={selected.driver.image_url}
                         alt={selected.driver.name}
-                        width={80}
-                        height={80}
-                        className="w-20 h-20 rounded-full object-cover border-2 border-sky-400"
+                        width={72}
+                        height={72}
+                        style={{ borderRadius: "50%", objectFit: "cover", border: "2px solid #38bdf8" }}
                         unoptimized
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-full bg-sky-200 text-sky-700 font-bold text-2xl flex items-center justify-center">
+                      <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#bae6fd", color: "#0369a1", fontSize: "1.5rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         {selected.driver.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
-
-                    <div className="flex flex-col gap-1.5 flex-1 text-center sm:text-left">
-                      <h4 className="text-base font-bold text-slate-800 m-0">{selected.driver.name}</h4>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 justify-center sm:justify-start">
-                        <span className="flex items-center gap-1">
-                          <Phone size={13} color="#08428c" /> {selected.driver.phone}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "5px", flex: 1 }}>
+                      <strong style={{ fontSize: "0.98rem", color: "#0f172a" }}>{selected.driver.name}</strong>
+                      <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: "#475569" }}>
+                        <Phone size={13} color="#08428c" /> {selected.driver.phone}
+                      </span>
+                      {selected.driver.email && (
+                        <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: "#475569" }}>
+                          <Mail size={13} color="#08428c" /> {selected.driver.email}
                         </span>
-                        {selected.driver.email && (
-                          <span className="flex items-center gap-1">
-                            <Mail size={13} color="#08428c" /> {selected.driver.email}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2 text-xs text-slate-500 pt-1">
-                        <span className="bg-white border border-slate-200 px-2 py-0.5 rounded">
+                      )}
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "4px" }}>
+                        <span style={{ fontSize: "0.72rem", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "6px", padding: "2px 8px", color: "#334155" }}>
                           License: <strong>{selected.driver.license_number}</strong>
                         </span>
-                        <span className="bg-white border border-slate-200 px-2 py-0.5 rounded">
+                        <span style={{ fontSize: "0.72rem", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "6px", padding: "2px 8px", color: "#334155" }}>
                           ID: <strong>{selected.driver.id_number}</strong>
                         </span>
                       </div>
@@ -674,22 +747,23 @@ export default function TransportServicesPage() {
               )}
             </div>
 
-            <div className={styles.modalFooter}>
+            {/* Modal footer */}
+            <div style={{ padding: "16px 24px 20px", display: "flex", gap: "10px", justifyContent: "flex-end", borderTop: "1px solid #f1f5f9" }}>
               <button
                 type="button"
-                className={styles.btnSecondary}
                 onClick={() => setSelected(null)}
+                style={{ minHeight: "44px", padding: "0 18px", borderRadius: "12px", border: "1px solid #e2e8f0", background: "#f8fafc", color: "#334155", fontWeight: 700, cursor: "pointer", fontSize: "0.84rem" }}
               >
                 Close Details
               </button>
               <button
                 type="button"
-                className={styles.primaryBtn}
                 onClick={() => {
                   const s = selected;
                   setSelected(null);
                   openBooking(s);
                 }}
+                style={{ minHeight: "44px", padding: "0 20px", borderRadius: "12px", background: "linear-gradient(145deg,#08428c,#063a78)", color: "#fff", fontWeight: 800, cursor: "pointer", fontSize: "0.84rem", border: "none" }}
               >
                 Book This Service
               </button>
@@ -698,137 +772,128 @@ export default function TransportServicesPage() {
         </div>
       )}
 
-      {/* Booking Form Modal */}
+      {/* ── Booking Form Modal ── */}
       {bookingOpen && bookingService && (
-        <div className={styles.modalBackdrop} onClick={() => setBookingOpen(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>Book {bookingService.title}</h2>
-              <button type="button" className={styles.closeBtn} onClick={() => setBookingOpen(false)}>
-                <X size={20} />
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 60,
+            background: "rgba(8,34,58,0.72)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+          onClick={() => setBookingOpen(false)}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "20px",
+              width: "min(100%,560px)",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 24px 64px rgba(8,66,140,0.22)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Booking header */}
+            <div
+              style={{
+                background: "linear-gradient(145deg,#08428c,#063a78)",
+                borderRadius: "20px 20px 0 0",
+                padding: "18px 22px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                color: "#fff",
+                gap: "12px",
+              }}
+            >
+              <h2 style={{ margin: 0, fontSize: "1.08rem", fontWeight: 700 }}>
+                Book {bookingService.title}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setBookingOpen(false)}
+                style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+              >
+                <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleBookingSubmit}>
-              <div className={styles.formBody}>
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+              <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: "14px" }}>
+                {/* Service summary */}
+                <div style={{ padding: "12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.82rem" }}>
                   <div>
-                    <strong className="block text-slate-800">{bookingService.vehicle?.name || bookingService.title}</strong>
-                    <span className="text-slate-500">Plate: {bookingService.vehicle?.plate_number} • Driver: {bookingService.driver?.name}</span>
+                    <strong style={{ display: "block", color: "#0f172a" }}>{bookingService.vehicle?.name ?? bookingService.title}</strong>
+                    <span style={{ color: "#64748b" }}>
+                      Plate: {bookingService.vehicle?.plate_number} &bull; Driver: {bookingService.driver?.name}
+                    </span>
                   </div>
-                  <span className="font-bold text-sm text-teal-800">
-                    ${bookingService.price} /{PRICING_LABELS[bookingService.pricing_type] || bookingService.pricing_type}
+                  <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#08428c" }}>
+                    ${bookingService.price} / {PRICING_LABELS[bookingService.pricing_type] ?? bookingService.pricing_type}
                   </span>
                 </div>
 
-                <div className={styles.formGrid}>
-                  <div className={styles.formField}>
-                    <label>
-                      Your Full Name <span className={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      className={styles.inputControl}
-                      placeholder="e.g. John Smith"
-                      value={bookingForm.full_name}
-                      onChange={(e) => setBookingForm({ ...bookingForm, full_name: e.target.value })}
-                    />
-                  </div>
-
-                  <div className={styles.formField}>
-                    <label>
-                      Email Address <span className={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      required
-                      type="email"
-                      className={styles.inputControl}
-                      placeholder="e.g. john@example.com"
-                      value={bookingForm.email}
-                      onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
-                    />
-                  </div>
-
-                  <div className={styles.formField}>
-                    <label>
-                      Phone Number (WhatsApp) <span className={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      required
-                      type="tel"
-                      className={styles.inputControl}
-                      placeholder="+255 777 000 111"
-                      value={bookingForm.phone}
-                      onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
-                    />
-                  </div>
-
-                  <div className={styles.formField}>
-                    <label>Passengers</label>
-                    <input
-                      required
-                      type="number"
-                      min="1"
-                      max={bookingService.vehicle?.capacity || 10}
-                      className={styles.inputControl}
-                      value={bookingForm.passengers}
-                      onChange={(e) => setBookingForm({ ...bookingForm, passengers: e.target.value })}
-                    />
-                  </div>
-
-                  <div className={styles.formField}>
-                    <label>
-                      Travel / Pickup Date <span className={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      required
-                      type="date"
-                      className={styles.inputControl}
-                      value={bookingForm.travel_date}
-                      onChange={(e) => setBookingForm({ ...bookingForm, travel_date: e.target.value })}
-                    />
-                  </div>
-
-                  <div className={styles.formField}>
-                    <label>Pickup Time</label>
-                    <input
-                      type="time"
-                      className={styles.inputControl}
-                      value={bookingForm.pickup_time}
-                      onChange={(e) => setBookingForm({ ...bookingForm, pickup_time: e.target.value })}
-                    />
-                  </div>
+                {/* Form grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  {[
+                    { label: "Your Full Name *", type: "text", key: "full_name", placeholder: "e.g. John Smith", required: true },
+                    { label: "Email Address *", type: "email", key: "email", placeholder: "john@example.com", required: true },
+                    { label: "Phone (WhatsApp) *", type: "tel", key: "phone", placeholder: "+255 777 000 111", required: true },
+                    { label: "Passengers", type: "number", key: "passengers", placeholder: "1", required: true },
+                    { label: "Travel / Pickup Date *", type: "date", key: "travel_date", placeholder: "", required: true },
+                    { label: "Pickup Time", type: "time", key: "pickup_time", placeholder: "", required: false },
+                  ].map(({ label, type, key, placeholder, required }) => (
+                    <div key={key} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "0.76rem", fontWeight: 700, color: "#334155" }}>{label}</label>
+                      <input
+                        required={required}
+                        type={type}
+                        placeholder={placeholder}
+                        value={bookingForm[key as keyof typeof bookingForm]}
+                        onChange={(e) => setBookingForm({ ...bookingForm, [key]: e.target.value })}
+                        style={{ minHeight: "40px", padding: "0 10px", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "0.84rem", color: "#0f172a", background: "#fafafa", outline: "none" }}
+                        {...(type === "number" ? { min: 1, max: bookingService.vehicle?.capacity ?? 10 } : {})}
+                      />
+                    </div>
+                  ))}
                 </div>
 
-                <div className={styles.formField}>
-                  <label>Pickup & Drop-off Location / Flight Number Notes</label>
+                {/* Notes */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <label style={{ fontSize: "0.76rem", fontWeight: 700, color: "#334155" }}>Pickup &amp; Drop-off / Flight Notes</label>
                   <textarea
                     rows={3}
-                    className={styles.textareaControl}
                     placeholder="e.g. Flight QR 1487 arriving ZNZ at 14:20. Drop-off at Kendwa Rocks Resort."
                     value={bookingForm.notes}
                     onChange={(e) => setBookingForm({ ...bookingForm, notes: e.target.value })}
+                    style={{ padding: "10px 12px", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "0.84rem", color: "#0f172a", background: "#fafafa", resize: "vertical", outline: "none" }}
                   />
                 </div>
               </div>
 
-              <div className={styles.modalFooter}>
+              {/* Booking footer */}
+              <div style={{ padding: "14px 22px 20px", display: "flex", gap: "10px", justifyContent: "flex-end", borderTop: "1px solid #f1f5f9" }}>
                 <button
                   type="button"
-                  className={styles.btnSecondary}
                   onClick={() => setBookingOpen(false)}
+                  style={{ minHeight: "44px", padding: "0 18px", borderRadius: "12px", border: "1px solid #e2e8f0", background: "#f8fafc", color: "#334155", fontWeight: 700, cursor: "pointer", fontSize: "0.84rem" }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={bookingSubmitting}
-                  className={styles.primaryBtn}
+                  style={{ minHeight: "44px", padding: "0 20px", borderRadius: "12px", background: "linear-gradient(145deg,#08428c,#063a78)", color: "#fff", fontWeight: 800, cursor: bookingSubmitting ? "not-allowed" : "pointer", fontSize: "0.84rem", border: "none", display: "flex", alignItems: "center", gap: "8px", opacity: bookingSubmitting ? 0.7 : 1 }}
                 >
                   {bookingSubmitting ? (
                     <>
-                      <Loader className="animate-spin" size={16} /> Submitting...
+                      <Loader size={15} style={{ animation: "spin 1s linear infinite" }} /> Submitting...
                     </>
                   ) : (
                     "Confirm Booking Request"
