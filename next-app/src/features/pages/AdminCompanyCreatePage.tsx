@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { companiesAPI } from "@/lib/api/client";
 import { ArrowLeft, Building2 } from "@/components/icons";
 import CompanyForm from "@/features/pages/CompanyForm";
 import type { Company } from "@/features/pages/types";
@@ -32,9 +33,10 @@ export default function AdminCompanyCreatePage() {
       <header className={dashStyles.dashMasthead}>
         <div className={dashStyles.dashMastheadText}>
           <p className={dashStyles.dashEyebrow}>Admin workspace · Companies</p>
-          <h1 className={dashStyles.dashTitle}><Building2 size={22} /> Add company</h1>
+          <h1 className={dashStyles.dashTitle}><Building2 size={22} /> Create company and owner</h1>
           <p className={dashStyles.dashCopy}>
-            Create a company profile. New companies start pending and private.
+            Set up the owner’s sign-in credentials and company profile together. The company
+            starts pending and private, assigned to this owner.
           </p>
         </div>
         <div className={dashStyles.dashActions}>
@@ -44,19 +46,22 @@ export default function AdminCompanyCreatePage() {
         </div>
       </header>
 
-      <section className={`${dashStyles.dashPanel} ${styles.companyCreate}`} aria-label="New company profile">
+      <section className={`${dashStyles.dashPanel} ${styles.companyCreate}`} aria-label="New company and owner">
         <div className={dashStyles.dashPanelHead}>
           <div className={dashStyles.dashPanelHeadMain}>
             <span className={dashStyles.dashPanelIcon} aria-hidden="true"><Building2 size={17} /></span>
             <div>
-              <h2 className={dashStyles.dashPanelTitle}>Company profile</h2>
+              <h2 className={dashStyles.dashPanelTitle}>Company profile and owner</h2>
               <p className={dashStyles.dashPanelCopy}>
-                Add identity, contact, location, branding, and public profile details.
+                Add the owner account and the company’s identity, contact, location, branding,
+                and public profile details in one submission.
               </p>
             </div>
           </div>
         </div>
         <CompanyForm
+          createWithOwner
+          onCreate={(data) => companiesAPI.createWithOwner(data)}
           onSaved={(company: Company) => {
             router.push(`/admin/companies/${company.id}`);
           }}

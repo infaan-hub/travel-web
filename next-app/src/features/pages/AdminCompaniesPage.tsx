@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { companiesAPI } from "@/lib/api/client";
 import { useAuth } from "@/context/AuthContext";
-import CompanyForm from "@/features/pages/CompanyForm";
 import {
   Building2,
   ChevronLeft,
@@ -63,8 +62,6 @@ export default function AdminCompaniesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-  const [ownerFormKey, setOwnerFormKey] = useState(0);
-  const [ownerMessage, setOwnerMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -161,36 +158,6 @@ export default function AdminCompaniesPage() {
           </p>
         </div>
       </header>
-
-      <section className={dashStyles.dashPanel} aria-label="Create Private Hire Company and owner">
-        <div className={dashStyles.dashPanelHead}>
-          <div className={dashStyles.dashPanelHeadMain}>
-            <span className={dashStyles.dashPanelIcon} aria-hidden="true">
-              <Building2 size={17} />
-            </span>
-            <div>
-              <h2 className={dashStyles.dashPanelTitle}>Create Private Hire Company with owner</h2>
-              <p className={dashStyles.dashPanelCopy}>
-                Create the owner login and full company profile together. The company will be
-                pending review and assigned to this owner.
-              </p>
-            </div>
-          </div>
-        </div>
-        {ownerMessage ? <p role="status">{ownerMessage}</p> : null}
-        <CompanyForm
-          key={ownerFormKey}
-          createWithOwner
-          onCreate={(data) => companiesAPI.createWithOwner(data)}
-          onSaved={(company) => {
-            setOwnerMessage(
-              `Created the pending profile for ${company.name} and assigned it to the new owner.`,
-            );
-            setReloadKey((key) => key + 1);
-            setOwnerFormKey((key) => key + 1);
-          }}
-        />
-      </section>
 
       <div className={`admin-toolbar ${styles.companyToolbar}`}>
         <div className="filter-select-group">
