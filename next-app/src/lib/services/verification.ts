@@ -315,7 +315,7 @@ export async function verifyLoginChallenge(
   isStaff: boolean;
   isSuperuser: boolean;
   isActive: boolean;
-  accountType: "CUSTOMER" | "TOUR_COMPANY";
+  accountType: "CUSTOMER" | "TOUR_COMPANY" | "DRIVER";
   sessionVersion: number;
 }> {
   const token = await prisma.verificationToken.findUnique({

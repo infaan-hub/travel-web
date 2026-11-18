@@ -125,6 +125,7 @@ export default function Sidebar() {
     { to: "/admin/home-editor", label: "Home Editor", icon: Image },
     { to: "/admin/users", label: "Users", icon: Users },
     { to: "/admin/companies", label: "Companies", icon: Building2 },
+    { to: "/admin/driver", label: "Public Drivers", icon: Users },
     { to: "/admin/bookings", label: "Bookings", icon: ClipboardList },
 
     { to: "/admin/reviews", label: "Reviews", icon: Star },

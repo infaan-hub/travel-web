@@ -78,6 +78,7 @@ enum JoinRequestStatus {
 enum UserAccountType {
   CUSTOMER
   TOUR_COMPANY
+  DRIVER
 }
 
 enum CompanyMembershipStatus {
@@ -116,6 +117,7 @@ model User {
   bookings                   Booking[]
   transportBookings          TransportBooking[]
   transportTripRequests      TransportTripRequest[]
+  privateHireDrivers         PrivateHireDriver[]
   reviews                    Review[]
   workspaces                 Workspace[]         @relation("WorkspaceTourist")
   travelTips                 TravelTip[]
@@ -745,7 +747,7 @@ model FunnelEvent {
 
 model PrivateHireVehicle {
   id              Int      @id @default(autoincrement())
-  companyId       Int      @map("company_id")
+  companyId       Int?     @map("company_id")
   name            String
   plateNumber     String   @map("plate_number")
   category        String   @default("Sedan")
@@ -761,7 +763,7 @@ model PrivateHireVehicle {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  company  Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company  Company?             @relation(fields: [companyId], references: [id], onDelete: Cascade)
   services PrivateHireService[]
   transportBookings TransportBooking[]
 
@@ -771,7 +773,9 @@ model PrivateHireVehicle {
 
 model PrivateHireDriver {
   id            Int          @id @default(autoincrement())
-  companyId     Int          @map("company_id")
+  companyId     Int?         @map("company_id")
+  userId        Int?         @map("user_id")
+  isPublic      Boolean      @default(false) @map("is_public")
   name          String
   phone         String
   email         String       @default("")
@@ -783,7 +787,8 @@ model PrivateHireDriver {
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
 
-  company  Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company  Company?             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user     User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
   services PrivateHireService[]
   transportBookings TransportBooking[]
 
@@ -793,7 +798,7 @@ model PrivateHireDriver {
 
 model PrivateHireService {
   id          Int      @id @default(autoincrement())
-  companyId   Int      @map("company_id")
+  companyId   Int?     @map("company_id")
   vehicleId   Int      @map("vehicle_id")
   driverId    Int      @map("driver_id")
   title       String
@@ -804,7 +809,7 @@ model PrivateHireService {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  company Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company Company?           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   vehicle PrivateHireVehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   driver  PrivateHireDriver  @relation(fields: [driverId], references: [id], onDelete: Cascade)
   transportBookings TransportBooking[]
