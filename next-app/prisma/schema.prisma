@@ -428,9 +428,9 @@ model Booking {
   createdAt           DateTime      @default(now()) @map("created_at")
 
   user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  tour       Tour           @relation(fields: [tourId], references: [id], onDelete: Restrict)
+  tour       Tour           @relation(fields: [tourId], references: [id], onDelete: Cascade)
   departure  TourDeparture? @relation(fields: [departureId], references: [id], onDelete: SetNull)
-  company    Company?       @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  company    Company?       @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
