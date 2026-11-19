@@ -38,7 +38,6 @@ export default function TransportServicesPage() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingService, setBookingService] = useState<PrivateHireService | null>(null);
   const [bookingForm, setBookingForm] = useState({
-    booking_type: "transport",
     full_name: "",
     email: "",
     phone: "",
@@ -110,8 +109,7 @@ export default function TransportServicesPage() {
   const openBooking = (svc: PrivateHireService) => {
     setBookingService(svc);
     setBookingForm({
-      booking_type: "transport",
-      full_name: "",
+        full_name: "",
       email: "",
       phone: "",
       passengers: String(svc.vehicle?.capacity || 1),

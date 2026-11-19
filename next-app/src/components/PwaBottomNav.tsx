@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Palmtree, Map, ClipboardList, User } from "@/components/icons";
+import { Home, Map, ClipboardList, User, Car } from "@/components/icons";
 import { usePwa } from "@/hooks/usePwa";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/tours", label: "Tours", icon: Palmtree },
+  { href: "/transport/", label: "Services", icon: Car },
   { href: "/trips", label: "Trips", icon: Map },
   { href: "/bookings", label: "Bookings", icon: ClipboardList },
   { href: "/profile", label: "Profile", icon: User },

@@ -7,7 +7,6 @@ import { z } from "zod";
 
 const createSchema = z.object({
   service_id: z.coerce.number().int().positive(),
-  booking_type: z.enum(["transport", "rental"]).default("transport"),
   full_name: z.string().trim().min(1).max(160),
   email: z.string().trim().email().max(254),
   phone: z.string().trim().min(1).max(40),
@@ -48,9 +47,6 @@ export async function POST(request: NextRequest) {
     if (Number.isNaN(travelDate.getTime()) || (endDate && Number.isNaN(endDate.getTime()))) {
       throw new ApiError(400, "Enter a valid travel date.");
     }
-    if (body.booking_type === "rental" && (!endDate || endDate < travelDate)) {
-      throw new ApiError(400, "Rental end date must be on or after the start date.");
-    }
 
     const service = await prisma.privateHireService.findFirst({
       where: {
@@ -68,7 +64,6 @@ export async function POST(request: NextRequest) {
     const booking = await prisma.transportBooking.create({
       data: {
         userId: context?.user?.id ?? null,
-        bookingType: body.booking_type,
         serviceId: service.id,
         companyId: service.companyId,
         vehicleId: service.vehicleId,

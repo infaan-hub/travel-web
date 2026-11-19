@@ -123,7 +123,6 @@ export function transportBookingSerializer(
   return {
     id: booking.id,
     reference: booking.reference,
-    booking_type: booking.bookingType,
     user_id: booking.userId,
     service_id: booking.serviceId,
     company_id: booking.companyId,

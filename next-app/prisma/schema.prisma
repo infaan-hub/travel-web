@@ -814,15 +814,9 @@ enum TransportBookingStatus {
   cancelled
 }
 
-enum TransportBookingType {
-  transport
-  rental
-}
-
 model TransportBooking {
   id          Int                    @id @default(autoincrement())
   reference   String?                @unique
-  bookingType TransportBookingType   @default(transport) @map("booking_type")
   userId      Int?                   @map("user_id")
   serviceId   Int?                   @map("service_id")
   companyId   Int?                   @map("company_id")
