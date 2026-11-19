@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "6mb",
     },
     authInterrupts: true,
+    agentUpgrade: "security",
   },
   images: {
     formats: ["image/avif", "image/webp"],
