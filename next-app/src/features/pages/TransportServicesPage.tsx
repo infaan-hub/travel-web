@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import styles from "@/features/pages/company-public.module.css";
+import cardStyles from "@/features/pages/company-private-service.module.css";
 
 type Vehicle = {
   id: number;
@@ -198,8 +199,11 @@ export default function TransportServicesPage() {
         page,
         page_size: PAGE_SIZE,
       });
-      const apiResults: Service[] = res.data?.results || [];
-      const apiTotal: number = res.data?.total ?? 0;
+      const data = res.data;
+      const apiResults: Service[] = Array.isArray(data) ? data : data?.results || [];
+      const apiTotal: number = Array.isArray(data)
+        ? data.length
+        : data?.total ?? data?.count ?? apiResults.length;
       if (apiResults.length > 0) {
         setServices(apiResults);
         setTotal(apiTotal);
@@ -302,7 +306,7 @@ export default function TransportServicesPage() {
         </div>
       </PageHero>
 
-      <div className={styles.content}>
+      <div className={`${styles.content} ${cardStyles.transportFleet}`}>
         {/* Listing head — identical structure to /companies/ */}
         <div className={styles.listingHead}>
           <div>
@@ -319,24 +323,20 @@ export default function TransportServicesPage() {
 
         {/* Grid — loading skeletons */}
         {loading ? (
-          <div className={styles.grid} aria-busy="true">
+          <div className={cardStyles.servicesGrid} aria-busy="true">
             {Array.from({ length: 6 }).map((_, index) => (
-              <article className={styles.card} key={index}>
-                <div className={styles.coverFrame}>
-                  <div className="company-skeleton-cover" />
-                </div>
-                <div className={styles.cardBody}>
-                  <div className={styles.identity}>
-                    <div className="company-skeleton-cover" style={{ width: 46, height: 46, borderRadius: "13px" }} />
-                    <div className={styles.identityCopy}>
-                      <div className="company-skeleton-line company-skeleton-line--title" />
-                      <div className="company-skeleton-line company-skeleton-line--short" />
-                    </div>
+              <div className={cardStyles.serviceCard} key={index}>
+                <div className={cardStyles.serviceHeader}>
+                  <div className={cardStyles.serviceTitleGroup}>
+                    <div className="company-skeleton-line company-skeleton-line--title" />
+                    <div className="company-skeleton-line company-skeleton-line--short" />
                   </div>
+                </div>
+                <div className={cardStyles.serviceBody}>
                   <div className="company-skeleton-line" />
                   <div className="company-skeleton-line company-skeleton-line--short" />
                 </div>
-              </article>
+              </div>
             ))}
           </div>
         ) : services.length === 0 ? (
@@ -366,8 +366,8 @@ export default function TransportServicesPage() {
           </div>
         ) : (
           <>
-            {/* Service Cards Grid */}
-            <div className={styles.grid}>
+            {/* Service Cards Grid — card style from commit 16886eb */}
+            <div className={cardStyles.servicesGrid}>
               {services.map((svc) => {
                 const vehicleName = svc.vehicle?.name ?? "Vehicle";
                 const plateNumber = svc.vehicle?.plate_number ?? "";
@@ -380,123 +380,120 @@ export default function TransportServicesPage() {
                   : "";
 
                 return (
-                  <article className={styles.card} key={svc.id}>
-                    {/* Cover image — vehicle front photo */}
-                    <div className={styles.coverFrame}>
-                      {svc.vehicle?.front_image_url ? (
-                        <Image
-                          className={styles.cover}
-                          src={svc.vehicle.front_image_url}
-                          alt={vehicleName}
-                          fill
-                          sizes="(max-width: 720px) 100vw, 33vw"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className={styles.coverFallback}>
-                          <Car size={28} />
-                        </div>
-                      )}
+                  <div key={svc.id} className={cardStyles.serviceCard}>
+                    {/* Header */}
+                    <div className={cardStyles.serviceHeader}>
+                      <div className={cardStyles.serviceTitleGroup}>
+                        <h3 className={cardStyles.cardVehicleTitle}>
+                          {vehicleName}
+                          {plateNumber && <span className={cardStyles.plateBadgeInline}>{plateNumber}</span>}
+                        </h3>
+                        {svc.title && <p className={cardStyles.tagline}>{svc.title}</p>}
+                        {companyName && <span className={cardStyles.companyNameBadge}>{companyName}</span>}
+                      </div>
+
+                      <div className={cardStyles.priceTag}>
+                        ${svc.price}
+                        <span className={cardStyles.pricingUnit}>
+                          /{PRICING_LABELS[svc.pricing_type] || svc.pricing_type}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Card body */}
-                    <div className={styles.cardBody}>
-                      {/* Identity row: logo + name + meta */}
-                      <div className={styles.identity}>
-                        {svc.company?.logo_image_url ? (
-                          <Image
-                            className={styles.logo}
-                            src={svc.company.logo_image_url}
-                            alt=""
-                            width={46}
-                            height={46}
-                          />
-                        ) : (
-                          <span className={styles.logoFallback}>
-                            <Car size={18} />
-                          </span>
+                    {/* Body */}
+                    <div className={cardStyles.serviceBody}>
+                      {/* Specs line: 5 pax • 5 bags */}
+                      <div className={cardStyles.specsLine}>
+                        <Users size={15} color="#08428c" />
+                        <span>{capacityPax} pax</span>
+                        <span>•</span>
+                        <Briefcase size={15} color="#08428c" />
+                        <span>{luggageBags} bags</span>
+                      </div>
+
+                      {/* Vehicle and Driver info rows */}
+                      <div className="flex flex-col gap-1.5 text-xs">
+                        {vehicleDesc && (
+                          <div className={cardStyles.vehicleDetailLine}>
+                            <strong>Vehicle:</strong>
+                            <span>{vehicleDesc}</span>
+                          </div>
                         )}
-                        <div className={styles.identityCopy}>
-                          <h2 className={styles.cardTitle}>
-                            {vehicleName}
-                            {plateNumber && (
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  marginLeft: "8px",
-                                  fontSize: "0.65rem",
-                                  fontWeight: 800,
-                                  fontFamily: "monospace",
-                                  letterSpacing: "0.08em",
-                                  background: "#08428c",
-                                  color: "#fff",
-                                  borderRadius: "5px",
-                                  padding: "1px 7px",
-                                  verticalAlign: "middle",
-                                }}
-                              >
-                                {plateNumber}
-                              </span>
-                            )}
-                          </h2>
-                          <p className={styles.cardMeta}>{companyName}</p>
+                        <div className={cardStyles.driverDetailLine}>
+                          <strong>Driver:</strong>
+                          <span>{driverName}</span>
                         </div>
                       </div>
 
-                      {/* Service title as description */}
-                      {svc.title && (
-                        <p className={styles.description}>{svc.title}</p>
-                      )}
+                      {/* Paired blocks: vehicle image + driver thumbnail */}
+                      <div className={cardStyles.pairedBlock}>
+                        <div className={cardStyles.subSectionCard}>
+                          <div className={cardStyles.sectionHeaderRow}>
+                            <Car size={13} /> Vehicle Photo
+                          </div>
+                          <div className={cardStyles.vehicleThumbArea}>
+                            {svc.vehicle?.front_image_url ? (
+                              <Image
+                                src={svc.vehicle.front_image_url}
+                                alt={vehicleName}
+                                fill
+                                className={cardStyles.thumbImg}
+                                unoptimized
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-slate-200">
+                                <Car size={24} color="#64748b" />
+                              </div>
+                            )}
+                            {plateNumber && <span className={cardStyles.plateMiniBadge}>{plateNumber}</span>}
+                          </div>
+                        </div>
 
-                      {/* Stats row */}
-                      <div className={styles.stats}>
-                        <span>
-                          <Users size={14} />
-                          {capacityPax} pax
-                        </span>
-                        <span>
-                          <Briefcase size={14} />
-                          {luggageBags} bags
-                        </span>
-                        {vehicleDesc && (
-                          <span>
-                            <Car size={14} />
-                            {vehicleDesc}
-                          </span>
-                        )}
-                        <span>
-                          <UserCheck size={14} />
-                          {driverName}
-                        </span>
-                        <span style={{ marginLeft: "auto", fontWeight: 800, fontSize: "0.9rem", color: "#08428c" }}>
-                          ${svc.price}
-                          <span style={{ fontWeight: 500, fontSize: "0.72rem", opacity: 0.72 }}>
-                            {" "}/ {PRICING_LABELS[svc.pricing_type] ?? svc.pricing_type}
-                          </span>
-                        </span>
+                        <div className={cardStyles.subSectionCard}>
+                          <div className={cardStyles.sectionHeaderRow}>
+                            <UserCheck size={13} /> Assigned Driver
+                          </div>
+                          <div className={cardStyles.driverInfoArea}>
+                            {svc.driver?.image_url ? (
+                              <Image
+                                src={svc.driver.image_url}
+                                alt={driverName}
+                                width={46}
+                                height={46}
+                                className={cardStyles.driverAvatarMini}
+                                unoptimized
+                              />
+                            ) : (
+                              <div className={cardStyles.driverAvatarFallback}>
+                                {(driverName || "DR").slice(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                            <div className={cardStyles.driverDetailsMini}>
+                              <span className={cardStyles.driverNameMini}>{driverName}</span>
+                              {svc.driver?.phone && (
+                                <span className={cardStyles.driverContactMini}>{svc.driver.phone}</span>
+                              )}
+                              <span className="text-[10px] font-semibold text-emerald-700">Verified Driver</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
+                    </div>
 
-                      {/* Action buttons — matching viewLink style */}
-                      <div style={{ display: "flex", gap: "8px", marginTop: "2px" }}>
+                    {/* Footer */}
+                    <div className={cardStyles.serviceFooter}>
+                      <button
+                        type="button"
+                        className={cardStyles.btnPreview}
+                        onClick={() => setSelected(svc)}
+                      >
+                        <Eye size={14} /> View full details
+                      </button>
+
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          className={styles.viewLink}
-                          style={{ flex: 1, cursor: "pointer", border: "none" }}
-                          onClick={() => setSelected(svc)}
-                        >
-                          <Eye size={14} style={{ marginRight: "5px" }} />
-                          View full details
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.viewLink}
-                          style={{
-                            flex: 1,
-                            cursor: "pointer",
-                            border: "1px solid rgba(8,66,140,0.3)",
-                            background: "linear-gradient(145deg, #08428c, #063a78)",
-                            color: "#fff",
-                          }}
+                          className={cardStyles.primaryBtn}
                           onClick={() => openBooking(svc)}
                         >
                           Book now
@@ -508,8 +505,7 @@ export default function TransportServicesPage() {
                             )}`}
                             target="_blank"
                             rel="noreferrer"
-                            className={styles.viewLink}
-                            style={{ flex: "0 0 44px", padding: "0", justifyContent: "center" }}
+                            className={cardStyles.btnSecondary}
                             title="Chat on WhatsApp"
                           >
                             <Phone size={14} />
@@ -517,7 +513,7 @@ export default function TransportServicesPage() {
                         )}
                       </div>
                     </div>
-                  </article>
+                  </div>
                 );
               })}
             </div>

@@ -649,3 +649,25 @@
 .inputControl:focus,.selectControl:focus,.textareaControl:focus { border-color: var(--fleet-blue); box-shadow: 0 0 0 3px rgba(8,66,140,.12); }.previewHeader { background: linear-gradient(135deg,var(--fleet-blue) 0%,#0b57b8 100%); }.previewPriceBadge { background: #fff; color: var(--fleet-blue); }.touristCallout { border-color: var(--fleet-line); background: var(--fleet-blue-soft); color: var(--fleet-blue); }.emptyState { border-color: var(--fleet-line); border-radius: 18px; box-shadow: var(--fleet-shadow); }.emptyStateTitle { color: var(--fleet-ink); font-family: var(--font-display); }
 @media(max-width:760px) { .overview { grid-template-columns: minmax(0,1fr); }.overviewAside { min-height: 150px; } }
 @media(max-width:560px) { .actionsArea { width: 100%; align-items: stretch; flex-direction: column; }.searchBox { width: 100%; min-width: 0; }.primaryBtn { justify-content: center; }.stats { grid-template-columns: 1fr; }.stats li { display: grid; grid-template-columns: 1fr auto; align-items: center; }.stats li small { grid-column: 1/-1; } }
+
+/* Fleet-blue skin for the public /transport/ service cards (matches the card
+   style used by the transport listing at commit 16886eb). */
+.transportFleet {
+  --fleet-blue: #08428c; --fleet-blue-hover: #0a52ad; --fleet-blue-deep: #063a78;
+  --fleet-blue-soft: #e7eef9; --fleet-surface-soft: #f2f2f2;
+  --fleet-ink: #12223a; --fleet-muted: #44546c; --fleet-line: rgba(8,66,140,.14);
+  --fleet-shadow: 0 1px 2px rgba(18,34,58,.04), 0 14px 34px rgba(8,66,140,.07);
+}
+.transportFleet .servicesGrid { grid-template-columns: repeat(auto-fill,minmax(min(100%,360px),1fr)); gap: 18px; }
+.transportFleet .serviceCard { border-color: var(--fleet-line); border-radius: 18px; box-shadow: var(--fleet-shadow); }
+.transportFleet .serviceCard:hover { transform: translateY(-3px); box-shadow: 0 2px 6px rgba(18,34,58,.06),0 22px 48px rgba(8,66,140,.16); }
+.transportFleet .serviceHeader { border-color: var(--fleet-line); background: linear-gradient(110deg,#f2f2f2,#fff 72%); }
+.transportFleet .priceTag { border-color: var(--fleet-line); background: var(--fleet-blue-soft); color: var(--fleet-blue); }
+.transportFleet .sectionHeaderRow { color: var(--fleet-blue); }
+.transportFleet .subSectionCard { border-color: var(--fleet-line); background: #f7f8fa; }
+.transportFleet .driverAvatarMini { border-color: var(--fleet-blue); }
+.transportFleet .serviceFooter { border-color: var(--fleet-line); background: #f7f8fa; }
+.transportFleet .btnSecondary { border: 1px solid var(--fleet-line); background: var(--fleet-blue-soft); color: var(--fleet-blue); }
+.transportFleet .btnPreview { background: var(--fleet-blue); }
+.transportFleet .primaryBtn { border: 1px solid var(--fleet-blue); border-radius: 11px; background: var(--fleet-blue); box-shadow: 0 8px 18px rgba(8,66,140,.18); }
+.transportFleet .primaryBtn:hover { background: var(--fleet-blue-hover); box-shadow: 0 12px 24px rgba(8,66,140,.24); }
