@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI, publicPrivateHireAPI } from '@/lib/api/client';
-import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
+import { ArrowRight, Star, MapPin, Send, X, Building2, Car } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
@@ -297,14 +297,14 @@ export default function HomePage() {
           <h2>Private hire for your journey</h2>
           <Link href="/transport/" className="btn btn-primary">Browse vehicles <ArrowRight size={16} /></Link>
         </div>
-        <div className={cardStyles.servicesGrid}>
+        <div className={`${cardStyles.servicesGrid} ${cardStyles.transportFleet}`}>
           {privateServices.slice(0, 6).map((svc) => {
             const vehicleName = svc.vehicle?.name ?? "Vehicle";
             const plateNumber = svc.vehicle?.plate_number ?? svc.vehicle?.plateNumber ?? "";
-            const driverName = svc.driver?.name ?? "Driver";
-            const companyName = svc.company?.name ?? "";
+            const companyName = svc.company?.name ?? "Company";
             const capacityPax = svc.vehicle?.capacity ?? svc.vehicle?.capacity ?? 0;
             const luggageBags = svc.vehicle?.luggage_capacity ?? svc.vehicle?.luggageCapacity ?? 0;
+            const companyLogo = svc.company?.logo_image_url ?? svc.company?.logoImageUrl ?? null;
             return (
               <div key={svc.id} className={cardStyles.serviceCard}>
                 <div className={cardStyles.serviceHeader}>
@@ -318,7 +318,9 @@ export default function HomePage() {
                   </div>
                   <div className={cardStyles.priceTag}>
                     ${svc.price}
-                    <span className={cardStyles.pricingUnit}>/{svc.pricing_type ? (PRICING_LABELS[svc.pricing_type] || svc.pricing_type) : "per trip"}</span>
+                    <span className={cardStyles.pricingUnit}>
+                      /{svc.pricing_type ? (PRICING_LABELS[svc.pricing_type] || svc.pricing_type) : (svc.pricingType ? (PRICING_LABELS[svc.pricingType] || svc.pricingType) : "per trip")}
+                    </span>
                   </div>
                 </div>
                 <div className={cardStyles.serviceBody}>
@@ -327,10 +329,47 @@ export default function HomePage() {
                     <span>•</span>
                     <span>{luggageBags} bags</span>
                   </div>
+                  <div className={cardStyles.pairedBlock}>
+                    <div className={cardStyles.subSectionCard}>
+                      <div className={cardStyles.sectionHeaderRow}>
+                        <Car size={13} /> Vehicle Photo
+                      </div>
+                      <div className={cardStyles.vehicleThumbArea}>
+                        {svc.vehicle?.front_image_url || svc.vehicle?.frontImage ? (
+                          <Image src={svc.vehicle?.front_image_url || svc.vehicle?.frontImage} alt={vehicleName} fill className={cardStyles.thumbImg} unoptimized />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-200">
+                            <Car size={24} color="#64748b" />
+                          </div>
+                        )}
+                        {plateNumber && <span className={cardStyles.plateMiniBadge}>{plateNumber}</span>}
+                      </div>
+                    </div>
+                    <div className={cardStyles.subSectionCard}>
+                      <div className={cardStyles.sectionHeaderRow}>
+                        <Building2 size={13} /> Company
+                      </div>
+                      <div className={cardStyles.driverInfoArea}>
+                        {companyLogo ? (
+                          <Image src={companyLogo} alt={companyName} width={46} height={46} className={cardStyles.driverAvatarMini} unoptimized />
+                        ) : (
+                          <div className={cardStyles.driverAvatarFallback}>
+                            {(companyName || "CO").slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className={cardStyles.driverDetailsMini}>
+                          <span className={cardStyles.driverNameMini}>{companyName}</span>
+                          <span className="text-[10px] font-semibold text-emerald-700">Verified Provider</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className={cardStyles.serviceFooter}>
                   <Link href={`/transport/service/${svc.id}/`} className={cardStyles.btnPreview} style={{ textDecoration: "none" }}>View full details</Link>
-                  <Link href={`/booking/${svc.id}/`} className={cardStyles.primaryBtn} style={{ textDecoration: "none" }}>Book now</Link>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/booking/${svc.id}/`} className={cardStyles.primaryBtn} style={{ textDecoration: "none" }}>Book now</Link>
+                  </div>
                 </div>
               </div>
             );
