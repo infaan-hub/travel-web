@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI, publicPrivateHireAPI } from '@/lib/api/client';
-import { ArrowRight, Star, MapPin, Send, X, Building2, Car } from '@/components/icons';
+import { ArrowRight, Star, MapPin, Send, X, Car } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
@@ -304,7 +304,6 @@ export default function HomePage() {
             const companyName = svc.company?.name ?? "Company";
             const capacityPax = svc.vehicle?.capacity ?? svc.vehicle?.capacity ?? 0;
             const luggageBags = svc.vehicle?.luggage_capacity ?? svc.vehicle?.luggageCapacity ?? 0;
-            const companyLogo = svc.company?.logo_image_url ?? svc.company?.logoImageUrl ?? null;
             return (
               <div key={svc.id} className={cardStyles.serviceCard}>
                 <div className={cardStyles.serviceHeader}>
@@ -332,7 +331,7 @@ export default function HomePage() {
                   <div className={cardStyles.pairedBlock}>
                     <div className={cardStyles.subSectionCard}>
                       <div className={cardStyles.sectionHeaderRow}>
-                        <Car size={13} /> Vehicle Photo
+                        <Car size={13} /> Private Hire transport
                       </div>
                       <div className={cardStyles.vehicleThumbArea}>
                         {svc.vehicle?.front_image_url || svc.vehicle?.frontImage ? (
@@ -343,24 +342,6 @@ export default function HomePage() {
                           </div>
                         )}
                         {plateNumber && <span className={cardStyles.plateMiniBadge}>{plateNumber}</span>}
-                      </div>
-                    </div>
-                    <div className={cardStyles.subSectionCard}>
-                      <div className={cardStyles.sectionHeaderRow}>
-                        <Building2 size={13} /> Company
-                      </div>
-                      <div className={cardStyles.driverInfoArea}>
-                        {companyLogo ? (
-                          <Image src={companyLogo} alt={companyName} width={46} height={46} className={cardStyles.driverAvatarMini} unoptimized />
-                        ) : (
-                          <div className={cardStyles.driverAvatarFallback}>
-                            {(companyName || "CO").slice(0, 2).toUpperCase()}
-                          </div>
-                        )}
-                        <div className={cardStyles.driverDetailsMini}>
-                          <span className={cardStyles.driverNameMini}>{companyName}</span>
-                          <span className="text-[10px] font-semibold text-emerald-700">Verified Provider</span>
-                        </div>
                       </div>
                     </div>
                   </div>
