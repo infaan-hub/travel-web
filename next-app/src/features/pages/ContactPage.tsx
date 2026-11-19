@@ -9,11 +9,11 @@ import { useToast } from "@/components/ToastProvider";
 import { PageHero } from "@/components/PageHero";
 import styles from "@/features/pages/contact-page.module.css";
 
-type TabMode = "inquiry" | "company" | "driver";
+type TabMode = "inquiry" | "company" | "driver" | null;
 
 export default function ContactPage() {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<TabMode>("company");
+  const [activeTab, setActiveTab] = useState<TabMode>(null);
 
   // General Inquiry form
   const [inquiryForm, setInquiryForm] = useState({
@@ -561,8 +561,7 @@ export default function ContactPage() {
                   </button>
                 </form>
               </>
-            ) : (
-              /* ================= 3. General Support Form ================= */
+            ) : activeTab === "inquiry" ? (
               <>
                 <div className={styles.formHead}>
                   <span className={styles.kicker}>Support & Inquiries</span>
@@ -641,7 +640,7 @@ export default function ContactPage() {
                   </button>
                 </form>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
