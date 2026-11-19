@@ -84,8 +84,8 @@ export default function BookingPage() {
           </div>
         ) : null}
         <div className={styles.heroTop}>
-          <Link href="/transport/" className={styles.backLink}><span>← All private hire services</span></Link>
-          <span className={styles.heroBadge}><span>Verified private hire</span></span>
+          <Link href="/transport/" className={styles.backLink}>← All private hire services</Link>
+          <span className={styles.heroBadge}>Verified private hire</span>
         </div>
         <div className={styles.heroBody}>
           <div className={styles.heroCopy}>
