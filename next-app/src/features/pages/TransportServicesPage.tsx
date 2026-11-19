@@ -100,6 +100,7 @@ export default function TransportServicesPage() {
   }, [search, page]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
 
@@ -169,9 +170,6 @@ export default function TransportServicesPage() {
           <div>
             <span className={styles.listingKicker}>Transport directory</span>
             <h2 className={styles.listingTitle}>Private hire services</h2>
-            <p className={styles.listingLead}>
-              Browse verified private hire services. Each listing pairs a licensed vehicle with a professional in-house driver.
-            </p>
           </div>
           <span className={styles.listingCount} aria-live="polite">
             {loading ? "Loading" : `${total} ${total === 1 ? "service" : "services"}`}
@@ -232,9 +230,6 @@ export default function TransportServicesPage() {
                 const companyName = svc.company?.name ?? "";
                 const capacityPax = svc.vehicle?.capacity ?? 0;
                 const luggageBags = svc.vehicle?.luggage_capacity ?? 0;
-                const vehicleDesc = svc.vehicle
-                  ? `${svc.vehicle.name} (${svc.vehicle.category})`
-                  : "";
 
                 return (
                   <div key={svc.id} className={cardStyles.serviceCard}>
@@ -266,20 +261,6 @@ export default function TransportServicesPage() {
                         <span>•</span>
                         <Briefcase size={15} color="#08428c" />
                         <span>{luggageBags} bags</span>
-                      </div>
-
-                      {/* Vehicle and Driver info rows */}
-                      <div className="flex flex-col gap-1.5 text-xs">
-                        {vehicleDesc && (
-                          <div className={cardStyles.vehicleDetailLine}>
-                            <strong>Vehicle:</strong>
-                            <span>{vehicleDesc}</span>
-                          </div>
-                        )}
-                        <div className={cardStyles.driverDetailLine}>
-                          <strong>Driver:</strong>
-                          <span>{driverName}</span>
-                        </div>
                       </div>
 
                       {/* Paired blocks: vehicle image + driver thumbnail */}
