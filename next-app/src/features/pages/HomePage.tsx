@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
+import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import styles from "@/features/pages/home-page.module.css";
 import cardStyles from "@/features/pages/company-private-service.module.css";
 
@@ -465,6 +466,53 @@ export default function HomePage() {
 
 
 
+      {reviews.length > 0 && (
+        <section className="testimonials-section">
+          <div className="section-header">
+            <h2>Notes from our customers</h2>
+            <p>Read feedback shared after private-hire journeys.</p>
+          </div>
+          <div className="testimonials-grid">
+            {reviews.slice(0, 6).map(review => (
+              <div key={review.id} className="testimonial-card">
+                <div className="testimonial-stars">
+                  {Array.from({ length: 5 }, (_: any, i: number) => (
+                    <Star key={i} size={16} fill={i < review.rating ? '#f59e0b' : 'none'} color={i < review.rating ? '#f59e0b' : '#d1d5db'} />
+                  ))}
+                </div>
+                <p>&quot;{review.content}&quot;</p>
+                <div className="testimonial-author-row">
+                  <div className="testimonial-avatar">
+                    {review.user_name?.charAt(0).toUpperCase() || '?'}
+                  </div>
+                  <div>
+                    <span className="testimonial-author">{review.user_name}</span>
+                    <span className="testimonial-date">{new Date(review.created_at ?? 0).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="section-footer">
+            {isAuthenticated ? (
+              <button className="btn btn-primary" onClick={() => setShowReviewForm(true)}>
+                Write a Review
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={() => router.push('/login')}>
+                Signin to Write a Review
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+
+      {!loading && (allTours.length === 0 || homeSettings?.more_experiences_image_urls?.some((image) => Boolean(image))) && (
+        <MoreExperiencesEmptyState
+          imageUrls={homeSettings?.more_experiences_image_urls?.slice(0, 5).map((image) => image ? getImageUrl(image) : null)}
+        />
+      )}
+
       <section className="all-tours-section">
         <div className="section-header">
           <h2>Private hire for your journey</h2>
@@ -530,47 +578,6 @@ export default function HomePage() {
           })}
         </div>
       </section>
-
-      {reviews.length > 0 && (
-        <section className="testimonials-section">
-          <div className="section-header">
-            <h2>Notes from our customers</h2>
-            <p>Read feedback shared after private-hire journeys.</p>
-          </div>
-          <div className="testimonials-grid">
-            {reviews.slice(0, 6).map(review => (
-              <div key={review.id} className="testimonial-card">
-                <div className="testimonial-stars">
-                  {Array.from({ length: 5 }, (_: any, i: number) => (
-                    <Star key={i} size={16} fill={i < review.rating ? '#f59e0b' : 'none'} color={i < review.rating ? '#f59e0b' : '#d1d5db'} />
-                  ))}
-                </div>
-                <p>&quot;{review.content}&quot;</p>
-                <div className="testimonial-author-row">
-                  <div className="testimonial-avatar">
-                    {review.user_name?.charAt(0).toUpperCase() || '?'}
-                  </div>
-                  <div>
-                    <span className="testimonial-author">{review.user_name}</span>
-                    <span className="testimonial-date">{new Date(review.created_at ?? 0).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="section-footer">
-            {isAuthenticated ? (
-              <button className="btn btn-primary" onClick={() => setShowReviewForm(true)}>
-                Write a Review
-              </button>
-            ) : (
-              <button className="btn btn-primary" onClick={() => router.push('/login')}>
-                Signin to Write a Review
-              </button>
-            )}
-          </div>
-        </section>
-      )}
 
       {showReviewForm && (
         <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
