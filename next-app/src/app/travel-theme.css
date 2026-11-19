@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    TRAVEL. â€” PREMIUM AQUA GLASSMORPHISM DESIGN SYSTEM
    Centralised tokens, themes, glass component library and responsive rules.
    Imported after the base stylesheet so it always wins.
@@ -5495,7 +5495,7 @@ body.nav-drawer-open {
   accent-color: #91a9ae;
 }
 
-:where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+:where(button:not(.top-header-menu-btn), input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
   a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]) {
   color: #263b41 !important;
   background: linear-gradient(145deg, rgba(255,255,255,.84), rgba(232,240,242,.56)) !important;
@@ -5506,7 +5506,7 @@ body.nav-drawer-open {
   transition: transform .18s ease, background .18s ease, box-shadow .18s ease !important;
 }
 
-:where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+:where(button:not(.top-header-menu-btn), input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
   a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):hover:not(:disabled) {
   color: #172f35 !important;
   background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(239,245,246,.86)) !important;
@@ -5514,20 +5514,20 @@ body.nav-drawer-open {
   transform: translateY(-1px);
 }
 
-:where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+:where(button:not(.top-header-menu-btn), input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
   a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):focus-visible {
   outline: 3px solid rgba(145,169,174,.48);
   outline-offset: 3px;
 }
 
-:where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"]):disabled {
+:where(button:not(.top-header-menu-btn), input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"]):disabled {
   cursor: not-allowed;
   opacity: .58;
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :where(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+  :where(button:not(.top-header-menu-btn), input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
     a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"],
     input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
     transition-duration: .01ms !important;
@@ -5536,7 +5536,7 @@ body.nav-drawer-open {
 
 /* Keep the shared glass controls ahead of legacy page and component rules. */
 html body :is(.app-layout .main-content .page, .app-layout .app-shell)
-  :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+  :is(button:not(.top-header-menu-btn), input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
     a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]) {
   color: #263b41 !important;
   background: linear-gradient(145deg, rgba(255,255,255,.84), rgba(232,240,242,.56)) !important;
@@ -5547,7 +5547,7 @@ html body :is(.app-layout .main-content .page, .app-layout .app-shell)
 }
 
 html body :is(.app-layout .main-content .page, .app-layout .app-shell)
-  :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+  :is(button:not(.top-header-menu-btn), input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
     a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):hover:not(:disabled) {
   color: #172f35 !important;
   background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(239,245,246,.86)) !important;
@@ -5556,7 +5556,7 @@ html body :is(.app-layout .main-content .page, .app-layout .app-shell)
 }
 
 html body :is(.app-layout .main-content .page, .app-layout .app-shell)
-  :is(button, input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
+  :is(button:not(.top-header-menu-btn), input[type="submit"], input[type="button"], input[type="reset"], .btn, [role="button"],
     a[class*="button"], a[class*="Button"], a[class*="cta"], a[class*="Cta"], .explore, .companies, [class*="ctaPrimary"], [class*="ctaSecondary"]):focus-visible {
   outline: 3px solid rgba(145,169,174,.48) !important;
   outline-offset: 3px;
@@ -6805,4 +6805,28 @@ body.nav-drawer-open .push-prompt {
 #trips-workspace a[class*="cta"],
 #trips-workspace a[class*="Cta"] {
   -webkit-backdrop-filter: none !important;
+}
+
+/* ---------- Top-header hamburger: transport-style accent button ---------- */
+html body .app-layout .app-shell .top-header .top-header-menu-btn {
+  color: #ffffff !important;
+  background: linear-gradient(145deg, #0a56a8, #063a78) !important;
+  border: 1px solid rgba(255, 255, 255, 0.34) !important;
+  border-radius: 13px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 20px rgba(8, 66, 140, 0.28) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html body .app-layout .app-shell .top-header .top-header-menu-btn:hover:not(:disabled) {
+  color: #ffffff !important;
+  background: linear-gradient(145deg, #0b60ba, #084a94) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 11px 24px rgba(8, 66, 140, 0.34) !important;
+  transform: translateY(-1px);
+}
+
+html body .app-layout .app-shell .top-header .top-header-menu-btn svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
 }

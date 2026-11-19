@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Briefcase,
   Building2,
+  CalendarCheck2,
   Car,
   CheckCircle2,
   Loader2,
@@ -108,6 +109,21 @@ export default function TransportServiceDetailPage({ id }: Props) {
   return (
     <div className={styles.page}>
       <header className={styles.hero}>
+        {vehicle?.front_image_url ? (
+          <div className={styles.heroMedia} aria-hidden="true">
+            <Image
+              src={getImageUrl(vehicle.front_image_url)}
+              alt=""
+              fill
+              sizes="100vw"
+              className={styles.heroImage}
+              priority
+              unoptimized
+            />
+            <span className={styles.heroScrim} />
+          </div>
+        ) : null}
+
         <div className={styles.heroTop}>
           <Link href="/transport/" className={styles.backLink}>
             <ArrowLeft size={16} /> Back to transport
@@ -147,6 +163,10 @@ export default function TransportServiceDetailPage({ id }: Props) {
             </li>
           </ul>
         ) : null}
+
+        <Link href={`/booking/${service.id}/`} className={styles.heroBookAction}>
+          <CalendarCheck2 size={18} /> Book This Service
+        </Link>
       </header>
 
       <div className={styles.layout}>
@@ -254,7 +274,7 @@ export default function TransportServiceDetailPage({ id }: Props) {
                 <div>
                   <span className={styles.sectionKicker}>Driver</span>
                   <h2 id="driver-heading" className={styles.panelTitle}>
-                    Assigned private hire driver
+                    Private hire driver
                   </h2>
                 </div>
                 <span className={styles.verifiedPill}>
@@ -311,7 +331,7 @@ export default function TransportServiceDetailPage({ id }: Props) {
               </p>
             ) : null}
 
-            <Link href={`/booking/${service.id}/`} className={styles.bookButton}>
+            <Link href={`/booking/${service.id}/`} className={styles.bookAction}>
               Book This Service
             </Link>
 
