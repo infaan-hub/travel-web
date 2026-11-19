@@ -293,6 +293,73 @@ export default function HomePage() {
         featuredTour={allTours.find((tour) => tour.featured) || allTours[0] || null}
       />
 
+      <section className="all-tours-section">
+        <div className="section-header">
+          <h2>Private hire for your journey</h2>
+          <Link href="/transport/" className="btn btn-primary btn-sm">Browse vehicles <ArrowRight size={14} /></Link>
+        </div>
+        <div className={`${cardStyles.servicesGrid} ${cardStyles.transportFleet}`}>
+          {privateServices.slice(0, 6).map((svc) => {
+            const vehicleName = svc.vehicle?.name ?? "Vehicle";
+            const plateNumber = svc.vehicle?.plate_number ?? svc.vehicle?.plateNumber ?? "";
+            const companyName = svc.company?.name ?? "Company";
+            const capacityPax = svc.vehicle?.capacity ?? svc.vehicle?.capacity ?? 0;
+            const luggageBags = svc.vehicle?.luggage_capacity ?? svc.vehicle?.luggageCapacity ?? 0;
+            return (
+              <div key={svc.id} className={cardStyles.serviceCard}>
+                <div className={cardStyles.serviceHeader}>
+                  <div className={cardStyles.serviceTitleGroup}>
+                    <h3 className={cardStyles.cardVehicleTitle}>
+                      {vehicleName}
+                      {plateNumber && <span className={cardStyles.plateBadgeInline}>{plateNumber}</span>}
+                    </h3>
+                    {svc.title && <p className={cardStyles.tagline}>{svc.title}</p>}
+                    {companyName && <span className={cardStyles.companyNameBadge}>{companyName}</span>}
+                  </div>
+                  <div className={cardStyles.priceTag}>
+                    ${svc.price}
+                    <span className={cardStyles.pricingUnit}>
+                      /{svc.pricing_type ? (PRICING_LABELS[svc.pricing_type] || svc.pricing_type) : (svc.pricingType ? (PRICING_LABELS[svc.pricingType] || svc.pricingType) : "per trip")}
+                    </span>
+                  </div>
+                </div>
+                <div className={cardStyles.serviceBody}>
+                  <div className={cardStyles.specsLine}>
+                    <span>{capacityPax} pax</span>
+                    <span>•</span>
+                    <span>{luggageBags} bags</span>
+                  </div>
+                  <div className={cardStyles.pairedBlock}>
+                    <div className={cardStyles.subSectionCard}>
+                      <div className={cardStyles.sectionHeaderRow}>
+                        <Car size={13} /> Private Hire transport
+                      </div>
+                      <div className={cardStyles.vehicleThumbArea}>
+                        {svc.vehicle?.front_image_url || svc.vehicle?.frontImage ? (
+                          <Image src={svc.vehicle?.front_image_url || svc.vehicle?.frontImage} alt={vehicleName} fill className={cardStyles.thumbImg} unoptimized />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-200">
+                            <Car size={24} color="#64748b" />
+                          </div>
+                        )}
+                        {plateNumber && <span className={cardStyles.plateMiniBadge}>{plateNumber}</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className={cardStyles.serviceFooter}>
+                  <Link href={`/transport/service/${svc.id}/`} className={cardStyles.btnPreview} style={{ textDecoration: "none" }}>View full details</Link>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/booking/${svc.id}/`} className={cardStyles.primaryBtn} style={{ textDecoration: "none" }}>Book now</Link>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+
       {!loading && !postedTripsLoading && (
         <section
           className={`cta-section ${styles.matchSection}`}
@@ -513,71 +580,7 @@ export default function HomePage() {
         />
       )}
 
-      <section className="all-tours-section">
-        <div className="section-header">
-          <h2>Private hire for your journey</h2>
-          <Link href="/transport/" className="btn btn-primary">Browse vehicles <ArrowRight size={16} /></Link>
-        </div>
-        <div className={`${cardStyles.servicesGrid} ${cardStyles.transportFleet}`}>
-          {privateServices.slice(0, 6).map((svc) => {
-            const vehicleName = svc.vehicle?.name ?? "Vehicle";
-            const plateNumber = svc.vehicle?.plate_number ?? svc.vehicle?.plateNumber ?? "";
-            const companyName = svc.company?.name ?? "Company";
-            const capacityPax = svc.vehicle?.capacity ?? svc.vehicle?.capacity ?? 0;
-            const luggageBags = svc.vehicle?.luggage_capacity ?? svc.vehicle?.luggageCapacity ?? 0;
-            return (
-              <div key={svc.id} className={cardStyles.serviceCard}>
-                <div className={cardStyles.serviceHeader}>
-                  <div className={cardStyles.serviceTitleGroup}>
-                    <h3 className={cardStyles.cardVehicleTitle}>
-                      {vehicleName}
-                      {plateNumber && <span className={cardStyles.plateBadgeInline}>{plateNumber}</span>}
-                    </h3>
-                    {svc.title && <p className={cardStyles.tagline}>{svc.title}</p>}
-                    {companyName && <span className={cardStyles.companyNameBadge}>{companyName}</span>}
-                  </div>
-                  <div className={cardStyles.priceTag}>
-                    ${svc.price}
-                    <span className={cardStyles.pricingUnit}>
-                      /{svc.pricing_type ? (PRICING_LABELS[svc.pricing_type] || svc.pricing_type) : (svc.pricingType ? (PRICING_LABELS[svc.pricingType] || svc.pricingType) : "per trip")}
-                    </span>
-                  </div>
-                </div>
-                <div className={cardStyles.serviceBody}>
-                  <div className={cardStyles.specsLine}>
-                    <span>{capacityPax} pax</span>
-                    <span>•</span>
-                    <span>{luggageBags} bags</span>
-                  </div>
-                  <div className={cardStyles.pairedBlock}>
-                    <div className={cardStyles.subSectionCard}>
-                      <div className={cardStyles.sectionHeaderRow}>
-                        <Car size={13} /> Private Hire transport
-                      </div>
-                      <div className={cardStyles.vehicleThumbArea}>
-                        {svc.vehicle?.front_image_url || svc.vehicle?.frontImage ? (
-                          <Image src={svc.vehicle?.front_image_url || svc.vehicle?.frontImage} alt={vehicleName} fill className={cardStyles.thumbImg} unoptimized />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-slate-200">
-                            <Car size={24} color="#64748b" />
-                          </div>
-                        )}
-                        {plateNumber && <span className={cardStyles.plateMiniBadge}>{plateNumber}</span>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className={cardStyles.serviceFooter}>
-                  <Link href={`/transport/service/${svc.id}/`} className={cardStyles.btnPreview} style={{ textDecoration: "none" }}>View full details</Link>
-                  <div className="flex items-center gap-2">
-                    <Link href={`/booking/${svc.id}/`} className={cardStyles.primaryBtn} style={{ textDecoration: "none" }}>Book now</Link>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+
 
       {showReviewForm && (
         <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
