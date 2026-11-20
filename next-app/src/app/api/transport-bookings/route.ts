@@ -15,6 +15,15 @@ const createSchema = z.object({
   end_date: z.string().optional(),
   pickup_time: z.string().max(20).optional(),
   notes: z.string().max(5000).optional(),
+  // Trip-first: every booking must carry an origin -> destination journey.
+  origin: z.string().trim().min(1).max(255),
+  destination: z.string().trim().min(1).max(255),
+  origin_lat: z.coerce.number().min(-90).max(90).optional(),
+  origin_lng: z.coerce.number().min(-180).max(180).optional(),
+  dest_lat: z.coerce.number().min(-90).max(90).optional(),
+  dest_lng: z.coerce.number().min(-180).max(180).optional(),
+  distance_km: z.coerce.number().min(0).optional(),
+  duration_mins: z.coerce.number().int().min(0).optional(),
 });
 
 const BOOKING_INCLUDE = {
@@ -61,6 +70,27 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, "This vehicle can carry up to " + service.vehicle.capacity + " passengers.");
     }
 
+    // Trip-first: create a TransportTripRequest (the trip) and link the booking to it.
+    const tripRequest = await prisma.transportTripRequest.create({
+      data: {
+        userId: context?.user?.id ?? null,
+        origin: body.origin,
+        originLat: body.origin_lat ?? null,
+        originLng: body.origin_lng ?? null,
+        destination: body.destination,
+        destLat: body.dest_lat ?? null,
+        destLng: body.dest_lng ?? null,
+        travelDate,
+        passengers: body.passengers,
+        luggage: 0,
+        contactName: body.full_name,
+        contactEmail: body.email.toLowerCase(),
+        contactPhone: body.phone,
+        notes: body.notes ?? "",
+        status: "requested",
+      },
+    });
+
     const booking = await prisma.transportBooking.create({
       data: {
         userId: context?.user?.id ?? null,
@@ -68,6 +98,7 @@ export async function POST(request: NextRequest) {
         companyId: service.companyId,
         vehicleId: service.vehicleId,
         driverId: service.driverId,
+        tripRequestId: tripRequest.id,
         fullName: body.full_name,
         email: body.email.toLowerCase(),
         phone: body.phone,
@@ -78,6 +109,14 @@ export async function POST(request: NextRequest) {
         totalPrice: service.price,
         status: "pending",
         notes: body.notes ?? "",
+        origin: body.origin,
+        originLat: body.origin_lat ?? null,
+        originLng: body.origin_lng ?? null,
+        destination: body.destination,
+        destLat: body.dest_lat ?? null,
+        destLng: body.dest_lng ?? null,
+        distanceKm: body.distance_km ?? null,
+        durationMins: body.duration_mins ?? null,
       },
       include: BOOKING_INCLUDE,
     });

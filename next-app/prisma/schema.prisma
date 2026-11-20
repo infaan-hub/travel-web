@@ -815,38 +815,50 @@ enum TransportBookingStatus {
 }
 
 model TransportBooking {
-  id          Int                    @id @default(autoincrement())
-  reference   String?                @unique
-  userId      Int?                   @map("user_id")
-  serviceId   Int?                   @map("service_id")
-  companyId   Int?                   @map("company_id")
-  vehicleId   Int?                   @map("vehicle_id")
-  driverId    Int?                   @map("driver_id")
-  fullName    String                 @map("full_name")
-  email       String
-  phone       String
-  passengers  Int                    @default(1)
-  travelDate  DateTime               @map("travel_date") @db.Date
-  endDate     DateTime?              @map("end_date") @db.Date
-  pickupTime  String?                @map("pickup_time")
-  totalPrice  Decimal?               @map("total_price") @db.Decimal(12, 2)
-  status      TransportBookingStatus @default(pending)
-  isPublic    Boolean                @default(false) @map("is_public")
-  notes       String                 @default("")
-  createdAt   DateTime               @default(now()) @map("created_at")
-  updatedAt   DateTime               @updatedAt @map("updated_at")
+  id            Int                    @id @default(autoincrement())
+  reference     String?                @unique
+  userId        Int?                   @map("user_id")
+  serviceId     Int?                   @map("service_id")
+  companyId     Int?                   @map("company_id")
+  vehicleId     Int?                   @map("vehicle_id")
+  driverId      Int?                   @map("driver_id")
+  tripRequestId Int?                   @map("trip_request_id")
+  fullName      String                 @map("full_name")
+  email         String
+  phone         String
+  passengers    Int                    @default(1)
+  travelDate    DateTime               @map("travel_date") @db.Date
+  endDate       DateTime?              @map("end_date") @db.Date
+  pickupTime    String?                @map("pickup_time")
+  totalPrice    Decimal?               @map("total_price") @db.Decimal(12, 2)
+  status        TransportBookingStatus @default(pending)
+  isPublic      Boolean                @default(false) @map("is_public")
+  notes         String                 @default("")
+  // Trip-first: every booking carries an origin -> destination journey.
+  origin        String?
+  originLat     Float?                 @map("origin_lat")
+  originLng     Float?                 @map("origin_lng")
+  destination   String?
+  destLat       Float?                 @map("dest_lat")
+  destLng       Float?                 @map("dest_lng")
+  distanceKm    Float?                 @map("distance_km")
+  durationMins  Int?                   @map("duration_mins")
+  createdAt     DateTime               @default(now()) @map("created_at")
+  updatedAt     DateTime               @updatedAt @map("updated_at")
 
-  user    User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
-  service PrivateHireService? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  company Company?            @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  vehicle PrivateHireVehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
-  driver  PrivateHireDriver?  @relation(fields: [driverId], references: [id], onDelete: SetNull)
-  reviews Review[]
+  user        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  service     PrivateHireService? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  company     Company?            @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  vehicle     PrivateHireVehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  driver      PrivateHireDriver?  @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  tripRequest TransportTripRequest? @relation(fields: [tripRequestId], references: [id], onDelete: SetNull)
+  reviews     Review[]
 
   @@index([userId, createdAt])
   @@index([companyId, status, travelDate])
   @@index([serviceId])
   @@index([isPublic, status, travelDate])
+  @@index([tripRequestId])
   @@map("transport_bookings")
 }
 
@@ -878,8 +890,9 @@ model TransportTripRequest {
   createdAt   DateTime                   @default(now()) @map("created_at")
   updatedAt   DateTime                   @updatedAt @map("updated_at")
 
-  user   User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
-  driver PrivateHireDriver? @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  user       User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  driver     PrivateHireDriver? @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  bookings   TransportBooking[]
 
   @@index([userId, createdAt])
   @@index([status, createdAt])

@@ -1,4 +1,4 @@
-﻿id,name,category,area,latitude,longitude,rating,reviews
+id,name,category,area,latitude,longitude,rating,reviews
 1,Emerson on Hurumzi,Hotel,Stone Town,-6.161013,39.191056,4.5,764
 2,Dhow Palace Hotel,Hotel,Stone Town,-6.164179,39.187576,4.2,719
 3,Balcony House Zanzibar,Hotel,Stone Town,-6.165023,39.18786,4.0,165
@@ -325,3 +325,773 @@
 324,Dr. Mehta's Hospital,Health / Pharmacy,Stone Town,-6.165101,39.188439,4.6,88
 325,Al Rahma Hospital,Health / Pharmacy,Stone Town,-6.177914,39.204202,3.6,61
 326,Kembo Pharmacy,Health / Pharmacy,Stone Town,-6.162493,39.187626,1.5,26
+327,Bwejuu Bar Spot 327,Bar,Bwejuu,-6.225643,39.537376,4.2,3405
+328,Kendwa Health / Pharmacy Spot 328,Health / Pharmacy,Kendwa,-5.755680,39.292222,4,4614
+329,Stone Town Spa / Wellness Spot 329,Spa / Wellness,Stone Town,-6.155242,39.184544,4.5,759
+330,Michamvi Kitesurf School Spot 330,Kitesurf School,Michamvi / Pingwe,-6.141249,39.511633,3.2,872
+331,Bwejuu Restaurant Spot 331,Restaurant,Bwejuu,-6.223273,39.537418,3.4,4278
+332,Jambiani Transport Spot 332,Transport,Jambiani,-6.324230,39.558227,3.8,4483
+333,Bwejuu Spa / Wellness Spot 333,Spa / Wellness,Bwejuu,-6.221689,39.539897,4.2,459
+334,Paje Shop / Market Spot 334,Shop / Market,Paje,-6.261256,39.535224,3.5,737
+335,Around Unguja Health / Pharmacy Spot 335,Health / Pharmacy,Around Unguja,-6.036754,39.221303,4.5,3210
+336,Around Unguja Spa / Wellness Spot 336,Spa / Wellness,Around Unguja,-6.391591,39.377406,4.1,47
+337,Nungwi Transport Spot 337,Transport,Nungwi,-5.721902,39.291815,4.5,2820
+338,Matemwe Spa / Wellness Spot 338,Spa / Wellness,Matemwe,-5.852480,39.357553,3.7,1380
+339,Paje Transport Spot 339,Transport,Paje,-6.269978,39.530304,3.6,2439
+340,Bwejuu Hotel Spot 340,Hotel,Bwejuu,-6.232060,39.536782,3,566
+341,Paje Shop / Market Spot 341,Shop / Market,Paje,-6.253954,39.534474,3.8,4090
+342,Michamvi Kitesurf School Spot 342,Kitesurf School,Michamvi / Pingwe,-6.151424,39.517794,3.5,745
+343,Jambiani Restaurant Spot 343,Restaurant,Jambiani,-6.301337,39.544177,4.4,607
+344,Kiwengwa Hotel Spot 344,Hotel,Kiwengwa,-5.982002,39.382377,3,4560
+345,Kiwengwa Bar Spot 345,Bar,Kiwengwa,-5.993101,39.380061,3.8,587
+346,Matemwe Shop / Market Spot 346,Shop / Market,Matemwe,-5.867777,39.356234,3.9,4171
+347,Jambiani Restaurant Spot 347,Restaurant,Jambiani,-6.326803,39.549755,4,941
+348,Uroa Restaurant Spot 348,Restaurant,Uroa / Chwaka,-6.108764,39.420618,3.5,2248
+349,Kendwa Spa / Wellness Spot 349,Spa / Wellness,Kendwa,-5.753002,39.292771,3,3405
+350,Stone Town Transport Spot 350,Transport,Stone Town,-6.156211,39.198781,4.9,1276
+351,Matemwe Transport Spot 351,Transport,Matemwe,-5.851687,39.357357,3.7,2478
+352,Uroa Tour / Activity Spot 352,Tour / Activity,Uroa / Chwaka,-6.093903,39.429729,3.5,1795
+353,Kendwa Bar Spot 353,Bar,Kendwa,-5.746104,39.290449,3.4,1181
+354,Kiwengwa Shop / Market Spot 354,Shop / Market,Kiwengwa,-5.974270,39.383889,3,4825
+355,Matemwe Bar Spot 355,Bar,Matemwe,-5.884722,39.357733,3.6,4337
+356,Kizimkazi Transport Spot 356,Transport,Kizimkazi,-6.454330,39.465399,3.7,2520
+357,Matemwe Health / Pharmacy Spot 357,Health / Pharmacy,Matemwe,-5.860721,39.354996,4.5,3967
+358,Kendwa Tour / Activity Spot 358,Tour / Activity,Kendwa,-5.741803,39.295872,3.7,2783
+359,Around Unguja Kitesurf School Spot 359,Kitesurf School,Around Unguja,-6.300604,39.353232,3.1,2288
+360,Paje Health / Pharmacy Spot 360,Health / Pharmacy,Paje,-6.268747,39.532605,3.6,2949
+361,Kendwa Health / Pharmacy Spot 361,Health / Pharmacy,Kendwa,-5.746261,39.282794,4.1,1035
+362,Paje Shop / Market Spot 362,Shop / Market,Paje,-6.263247,39.538529,3.8,2585
+363,Matemwe Hotel Spot 363,Hotel,Matemwe,-5.896383,39.356628,3.6,30
+364,Kizimkazi Restaurant Spot 364,Restaurant,Kizimkazi,-6.454207,39.463564,4.8,4563
+365,Matemwe Health / Pharmacy Spot 365,Health / Pharmacy,Matemwe,-5.881266,39.354529,4.8,2928
+366,Fumba Spa / Wellness Spot 366,Spa / Wellness,Fumba,-6.315988,39.287670,3.5,1716
+367,Stone Town Spa / Wellness Spot 367,Spa / Wellness,Stone Town,-6.150988,39.188595,4.8,861
+368,Stone Town Bar Spot 368,Bar,Stone Town,-6.166049,39.189695,3.2,3115
+369,Jambiani Bar Spot 369,Bar,Jambiani,-6.321877,39.543634,4.7,2932
+370,Michamvi Shop / Market Spot 370,Shop / Market,Michamvi / Pingwe,-6.144097,39.517872,3.1,2970
+371,Kiwengwa Shop / Market Spot 371,Shop / Market,Kiwengwa,-5.985017,39.371716,4.8,4548
+372,Jambiani Hotel Spot 372,Hotel,Jambiani,-6.322044,39.540418,4.7,2248
+373,Nungwi Spa / Wellness Spot 373,Spa / Wellness,Nungwi,-5.731679,39.298723,4.2,213
+374,Paje Health / Pharmacy Spot 374,Health / Pharmacy,Paje,-6.258581,39.538826,4.1,2549
+375,Jambiani Health / Pharmacy Spot 375,Health / Pharmacy,Jambiani,-6.316696,39.555862,4.2,1369
+376,Around Unguja Bar Spot 376,Bar,Around Unguja,-6.175003,39.324983,4,4827
+377,Michamvi Restaurant Spot 377,Restaurant,Michamvi / Pingwe,-6.150338,39.511931,4.6,3864
+378,Kizimkazi Health / Pharmacy Spot 378,Health / Pharmacy,Kizimkazi,-6.433712,39.463119,3.6,515
+379,Around Unguja Restaurant Spot 379,Restaurant,Around Unguja,-5.951957,39.432368,4.1,3684
+380,Uroa Hotel Spot 380,Hotel,Uroa / Chwaka,-6.107390,39.425551,3.4,4624
+381,Uroa Health / Pharmacy Spot 381,Health / Pharmacy,Uroa / Chwaka,-6.113755,39.422516,4.6,2871
+382,Around Unguja Tour / Activity Spot 382,Tour / Activity,Around Unguja,-5.942838,39.418591,4.8,3604
+383,Around Unguja Bar Spot 383,Bar,Around Unguja,-5.889855,39.220975,3.7,3498
+384,Fumba Restaurant Spot 384,Restaurant,Fumba,-6.305240,39.271324,3.1,2757
+385,Kendwa Cafe Spot 385,Cafe,Kendwa,-5.757073,39.284071,3.4,669
+386,Fumba Transport Spot 386,Transport,Fumba,-6.305355,39.276714,4.8,4771
+387,Kendwa Spa / Wellness Spot 387,Spa / Wellness,Kendwa,-5.749694,39.291182,3.2,82
+388,Bwejuu Shop / Market Spot 388,Shop / Market,Bwejuu,-6.214820,39.537096,3.8,2815
+389,Matemwe Tour / Activity Spot 389,Tour / Activity,Matemwe,-5.870516,39.350339,3.9,4373
+390,Jambiani Hotel Spot 390,Hotel,Jambiani,-6.310637,39.548244,4.1,4431
+391,Michamvi Spa / Wellness Spot 391,Spa / Wellness,Michamvi / Pingwe,-6.155658,39.519081,3.6,1341
+392,Kiwengwa Cafe Spot 392,Cafe,Kiwengwa,-5.993235,39.383620,4.3,2520
+393,Kizimkazi Kitesurf School Spot 393,Kitesurf School,Kizimkazi,-6.453325,39.473818,4.6,3779
+394,Kiwengwa Hotel Spot 394,Hotel,Kiwengwa,-5.960981,39.379375,4.8,573
+395,Stone Town Shop / Market Spot 395,Shop / Market,Stone Town,-6.165317,39.192507,3,4119
+396,Uroa Bar Spot 396,Bar,Uroa / Chwaka,-6.097978,39.423755,3.4,2595
+397,Matemwe Tour / Activity Spot 397,Tour / Activity,Matemwe,-5.884298,39.356996,4.7,752
+398,Around Unguja Cafe Spot 398,Cafe,Around Unguja,-6.180666,39.348206,4.2,4715
+399,Bwejuu Health / Pharmacy Spot 399,Health / Pharmacy,Bwejuu,-6.214859,39.533089,5,3929
+400,Paje Cafe Spot 400,Cafe,Paje,-6.268429,39.531840,3.5,2002
+401,Jambiani Hotel Spot 401,Hotel,Jambiani,-6.304076,39.543353,4.2,2473
+402,Paje Shop / Market Spot 402,Shop / Market,Paje,-6.265032,39.539145,3.7,2159
+403,Stone Town Restaurant Spot 403,Restaurant,Stone Town,-6.154917,39.197083,4.5,517
+404,Matemwe Hotel Spot 404,Hotel,Matemwe,-5.899359,39.356292,3.9,4841
+405,Kizimkazi Restaurant Spot 405,Restaurant,Kizimkazi,-6.443379,39.471633,4,4965
+406,Jambiani Bar Spot 406,Bar,Jambiani,-6.313401,39.550888,3.6,4846
+407,Paje Transport Spot 407,Transport,Paje,-6.267697,39.532018,3.4,106
+408,Around Unguja Transport Spot 408,Transport,Around Unguja,-5.954940,39.377882,4.1,2491
+409,Kizimkazi Bar Spot 409,Bar,Kizimkazi,-6.452945,39.471365,4.2,74
+410,Nungwi Restaurant Spot 410,Restaurant,Nungwi,-5.731655,39.299099,3.9,2192
+411,Paje Spa / Wellness Spot 411,Spa / Wellness,Paje,-6.256770,39.531372,3.1,680
+412,Paje Shop / Market Spot 412,Shop / Market,Paje,-6.256515,39.538598,4.1,1647
+413,Michamvi Health / Pharmacy Spot 413,Health / Pharmacy,Michamvi / Pingwe,-6.155372,39.513488,4.2,2192
+414,Kendwa Kitesurf School Spot 414,Kitesurf School,Kendwa,-5.750907,39.284502,4.3,4130
+415,Kiwengwa Transport Spot 415,Transport,Kiwengwa,-5.969716,39.370166,4.7,2258
+416,Stone Town Bar Spot 416,Bar,Stone Town,-6.169449,39.182513,3.4,3014
+417,Paje Restaurant Spot 417,Restaurant,Paje,-6.251346,39.535883,4,4689
+418,Kiwengwa Transport Spot 418,Transport,Kiwengwa,-5.966965,39.377426,4.1,3337
+419,Michamvi Bar Spot 419,Bar,Michamvi / Pingwe,-6.152673,39.513133,4.2,2438
+420,Kizimkazi Shop / Market Spot 420,Shop / Market,Kizimkazi,-6.432842,39.468976,4.1,2198
+421,Kizimkazi Transport Spot 421,Transport,Kizimkazi,-6.447489,39.471768,3.7,1117
+422,Kizimkazi Restaurant Spot 422,Restaurant,Kizimkazi,-6.447911,39.468332,3.7,3670
+423,Fumba Cafe Spot 423,Cafe,Fumba,-6.310435,39.287891,4.6,153
+424,Fumba Hotel Spot 424,Hotel,Fumba,-6.309467,39.280061,3.8,555
+425,Kendwa Shop / Market Spot 425,Shop / Market,Kendwa,-5.745536,39.285036,4.4,2662
+426,Nungwi Shop / Market Spot 426,Shop / Market,Nungwi,-5.728386,39.304547,4.8,284
+427,Kizimkazi Bar Spot 427,Bar,Kizimkazi,-6.453839,39.470039,4.5,525
+428,Uroa Spa / Wellness Spot 428,Spa / Wellness,Uroa / Chwaka,-6.106459,39.424680,3.3,1743
+429,Kendwa Restaurant Spot 429,Restaurant,Kendwa,-5.749849,39.293531,3.4,2747
+430,Uroa Tour / Activity Spot 430,Tour / Activity,Uroa / Chwaka,-6.102235,39.426369,4.9,1272
+431,Jambiani Tour / Activity Spot 431,Tour / Activity,Jambiani,-6.315506,39.550497,3.4,919
+432,Stone Town Restaurant Spot 432,Restaurant,Stone Town,-6.169658,39.184929,4,2694
+433,Fumba Cafe Spot 433,Cafe,Fumba,-6.305968,39.283581,3.1,4073
+434,Michamvi Transport Spot 434,Transport,Michamvi / Pingwe,-6.147797,39.519639,3.2,3121
+435,Uroa Tour / Activity Spot 435,Tour / Activity,Uroa / Chwaka,-6.100532,39.421653,3.4,508
+436,Uroa Tour / Activity Spot 436,Tour / Activity,Uroa / Chwaka,-6.116279,39.429255,3.8,2297
+437,Jambiani Tour / Activity Spot 437,Tour / Activity,Jambiani,-6.324984,39.551567,4.7,1569
+438,Around Unguja Spa / Wellness Spot 438,Spa / Wellness,Around Unguja,-6.307306,39.415719,4.4,1096
+439,Around Unguja Cafe Spot 439,Cafe,Around Unguja,-6.251315,39.269379,4.1,4016
+440,Matemwe Kitesurf School Spot 440,Kitesurf School,Matemwe,-5.870971,39.350785,3.3,813
+441,Stone Town Tour / Activity Spot 441,Tour / Activity,Stone Town,-6.150516,39.188529,4.1,3755
+442,Stone Town Kitesurf School Spot 442,Kitesurf School,Stone Town,-6.152510,39.180082,3.5,2285
+443,Kendwa Hotel Spot 443,Hotel,Kendwa,-5.749868,39.285110,4.1,4801
+444,Kiwengwa Bar Spot 444,Bar,Kiwengwa,-5.967162,39.383402,3,4023
+445,Paje Spa / Wellness Spot 445,Spa / Wellness,Paje,-6.253772,39.535926,3.1,1511
+446,Paje Kitesurf School Spot 446,Kitesurf School,Paje,-6.264988,39.530068,4.6,3056
+447,Uroa Restaurant Spot 447,Restaurant,Uroa / Chwaka,-6.134021,39.422984,4.6,2418
+448,Jambiani Shop / Market Spot 448,Shop / Market,Jambiani,-6.320693,39.547960,3.1,3400
+449,Kendwa Transport Spot 449,Transport,Kendwa,-5.757945,39.282214,4.7,3820
+450,Jambiani Restaurant Spot 450,Restaurant,Jambiani,-6.317441,39.544312,4,422
+451,Matemwe Kitesurf School Spot 451,Kitesurf School,Matemwe,-5.855638,39.355191,3.7,1086
+452,Around Unguja Shop / Market Spot 452,Shop / Market,Around Unguja,-6.039556,39.398081,3.2,3309
+453,Michamvi Tour / Activity Spot 453,Tour / Activity,Michamvi / Pingwe,-6.156827,39.517867,4.8,1155
+454,Stone Town Health / Pharmacy Spot 454,Health / Pharmacy,Stone Town,-6.167772,39.190795,4.7,3649
+455,Around Unguja Spa / Wellness Spot 455,Spa / Wellness,Around Unguja,-6.154341,39.328993,4.2,1925
+456,Nungwi Cafe Spot 456,Cafe,Nungwi,-5.736766,39.295440,4.2,4853
+457,Kizimkazi Cafe Spot 457,Cafe,Kizimkazi,-6.456765,39.476544,4.6,4477
+458,Kiwengwa Spa / Wellness Spot 458,Spa / Wellness,Kiwengwa,-5.981883,39.384558,4.3,1705
+459,Kiwengwa Bar Spot 459,Bar,Kiwengwa,-5.989904,39.381023,3.1,1221
+460,Kendwa Bar Spot 460,Bar,Kendwa,-5.756149,39.281830,3.5,1585
+461,Kiwengwa Transport Spot 461,Transport,Kiwengwa,-5.993323,39.383381,4.9,2620
+462,Fumba Transport Spot 462,Transport,Fumba,-6.308328,39.281165,4.9,4167
+463,Bwejuu Health / Pharmacy Spot 463,Health / Pharmacy,Bwejuu,-6.225360,39.535637,3.5,2697
+464,Nungwi Tour / Activity Spot 464,Tour / Activity,Nungwi,-5.735326,39.298569,4.8,2740
+465,Matemwe Tour / Activity Spot 465,Tour / Activity,Matemwe,-5.853487,39.354143,3.9,2949
+466,Michamvi Bar Spot 466,Bar,Michamvi / Pingwe,-6.149673,39.517825,4.4,2062
+467,Around Unguja Spa / Wellness Spot 467,Spa / Wellness,Around Unguja,-5.821943,39.319398,4.3,3753
+468,Paje Tour / Activity Spot 468,Tour / Activity,Paje,-6.267690,39.539103,4.1,573
+469,Jambiani Hotel Spot 469,Hotel,Jambiani,-6.318295,39.547497,5,1395
+470,Jambiani Kitesurf School Spot 470,Kitesurf School,Jambiani,-6.325626,39.541371,3.6,4916
+471,Around Unguja Hotel Spot 471,Hotel,Around Unguja,-6.008059,39.218641,3.9,2682
+472,Nungwi Shop / Market Spot 472,Shop / Market,Nungwi,-5.721486,39.305981,4.6,4622
+473,Bwejuu Tour / Activity Spot 473,Tour / Activity,Bwejuu,-6.217253,39.538918,4.7,3299
+474,Stone Town Cafe Spot 474,Cafe,Stone Town,-6.151801,39.190141,3.8,78
+475,Kiwengwa Transport Spot 475,Transport,Kiwengwa,-5.990272,39.372168,3.4,756
+476,Stone Town Spa / Wellness Spot 476,Spa / Wellness,Stone Town,-6.158409,39.196428,4,3115
+477,Paje Spa / Wellness Spot 477,Spa / Wellness,Paje,-6.266189,39.530727,4.4,3953
+478,Around Unguja Spa / Wellness Spot 478,Spa / Wellness,Around Unguja,-6.210350,39.296452,4.2,153
+479,Stone Town Bar Spot 479,Bar,Stone Town,-6.163972,39.180865,3.8,2620
+480,Paje Cafe Spot 480,Cafe,Paje,-6.269854,39.535241,3,1207
+481,Uroa Bar Spot 481,Bar,Uroa / Chwaka,-6.105960,39.423420,4.3,1945
+482,Uroa Hotel Spot 482,Hotel,Uroa / Chwaka,-6.125301,39.427075,3,120
+483,Jambiani Bar Spot 483,Bar,Jambiani,-6.306054,39.540217,4.6,1431
+484,Kizimkazi Cafe Spot 484,Cafe,Kizimkazi,-6.433094,39.464798,4.6,926
+485,Bwejuu Tour / Activity Spot 485,Tour / Activity,Bwejuu,-6.230387,39.537890,4.5,2504
+486,Bwejuu Cafe Spot 486,Cafe,Bwejuu,-6.233532,39.536321,3.9,2579
+487,Michamvi Restaurant Spot 487,Restaurant,Michamvi / Pingwe,-6.154603,39.516024,4.4,69
+488,Around Unguja Spa / Wellness Spot 488,Spa / Wellness,Around Unguja,-5.897623,39.243203,4.8,4480
+489,Kendwa Spa / Wellness Spot 489,Spa / Wellness,Kendwa,-5.746949,39.283696,3.7,413
+490,Kendwa Restaurant Spot 490,Restaurant,Kendwa,-5.759654,39.281810,3.8,4676
+491,Kiwengwa Restaurant Spot 491,Restaurant,Kiwengwa,-5.977547,39.379896,4.5,4911
+492,Kiwengwa Tour / Activity Spot 492,Tour / Activity,Kiwengwa,-5.974474,39.381955,4.1,1594
+493,Stone Town Spa / Wellness Spot 493,Spa / Wellness,Stone Town,-6.167038,39.187644,3.5,2879
+494,Uroa Cafe Spot 494,Cafe,Uroa / Chwaka,-6.092521,39.425894,4.2,883
+495,Fumba Bar Spot 495,Bar,Fumba,-6.310671,39.271560,3.1,3345
+496,Paje Restaurant Spot 496,Restaurant,Paje,-6.251263,39.535629,4.3,1349
+497,Fumba Tour / Activity Spot 497,Tour / Activity,Fumba,-6.310336,39.273630,3.6,1266
+498,Bwejuu Restaurant Spot 498,Restaurant,Bwejuu,-6.233610,39.533971,3.8,4665
+499,Fumba Health / Pharmacy Spot 499,Health / Pharmacy,Fumba,-6.300889,39.277101,3.6,3563
+500,Michamvi Cafe Spot 500,Cafe,Michamvi / Pingwe,-6.144013,39.512894,4.2,3859
+501,Uroa Spa / Wellness Spot 501,Spa / Wellness,Uroa / Chwaka,-6.139609,39.424011,4.5,1821
+502,Matemwe Restaurant Spot 502,Restaurant,Matemwe,-5.873652,39.359270,4.8,752
+503,Uroa Shop / Market Spot 503,Shop / Market,Uroa / Chwaka,-6.128670,39.427104,4.5,3524
+504,Matemwe Health / Pharmacy Spot 504,Health / Pharmacy,Matemwe,-5.863596,39.356735,3.4,2842
+505,Uroa Restaurant Spot 505,Restaurant,Uroa / Chwaka,-6.134099,39.427156,4.5,2407
+506,Kizimkazi Restaurant Spot 506,Restaurant,Kizimkazi,-6.440797,39.476527,3.9,1245
+507,Jambiani Shop / Market Spot 507,Shop / Market,Jambiani,-6.304978,39.556487,3.9,1004
+508,Uroa Hotel Spot 508,Hotel,Uroa / Chwaka,-6.128079,39.426476,5,2013
+509,Stone Town Bar Spot 509,Bar,Stone Town,-6.158757,39.196229,4.2,676
+510,Kizimkazi Hotel Spot 510,Hotel,Kizimkazi,-6.434691,39.460357,3.6,1345
+511,Matemwe Restaurant Spot 511,Restaurant,Matemwe,-5.860822,39.356197,3.1,2157
+512,Nungwi Transport Spot 512,Transport,Nungwi,-5.732466,39.291161,3.9,1963
+513,Kiwengwa Health / Pharmacy Spot 513,Health / Pharmacy,Kiwengwa,-5.996440,39.386443,3.2,2027
+514,Fumba Transport Spot 514,Transport,Fumba,-6.300286,39.281984,3.1,4068
+515,Around Unguja Tour / Activity Spot 515,Tour / Activity,Around Unguja,-5.937877,39.255394,3.5,1944
+516,Michamvi Kitesurf School Spot 516,Kitesurf School,Michamvi / Pingwe,-6.148963,39.512923,3.6,3479
+517,Jambiani Bar Spot 517,Bar,Jambiani,-6.315233,39.553404,4.5,4662
+518,Around Unguja Shop / Market Spot 518,Shop / Market,Around Unguja,-5.804480,39.317290,4.6,4262
+519,Kizimkazi Hotel Spot 519,Hotel,Kizimkazi,-6.436904,39.466428,3.1,904
+520,Michamvi Bar Spot 520,Bar,Michamvi / Pingwe,-6.158593,39.514263,3.7,3666
+521,Stone Town Health / Pharmacy Spot 521,Health / Pharmacy,Stone Town,-6.161479,39.194510,3,2326
+522,Uroa Transport Spot 522,Transport,Uroa / Chwaka,-6.123592,39.424905,3.1,1285
+523,Stone Town Hotel Spot 523,Hotel,Stone Town,-6.168109,39.186861,4.4,4862
+524,Michamvi Kitesurf School Spot 524,Kitesurf School,Michamvi / Pingwe,-6.157876,39.515968,4.7,2283
+525,Kiwengwa Cafe Spot 525,Cafe,Kiwengwa,-5.991161,39.370684,4.3,1345
+526,Around Unguja Hotel Spot 526,Hotel,Around Unguja,-6.135198,39.395123,4.2,2485
+527,Kizimkazi Transport Spot 527,Transport,Kizimkazi,-6.449881,39.463513,3.4,2546
+528,Kendwa Restaurant Spot 528,Restaurant,Kendwa,-5.757489,39.288642,4.1,78
+529,Kizimkazi Kitesurf School Spot 529,Kitesurf School,Kizimkazi,-6.449307,39.478773,3.3,4096
+530,Jambiani Hotel Spot 530,Hotel,Jambiani,-6.301473,39.540601,3.3,2417
+531,Kizimkazi Shop / Market Spot 531,Shop / Market,Kizimkazi,-6.438064,39.479272,4.5,3218
+532,Jambiani Tour / Activity Spot 532,Tour / Activity,Jambiani,-6.315750,39.543127,4.6,4695
+533,Stone Town Transport Spot 533,Transport,Stone Town,-6.167130,39.196243,4.2,3208
+534,Jambiani Restaurant Spot 534,Restaurant,Jambiani,-6.328738,39.542991,4.7,1773
+535,Stone Town Restaurant Spot 535,Restaurant,Stone Town,-6.154972,39.186811,3.6,1641
+536,Kiwengwa Hotel Spot 536,Hotel,Kiwengwa,-5.971333,39.389507,4.9,444
+537,Nungwi Bar Spot 537,Bar,Nungwi,-5.725859,39.305220,3.1,738
+538,Paje Kitesurf School Spot 538,Kitesurf School,Paje,-6.267806,39.536092,3.9,3989
+539,Uroa Bar Spot 539,Bar,Uroa / Chwaka,-6.104961,39.424114,3.5,248
+540,Nungwi Hotel Spot 540,Hotel,Nungwi,-5.738201,39.295161,3.5,2908
+541,Stone Town Bar Spot 541,Bar,Stone Town,-6.151138,39.185959,4.2,192
+542,Kizimkazi Hotel Spot 542,Hotel,Kizimkazi,-6.444867,39.473914,4.1,2012
+543,Around Unguja Cafe Spot 543,Cafe,Around Unguja,-5.996924,39.382095,4.1,2444
+544,Paje Tour / Activity Spot 544,Tour / Activity,Paje,-6.254064,39.532001,3.1,2699
+545,Around Unguja Hotel Spot 545,Hotel,Around Unguja,-5.998791,39.298469,4.4,4372
+546,Bwejuu Tour / Activity Spot 546,Tour / Activity,Bwejuu,-6.234660,39.538268,3.4,3767
+547,Kendwa Bar Spot 547,Bar,Kendwa,-5.750595,39.288447,3.8,4090
+548,Kizimkazi Health / Pharmacy Spot 548,Health / Pharmacy,Kizimkazi,-6.449519,39.475204,3.5,1640
+549,Paje Restaurant Spot 549,Restaurant,Paje,-6.258298,39.532374,3.8,2404
+550,Around Unguja Transport Spot 550,Transport,Around Unguja,-5.993743,39.416924,3.5,931
+551,Fumba Shop / Market Spot 551,Shop / Market,Fumba,-6.308328,39.283243,4.1,2722
+552,Stone Town Spa / Wellness Spot 552,Spa / Wellness,Stone Town,-6.157776,39.193545,3.7,938
+553,Stone Town Kitesurf School Spot 553,Kitesurf School,Stone Town,-6.168049,39.180830,4.1,4129
+554,Uroa Spa / Wellness Spot 554,Spa / Wellness,Uroa / Chwaka,-6.126909,39.421017,4.1,1650
+555,Kendwa Kitesurf School Spot 555,Kitesurf School,Kendwa,-5.757185,39.282090,4.9,560
+556,Fumba Shop / Market Spot 556,Shop / Market,Fumba,-6.304910,39.287388,4.7,3275
+557,Jambiani Transport Spot 557,Transport,Jambiani,-6.313094,39.551898,3.2,2817
+558,Bwejuu Cafe Spot 558,Cafe,Bwejuu,-6.223858,39.532602,3.2,1274
+559,Kendwa Bar Spot 559,Bar,Kendwa,-5.756670,39.291543,3.7,566
+560,Fumba Shop / Market Spot 560,Shop / Market,Fumba,-6.317091,39.273848,4.2,4340
+561,Matemwe Spa / Wellness Spot 561,Spa / Wellness,Matemwe,-5.867061,39.351424,4.9,903
+562,Michamvi Spa / Wellness Spot 562,Spa / Wellness,Michamvi / Pingwe,-6.143755,39.514125,4.1,4665
+563,Uroa Transport Spot 563,Transport,Uroa / Chwaka,-6.114790,39.423426,4.9,728
+564,Michamvi Kitesurf School Spot 564,Kitesurf School,Michamvi / Pingwe,-6.148127,39.512715,3.8,1808
+565,Kizimkazi Tour / Activity Spot 565,Tour / Activity,Kizimkazi,-6.441070,39.478514,4.9,916
+566,Paje Shop / Market Spot 566,Shop / Market,Paje,-6.262041,39.539068,3.7,2016
+567,Kizimkazi Cafe Spot 567,Cafe,Kizimkazi,-6.449905,39.477149,3,1091
+568,Jambiani Spa / Wellness Spot 568,Spa / Wellness,Jambiani,-6.305668,39.554125,3.6,3747
+569,Kizimkazi Bar Spot 569,Bar,Kizimkazi,-6.434803,39.465216,4.7,3279
+570,Nungwi Shop / Market Spot 570,Shop / Market,Nungwi,-5.724000,39.300018,4.6,608
+571,Stone Town Hotel Spot 571,Hotel,Stone Town,-6.161755,39.194421,4.8,887
+572,Bwejuu Bar Spot 572,Bar,Bwejuu,-6.229828,39.534504,4.2,4676
+573,Kiwengwa Tour / Activity Spot 573,Tour / Activity,Kiwengwa,-5.985185,39.376821,3.6,219
+574,Matemwe Hotel Spot 574,Hotel,Matemwe,-5.893585,39.357330,4.5,2352
+575,Kendwa Bar Spot 575,Bar,Kendwa,-5.756817,39.280321,3.3,4003
+576,Fumba Tour / Activity Spot 576,Tour / Activity,Fumba,-6.307335,39.272955,4.8,290
+577,Jambiani Spa / Wellness Spot 577,Spa / Wellness,Jambiani,-6.305477,39.559459,3.2,3877
+578,Bwejuu Bar Spot 578,Bar,Bwejuu,-6.219918,39.533204,3.9,3046
+579,Nungwi Cafe Spot 579,Cafe,Nungwi,-5.731298,39.300169,3.3,2750
+580,Uroa Bar Spot 580,Bar,Uroa / Chwaka,-6.134571,39.428138,3,233
+581,Jambiani Kitesurf School Spot 581,Kitesurf School,Jambiani,-6.328725,39.554940,3.8,302
+582,Matemwe Hotel Spot 582,Hotel,Matemwe,-5.871983,39.354295,4.1,2103
+583,Around Unguja Kitesurf School Spot 583,Kitesurf School,Around Unguja,-6.390598,39.215629,4.2,824
+584,Bwejuu Bar Spot 584,Bar,Bwejuu,-6.227895,39.536754,4.5,425
+585,Nungwi Transport Spot 585,Transport,Nungwi,-5.723224,39.302884,3.4,1792
+586,Kendwa Tour / Activity Spot 586,Tour / Activity,Kendwa,-5.758918,39.285247,3.3,2898
+587,Nungwi Shop / Market Spot 587,Shop / Market,Nungwi,-5.730785,39.292902,4.9,379
+588,Matemwe Cafe Spot 588,Cafe,Matemwe,-5.874761,39.353451,3.1,3660
+589,Kizimkazi Restaurant Spot 589,Restaurant,Kizimkazi,-6.443441,39.466587,4.9,2716
+590,Matemwe Cafe Spot 590,Cafe,Matemwe,-5.892210,39.355043,4.7,4151
+591,Paje Spa / Wellness Spot 591,Spa / Wellness,Paje,-6.250144,39.533104,3,3923
+592,Nungwi Tour / Activity Spot 592,Tour / Activity,Nungwi,-5.730566,39.306509,3.5,2427
+593,Kendwa Kitesurf School Spot 593,Kitesurf School,Kendwa,-5.746241,39.293675,3.2,250
+594,Kendwa Restaurant Spot 594,Restaurant,Kendwa,-5.750504,39.292134,4.7,4766
+595,Uroa Tour / Activity Spot 595,Tour / Activity,Uroa / Chwaka,-6.107723,39.428910,3.3,1740
+596,Matemwe Tour / Activity Spot 596,Tour / Activity,Matemwe,-5.898402,39.351354,3.9,4433
+597,Uroa Hotel Spot 597,Hotel,Uroa / Chwaka,-6.127054,39.421018,4.3,1799
+598,Kendwa Restaurant Spot 598,Restaurant,Kendwa,-5.743927,39.295614,3.4,43
+599,Kiwengwa Shop / Market Spot 599,Shop / Market,Kiwengwa,-5.971926,39.373014,3.5,2242
+600,Bwejuu Tour / Activity Spot 600,Tour / Activity,Bwejuu,-6.223758,39.537905,4.8,2203
+601,Around Unguja Transport Spot 601,Transport,Around Unguja,-6.215433,39.336086,4.7,2677
+602,Bwejuu Spa / Wellness Spot 602,Spa / Wellness,Bwejuu,-6.223853,39.533383,3.7,3683
+603,Matemwe Shop / Market Spot 603,Shop / Market,Matemwe,-5.887569,39.359555,4,2151
+604,Fumba Kitesurf School Spot 604,Kitesurf School,Fumba,-6.305211,39.276286,3.6,3862
+605,Jambiani Bar Spot 605,Bar,Jambiani,-6.326518,39.541404,3.3,3562
+606,Fumba Restaurant Spot 606,Restaurant,Fumba,-6.311055,39.278463,4.7,2571
+607,Bwejuu Spa / Wellness Spot 607,Spa / Wellness,Bwejuu,-6.226930,39.536456,4,1687
+608,Stone Town Spa / Wellness Spot 608,Spa / Wellness,Stone Town,-6.153637,39.198685,4.5,2301
+609,Kiwengwa Transport Spot 609,Transport,Kiwengwa,-5.999647,39.374933,4.4,3669
+610,Stone Town Hotel Spot 610,Hotel,Stone Town,-6.165099,39.182566,3.2,4228
+611,Nungwi Bar Spot 611,Bar,Nungwi,-5.732265,39.296554,4.8,1487
+612,Michamvi Bar Spot 612,Bar,Michamvi / Pingwe,-6.159044,39.514432,3.4,231
+613,Michamvi Health / Pharmacy Spot 613,Health / Pharmacy,Michamvi / Pingwe,-6.157003,39.515571,3.2,4330
+614,Around Unguja Transport Spot 614,Transport,Around Unguja,-6.157874,39.210079,4.8,4252
+615,Nungwi Health / Pharmacy Spot 615,Health / Pharmacy,Nungwi,-5.728875,39.304274,3.9,1355
+616,Matemwe Cafe Spot 616,Cafe,Matemwe,-5.853484,39.356221,3.8,652
+617,Stone Town Cafe Spot 617,Cafe,Stone Town,-6.162793,39.185968,3.7,4984
+618,Bwejuu Kitesurf School Spot 618,Kitesurf School,Bwejuu,-6.234016,39.533832,4.9,1964
+619,Kendwa Transport Spot 619,Transport,Kendwa,-5.750158,39.282768,4.1,3780
+620,Kendwa Spa / Wellness Spot 620,Spa / Wellness,Kendwa,-5.748362,39.285826,3.3,2294
+621,Michamvi Shop / Market Spot 621,Shop / Market,Michamvi / Pingwe,-6.140079,39.518401,3.3,613
+622,Fumba Hotel Spot 622,Hotel,Fumba,-6.311939,39.276267,3.8,2711
+623,Kizimkazi Cafe Spot 623,Cafe,Kizimkazi,-6.451698,39.473162,3.5,4197
+624,Michamvi Spa / Wellness Spot 624,Spa / Wellness,Michamvi / Pingwe,-6.143301,39.519638,4.2,963
+625,Matemwe Kitesurf School Spot 625,Kitesurf School,Matemwe,-5.866834,39.358052,4.8,2129
+626,Paje Transport Spot 626,Transport,Paje,-6.257603,39.534032,4.2,3136
+627,Matemwe Transport Spot 627,Transport,Matemwe,-5.899247,39.353238,4.2,1861
+628,Kiwengwa Bar Spot 628,Bar,Kiwengwa,-5.969849,39.380798,3.9,996
+629,Fumba Hotel Spot 629,Hotel,Fumba,-6.302526,39.289169,4.1,3023
+630,Bwejuu Cafe Spot 630,Cafe,Bwejuu,-6.219578,39.532770,4.9,2969
+631,Kiwengwa Health / Pharmacy Spot 631,Health / Pharmacy,Kiwengwa,-5.995996,39.375812,3.5,2355
+632,Uroa Cafe Spot 632,Cafe,Uroa / Chwaka,-6.121479,39.420879,4.4,2188
+633,Nungwi Kitesurf School Spot 633,Kitesurf School,Nungwi,-5.734536,39.298570,4.3,4008
+634,Stone Town Restaurant Spot 634,Restaurant,Stone Town,-6.155633,39.186941,4.7,294
+635,Kendwa Bar Spot 635,Bar,Kendwa,-5.745452,39.288694,4.8,4278
+636,Stone Town Tour / Activity Spot 636,Tour / Activity,Stone Town,-6.151813,39.188235,4.7,4020
+637,Kendwa Bar Spot 637,Bar,Kendwa,-5.747558,39.284118,3.1,225
+638,Nungwi Cafe Spot 638,Cafe,Nungwi,-5.721050,39.291183,3.9,4203
+639,Kizimkazi Shop / Market Spot 639,Shop / Market,Kizimkazi,-6.456147,39.471126,4.6,3143
+640,Jambiani Bar Spot 640,Bar,Jambiani,-6.316459,39.559577,3.9,1196
+641,Kizimkazi Spa / Wellness Spot 641,Spa / Wellness,Kizimkazi,-6.441561,39.466038,3.1,1682
+642,Around Unguja Tour / Activity Spot 642,Tour / Activity,Around Unguja,-6.041424,39.442471,4.4,951
+643,Paje Tour / Activity Spot 643,Tour / Activity,Paje,-6.263941,39.532107,3.4,2497
+644,Michamvi Shop / Market Spot 644,Shop / Market,Michamvi / Pingwe,-6.157740,39.519208,4.1,137
+645,Stone Town Spa / Wellness Spot 645,Spa / Wellness,Stone Town,-6.169176,39.199228,4.2,4495
+646,Kizimkazi Spa / Wellness Spot 646,Spa / Wellness,Kizimkazi,-6.438877,39.467380,3.9,3855
+647,Kiwengwa Kitesurf School Spot 647,Kitesurf School,Kiwengwa,-5.987751,39.372565,4.2,2055
+648,Fumba Cafe Spot 648,Cafe,Fumba,-6.300382,39.272270,4.3,3489
+649,Fumba Kitesurf School Spot 649,Kitesurf School,Fumba,-6.313358,39.274602,3.2,4578
+650,Paje Cafe Spot 650,Cafe,Paje,-6.259043,39.538683,4.2,3224
+651,Michamvi Cafe Spot 651,Cafe,Michamvi / Pingwe,-6.154009,39.518130,4.9,2488
+652,Around Unguja Health / Pharmacy Spot 652,Health / Pharmacy,Around Unguja,-6.241891,39.422283,4.5,2466
+653,Paje Transport Spot 653,Transport,Paje,-6.253189,39.536322,4.4,4456
+654,Stone Town Shop / Market Spot 654,Shop / Market,Stone Town,-6.160818,39.185950,3.8,2180
+655,Matemwe Tour / Activity Spot 655,Tour / Activity,Matemwe,-5.861536,39.359742,3.6,761
+656,Jambiani Tour / Activity Spot 656,Tour / Activity,Jambiani,-6.306149,39.549528,4.1,4480
+657,Jambiani Bar Spot 657,Bar,Jambiani,-6.327976,39.548835,4,4180
+658,Bwejuu Restaurant Spot 658,Restaurant,Bwejuu,-6.232637,39.532040,3.2,1403
+659,Paje Bar Spot 659,Bar,Paje,-6.262667,39.535110,3.1,4212
+660,Kizimkazi Restaurant Spot 660,Restaurant,Kizimkazi,-6.457904,39.475373,4.4,3371
+661,Kiwengwa Hotel Spot 661,Hotel,Kiwengwa,-5.987410,39.381375,4.3,352
+662,Nungwi Hotel Spot 662,Hotel,Nungwi,-5.721398,39.304416,3.6,4968
+663,Matemwe Restaurant Spot 663,Restaurant,Matemwe,-5.872181,39.359104,3.5,1631
+664,Paje Transport Spot 664,Transport,Paje,-6.253401,39.537526,3.1,2702
+665,Matemwe Kitesurf School Spot 665,Kitesurf School,Matemwe,-5.885941,39.350542,3.1,2493
+666,Kiwengwa Hotel Spot 666,Hotel,Kiwengwa,-5.986833,39.388588,4,1284
+667,Stone Town Shop / Market Spot 667,Shop / Market,Stone Town,-6.152887,39.195430,4.7,2642
+668,Kendwa Transport Spot 668,Transport,Kendwa,-5.745841,39.287689,4.5,1709
+669,Paje Shop / Market Spot 669,Shop / Market,Paje,-6.264387,39.531091,4.1,4951
+670,Uroa Kitesurf School Spot 670,Kitesurf School,Uroa / Chwaka,-6.132220,39.422773,4.2,1836
+671,Kiwengwa Tour / Activity Spot 671,Tour / Activity,Kiwengwa,-5.986516,39.388070,3.1,2735
+672,Bwejuu Hotel Spot 672,Hotel,Bwejuu,-6.216739,39.530283,4.7,2178
+673,Nungwi Spa / Wellness Spot 673,Spa / Wellness,Nungwi,-5.728622,39.301451,3.8,170
+674,Michamvi Health / Pharmacy Spot 674,Health / Pharmacy,Michamvi / Pingwe,-6.151254,39.519323,4.2,2483
+675,Kendwa Bar Spot 675,Bar,Kendwa,-5.750535,39.290387,4,938
+676,Paje Spa / Wellness Spot 676,Spa / Wellness,Paje,-6.252879,39.539523,3.5,2465
+677,Bwejuu Shop / Market Spot 677,Shop / Market,Bwejuu,-6.234781,39.539780,3.7,2567
+678,Paje Bar Spot 678,Bar,Paje,-6.260842,39.536978,4.3,963
+679,Paje Tour / Activity Spot 679,Tour / Activity,Paje,-6.266690,39.535614,3.6,3613
+680,Fumba Bar Spot 680,Bar,Fumba,-6.318555,39.280224,4.7,1384
+681,Matemwe Transport Spot 681,Transport,Matemwe,-5.868452,39.358498,4.1,975
+682,Nungwi Restaurant Spot 682,Restaurant,Nungwi,-5.735709,39.293723,3.2,3106
+683,Around Unguja Shop / Market Spot 683,Shop / Market,Around Unguja,-5.868579,39.346538,3.9,4532
+684,Paje Restaurant Spot 684,Restaurant,Paje,-6.254589,39.533483,3.6,825
+685,Around Unguja Health / Pharmacy Spot 685,Health / Pharmacy,Around Unguja,-5.970620,39.364707,4.3,2328
+686,Bwejuu Hotel Spot 686,Hotel,Bwejuu,-6.217219,39.538142,4.3,3560
+687,Kendwa Bar Spot 687,Bar,Kendwa,-5.751489,39.295702,4.8,4584
+688,Matemwe Cafe Spot 688,Cafe,Matemwe,-5.890395,39.356635,3.2,184
+689,Stone Town Spa / Wellness Spot 689,Spa / Wellness,Stone Town,-6.156318,39.185916,4.6,4095
+690,Uroa Cafe Spot 690,Cafe,Uroa / Chwaka,-6.093321,39.422514,4.5,3659
+691,Fumba Health / Pharmacy Spot 691,Health / Pharmacy,Fumba,-6.307096,39.283585,3.1,1000
+692,Around Unguja Health / Pharmacy Spot 692,Health / Pharmacy,Around Unguja,-5.937179,39.408730,4.1,1897
+693,Michamvi Hotel Spot 693,Hotel,Michamvi / Pingwe,-6.146474,39.516314,4.2,2894
+694,Bwejuu Transport Spot 694,Transport,Bwejuu,-6.228830,39.534266,3.6,4827
+695,Kiwengwa Health / Pharmacy Spot 695,Health / Pharmacy,Kiwengwa,-5.997786,39.381764,3.5,2668
+696,Kiwengwa Transport Spot 696,Transport,Kiwengwa,-5.994548,39.380692,3.4,1744
+697,Paje Cafe Spot 697,Cafe,Paje,-6.259935,39.534271,3.8,3917
+698,Nungwi Bar Spot 698,Bar,Nungwi,-5.737811,39.299040,3.1,404
+699,Paje Bar Spot 699,Bar,Paje,-6.258963,39.533664,4.6,2182
+700,Bwejuu Spa / Wellness Spot 700,Spa / Wellness,Bwejuu,-6.219482,39.537643,4.3,854
+701,Nungwi Restaurant Spot 701,Restaurant,Nungwi,-5.723132,39.307401,3.8,4773
+702,Bwejuu Shop / Market Spot 702,Shop / Market,Bwejuu,-6.236250,39.531157,4.5,349
+703,Bwejuu Bar Spot 703,Bar,Bwejuu,-6.220834,39.539261,3.5,3078
+704,Jambiani Hotel Spot 704,Hotel,Jambiani,-6.319084,39.553954,3.5,3753
+705,Nungwi Bar Spot 705,Bar,Nungwi,-5.720899,39.298313,4.6,3858
+706,Around Unguja Health / Pharmacy Spot 706,Health / Pharmacy,Around Unguja,-6.390858,39.482294,4.4,1820
+707,Kiwengwa Spa / Wellness Spot 707,Spa / Wellness,Kiwengwa,-5.983498,39.376426,3.1,132
+708,Kizimkazi Health / Pharmacy Spot 708,Health / Pharmacy,Kizimkazi,-6.451207,39.466753,4,4400
+709,Kizimkazi Bar Spot 709,Bar,Kizimkazi,-6.453184,39.465021,4.2,1241
+710,Bwejuu Health / Pharmacy Spot 710,Health / Pharmacy,Bwejuu,-6.215586,39.536118,3,1329
+711,Bwejuu Kitesurf School Spot 711,Kitesurf School,Bwejuu,-6.216332,39.535703,3.9,2934
+712,Michamvi Kitesurf School Spot 712,Kitesurf School,Michamvi / Pingwe,-6.146968,39.514477,4,3674
+713,Paje Spa / Wellness Spot 713,Spa / Wellness,Paje,-6.266011,39.534284,4.2,945
+714,Bwejuu Tour / Activity Spot 714,Tour / Activity,Bwejuu,-6.231773,39.539049,4.1,3466
+715,Matemwe Transport Spot 715,Transport,Matemwe,-5.874840,39.352621,4.6,1114
+716,Kiwengwa Transport Spot 716,Transport,Kiwengwa,-5.997645,39.374199,3.3,393
+717,Bwejuu Restaurant Spot 717,Restaurant,Bwejuu,-6.232957,39.538546,4.4,702
+718,Nungwi Cafe Spot 718,Cafe,Nungwi,-5.724178,39.303126,4,438
+719,Paje Kitesurf School Spot 719,Kitesurf School,Paje,-6.250223,39.536360,4.3,2835
+720,Kendwa Kitesurf School Spot 720,Kitesurf School,Kendwa,-5.755792,39.289385,3.6,130
+721,Uroa Tour / Activity Spot 721,Tour / Activity,Uroa / Chwaka,-6.108461,39.429942,3,3987
+722,Kendwa Health / Pharmacy Spot 722,Health / Pharmacy,Kendwa,-5.742039,39.299123,4.7,1654
+723,Kendwa Bar Spot 723,Bar,Kendwa,-5.744487,39.295013,4,2397
+724,Kendwa Bar Spot 724,Bar,Kendwa,-5.759631,39.298404,4.3,3329
+725,Michamvi Bar Spot 725,Bar,Michamvi / Pingwe,-6.156221,39.516834,4.8,2052
+726,Jambiani Bar Spot 726,Bar,Jambiani,-6.320521,39.551216,4.3,4293
+727,Kizimkazi Shop / Market Spot 727,Shop / Market,Kizimkazi,-6.431671,39.462761,3.7,4939
+728,Fumba Hotel Spot 728,Hotel,Fumba,-6.317329,39.286486,4,4866
+729,Uroa Bar Spot 729,Bar,Uroa / Chwaka,-6.091606,39.429772,3,4556
+730,Bwejuu Health / Pharmacy Spot 730,Health / Pharmacy,Bwejuu,-6.236506,39.534424,4.6,4776
+731,Bwejuu Transport Spot 731,Transport,Bwejuu,-6.214033,39.536896,4.3,2832
+732,Uroa Hotel Spot 732,Hotel,Uroa / Chwaka,-6.131748,39.420395,5,3491
+733,Kiwengwa Cafe Spot 733,Cafe,Kiwengwa,-5.980413,39.374105,4.9,1201
+734,Michamvi Health / Pharmacy Spot 734,Health / Pharmacy,Michamvi / Pingwe,-6.157038,39.518338,3.6,4415
+735,Uroa Bar Spot 735,Bar,Uroa / Chwaka,-6.128947,39.424852,4.1,3430
+736,Stone Town Tour / Activity Spot 736,Tour / Activity,Stone Town,-6.161726,39.195707,4,2943
+737,Kizimkazi Health / Pharmacy Spot 737,Health / Pharmacy,Kizimkazi,-6.455830,39.474072,4.3,459
+738,Uroa Cafe Spot 738,Cafe,Uroa / Chwaka,-6.119938,39.423358,4.6,3474
+739,Uroa Transport Spot 739,Transport,Uroa / Chwaka,-6.108330,39.421207,4.4,3716
+740,Michamvi Hotel Spot 740,Hotel,Michamvi / Pingwe,-6.158783,39.513958,4.8,106
+741,Kizimkazi Bar Spot 741,Bar,Kizimkazi,-6.448427,39.466806,4,3436
+742,Nungwi Bar Spot 742,Bar,Nungwi,-5.728572,39.298316,3.6,2773
+743,Jambiani Hotel Spot 743,Hotel,Jambiani,-6.308229,39.540119,3.5,3733
+744,Uroa Spa / Wellness Spot 744,Spa / Wellness,Uroa / Chwaka,-6.120720,39.428389,3.1,2789
+745,Matemwe Tour / Activity Spot 745,Tour / Activity,Matemwe,-5.871296,39.358775,3.5,1498
+746,Paje Spa / Wellness Spot 746,Spa / Wellness,Paje,-6.267652,39.539749,4.7,2878
+747,Stone Town Tour / Activity Spot 747,Tour / Activity,Stone Town,-6.166241,39.198292,3.2,2460
+748,Around Unguja Shop / Market Spot 748,Shop / Market,Around Unguja,-5.854879,39.283601,3.9,3853
+749,Kizimkazi Tour / Activity Spot 749,Tour / Activity,Kizimkazi,-6.452299,39.467645,4.2,2937
+750,Jambiani Hotel Spot 750,Hotel,Jambiani,-6.312367,39.548666,4.9,1255
+751,Jambiani Cafe Spot 751,Cafe,Jambiani,-6.311482,39.541519,4.5,3998
+752,Matemwe Transport Spot 752,Transport,Matemwe,-5.876355,39.352686,3.1,2532
+753,Nungwi Spa / Wellness Spot 753,Spa / Wellness,Nungwi,-5.729392,39.295981,3.5,1319
+754,Around Unguja Tour / Activity Spot 754,Tour / Activity,Around Unguja,-6.346351,39.316196,3.6,208
+755,Kiwengwa Hotel Spot 755,Hotel,Kiwengwa,-5.977011,39.370098,3.5,3466
+756,Matemwe Cafe Spot 756,Cafe,Matemwe,-5.898166,39.354723,3.6,2196
+757,Nungwi Kitesurf School Spot 757,Kitesurf School,Nungwi,-5.722416,39.301092,3.6,1553
+758,Nungwi Health / Pharmacy Spot 758,Health / Pharmacy,Nungwi,-5.720418,39.297318,4.9,2799
+759,Kiwengwa Bar Spot 759,Bar,Kiwengwa,-5.985003,39.385106,3,4396
+760,Kendwa Spa / Wellness Spot 760,Spa / Wellness,Kendwa,-5.749045,39.286563,3.4,4884
+761,Stone Town Health / Pharmacy Spot 761,Health / Pharmacy,Stone Town,-6.151310,39.187767,4.2,942
+762,Nungwi Cafe Spot 762,Cafe,Nungwi,-5.727994,39.297936,4.2,2225
+763,Around Unguja Transport Spot 763,Transport,Around Unguja,-6.302796,39.246893,4.4,2164
+764,Uroa Health / Pharmacy Spot 764,Health / Pharmacy,Uroa / Chwaka,-6.128386,39.427710,4.7,983
+765,Stone Town Bar Spot 765,Bar,Stone Town,-6.165274,39.180045,4.7,4269
+766,Around Unguja Transport Spot 766,Transport,Around Unguja,-6.229546,39.208209,3.3,3467
+767,Kendwa Shop / Market Spot 767,Shop / Market,Kendwa,-5.754067,39.296723,3.4,386
+768,Nungwi Tour / Activity Spot 768,Tour / Activity,Nungwi,-5.735359,39.291872,4.6,2121
+769,Kendwa Tour / Activity Spot 769,Tour / Activity,Kendwa,-5.743076,39.299254,3.9,4654
+770,Nungwi Health / Pharmacy Spot 770,Health / Pharmacy,Nungwi,-5.730887,39.309436,3.6,1453
+771,Matemwe Kitesurf School Spot 771,Kitesurf School,Matemwe,-5.895016,39.355510,4.6,3082
+772,Kendwa Tour / Activity Spot 772,Tour / Activity,Kendwa,-5.748913,39.297947,4.7,3504
+773,Stone Town Transport Spot 773,Transport,Stone Town,-6.156415,39.192991,4.4,1779
+774,Around Unguja Spa / Wellness Spot 774,Spa / Wellness,Around Unguja,-5.850080,39.225550,4.5,839
+775,Michamvi Shop / Market Spot 775,Shop / Market,Michamvi / Pingwe,-6.147220,39.515907,3.5,449
+776,Matemwe Tour / Activity Spot 776,Tour / Activity,Matemwe,-5.899780,39.359025,3.6,4760
+777,Nungwi Hotel Spot 777,Hotel,Nungwi,-5.723314,39.300044,4.9,1495
+778,Jambiani Spa / Wellness Spot 778,Spa / Wellness,Jambiani,-6.322050,39.559699,3.3,4591
+779,Kizimkazi Transport Spot 779,Transport,Kizimkazi,-6.458353,39.461676,3.1,44
+780,Kendwa Spa / Wellness Spot 780,Spa / Wellness,Kendwa,-5.742147,39.281942,4.9,4826
+781,Bwejuu Tour / Activity Spot 781,Tour / Activity,Bwejuu,-6.226266,39.539529,4.6,521
+782,Michamvi Cafe Spot 782,Cafe,Michamvi / Pingwe,-6.158235,39.519883,4.7,4230
+783,Bwejuu Bar Spot 783,Bar,Bwejuu,-6.213422,39.534902,4.2,4474
+784,Fumba Tour / Activity Spot 784,Tour / Activity,Fumba,-6.316524,39.277615,4,2683
+785,Matemwe Bar Spot 785,Bar,Matemwe,-5.868700,39.359653,3.7,4007
+786,Bwejuu Health / Pharmacy Spot 786,Health / Pharmacy,Bwejuu,-6.223040,39.537429,3.9,1161
+787,Kizimkazi Transport Spot 787,Transport,Kizimkazi,-6.457775,39.466556,4.4,419
+788,Uroa Hotel Spot 788,Hotel,Uroa / Chwaka,-6.100280,39.420872,4.8,4355
+789,Michamvi Tour / Activity Spot 789,Tour / Activity,Michamvi / Pingwe,-6.157557,39.518278,4.4,4524
+790,Kizimkazi Hotel Spot 790,Hotel,Kizimkazi,-6.443193,39.463100,4,23
+791,Kendwa Transport Spot 791,Transport,Kendwa,-5.743756,39.290279,3.4,4422
+792,Kiwengwa Cafe Spot 792,Cafe,Kiwengwa,-5.970351,39.386244,4.8,4080
+793,Around Unguja Tour / Activity Spot 793,Tour / Activity,Around Unguja,-5.899171,39.318778,3.1,1436
+794,Nungwi Restaurant Spot 794,Restaurant,Nungwi,-5.739346,39.296727,4,3468
+795,Kendwa Transport Spot 795,Transport,Kendwa,-5.742080,39.288609,5,1934
+796,Uroa Transport Spot 796,Transport,Uroa / Chwaka,-6.138150,39.422139,3.6,4260
+797,Stone Town Hotel Spot 797,Hotel,Stone Town,-6.152089,39.194549,3.5,2090
+798,Bwejuu Hotel Spot 798,Hotel,Bwejuu,-6.222619,39.536804,4.9,199
+799,Kiwengwa Transport Spot 799,Transport,Kiwengwa,-5.994446,39.384755,3,1846
+800,Stone Town Restaurant Spot 800,Restaurant,Stone Town,-6.152114,39.199220,4.6,812
+801,Kendwa Restaurant Spot 801,Restaurant,Kendwa,-5.751543,39.284579,4.6,1389
+802,Stone Town Restaurant Spot 802,Restaurant,Stone Town,-6.152524,39.198404,4.9,3405
+803,Fumba Spa / Wellness Spot 803,Spa / Wellness,Fumba,-6.319634,39.270330,4.6,2666
+804,Kendwa Restaurant Spot 804,Restaurant,Kendwa,-5.746384,39.286173,4.1,194
+805,Bwejuu Bar Spot 805,Bar,Bwejuu,-6.212912,39.538697,4.3,471
+806,Kendwa Health / Pharmacy Spot 806,Health / Pharmacy,Kendwa,-5.750694,39.286892,3.2,1570
+807,Stone Town Hotel Spot 807,Hotel,Stone Town,-6.164517,39.190588,4.2,4692
+808,Jambiani Spa / Wellness Spot 808,Spa / Wellness,Jambiani,-6.309573,39.548223,4.1,2569
+809,Kiwengwa Restaurant Spot 809,Restaurant,Kiwengwa,-5.963337,39.385029,4.6,1273
+810,Around Unguja Spa / Wellness Spot 810,Spa / Wellness,Around Unguja,-6.047797,39.308580,4.6,3607
+811,Nungwi Spa / Wellness Spot 811,Spa / Wellness,Nungwi,-5.720046,39.306888,4.4,2471
+812,Kendwa Transport Spot 812,Transport,Kendwa,-5.751609,39.289931,3.8,359
+813,Jambiani Cafe Spot 813,Cafe,Jambiani,-6.326191,39.552643,3.1,188
+814,Matemwe Hotel Spot 814,Hotel,Matemwe,-5.856040,39.358301,3.4,991
+815,Fumba Hotel Spot 815,Hotel,Fumba,-6.314460,39.276298,3.1,220
+816,Kizimkazi Health / Pharmacy Spot 816,Health / Pharmacy,Kizimkazi,-6.448359,39.465910,3.9,1230
+817,Paje Tour / Activity Spot 817,Tour / Activity,Paje,-6.263064,39.530648,3.5,2796
+818,Uroa Shop / Market Spot 818,Shop / Market,Uroa / Chwaka,-6.134735,39.424883,4.6,4023
+819,Kiwengwa Health / Pharmacy Spot 819,Health / Pharmacy,Kiwengwa,-5.990454,39.378643,3.3,3471
+820,Matemwe Cafe Spot 820,Cafe,Matemwe,-5.851374,39.359850,4.8,1983
+821,Kiwengwa Transport Spot 821,Transport,Kiwengwa,-5.987146,39.383947,4.9,1244
+822,Matemwe Restaurant Spot 822,Restaurant,Matemwe,-5.878074,39.354395,3.5,803
+823,Fumba Spa / Wellness Spot 823,Spa / Wellness,Fumba,-6.319975,39.284963,3.6,2324
+824,Around Unguja Bar Spot 824,Bar,Around Unguja,-6.022033,39.409071,4,4103
+825,Uroa Kitesurf School Spot 825,Kitesurf School,Uroa / Chwaka,-6.113450,39.425602,4.9,1219
+826,Paje Health / Pharmacy Spot 826,Health / Pharmacy,Paje,-6.260590,39.533763,3.7,1009
+827,Chuini Ward 13 #827,Ward,Unguja,-5.505034,39.885848,4,1261
+828,Mlandege Ward 8 #828,Ward,Unguja,-5.691235,39.385327,3.7,247
+829,Mbweni Rd 174 #829,Street,Unguja,-5.881683,39.498614,3.3,1882
+830,Creek Rd 19 #830,Street,Unguja,-5.840404,39.410281,4.7,797
+834,Pemba Region #834,Region,Unguja,-6.531805,39.445545,3.9,1604
+839,Fuoni Ward 13 #839,Ward,Unguja,-5.996434,39.351810,5,927
+841,Mlandege St 3 #841,Street,Unguja,-5.642755,39.298292,4,1104
+842,Benjamin Mkapa Rd 84 #842,Street,Unguja,-5.944245,39.445537,3.9,205
+844,Mbweni Ward 12 #844,Ward,Unguja,-6.131824,39.580177,3.3,1
+845,Jambiani #845,City,Unguja,-5.817850,39.519276,4.6,1777
+846,Vuga St 161 #846,Street,Unguja,-5.912095,39.413146,3.7,1237
+847,Bububu Ward 19 #847,Ward,Unguja,-5.909020,39.164480,3,755
+848,Fumba #848,City,Unguja,-5.799186,39.239016,3.4,1614
+851,North B District #851,District,Unguja,-5.760467,39.584384,3.2,346
+854,Mwera Ward 10 #854,Ward,Unguja,-6.172255,39.339588,4.7,565
+857,Mpendae Ward 9 #857,Ward,Unguja,-5.533112,39.864375,3.4,810
+861,Uroa #861,City,Unguja,-5.905949,39.260111,4.3,52
+866,Central District #866,District,Unguja,-6.308799,39.343880,3.2,617
+871,Kenyatta Rd 81 #871,Street,Unguja,-5.801386,39.275225,3.7,1899
+873,North B District #873,District,Unguja,-5.934075,39.210517,4.3,1179
+874,Mtoni Ward 13 #874,Ward,Unguja,-5.704521,39.279368,4,829
+875,Chuini Ward 7 #875,Ward,Unguja,-6.302465,39.244595,4.1,1528
+877,Creek Rd 83 #877,Street,Unguja,-6.246215,39.592026,3.4,1609
+878,Paje #878,City,Unguja,-5.543899,39.551899,4.8,1328
+881,Chukwani Ward 12 #881,Ward,Unguja,-6.430125,39.379201,4.7,1753
+882,Wete District #882,District,Unguja,-5.902442,39.380275,3,580
+884,Mlandege St 175 #884,Street,Unguja,-6.397425,39.570037,4.7,533
+885,Kaunda Rd 2 #885,Street,Unguja,-5.889663,39.267624,4.4,302
+886,Mpendae Ward 11 #886,Ward,Unguja,-6.066760,39.286696,4.6,865
+888,Kiembe Samaki Ward 8 #888,Ward,Unguja,-6.404917,39.432484,3.9,1061
+890,North B District #890,District,Unguja,-6.455300,39.399873,4.9,838
+891,Fuoni Rd 74 #891,Street,Unguja,-5.658194,39.215365,4.1,910
+892,Nyerere Rd 114 #892,Street,Unguja,-5.502055,39.972112,3.7,532
+894,Jambiani #894,City,Unguja,-5.692742,39.181802,3.5,742
+898,Pemba Region #898,Region,Unguja,-6.486445,39.519498,4.5,682
+899,Kenyatta Rd 122 #899,Street,Unguja,-6.282552,39.189687,4.7,1248
+900,Amani Ward 17 #900,Ward,Unguja,-5.665397,39.202431,4.1,49
+902,North A District #902,District,Unguja,-6.321590,39.398234,3.6,1315
+904,Malawi Rd 192 #904,Street,Unguja,-5.531585,39.870831,4.5,1571
+910,Chukwani Ward 16 #910,Ward,Unguja,-5.985124,39.480542,4.1,110
+911,Creek Rd 199 #911,Street,Unguja,-5.660954,39.549121,3.6,321
+914,Shangani St 131 #914,Street,Unguja,-5.688474,39.123698,5,1724
+915,North B District #915,District,Unguja,-6.467162,39.151923,3.1,1189
+916,Kizimkazi Mkunguni #916,City,Unguja,-5.702049,39.430259,3.1,470
+920,Mlandege St 150 #920,Street,Unguja,-5.511536,39.883240,4.7,659
+924,Chukwani Rd 131 #924,Street,Unguja,-6.164943,39.418564,4.5,730
+928,Shangani St 83 #928,Street,Unguja,-6.478322,39.127320,3.8,1060
+930,Mizingani Rd 175 #930,Street,Unguja,-6.128032,39.319956,3.5,1345
+932,Kiwengwa #932,City,Unguja,-5.948255,39.253834,4.3,66
+933,Fuoni Rd 22 #933,Street,Unguja,-6.501713,39.208727,3,1926
+936,Bambi Ward 4 #936,Ward,Unguja,-5.649947,39.421132,4.7,1975
+937,Fumba #937,City,Unguja,-5.983546,39.502645,4.1,239
+938,Jamhuri St 174 #938,Street,Unguja,-5.735078,39.518839,3.3,959
+940,Mpendae Ward 11 #940,Ward,Unguja,-5.756224,39.561034,3.5,1464
+941,Malawi Rd 191 #941,Street,Unguja,-5.646389,39.388745,4.2,208
+942,Bambi Ward 17 #942,Ward,Unguja,-5.959301,39.470980,4.6,466
+943,Kaunda Rd 14 #943,Street,Unguja,-6.521902,39.583613,3.8,488
+944,Bububu Ward 15 #944,Ward,Unguja,-5.733660,39.537472,4,422
+945,Chukwani Rd 127 #945,Street,Unguja,-5.893972,39.519592,3.3,349
+948,Stone Town #948,City,Unguja,-6.241604,39.251811,4.9,1667
+949,Pemba Region #949,Region,Unguja,-6.502969,39.416401,3,264
+951,Chuini Ward 1 #951,Ward,Unguja,-5.689123,39.455691,5,1940
+953,Mwera Ward 11 #953,Ward,Unguja,-6.311391,39.154335,4.1,1504
+955,Nyerere Rd 110 #955,Street,Unguja,-6.263525,39.515074,4.9,1532
+958,Mbweni Ward 7 #958,Ward,Unguja,-5.502847,39.554903,3.9,138
+959,Mizingani Rd 159 #959,Street,Unguja,-6.452567,39.434970,4.9,1846
+960,Town District #960,District,Unguja,-5.663685,39.406623,4.2,1053
+961,Unguja Region #961,Region,Unguja,-6.052849,39.483492,5,572
+962,Mwera Ward 14 #962,Ward,Unguja,-5.957571,39.338229,4.3,156
+963,Kiembe Samaki Ward 4 #963,Ward,Unguja,-6.033312,39.507415,3.2,606
+964,Mbweni Ward 12 #964,Ward,Unguja,-6.379209,39.301706,3.2,1896
+965,Malawi Rd 40 #965,Street,Unguja,-6.548201,39.262885,3.3,461
+966,Chukwani Rd 130 #966,Street,Unguja,-5.750289,39.159895,4.6,601
+967,Mwera Ward 14 #967,Ward,Unguja,-5.817332,39.179755,3.5,808
+969,Mwera Ward 4 #969,Ward,Unguja,-6.328269,39.532240,4.9,1162
+970,Amani Ward 15 #970,Ward,Unguja,-6.414106,39.285068,4.3,674
+974,Shangani St 22 #974,Street,Unguja,-5.770513,39.214222,4.2,1817
+976,Malawi Rd 66 #976,Street,Unguja,-5.837438,39.187554,3,1708
+977,Matemwe #977,City,Unguja,-5.939035,39.338867,3.9,439
+979,Creek Rd 67 #979,Street,Unguja,-5.904366,39.519081,4.6,544
+981,Bambi Ward 18 #981,Ward,Unguja,-5.540853,39.901452,4.1,1891
+983,Mbweni Ward 17 #983,Ward,Unguja,-6.390044,39.544219,4.6,275
+984,Dimani Ward 10 #984,Ward,Unguja,-6.036899,39.286574,4.1,1740
+985,Jamhuri St 58 #985,Street,Unguja,-5.530859,39.597984,4.2,805
+986,Matemwe #986,City,Unguja,-6.402019,39.484350,3.7,1403
+987,Mbweni Rd 11 #987,Street,Unguja,-6.341875,39.340044,3.9,626
+988,Benjamin Mkapa Rd 86 #988,Street,Unguja,-5.745804,39.532823,3.7,92
+989,Chukwani Rd 139 #989,Street,Unguja,-6.174269,39.504502,3.3,706
+991,Mbweni Rd 90 #991,Street,Unguja,-5.711722,39.376578,5,1144
+994,Nungwi #994,City,Unguja,-6.046853,39.323111,4.1,1476
+995,Vuga St 115 #995,Street,Unguja,-5.681477,39.320806,3.6,1865
+998,Nyerere Rd 182 #998,Street,Unguja,-5.823664,39.406193,4.8,647
+999,Mwembeladu Ward 15 #999,Ward,Unguja,-5.885705,39.557222,4.7,314
+1000,Pemba Region #1000,Region,Unguja,-6.398916,39.538524,3.1,1727
+1001,Unguja Region #1001,Region,Unguja,-5.673798,39.246106,3.3,879
+1002,Mbweni Rd 122 #1002,Street,Unguja,-5.812513,39.253968,3.6,527
+1003,Vuga St 163 #1003,Street,Unguja,-5.540417,39.920645,4.9,162
+1007,Vuga St 114 #1007,Street,Unguja,-5.821331,39.176771,3.6,1191
+1009,Kiwengwa #1009,City,Unguja,-6.344852,39.165852,3.9,1299
+1011,Mizingani Rd 104 #1011,Street,Unguja,-5.680751,39.142757,4.4,1904
+1013,North A District #1013,District,Unguja,-5.510978,39.828765,4.8,428
+1016,Bwejuu #1016,City,Unguja,-6.217528,39.599531,3.2,1096
+1018,Mwembeladu Ward 8 #1018,Ward,Unguja,-6.218655,39.288054,3.9,104
+1024,Mbweni Rd 179 #1024,Street,Unguja,-5.724005,39.214186,3.8,1640
+1026,Benjamin Mkapa Rd 193 #1026,Street,Unguja,-5.940600,39.359920,3.1,1968
+1028,Mpendae Ward 2 #1028,Ward,Unguja,-6.319031,39.590994,3.1,1949
+1029,Nyerere Rd 194 #1029,Street,Unguja,-6.028144,39.237287,4.7,1491
+1030,Kaunda Rd 165 #1030,Street,Unguja,-6.365399,39.162846,3.4,752
+1033,Kendwa #1033,City,Unguja,-6.071526,39.410051,3.7,1439
+1035,Vuga St 137 #1035,Street,Unguja,-6.000049,39.370747,4,1819
+1038,Vuga St 152 #1038,Street,Unguja,-6.470977,39.229471,3.9,3
+1041,Chuini Ward 19 #1041,Ward,Unguja,-6.402706,39.560772,3.3,1253
+1042,Kaunda Rd 199 #1042,Street,Unguja,-5.530222,39.876314,3.7,1344
+1044,Shangani St 38 #1044,Street,Unguja,-5.742500,39.465759,4,409
+1045,Paje #1045,City,Unguja,-6.243667,39.448457,4.1,1582
+1046,Mlandege Ward 4 #1046,Ward,Unguja,-5.894987,39.138535,3.5,507
+1047,Mbweni Rd 94 #1047,Street,Unguja,-5.714530,39.556083,3.3,1909
+1050,Bambi Ward 4 #1050,Ward,Unguja,-5.658193,39.569157,3.5,867
+1051,Bububu Rd 87 #1051,Street,Unguja,-6.536743,39.551022,3.5,1320
+1053,Mtoni Ward 19 #1053,Ward,Unguja,-6.372846,39.498535,4,660
+1056,Kizimkazi Mkunguni #1056,City,Unguja,-6.261401,39.547101,3.7,1804
+1058,Mizingani Rd 144 #1058,Street,Unguja,-5.748649,39.390624,3.6,591
+1060,Kiwengwa #1060,City,Unguja,-6.083882,39.439773,3.8,366
+1064,Mwera Ward 20 #1064,Ward,Unguja,-6.421763,39.484165,3.2,434
+1065,Pemba Region #1065,Region,Unguja,-6.177041,39.328628,3,714
+1067,Kaunda Rd 55 #1067,Street,Unguja,-6.242007,39.305894,3.4,123
+1068,Nungwi #1068,City,Unguja,-5.804911,39.257608,3.5,432
+1070,Mlandege St 108 #1070,Street,Unguja,-5.966393,39.387726,3.1,1288
+1071,Chukwani Rd 57 #1071,Street,Unguja,-6.182173,39.496759,4.8,763
+1075,North A District #1075,District,Unguja,-6.239811,39.333357,4.4,210
+1076,Central District #1076,District,Unguja,-5.870326,39.323464,4.5,309
+1077,Mwera Ward 15 #1077,Ward,Unguja,-5.666651,39.128887,4.4,1527
+1078,Dimani Ward 1 #1078,Ward,Unguja,-6.232009,39.515928,3.2,713
+1079,Mwera Ward 12 #1079,Ward,Unguja,-6.183511,39.213033,4.5,79
+1084,West District #1084,District,Unguja,-5.763279,39.590268,4.5,1143
+1088,Chukwani Rd 167 #1088,Street,Unguja,-6.028797,39.335896,3.8,649
+1089,Creek Rd 50 #1089,Street,Unguja,-5.968013,39.217457,4.7,152
+1090,Kizimkazi Mkunguni #1090,City,Unguja,-5.834311,39.316419,3.6,1718
+1091,Amani Ward 11 #1091,Ward,Unguja,-5.869010,39.491058,4.7,251
+1092,Jamhuri St 58 #1092,Street,Unguja,-6.159528,39.233504,3.3,1762
+1093,Zanzibar City #1093,City,Unguja,-6.518979,39.185104,4.1,904
+1094,Mbweni Ward 18 #1094,Ward,Unguja,-6.099094,39.432037,4.4,584
+1096,Benjamin Mkapa Rd 56 #1096,Street,Unguja,-6.345715,39.286173,4.7,114
+1097,Dimani Ward 16 #1097,Ward,Unguja,-5.986778,39.482275,3.2,943
+1099,Malawi Rd 161 #1099,Street,Unguja,-6.499029,39.530428,3.4,499
+1100,Pemba Region #1100,Region,Unguja,-6.307899,39.453817,4.8,1680
+1103,Bambi Ward 19 #1103,Ward,Unguja,-5.712277,39.444102,4.5,499
+1104,Mwera Ward 6 #1104,Ward,Unguja,-6.162020,39.127126,4.8,138
+1105,Mtoni Ward 10 #1105,Ward,Unguja,-6.387839,39.556150,4.8,1353
+1106,Kizimkazi #1106,City,Unguja,-5.535843,39.797101,4.1,1465
+1107,Mbweni Rd 185 #1107,Street,Unguja,-6.353643,39.288601,4.8,1146
+1108,Mlandege St 166 #1108,Street,Unguja,-6.418085,39.592579,3.9,513
+1112,Unguja Region #1112,Region,Unguja,-5.650678,39.262874,4,49
+1114,West District #1114,District,Unguja,-6.190601,39.509105,3.4,886
+1115,Chukwani Rd 88 #1115,Street,Unguja,-5.505619,39.705619,3.7,381
+1116,Bububu Ward 16 #1116,Ward,Unguja,-5.888569,39.387780,4.8,1617
+1117,Mlandege Ward 12 #1117,Ward,Unguja,-6.445593,39.557102,3.5,1948
+1118,Shangani St 22 #1118,Street,Unguja,-6.354092,39.566277,3.7,173
+1119,Central District #1119,District,Unguja,-6.366344,39.159242,3.9,1513
+1120,Kiembe Samaki Ward 11 #1120,Ward,Unguja,-6.365898,39.300814,3.8,412
+1122,Nungwi #1122,City,Unguja,-6.099693,39.562856,4,325
+1124,Kiembe Samaki Ward 3 #1124,Ward,Unguja,-5.813088,39.245741,3.6,686
+1125,Mlandege Ward 4 #1125,Ward,Unguja,-5.767344,39.510924,3.6,499
+1127,Chukwani Rd 186 #1127,Street,Unguja,-5.652222,39.547206,3.3,1238
+1128,Jamhuri St 36 #1128,Street,Unguja,-6.504535,39.241519,3.6,115
+1129,Fuoni Rd 43 #1129,Street,Unguja,-6.092962,39.508141,4.1,1882
+1131,Mkoani District #1131,District,Unguja,-5.747380,39.191813,4.5,1740
+1132,Chukwani Rd 124 #1132,Street,Unguja,-5.784523,39.467124,3.9,1665
+1133,Pemba Region #1133,Region,Unguja,-6.469460,39.537235,4.1,368
+1134,North B District #1134,District,Unguja,-6.041673,39.344635,4.5,1059
+1135,Creek Rd 74 #1135,Street,Unguja,-5.906688,39.591029,3.8,320
+1138,Fuoni Rd 131 #1138,Street,Unguja,-5.727199,39.552599,4.2,1215
+1139,Mwera Ward 1 #1139,Ward,Unguja,-6.399855,39.457347,3.8,1419
+1140,Mbweni Rd 30 #1140,Street,Unguja,-5.910953,39.225573,3.6,1353
+1141,Vuga St 132 #1141,Street,Unguja,-6.186846,39.327240,4.3,1731
+1142,Mbweni Rd 185 #1142,Street,Unguja,-5.793325,39.297253,4.5,977
+1143,Mbweni Rd 141 #1143,Street,Unguja,-5.870747,39.245446,3.6,1880
+1144,Mbweni Rd 136 #1144,Street,Unguja,-5.692086,39.463355,4.1,712
+1145,Fuoni Ward 4 #1145,Ward,Unguja,-6.329114,39.312256,3.3,1437
+1146,Kaunda Rd 122 #1146,Street,Unguja,-5.645457,39.398317,4.9,73
+1147,Kaunda Rd 58 #1147,Street,Unguja,-6.477065,39.146750,4.3,914
+1149,Vuga St 21 #1149,Street,Unguja,-5.517885,39.619781,3.5,503
+1151,Uroa #1151,City,Unguja,-5.655800,39.186351,3.9,1014
+1153,Kaunda Rd 171 #1153,Street,Unguja,-6.184383,39.278776,4.8,190
+1156,Bububu Ward 7 #1156,Ward,Unguja,-6.194860,39.420437,3.9,1214
+1157,Kizimkazi Mkunguni #1157,City,Unguja,-6.383452,39.291683,4.5,572
+1161,Bwejuu #1161,City,Unguja,-6.116164,39.462054,4.1,1630
+1162,Bububu Ward 9 #1162,Ward,Unguja,-5.531243,39.630861,3.9,1900
+1164,Mlandege St 191 #1164,Street,Unguja,-6.401990,39.398982,4.9,848
+1165,Wete District #1165,District,Unguja,-6.506325,39.392796,3.5,1590
+1167,Zanzibar City #1167,City,Unguja,-6.503359,39.202307,4.4,1032
+1168,Mizingani Rd 171 #1168,Street,Unguja,-5.946749,39.554184,3.4,194
+1172,Amani Ward 7 #1172,Ward,Unguja,-6.357419,39.501765,4.7,781
+1174,Wete District #1174,District,Unguja,-5.981438,39.243369,4.9,422
+1175,Wete District #1175,District,Unguja,-5.757898,39.197065,3.7,960
+1176,Kiembe Samaki Ward 9 #1176,Ward,Unguja,-5.951291,39.470572,4.7,877
+1178,Pemba Region #1178,Region,Unguja,-6.258148,39.201956,4.7,966
+1179,Mizingani Rd 25 #1179,Street,Unguja,-5.878207,39.508592,3.6,919
+1183,Creek Rd 146 #1183,Street,Unguja,-6.101553,39.376187,3.5,938
+1184,Vuga St 186 #1184,Street,Unguja,-6.359605,39.145984,3.3,1084
+1187,Bwejuu #1187,City,Unguja,-6.235659,39.321844,4.5,1037
+1188,Kaunda Rd 136 #1188,Street,Unguja,-5.969650,39.515393,3.9,101
+1191,Malawi Rd 170 #1191,Street,Unguja,-6.341880,39.568309,3.6,799
+1192,South District #1192,District,Unguja,-5.940830,39.330610,4.2,1286
+1193,Pemba Region #1193,Region,Unguja,-6.023023,39.342679,3.2,1654
+1196,Unguja Region #1196,Region,Unguja,-5.707380,39.228274,3.1,440
+1200,Creek Rd 2 #1200,Street,Unguja,-5.898961,39.188127,4,872
+1201,Bububu Rd 18 #1201,Street,Unguja,-6.068521,39.218255,3.3,1346
+1202,Benjamin Mkapa Rd 95 #1202,Street,Unguja,-5.908681,39.487008,4,1127
+1204,Pemba Region #1204,Region,Unguja,-5.648482,39.591829,4.8,826
+1207,Fuoni Rd 17 #1207,Street,Unguja,-6.279057,39.288719,4.5,763
+1208,Fuoni Ward 14 #1208,Ward,Unguja,-6.303840,39.334980,3.3,41
+1209,Town District #1209,District,Unguja,-6.108631,39.322419,3.8,496
+1210,Bambi Ward 11 #1210,Ward,Unguja,-5.734414,39.480850,4.5,505
+1211,Kenyatta Rd 67 #1211,Street,Unguja,-5.689415,39.230315,3.2,1166
+1212,Mlandege St 40 #1212,Street,Unguja,-5.937795,39.466199,3.9,415
+1213,Bububu Rd 145 #1213,Street,Unguja,-5.834238,39.319125,3.3,1738
+1215,Mpendae Ward 15 #1215,Ward,Unguja,-6.443773,39.519679,4.2,1550
+1216,Kaunda Rd 43 #1216,Street,Unguja,-6.477886,39.249911,4.1,674
+1217,South District #1217,District,Unguja,-6.494347,39.160232,3.5,880
+1221,Chukwani Rd 2 #1221,Street,Unguja,-5.642494,39.338805,3.4,608
+1222,Fuoni Rd 189 #1222,Street,Unguja,-6.354694,39.489488,3.4,1454
+1224,Malawi Rd 108 #1224,Street,Unguja,-5.640481,39.395434,4.3,1930
+1225,Bambi Ward 13 #1225,Ward,Unguja,-6.368489,39.318354,3.1,710
+1226,Jamhuri St 57 #1226,Street,Unguja,-6.249275,39.143315,4.4,153
+1227,Mizingani Rd 16 #1227,Street,Unguja,-6.298131,39.364782,3.6,1825
+1229,Mbweni Ward 12 #1229,Ward,Unguja,-6.006576,39.129868,4.4,1152
+1230,Mizingani Rd 177 #1230,Street,Unguja,-6.529716,39.131465,4.7,1858
+1231,Wete District #1231,District,Unguja,-6.542749,39.213719,3.9,152
+1235,West District #1235,District,Unguja,-5.663350,39.395931,3.9,1358
+1236,North B District #1236,District,Unguja,-6.322467,39.531300,3.8,1235
+1237,Fuoni Ward 7 #1237,Ward,Unguja,-5.831540,39.478938,4.5,1270
+1238,Mtoni Ward 10 #1238,Ward,Unguja,-6.228074,39.298766,4.9,1278
+1239,Kaunda Rd 40 #1239,Street,Unguja,-6.208747,39.360329,4.2,1017
+1240,Chukwani Rd 83 #1240,Street,Unguja,-6.057644,39.166701,4,1256
+1241,Benjamin Mkapa Rd 7 #1241,Street,Unguja,-5.723515,39.456106,3.1,1409
+1243,Bambi Ward 12 #1243,Ward,Unguja,-5.928803,39.504819,5,483
+1244,Nyerere Rd 143 #1244,Street,Unguja,-6.343363,39.387172,3.1,119
+1248,Nyerere Rd 110 #1248,Street,Unguja,-6.461638,39.479179,3.7,1694
+1249,Bububu Rd 17 #1249,Street,Unguja,-5.768170,39.403177,3.8,459
+1253,Stone Town #1253,City,Unguja,-5.752938,39.436556,4.8,1318
+1258,Zanzibar City #1258,City,Unguja,-5.764701,39.460870,4.4,105
+1261,Vuga St 112 #1261,Street,Unguja,-6.035800,39.497093,3.4,1734
+1266,Matemwe #1266,City,Unguja,-6.022953,39.129883,5,1933
+1267,Amani Ward 20 #1267,Ward,Unguja,-6.197317,39.265677,4.9,1470
+1269,Matemwe #1269,City,Unguja,-6.199464,39.127076,3.4,1844
+1276,Mwera Ward 17 #1276,Ward,Unguja,-5.914527,39.288997,3.3,476
+1280,Bububu Ward 5 #1280,Ward,Unguja,-5.654709,39.575408,3.6,1753
+1281,Malawi Rd 35 #1281,Street,Unguja,-6.199306,39.344723,3.2,1802
+1282,Dimani Ward 17 #1282,Ward,Unguja,-6.119164,39.265316,4.2,1441
+1283,Bwejuu #1283,City,Unguja,-5.909262,39.193535,3.9,1202
+1284,Amani Ward 19 #1284,Ward,Unguja,-5.979822,39.288800,3.5,827
+1290,Mizingani Rd 110 #1290,Street,Unguja,-6.464514,39.567817,3.1,1597
+1291,Unguja Region #1291,Region,Unguja,-6.297987,39.380781,3.9,410
+1293,West District #1293,District,Unguja,-6.184070,39.337548,3.1,73
+1294,Malawi Rd 51 #1294,Street,Unguja,-5.644958,39.269935,3.7,1587
+1296,Unguja Region #1296,Region,Unguja,-6.041166,39.241046,4.4,1210
+1301,Fuoni Rd 52 #1301,Street,Unguja,-6.499488,39.215874,4.1,184
+1304,Wete District #1304,District,Unguja,-6.344935,39.266414,4.9,483
+1305,Mbweni Ward 5 #1305,Ward,Unguja,-6.461264,39.272047,4.6,88
+1308,Mbweni Rd 74 #1308,Street,Unguja,-6.247766,39.529161,3.5,243
+1309,Unguja Region #1309,Region,Unguja,-5.660453,39.570278,3.9,90
+1310,Shangani St 81 #1310,Street,Unguja,-5.501568,39.615913,3.3,1320
+1312,Paje #1312,City,Unguja,-5.679051,39.420738,3.9,725
+1314,Shangani St 1 #1314,Street,Unguja,-5.525114,39.709026,4,1244
+1315,Fumba #1315,City,Unguja,-5.991845,39.346857,4.3,1180
+1316,Bambi Ward 20 #1316,Ward,Unguja,-5.943788,39.308482,3.8,1773
+1320,Nyerere Rd 143 #1320,Street,Unguja,-6.523938,39.122713,5,1048
+1322,Jambiani #1322,City,Unguja,-5.926414,39.329118,4.7,471
+1324,Zanzibar City #1324,City,Unguja,-6.170670,39.184737,3.7,1545

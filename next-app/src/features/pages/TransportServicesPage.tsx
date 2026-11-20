@@ -46,6 +46,8 @@ export default function TransportServicesPage() {
     end_date: "",
     pickup_time: "",
     notes: "",
+    origin: "",
+    destination: "",
   });
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
 
@@ -117,6 +119,8 @@ export default function TransportServicesPage() {
       end_date: "",
       pickup_time: "",
       notes: "",
+      origin: "",
+      destination: "",
     });
     setBookingOpen(true);
   };
@@ -478,7 +482,8 @@ export default function TransportServicesPage() {
                     { label: "Passengers", type: "number", key: "passengers", placeholder: "1", required: true },
                     { label: "Travel / Pickup Date *", type: "date", key: "travel_date", placeholder: "", required: true },
                     { label: "Pickup Time", type: "time", key: "pickup_time", placeholder: "", required: false },
-                  ].map(({ label, type, key, placeholder, required }) => (
+                    { label: "Origin (Pickup Location) *", type: "text", key: "origin", placeholder: "e.g. ZNZ Airport", required: true },
+                    { label: "Destination (Drop-off) *", type: "text", key: "destination", placeholder: "e.g. Kendwa Rocks Resort", required: true },                  ].map(({ label, type, key, placeholder, required }) => (
                     <div key={key} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                       <label style={{ fontSize: "0.76rem", fontWeight: 700, color: "#334155" }}>{label}</label>
                       <input

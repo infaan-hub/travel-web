@@ -59,6 +59,7 @@ type PlaceGroupId = Exclude<TripPlaceGroupId, "all">;
 const GROUP_COLORS: Record<PlaceGroupId, string> = {
   attractions: "#0f6b6b",
   activities: "#7c3aed",
+  areas: "#6b7280",
   food: "#dc2626",
   stays: "#1d4ed8",
   shopping: "#db2777",
@@ -80,6 +81,8 @@ for (const group of TRIP_PLACE_GROUPS) {
 
 const CATEGORY_NOTES: Record<TripPlaceCategory, string> = {
   Attraction: "Landmark, heritage site or viewpoint worth a stop.",
+  City: "City or town centre and its services.",
+  District: "District administrative area.",
   Bar: "Drinks, music and an easy evening atmosphere.",
   "Beach / Sandbank": "Sand, swimming and Indian Ocean views.",
   Cafe: "Coffee, snacks and a relaxed pause.",
@@ -90,7 +93,10 @@ const CATEGORY_NOTES: Record<TripPlaceCategory, string> = {
   "Shop / Market": "Souvenirs, spices and local shopping.",
   "Spa / Wellness": "Treatments, massage and relaxation.",
   "Spice Farm": "Spice-growing tours, tastings and gardens.",
+  "Region": "Regional administrative area.",
+  "Street": "Street or road location.",
   "Tour / Activity": "A guided experience or excursion.",
+  "Ward": "Ward-level administrative area.",
   Transport: "Ferry, airport or local transport hub.",
   "Wildlife / Turtles": "Wildlife encounter and conservation site.",
 };
@@ -114,6 +120,7 @@ const ROUTE_CASING = "#064e3b";
 const GROUP_ICON: Record<PlaceGroupId, IconSvgObject> = {
   attractions: LandmarkIcon,
   activities: ActivityIcon,
+  areas: LandmarkIcon,
   food: RestaurantIcon,
   stays: House01Icon,
   shopping: ShoppingBagIcon,
@@ -122,6 +129,8 @@ const GROUP_ICON: Record<PlaceGroupId, IconSvgObject> = {
 };
 const CATEGORY_ICON: Record<TripPlaceCategory, IconSvgObject> = {
   Attraction: LandmarkIcon,
+  "City": LandmarkIcon,
+  "District": LandmarkIcon,
   "Bar": RestaurantIcon,
   "Beach / Sandbank": BeachIcon,
   "Cafe": CafeIcon,
@@ -132,7 +141,10 @@ const CATEGORY_ICON: Record<TripPlaceCategory, IconSvgObject> = {
   "Shop / Market": ShoppingBagIcon,
   "Spa / Wellness": WellnessIcon,
   "Spice Farm": PlantIcon,
+  "Region": LandmarkIcon,
+  "Street": LandmarkIcon,
   "Tour / Activity": ActivityIcon,
+  "Ward": LandmarkIcon,
   "Transport": CarIcon,
   "Wildlife / Turtles": TurtleIcon,
 };
