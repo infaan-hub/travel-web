@@ -263,13 +263,13 @@ export default function BookingPage() {
     passengersCount <= maxPassengers;
   const travelDateValid =
     Boolean(form.travel_date) && form.travel_date >= today;
-  const pickupTimeValid = TIME_PATTERN.test(form.pickup_time);
+  const pickupTimeValid =
+    form.pickup_time.trim() === "" || TIME_PATTERN.test(form.pickup_time);
   const contactComplete =
     form.full_name.trim().length >= 2 &&
     form.phone.replace(/\D/g, "").length >= 7 &&
     EMAIL_PATTERN.test(form.email.trim());
-  const journeyComplete =
-    passengersValid && travelDateValid && pickupTimeValid;
+  const journeyComplete = passengersValid && travelDateValid;
   const sameRoute =
     form.origin.trim().toLowerCase() ===
     form.destination.trim().toLowerCase();
@@ -508,7 +508,7 @@ export default function BookingPage() {
         phone: form.phone.trim(),
         passengers: Number(form.passengers),
         travel_date: form.travel_date,
-        pickup_time: form.pickup_time,
+        pickup_time: form.pickup_time || undefined,
         notes: form.notes.trim() || undefined,
         origin: form.origin.trim(),
         destination: form.destination.trim(),

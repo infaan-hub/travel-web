@@ -18,7 +18,8 @@ const isoDate = z
 const pickupTime = z
   .string()
   .trim()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Enter a valid pickup time (HH:MM).");
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Enter a valid pickup time (HH:MM).")
+  .optional();
 
 const createSchema = z
   .object({
@@ -29,7 +30,7 @@ const createSchema = z
     passengers: z.coerce.number().int().min(1).max(100),
     travel_date: isoDate,
     end_date: isoDate.optional(),
-    pickup_time: pickupTime,
+    pickup_time: pickupTime.optional(),
     notes: z.string().trim().max(5000).optional(),
     // Trip-first: every booking must carry an origin -> destination journey.
     origin: z.string().trim().min(2).max(255),
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
             destLat: body.dest_lat ?? null,
             destLng: body.dest_lng ?? null,
             travelDate,
-            pickupTime: body.pickup_time,
+            pickupTime: body.pickup_time ?? null,
             passengers: body.passengers,
             luggage: 0,
             distanceKm: metrics.distanceKm,
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
             passengers: body.passengers,
             travelDate,
             endDate,
-            pickupTime: body.pickup_time,
+            pickupTime: body.pickup_time ?? null,
             totalPrice: hireService.price,
             status: "pending",
             notes: body.notes ?? "",
