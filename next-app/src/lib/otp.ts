@@ -28,15 +28,18 @@ export function applyOtpInput(
   length: number = OTP_LENGTH,
 ): OtpUpdateResult {
   const next = Array.from({ length }, (_, idx) => current[idx] ?? "");
+  const target = Math.max(0, Math.min(index, length - 1));
   const cleaned = sanitizeOtpDigits(rawValue, length);
   const changedIndices: number[] = [];
 
   if (!cleaned) {
-    if (index >= 0 && index < length && next[index] !== "") {
-      next[index] = "";
-      changedIndices.push(index);
+    // Only clear the box on an actual empty value (e.g. mobile keyboard delete).
+    // Ignore non-numeric characters so stray letters do not wipe a valid digit.
+    if (rawValue === "" && next[target] !== "") {
+      next[target] = "";
+      changedIndices.push(target);
     }
-    return { digits: next, nextFocusIndex: Math.max(0, Math.min(index, length - 1)), changedIndices };
+    return { digits: next, nextFocusIndex: target, changedIndices };
   }
 
   // Full code paste or iOS/Android one-time-code autofill fills from slot 0.
@@ -51,7 +54,6 @@ export function applyOtpInput(
   // Android soft keyboards often append to an already-filled single-digit cell
   // instead of replacing its selection (e.g. "5" + "7" -> "57"). Replace only
   // the current cell with the newly typed digit and advance cleanly.
-  const target = Math.max(0, Math.min(index, length - 1));
   if (cleaned.length === 2 && next[target]) {
     const replacement =
       cleaned[0] === next[target]
@@ -82,6 +84,11 @@ export function applyOtpInput(
       nextFocusIndex: Math.min(cursor, length - 1),
       changedIndices,
     };
+  }
+
+  // Ignore stray non-digits appended to an already-filled cell (e.g. "5a").
+  if (cleaned === next[target] && rawValue !== cleaned) {
+    return { digits: next, nextFocusIndex: target, changedIndices };
   }
 
   // Single digit entry.

@@ -70,8 +70,14 @@ export default function VerifyEmailPage() {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const digitsRef = useRef<string[]>(emptyOtpDigits(OTP_LENGTH));
   const lastSubmittedCodeRef = useRef<string | null>(null);
   const verifyingRef = useRef(false);
+
+  const updateDigits = useCallback((nextDigits: string[]) => {
+    digitsRef.current = nextDigits;
+    setDigits(nextDigits);
+  }, []);
 
   const code = useMemo(() => digits.join(""), [digits]);
   const filledCount = useMemo(
@@ -83,8 +89,11 @@ export default function VerifyEmailPage() {
   const focusCell = useCallback((idx: number) => {
     const bounded = Math.max(0, Math.min(idx, OTP_LENGTH - 1));
     const el = inputRefs.current[bounded];
-    if (el) {
-      el.focus();
+    if (!el || el.disabled) return;
+    el.focus({ preventScroll: true });
+    try {
+      el.setSelectionRange(0, el.value.length);
+    } catch {
       el.select();
     }
   }, []);
@@ -183,7 +192,7 @@ export default function VerifyEmailPage() {
 
     const timer = window.setTimeout(() => {
       void verifyCode(code);
-    }, 110);
+    }, 150);
     return () => window.clearTimeout(timer);
   }, [busy, code, complete, loading, success, verifyCode]);
 
@@ -200,14 +209,16 @@ export default function VerifyEmailPage() {
 
   const handleDigitChange = (index: number, rawValue: string) => {
     if (busy || success) return;
-    const result = applyOtpInput(digits, index, rawValue, OTP_LENGTH);
-    setDigits(result.digits);
+    const result = applyOtpInput(digitsRef.current, index, rawValue, OTP_LENGTH);
+    updateDigits(result.digits);
     bumpMotion(result.changedIndices);
-    setError("");
-    setResendNotice("");
-    lastSubmittedCodeRef.current = null;
+    if (result.changedIndices.length > 0) {
+      setError("");
+      setResendNotice("");
+      lastSubmittedCodeRef.current = null;
+    }
 
-    if (result.digits[index] && result.nextFocusIndex !== index) {
+    if (result.changedIndices.length > 0 && result.nextFocusIndex !== index) {
       focusCell(result.nextFocusIndex);
     } else if (sanitizeOtpDigits(rawValue, OTP_LENGTH).length > 1) {
       focusCell(result.nextFocusIndex);
@@ -219,11 +230,23 @@ export default function VerifyEmailPage() {
 
     if (e.key === "Backspace") {
       e.preventDefault();
-      const result = applyOtpBackspace(digits, index, OTP_LENGTH);
-      setDigits(result.digits);
+      const result = applyOtpBackspace(digitsRef.current, index, OTP_LENGTH);
+      updateDigits(result.digits);
       setError("");
       lastSubmittedCodeRef.current = null;
       focusCell(result.nextFocusIndex);
+      return;
+    }
+
+    if (e.key === "Delete") {
+      e.preventDefault();
+      const next = [...digitsRef.current];
+      if (next[index] !== "") {
+        next[index] = "";
+        updateDigits(next);
+        setError("");
+        lastSubmittedCodeRef.current = null;
+      }
       return;
     }
 
@@ -252,7 +275,7 @@ export default function VerifyEmailPage() {
     }
 
     // Re-typing the exact same digit into a filled box should still pop & advance
-    if (/^\d$/.test(e.key) && digits[index] === e.key) {
+    if (/^\d$/.test(e.key) && digitsRef.current[index] === e.key) {
       e.preventDefault();
       bumpMotion([index]);
       setError("");
@@ -269,8 +292,8 @@ export default function VerifyEmailPage() {
     if (!pasted) return;
     e.preventDefault();
     const start = pasted.length >= OTP_LENGTH ? 0 : index;
-    const result = applyOtpInput(digits, start, pasted, OTP_LENGTH);
-    setDigits(result.digits);
+    const result = applyOtpInput(digitsRef.current, start, pasted, OTP_LENGTH);
+    updateDigits(result.digits);
     bumpMotion(result.changedIndices);
     setError("");
     setResendNotice("");
@@ -279,7 +302,8 @@ export default function VerifyEmailPage() {
   };
 
   const handleClearCode = () => {
-    setDigits(emptyOtpDigits(OTP_LENGTH));
+    updateDigits(emptyOtpDigits(OTP_LENGTH));
+    setMotionTicks(Array.from({ length: OTP_LENGTH }, () => 0));
     setError("");
     setResendNotice("");
     lastSubmittedCodeRef.current = null;
@@ -296,7 +320,8 @@ export default function VerifyEmailPage() {
       setMaskedEmail(res.data?.masked_email ?? maskedEmail);
       setExpiresAt(res.data?.expires_at ?? expiresAt);
       setCooldown(res.data?.cooldown ?? 60);
-      setDigits(emptyOtpDigits(OTP_LENGTH));
+      updateDigits(emptyOtpDigits(OTP_LENGTH));
+      setMotionTicks(Array.from({ length: OTP_LENGTH }, () => 0));
       lastSubmittedCodeRef.current = null;
       setResendNotice("A new 6-digit code has been sent to your email.");
       focusCell(0);
@@ -400,15 +425,27 @@ export default function VerifyEmailPage() {
                 .join(" ");
 
               return (
-                <div key={index} className={cellClassName} style={cellStyle}>
+                <div
+                  key={index}
+                  className={cellClassName}
+                  style={cellStyle}
+                  onClick={() => {
+                    if (!busy && !success) focusCell(index);
+                  }}
+                >
                   <input
                     ref={(node) => {
                       inputRefs.current[index] = node;
                     }}
                     id={`verify-digit-${index + 1}`}
                     type="text"
+                    size={1}
+                    maxLength={OTP_LENGTH}
                     inputMode="numeric"
                     pattern="[0-9]*"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                     enterKeyHint={index === OTP_LENGTH - 1 ? "done" : "next"}
                     autoComplete={index === 0 ? "one-time-code" : "off"}
                     aria-label={`Digit ${index + 1} of ${OTP_LENGTH}`}
@@ -417,13 +454,13 @@ export default function VerifyEmailPage() {
                     value={digit}
                     disabled={busy || success}
                     onFocus={(e) => {
-                      const firstEmpty = digits.findIndex((d) => d === "");
-                      if (firstEmpty !== -1 && index > firstEmpty) {
-                        focusCell(firstEmpty);
-                        return;
-                      }
                       setFocusedIndex(index);
-                      e.currentTarget.select();
+                      const input = e.currentTarget;
+                      try {
+                        input.setSelectionRange(0, input.value.length);
+                      } catch {
+                        input.select();
+                      }
                     }}
                     onBlur={() => {
                       setFocusedIndex((current) => (current === index ? null : current));

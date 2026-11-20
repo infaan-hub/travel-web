@@ -22,7 +22,7 @@
   --ve-line-strong: rgba(8, 66, 140, 0.28);
   --ve-surface: #ffffff;
   --ve-cell-bg: #f8fbff;
-  --ve-cell-border: #bfd4ef;
+  --ve-cell-border: #94b4dc;
 
   position: relative;
   display: flex;
@@ -59,7 +59,7 @@
   --ve-line-strong: rgba(148, 163, 184, 0.42);
   --ve-surface: #0f172a;
   --ve-cell-bg: #17233a;
-  --ve-cell-border: rgba(148, 163, 184, 0.42);
+  --ve-cell-border: rgba(148, 163, 184, 0.56);
   background:
     radial-gradient(640px 420px at 10% 0%, rgba(37, 99, 235, 0.18), transparent 60%),
     linear-gradient(160deg, #0b1120 0%, #0f172a 100%);
@@ -219,6 +219,7 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: clamp(6px, 1.8vw, 10px);
   width: 100%;
+  min-width: 0;
 }
 
 .otpGridShake {
@@ -231,12 +232,15 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: clamp(48px, 12.5vw, 58px);
+  min-width: 0;
+  height: clamp(46px, 12.5vw, 58px);
   border: 2px solid var(--ve-cell-border);
-  border-radius: clamp(11px, 2.8vw, 14px);
+  border-radius: clamp(10px, 2.8vw, 14px);
   background: var(--ve-cell-bg);
-  box-shadow: 0 2px 6px rgba(8, 66, 140, 0.04);
+  box-shadow: 0 2px 6px rgba(8, 66, 140, 0.05);
   box-sizing: border-box;
+  overflow: hidden;
+  cursor: text;
   transition:
     border-color 0.18s ease,
     background-color 0.18s ease,
@@ -244,7 +248,12 @@
     transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.otpCellFocused {
+.otpCell:hover:not(.otpCellVerifying):not(.otpCellSuccess):not(.otpCellError) {
+  border-color: var(--ve-blue);
+}
+
+.otpCellFocused,
+.otpCell:focus-within:not(.otpCellVerifying):not(.otpCellSuccess):not(.otpCellError) {
   border-color: var(--ve-blue);
   background: var(--ve-surface);
   box-shadow:
@@ -270,57 +279,92 @@
   animation-delay: calc(var(--cell-index, 0) * 85ms);
 }
 
-.otpCellSuccess {
+.otpCell.otpCellSuccess {
   border-color: var(--ve-emerald);
   background: var(--ve-emerald-soft);
   box-shadow: 0 4px 12px rgba(21, 128, 61, 0.14);
 }
 
-.otpCellError {
+.otpCell.otpCellError {
   border-color: var(--ve-rose);
   background: var(--ve-rose-soft);
   box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.1);
 }
 
-/* Native accessible input covering the cell cleanly without triggering iOS zoom (>=16px) */
-:global(#verify-email-root) .otpInput {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+.otpCell.otpCellError.otpCellFocused,
+.otpCell.otpCellError:focus-within {
+  border-color: var(--ve-rose);
+  background: var(--ve-surface);
+  box-shadow:
+    0 0 0 3.5px rgba(190, 18, 60, 0.2),
+    0 6px 14px rgba(190, 18, 60, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Native accessible input beneath the crisp visual layer (no backdrop blur, >=16px to prevent iOS zoom) */
+:global(#verify-email-root) input.otpInput,
+:global(.app-layout .main-content #verify-email-root) input.otpInput {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
   width: 100% !important;
   height: 100% !important;
+  min-width: 0 !important;
   min-height: 0 !important;
+  max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
+  border-width: 0 !important;
   border-radius: inherit !important;
   background: transparent !important;
+  background-color: transparent !important;
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
   caret-color: transparent !important;
   box-shadow: none !important;
   outline: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  box-sizing: border-box !important;
   text-align: center;
-  font-size: 1.25rem !important;
+  font-size: 16px !important;
   font-weight: 700;
   cursor: text;
 }
 
-:global(#verify-email-root) .otpInput:focus,
-:global(#verify-email-root) .otpInput:hover {
+:global(#verify-email-root) input.otpInput:focus,
+:global(#verify-email-root) input.otpInput:focus-visible,
+:global(#verify-email-root) input.otpInput:hover,
+:global(#verify-email-root) input.otpInput[aria-invalid="true"],
+:global(.app-layout .main-content #verify-email-root) input.otpInput:focus,
+:global(.app-layout .main-content #verify-email-root) input.otpInput:focus-visible,
+:global(.app-layout .main-content #verify-email-root) input.otpInput:hover,
+:global(.app-layout .main-content #verify-email-root) input.otpInput[aria-invalid="true"] {
   border: 0 !important;
+  border-color: transparent !important;
   background: transparent !important;
   box-shadow: none !important;
   outline: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-:global(#verify-email-root) .otpInput:disabled {
+:global(#verify-email-root) input.otpInput::selection {
+  background: transparent !important;
+  color: transparent !important;
+}
+
+:global(#verify-email-root) input.otpInput:disabled {
   cursor: default;
 }
 
 .otpVisual {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -717,6 +761,29 @@
   :global(#verify-email-root) .resendBtn,
   .backLink {
     width: 100%;
+  }
+}
+
+@media (max-width: 340px) {
+  .page {
+    padding-inline: 8px;
+  }
+
+  .card {
+    padding: 14px 10px;
+  }
+
+  .otpGrid {
+    gap: 4px;
+  }
+
+  .otpCell {
+    height: 44px;
+    border-radius: 9px;
+  }
+
+  .otpDigit {
+    font-size: 1.2rem;
   }
 }
 
