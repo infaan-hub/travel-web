@@ -1,66 +1,86 @@
 "use client";
 
-import Image from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-} from "react";
-import {
-  AlertCircle,
+  ArrowUpDown,
+  Award,
+  BarChart3,
   Building2,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Image as ImageIcon,
-  Loader,
-  Locate,
+  Car,
+  Check,
+  CheckCircle2,
+  ClipboardList,
+  Clock3,
+  Compass,
+  Copy,
+  ExternalLink,
+  LayoutDashboard,
+  LoaderCircle,
+  LocateFixed,
+  Map as MapIcon,
   MapPin,
-  Pencil,
-  Plus,
-  Save,
-  Search,
-  Trash2,
-  Upload,
+  MessageCircle,
+  Navigation,
+  Route as RouteIcon,
+  Send,
+  Star,
+  Users,
   X,
-} from "@/components/icons";
+} from "lucide-react";
+import { geocodeAPI, reviewsAPI, routeAPI, tripsAPI } from "@/lib/api/client";
+import {
+  AIRPORT_HUB,
+  CURATED_DESTINATIONS,
+  CURATED_TOP_RATED_TRIPS,
+  MEASURE_PRESETS,
+  formatTripDistance,
+  formatTripDuration,
+  type CuratedDestination,
+  type CuratedTripRoute,
+  type TripEndpoint,
+} from "@/lib/trip-discovery";
+import {
+  buildDriverTripWhatsAppMessage,
+  buildGoogleMapsTripRouteUrl,
+  buildWhatsAppDirectContactPickerUrl,
+} from "@/lib/driver-trip-share";
+import { tripPlaceNameForCoords } from "@/lib/trips";
+import type { PlaceSuggestion } from "@/lib/place-types";
+import PlaceAutocomplete from "@/components/PlaceAutocomplete";
+import TripRouteOverlayMap from "@/components/TripRouteOverlayMap";
 import { useToast } from "@/components/ToastProvider";
-import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
-import { companyAPI, routeAPI, geocodeAPI } from "@/lib/api/client";
-import { findTripPlace, type TripPlace, ZANZIBAR_TRIP_PLACES } from "@/lib/trips";
-import { isInZanzibar } from "@/lib/zanzibar";
-import styles from "@/features/pages/company-trips.module.css";
+import styles from "@/features/pages/driver-workspace.module.css";
 
-function placeNameForCoords(lat: string, lng: string) {
-  const la = Number(lat);
-  const lo = Number(lng);
-  if (!Number.isFinite(la) || !Number.isFinite(lo)) return null;
-  const match = ZANZIBAR_TRIP_PLACES.find(
-    (place) => Math.abs(place.latitude - la) < 0.0005 && Math.abs(place.longitude - lo) < 0.0005,
-  );
-  return match ? match.name : null;
-}
+export type CompanyTripHubContext = {
+  id: number;
+  name: string;
+  contact_phone: string;
+  contact_email: string;
+  drivers: {
+    id: number;
+    name: string;
+    phone: string;
+    license_number: string;
+    is_active: boolean;
+  }[];
+  vehicles: {
+    id: number;
+    name: string;
+    plate_number: string;
+    category: string;
+    capacity: number;
+    is_available: boolean;
+  }[];
+};
 
-const PAGE_SIZE = 12;
-
-const SORT_OPTIONS = [
-  { value: "recent", label: "Recently updated" },
-  { value: "price-asc", label: "Price: low to high" },
-  { value: "price-desc", label: "Price: high to low" },
-  { value: "title", label: "Title A–Z" },
-] as const;
-
-type SortValue = (typeof SORT_OPTIONS)[number]["value"];
-
-type CompanyTrip = {
+type PublicTripRecord = {
   id: number;
   title: string;
-  place: string;
+  description?: string;
+  place?: string;
+  price?: number | string | null;
+  company_name?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   origin_latitude?: number | null;
@@ -69,1279 +89,1236 @@ type CompanyTrip = {
   destination_longitude?: number | null;
   distance_km?: number | null;
   duration_mins?: number | null;
-  description: string;
-  price: string | null;
-  image_url: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
 };
 
-type TripForm = {
-  title: string;
-  place: string;
-  description: string;
-  price: string;
-  latitude: string;
-  longitude: string;
-  origin_latitude: string;
-  origin_longitude: string;
-  destination_latitude: string;
-  destination_longitude: string;
-  distance_km: string;
-  duration_mins: string;
+type ReviewStat = {
+  trip_id?: number;
+  average_rating?: number;
+  review_count?: number;
 };
 
-const EMPTY_FORM: TripForm = {
-  title: "",
-  place: "",
-  description: "",
-  price: "",
-  latitude: "",
-  longitude: "",
-  origin_latitude: "",
-  origin_longitude: "",
-  destination_latitude: "",
-  destination_longitude: "",
-  distance_km: "",
-  duration_mins: "",
+type Props = {
+  company: CompanyTripHubContext;
 };
 
-function priceValue(value: string | null) {
-  if (value === null || value.trim() === "") return null;
-  const amount = Number(value);
-  return Number.isFinite(amount) ? amount : null;
+function placeLabel(place: PlaceSuggestion): string {
+  return place.area ? `${place.name}, ${place.area}` : place.name;
 }
 
-function coordinateValue(value: string) {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  const parsed = Number(trimmed);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function formatPrice(value: string | null) {
-  const amount = priceValue(value);
-  if (amount === null) return null;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-  }).format(amount);
-}
-
-function formatCurrency(amount: number, maximumFractionDigits = 0) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits,
-  }).format(amount);
-}
-
-function formatDate(value: string | null | undefined, prefix: string) {
-  if (!value) return `${prefix} recently`;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return `${prefix} recently`;
-  return `${prefix} ${date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  })}`;
-}
-
-function tripTimestamp(trip: CompanyTrip) {
-  const raw = trip.updated_at ?? trip.created_at;
-  const time = raw ? Date.parse(raw) : Number.NaN;
-  return Number.isFinite(time) ? time : 0;
-}
-
-function sortTrips(rows: CompanyTrip[], sort: SortValue) {
-  const sorted = [...rows];
-  if (sort === "title") {
-    return sorted.sort((a, b) =>
-      a.title.localeCompare(b.title, "en", { sensitivity: "base" }),
-    );
-  }
-  if (sort === "price-asc" || sort === "price-desc") {
-    const direction = sort === "price-asc" ? 1 : -1;
-    return sorted.sort((a, b) => {
-      const priceA = priceValue(a.price);
-      const priceB = priceValue(b.price);
-      if (priceA === null && priceB === null) {
-        return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
-      }
-      if (priceA === null) return 1;
-      if (priceB === null) return -1;
-      return (priceA - priceB) * direction;
-    });
-  }
-  return sorted.sort((a, b) => tripTimestamp(b) - tripTimestamp(a));
-}
-
-function errorMessage(error: unknown) {
-  if (typeof error === "object" && error) {
-    const candidate = error as {
-      response?: {
-        data?: {
-          message?: string;
-          error?: string;
-          errors?: Record<string, string[] | string>;
-        };
-      };
-    };
-    const data = candidate.response?.data;
-    if (data?.message) return data.message;
-    if (data?.error) return data.error;
-    const firstError = data?.errors ? Object.values(data.errors)[0] : null;
-    if (Array.isArray(firstError) && firstError[0]) return firstError[0];
-    if (typeof firstError === "string" && firstError) return firstError;
-  }
-  return "The trip could not be saved. Please try again.";
-}
-
-function prefersReducedMotion() {
-  return (
-    typeof window !== "undefined" &&
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
-
-export default function CompanyTripsPage() {
+export default function CompanyTripsPage({ company }: Props) {
   const toast = useToast();
-  const [trips, setTrips] = useState<CompanyTrip[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
+  const generatorRef = useRef<HTMLElement | null>(null);
+  const mapCardRef = useRef<HTMLElement | null>(null);
+  const originGeocodeSeqRef = useRef(0);
+  const destGeocodeSeqRef = useRef(0);
 
-  const [searchInput, setSearchInput] = useState("");
-  const [sort, setSort] = useState<SortValue>("recent");
-  const [page, setPage] = useState(1);
+  const defaultDriver =
+    company.drivers.find((d) => d.is_active) ?? company.drivers[0] ?? null;
+  const defaultVehicle =
+    company.vehicles.find((v) => v.is_available) ?? company.vehicles[0] ?? null;
 
-  const [editing, setEditing] = useState<CompanyTrip | null>(null);
-  const [form, setForm] = useState<TripForm>(EMPTY_FORM);
-  const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [routeLoading, setRouteLoading] = useState(false);
-  const [originName, setOriginName] = useState("");
-  const [destinationName, setDestinationName] = useState("");
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  // Trip builder state — starts unpinned so the company freely picks any origin & destination
+  const [originLabel, setOriginLabel] = useState("");
+  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [destLabel, setDestLabel] = useState("");
+  const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  const composerRef = useRef<HTMLElement | null>(null);
-  const titleInputRef = useRef<HTMLInputElement | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const previewObjectUrl = useRef<string | null>(null);
+  const [selectedDriverId, setSelectedDriverId] = useState<string>(
+    defaultDriver ? String(defaultDriver.id) : "custom",
+  );
+  const [driverName, setDriverName] = useState(defaultDriver?.name ?? company.name);
+  const [driverPhone, setDriverPhone] = useState(
+    defaultDriver?.phone || company.contact_phone || "",
+  );
+  const [driverLicense, setDriverLicense] = useState(defaultDriver?.license_number ?? "");
 
-  const fetchTrips = useCallback(async () => {
-    const response = await companyAPI.trips();
-    const payload = response.data;
-    return (Array.isArray(payload) ? payload : payload?.results ?? []) as CompanyTrip[];
-  }, []);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string>(
+    defaultVehicle ? String(defaultVehicle.id) : "custom",
+  );
+  const [vehicleName, setVehicleName] = useState(defaultVehicle?.name ?? "");
+  const [vehiclePlate, setVehiclePlate] = useState(defaultVehicle?.plate_number ?? "");
+  const [vehicleCategory, setVehicleCategory] = useState(
+    defaultVehicle?.category ?? "Private Hire",
+  );
+  const [vehicleSeats, setVehicleSeats] = useState<number>(defaultVehicle?.capacity ?? 4);
+
+  const [scheduleText, setScheduleText] = useState("");
+  const [passengers, setPassengers] = useState("2");
+  const [fareEstimate, setFareEstimate] = useState("");
+  const [tripNotes, setTripNotes] = useState("");
+
+  const [routeMetrics, setRouteMetrics] = useState<{
+    key: string;
+    distanceKm: number | null;
+    durationMins: number | null;
+  } | null>(null);
+  const [manualGeocoding, setManualGeocoding] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [showMap, setShowMap] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const routeCoordsKey =
+    originCoords && destCoords
+      ? `${originCoords.lat},${originCoords.lng}->${destCoords.lat},${destCoords.lng}`
+      : null;
+  const activeRouteMetrics =
+    routeCoordsKey && routeMetrics?.key === routeCoordsKey ? routeMetrics : null;
+  const routeDistanceKm = activeRouteMetrics?.distanceKm ?? null;
+  const routeDurationMins = activeRouteMetrics?.durationMins ?? null;
+  const calculating =
+    manualGeocoding || Boolean(routeCoordsKey && routeMetrics?.key !== routeCoordsKey);
+
+  // Discovery lists
+  const [companyTrips, setCompanyTrips] = useState<PublicTripRecord[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStat[]>([]);
 
   useEffect(() => {
     let active = true;
-
-    fetchTrips()
-      .then((rows) => {
-        if (!active) return;
-        setTrips(rows);
-        setError(null);
-      })
-      .catch(() => {
-        if (active) {
-          setError("Company trips could not be loaded. Please try again.");
-        }
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
+    Promise.all([
+      tripsAPI.getAll().catch(() => ({ data: [] })),
+      reviewsAPI.getStats().catch(() => ({ data: [] })),
+    ]).then(([tripsRes, statsRes]) => {
+      if (!active) return;
+      const tData = tripsRes.data;
+      setCompanyTrips(Array.isArray(tData) ? tData : tData?.results ?? []);
+      const sData = statsRes.data;
+      setReviewStats(Array.isArray(sData) ? sData : sData?.results ?? []);
+    });
     return () => {
       active = false;
     };
-  }, [fetchTrips, reloadKey]);
-
-  const refreshTrips = useCallback(async () => {
-    const rows = await fetchTrips();
-    setTrips(rows);
-    setError(null);
-  }, [fetchTrips]);
-
-  const releasePreviewUrl = useCallback(() => {
-    if (!previewObjectUrl.current) return;
-    URL.revokeObjectURL(previewObjectUrl.current);
-    previewObjectUrl.current = null;
   }, []);
 
-  useEffect(() => releasePreviewUrl, [releasePreviewUrl]);
-
-  const search = searchInput.trim().toLowerCase();
-
-  const filteredTrips = useMemo(() => {
-    const rows = search
-      ? trips.filter((trip) =>
-          [trip.title, trip.place, trip.description ?? ""].some((value) =>
-            value.toLowerCase().includes(search),
-          ),
-        )
-      : trips;
-    return sortTrips(rows, sort);
-  }, [trips, search, sort]);
-
-  const total = filteredTrips.length;
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const currentPage = Math.min(page, pages);
-  const pageTrips = filteredTrips.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
-  const rangeStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const rangeEnd = Math.min(total, rangeStart + pageTrips.length - 1);
-
-  const pricedTrips = filteredTrips
-    .map((trip) => priceValue(trip.price))
-    .filter((amount): amount is number => amount !== null);
-  const averagePrice = pricedTrips.length
-    ? pricedTrips.reduce((sum, amount) => sum + amount, 0) / pricedTrips.length
-    : null;
-  const placeCount = new Set(
-    filteredTrips
-      .map((trip) => trip.place.trim().toLowerCase())
-      .filter(Boolean),
-  ).size;
-
-  const isFiltered = Boolean(search);
-  const isAdjusted = isFiltered || sort !== "recent";
-
-  const clearForm = useCallback(() => {
-    releasePreviewUrl();
-    setEditing(null);
-    setForm(EMPTY_FORM);
-    setImage(null);
-    setPreview(null);
-    setFormError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [releasePreviewUrl]);
-
-  const focusComposer = useCallback(() => {
-    window.requestAnimationFrame(() => {
-      composerRef.current?.scrollIntoView({
-        behavior: prefersReducedMotion() ? "auto" : "smooth",
-        block: "start",
-      });
-      titleInputRef.current?.focus({ preventScroll: true });
-    });
-  }, []);
-
-  const startCreate = useCallback(() => {
-    clearForm();
-    focusComposer();
-  }, [clearForm, focusComposer]);
-
-  const editTrip = (trip: CompanyTrip) => {
-    releasePreviewUrl();
-    const datasetPlace =
-      findTripPlace(trip.place) ??
-      findTripPlace(trip.place.split(",")[0] ?? "");
-    const latitude = trip.latitude ?? datasetPlace?.latitude ?? null;
-    const longitude = trip.longitude ?? datasetPlace?.longitude ?? null;
-    setEditing(trip);
-    setForm({
-      title: trip.title,
-      place: trip.place,
-      description: trip.description ?? "",
-      price: trip.price ?? "",
-      latitude: latitude === null ? "" : latitude.toFixed(6),
-      longitude: longitude === null ? "" : longitude.toFixed(6),
-      origin_latitude: trip.origin_latitude == null ? "" : trip.origin_latitude.toFixed(6),
-      origin_longitude: trip.origin_longitude == null ? "" : trip.origin_longitude.toFixed(6),
-      destination_latitude: trip.destination_latitude == null ? "" : trip.destination_latitude.toFixed(6),
-      destination_longitude: trip.destination_longitude == null ? "" : trip.destination_longitude.toFixed(6),
-      distance_km: trip.distance_km == null ? "" : String(trip.distance_km),
-      duration_mins: trip.duration_mins == null ? "" : String(trip.duration_mins),
-    });
-    setImage(null);
-    setPreview(trip.image_url);
-    setFormError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    focusComposer();
-  };
-
-  const selectTripPlace = useCallback((place: TripPlace) => {
-    const label = place.name.toLowerCase().includes(place.area.toLowerCase())
-      ? place.name
-      : `${place.name}, ${place.area}`;
-    const lat = place.latitude.toFixed(6);
-    const lng = place.longitude.toFixed(6);
-    const isFirst = !form.origin_latitude || !form.origin_longitude;
-    setForm((current) => {
-      if (!current.origin_latitude || !current.origin_longitude) {
-        return {
-          ...current,
-          place: label,
-          latitude: lat,
-          longitude: lng,
-          origin_latitude: lat,
-          origin_longitude: lng,
-        };
-      }
-      return {
-        ...current,
-        destination_latitude: lat,
-        destination_longitude: lng,
-      };
-    });
-    setFormError(null);
-    geocodeAPI
-      .reverse(place.latitude, place.longitude)
-      .then((res) => {
-        const name = res.data?.display_name;
-        if (!name) return;
-        if (isFirst) setOriginName(name);
-        else setDestinationName(name);
+  // Automatically calculate road distance & duration whenever both coordinates are ready
+  useEffect(() => {
+    if (!originCoords || !destCoords || !routeCoordsKey) return;
+    let active = true;
+    routeAPI
+      .calculate({
+        origin_lat: originCoords.lat,
+        origin_lng: originCoords.lng,
+        destination_lat: destCoords.lat,
+        destination_lng: destCoords.lng,
       })
-      .catch(() => {});
-  }, [form.origin_latitude, form.origin_longitude]);
-
-  const pickTripPoint = useCallback((latitude: number, longitude: number) => {
-    const lat = latitude.toFixed(6);
-    const lng = longitude.toFixed(6);
-    const isFirst = !form.origin_latitude || !form.origin_longitude;
-    setForm((current) => {
-      if (!current.origin_latitude || !current.origin_longitude) {
-        return { ...current, origin_latitude: lat, origin_longitude: lng, latitude: lat, longitude: lng };
-      }
-      return { ...current, destination_latitude: lat, destination_longitude: lng };
-    });
-    setFormError(null);
-    geocodeAPI
-      .reverse(latitude, longitude)
       .then((res) => {
-        const name = res.data?.display_name;
-        if (!name) return;
-        if (isFirst) setOriginName(name);
-        else setDestinationName(name);
+        if (!active) return;
+        const dist = Number(res.data?.distance_km);
+        const dur = Number(res.data?.duration_mins ?? res.data?.estimated_time_mins);
+        setRouteMetrics({
+          key: routeCoordsKey,
+          distanceKm: Number.isFinite(dist) ? dist : null,
+          durationMins: Number.isFinite(dur) ? dur : null,
+        });
       })
-      .catch(() => {});
-  }, [form.origin_latitude, form.origin_longitude]);
-  const createRoute = useCallback(async () => {
-    const originLat = coordinateValue(form.origin_latitude);
-    const originLng = coordinateValue(form.origin_longitude);
-    const destLat = coordinateValue(form.destination_latitude);
-    const destLng = coordinateValue(form.destination_longitude);
-    if (originLat === null || originLng === null || destLat === null || destLng === null) {
-      setFormError("Pick both a start point and a destination on the map first.");
-      return;
-    }
-    setRouteLoading(true);
-    setFormError(null);
-    try {
-      const res = await routeAPI.calculate({
-        origin_lat: originLat,
-        origin_lng: originLng,
-        destination_lat: destLat,
-        destination_lng: destLng,
+      .catch(() => {
+        if (!active) return;
+        setRouteMetrics({
+          key: routeCoordsKey,
+          distanceKm: null,
+          durationMins: null,
+        });
       });
-      const data = res.data ?? {};
-      setForm((current) => ({
-        ...current,
-        distance_km: data.distance_km != null ? String(data.distance_km) : current.distance_km,
-        duration_mins: data.estimated_time_mins != null ? String(data.estimated_time_mins) : current.duration_mins,
-      }));
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message || "Could not calculate the route.");
-    } finally {
-      setRouteLoading(false);
-    }
-  }, [form.origin_latitude, form.origin_longitude, form.destination_latitude, form.destination_longitude]);
+    return () => {
+      active = false;
+    };
+  }, [destCoords, originCoords, routeCoordsKey]);
 
-  const clearTripPoint = useCallback(() => {
-    setForm((current) => ({
-      ...current,
-      latitude: "",
-      longitude: "",
-      origin_latitude: "",
-      origin_longitude: "",
-      destination_latitude: "",
-      destination_longitude: "",
-      distance_km: "",
-      duration_mins: "",
-    }));
-    setOriginName("");
-    setDestinationName("");
-  }, []);
-
-  const onImage = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] ?? null;
-    releasePreviewUrl();
-    setFormError(null);
-
-    if (!file) {
-      setImage(null);
-      setPreview(editing?.image_url ?? null);
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      event.target.value = "";
-      setImage(null);
-      setPreview(editing?.image_url ?? null);
-      setFormError("Choose an image no larger than 5 MB.");
-      return;
-    }
-
-    const objectUrl = URL.createObjectURL(file);
-    previewObjectUrl.current = objectUrl;
-    setImage(file);
-    setPreview(objectUrl);
-  };
-
-  const saveTrip = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const title = form.title.trim();
-    const place = form.place.trim();
-    const description = form.description.trim();
-    const price = Number(form.price);
-
-    if (!title) {
-      setFormError("Enter a name for this trip.");
-      titleInputRef.current?.focus();
-      return;
-    }
-    if (!place) {
-      setFormError("Enter the place this trip visits.");
-      return;
-    }
-    if (form.price.trim() === "" || !Number.isFinite(price) || price < 0) {
-      setFormError("Enter a valid price of 0 or more.");
-      return;
-    }
-
-    const latitude = coordinateValue(form.latitude);
-    const longitude = coordinateValue(form.longitude);
-    if ((latitude === null) !== (longitude === null)) {
-      setFormError("Pick the trip location again on the map.");
-      return;
-    }
-    if (
-      latitude !== null &&
-      longitude !== null &&
-      !isInZanzibar(latitude, longitude)
-    ) {
-      setFormError("The map pin must be inside Zanzibar.");
-      return;
-    }
-
-    if (!editing && !image) {
-      setFormError("Choose a JPG, PNG or WebP image for this trip.");
-      fileInputRef.current?.focus();
-      return;
-    }
-
-    setSaving(true);
-    setFormError(null);
-
-    try {
-      const originLat = coordinateValue(form.origin_latitude);
-      const originLng = coordinateValue(form.origin_longitude);
-      const destLat = coordinateValue(form.destination_latitude);
-      const destLng = coordinateValue(form.destination_longitude);
-      const derivedPlace =
-        place.trim() ||
-        (originLat !== null && originLng !== null && destLat !== null && destLng !== null
-          ? `${originLat.toFixed(5)}, ${originLng.toFixed(5)} to ${destLat.toFixed(5)}, ${destLng.toFixed(5)}`
-          : "Route");
-      const data = new FormData();
-      data.append("title", title);
-      data.append("place", derivedPlace);
-      data.append("description", description);
-      data.append("price", String(price));
-      if (latitude !== null && longitude !== null) {
-        data.append("latitude", String(latitude));
-        data.append("longitude", String(longitude));
-      } else if (editing) {
-        // Explicit empty values clear a previously saved pin.
-        data.append("latitude", "");
-        data.append("longitude", "");
-      }
-
-      if (originLat !== null && originLng !== null) {
-        data.append("origin_latitude", String(originLat));
-        data.append("origin_longitude", String(originLng));
-      }
-      if (destLat !== null && destLng !== null) {
-        data.append("destination_latitude", String(destLat));
-        data.append("destination_longitude", String(destLng));
-      }
-      if (form.distance_km.trim()) data.append("distance_km", form.distance_km.trim());
-      if (form.duration_mins.trim()) data.append("duration_mins", form.duration_mins.trim());
-
-      if (image) data.append("image", image);
-
-      if (editing) {
-        await companyAPI.updateTrip(editing.id, data);
-        toast.success("Trip updated.");
-      } else {
-        await companyAPI.createTrip(data);
-        toast.success("Trip created.");
-        setPage(1);
-      }
-
-      clearForm();
+  const resolveCustomEndpoint = useCallback(
+    async (target: "origin" | "destination", query: string) => {
+      const trimmed = query.trim();
+      if (trimmed.length < 2) return;
+      const seqRef = target === "origin" ? originGeocodeSeqRef : destGeocodeSeqRef;
+      const seq = ++seqRef.current;
       try {
-        await refreshTrips();
+        const res = await geocodeAPI.search(trimmed);
+        if (seqRef.current !== seq) return;
+        const lat = Number(res.data?.lat);
+        const lng = Number(res.data?.lng);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          if (target === "origin") {
+            setOriginCoords({ lat, lng });
+          } else {
+            setDestCoords({ lat, lng });
+          }
+        }
       } catch {
-        toast.error("The trip was saved, but the list could not be refreshed.");
+        // Keep text value; company can still generate or send via WhatsApp.
       }
-    } catch (submitError) {
-      setFormError(errorMessage(submitError));
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+    [],
+  );
 
-  const deleteTrip = async (trip: CompanyTrip) => {
-    if (!window.confirm(`Delete "${trip.title}"? This cannot be undone.`)) {
+  const handleDriverSelect = (val: string) => {
+    setSelectedDriverId(val);
+    if (val === "custom") {
+      setDriverLicense("");
       return;
     }
-
-    setDeletingId(trip.id);
-    try {
-      await companyAPI.deleteTrip(trip.id);
-      setTrips((rows) => rows.filter((row) => row.id !== trip.id));
-      toast.success("Trip deleted.");
-      if (editing?.id === trip.id) clearForm();
-      void refreshTrips().catch(() => {
-        toast.error("The list could not be refreshed. Reload the page to try again.");
-      });
-    } catch {
-      toast.error("The trip could not be deleted.");
-    } finally {
-      setDeletingId(null);
+    const found = company.drivers.find((d) => String(d.id) === val);
+    if (found) {
+      setDriverName(found.name);
+      setDriverPhone(found.phone || company.contact_phone || "");
+      setDriverLicense(found.license_number);
     }
   };
 
-  const resetView = () => {
-    setSearchInput("");
-    setSort("recent");
-    setPage(1);
+  const handleVehicleSelect = (val: string) => {
+    setSelectedVehicleId(val);
+    if (val === "custom") return;
+    const found = company.vehicles.find((v) => String(v.id) === val);
+    if (found) {
+      setVehicleName(found.name);
+      setVehiclePlate(found.plate_number);
+      setVehicleCategory(found.category);
+      setVehicleSeats(found.capacity);
+    }
   };
 
-  const emptyTitle = isFiltered ? "No matching trips" : "No trips yet";
-  const emptyCopy = isFiltered
-    ? `No trips match “${searchInput.trim()}”. Try a different title, place or description.`
-    : "Add the first place-based listing above. It will appear on this company's public profile.";
+  const handleUseCurrentGps = () => {
+    if (typeof window === "undefined" || !("geolocation" in navigator)) {
+      toast.error("GPS location is not available on this device.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = Number(pos.coords.latitude.toFixed(6));
+        const lng = Number(pos.coords.longitude.toFixed(6));
+        let label = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        try {
+          const rev = await geocodeAPI.reverse(lat, lng);
+          if (rev.data?.display_name) {
+            label = String(rev.data.display_name).trim().slice(0, 140);
+          }
+        } catch {
+          // Keep coordinate label
+        }
+        originGeocodeSeqRef.current += 1;
+        setOriginLabel(label);
+        setOriginCoords({ lat, lng });
+        setShowMap(true);
+        setLocating(false);
+      },
+      () => {
+        setLocating(false);
+        toast.error("Could not detect current GPS location.");
+      },
+      { enableHighAccuracy: true, timeout: 12_000 },
+    );
+  };
+
+  const handleSwap = () => {
+    originGeocodeSeqRef.current += 1;
+    destGeocodeSeqRef.current += 1;
+    setOriginLabel(destLabel);
+    setDestLabel(originLabel);
+    setOriginCoords(destCoords);
+    setDestCoords(originCoords);
+  };
+
+  const handleClearLocations = () => {
+    originGeocodeSeqRef.current += 1;
+    destGeocodeSeqRef.current += 1;
+    setOriginLabel("");
+    setOriginCoords(null);
+    setDestLabel("");
+    setDestCoords(null);
+    setRouteMetrics(null);
+  };
+
+  const handleGenerateManual = async () => {
+    if (!originLabel.trim() || !destLabel.trim()) {
+      toast.error("Choose both origin and destination first.");
+      return;
+    }
+    setManualGeocoding(true);
+    try {
+      let o = originCoords;
+      let d = destCoords;
+      if (!o) {
+        const seq = ++originGeocodeSeqRef.current;
+        const r = await geocodeAPI.search(originLabel.trim());
+        const lat = Number(r.data?.lat);
+        const lng = Number(r.data?.lng);
+        if (originGeocodeSeqRef.current === seq && Number.isFinite(lat) && Number.isFinite(lng)) {
+          o = { lat, lng };
+          setOriginCoords(o);
+        }
+      }
+      if (!d) {
+        const seq = ++destGeocodeSeqRef.current;
+        const r = await geocodeAPI.search(destLabel.trim());
+        const lat = Number(r.data?.lat);
+        const lng = Number(r.data?.lng);
+        if (destGeocodeSeqRef.current === seq && Number.isFinite(lat) && Number.isFinite(lng)) {
+          d = { lat, lng };
+          setDestCoords(d);
+        }
+      }
+      setShowMap(true);
+      mapCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (!o || !d) {
+        toast.success("Trip ready! You can send it via WhatsApp with Google Maps links.");
+      }
+    } catch {
+      toast.error("Could not geocode custom place name — you can still share via WhatsApp.");
+    } finally {
+      setManualGeocoding(false);
+    }
+  };
+
+  const loadRouteIntoGenerator = useCallback((origin: TripEndpoint, destination: TripEndpoint) => {
+    originGeocodeSeqRef.current += 1;
+    destGeocodeSeqRef.current += 1;
+    setOriginLabel(origin.label);
+    setOriginCoords({ lat: origin.lat, lng: origin.lng });
+    setDestLabel(destination.label);
+    setDestCoords({ lat: destination.lat, lng: destination.lng });
+    setShowMap(true);
+    generatorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const buildWhatsAppForRoute = useCallback(
+    (
+      origin: { label: string; lat?: number | null; lng?: number | null },
+      destination: { label: string; lat?: number | null; lng?: number | null },
+      opts?: { distanceKm?: number | null; durationMins?: number | null; fare?: string | null },
+    ) => {
+      const msg = buildDriverTripWhatsAppMessage({
+        driverName: driverName.trim() || company.name,
+        driverPhone: driverPhone.trim() || company.contact_phone || null,
+        driverLicense: driverLicense.trim() || null,
+        companyName: company.name,
+        vehicleName: vehicleName || defaultVehicle?.name || "Private Hire Vehicle",
+        vehiclePlate: vehiclePlate || defaultVehicle?.plate_number || "",
+        vehicleCategory: vehicleCategory || defaultVehicle?.category || "",
+        vehicleSeats,
+        origin,
+        destination,
+        distanceKm: opts?.distanceKm ?? null,
+        durationMins: opts?.durationMins ?? null,
+        scheduleText: scheduleText.trim() || null,
+        passengers: passengers.trim() || null,
+        fareEstimate: opts?.fare ?? (fareEstimate.trim() || null),
+        notes: tripNotes.trim() || null,
+      });
+      return { message: msg, url: buildWhatsAppDirectContactPickerUrl(msg) };
+    },
+    [
+      company.contact_phone,
+      company.name,
+      defaultVehicle?.category,
+      defaultVehicle?.name,
+      defaultVehicle?.plate_number,
+      driverLicense,
+      driverName,
+      driverPhone,
+      fareEstimate,
+      passengers,
+      scheduleText,
+      tripNotes,
+      vehicleCategory,
+      vehicleName,
+      vehiclePlate,
+      vehicleSeats,
+    ],
+  );
+
+  const generatedWhatsApp = useMemo(() => {
+    if (!originLabel.trim() || !destLabel.trim()) return null;
+    return buildWhatsAppForRoute(
+      { label: originLabel, lat: originCoords?.lat, lng: originCoords?.lng },
+      { label: destLabel, lat: destCoords?.lat, lng: destCoords?.lng },
+      { distanceKm: routeDistanceKm, durationMins: routeDurationMins },
+    );
+  }, [
+    buildWhatsAppForRoute,
+    destCoords?.lat,
+    destCoords?.lng,
+    destLabel,
+    originCoords?.lat,
+    originCoords?.lng,
+    originLabel,
+    routeDistanceKm,
+    routeDurationMins,
+  ]);
+
+  const googleMapsUrl = useMemo(() => {
+    if (!originLabel.trim() || !destLabel.trim()) return null;
+    return buildGoogleMapsTripRouteUrl(
+      { label: originLabel, lat: originCoords?.lat, lng: originCoords?.lng },
+      { label: destLabel, lat: destCoords?.lat, lng: destCoords?.lng },
+    );
+  }, [
+    destCoords?.lat,
+    destCoords?.lng,
+    destLabel,
+    originCoords?.lat,
+    originCoords?.lng,
+    originLabel,
+  ]);
+
+  const handleCopyMessage = async () => {
+    if (!generatedWhatsApp) return;
+    try {
+      await navigator.clipboard.writeText(generatedWhatsApp.message);
+      setCopied(true);
+      toast.success("Trip WhatsApp message copied to clipboard.");
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      toast.error("Could not copy message.");
+    }
+  };
+
+  const topRatedTrips = useMemo<CuratedTripRoute[]>(() => {
+    const statByTripId = new Map<number, { rating: number; count: number }>();
+    for (const s of reviewStats) {
+      if (s.trip_id != null && Number(s.average_rating ?? 0) > 0) {
+        statByTripId.set(s.trip_id, {
+          rating: Number(s.average_rating),
+          count: Number(s.review_count ?? 1),
+        });
+      }
+    }
+
+    const fromCompany: CuratedTripRoute[] = companyTrips
+      .map((trip) => {
+        const stat = statByTripId.get(trip.id);
+        const oLat = trip.origin_latitude ?? trip.latitude;
+        const oLng = trip.origin_longitude ?? trip.longitude;
+        const dLat = trip.destination_latitude;
+        const dLng = trip.destination_longitude;
+        if (
+          !stat ||
+          stat.rating < 4 ||
+          oLat == null ||
+          oLng == null ||
+          dLat == null ||
+          dLng == null
+        ) {
+          return null;
+        }
+        return {
+          id: `company-hub-trip-${trip.id}`,
+          title: trip.title,
+          badge: "Top rated",
+          origin: {
+            label: trip.place || tripPlaceNameForCoords(oLat, oLng) || "Origin",
+            lat: oLat,
+            lng: oLng,
+          },
+          destination: {
+            label: tripPlaceNameForCoords(dLat, dLng) || "Destination",
+            lat: dLat,
+            lng: dLng,
+          },
+          distanceKm: Number(trip.distance_km ?? 0),
+          durationMins: Number(trip.duration_mins ?? 0),
+          rating: stat.rating,
+          reviews: stat.count,
+          priceHint: trip.price ? `$${trip.price}` : undefined,
+          summary:
+            trip.description ||
+            (trip.company_name ? `Operated by ${trip.company_name}.` : "Verified Zanzibar trip."),
+        } as CuratedTripRoute;
+      })
+      .filter((item): item is CuratedTripRoute => item !== null)
+      .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+
+    return [...fromCompany, ...CURATED_TOP_RATED_TRIPS].slice(0, 6);
+  }, [companyTrips, reviewStats]);
+
+  const measureDestination = (dest: CuratedDestination) => {
+    const start: TripEndpoint =
+      originCoords && originLabel.trim()
+        ? { label: originLabel.trim(), lat: originCoords.lat, lng: originCoords.lng }
+        : AIRPORT_HUB;
+    loadRouteIntoGenerator(start, {
+      label: `${dest.name}, ${dest.area}`,
+      lat: dest.lat,
+      lng: dest.lng,
+    });
+  };
 
   return (
-    <div id="trips-workspace" className={styles.tripsRoot}>
-      <header className={styles.tripsMasthead}>
-        <div className={styles.tripsMastheadText}>
-          <nav className={styles.tripsBreadcrumb} aria-label="Breadcrumb">
-            <Link href="/company/dashboard/">Company workspace</Link>
-            <span className={styles.tripsBreadcrumbSep} aria-hidden="true">
-              /
-            </span>
-            <span className={styles.tripsBreadcrumbCurrent}>Trips</span>
-          </nav>
-          <p className={styles.tripsEyebrow}>Company workspace</p>
-          <h1 className={styles.tripsTitle}>Trips</h1>
-          <p className={styles.tripsLead}>
-            Standalone place-based listings shown on your public company profile.
-            Add a photo and price, then keep every destination up to date from
-            this page.
-          </p>
-        </div>
-        <div className={styles.tripsActions}>
-          <button className="btn btn-primary" type="button" onClick={startCreate}>
-            <Plus size={16} /> Add trip
-          </button>
-        </div>
-      </header>
+    <main id="driver-workspace-root" className={`page ${styles.page}`}>
+      <div className={styles.shell}>
+        {/* TOP COMPANY WORKSPACE NAV */}
+        <nav className={styles.topNav} aria-label="Company workspace navigation">
+          <div className={styles.topNavTabs}>
+            <Link href="/company/dashboard/" className={styles.topNavLink}>
+              <LayoutDashboard size={15} aria-hidden="true" />
+              Overview
+            </Link>
+            <Link href="/company/bookings/" className={styles.topNavLink}>
+              <ClipboardList size={15} aria-hidden="true" />
+              Bookings
+            </Link>
+            <Link
+              href="/company/trips/"
+              className={`${styles.topNavLink} ${styles.topNavLinkActive}`}
+              aria-current="page"
+            >
+              <Compass size={15} aria-hidden="true" />
+              Trips
+            </Link>
+            <Link href="/company/private-hire/" className={styles.topNavLink}>
+              <Car size={15} aria-hidden="true" />
+              Fleet
+            </Link>
+            <Link href="/company/private-driver/" className={styles.topNavLink}>
+              <Users size={15} aria-hidden="true" />
+              Drivers
+            </Link>
+            <Link href="/company/analytics/" className={styles.topNavLink}>
+              <BarChart3 size={15} aria-hidden="true" />
+              Insights
+            </Link>
+          </div>
+        </nav>
 
-      <section className={styles.tripsHero} aria-label="Catalogue overview">
-        <div className={styles.tripsHeroMain}>
-          <div className={styles.tripsHeroHead}>
-            <span className={styles.tripsHeroIcon} aria-hidden="true">
-              <MapPin size={23} />
-            </span>
-            <div>
-              <h2 className={styles.tripsHeroTitle}>Trip catalogue</h2>
-              <p className={styles.tripsHeroCopy}>
-                Every trip below belongs to your active company and appears on
-                its public profile. Search, sort and manage the listings without
-                leaving this page.
-              </p>
+        {/* EXECUTIVE HEADER */}
+        <header className={styles.heroCard}>
+          <div className={styles.heroCopy}>
+            <div className={styles.eyebrowRow}>
+              <span className={styles.eyebrow}>
+                <Compass size={13} aria-hidden="true" />
+                Company trip generator &amp; WhatsApp dispatch
+              </span>
+              <span className={styles.companyTag}>
+                <Building2 size={12} aria-hidden="true" />
+                {company.name}
+              </span>
             </div>
+            <h1 className={styles.heroTitle}>Generate &amp; Send Trips to Customers</h1>
           </div>
-          <ul className={styles.tripsStatRow}>
-            <li className={styles.tripsStat}>
-              <span className={styles.tripsStatLabel}>Results</span>
-              <span className={styles.tripsStatValue}>{total}</span>
-              <span className={styles.tripsStatHint}>
-                {isFiltered ? "After search" : "Whole catalogue"}
-              </span>
-            </li>
-            <li className={styles.tripsStat}>
-              <span className={styles.tripsStatLabel}>Average price</span>
-              <span className={styles.tripsStatValue}>
-                {averagePrice === null ? "—" : formatCurrency(averagePrice)}
-              </span>
-              <span className={styles.tripsStatHint}>
-                {pricedTrips.length
-                  ? `Across ${pricedTrips.length} priced trip${
-                      pricedTrips.length === 1 ? "" : "s"
-                    }`
-                  : "No prices set"}
-              </span>
-            </li>
-            <li className={styles.tripsStat}>
-              <span className={styles.tripsStatLabel}>Places</span>
-              <span className={styles.tripsStatValue}>{placeCount}</span>
-              <span className={styles.tripsStatHint}>Unique destinations</span>
-            </li>
-          </ul>
-        </div>
-        <aside className={styles.tripsAside}>
-          <div className={styles.tripsAsideMain}>
-            <p className={styles.tripsAsideLabel}>Catalogue size</p>
-            <p className={styles.tripsAsideValue}>
-              {total} <span>trip{total === 1 ? "" : "s"}</span>
-            </p>
-            <p className={styles.tripsAsideCopy}>
-              {isFiltered
-                ? "match the current search. Clear it to see the whole catalogue."
-                : "in this company's catalogue. Trips are published alongside your tours and company profile."}
-            </p>
-          </div>
-          <button
-            className={styles.tripsAsideCta}
-            type="button"
-            onClick={startCreate}
-          >
-            <Plus size={15} /> Add a trip
-          </button>
-        </aside>
-      </section>
+        </header>
 
-      <section
-        id="trip-composer"
-        ref={composerRef}
-        className={`${styles.tripsComposer} ${
-          editing ? styles.tripsComposerEditing : ""
-        }`}
-        aria-labelledby="trip-composer-title"
-      >
-        <div className={styles.tripsComposerHead}>
-          <div className={styles.tripsComposerTitleWrap}>
-            <span className={styles.tripsComposerIcon} aria-hidden="true">
-              {editing ? <Pencil size={20} /> : <Plus size={20} />}
-            </span>
-            <div>
-              <p className={styles.tripsComposerEyebrow}>
-                {editing ? "Editing listing" : "New listing"}
-              </p>
-              <h2 className={styles.tripsComposerTitle} id="trip-composer-title">
-                {editing ? editing.title : "Add a trip to your catalogue"}
+        {/* ===================================================================
+            CARD 1: DEDICATED CUSTOM TRIP BUILDER CARD (NO MAP OVERLAP!)
+           =================================================================== */}
+        <section
+          ref={generatorRef}
+          className={`${styles.panel} ${styles.builderCard}`}
+          aria-labelledby="company-trip-generator-heading"
+        >
+          <header className={styles.panelHead}>
+            <div className={styles.panelHeadCopy}>
+              <span className={styles.eyebrow}>
+                <RouteIcon size={13} aria-hidden="true" />
+                Step 1 · Custom trip builder
+              </span>
+              <h2 id="company-trip-generator-heading" className={styles.panelTitle}>
+                Generate trip &amp; send via WhatsApp
               </h2>
-              <p className={styles.tripsComposerCopy}>
-                {editing
-                  ? "Update the details visitors see on the public company profile. Choose a new image only if you want to replace the current one."
-                  : "Create a standalone place-based listing. Every new trip needs a name, place, price and photo."}
+              <p className={styles.panelSub}>
+                Choose Origin &amp; Destination to calculate the live road route and build a
+                complete WhatsApp card with Google Maps directions.
               </p>
             </div>
-          </div>
-          <span className={styles.tripsComposerMode}>
-            {editing ? `Trip #${editing.id}` : "Draft"}
-          </span>
-        </div>
+          </header>
 
-        <form className={styles.tripsForm} onSubmit={saveTrip}>
-          <div className={styles.tripsFormGrid}>
-            <div className={`${styles.tripsField} ${styles.tripsFieldTitle}`}>
-              <label className={styles.tripsFieldLabel} htmlFor="trip-title">
-                Trip name{" "}
-                <span className={styles.tripsRequired} aria-hidden="true">
-                  *
-                </span>
-              </label>
-              <input
-                id="trip-title"
-                ref={titleInputRef}
-                className={styles.tripsInput}
-                value={form.title}
-                onChange={(event) =>
-                  setForm({ ...form, title: event.target.value })
+          {/* Quick route presets */}
+          <div className={styles.presetsRow}>
+            <span className={styles.presetsLabel}>Quick routes:</span>
+            {MEASURE_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                className={styles.presetBtn}
+                onClick={() => loadRouteIntoGenerator(preset.origin, preset.destination)}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.builderSections}>
+            {/* Group A: Origin & Destination Route */}
+            <div className={styles.builderGroup}>
+              <h3 className={styles.builderGroupTitle}>
+                <MapPin size={15} aria-hidden="true" />
+                Route locations
+              </h3>
+
+              <PlaceAutocomplete
+                label="Origin (Pickup location)"
+                name="company-trip-origin"
+                variant="origin"
+                value={originLabel}
+                pinned={originCoords != null}
+                pinnedLabel="Selected"
+                placeholder="Select or search any origin e.g. Airport, Stone Town, Ferry…"
+                onChange={(val) => {
+                  originGeocodeSeqRef.current += 1;
+                  setOriginLabel(val);
+                  setOriginCoords(null);
+                }}
+                onSelect={(place) => {
+                  originGeocodeSeqRef.current += 1;
+                  setOriginLabel(placeLabel(place));
+                  setOriginCoords({ lat: place.latitude, lng: place.longitude });
+                  setShowMap(true);
+                }}
+                onCustomConfirm={(val) => {
+                  setOriginLabel(val);
+                  setOriginCoords(null);
+                  void resolveCustomEndpoint("origin", val);
+                }}
+                action={
+                  <button
+                    type="button"
+                    className={styles.presetBtn}
+                    onClick={handleUseCurrentGps}
+                    disabled={locating}
+                  >
+                    {locating ? (
+                      <LoaderCircle size={13} className={styles.spin} aria-hidden="true" />
+                    ) : (
+                      <LocateFixed size={13} aria-hidden="true" />
+                    )}
+                    {locating ? "Locating…" : "Use GPS"}
+                  </button>
                 }
-                placeholder="e.g. Sunrise hike to Mount Batur"
-                autoComplete="off"
-                maxLength={200}
-                required
+              />
+
+              <div className={styles.swapRow}>
+                <span className={styles.swapLine} aria-hidden="true" />
+                <button
+                  type="button"
+                  className={styles.swapBtn}
+                  onClick={handleSwap}
+                  disabled={!originLabel.trim() && !destLabel.trim()}
+                >
+                  <ArrowUpDown size={13} aria-hidden="true" />
+                  Swap origin &amp; destination
+                </button>
+                {originLabel.trim() || destLabel.trim() ? (
+                  <button
+                    type="button"
+                    className={styles.swapBtn}
+                    onClick={handleClearLocations}
+                  >
+                    <X size={13} aria-hidden="true" />
+                    Clear
+                  </button>
+                ) : null}
+                <span className={styles.swapLine} aria-hidden="true" />
+              </div>
+
+              <PlaceAutocomplete
+                label="Destination (Drop-off location)"
+                name="company-trip-destination"
+                variant="destination"
+                value={destLabel}
+                pinned={destCoords != null}
+                pinnedLabel="Selected"
+                placeholder="Select or search any destination e.g. Nungwi, Kendwa, Paje, Jambiani…"
+                onChange={(val) => {
+                  destGeocodeSeqRef.current += 1;
+                  setDestLabel(val);
+                  setDestCoords(null);
+                }}
+                onSelect={(place) => {
+                  destGeocodeSeqRef.current += 1;
+                  setDestLabel(placeLabel(place));
+                  setDestCoords({ lat: place.latitude, lng: place.longitude });
+                  setShowMap(true);
+                }}
+                onCustomConfirm={(val) => {
+                  setDestLabel(val);
+                  setDestCoords(null);
+                  void resolveCustomEndpoint("destination", val);
+                }}
               />
             </div>
 
-            <div className={styles.tripsField}>
-              <span className={styles.tripsFieldLabel}>Route</span>
-              <div className={styles.tripsRouteGrid}>
-                <div className={styles.tripsRoutePoint}>
-                  <span className={styles.tripsRouteLabel}>Start</span>
-                  <span className={styles.tripsRouteValue}>
-                    {form.origin_latitude && form.origin_longitude
-                      ? originName || placeNameForCoords(form.origin_latitude, form.origin_longitude) || `${form.origin_latitude}, ${form.origin_longitude}`
-                      : "Pick start point on map"}
-                  </span>
+            {/* Group B: Driver, Vehicle & Customer Quote Details */}
+            <div className={styles.builderGroup}>
+              <h3 className={styles.builderGroupTitle}>
+                <Car size={15} aria-hidden="true" />
+                Driver, vehicle &amp; trip quote
+              </h3>
+
+              {company.drivers.length > 0 ? (
+                <div className={styles.miniField}>
+                  <label htmlFor="company-driver-select" className={styles.miniLabel}>
+                    Assigned driver
+                  </label>
+                  <select
+                    id="company-driver-select"
+                    className={styles.miniSelect}
+                    value={selectedDriverId}
+                    onChange={(e) => handleDriverSelect(e.target.value)}
+                  >
+                    {company.drivers.map((d) => (
+                      <option key={d.id} value={String(d.id)}>
+                        {d.name}
+                        {d.phone ? ` · ${d.phone}` : ""}
+                      </option>
+                    ))}
+                    <option value="custom">Custom / Company dispatch</option>
+                  </select>
                 </div>
-                <div className={styles.tripsRoutePoint}>
-                  <span className={styles.tripsRouteLabel}>Destination</span>
-                  <span className={styles.tripsRouteValue}>
-                    {form.destination_latitude && form.destination_longitude
-                      ? destinationName || placeNameForCoords(form.destination_latitude, form.destination_longitude) || `${form.destination_latitude}, ${form.destination_longitude}`
-                      : "Pick destination on map"}
-                  </span>
+              ) : null}
+
+              <div className={styles.formMiniGrid}>
+                <div className={styles.miniField}>
+                  <label htmlFor="company-driver-name" className={styles.miniLabel}>
+                    Driver / contact name
+                  </label>
+                  <input
+                    id="company-driver-name"
+                    type="text"
+                    className={styles.miniInput}
+                    value={driverName}
+                    onChange={(e) => {
+                      setDriverName(e.target.value);
+                      setSelectedDriverId("custom");
+                    }}
+                    placeholder="e.g. Driver or dispatcher name"
+                  />
+                </div>
+                <div className={styles.miniField}>
+                  <label htmlFor="company-driver-phone" className={styles.miniLabel}>
+                    Phone / WhatsApp
+                  </label>
+                  <input
+                    id="company-driver-phone"
+                    type="text"
+                    className={styles.miniInput}
+                    value={driverPhone}
+                    onChange={(e) => setDriverPhone(e.target.value)}
+                    placeholder="e.g. +255 777 000 000"
+                  />
                 </div>
               </div>
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                onClick={() => void createRoute()}
-                disabled={routeLoading || !form.origin_latitude || !form.destination_latitude}
-              >
-                {routeLoading ? "Calculating…" : "Create route"}
-              </button>
-              {form.distance_km || form.duration_mins ? (
-                <span className={styles.tripsHint}>
-                  Route: {form.distance_km ? `${form.distance_km} km` : ""}
-                  {form.distance_km && form.duration_mins ? " · " : ""}
-                  {form.duration_mins ? `${form.duration_mins} min` : ""}
-                </span>
+
+              {company.vehicles.length > 0 ? (
+                <div className={styles.miniField}>
+                  <label htmlFor="company-vehicle-select" className={styles.miniLabel}>
+                    Assigned vehicle
+                  </label>
+                  <select
+                    id="company-vehicle-select"
+                    className={styles.miniSelect}
+                    value={selectedVehicleId}
+                    onChange={(e) => handleVehicleSelect(e.target.value)}
+                  >
+                    {company.vehicles.map((v) => (
+                      <option key={v.id} value={String(v.id)}>
+                        {v.name} · {v.plate_number} ({v.capacity} seats)
+                      </option>
+                    ))}
+                    <option value="custom">Custom / Other vehicle</option>
+                  </select>
+                </div>
+              ) : null}
+
+              <div className={styles.formMiniGrid}>
+                <div className={styles.miniField}>
+                  <label htmlFor="company-vehicle-name" className={styles.miniLabel}>
+                    Vehicle model
+                  </label>
+                  <input
+                    id="company-vehicle-name"
+                    type="text"
+                    className={styles.miniInput}
+                    value={vehicleName}
+                    onChange={(e) => {
+                      setVehicleName(e.target.value);
+                      setSelectedVehicleId("custom");
+                    }}
+                    placeholder="e.g. Toyota Alphard"
+                  />
+                </div>
+                <div className={styles.miniField}>
+                  <label htmlFor="company-vehicle-plate" className={styles.miniLabel}>
+                    Plate number
+                  </label>
+                  <input
+                    id="company-vehicle-plate"
+                    type="text"
+                    className={styles.miniInput}
+                    value={vehiclePlate}
+                    onChange={(e) => setVehiclePlate(e.target.value)}
+                    placeholder="e.g. Z 441 AB"
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formMiniGrid}>
+                <div className={styles.miniField}>
+                  <label htmlFor="company-trip-schedule" className={styles.miniLabel}>
+                    Pickup date &amp; time (optional)
+                  </label>
+                  <input
+                    id="company-trip-schedule"
+                    type="text"
+                    className={styles.miniInput}
+                    value={scheduleText}
+                    onChange={(e) => setScheduleText(e.target.value)}
+                    placeholder="e.g. Today · 15:00"
+                  />
+                </div>
+                <div className={styles.miniField}>
+                  <label htmlFor="company-trip-fare" className={styles.miniLabel}>
+                    Fare quote (optional)
+                  </label>
+                  <input
+                    id="company-trip-fare"
+                    type="text"
+                    className={styles.miniInput}
+                    value={fareEstimate}
+                    onChange={(e) => setFareEstimate(e.target.value)}
+                    placeholder="e.g. $55 or 145,000 TZS"
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formMiniGrid}>
+                <div className={styles.miniField}>
+                  <label htmlFor="company-trip-pax" className={styles.miniLabel}>
+                    Passengers
+                  </label>
+                  <input
+                    id="company-trip-pax"
+                    type="number"
+                    min={1}
+                    max={50}
+                    className={styles.miniInput}
+                    value={passengers}
+                    onChange={(e) => setPassengers(e.target.value)}
+                  />
+                </div>
+                <div className={styles.miniField}>
+                  <label htmlFor="company-trip-notes" className={styles.miniLabel}>
+                    Extra note (optional)
+                  </label>
+                  <input
+                    id="company-trip-notes"
+                    type="text"
+                    className={styles.miniInput}
+                    value={tripNotes}
+                    onChange={(e) => setTripNotes(e.target.value)}
+                    placeholder="e.g. Meet at Arrival Gate A"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <footer className={styles.builderFooterBar}>
+            <span className={styles.builderRoutePill}>
+              <RouteIcon size={15} aria-hidden="true" />
+              {calculating
+                ? "Calculating road distance & time…"
+                : routeDistanceKm
+                  ? `${formatTripDistance(routeDistanceKm)} · ${formatTripDuration(routeDurationMins)}`
+                  : "Pick Origin & Destination to measure"}
+            </span>
+
+            <button
+              type="button"
+              className={styles.btnPrimary}
+              disabled={calculating || !originLabel.trim() || !destLabel.trim()}
+              onClick={() => void handleGenerateManual()}
+            >
+              {calculating ? (
+                <LoaderCircle size={16} className={styles.spin} aria-hidden="true" />
+              ) : (
+                <Navigation size={16} aria-hidden="true" />
+              )}
+              {calculating ? "Calculating route…" : "Generate trip route"}
+            </button>
+          </footer>
+        </section>
+
+        {/* ===================================================================
+            CARD 2: SEPARATE FULL-WIDTH LIVE ROUTE MAP CARD
+           =================================================================== */}
+        <section
+          ref={mapCardRef}
+          className={`${styles.panel} ${styles.mapCard}`}
+          aria-labelledby="company-route-map-heading"
+        >
+          <header className={styles.panelHead}>
+            <div className={styles.panelHeadCopy}>
+              <span className={styles.eyebrow}>
+                <MapIcon size={13} aria-hidden="true" />
+                Step 2 · Live route preview map
+              </span>
+              <h2 id="company-route-map-heading" className={styles.panelTitle}>
+                {originLabel.trim() || destLabel.trim()
+                  ? `${originLabel.split(",")[0] || "Select origin"} → ${destLabel.split(",")[0] || "Select destination"}`
+                  : "Select Origin → Destination"}
+              </h2>
+              <p className={styles.panelSub}>
+                Clear trip route map showing only your pickup origin, driving road line, and
+                drop-off destination.
+              </p>
+            </div>
+
+            <div className={styles.heroActions}>
+              {googleMapsUrl ? (
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.linkSecondary}
+                >
+                  <ExternalLink size={15} aria-hidden="true" />
+                  Open in Google Maps
+                </a>
+              ) : null}
+              {originCoords && destCoords ? (
+                <button
+                  type="button"
+                  className={styles.btnSecondary}
+                  onClick={() => setShowMap((v) => !v)}
+                >
+                  <MapIcon size={15} aria-hidden="true" />
+                  {showMap ? "Hide map" : "Show map"}
+                </button>
               ) : null}
             </div>
+          </header>
 
-            <div className={styles.tripsField}>
-              <label className={styles.tripsFieldLabel} htmlFor="trip-price">
-                Price (USD){" "}
-                <span className={styles.tripsRequired} aria-hidden="true">
-                  *
-                </span>
-              </label>
-              <div className={styles.tripsMoney}>
-                <span className={styles.tripsMoneySymbol} aria-hidden="true">
-                  $
-                </span>
-                <input
-                  id="trip-price"
-                  className={styles.tripsInput}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  inputMode="decimal"
-                  value={form.price}
-                  onChange={(event) =>
-                    setForm({ ...form, price: event.target.value })
-                  }
-                  placeholder="0"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className={`${styles.tripsField} ${styles.tripsFieldWide}`}>
-              <div className={styles.tripsFieldHead}>
-                <label
-                  className={styles.tripsFieldLabel}
-                  htmlFor="trip-description"
-                >
-                  Description
-                </label>
-                <span className={styles.tripsCounter}>
-                  {form.description.length.toLocaleString("en-US")} / 5,000
-                </span>
-              </div>
-              <textarea
-                id="trip-description"
-                className={styles.tripsTextarea}
-                value={form.description}
-                onChange={(event) =>
-                  setForm({ ...form, description: event.target.value })
-                }
-                placeholder="What makes this place worth visiting?"
-                rows={3}
-                maxLength={5000}
-              />
-            </div>
-
-            <div className={`${styles.tripsField} ${styles.tripsMapField}`}>
-              <div className={styles.tripsFieldHead}>
-                <span className={styles.tripsFieldLabel}>
-                  <MapPin size={14} aria-hidden="true" /> Zanzibar location map
-                </span>
-                <span className={styles.tripsFieldHint}>
-                  Pick a place to fill the place name and coordinates
-                </span>
-              </div>
-              <TripPlaceMapPicker
-                latitude={coordinateValue(form.latitude)}
-                longitude={coordinateValue(form.longitude)}
-                disabled={saving}
-                onSelectPlace={selectTripPlace}
-                onPickPoint={pickTripPoint}
-                onClearPoint={clearTripPoint}
-              />
-            </div>
-
-            <div className={`${styles.tripsField} ${styles.tripsMediaField}`}>
-              <span className={styles.tripsFieldLabel}>
-                Listing image{" "}
-                {editing ? (
-                  <span className={styles.tripsFieldHint}>(optional)</span>
-                ) : (
-                  <span className={styles.tripsRequired} aria-hidden="true">
-                    *
-                  </span>
-                )}
+          <div className={styles.mapRouteStrip}>
+            <div className={styles.routeStop}>
+              <span className={styles.stopPinA} aria-hidden="true">
+                A
               </span>
-              <div className={styles.tripsMediaRow}>
-                <div className={styles.tripsUpload}>
-                  <input
-                    id="trip-image"
-                    ref={fileInputRef}
-                    className={styles.tripsFileInput}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={onImage}
-                    aria-label="Listing image"
-                    aria-describedby="trip-image-hint"
-                  />
-                  <label className={styles.tripsFileButton} htmlFor="trip-image">
-                    <Upload size={15} />
-                    {image
-                      ? "Change image"
-                      : editing
-                        ? "Replace image"
-                        : "Choose image"}
-                  </label>
-                  <div className={styles.tripsUploadMeta}>
-                    <span className={styles.tripsFileName}>
-                      {image
-                        ? image.name
-                        : editing
-                          ? "Keeping the current image"
-                          : "No file selected"}
-                    </span>
-                    <span className={styles.tripsFieldHint} id="trip-image-hint">
-                      JPG, PNG or WebP; maximum 5 MB.
+              <div className={styles.stopCopy}>
+                <span className={styles.stopLabel}>Pickup origin</span>
+                <span className={styles.stopValue}>{originLabel || "Choose origin above"}</span>
+              </div>
+            </div>
+            <div className={styles.routeStop}>
+              <span className={styles.stopPinB} aria-hidden="true">
+                B
+              </span>
+              <div className={styles.stopCopy}>
+                <span className={styles.stopLabel}>Drop-off destination</span>
+                <span className={styles.stopValue}>{destLabel || "Choose destination above"}</span>
+              </div>
+            </div>
+          </div>
+
+          {showMap && originCoords && destCoords ? (
+            <div className={styles.mapPreviewWrap}>
+              <TripRouteOverlayMap
+                originLat={originCoords.lat}
+                originLng={originCoords.lng}
+                destinationLat={destCoords.lat}
+                destinationLng={destCoords.lng}
+                originLabel={originLabel}
+                destinationLabel={destLabel}
+                routeOnly
+              />
+            </div>
+          ) : !originCoords || !destCoords ? (
+            <div className={styles.stateCard}>
+              <span className={styles.stateIcon} aria-hidden="true">
+                <MapPin size={26} />
+              </span>
+              <h3>
+                {originCoords && !destCoords
+                  ? "Now select a destination to display the route"
+                  : !originCoords && destCoords
+                    ? "Now select a pickup origin to display the route"
+                    : originLabel.trim() && destLabel.trim()
+                      ? "Tap Generate trip route to plot your locations"
+                      : "Select an origin and destination to see the trip route"}
+              </h3>
+              <p>
+                {originCoords && !destCoords
+                  ? `Pickup origin is set to ${originLabel.split(",")[0]}. Choose any destination in Step 1 to show the road route.`
+                  : !originCoords && destCoords
+                    ? `Destination is set to ${destLabel.split(",")[0]}. Choose any pickup origin (or tap Use GPS) in Step 1 to show the road route.`
+                    : "Choose any pickup origin first, then choose a destination in Step 1. The map will show only your origin pin, road route line, and destination pin."}
+              </p>
+            </div>
+          ) : null}
+        </section>
+
+        {/* ===================================================================
+            CARD 3: SEPARATE WHATSAPP CUSTOMER DISPATCH CARD
+           =================================================================== */}
+        <section
+          className={`${styles.panel} ${styles.whatsappDispatchCard}`}
+          aria-labelledby="company-whatsapp-card-heading"
+        >
+          <header className={styles.panelHead}>
+            <div className={styles.panelHeadCopy}>
+              <span className={styles.eyebrow}>
+                <MessageCircle size={13} aria-hidden="true" />
+                Step 3 · Direct WhatsApp send
+              </span>
+              <h2 id="company-whatsapp-card-heading" className={styles.panelTitle}>
+                Send full trip card to customer on WhatsApp
+              </h2>
+              <p className={styles.panelSub}>
+                Tapping send opens WhatsApp directly to your contact picker with your company and
+                driver details, vehicle info, route estimate, and clickable Google Maps directions.
+              </p>
+            </div>
+            <button
+              type="button"
+              className={styles.btnSecondary}
+              disabled={!generatedWhatsApp}
+              onClick={() => void handleCopyMessage()}
+            >
+              {copied ? (
+                <Check size={15} aria-hidden="true" />
+              ) : (
+                <Copy size={15} aria-hidden="true" />
+              )}
+              {copied ? "Copied!" : "Copy message"}
+            </button>
+          </header>
+
+          <div className={styles.whatsappDispatchGrid}>
+            <pre className={styles.whatsappPreviewBody}>
+              {generatedWhatsApp?.message ||
+                "Select an origin and destination in Step 1 to compose the full customer WhatsApp message."}
+            </pre>
+
+            <div className={styles.whatsappSideBox}>
+              <ul className={styles.whatsappSideList}>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>
+                    Operator: <strong>{company.name}</strong>
+                  </span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>
+                    Driver: <strong>{driverName.trim() || company.name}</strong>
+                    {driverPhone.trim() ? ` (${driverPhone.trim()})` : ""}
+                  </span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>
+                    Vehicle:{" "}
+                    <strong>{vehicleName || defaultVehicle?.name || "Private Hire"}</strong>
+                    {vehiclePlate ? ` · ${vehiclePlate}` : ""}
+                  </span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>
+                    Google Maps full Origin → Destination route &amp; individual location pins
+                    included
+                  </span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>Opens WhatsApp directly to select any customer contact</span>
+                </li>
+              </ul>
+
+              <div className={styles.whatsappActionsStack}>
+                {generatedWhatsApp ? (
+                  <a
+                    href={generatedWhatsApp.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.whatsappPrimaryLink}
+                  >
+                    <Send size={16} aria-hidden="true" />
+                    Send Trip via WhatsApp (Select Contact)
+                  </a>
+                ) : null}
+                {googleMapsUrl ? (
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.linkSecondary}
+                  >
+                    <ExternalLink size={15} aria-hidden="true" />
+                    Preview Route in Google Maps
+                  </a>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 4: SUGGESTED ZANZIBAR DESTINATIONS */}
+        <section className={styles.panel} aria-labelledby="company-suggested-heading">
+          <header className={styles.panelHead}>
+            <div className={styles.panelHeadCopy}>
+              <span className={styles.eyebrow}>
+                <Compass size={13} aria-hidden="true" />
+                Suggested destinations
+              </span>
+              <h2 id="company-suggested-heading" className={styles.panelTitle}>
+                Suggested Zanzibar Destinations
+              </h2>
+            </div>
+          </header>
+
+          <div className={styles.discoveryGrid}>
+            {CURATED_DESTINATIONS.map((dest) => {
+              const directWa = buildWhatsAppForRoute(
+                AIRPORT_HUB,
+                { label: `${dest.name}, ${dest.area}`, lat: dest.lat, lng: dest.lng },
+                {
+                  distanceKm: dest.approxFromAirportKm,
+                  durationMins: dest.approxFromAirportMins,
+                },
+              );
+
+              return (
+                <article className={styles.discoveryCard} key={dest.id}>
+                  <div className={styles.badgeGroup}>
+                    <span className={styles.companyTag}>{dest.categoryLabel}</span>
+                    <span className={`${styles.statusBadge} ${styles.statusPending}`}>
+                      <Star size={11} fill="currentColor" aria-hidden="true" />
+                      {dest.rating.toFixed(1)} ({dest.reviews.toLocaleString("en-US")})
                     </span>
                   </div>
-                </div>
-                <div className={styles.tripsPreview}>
-                  {preview ? (
-                    <Image
-                      className={styles.tripsPreviewImg}
-                      src={preview}
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 100vw, 300px"
-                      unoptimized
-                    />
-                  ) : (
-                    <span className={styles.tripsPreviewEmpty}>
-                      <ImageIcon size={22} aria-hidden="true" />
-                      <span>Image preview</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {formError ? (
-            <p className={styles.tripsFormError} role="alert">
-              <AlertCircle size={16} aria-hidden="true" />
-              <span>{formError}</span>
-            </p>
-          ) : null}
+                  <div>
+                    <h3 className={styles.bookingTitle}>{dest.name}</h3>
+                    <p
+                      className={styles.panelSub}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+                    >
+                      <MapPin size={12} aria-hidden="true" />
+                      {dest.area}
+                    </p>
+                  </div>
 
-          <div className={styles.tripsFormActions}>
-            <button className="btn btn-primary" type="submit" disabled={saving}>
-              {saving ? (
-                <span className={styles.tripsSpin}>
-                  <Loader size={16} />
-                </span>
-              ) : (
-                <Save size={16} />
-              )}
-              {saving
-                ? "Saving…"
-                : editing
-                  ? "Save changes"
-                  : "Create trip"}
-            </button>
-            {editing ? (
-              <button
-                className="btn btn-outline"
-                type="button"
-                onClick={clearForm}
-                disabled={saving}
-              >
-                <X size={16} /> Cancel edit
-              </button>
-            ) : (
-              <button
-                className="btn btn-ghost"
-                type="button"
-                onClick={clearForm}
-                disabled={saving}
-              >
-                <X size={16} /> Clear
-              </button>
-            )}
-            <span className={styles.tripsFormNote}>
-              Saved trips appear immediately on your public company profile.
-            </span>
-          </div>
-        </form>
-      </section>
+                  <p className={styles.panelSub}>{dest.summary}</p>
 
-      <section className={styles.tripsControls} aria-label="Search and sort trips">
-        <div className={styles.tripsControlsTop}>
-          <div className={styles.tripsSearch}>
-            <span className={styles.tripsSearchIcon} aria-hidden="true">
-              <Search size={16} />
-            </span>
-            <label className={styles.tripsSrOnly} htmlFor="trip-search">
-              Search trips
-            </label>
-            <input
-              id="trip-search"
-              className={styles.tripsSearchInput}
-              type="search"
-              placeholder="Search by title, place or description…"
-              value={searchInput}
-              onChange={(event) => {
-                setSearchInput(event.target.value);
-                setPage(1);
-              }}
-              autoComplete="off"
-              maxLength={200}
-            />
-            {searchInput ? (
-              <button
-                className={styles.tripsSearchClear}
-                type="button"
-                onClick={() => {
-                  setSearchInput("");
-                  setPage(1);
-                }}
-                aria-label="Clear trip search"
-              >
-                <X size={15} />
-              </button>
-            ) : null}
-          </div>
-          <div className={styles.tripsControlsMeta}>
-            <p className={styles.tripsCount} role="status" aria-live="polite">
-              <strong>{total}</strong> trip{total === 1 ? "" : "s"}
-              {isFiltered ? " match" : " listed"}
-            </p>
-          </div>
-        </div>
-        <div className={styles.tripsFilters}>
-          <span className={styles.tripsSortLabel}>Sort</span>
-          <div
-            className={styles.tripsFilterScroll}
-            role="group"
-            aria-label="Sort trips"
-          >
-            {SORT_OPTIONS.map((option) => {
-              const active = sort === option.value;
-              return (
-                <button
-                  key={option.value}
-                  className={`${styles.tripsFilter} ${
-                    active ? styles.tripsFilterActive : ""
-                  }`}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => {
-                    setSort(option.value);
-                    setPage(1);
-                  }}
-                >
-                  {active ? (
-                    <span className={styles.tripsFilterDot} aria-hidden="true" />
-                  ) : null}
-                  {option.label}
-                </button>
+                  <span className={styles.footerHint}>
+                    <Clock3 size={13} aria-hidden="true" />~
+                    {formatTripDistance(dest.approxFromAirportKm)} ·{" "}
+                    {formatTripDuration(dest.approxFromAirportMins)} from Airport
+                  </span>
+
+                  <div className={styles.discoveryCardFooter}>
+                    <button
+                      type="button"
+                      className={styles.btnSecondary}
+                      onClick={() => measureDestination(dest)}
+                    >
+                      <RouteIcon size={14} aria-hidden="true" />
+                      Generate
+                    </button>
+                    <a
+                      href={directWa.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={styles.whatsappMiniLink}
+                    >
+                      <Send size={13} aria-hidden="true" />
+                      Send WhatsApp
+                    </a>
+                  </div>
+                </article>
               );
             })}
           </div>
-          {isAdjusted ? (
-            <button className={styles.tripsReset} type="button" onClick={resetView}>
-              Reset view
-            </button>
-          ) : null}
-        </div>
-      </section>
+        </section>
 
-      {error ? (
-        <div
-          className={`${styles.tripsState} ${styles.tripsStateDanger}`}
-          role="alert"
-        >
-          <span className={styles.tripsStateIcon} aria-hidden="true">
-            <AlertCircle size={22} />
-          </span>
-          <h2 className={styles.tripsStateTitle}>Trips unavailable</h2>
-          <p className={styles.tripsStateCopy}>{error}</p>
-          <div className={styles.tripsStateActions}>
-            <button
-              className="btn btn-outline btn-sm"
-              type="button"
-              onClick={() => {
-                setError(null);
-                setLoading(true);
-                setReloadKey((value) => value + 1);
-              }}
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      ) : loading ? (
-        <div className={styles.tripsGridWrap} role="status">
-          <span className={styles.tripsSrOnly}>Loading company trips…</span>
-          <ul className={styles.tripsGrid} aria-hidden="true">
-            {Array.from({ length: 6 }, (_, index) => (
-              <li className={styles.tripsSkeleton} key={index}>
-                <div className={styles.tripsSkeletonMedia} />
-                <div className={styles.tripsSkeletonBody}>
-                  <div
-                    className={`${styles.tripsSkeletonLine} ${styles.tripsSkeletonTitle}`}
-                  />
-                  <div
-                    className={`${styles.tripsSkeletonLine} ${styles.tripsSkeletonLineMedium}`}
-                  />
-                  <div
-                    className={`${styles.tripsSkeletonLine} ${styles.tripsSkeletonLineShort}`}
-                  />
-                  <div className={styles.tripsSkeletonFooter}>
-                    <div className={styles.tripsSkeletonPrice} />
-                    <div className={styles.tripsSkeletonMeta} />
-                  </div>
-                </div>
-                <div className={styles.tripsSkeletonActions}>
-                  <div className={styles.tripsSkeletonButton} />
-                  <div
-                    className={`${styles.tripsSkeletonButton} ${styles.tripsSkeletonButtonIcon}`}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : pageTrips.length === 0 ? (
-        <div className={styles.tripsState}>
-          <span className={styles.tripsStateIcon} aria-hidden="true">
-            {isFiltered ? <Search size={22} /> : <Building2 size={22} />}
-          </span>
-          <h2 className={styles.tripsStateTitle}>{emptyTitle}</h2>
-          <p className={styles.tripsStateCopy}>{emptyCopy}</p>
-          <div className={styles.tripsStateActions}>
-            {isFiltered ? (
-              <button
-                className="btn btn-outline btn-sm"
-                type="button"
-                onClick={() => {
-                  setSearchInput("");
-                  setPage(1);
-                }}
-              >
-                Clear search
-              </button>
-            ) : (
-              <button
-                className="btn btn-primary btn-sm"
-                type="button"
-                onClick={startCreate}
-              >
-                <Plus size={15} /> Add trip
-              </button>
-            )}
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className={styles.tripsGridWrap}>
-            <ul className={styles.tripsGrid}>
-              {pageTrips.map((trip) => {
-                const price = formatPrice(trip.price);
-                const busy = deletingId === trip.id;
-                const isEditing = editing?.id === trip.id;
-
-                return (
-                  <li
-                    className={`${styles.tripsCard} ${
-                      isEditing ? styles.tripsCardEditing : ""
-                    }`}
-                    key={trip.id}
-                  >
-                    <div className={styles.tripsMedia}>
-                      {trip.image_url ? (
-                        <Image
-                          className={styles.tripsMediaImg}
-                          src={trip.image_url}
-                          alt=""
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw"
-                        />
-                      ) : (
-                        <span
-                          className={styles.tripsMediaFallback}
-                          aria-hidden="true"
-                        >
-                          <MapPin size={34} />
-                        </span>
-                      )}
-                      <span
-                        className={styles.tripsMediaShade}
-                        aria-hidden="true"
-                      />
-                      <span className={styles.tripsPlaceBadge}>
-                        {trip.place || "No place"}
-                      </span>
-                      <span className={styles.tripsPriceBadge}>
-                        {price ?? "No price"}
-                      </span>
-                      {isEditing ? (
-                        <span className={styles.tripsEditingTag}>Editing</span>
-                      ) : null}
-                    </div>
-
-                    <div className={styles.tripsBody}>
-                      <h3 className={styles.tripsCardTitle}>{trip.title}</h3>
-                      <p className={styles.tripsMeta}>
-                        <span className={styles.tripsMetaItem}>
-                          <MapPin size={13} aria-hidden="true" />
-                          <span>{trip.place || "No place"}</span>
-                        </span>
-                        {trip.latitude != null && trip.longitude != null ? (
-                          <a
-                            className={`${styles.tripsMetaItem} ${styles.tripsMetaLink}`}
-                            href={`https://www.google.com/maps/search/?api=1&query=${trip.latitude},${trip.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Open saved coordinates in Google Maps"
-                          >
-                            <Locate size={13} aria-hidden="true" />
-                            <span>
-                              {trip.latitude.toFixed(5)},{" "}
-                              {trip.longitude.toFixed(5)}
-                            </span>
-                          </a>
-                        ) : null}
-                        {trip.origin_latitude != null && trip.origin_longitude != null && trip.destination_latitude != null && trip.destination_longitude != null ? (
-                          <span className={styles.tripsMetaItem}>
-                            <MapPin size={13} aria-hidden="true" />
-                            <span>
-                              {trip.origin_latitude.toFixed(5)}, {trip.origin_longitude.toFixed(5)} → {trip.destination_latitude.toFixed(5)}, {trip.destination_longitude.toFixed(5)}
-                              {trip.distance_km != null ? ` · ${trip.distance_km.toFixed(1)} km` : ""}
-                              {trip.duration_mins != null ? ` · ${trip.duration_mins} min` : ""}
-                            </span>
-                          </span>
-                        ) : null}
-                        <span className={styles.tripsMetaItem}>
-                          <CalendarDays size={13} aria-hidden="true" />
-                          <span>{formatDate(trip.created_at, "Added")}</span>
-                        </span>
-                      </p>
-                      <p
-                        className={`${styles.tripsCopy} ${
-                          trip.description?.trim() ? "" : styles.tripsCopyEmpty
-                        }`}
-                      >
-                        {trip.description?.trim() || "No description yet."}
-                      </p>
-                      <div className={styles.tripsFoot}>
-                        <div className={styles.tripsPrice}>
-                          <span className={styles.tripsPriceValue}>
-                            {price ?? "Price on request"}
-                          </span>
-                          <span className={styles.tripsPriceHint}>
-                            {price ? "Listed price" : "No price set"}
-                          </span>
-                        </div>
-                        <div className={styles.tripsFootMeta}>
-                          <span className={styles.tripsUpdated}>
-                            {formatDate(trip.updated_at, "Updated")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={styles.tripsCardActions}>
-                      <button
-                        className="btn btn-primary btn-sm"
-                        type="button"
-                        onClick={() => editTrip(trip)}
-                      >
-                        <Pencil size={14} /> Edit trip
-                      </button>
-                      <button
-                        className={styles.tripsDelete}
-                        type="button"
-                        onClick={() => void deleteTrip(trip)}
-                        disabled={busy}
-                        aria-label={`Delete ${trip.title}`}
-                        title="Delete trip"
-                      >
-                        {busy ? (
-                          <span className={styles.tripsSpin}>
-                            <Loader size={15} />
-                          </span>
-                        ) : (
-                          <Trash2 size={15} />
-                        )}
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          <nav className={styles.tripsPagination} aria-label="Trip pages">
-            <p className={styles.tripsRange}>
-              Showing <strong>{rangeStart}</strong>–<strong>{rangeEnd}</strong> of{" "}
-              <strong>{total}</strong> trip{total === 1 ? "" : "s"}
-            </p>
-            <div className={styles.tripsPageControls}>
-              <button
-                className="btn btn-outline btn-sm"
-                type="button"
-                onClick={() => setPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage <= 1}
-                aria-label="Previous page"
-              >
-                <ChevronLeft size={15} /> Previous
-              </button>
-              <span className={styles.tripsPageStatus}>
-                Page {currentPage} of {pages}
+        {/* SECTION 5: TOP RATED TRIPS */}
+        <section className={styles.panel} aria-labelledby="company-top-rated-heading">
+          <header className={styles.panelHead}>
+            <div className={styles.panelHeadCopy}>
+              <span className={styles.eyebrow}>
+                <Award size={13} aria-hidden="true" />
+                Highest traveler scores
               </span>
-              <button
-                className="btn btn-outline btn-sm"
-                type="button"
-                onClick={() => setPage(Math.min(pages, currentPage + 1))}
-                disabled={currentPage >= pages}
-                aria-label="Next page"
-              >
-                Next <ChevronRight size={15} />
-              </button>
+              <h2 id="company-top-rated-heading" className={styles.panelTitle}>
+                Top Rated Trips
+              </h2>
+              <p className={styles.panelSub}>
+                Most loved Zanzibar routes you can instantly customize or share directly with
+                customers via WhatsApp.
+              </p>
             </div>
-          </nav>
-        </>
-      )}
-    </div>
+          </header>
+
+          <div className={styles.discoveryGrid}>
+            {topRatedTrips.map((trip) => {
+              const directWa = buildWhatsAppForRoute(trip.origin, trip.destination, {
+                distanceKm: trip.distanceKm || null,
+                durationMins: trip.durationMins || null,
+                fare: trip.priceHint ?? null,
+              });
+
+              return (
+                <article className={styles.discoveryCard} key={trip.id}>
+                  <div className={styles.badgeGroup}>
+                    <span className={`${styles.statusBadge} ${styles.statusPending}`}>
+                      <Star size={11} fill="currentColor" aria-hidden="true" />
+                      {trip.rating.toFixed(1)} · {trip.reviews.toLocaleString("en-US")} reviews
+                    </span>
+                    {trip.priceHint ? (
+                      <span className={`${styles.statusBadge} ${styles.statusConfirmed}`}>
+                        {trip.priceHint}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <h3 className={styles.bookingTitle}>{trip.title}</h3>
+                  <p className={styles.panelSub}>{trip.summary}</p>
+
+                  <div className={styles.routeBox}>
+                    <div className={styles.routeStop}>
+                      <span className={styles.stopPinA} aria-hidden="true">
+                        A
+                      </span>
+                      <span className={styles.stopValue}>{trip.origin.label.split(",")[0]}</span>
+                    </div>
+                    <div className={styles.routeStop}>
+                      <span className={styles.stopPinB} aria-hidden="true">
+                        B
+                      </span>
+                      <span className={styles.stopValue}>
+                        {trip.destination.label.split(",")[0]}
+                      </span>
+                    </div>
+                    {trip.distanceKm || trip.durationMins ? (
+                      <div className={styles.routeMetaChips}>
+                        <span>{formatTripDistance(trip.distanceKm)}</span>
+                        <span>·</span>
+                        <span>{formatTripDuration(trip.durationMins)}</span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className={styles.discoveryCardFooter}>
+                    <button
+                      type="button"
+                      className={styles.btnSecondary}
+                      onClick={() => loadRouteIntoGenerator(trip.origin, trip.destination)}
+                    >
+                      <Car size={14} aria-hidden="true" />
+                      Load route
+                    </button>
+                    <a
+                      href={directWa.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={styles.whatsappMiniLink}
+                    >
+                      <Send size={13} aria-hidden="true" />
+                      Send WhatsApp
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }
