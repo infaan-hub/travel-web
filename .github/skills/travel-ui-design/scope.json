@@ -195,6 +195,7 @@
         "src/app/onboarding/**",
         "src/app/tour-company/**",
         "src/features/pages/CompaniesPage.tsx",
+        "src/features/pages/companies-page.module.css",
         "src/features/pages/company-public.module.css",
         "src/features/pages/company-profile-page.module.css",
         "src/features/pages/TripsPage.tsx",
