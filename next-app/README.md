@@ -107,12 +107,17 @@ Open `http://localhost:3000`.
 ## Environment
 
 See `.env.example`. Production requires a real PostgreSQL `DATABASE_URL` and a
-32+ character `AUTH_SECRET`. The current upload implementation writes to
-`public/uploads`; that directory is ephemeral on Vercel, so a durable external
-media service must be integrated before relying on production uploads. External object
-Storage is not currently implemented. SMTP, WhatsApp and Nominatim settings are
-optional; in-app notifications and Web Push are the supported notification
-paths.
+32+ character `AUTH_SECRET`. `npm run build` runs `scripts/build.js`: when
+`DATABASE_URL`/`DIRECT_URL` are missing (for example, a Vercel Preview
+deployment with Production-scoped variables), it skips migrations and uses a
+placeholder connection so the Next.js build can complete. Set both variables
+for any environment that needs database access.
+
+The current upload implementation writes to `public/uploads`; that directory is
+ephemeral on Vercel, so a durable external media service must be integrated
+before relying on production uploads. External object Storage is not currently
+implemented. SMTP, WhatsApp and Nominatim settings are optional; in-app
+notifications and Web Push are the supported notification paths.
 
 ## Authentication
 

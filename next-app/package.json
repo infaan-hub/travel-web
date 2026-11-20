@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/migrate-deploy.js && prisma generate && next build",
+    "build": "node scripts/build.js",
     "vercel-build": "npm run build",
     "start": "next start",
     "lint": "eslint .",
