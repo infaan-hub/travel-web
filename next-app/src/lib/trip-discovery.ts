@@ -551,3 +551,55 @@ export function toggleFavoriteTrip(
     added: true,
   };
 }
+
+export const DEFAULT_TRIP_BOOKING_SERVICE_ID = 2;
+
+export function buildBookingDestinationHref(
+  destination?: TripEndpoint | null,
+  fallbackLabel?: string,
+  serviceId: number | string = DEFAULT_TRIP_BOOKING_SERVICE_ID,
+): string {
+  const label = (destination?.label || fallbackLabel || "").trim().slice(0, 255);
+  const base = `/booking/${serviceId}/`;
+  if (!label) return base;
+  const params = new URLSearchParams();
+  params.set("destination", label);
+  if (
+    destination &&
+    Number.isFinite(destination.lat) &&
+    Number.isFinite(destination.lng)
+  ) {
+    params.set("dest_lat", String(destination.lat));
+    params.set("dest_lng", String(destination.lng));
+  }
+  return `${base}?${params.toString()}`;
+}
+
+export function parseBookingDestinationParams(searchParams: {
+  get(name: string): string | null;
+}): {
+  destination: string;
+  destLat: number | null;
+  destLng: number | null;
+} | null {
+  const rawDest = searchParams.get("destination")?.trim().slice(0, 255) ?? "";
+  if (rawDest.length < 2) return null;
+
+  const rawLat = searchParams.get("dest_lat");
+  const rawLng = searchParams.get("dest_lng");
+  const lat = rawLat !== null && rawLat !== "" ? Number(rawLat) : NaN;
+  const lng = rawLng !== null && rawLng !== "" ? Number(rawLng) : NaN;
+  const validCoords =
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180;
+
+  return {
+    destination: rawDest,
+    destLat: validCoords ? lat : null,
+    destLng: validCoords ? lng : null,
+  };
+}

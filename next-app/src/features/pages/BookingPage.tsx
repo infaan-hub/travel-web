@@ -8,7 +8,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
@@ -50,6 +50,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getImageUrl } from "@/lib/utils/image-url";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import type { PlaceSuggestion } from "@/lib/place-types";
+import { parseBookingDestinationParams } from "@/lib/trip-discovery";
 import styles from "@/features/pages/booking-trip.module.css";
 
 const TripRouteOverlayMap = dynamic(
@@ -231,6 +232,11 @@ function scrollSectionIntoView(sectionId: string, force = false) {
 export default function BookingPage() {
   const params = useParams<Record<string, string>>();
   const serviceId = params.serviceId;
+  const searchParams = useSearchParams();
+  const initialPrefill = useMemo(
+    () => parseBookingDestinationParams(searchParams),
+    [searchParams],
+  );
   const { user, loading: authLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -255,8 +261,9 @@ export default function BookingPage() {
     error: string;
   } | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [destinationEditedByUser, setDestinationEditedByUser] = useState(false);
 
-  const [form, setForm] = useState<FormState>({
+  const [form, setForm] = useState<FormState>(() => ({
     full_name: "",
     phone: "",
     passengers: "1",
@@ -266,12 +273,52 @@ export default function BookingPage() {
     originLat: null,
     originLng: null,
     originSource: "none",
-    destination: "",
-    destLat: null,
-    destLng: null,
-    destSource: "none",
+    destination: initialPrefill?.destination ?? "",
+    destLat: initialPrefill?.destLat ?? null,
+    destLng: initialPrefill?.destLng ?? null,
+    destSource: initialPrefill
+      ? initialPrefill.destLat != null && initialPrefill.destLng != null
+        ? "suggestion"
+        : "custom"
+      : "none",
     notes: "",
-  });
+  }));
+
+  useEffect(() => {
+    if (
+      !initialPrefill ||
+      (initialPrefill.destLat != null && initialPrefill.destLng != null)
+    ) {
+      return;
+    }
+    let active = true;
+    const targetName = initialPrefill.destination;
+    geocodeAPI
+      .search(targetName)
+      .then((response) => {
+        if (!active) return;
+        const lat = Number(response.data?.lat);
+        const lng = Number(response.data?.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        setForm((current) => {
+          if (current.destination.trim() !== targetName || current.destLat != null) {
+            return current;
+          }
+          return {
+            ...current,
+            destLat: lat,
+            destLng: lng,
+            destSource: "suggestion",
+          };
+        });
+      })
+      .catch(() => {
+        // Pre-filled destination name stays valid even without geocoded coordinates.
+      });
+    return () => {
+      active = false;
+    };
+  }, [initialPrefill]);
 
   const today = useMemo(() => localDateIso(), []);
   const loading = Boolean(serviceId) && loadedServiceId !== serviceId;
@@ -377,11 +424,16 @@ export default function BookingPage() {
   // Progressive partition visibility: each partition appears automatically below
   // once the prior partition is complete, and stays mounted if already started
   // so editing an earlier typo never collapses the form.
+  const destinationPrefilledActive =
+    Boolean(initialPrefill) &&
+    !destinationEditedByUser &&
+    form.destination.trim().length >= 2;
+
   const hasJourneyProgress = Boolean(
     form.travel_date || form.pickup_time || form.passengers !== "1",
   );
   const hasRouteProgress = Boolean(
-    form.origin.trim() || form.destination.trim(),
+    form.origin.trim() || (form.destination.trim() && destinationEditedByUser),
   );
   const hasNotesProgress = Boolean(form.notes.trim());
 
@@ -541,8 +593,9 @@ export default function BookingPage() {
     : "";
   const providerName = service?.company?.name?.trim() || "The provider";
   const driverName = service?.driver?.name?.trim() || "Assigned driver";
+  const bookingSearch = searchParams.toString();
   const loginReturnUrl = `/login/?from=${encodeURIComponent(
-    `/booking/${serviceId ?? ""}/`,
+    `/booking/${serviceId ?? ""}/${bookingSearch ? `?${bookingSearch}` : ""}`,
   )}`;
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -693,6 +746,7 @@ export default function BookingPage() {
   }
 
   function swapRoute() {
+    setDestinationEditedByUser(true);
     setForm((current) => ({
       ...current,
       origin: current.destination,
@@ -1499,9 +1553,21 @@ export default function BookingPage() {
                   <div className={styles.nextPartitionCue}>
                     <ArrowRight size={14} aria-hidden="true" />
                     <span>
-                      Select your travel date and time to unlock{" "}
-                      <strong>Origin &amp; Destination (Trip Generator)</strong>{" "}
-                      below.
+                      {destinationPrefilledActive ? (
+                        <>
+                          Select your travel date and time to unlock{" "}
+                          <strong>Origin &amp; Destination</strong> — your
+                          destination (<strong>{form.destination}</strong>) is
+                          already filled in, so you only need to choose your
+                          pickup origin.
+                        </>
+                      ) : (
+                        <>
+                          Select your travel date and time to unlock{" "}
+                          <strong>Origin &amp; Destination (Trip Generator)</strong>{" "}
+                          below.
+                        </>
+                      )}
                     </span>
                   </div>
                 ) : null}
@@ -1630,32 +1696,43 @@ export default function BookingPage() {
                     maxLength={255}
                     pinned={form.destSource !== "none" && !sameRoute}
                     pinnedLabel={
-                      form.destSource === "custom" ? "Custom" : "Selected"
+                      destinationPrefilledActive
+                        ? "From trip"
+                        : form.destSource === "custom"
+                          ? "Custom"
+                          : "Selected"
                     }
                     placeholder="Start typing or pick e.g. Nungwi, Kendwa, Paje"
-                    hint="Choose a suggested Zanzibar destination to compute distance & travel time."
+                    hint={
+                      destinationPrefilledActive
+                        ? "Auto-filled from your selected trip — just fill your pickup origin above (or change this destination anytime)."
+                        : "Choose a suggested Zanzibar destination to compute distance & travel time."
+                    }
                     error={errors.destination}
-                    onChange={(value) =>
+                    onChange={(value) => {
+                      setDestinationEditedByUser(true);
                       setForm((current) => ({
                         ...current,
                         destination: value,
                         destLat: null,
                         destLng: null,
                         destSource: "none",
-                      }))
-                    }
-                    onSelect={(place) =>
+                      }));
+                    }}
+                    onSelect={(place) => {
+                      setDestinationEditedByUser(true);
                       setForm((current) => ({
                         ...current,
                         destination: placeLabel(place),
                         destLat: place.latitude,
                         destLng: place.longitude,
                         destSource: "suggestion",
-                      }))
-                    }
-                    onCustomConfirm={(value) =>
-                      confirmCustomLocation("destination", value)
-                    }
+                      }));
+                    }}
+                    onCustomConfirm={(value) => {
+                      setDestinationEditedByUser(true);
+                      confirmCustomLocation("destination", value);
+                    }}
                     onBlur={() => handlePlaceBlur("destination")}
                   />
                 </div>
@@ -1835,8 +1912,19 @@ export default function BookingPage() {
                   <div className={styles.nextPartitionCue}>
                     <ArrowRight size={14} aria-hidden="true" />
                     <span>
-                      Pick both an origin and destination to generate your trip
-                      and reveal <strong>Description &amp; Submit</strong> below.
+                      {destConfirmed && !originConfirmed ? (
+                        <>
+                          Choose or enter your pickup <strong>Origin</strong>{" "}
+                          above to generate your trip and reveal{" "}
+                          <strong>Description &amp; Submit</strong> below.
+                        </>
+                      ) : (
+                        <>
+                          Pick both an origin and destination to generate your
+                          trip and reveal{" "}
+                          <strong>Description &amp; Submit</strong> below.
+                        </>
+                      )}
                     </span>
                   </div>
                 )}
@@ -2061,10 +2149,12 @@ export default function BookingPage() {
                   <span className={styles.summaryRowLabel}>Trip route</span>
                   <span className={styles.summaryRowValue}>
                     {routeComplete
-                      ? `${form.origin} â†’ ${form.destination}`
+                      ? `${form.origin} → ${form.destination}`
                       : form.origin.trim()
-                        ? `${form.origin} â†’ Choose destination`
-                        : "Origin & destination"}
+                        ? `${form.origin} → ${form.destination.trim() || "Choose destination"}`
+                        : form.destination.trim()
+                          ? `Choose origin → ${form.destination}`
+                          : "Origin & destination"}
                   </span>
                 </span>
               </div>

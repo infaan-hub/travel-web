@@ -49,6 +49,7 @@ import {
   CURATED_TOP_RATED_TRIPS,
   DESTINATION_FILTERS,
   MEASURE_PRESETS,
+  buildBookingDestinationHref,
   formatTripDistance,
   formatTripDuration,
   googleMapsDirectionsUrl,
@@ -927,7 +928,14 @@ export default function TripsPage() {
                           },
                           distanceKm: activeRoute.distanceKm,
                           durationMins: activeRoute.durationMins,
-                          href: "/transport/",
+                          href: buildBookingDestinationHref(
+                            {
+                              label: destLabel,
+                              lat: destCoords.lat,
+                              lng: destCoords.lng,
+                            },
+                            destLabel,
+                          ),
                           savedAt: new Date().toISOString(),
                         })
                       }
@@ -1083,6 +1091,15 @@ export default function TripsPage() {
         <div className={styles.grid3}>
           {filteredDestinations.map((dest) => {
             const isFav = favoriteIds.has(dest.id);
+            const destEndpoint: TripEndpoint = {
+              label: `${dest.name}, ${dest.area}`,
+              lat: dest.lat,
+              lng: dest.lng,
+            };
+            const destBookingHref = buildBookingDestinationHref(
+              destEndpoint,
+              dest.name,
+            );
             return (
               <article key={dest.id} className={styles.tripCard}>
                 <div className={styles.tripCardTop}>
@@ -1111,15 +1128,11 @@ export default function TripsPage() {
                         title: dest.name,
                         subtitle: `${dest.area} · ${dest.categoryLabel}`,
                         origin: AIRPORT_HUB,
-                        destination: {
-                          label: `${dest.name}, ${dest.area}`,
-                          lat: dest.lat,
-                          lng: dest.lng,
-                        },
+                        destination: destEndpoint,
                         distanceKm: dest.approxFromAirportKm,
                         durationMins: dest.approxFromAirportMins,
                         rating: dest.rating,
-                        href: "/transport/",
+                        href: destBookingHref,
                         savedAt: new Date().toISOString(),
                       })
                     }
@@ -1163,7 +1176,7 @@ export default function TripsPage() {
                     <RouteIcon size={14} aria-hidden="true" />
                     Measure route
                   </button>
-                  <Link href="/transport/" className={styles.cardActionBook}>
+                  <Link href={destBookingHref} className={styles.cardActionBook}>
                     Book transfer
                     <ArrowRight size={14} aria-hidden="true" />
                   </Link>
@@ -1212,6 +1225,10 @@ export default function TripsPage() {
         <div className={styles.grid3}>
           {mostBookedTrips.map((trip, index) => {
             const isFav = favoriteIds.has(trip.id);
+            const bookingHref = buildBookingDestinationHref(
+              trip.destination,
+              trip.title,
+            );
             return (
               <article key={trip.id} className={styles.tripCard}>
                 <div className={styles.tripCardTop}>
@@ -1252,7 +1269,7 @@ export default function TripsPage() {
                         durationMins: trip.durationMins || null,
                         rating: trip.rating,
                         priceLabel: trip.priceHint ?? null,
-                        href: "/transport/",
+                        href: bookingHref,
                         savedAt: new Date().toISOString(),
                       })
                     }
@@ -1305,7 +1322,7 @@ export default function TripsPage() {
                     <RouteIcon size={14} aria-hidden="true" />
                     Measure
                   </button>
-                  <Link href="/transport/" className={styles.cardActionBook}>
+                  <Link href={bookingHref} className={styles.cardActionBook}>
                     Book transfer
                     <ArrowRight size={14} aria-hidden="true" />
                   </Link>
@@ -1342,9 +1359,10 @@ export default function TripsPage() {
           {topRatedTrips.map((trip) => {
             const isFav = favoriteIds.has(trip.id);
             const isCompanyTrip = trip.id.startsWith("company-trip-");
-            const tripHref = isCompanyTrip
-              ? `/trips/${trip.id.replace("company-trip-", "")}/`
-              : "/transport/";
+            const bookingHref = buildBookingDestinationHref(
+              trip.destination,
+              trip.title,
+            );
             return (
               <article key={trip.id} className={styles.tripCard}>
                 <div className={styles.tripCardTop}>
@@ -1378,7 +1396,7 @@ export default function TripsPage() {
                         durationMins: trip.durationMins || null,
                         rating: trip.rating,
                         priceLabel: trip.priceHint ?? null,
-                        href: tripHref,
+                        href: bookingHref,
                         savedAt: new Date().toISOString(),
                       })
                     }
@@ -1431,8 +1449,8 @@ export default function TripsPage() {
                     <RouteIcon size={14} aria-hidden="true" />
                     Measure
                   </button>
-                  <Link href={tripHref} className={styles.cardActionBook}>
-                    {isCompanyTrip ? "View trip" : "Book trip"}
+                  <Link href={bookingHref} className={styles.cardActionBook}>
+                    Book trip
                     <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </div>
@@ -1567,10 +1585,13 @@ export default function TripsPage() {
                     </button>
                   ) : null}
                   <Link
-                    href={fav.href || "/transport/"}
+                    href={buildBookingDestinationHref(
+                      fav.destination,
+                      fav.title,
+                    )}
                     className={styles.cardActionBook}
                   >
-                    {fav.kind === "company_trip" ? "View trip" : "Book trip"}
+                    Book trip
                     <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </div>
