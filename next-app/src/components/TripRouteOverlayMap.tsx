@@ -13,12 +13,14 @@ type Props = {
   destinationLng: number;
   originLabel?: string;
   destinationLabel?: string;
+  /** Show only origin pin, road route line, and destination pin without Zanzibar POI clutter. */
+  routeOnly?: boolean;
 };
 
 /**
- * Customer-facing trip map. It reuses the company trip composer map so the
- * roads, place pins, symbols and legend stay identical, but runs it in
- * read-only mode with the trip's fixed road route.
+ * Trip route map. In standard mode it reuses the company trip composer map so
+ * roads, place pins, symbols and legend stay identical; in `routeOnly` mode it
+ * displays a clean focused route with only origin, road line, and destination.
  */
 export default function TripRouteOverlayMap({
   originLat,
@@ -27,6 +29,7 @@ export default function TripRouteOverlayMap({
   destinationLng,
   originLabel,
   destinationLabel,
+  routeOnly = false,
 }: Props) {
   const [selectedPlace, setSelectedPlace] = useState<TripPlace | null>(null);
 
@@ -41,10 +44,11 @@ export default function TripRouteOverlayMap({
 
   return (
     <TripPlaceMapPicker
-      key={`${originLat}:${originLng}:${destinationLat}:${destinationLng}:${originLabel ?? ""}:${destinationLabel ?? ""}`}
+      key={`${routeOnly ? "route" : "full"}:${originLat}:${originLng}:${destinationLat}:${destinationLng}:${originLabel ?? ""}:${destinationLabel ?? ""}`}
       latitude={selectedPlace?.latitude ?? null}
       longitude={selectedPlace?.longitude ?? null}
       readOnly
+      routeOnly={routeOnly}
       viewerRoute={viewerRoute}
       onSelectPlace={setSelectedPlace}
       onPickPoint={() => {}}

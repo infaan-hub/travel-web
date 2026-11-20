@@ -25,6 +25,7 @@ import {
   Route as RouteIcon,
   Send,
   Star,
+  X,
 } from "lucide-react";
 import { geocodeAPI, reviewsAPI, routeAPI, tripsAPI } from "@/lib/api/client";
 import {
@@ -88,20 +89,16 @@ export default function DriverTripsHubPage({ driver }: Props) {
   const toast = useToast();
   const generatorRef = useRef<HTMLElement | null>(null);
   const mapCardRef = useRef<HTMLElement | null>(null);
+  const originGeocodeSeqRef = useRef(0);
+  const destGeocodeSeqRef = useRef(0);
 
   const defaultVehicle = driver.vehicles[0] ?? null;
 
-  // Trip builder state
-  const [originLabel, setOriginLabel] = useState(AIRPORT_HUB.label);
-  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>({
-    lat: AIRPORT_HUB.lat,
-    lng: AIRPORT_HUB.lng,
-  });
-  const [destLabel, setDestLabel] = useState("Nungwi Beach, North Coast");
-  const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>({
-    lat: -5.727227,
-    lng: 39.299202,
-  });
+  // Trip builder state — starts unpinned so the driver freely picks any origin & destination
+  const [originLabel, setOriginLabel] = useState("");
+  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [destLabel, setDestLabel] = useState("");
+  const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>(
     defaultVehicle ? String(defaultVehicle.id) : "custom",
@@ -116,12 +113,26 @@ export default function DriverTripsHubPage({ driver }: Props) {
   const [fareEstimate, setFareEstimate] = useState("");
   const [tripNotes, setTripNotes] = useState("");
 
-  const [routeDistanceKm, setRouteDistanceKm] = useState<number | null>(null);
-  const [routeDurationMins, setRouteDurationMins] = useState<number | null>(null);
-  const [calculating, setCalculating] = useState(false);
+  const [routeMetrics, setRouteMetrics] = useState<{
+    key: string;
+    distanceKm: number | null;
+    durationMins: number | null;
+  } | null>(null);
+  const [manualGeocoding, setManualGeocoding] = useState(false);
   const [locating, setLocating] = useState(false);
   const [showMap, setShowMap] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  const routeCoordsKey =
+    originCoords && destCoords
+      ? `${originCoords.lat},${originCoords.lng}->${destCoords.lat},${destCoords.lng}`
+      : null;
+  const activeRouteMetrics =
+    routeCoordsKey && routeMetrics?.key === routeCoordsKey ? routeMetrics : null;
+  const routeDistanceKm = activeRouteMetrics?.distanceKm ?? null;
+  const routeDurationMins = activeRouteMetrics?.durationMins ?? null;
+  const calculating =
+    manualGeocoding || Boolean(routeCoordsKey && routeMetrics?.key !== routeCoordsKey);
 
   // Discovery lists
   const [destCategory, setDestCategory] = useState<"all" | DestinationCategory>("all");
@@ -147,9 +158,8 @@ export default function DriverTripsHubPage({ driver }: Props) {
 
   // Automatically calculate road distance & duration whenever both coordinates are ready
   useEffect(() => {
-    if (!originCoords || !destCoords) return;
+    if (!originCoords || !destCoords || !routeCoordsKey) return;
     let active = true;
-    setCalculating(true); // eslint-disable-line react-hooks/set-state-in-effect
     routeAPI
       .calculate({
         origin_lat: originCoords.lat,
@@ -161,21 +171,49 @@ export default function DriverTripsHubPage({ driver }: Props) {
         if (!active) return;
         const dist = Number(res.data?.distance_km);
         const dur = Number(res.data?.duration_mins ?? res.data?.estimated_time_mins);
-        setRouteDistanceKm(Number.isFinite(dist) ? dist : null);
-        setRouteDurationMins(Number.isFinite(dur) ? dur : null);
+        setRouteMetrics({
+          key: routeCoordsKey,
+          distanceKm: Number.isFinite(dist) ? dist : null,
+          durationMins: Number.isFinite(dur) ? dur : null,
+        });
       })
       .catch(() => {
         if (!active) return;
-        setRouteDistanceKm(null);
-        setRouteDurationMins(null);
-      })
-      .finally(() => {
-        if (active) setCalculating(false);
+        setRouteMetrics({
+          key: routeCoordsKey,
+          distanceKm: null,
+          durationMins: null,
+        });
       });
     return () => {
       active = false;
     };
-  }, [destCoords, originCoords]);
+  }, [destCoords, originCoords, routeCoordsKey]);
+
+  const resolveCustomEndpoint = useCallback(
+    async (target: "origin" | "destination", query: string) => {
+      const trimmed = query.trim();
+      if (trimmed.length < 2) return;
+      const seqRef = target === "origin" ? originGeocodeSeqRef : destGeocodeSeqRef;
+      const seq = ++seqRef.current;
+      try {
+        const res = await geocodeAPI.search(trimmed);
+        if (seqRef.current !== seq) return;
+        const lat = Number(res.data?.lat);
+        const lng = Number(res.data?.lng);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          if (target === "origin") {
+            setOriginCoords({ lat, lng });
+          } else {
+            setDestCoords({ lat, lng });
+          }
+        }
+      } catch {
+        // Keep text value; driver can still generate or send via WhatsApp.
+      }
+    },
+    [],
+  );
 
   const handleVehicleSelect = (val: string) => {
     setSelectedVehicleId(val);
@@ -208,6 +246,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
         } catch {
           // Keep coordinate label
         }
+        originGeocodeSeqRef.current += 1;
         setOriginLabel(label);
         setOriginCoords({ lat, lng });
         setLocating(false);
@@ -221,10 +260,22 @@ export default function DriverTripsHubPage({ driver }: Props) {
   };
 
   const handleSwap = () => {
+    originGeocodeSeqRef.current += 1;
+    destGeocodeSeqRef.current += 1;
     setOriginLabel(destLabel);
     setDestLabel(originLabel);
     setOriginCoords(destCoords);
     setDestCoords(originCoords);
+  };
+
+  const handleClearLocations = () => {
+    originGeocodeSeqRef.current += 1;
+    destGeocodeSeqRef.current += 1;
+    setOriginLabel("");
+    setOriginCoords(null);
+    setDestLabel("");
+    setDestCoords(null);
+    setRouteMetrics(null);
   };
 
   const handleGenerateManual = async () => {
@@ -232,24 +283,26 @@ export default function DriverTripsHubPage({ driver }: Props) {
       toast.error("Choose both origin and destination first.");
       return;
     }
-    setCalculating(true);
+    setManualGeocoding(true);
     try {
       let o = originCoords;
       let d = destCoords;
       if (!o) {
+        const seq = ++originGeocodeSeqRef.current;
         const r = await geocodeAPI.search(originLabel.trim());
         const lat = Number(r.data?.lat);
         const lng = Number(r.data?.lng);
-        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        if (originGeocodeSeqRef.current === seq && Number.isFinite(lat) && Number.isFinite(lng)) {
           o = { lat, lng };
           setOriginCoords(o);
         }
       }
       if (!d) {
+        const seq = ++destGeocodeSeqRef.current;
         const r = await geocodeAPI.search(destLabel.trim());
         const lat = Number(r.data?.lat);
         const lng = Number(r.data?.lng);
-        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        if (destGeocodeSeqRef.current === seq && Number.isFinite(lat) && Number.isFinite(lng)) {
           d = { lat, lng };
           setDestCoords(d);
         }
@@ -262,11 +315,13 @@ export default function DriverTripsHubPage({ driver }: Props) {
     } catch {
       toast.error("Could not geocode custom place name — you can still share via WhatsApp.");
     } finally {
-      setCalculating(false);
+      setManualGeocoding(false);
     }
   };
 
   const loadRouteIntoGenerator = useCallback((origin: TripEndpoint, destination: TripEndpoint) => {
+    originGeocodeSeqRef.current += 1;
+    destGeocodeSeqRef.current += 1;
     setOriginLabel(origin.label);
     setOriginCoords({ lat: origin.lat, lng: origin.lng });
     setDestLabel(destination.label);
@@ -416,7 +471,11 @@ export default function DriverTripsHubPage({ driver }: Props) {
   }, [companyTrips, reviewStats]);
 
   const measureDestination = (dest: CuratedDestination) => {
-    loadRouteIntoGenerator(AIRPORT_HUB, {
+    const start: TripEndpoint =
+      originCoords && originLabel.trim()
+        ? { label: originLabel.trim(), lat: originCoords.lat, lng: originCoords.lng }
+        : AIRPORT_HUB;
+    loadRouteIntoGenerator(start, {
       label: `${dest.name}, ${dest.area}`,
       lat: dest.lat,
       lng: dest.lng,
@@ -531,19 +590,23 @@ export default function DriverTripsHubPage({ driver }: Props) {
                 variant="origin"
                 value={originLabel}
                 pinned={originCoords != null}
-                pinnedLabel="Pinned"
-                placeholder="Start typing e.g. Airport, Stone Town, Ferry…"
+                pinnedLabel="Selected"
+                placeholder="Select or search any origin e.g. Airport, Stone Town, Ferry…"
                 onChange={(val) => {
+                  originGeocodeSeqRef.current += 1;
                   setOriginLabel(val);
                   setOriginCoords(null);
                 }}
                 onSelect={(place) => {
+                  originGeocodeSeqRef.current += 1;
                   setOriginLabel(placeLabel(place));
                   setOriginCoords({ lat: place.latitude, lng: place.longitude });
+                  setShowMap(true);
                 }}
                 onCustomConfirm={(val) => {
                   setOriginLabel(val);
                   setOriginCoords(null);
+                  void resolveCustomEndpoint("origin", val);
                 }}
                 action={
                   <button
@@ -564,10 +627,25 @@ export default function DriverTripsHubPage({ driver }: Props) {
 
               <div className={styles.swapRow}>
                 <span className={styles.swapLine} aria-hidden="true" />
-                <button type="button" className={styles.swapBtn} onClick={handleSwap}>
+                <button
+                  type="button"
+                  className={styles.swapBtn}
+                  onClick={handleSwap}
+                  disabled={!originLabel.trim() && !destLabel.trim()}
+                >
                   <ArrowUpDown size={13} aria-hidden="true" />
                   Swap origin &amp; destination
                 </button>
+                {originLabel.trim() || destLabel.trim() ? (
+                  <button
+                    type="button"
+                    className={styles.swapBtn}
+                    onClick={handleClearLocations}
+                  >
+                    <X size={13} aria-hidden="true" />
+                    Clear
+                  </button>
+                ) : null}
                 <span className={styles.swapLine} aria-hidden="true" />
               </div>
 
@@ -577,19 +655,23 @@ export default function DriverTripsHubPage({ driver }: Props) {
                 variant="destination"
                 value={destLabel}
                 pinned={destCoords != null}
-                pinnedLabel="Pinned"
-                placeholder="Start typing e.g. Nungwi, Kendwa, Paje, Jambiani…"
+                pinnedLabel="Selected"
+                placeholder="Select or search any destination e.g. Nungwi, Kendwa, Paje, Jambiani…"
                 onChange={(val) => {
+                  destGeocodeSeqRef.current += 1;
                   setDestLabel(val);
                   setDestCoords(null);
                 }}
                 onSelect={(place) => {
+                  destGeocodeSeqRef.current += 1;
                   setDestLabel(placeLabel(place));
                   setDestCoords({ lat: place.latitude, lng: place.longitude });
+                  setShowMap(true);
                 }}
                 onCustomConfirm={(val) => {
                   setDestLabel(val);
                   setDestCoords(null);
+                  void resolveCustomEndpoint("destination", val);
                 }}
               />
             </div>
@@ -753,12 +835,13 @@ export default function DriverTripsHubPage({ driver }: Props) {
                 Step 2 · Live route preview map
               </span>
               <h2 id="driver-route-map-heading" className={styles.panelTitle}>
-                {originLabel.split(",")[0] || "Origin"} →{" "}
-                {destLabel.split(",")[0] || "Destination"}
+                {originLabel.trim() || destLabel.trim()
+                  ? `${originLabel.split(",")[0] || "Select origin"} → ${destLabel.split(",")[0] || "Select destination"}`
+                  : "Select Origin → Destination"}
               </h2>
               <p className={styles.panelSub}>
-                Full-width road route preview with exact pickup &amp; destination pins across
-                Zanzibar.
+                Clear trip route map showing only your pickup origin, driving road line, and
+                drop-off destination.
               </p>
             </div>
 
@@ -817,6 +900,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
                 destinationLng={destCoords.lng}
                 originLabel={originLabel}
                 destinationLabel={destLabel}
+                routeOnly
               />
             </div>
           ) : !originCoords || !destCoords ? (
@@ -824,10 +908,21 @@ export default function DriverTripsHubPage({ driver }: Props) {
               <span className={styles.stateIcon} aria-hidden="true">
                 <MapPin size={26} />
               </span>
-              <h3>Select pinned locations to display the live road map</h3>
+              <h3>
+                {originCoords && !destCoords
+                  ? "Now select a destination to display the route"
+                  : !originCoords && destCoords
+                    ? "Now select a pickup origin to display the route"
+                    : originLabel.trim() && destLabel.trim()
+                      ? "Tap Generate trip route to plot your locations"
+                      : "Select an origin and destination to see the trip route"}
+              </h3>
               <p>
-                Pick an origin and destination from the suggestions in Step 1 (or tap Generate trip
-                route) to plot the road line here.
+                {originCoords && !destCoords
+                  ? `Pickup origin is set to ${originLabel.split(",")[0]}. Choose any destination in Step 1 to show the road route.`
+                  : !originCoords && destCoords
+                    ? `Destination is set to ${destLabel.split(",")[0]}. Choose any pickup origin (or tap Use GPS) in Step 1 to show the road route.`
+                    : "Choose any pickup origin first, then choose a destination in Step 1. The map will show only your origin pin, road route line, and destination pin."}
               </p>
             </div>
           ) : null}
