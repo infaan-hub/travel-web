@@ -1522,6 +1522,157 @@
   gap: 14px;
 }
 
+.builderCard {
+  position: relative;
+  z-index: 20;
+  overflow: visible;
+}
+
+.builderSections {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.builderGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid var(--dw-line);
+  border-radius: 16px;
+  background: var(--dw-surface-soft);
+}
+
+.builderGroupTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--dw-ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.builderGroupTitle svg {
+  color: var(--dw-blue);
+}
+
+.builderFooterBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--dw-line);
+}
+
+.builderRoutePill {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--dw-line);
+  border-radius: 999px;
+  background: var(--dw-blue-tint);
+  color: var(--dw-ink);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.builderRoutePill svg {
+  color: var(--dw-blue);
+}
+
+.mapCard {
+  position: relative;
+  z-index: 1;
+}
+
+.mapRouteStrip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1px solid var(--dw-line);
+  border-radius: 15px;
+  background: var(--dw-blue-tint);
+}
+
+.mapPreviewWrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid var(--dw-line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--dw-surface-soft);
+}
+
+.whatsappDispatchCard {
+  position: relative;
+  z-index: 1;
+  border-color: var(--dw-emerald-border);
+  background:
+    radial-gradient(520px 220px at 100% 0%, rgba(21, 128, 61, 0.09), transparent 65%),
+    var(--dw-surface);
+}
+
+.whatsappDispatchGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+  align-items: stretch;
+  gap: 18px;
+}
+
+.whatsappSideBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--dw-emerald-border);
+  border-radius: 16px;
+  background: var(--dw-emerald-soft);
+}
+
+.whatsappSideList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.whatsappSideList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--dw-ink);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.whatsappSideList svg {
+  flex: 0 0 auto;
+  color: var(--dw-emerald);
+  margin-top: 2px;
+}
+
+.whatsappActionsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .presetsRow {
   display: flex;
   flex-wrap: wrap;
@@ -1676,7 +1827,7 @@
   line-height: 1.52;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 270px;
+  max-height: 360px;
   overflow-y: auto;
 }
 
@@ -1691,7 +1842,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  flex: 1 1 220px;
+  width: 100%;
+  flex: 0 0 auto;
   min-height: 50px;
   padding: 0 18px;
   border-radius: 14px;
@@ -1707,12 +1859,6 @@
 .whatsappPrimaryLink:hover {
   background: #166534;
   transform: translateY(-1px);
-}
-
-.mapPreviewWrap {
-  border: 1px solid var(--dw-line);
-  border-radius: 16px;
-  overflow: hidden;
 }
 
 .discoveryGrid {
@@ -1781,7 +1927,9 @@
 
   .opsGrid,
   .chartsGrid,
-  .generatorGrid {
+  .generatorGrid,
+  .builderSections,
+  .whatsappDispatchGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -1791,8 +1939,9 @@
 }
 
 @media (max-width: 720px) {
-  .stepperBar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .stepperBar,
+  .mapRouteStrip {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .searchWrap {

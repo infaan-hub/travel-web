@@ -9,6 +9,7 @@ import {
   Building2,
   Car,
   Check,
+  CheckCircle2,
   ClipboardList,
   Clock3,
   Compass,
@@ -86,10 +87,11 @@ function placeLabel(place: PlaceSuggestion): string {
 export default function DriverTripsHubPage({ driver }: Props) {
   const toast = useToast();
   const generatorRef = useRef<HTMLElement | null>(null);
+  const mapCardRef = useRef<HTMLElement | null>(null);
 
   const defaultVehicle = driver.vehicles[0] ?? null;
 
-  // Trip generator state
+  // Trip builder state
   const [originLabel, setOriginLabel] = useState(AIRPORT_HUB.label);
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>({
     lat: AIRPORT_HUB.lat,
@@ -204,7 +206,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
             label = String(rev.data.display_name).trim().slice(0, 140);
           }
         } catch {
-          // Keep coordinates label
+          // Keep coordinate label
         }
         setOriginLabel(label);
         setOriginCoords({ lat, lng });
@@ -252,8 +254,10 @@ export default function DriverTripsHubPage({ driver }: Props) {
           setDestCoords(d);
         }
       }
+      setShowMap(true);
+      mapCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       if (!o || !d) {
-        toast.success("Trip ready! You can still send it via WhatsApp with Google Maps search links.");
+        toast.success("Trip ready! You can send it via WhatsApp with Google Maps links.");
       }
     } catch {
       toast.error("Could not geocode custom place name — you can still share via WhatsApp.");
@@ -267,6 +271,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
     setOriginCoords({ lat: origin.lat, lng: origin.lng });
     setDestLabel(destination.label);
     setDestCoords({ lat: destination.lat, lng: destination.lng });
+    setShowMap(true);
     generatorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
@@ -384,14 +389,24 @@ export default function DriverTripsHubPage({ driver }: Props) {
           id: `driver-company-trip-${trip.id}`,
           title: trip.title,
           badge: "Top rated",
-          origin: { label: trip.place || tripPlaceNameForCoords(oLat, oLng) || "Origin", lat: oLat, lng: oLng },
-          destination: { label: tripPlaceNameForCoords(dLat, dLng) || "Destination", lat: dLat, lng: dLng },
+          origin: {
+            label: trip.place || tripPlaceNameForCoords(oLat, oLng) || "Origin",
+            lat: oLat,
+            lng: oLng,
+          },
+          destination: {
+            label: tripPlaceNameForCoords(dLat, dLng) || "Destination",
+            lat: dLat,
+            lng: dLng,
+          },
           distanceKm: Number(trip.distance_km ?? 0),
           durationMins: Number(trip.duration_mins ?? 0),
           rating: stat.rating,
           reviews: stat.count,
           priceHint: trip.price ? `$${trip.price}` : undefined,
-          summary: trip.description || (trip.company_name ? `Operated by ${trip.company_name}.` : "Verified Zanzibar trip."),
+          summary:
+            trip.description ||
+            (trip.company_name ? `Operated by ${trip.company_name}.` : "Verified Zanzibar trip."),
         } as CuratedTripRoute;
       })
       .filter((item): item is CuratedTripRoute => item !== null)
@@ -452,24 +467,26 @@ export default function DriverTripsHubPage({ driver }: Props) {
             </div>
             <h1 className={styles.heroTitle}>Generate &amp; Send Trips to Customers</h1>
             <p className={styles.heroLead}>
-              Pick any Zanzibar origin and destination, browse suggested &amp; top-rated trips, and
-              tap <strong>Send Trip via WhatsApp</strong> to pick a customer contact with your
-              driver profile, vehicle details, and Google Maps route link ready to go.
+              Build a custom route, preview the full road map in its own dedicated card, and send a
+              complete WhatsApp trip card with your driver info, vehicle details, and Google Maps
+              route link directly to any contact.
             </p>
           </div>
         </header>
 
-        {/* SECTION 1: INTERACTIVE TRIP GENERATOR + DIRECT WHATSAPP SENDER */}
+        {/* ===================================================================
+            CARD 1: DEDICATED CUSTOM TRIP BUILDER CARD (NO MAP OVERLAP!)
+           =================================================================== */}
         <section
           ref={generatorRef}
-          className={styles.panel}
+          className={`${styles.panel} ${styles.builderCard}`}
           aria-labelledby="driver-trip-generator-heading"
         >
           <header className={styles.panelHead}>
             <div className={styles.panelHeadCopy}>
               <span className={styles.eyebrow}>
                 <RouteIcon size={13} aria-hidden="true" />
-                Custom trip builder
+                Step 1 · Custom trip builder
               </span>
               <h2 id="driver-trip-generator-heading" className={styles.panelTitle}>
                 Generate trip &amp; send via WhatsApp
@@ -481,22 +498,28 @@ export default function DriverTripsHubPage({ driver }: Props) {
             </div>
           </header>
 
-          <div className={styles.generatorGrid}>
-            {/* LEFT: ROUTE + VEHICLE + TRIP OPTIONS */}
-            <div className={styles.generatorForm}>
-              <div className={styles.presetsRow}>
-                <span className={styles.presetsLabel}>Quick routes:</span>
-                {MEASURE_PRESETS.map((preset) => (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    className={styles.presetBtn}
-                    onClick={() => loadRouteIntoGenerator(preset.origin, preset.destination)}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
+          {/* Quick route presets */}
+          <div className={styles.presetsRow}>
+            <span className={styles.presetsLabel}>Quick routes:</span>
+            {MEASURE_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                className={styles.presetBtn}
+                onClick={() => loadRouteIntoGenerator(preset.origin, preset.destination)}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.builderSections}>
+            {/* Group A: Origin & Destination Route */}
+            <div className={styles.builderGroup}>
+              <h3 className={styles.builderGroupTitle}>
+                <MapPin size={15} aria-hidden="true" />
+                Route locations
+              </h3>
 
               <PlaceAutocomplete
                 label="Origin (Pickup location)"
@@ -565,8 +588,15 @@ export default function DriverTripsHubPage({ driver }: Props) {
                   setDestCoords(null);
                 }}
               />
+            </div>
 
-              {/* Vehicle & Optional Quote Fields */}
+            {/* Group B: Vehicle & Customer Quote Details */}
+            <div className={styles.builderGroup}>
+              <h3 className={styles.builderGroupTitle}>
+                <Car size={15} aria-hidden="true" />
+                Vehicle &amp; trip quote
+              </h3>
+
               {driver.vehicles.length > 0 ? (
                 <div className={styles.miniField}>
                   <label htmlFor="driver-vehicle-select" className={styles.miniLabel}>
@@ -675,135 +705,226 @@ export default function DriverTripsHubPage({ driver }: Props) {
                   />
                 </div>
               </div>
+            </div>
+          </div>
 
-              <button
-                type="button"
-                className={styles.btnPrimary}
-                disabled={calculating || !originLabel.trim() || !destLabel.trim()}
-                onClick={() => void handleGenerateManual()}
-              >
-                {calculating ? (
-                  <LoaderCircle size={16} className={styles.spin} aria-hidden="true" />
-                ) : (
-                  <Navigation size={16} aria-hidden="true" />
-                )}
-                {calculating ? "Calculating road route…" : "Generate trip route"}
-              </button>
+          <footer className={styles.builderFooterBar}>
+            <span className={styles.builderRoutePill}>
+              <RouteIcon size={15} aria-hidden="true" />
+              {calculating
+                ? "Calculating road distance & time…"
+                : routeDistanceKm
+                  ? `${formatTripDistance(routeDistanceKm)} · ${formatTripDuration(routeDurationMins)}`
+                  : "Pick Origin & Destination to measure"}
+            </span>
+
+            <button
+              type="button"
+              className={styles.btnPrimary}
+              disabled={calculating || !originLabel.trim() || !destLabel.trim()}
+              onClick={() => void handleGenerateManual()}
+            >
+              {calculating ? (
+                <LoaderCircle size={16} className={styles.spin} aria-hidden="true" />
+              ) : (
+                <Navigation size={16} aria-hidden="true" />
+              )}
+              {calculating ? "Calculating route…" : "Generate trip route"}
+            </button>
+          </footer>
+        </section>
+
+        {/* ===================================================================
+            CARD 2: SEPARATE FULL-WIDTH LIVE ROUTE MAP CARD
+           =================================================================== */}
+        <section
+          ref={mapCardRef}
+          className={`${styles.panel} ${styles.mapCard}`}
+          aria-labelledby="driver-route-map-heading"
+        >
+          <header className={styles.panelHead}>
+            <div className={styles.panelHeadCopy}>
+              <span className={styles.eyebrow}>
+                <MapIcon size={13} aria-hidden="true" />
+                Step 2 · Live route preview map
+              </span>
+              <h2 id="driver-route-map-heading" className={styles.panelTitle}>
+                {originLabel.split(",")[0] || "Origin"} →{" "}
+                {destLabel.split(",")[0] || "Destination"}
+              </h2>
+              <p className={styles.panelSub}>
+                Full-width road route preview with exact pickup &amp; destination pins across
+                Zanzibar.
+              </p>
             </div>
 
-            {/* RIGHT: LIVE ROUTE PREVIEW + MAP + WHATSAPP MESSAGE & DIRECT SEND */}
-            <div className={styles.previewColumn}>
-              <div className={styles.routeBox}>
-                <div className={styles.routeStop}>
-                  <span className={styles.stopPinA} aria-hidden="true">
-                    A
-                  </span>
-                  <div className={styles.stopCopy}>
-                    <span className={styles.stopLabel}>Origin</span>
-                    <span className={styles.stopValue}>{originLabel || "Choose origin"}</span>
-                  </div>
-                </div>
-                <div className={styles.routeStop}>
-                  <span className={styles.stopPinB} aria-hidden="true">
-                    B
-                  </span>
-                  <div className={styles.stopCopy}>
-                    <span className={styles.stopLabel}>Destination</span>
-                    <span className={styles.stopValue}>{destLabel || "Choose destination"}</span>
-                  </div>
-                </div>
-                <div className={styles.routeMetaChips}>
-                  <span>
-                    {calculating
-                      ? "Calculating…"
-                      : routeDistanceKm
-                        ? formatTripDistance(routeDistanceKm)
-                        : "Distance ready on route"}
-                  </span>
-                  <span>·</span>
-                  <span>
-                    {routeDurationMins ? formatTripDuration(routeDurationMins) : "ETA ready"}
-                  </span>
-                  {originCoords && destCoords ? (
-                    <button
-                      type="button"
-                      className={styles.presetBtn}
-                      style={{ marginLeft: "auto" }}
-                      onClick={() => setShowMap((v) => !v)}
-                    >
-                      <MapIcon size={13} aria-hidden="true" />
-                      {showMap ? "Hide map" : "Show map"}
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-
-              {showMap && originCoords && destCoords ? (
-                <div className={styles.mapPreviewWrap}>
-                  <TripRouteOverlayMap
-                    originLat={originCoords.lat}
-                    originLng={originCoords.lng}
-                    destinationLat={destCoords.lat}
-                    destinationLng={destCoords.lng}
-                    originLabel={originLabel}
-                    destinationLabel={destLabel}
-                  />
-                </div>
+            <div className={styles.heroActions}>
+              {googleMapsUrl ? (
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.linkSecondary}
+                >
+                  <ExternalLink size={15} aria-hidden="true" />
+                  Open in Google Maps
+                </a>
               ) : null}
+              {originCoords && destCoords ? (
+                <button
+                  type="button"
+                  className={styles.btnSecondary}
+                  onClick={() => setShowMap((v) => !v)}
+                >
+                  <MapIcon size={15} aria-hidden="true" />
+                  {showMap ? "Hide map" : "Show map"}
+                </button>
+              ) : null}
+            </div>
+          </header>
 
-              {/* WHATSAPP FULL MESSAGE PREVIEW & DIRECT CONTACT-PICKER SEND */}
-              <div className={styles.whatsappPreviewCard}>
-                <div className={styles.whatsappPreviewHead}>
-                  <span className={styles.whatsappBadge}>
-                    <MessageCircle size={13} aria-hidden="true" />
-                    WhatsApp customer trip card
+          <div className={styles.mapRouteStrip}>
+            <div className={styles.routeStop}>
+              <span className={styles.stopPinA} aria-hidden="true">
+                A
+              </span>
+              <div className={styles.stopCopy}>
+                <span className={styles.stopLabel}>Pickup origin</span>
+                <span className={styles.stopValue}>{originLabel || "Choose origin above"}</span>
+              </div>
+            </div>
+            <div className={styles.routeStop}>
+              <span className={styles.stopPinB} aria-hidden="true">
+                B
+              </span>
+              <div className={styles.stopCopy}>
+                <span className={styles.stopLabel}>Drop-off destination</span>
+                <span className={styles.stopValue}>{destLabel || "Choose destination above"}</span>
+              </div>
+            </div>
+          </div>
+
+          {showMap && originCoords && destCoords ? (
+            <div className={styles.mapPreviewWrap}>
+              <TripRouteOverlayMap
+                originLat={originCoords.lat}
+                originLng={originCoords.lng}
+                destinationLat={destCoords.lat}
+                destinationLng={destCoords.lng}
+                originLabel={originLabel}
+                destinationLabel={destLabel}
+              />
+            </div>
+          ) : !originCoords || !destCoords ? (
+            <div className={styles.stateCard}>
+              <span className={styles.stateIcon} aria-hidden="true">
+                <MapPin size={26} />
+              </span>
+              <h3>Select pinned locations to display the live road map</h3>
+              <p>
+                Pick an origin and destination from the suggestions in Step 1 (or tap Generate trip
+                route) to plot the road line here.
+              </p>
+            </div>
+          ) : null}
+        </section>
+
+        {/* ===================================================================
+            CARD 3: SEPARATE WHATSAPP CUSTOMER DISPATCH CARD
+           =================================================================== */}
+        <section
+          className={`${styles.panel} ${styles.whatsappDispatchCard}`}
+          aria-labelledby="driver-whatsapp-card-heading"
+        >
+          <header className={styles.panelHead}>
+            <div className={styles.panelHeadCopy}>
+              <span className={styles.eyebrow}>
+                <MessageCircle size={13} aria-hidden="true" />
+                Step 3 · Direct WhatsApp send
+              </span>
+              <h2 id="driver-whatsapp-card-heading" className={styles.panelTitle}>
+                Send full trip card to customer on WhatsApp
+              </h2>
+              <p className={styles.panelSub}>
+                Tapping send opens WhatsApp directly to your contact picker with your driver
+                details, vehicle info, route estimate, and clickable Google Maps directions.
+              </p>
+            </div>
+            <button
+              type="button"
+              className={styles.btnSecondary}
+              disabled={!generatedWhatsApp}
+              onClick={() => void handleCopyMessage()}
+            >
+              {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
+              {copied ? "Copied!" : "Copy message"}
+            </button>
+          </header>
+
+          <div className={styles.whatsappDispatchGrid}>
+            <pre className={styles.whatsappPreviewBody}>
+              {generatedWhatsApp?.message ||
+                "Select an origin and destination in Step 1 to compose the full customer WhatsApp message."}
+            </pre>
+
+            <div className={styles.whatsappSideBox}>
+              <ul className={styles.whatsappSideList}>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>
+                    Driver: <strong>{driver.name}</strong>
+                    {driver.phone ? ` (${driver.phone})` : ""}
                   </span>
-                  <button
-                    type="button"
-                    className={styles.presetBtn}
-                    disabled={!generatedWhatsApp}
-                    onClick={() => void handleCopyMessage()}
+                </li>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>
+                    Vehicle: <strong>{vehicleName || defaultVehicle?.name || "Private Hire"}</strong>
+                    {vehiclePlate ? ` · ${vehiclePlate}` : ""}
+                  </span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>
+                    Google Maps full Origin → Destination route &amp; individual location pins
+                    included
+                  </span>
+                </li>
+                <li>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  <span>Opens WhatsApp directly to select any customer contact</span>
+                </li>
+              </ul>
+
+              <div className={styles.whatsappActionsStack}>
+                {generatedWhatsApp ? (
+                  <a
+                    href={generatedWhatsApp.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.whatsappPrimaryLink}
                   >
-                    {copied ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
-                    {copied ? "Copied" : "Copy text"}
-                  </button>
-                </div>
-
-                <pre className={styles.whatsappPreviewBody}>
-                  {generatedWhatsApp?.message ||
-                    "Select an origin and destination on the left to generate your customer WhatsApp message with driver info, vehicle details, and Google Maps links."}
-                </pre>
-
-                <div className={styles.whatsappActionsRow}>
-                  {generatedWhatsApp ? (
-                    <a
-                      href={generatedWhatsApp.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={styles.whatsappPrimaryLink}
-                    >
-                      <Send size={16} aria-hidden="true" />
-                      Send Trip via WhatsApp (Select Contact)
-                    </a>
-                  ) : null}
-                  {googleMapsUrl ? (
-                    <a
-                      href={googleMapsUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={styles.linkSecondary}
-                    >
-                      <ExternalLink size={15} aria-hidden="true" />
-                      Google Maps
-                    </a>
-                  ) : null}
-                </div>
+                    <Send size={16} aria-hidden="true" />
+                    Send Trip via WhatsApp (Select Contact)
+                  </a>
+                ) : null}
+                {googleMapsUrl ? (
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.linkSecondary}
+                  >
+                    <ExternalLink size={15} aria-hidden="true" />
+                    Preview Route in Google Maps
+                  </a>
+                ) : null}
               </div>
             </div>
           </div>
         </section>
 
-        {/* SECTION 2: SUGGESTED ZANZIBAR DESTINATIONS */}
+        {/* SECTION 4: SUGGESTED ZANZIBAR DESTINATIONS */}
         <section className={styles.panel} aria-labelledby="driver-suggested-heading">
           <header className={styles.panelHead}>
             <div className={styles.panelHeadCopy}>
@@ -859,7 +980,10 @@ export default function DriverTripsHubPage({ driver }: Props) {
 
                   <div>
                     <h3 className={styles.bookingTitle}>{dest.name}</h3>
-                    <p className={styles.panelSub} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <p
+                      className={styles.panelSub}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+                    >
                       <MapPin size={12} aria-hidden="true" />
                       {dest.area}
                     </p>
@@ -898,7 +1022,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
           </div>
         </section>
 
-        {/* SECTION 3: TOP RATED TRIPS */}
+        {/* SECTION 5: TOP RATED TRIPS */}
         <section className={styles.panel} aria-labelledby="driver-top-rated-heading">
           <header className={styles.panelHead}>
             <div className={styles.panelHeadCopy}>
