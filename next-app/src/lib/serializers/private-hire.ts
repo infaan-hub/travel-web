@@ -4,10 +4,12 @@ import type {
   PrivateHireDriver,
   PrivateHireService,
   Company,
+  Profile,
   TransportBooking,
   TransportTripRequest,
   User,
 } from "@prisma/client";
+import { resolveDriverStage } from "@/lib/driver-workflow";
 
 export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
   let includes: string[] = [];
@@ -120,8 +122,21 @@ export function transportBookingSerializer(
     driver?: PrivateHireDriver | null;
     company?: Company | null;
     tripRequest?: TransportTripRequest | null;
+    user?: (Pick<User, "id" | "username" | "email" | "firstName" | "lastName" | "emailVerified" | "dateJoined"> & {
+      profile?: Pick<Profile, "fullName" | "phone" | "address" | "image"> | null;
+    }) | null;
   },
 ) {
+  const effectiveStage = resolveDriverStage({
+    status: booking.status,
+    driverStage: booking.driverStage,
+  });
+
+  const accountFullName =
+    booking.user?.profile?.fullName?.trim() ||
+    [booking.user?.firstName, booking.user?.lastName].filter(Boolean).join(" ").trim() ||
+    booking.fullName;
+
   return {
     id: booking.id,
     reference: booking.reference,
@@ -137,17 +152,55 @@ export function transportBookingSerializer(
     pickup_time: booking.pickupTime,
     total_price: booking.totalPrice?.toString() ?? null,
     status: booking.status,
+    driver_stage: effectiveStage,
+    confirmed_at: booking.confirmedAt?.toISOString() ?? null,
+    started_at: booking.startedAt?.toISOString() ?? null,
+    arrived_at: booking.arrivedAt?.toISOString() ?? null,
+    picked_up_at: booking.pickedUpAt?.toISOString() ?? null,
+    reached_dest_at: booking.reachedDestAt?.toISOString() ?? null,
+    completed_at: booking.completedAt?.toISOString() ?? null,
+    driver_lat: booking.driverLat ?? null,
+    driver_lng: booking.driverLng ?? null,
+    driver_location_updated_at: booking.driverLocationUpdatedAt?.toISOString() ?? null,
+    driver_notes: booking.driverNotes ?? "",
     is_public: booking.isPublic,
     notes: booking.notes,
-    origin: booking.origin,
-    origin_lat: booking.originLat,
-    origin_lng: booking.originLng,
-    destination: booking.destination,
-    dest_lat: booking.destLat,
-    dest_lng: booking.destLng,
-    distance_km: booking.distanceKm,
-    duration_mins: booking.durationMins,
+    origin: booking.origin ?? booking.tripRequest?.origin ?? null,
+    origin_lat: booking.originLat ?? booking.tripRequest?.originLat ?? null,
+    origin_lng: booking.originLng ?? booking.tripRequest?.originLng ?? null,
+    destination: booking.destination ?? booking.tripRequest?.destination ?? null,
+    dest_lat: booking.destLat ?? booking.tripRequest?.destLat ?? null,
+    dest_lng: booking.destLng ?? booking.tripRequest?.destLng ?? null,
+    distance_km: booking.distanceKm ?? booking.tripRequest?.distanceKm ?? null,
+    duration_mins: booking.durationMins ?? booking.tripRequest?.durationMins ?? null,
     trip_request_id: booking.tripRequestId,
+    customer_account: booking.user
+      ? {
+          id: booking.user.id,
+          username: booking.user.username,
+          full_name: accountFullName,
+          first_name: booking.user.firstName,
+          last_name: booking.user.lastName,
+          email: booking.user.email || booking.email,
+          email_verified: booking.user.emailVerified,
+          phone: booking.user.profile?.phone?.trim() || booking.phone,
+          address: booking.user.profile?.address?.trim() || "",
+          avatar_url: publicImageUrl(booking.user.profile?.image),
+          date_joined: booking.user.dateJoined.toISOString(),
+        }
+      : {
+          id: null,
+          username: null,
+          full_name: booking.fullName,
+          first_name: "",
+          last_name: "",
+          email: booking.email,
+          email_verified: false,
+          phone: booking.phone,
+          address: "",
+          avatar_url: null,
+          date_joined: null,
+        },
     trip: booking.tripRequest
       ? {
           id: booking.tripRequest.id,

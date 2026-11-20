@@ -291,9 +291,28 @@ export const transportBookingsAPI = {
 };
 export const driverAPI = {
   getBookings: () => api.get("/driver/bookings/"),
+  getBooking: (id: string | number) => api.get(`/driver/bookings/${id}/`),
+  getInsights: (month?: string) =>
+    api.get("/driver/insight/", { params: month ? { month } : undefined }),
   getTripRequests: () => api.get("/driver/trip-requests/"),
   updateBooking: (id: string | number, status: "confirmed" | "in_progress" | "completed") =>
     api.patch(`/driver/bookings/${id}/`, { status }),
+  transitionBooking: (
+    id: string | number,
+    payload: {
+      action:
+        | "confirm"
+        | "start"
+        | "arrived"
+        | "picked_up"
+        | "reached_destination"
+        | "finalize"
+        | "location";
+      lat?: number;
+      lng?: number;
+      notes?: string;
+    },
+  ) => api.patch(`/driver/bookings/${id}/`, payload),
   acceptTripRequest: (id: string | number) => api.patch(`/driver/trip-requests/${id}/`, { action: "accept" }),
 };
 export const companyTransportBookingsAPI = {

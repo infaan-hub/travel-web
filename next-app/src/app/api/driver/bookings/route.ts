@@ -4,6 +4,33 @@ import { requirePrivateHireDriver } from "@/lib/auth/private-hire-driver";
 import prisma from "@/lib/db/prisma";
 import { transportBookingSerializer } from "@/lib/serializers/private-hire";
 
+const DRIVER_BOOKING_INCLUDE = {
+  service: { include: { vehicle: true, driver: true, company: true } },
+  vehicle: true,
+  driver: true,
+  company: true,
+  tripRequest: true,
+  user: {
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      emailVerified: true,
+      dateJoined: true,
+      profile: {
+        select: {
+          fullName: true,
+          phone: true,
+          address: true,
+          image: true,
+        },
+      },
+    },
+  },
+} as const;
+
 export async function GET(request: NextRequest) {
   try {
     const { driver } = await requirePrivateHireDriver(request);
@@ -11,29 +38,37 @@ export async function GET(request: NextRequest) {
       where: {
         OR: [
           { driverId: driver.id },
-          ...(driver.isPublic && !driver.companyId ? [{ isPublic: true, status: "pending" as const }] : []),
+          ...(driver.isPublic && !driver.companyId
+            ? [{ isPublic: true, status: "pending" as const }]
+            : []),
         ],
       },
-      include: {
-        service: { include: { vehicle: true, driver: true, company: true } },
-        vehicle: true,
-        driver: true,
-        company: true,
-        tripRequest: true,
-      },
+      include: DRIVER_BOOKING_INCLUDE,
       orderBy: [{ travelDate: "asc" }, { createdAt: "desc" }],
       take: 100,
     });
+
     return ok({
-      driver: { id: driver.id, name: driver.name },
+      driver: {
+        id: driver.id,
+        name: driver.name,
+        phone: driver.phone,
+        email: driver.email,
+        is_public: driver.isPublic,
+        company_id: driver.companyId,
+        company_name: driver.company?.name ?? null,
+      },
       bookings: bookings.map((booking) => {
         const serialized = transportBookingSerializer(booking);
-        if (!driver.isPublic || driver.companyId || booking.driverId === driver.id) return serialized;
+        if (!driver.isPublic || driver.companyId || booking.driverId === driver.id) {
+          return serialized;
+        }
         return {
           ...serialized,
           full_name: "Customer",
           phone: "",
           email: "",
+          customer_account: null,
           driver: null,
           service: serialized.service ? { ...serialized.service, driver: null } : null,
         };

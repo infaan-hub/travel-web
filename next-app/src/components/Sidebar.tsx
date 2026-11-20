@@ -26,7 +26,6 @@ import {
   X,
   Car,
   Briefcase,
-  Truck,
   User,
 } from "@/components/icons";
 import NextImage from "next/image";
@@ -143,7 +142,9 @@ export default function Sidebar() {
 
   const driverNavItems: NavItem[] = [
     { to: "/driver/dashboard/", label: "Driver dashboard", icon: LayoutDashboard, exact: true },
-    { to: "/driver/dashboard/trips/", label: "Trips", icon: Truck },
+    { to: "/driver/bookings/", label: "Bookings", icon: ClipboardList },
+    { to: "/driver/trips/", label: "Trips", icon: Map },
+    { to: "/driver/insight/", label: "Insight", icon: TrendingUp },
     { to: "/profile/", label: "Account profile", icon: User },
   ];
 

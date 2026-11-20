@@ -1,0 +1,313 @@
+/* ==========================================================================
+   Live Real-Time Driver Navigation Map
+   ========================================================================== */
+
+.mapShell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1.5px solid rgba(8, 66, 140, 0.16);
+  border-radius: 20px;
+  overflow: hidden;
+  background: #e9f0f8;
+  box-shadow:
+    0 2px 8px rgba(18, 34, 58, 0.05),
+    0 14px 34px rgba(8, 66, 140, 0.08);
+}
+
+.mapCanvasWrap {
+  position: relative;
+  width: 100%;
+  height: clamp(320px, 48vh, 460px);
+  background: #e9f0f8;
+}
+
+.mapCanvas {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Floating Top Overlay Bar */
+.topOverlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+  z-index: 420;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.topOverlay > * {
+  pointer-events: auto;
+}
+
+.gpsPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #12223a;
+  font-size: 0.75rem;
+  font-weight: 750;
+  box-shadow: 0 6px 18px rgba(12, 27, 46, 0.14);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.gpsDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #15803d;
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.22);
+  animation: driver-gps-pulse 1.6s ease-in-out infinite;
+}
+
+.gpsDotSearching {
+  background: #d97706;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.22);
+}
+
+.gpsDotError {
+  background: #be123c;
+  box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.2);
+  animation: none;
+}
+
+.gpsMeta {
+  color: #526580;
+  font-weight: 650;
+}
+
+.mapControls {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.mapCtrlBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(8, 66, 140, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #12223a;
+  font-size: 0.74rem;
+  font-weight: 750;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(12, 27, 46, 0.12);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.mapCtrlBtn:hover {
+  border-color: #08428c;
+  background: #edf4fc;
+  color: #08428c;
+}
+
+.mapCtrlBtnActive {
+  border-color: #08428c;
+  background: #08428c;
+  color: #ffffff;
+}
+
+.mapCtrlBtnActive:hover {
+  background: #063570;
+  color: #ffffff;
+}
+
+/* GPS Alert Strip */
+.gpsWarningBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.gpsWarningText {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.retryGpsBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d97706;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #92400e;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Live Bottom Telemetry Bar */
+.telemetryBar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(8, 66, 140, 0.12);
+  background: #ffffff;
+}
+
+.telemetryCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.telemetryLabel {
+  color: #526580;
+  font-size: 0.69rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.telemetryValue {
+  color: #12223a;
+  font-size: 0.94rem;
+  font-weight: 850;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.telemetryValueLive {
+  color: #08428c;
+}
+
+/* Leaflet Custom DivIcon Markers */
+:global(.driver-live-marker) {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+}
+
+:global(.driver-live-marker__pulse) {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(8, 66, 140, 0.28);
+  animation: driver-marker-radar 1.8s ease-out infinite;
+}
+
+:global(.driver-live-marker__core) {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: #08428c;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(8, 66, 140, 0.45);
+}
+
+:global(.driver-stop-pin) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #ffffff;
+  border-radius: 50% 50% 50% 4px;
+  transform: rotate(-45deg);
+  box-shadow: 0 6px 14px rgba(12, 27, 46, 0.32);
+}
+
+:global(.driver-stop-pin > span) {
+  transform: rotate(45deg);
+  color: #ffffff;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+:global(.driver-stop-pin--origin) {
+  background: #15803d;
+}
+
+:global(.driver-stop-pin--dest) {
+  background: #08428c;
+}
+
+@keyframes driver-gps-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes driver-marker-radar {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .mapCanvasWrap {
+    height: clamp(270px, 44vh, 360px);
+  }
+
+  .telemetryBar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 10px 12px;
+  }
+
+  .telemetryValue {
+    font-size: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gpsDot,
+  :global(.driver-live-marker__pulse) {
+    animation: none !important;
+  }
+}
