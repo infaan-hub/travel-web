@@ -236,6 +236,7 @@
         "src/features/pages/BookingsPage.tsx",
         "src/features/pages/ProfilePage.tsx",
         "src/features/pages/MyTransportPage.tsx",
+        "src/features/pages/my-transport.module.css",
         "src/features/pages/account-settings.module.css"
       ]
     },
