@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { AlertCircle, ArrowRight, CheckCircle, Palmtree, Compass, Map, Star } from '@/components/icons';
+import { AlertCircle, ArrowRight, CheckCircle, Palmtree, Compass, Map } from '@/components/icons';
 import styles from './auth-page.module.css';
 import type { ChangeEvent, FormEvent } from "react";
 import {
@@ -195,7 +195,7 @@ export default function LoginPage() {
               <span className={styles.bannerFeature}><Palmtree size={17} /> Private hire services</span>
               <span className={styles.bannerFeature}><Compass size={17} /> Drivers and vehicles</span>
               <span className={styles.bannerFeature}><Map size={17} /> Provider profiles</span>
-              <span className={styles.bannerFeature}><Star size={17} fill="currentColor" className={styles.bannerStar} /> Request-based bookings</span>
+              <span className={styles.bannerFeature}><CheckCircle size={17} /> Request-based bookings</span>
             </div>
           </div>
         </div>

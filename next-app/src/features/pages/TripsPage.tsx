@@ -29,7 +29,6 @@ import {
   Navigation,
   Route as RouteIcon,
   Search,
-  Sparkles,
   Star,
   Trash2,
 } from "lucide-react";
@@ -38,6 +37,7 @@ import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { tripPlaceNameForCoords } from "@/lib/trips";
 import { useToast } from "@/components/ToastProvider";
+import { PageHero } from "@/components/PageHero";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import ZanzibarAttractions from "@/components/ZanzibarAttractions";
 import type { PlaceSuggestion } from "@/lib/place-types";
@@ -635,92 +635,72 @@ export default function TripsPage() {
 
   return (
     <div id="trips-hub-root" className={`page ${styles.page}`}>
-      {/* HERO BANNER */}
-      <header className={styles.hero}>
-        <div className={styles.heroTop}>
-          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-            <Link href="/">Home</Link>
-            <span aria-hidden="true">/</span>
-            <span>Trips</span>
-          </nav>
-
-          <div className={styles.heroQuickLinks}>
-            <Link href="/transport/" className={styles.heroActionPrimary}>
-              <Car size={15} aria-hidden="true" />
-              Book private hire
-            </Link>
-            <Link href="/trip-request/" className={styles.heroActionSecondary}>
-              Request custom trip
-            </Link>
-          </div>
+      <PageHero
+        eyebrow="Zanzibar trip planner"
+        title="Measure trips & explore Zanzibar"
+        subtitle="Measure live driving distance and travel time between any two Zanzibar locations, browse suggested destinations, most-booked and top-rated journeys, and save your favorites."
+        backgroundImageKey="feature"
+        patternImageKey="thumb"
+        ctaPrimary={{ label: "Book private hire", href: "/transport/" }}
+        ctaSecondary={{ label: "Request custom trip", href: "/trip-request/" }}
+      >
+        <div className={styles.heroStats}>
+          <span className={styles.heroStatPill}>
+            <strong>1,096+</strong> Zanzibar places
+          </span>
+          <span className={styles.heroStatPill}>
+            <strong>
+              {loadingTrips
+                ? "—"
+                : trips.length + CURATED_TOP_RATED_TRIPS.length}
+            </strong>{" "}
+            Trips &amp; routes
+          </span>
+          <span className={styles.heroStatPill}>
+            <strong>{favorites.length}</strong> Saved favorites
+          </span>
         </div>
+      </PageHero>
 
-        <div className={styles.heroMain}>
-          <div>
-            <span className={styles.heroEyebrow}>
-              <Sparkles size={14} aria-hidden="true" />
-              Zanzibar trip planner &amp; route measurer
-            </span>
-            <h1 className={styles.heroTitle}>
-              Measure trips, discover destinations &amp; save favorites
-            </h1>
-            <p className={styles.heroLead}>
-              Measure live driving distance and travel time between any two
-              Zanzibar locations, browse top-rated and most-booked journeys, and
-              favorite trips for effortless booking.
-            </p>
-          </div>
-
-          <div className={styles.heroMetrics}>
-            <div className={styles.heroMetricCard}>
-              <span className={styles.heroMetricValue}>1,096+</span>
-              <span className={styles.heroMetricLabel}>Zanzibar places</span>
-            </div>
-            <div className={styles.heroMetricCard}>
-              <span className={styles.heroMetricValue}>
-                {loadingTrips ? "—" : trips.length + CURATED_TOP_RATED_TRIPS.length}
-              </span>
-              <span className={styles.heroMetricLabel}>Trips &amp; routes</span>
-            </div>
-            <div className={styles.heroMetricCard}>
-              <span className={styles.heroMetricValue}>{favorites.length}</span>
-              <span className={styles.heroMetricLabel}>Saved favorites</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* QUICK SECTION JUMP BAR */}
-      <nav className={styles.jumpNav} aria-label="Trips sections">
-        <a href="#measure-trip" className={styles.jumpLink}>
-          <RouteIcon size={14} aria-hidden="true" />
-          Measure Trip
-        </a>
-        <a href="#suggested-destinations" className={styles.jumpLink}>
-          <Compass size={14} aria-hidden="true" />
-          Destinations
-        </a>
-        <a href="#top-rated-trips" className={styles.jumpLink}>
-          <Award size={14} aria-hidden="true" />
-          Top Rated
-        </a>
-        <a href="#most-booked-trips" className={styles.jumpLink}>
-          <Flame size={14} aria-hidden="true" />
-          Most Booked
-        </a>
-        <a href="#posted-trips" className={styles.jumpLink}>
-          <Car size={14} aria-hidden="true" />
-          Posted Trips
-        </a>
-        <a href="#favorite-trips" className={`${styles.jumpLink} ${styles.jumpLinkFav}`}>
-          <Heart
-            size={14}
-            fill={favorites.length > 0 ? "currentColor" : "none"}
-            aria-hidden="true"
-          />
-          Favorites ({favorites.length})
-        </a>
-      </nav>
+      <div className={styles.content}>
+        {/* QUICK SECTION JUMP BAR */}
+        <nav className={styles.jumpNav} aria-label="Trips sections">
+          <a href="#measure-trip" className={styles.jumpLink}>
+            <RouteIcon size={14} aria-hidden="true" />
+            Measure Trip
+          </a>
+          <a href="#suggested-destinations" className={styles.jumpLink}>
+            <Compass size={14} aria-hidden="true" />
+            Destinations
+          </a>
+          <a href="#zanzibar-attractions" className={styles.jumpLink}>
+            <MapIcon size={14} aria-hidden="true" />
+            Attractions &amp; Places
+          </a>
+          <a href="#most-booked-trips" className={styles.jumpLink}>
+            <Flame size={14} aria-hidden="true" />
+            Most Booked
+          </a>
+          <a href="#top-rated-trips" className={styles.jumpLink}>
+            <Award size={14} aria-hidden="true" />
+            Top Rated
+          </a>
+          <a
+            href="#favorite-trips"
+            className={`${styles.jumpLink} ${styles.jumpLinkFav}`}
+          >
+            <Heart
+              size={14}
+              fill={favorites.length > 0 ? "currentColor" : "none"}
+              aria-hidden="true"
+            />
+            Favorites ({favorites.length})
+          </a>
+          <a href="#posted-trips" className={styles.jumpLink}>
+            <Car size={14} aria-hidden="true" />
+            Posted Trips
+          </a>
+        </nav>
 
       {/* SECTION 1: INTERACTIVE TRIP MEASURER */}
       <section
@@ -1058,7 +1038,403 @@ export default function TripsPage() {
         </div>
       </section>
 
-      {/* SECTION 2: FAVORITE TRIPS */}
+      {/* SECTION 2: TRIP SUGGESTIONS & DESTINATIONS */}
+      <section
+        id="suggested-destinations"
+        className={styles.section}
+        aria-labelledby="destinations-heading"
+      >
+        <header className={styles.sectionHead}>
+          <div className={styles.sectionHeadCopy}>
+            <span className={styles.sectionEyebrow}>
+              <Compass size={13} aria-hidden="true" />
+              Trip suggestions &amp; destinations
+            </span>
+            <h2 id="destinations-heading" className={styles.sectionTitle}>
+              Suggested Zanzibar Destinations
+            </h2>
+            <p className={styles.sectionLead}>
+              Explore Zanzibar&apos;s favorite beaches, heritage quarters, spice
+              farms, and coastal resorts — measure any destination in one tap.
+            </p>
+          </div>
+
+          <div
+            className={styles.filterBar}
+            role="group"
+            aria-label="Filter destinations by category"
+          >
+            {DESTINATION_FILTERS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`${styles.filterChip} ${
+                  destCategory === item.id ? styles.filterChipActive : ""
+                }`}
+                aria-pressed={destCategory === item.id}
+                onClick={() => setDestCategory(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </header>
+
+        <div className={styles.grid3}>
+          {filteredDestinations.map((dest) => {
+            const isFav = favoriteIds.has(dest.id);
+            return (
+              <article key={dest.id} className={styles.tripCard}>
+                <div className={styles.tripCardTop}>
+                  <div className={styles.badgeCluster}>
+                    <span className={styles.pillBlue}>{dest.categoryLabel}</span>
+                    <span className={styles.pillGold}>
+                      <Star size={11} fill="currentColor" aria-hidden="true" />
+                      {dest.rating.toFixed(1)} ({dest.reviews.toLocaleString("en-US")})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={`${styles.favButton} ${
+                      isFav ? styles.favButtonActive : ""
+                    } ${styles.favIconOnly}`}
+                    aria-label={
+                      isFav
+                        ? `Remove ${dest.name} from favorites`
+                        : `Save ${dest.name} to favorites`
+                    }
+                    aria-pressed={isFav}
+                    onClick={() =>
+                      handleToggleFavorite({
+                        id: dest.id,
+                        kind: "destination",
+                        title: dest.name,
+                        subtitle: `${dest.area} · ${dest.categoryLabel}`,
+                        origin: AIRPORT_HUB,
+                        destination: {
+                          label: `${dest.name}, ${dest.area}`,
+                          lat: dest.lat,
+                          lng: dest.lng,
+                        },
+                        distanceKm: dest.approxFromAirportKm,
+                        durationMins: dest.approxFromAirportMins,
+                        rating: dest.rating,
+                        href: "/transport/",
+                        savedAt: new Date().toISOString(),
+                      })
+                    }
+                  >
+                    <Heart
+                      size={16}
+                      fill={isFav ? "currentColor" : "none"}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+
+                <div>
+                  <h3 className={styles.cardTitle}>{dest.name}</h3>
+                  <p className={styles.cardSub}>
+                    <MapPin
+                      size={12}
+                      style={{ display: "inline", marginRight: 4, verticalAlign: -1 }}
+                      aria-hidden="true"
+                    />
+                    {dest.area}
+                  </p>
+                </div>
+
+                <p className={styles.cardSub}>{dest.summary}</p>
+
+                <div className={styles.cardStatsBar}>
+                  <span className={styles.cardStatInline}>
+                    <Navigation size={13} aria-hidden="true" />
+                    ~{formatTripDistance(dest.approxFromAirportKm)} ·{" "}
+                    {formatTripDuration(dest.approxFromAirportMins)} from Airport
+                  </span>
+                </div>
+
+                <div className={styles.cardFooter}>
+                  <button
+                    type="button"
+                    className={styles.cardActionMeasure}
+                    onClick={() => measureDestination(dest)}
+                  >
+                    <RouteIcon size={14} aria-hidden="true" />
+                    Measure route
+                  </button>
+                  <Link href="/transport/" className={styles.cardActionBook}>
+                    Book transfer
+                    <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* SECTION 3: ZANZIBAR ATTRACTIONS & PLACES */}
+      <div id="zanzibar-attractions" className={styles.explorerSection}>
+        <ZanzibarAttractions />
+      </div>
+
+      {/* SECTION 4: MOST BOOKED TRIPS */}
+      <section
+        id="most-booked-trips"
+        className={styles.section}
+        aria-labelledby="most-booked-heading"
+      >
+        <header className={styles.sectionHead}>
+          <div className={styles.sectionHeadCopy}>
+            <span className={`${styles.sectionEyebrow} ${styles.sectionEyebrowEmerald}`}>
+              <Flame size={13} aria-hidden="true" />
+              Traveler favorites
+            </span>
+            <h2 id="most-booked-heading" className={styles.sectionTitle}>
+              Most Booked Trips
+            </h2>
+            <p className={styles.sectionLead}>
+              High-demand airport transfers, ferry pickups, and day excursions
+              booked most frequently across Zanzibar.
+            </p>
+          </div>
+        </header>
+
+        <div className={styles.grid3}>
+          {mostBookedTrips.map((trip, index) => {
+            const isFav = favoriteIds.has(trip.id);
+            return (
+              <article key={trip.id} className={styles.tripCard}>
+                <div className={styles.tripCardTop}>
+                  <div className={styles.badgeCluster}>
+                    <span className={styles.pillEmerald}>
+                      <Flame size={11} aria-hidden="true" />
+                      {trip.bookingCount
+                        ? `${trip.bookingCount} ${trip.bookingCount === 1 ? "booking" : "bookings"}`
+                        : index === 0
+                          ? "#1 Most booked"
+                          : trip.badge}
+                    </span>
+                    <span className={styles.pillGold}>
+                      <Star size={11} fill="currentColor" aria-hidden="true" />
+                      {trip.rating.toFixed(1)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={`${styles.favButton} ${
+                      isFav ? styles.favButtonActive : ""
+                    } ${styles.favIconOnly}`}
+                    aria-label={
+                      isFav
+                        ? `Remove ${trip.title} from favorites`
+                        : `Save ${trip.title} to favorites`
+                    }
+                    aria-pressed={isFav}
+                    onClick={() =>
+                      handleToggleFavorite({
+                        id: trip.id,
+                        kind: "most_booked",
+                        title: trip.title,
+                        subtitle: trip.summary,
+                        origin: trip.origin,
+                        destination: trip.destination,
+                        distanceKm: trip.distanceKm || null,
+                        durationMins: trip.durationMins || null,
+                        rating: trip.rating,
+                        priceLabel: trip.priceHint ?? null,
+                        href: "/transport/",
+                        savedAt: new Date().toISOString(),
+                      })
+                    }
+                  >
+                    <Heart
+                      size={16}
+                      fill={isFav ? "currentColor" : "none"}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+
+                <h3 className={styles.cardTitle}>{trip.title}</h3>
+                <p className={styles.cardSub}>{trip.summary}</p>
+
+                <div className={styles.cardRouteChip}>
+                  <span className={styles.cardRouteLine}>
+                    <span className={styles.dotGreen} aria-hidden="true" />
+                    {trip.origin.label.split(",")[0]}
+                  </span>
+                  <span className={styles.cardRouteLine}>
+                    <span className={styles.dotNavy} aria-hidden="true" />
+                    {trip.destination.label.split(",")[0]}
+                  </span>
+                </div>
+
+                <div className={styles.cardStatsBar}>
+                  <span className={styles.cardStatInline}>
+                    <Clock size={14} aria-hidden="true" />
+                    {[
+                      formatTripDistance(trip.distanceKm),
+                      formatTripDuration(trip.durationMins),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "Measure live"}
+                  </span>
+                  {trip.priceHint ? (
+                    <span className={styles.cardPrice}>{trip.priceHint}</span>
+                  ) : null}
+                </div>
+
+                <div className={styles.cardFooter}>
+                  <button
+                    type="button"
+                    className={styles.cardActionMeasure}
+                    onClick={() =>
+                      loadIntoMeasurer(trip.origin, trip.destination)
+                    }
+                  >
+                    <RouteIcon size={14} aria-hidden="true" />
+                    Measure
+                  </button>
+                  <Link href="/transport/" className={styles.cardActionBook}>
+                    Book transfer
+                    <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* SECTION 5: TOP RATED TRIPS */}
+      <section
+        id="top-rated-trips"
+        className={styles.section}
+        aria-labelledby="top-rated-heading"
+      >
+        <header className={styles.sectionHead}>
+          <div className={styles.sectionHeadCopy}>
+            <span className={`${styles.sectionEyebrow} ${styles.sectionEyebrowGold}`}>
+              <Award size={13} aria-hidden="true" />
+              Highest traveler scores
+            </span>
+            <h2 id="top-rated-heading" className={styles.sectionTitle}>
+              Top Rated Trips
+            </h2>
+            <p className={styles.sectionLead}>
+              Loved for scenic coastal drives, heritage charm, and standout
+              traveler reviews across Zanzibar.
+            </p>
+          </div>
+        </header>
+
+        <div className={styles.grid3}>
+          {topRatedTrips.map((trip) => {
+            const isFav = favoriteIds.has(trip.id);
+            const isCompanyTrip = trip.id.startsWith("company-trip-");
+            const tripHref = isCompanyTrip
+              ? `/trips/${trip.id.replace("company-trip-", "")}/`
+              : "/transport/";
+            return (
+              <article key={trip.id} className={styles.tripCard}>
+                <div className={styles.tripCardTop}>
+                  <div className={styles.badgeCluster}>
+                    <span className={styles.pillGold}>
+                      <Star size={11} fill="currentColor" aria-hidden="true" />
+                      {trip.rating.toFixed(1)} · {trip.reviews.toLocaleString("en-US")}{" "}
+                      {trip.reviews === 1 ? "review" : "reviews"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={`${styles.favButton} ${
+                      isFav ? styles.favButtonActive : ""
+                    } ${styles.favIconOnly}`}
+                    aria-label={
+                      isFav
+                        ? `Remove ${trip.title} from favorites`
+                        : `Save ${trip.title} to favorites`
+                    }
+                    aria-pressed={isFav}
+                    onClick={() =>
+                      handleToggleFavorite({
+                        id: trip.id,
+                        kind: isCompanyTrip ? "company_trip" : "top_rated",
+                        title: trip.title,
+                        subtitle: trip.summary,
+                        origin: trip.origin,
+                        destination: trip.destination,
+                        distanceKm: trip.distanceKm || null,
+                        durationMins: trip.durationMins || null,
+                        rating: trip.rating,
+                        priceLabel: trip.priceHint ?? null,
+                        href: tripHref,
+                        savedAt: new Date().toISOString(),
+                      })
+                    }
+                  >
+                    <Heart
+                      size={16}
+                      fill={isFav ? "currentColor" : "none"}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+
+                <h3 className={styles.cardTitle}>{trip.title}</h3>
+                <p className={styles.cardSub}>{trip.summary}</p>
+
+                <div className={styles.cardRouteChip}>
+                  <span className={styles.cardRouteLine}>
+                    <span className={styles.dotGreen} aria-hidden="true" />
+                    {trip.origin.label.split(",")[0]}
+                  </span>
+                  <span className={styles.cardRouteLine}>
+                    <span className={styles.dotNavy} aria-hidden="true" />
+                    {trip.destination.label.split(",")[0]}
+                  </span>
+                </div>
+
+                <div className={styles.cardStatsBar}>
+                  <span className={styles.cardStatInline}>
+                    <Clock size={14} aria-hidden="true" />
+                    {[
+                      formatTripDistance(trip.distanceKm),
+                      formatTripDuration(trip.durationMins),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "Measure live"}
+                  </span>
+                  {trip.priceHint ? (
+                    <span className={styles.cardPrice}>{trip.priceHint}</span>
+                  ) : null}
+                </div>
+
+                <div className={styles.cardFooter}>
+                  <button
+                    type="button"
+                    className={styles.cardActionMeasure}
+                    onClick={() =>
+                      loadIntoMeasurer(trip.origin, trip.destination)
+                    }
+                  >
+                    <RouteIcon size={14} aria-hidden="true" />
+                    Measure
+                  </button>
+                  <Link href={tripHref} className={styles.cardActionBook}>
+                    {isCompanyTrip ? "View trip" : "Book trip"}
+                    <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* SECTION 6: MY FAVORITE TRIPS */}
       <section
         id="favorite-trips"
         className={styles.section}
@@ -1196,398 +1572,7 @@ export default function TripsPage() {
         )}
       </section>
 
-      {/* SECTION 3: TRIP SUGGESTIONS & DESTINATIONS */}
-      <section
-        id="suggested-destinations"
-        className={styles.section}
-        aria-labelledby="destinations-heading"
-      >
-        <header className={styles.sectionHead}>
-          <div className={styles.sectionHeadCopy}>
-            <span className={styles.sectionEyebrow}>
-              <Compass size={13} aria-hidden="true" />
-              Trip suggestions &amp; destinations
-            </span>
-            <h2 id="destinations-heading" className={styles.sectionTitle}>
-              Suggested Zanzibar Destinations
-            </h2>
-            <p className={styles.sectionLead}>
-              Explore Zanzibar&apos;s favorite beaches, heritage quarters, spice
-              farms, and coastal resorts — measure any destination in one tap.
-            </p>
-          </div>
-
-          <div
-            className={styles.filterBar}
-            role="group"
-            aria-label="Filter destinations by category"
-          >
-            {DESTINATION_FILTERS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`${styles.filterChip} ${
-                  destCategory === item.id ? styles.filterChipActive : ""
-                }`}
-                aria-pressed={destCategory === item.id}
-                onClick={() => setDestCategory(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </header>
-
-        <div className={styles.grid3}>
-          {filteredDestinations.map((dest) => {
-            const isFav = favoriteIds.has(dest.id);
-            return (
-              <article key={dest.id} className={styles.tripCard}>
-                <div className={styles.tripCardTop}>
-                  <div className={styles.badgeCluster}>
-                    <span className={styles.pillBlue}>{dest.categoryLabel}</span>
-                    <span className={styles.pillGold}>
-                      <Star size={11} fill="currentColor" aria-hidden="true" />
-                      {dest.rating.toFixed(1)} ({dest.reviews.toLocaleString("en-US")})
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className={`${styles.favButton} ${
-                      isFav ? styles.favButtonActive : ""
-                    } ${styles.favIconOnly}`}
-                    aria-label={
-                      isFav
-                        ? `Remove ${dest.name} from favorites`
-                        : `Save ${dest.name} to favorites`
-                    }
-                    aria-pressed={isFav}
-                    onClick={() =>
-                      handleToggleFavorite({
-                        id: dest.id,
-                        kind: "destination",
-                        title: dest.name,
-                        subtitle: `${dest.area} · ${dest.categoryLabel}`,
-                        origin: AIRPORT_HUB,
-                        destination: {
-                          label: `${dest.name}, ${dest.area}`,
-                          lat: dest.lat,
-                          lng: dest.lng,
-                        },
-                        distanceKm: dest.approxFromAirportKm,
-                        durationMins: dest.approxFromAirportMins,
-                        rating: dest.rating,
-                        href: "/transport/",
-                        savedAt: new Date().toISOString(),
-                      })
-                    }
-                  >
-                    <Heart
-                      size={16}
-                      fill={isFav ? "currentColor" : "none"}
-                      aria-hidden="true"
-                    />
-                  </button>
-                </div>
-
-                <div>
-                  <h3 className={styles.cardTitle}>{dest.name}</h3>
-                  <p className={styles.cardSub}>
-                    <MapPin
-                      size={12}
-                      style={{ display: "inline", marginRight: 4, verticalAlign: -1 }}
-                      aria-hidden="true"
-                    />
-                    {dest.area}
-                  </p>
-                </div>
-
-                <p className={styles.cardSub}>{dest.summary}</p>
-
-                <div className={styles.cardStatsBar}>
-                  <span className={styles.cardStatInline}>
-                    <Navigation size={13} aria-hidden="true" />
-                    ~{formatTripDistance(dest.approxFromAirportKm)} ·{" "}
-                    {formatTripDuration(dest.approxFromAirportMins)} from Airport
-                  </span>
-                </div>
-
-                <div className={styles.cardFooter}>
-                  <button
-                    type="button"
-                    className={styles.cardActionMeasure}
-                    onClick={() => measureDestination(dest)}
-                  >
-                    <RouteIcon size={14} aria-hidden="true" />
-                    Measure route
-                  </button>
-                  <Link href="/transport/" className={styles.cardActionBook}>
-                    Book transfer
-                    <ArrowRight size={14} aria-hidden="true" />
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* SECTION 4: TOP RATED TRIPS */}
-      <section
-        id="top-rated-trips"
-        className={styles.section}
-        aria-labelledby="top-rated-heading"
-      >
-        <header className={styles.sectionHead}>
-          <div className={styles.sectionHeadCopy}>
-            <span className={`${styles.sectionEyebrow} ${styles.sectionEyebrowGold}`}>
-              <Award size={13} aria-hidden="true" />
-              Highest traveler scores
-            </span>
-            <h2 id="top-rated-heading" className={styles.sectionTitle}>
-              Top Rated Trips
-            </h2>
-            <p className={styles.sectionLead}>
-              Loved for scenic coastal drives, heritage charm, and standout
-              traveler reviews across Zanzibar.
-            </p>
-          </div>
-        </header>
-
-        <div className={styles.grid3}>
-          {topRatedTrips.map((trip) => {
-            const isFav = favoriteIds.has(trip.id);
-            const isCompanyTrip = trip.id.startsWith("company-trip-");
-            const tripHref = isCompanyTrip
-              ? `/trips/${trip.id.replace("company-trip-", "")}/`
-              : "/transport/";
-            return (
-              <article key={trip.id} className={styles.tripCard}>
-                <div className={styles.tripCardTop}>
-                  <div className={styles.badgeCluster}>
-                    <span className={styles.pillGold}>
-                      <Star size={11} fill="currentColor" aria-hidden="true" />
-                      {trip.rating.toFixed(1)} · {trip.reviews.toLocaleString("en-US")}{" "}
-                      {trip.reviews === 1 ? "review" : "reviews"}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className={`${styles.favButton} ${
-                      isFav ? styles.favButtonActive : ""
-                    } ${styles.favIconOnly}`}
-                    aria-label={
-                      isFav
-                        ? `Remove ${trip.title} from favorites`
-                        : `Save ${trip.title} to favorites`
-                    }
-                    aria-pressed={isFav}
-                    onClick={() =>
-                      handleToggleFavorite({
-                        id: trip.id,
-                        kind: isCompanyTrip ? "company_trip" : "top_rated",
-                        title: trip.title,
-                        subtitle: trip.summary,
-                        origin: trip.origin,
-                        destination: trip.destination,
-                        distanceKm: trip.distanceKm || null,
-                        durationMins: trip.durationMins || null,
-                        rating: trip.rating,
-                        priceLabel: trip.priceHint ?? null,
-                        href: tripHref,
-                        savedAt: new Date().toISOString(),
-                      })
-                    }
-                  >
-                    <Heart
-                      size={16}
-                      fill={isFav ? "currentColor" : "none"}
-                      aria-hidden="true"
-                    />
-                  </button>
-                </div>
-
-                <h3 className={styles.cardTitle}>{trip.title}</h3>
-                <p className={styles.cardSub}>{trip.summary}</p>
-
-                <div className={styles.cardRouteChip}>
-                  <span className={styles.cardRouteLine}>
-                    <span className={styles.dotGreen} aria-hidden="true" />
-                    {trip.origin.label.split(",")[0]}
-                  </span>
-                  <span className={styles.cardRouteLine}>
-                    <span className={styles.dotNavy} aria-hidden="true" />
-                    {trip.destination.label.split(",")[0]}
-                  </span>
-                </div>
-
-                <div className={styles.cardStatsBar}>
-                  <span className={styles.cardStatInline}>
-                    <Clock size={14} aria-hidden="true" />
-                    {[
-                      formatTripDistance(trip.distanceKm),
-                      formatTripDuration(trip.durationMins),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ") || "Measure live"}
-                  </span>
-                  {trip.priceHint ? (
-                    <span className={styles.cardPrice}>{trip.priceHint}</span>
-                  ) : null}
-                </div>
-
-                <div className={styles.cardFooter}>
-                  <button
-                    type="button"
-                    className={styles.cardActionMeasure}
-                    onClick={() =>
-                      loadIntoMeasurer(trip.origin, trip.destination)
-                    }
-                  >
-                    <RouteIcon size={14} aria-hidden="true" />
-                    Measure
-                  </button>
-                  <Link href={tripHref} className={styles.cardActionBook}>
-                    {isCompanyTrip ? "View trip" : "Book trip"}
-                    <ArrowRight size={14} aria-hidden="true" />
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* SECTION 5: MOST BOOKED TRIPS */}
-      <section
-        id="most-booked-trips"
-        className={styles.section}
-        aria-labelledby="most-booked-heading"
-      >
-        <header className={styles.sectionHead}>
-          <div className={styles.sectionHeadCopy}>
-            <span className={`${styles.sectionEyebrow} ${styles.sectionEyebrowEmerald}`}>
-              <Flame size={13} aria-hidden="true" />
-              Traveler favorites
-            </span>
-            <h2 id="most-booked-heading" className={styles.sectionTitle}>
-              Most Booked Trips
-            </h2>
-            <p className={styles.sectionLead}>
-              High-demand airport transfers, ferry pickups, and day excursions
-              booked most frequently across Zanzibar.
-            </p>
-          </div>
-        </header>
-
-        <div className={styles.grid3}>
-          {mostBookedTrips.map((trip, index) => {
-            const isFav = favoriteIds.has(trip.id);
-            return (
-              <article key={trip.id} className={styles.tripCard}>
-                <div className={styles.tripCardTop}>
-                  <div className={styles.badgeCluster}>
-                    <span className={styles.pillEmerald}>
-                      <Flame size={11} aria-hidden="true" />
-                      {trip.bookingCount
-                        ? `${trip.bookingCount} ${trip.bookingCount === 1 ? "booking" : "bookings"}`
-                        : index === 0
-                          ? "#1 Most booked"
-                          : trip.badge}
-                    </span>
-                    <span className={styles.pillGold}>
-                      <Star size={11} fill="currentColor" aria-hidden="true" />
-                      {trip.rating.toFixed(1)}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className={`${styles.favButton} ${
-                      isFav ? styles.favButtonActive : ""
-                    } ${styles.favIconOnly}`}
-                    aria-label={
-                      isFav
-                        ? `Remove ${trip.title} from favorites`
-                        : `Save ${trip.title} to favorites`
-                    }
-                    aria-pressed={isFav}
-                    onClick={() =>
-                      handleToggleFavorite({
-                        id: trip.id,
-                        kind: "most_booked",
-                        title: trip.title,
-                        subtitle: trip.summary,
-                        origin: trip.origin,
-                        destination: trip.destination,
-                        distanceKm: trip.distanceKm || null,
-                        durationMins: trip.durationMins || null,
-                        rating: trip.rating,
-                        priceLabel: trip.priceHint ?? null,
-                        href: "/transport/",
-                        savedAt: new Date().toISOString(),
-                      })
-                    }
-                  >
-                    <Heart
-                      size={16}
-                      fill={isFav ? "currentColor" : "none"}
-                      aria-hidden="true"
-                    />
-                  </button>
-                </div>
-
-                <h3 className={styles.cardTitle}>{trip.title}</h3>
-                <p className={styles.cardSub}>{trip.summary}</p>
-
-                <div className={styles.cardRouteChip}>
-                  <span className={styles.cardRouteLine}>
-                    <span className={styles.dotGreen} aria-hidden="true" />
-                    {trip.origin.label.split(",")[0]}
-                  </span>
-                  <span className={styles.cardRouteLine}>
-                    <span className={styles.dotNavy} aria-hidden="true" />
-                    {trip.destination.label.split(",")[0]}
-                  </span>
-                </div>
-
-                <div className={styles.cardStatsBar}>
-                  <span className={styles.cardStatInline}>
-                    <Clock size={14} aria-hidden="true" />
-                    {[
-                      formatTripDistance(trip.distanceKm),
-                      formatTripDuration(trip.durationMins),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ") || "Measure live"}
-                  </span>
-                  {trip.priceHint ? (
-                    <span className={styles.cardPrice}>{trip.priceHint}</span>
-                  ) : null}
-                </div>
-
-                <div className={styles.cardFooter}>
-                  <button
-                    type="button"
-                    className={styles.cardActionMeasure}
-                    onClick={() =>
-                      loadIntoMeasurer(trip.origin, trip.destination)
-                    }
-                  >
-                    <RouteIcon size={14} aria-hidden="true" />
-                    Measure
-                  </button>
-                  <Link href="/transport/" className={styles.cardActionBook}>
-                    Book transfer
-                    <ArrowRight size={14} aria-hidden="true" />
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* SECTION 6: COMPANY POSTED TRIPS */}
+      {/* SECTION 7: COMPANY POSTED TRIPS */}
       <section
         id="posted-trips"
         className={styles.section}
@@ -1855,10 +1840,6 @@ export default function TripsPage() {
           </div>
         )}
       </section>
-
-      {/* SECTION 7: INTERACTIVE ZANZIBAR PLACES MAP */}
-      <div className={styles.explorerSection}>
-        <ZanzibarAttractions />
       </div>
     </div>
   );
