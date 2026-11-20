@@ -4,19 +4,22 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
-import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI } from '@/lib/api/client';
-import { ArrowRight, Star, MapPin, Send, X } from '@/components/icons';
+import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI, publicPrivateHireAPI } from '@/lib/api/client';
+import { ArrowRight, Star, MapPin, Send, X, Car } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
+import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import styles from "@/features/pages/home-page.module.css";
+import cardStyles from "@/features/pages/company-private-service.module.css";
 
 import DestinationCard from "@/components/DestinationCard";
 
-import type {  HomeSettings, Review, Tour } from "@/features/pages/types";
+import type { HomeSettings, Review, Tour } from "@/features/pages/types";
+import { PRICING_LABELS, SAMPLE_PRIVATE_HIRE_SERVICES, type PrivateHireService } from "@/features/transport/private-hire-data";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
 
 type FeaturedCompany = {
@@ -51,6 +54,7 @@ export default function HomePage() {
   const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(() => readClientCache<HomeSettings>("travel.homeSettings"));
   const [reviews, setReviews] = useState<Review[]>(() => readClientCache<Review[]>("travel.homeReviews") ?? []);
   const [companies, setCompanies] = useState<FeaturedCompany[]>(() => readClientCache<FeaturedCompany[]>("travel.homeCompanies") ?? []);
+  const [privateServices, setPrivateServices] = useState<any[]>(() => readClientCache<any[]>("travel.homePrivateServices") ?? []);
   const [postedTrips, setPostedTrips] = useState<CompanyPostedTrip[]>(() => readClientCache<CompanyPostedTrip[]>("travel.homePostedTrips") ?? []);
   const [postedTripsLoading, setPostedTripsLoading] = useState<boolean>(() => readClientCache<CompanyPostedTrip[]>("travel.homePostedTrips") === null);
   const [loading, setLoading] = useState<boolean>(() => !(
@@ -114,6 +118,20 @@ export default function HomePage() {
     update();
     mobileLayout.addEventListener('change', update);
     return () => mobileLayout.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    publicPrivateHireAPI.getAll({ page_size: 6 })
+      .then((res) => {
+        const data = res.data;
+        const list = Array.isArray(data) ? data : data?.results || [];
+        const services = list.length ? list : SAMPLE_PRIVATE_HIRE_SERVICES.slice(0, 6);
+        setPrivateServices(services);
+        writeClientCache("travel.homePrivateServices", services);
+      })
+      .catch(() => {
+        setPrivateServices(SAMPLE_PRIVATE_HIRE_SERVICES.slice(0, 6));
+      });
   }, []);
 
   useEffect(() => {
@@ -278,7 +296,66 @@ export default function HomePage() {
       <section className="all-tours-section">
         <div className="section-header">
           <h2>Private hire for your journey</h2>
-          <Link href="/transport/" className="btn btn-primary">Browse vehicles <ArrowRight size={16} /></Link>
+          <Link href="/transport/" className="btn btn-primary btn-sm">Browse vehicles <ArrowRight size={14} /></Link>
+        </div>
+        <div className={`${cardStyles.servicesGrid} ${cardStyles.transportFleet}`}>
+          {privateServices.slice(0, 6).map((svc) => {
+            const vehicleName = svc.vehicle?.name ?? "Vehicle";
+            const plateNumber = svc.vehicle?.plate_number ?? svc.vehicle?.plateNumber ?? "";
+            const companyName = svc.company?.name ?? "Company";
+            const capacityPax = svc.vehicle?.capacity ?? svc.vehicle?.capacity ?? 0;
+            const luggageBags = svc.vehicle?.luggage_capacity ?? svc.vehicle?.luggageCapacity ?? 0;
+            return (
+              <div key={svc.id} className={cardStyles.serviceCard}>
+                <div className={cardStyles.serviceHeader}>
+                  <div className={cardStyles.serviceTitleGroup}>
+                    <h3 className={cardStyles.cardVehicleTitle}>
+                      {vehicleName}
+                      {plateNumber && <span className={cardStyles.plateBadgeInline}>{plateNumber}</span>}
+                    </h3>
+                    {svc.title && <p className={cardStyles.tagline}>{svc.title}</p>}
+                    {companyName && <span className={cardStyles.companyNameBadge}>{companyName}</span>}
+                  </div>
+                  <div className={cardStyles.priceTag}>
+                    ${svc.price}
+                    <span className={cardStyles.pricingUnit}>
+                      /{svc.pricing_type ? (PRICING_LABELS[svc.pricing_type] || svc.pricing_type) : (svc.pricingType ? (PRICING_LABELS[svc.pricingType] || svc.pricingType) : "per trip")}
+                    </span>
+                  </div>
+                </div>
+                <div className={cardStyles.serviceBody}>
+                  <div className={cardStyles.specsLine}>
+                    <span>{capacityPax} pax</span>
+                    <span>•</span>
+                    <span>{luggageBags} bags</span>
+                  </div>
+                  <div className={cardStyles.pairedBlock}>
+                    <div className={cardStyles.subSectionCard}>
+                      <div className={cardStyles.sectionHeaderRow}>
+                        <Car size={13} /> Private Hire transport
+                      </div>
+                      <div className={cardStyles.vehicleThumbArea}>
+                        {svc.vehicle?.front_image_url || svc.vehicle?.frontImage ? (
+                          <Image src={svc.vehicle?.front_image_url || svc.vehicle?.frontImage} alt={vehicleName} fill className={cardStyles.thumbImg} unoptimized />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-200">
+                            <Car size={24} color="#64748b" />
+                          </div>
+                        )}
+                        {plateNumber && <span className={cardStyles.plateMiniBadge}>{plateNumber}</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className={cardStyles.serviceFooter}>
+                  <Link href={`/transport/service/${svc.id}/`} className={cardStyles.btnPreview} style={{ textDecoration: "none" }}>View full details</Link>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/booking/${svc.id}/`} className={cardStyles.primaryBtn} style={{ textDecoration: "none" }}>Book now</Link>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -496,6 +573,14 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {!loading && (allTours.length === 0 || homeSettings?.more_experiences_image_urls?.some((image) => Boolean(image))) && (
+        <MoreExperiencesEmptyState
+          imageUrls={homeSettings?.more_experiences_image_urls?.slice(0, 5).map((image) => image ? getImageUrl(image) : null)}
+        />
+      )}
+
+
 
       {showReviewForm && (
         <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>

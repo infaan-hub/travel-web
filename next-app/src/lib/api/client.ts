@@ -90,6 +90,7 @@ export const toursAPI = {
 export const tripsAPI = {
   getAll: (params?: Params) => api.get("/trips/", { params }),
   getById: (id: string | number) => api.get(`/trips/${id}/`),
+  getPopular: () => api.get("/trips/popular/"),
   create: (data: FormData | Record<string, unknown>) =>
     api.post("/trips/", data, formDataConfig(data)),
   update: (id: string | number, data: FormData | Record<string, unknown>) =>

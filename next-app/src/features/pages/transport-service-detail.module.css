@@ -749,7 +749,11 @@
   }
 }
 
-/* ---------- Loading / not found ---------- */
+/* Make form controls on the booking page legible (visible borders). */
+:global(html body .app-layout .main-content) .page :where(input, textarea, select) {
+  border: 1px solid rgba(8, 66, 140, 0.22) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+}
 
 .stateCard {
   display: flex;
