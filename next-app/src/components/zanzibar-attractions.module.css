@@ -1,18 +1,20 @@
-/* Zanzibar attractions map on /trips */
+/* Redesigned Unguja / Zanzibar Interactive Atlas on /trips */
 
 .section {
   position: relative;
   isolation: isolate;
+  scroll-margin-top: 90px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: clamp(16px, 2.2vw, 26px);
-  background: var(--trips-surface, #ffffff);
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
-  border-radius: var(--trips-radius-xl, 22px);
-  box-shadow: var(--trips-shadow, 0 14px 34px rgba(8, 66, 140, 0.07));
-  margin-bottom: 32px;
-  color: var(--trips-ink, #12223a);
+  gap: 16px;
+  padding: clamp(18px, 2.4vw, 28px);
+  background: #ffffff;
+  border: 1px solid rgba(8, 66, 140, 0.14);
+  border-radius: 24px;
+  box-shadow:
+    0 4px 14px rgba(8, 66, 140, 0.05),
+    0 20px 44px rgba(8, 66, 140, 0.08);
+  color: #12223a;
 }
 
 /* --------------------------------------------------------------------------
@@ -24,48 +26,43 @@
   align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 18px;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(8, 66, 140, 0.11);
 }
 
 .headerCopy {
   min-width: 0;
-  max-width: 720px;
+  max-width: 680px;
 }
 
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 7px;
-  color: var(--trips-accent, #08428c);
-  font-size: 0.7rem;
+  gap: 6px;
+  margin: 0 0 6px;
+  color: #08428c;
+  font-size: 0.69rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.eyebrow::before {
-  width: 24px;
-  height: 2px;
-  border-radius: 2px;
-  background: currentColor;
-  content: "";
-}
-
 .title {
   margin: 0 0 6px;
-  color: var(--trips-ink, #12223a);
+  color: #12223a;
   font-family: var(--font-display, inherit);
-  font-size: clamp(1.4rem, 2.5vw, 1.95rem);
-  line-height: 1.12;
+  font-size: clamp(1.38rem, 1.15rem + 0.8vw, 1.85rem);
+  font-weight: 650;
+  line-height: 1.15;
   letter-spacing: -0.02em;
 }
 
 .lead {
   margin: 0;
-  color: var(--trips-ink-2, #44546c);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  color: #526580;
+  font-size: 0.87rem;
+  line-height: 1.56;
 }
 
 .stats {
@@ -79,39 +76,39 @@
   align-items: baseline;
   gap: 6px;
   padding: 8px 12px;
-  background: var(--trips-accent-soft, #e7eef9);
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
+  background: #edf4fc;
+  border: 1px solid #cfe0f4;
   border-radius: 12px;
 }
 
 .stat strong {
-  color: var(--trips-accent, #08428c);
+  color: #08428c;
   font-family: var(--font-display, inherit);
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.08rem;
+  font-weight: 750;
   line-height: 1;
 }
 
 .stat span {
-  color: var(--trips-ink-2, #44546c);
-  font-size: 0.66rem;
+  color: #334763;
+  font-size: 0.64rem;
   font-weight: 800;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 /* --------------------------------------------------------------------------
-   Toolbar: search + category chips
+   Toolbar: search + highlights toggle + category chips + quick area jumps
    -------------------------------------------------------------------------- */
 
 .toolbar {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px;
-  background: var(--trips-surface-soft, #f2f2f2);
-  border: 1px solid var(--trips-line-soft, rgba(8, 66, 140, 0.08));
-  border-radius: 16px;
+  padding: 13px;
+  background: #f6f9fe;
+  border: 1px solid rgba(8, 66, 140, 0.1);
+  border-radius: 18px;
 }
 
 .searchRow {
@@ -129,18 +126,16 @@
   flex: 1 1 280px;
   min-width: 0;
   min-height: 44px;
-  padding: 0 4px 0 12px;
-  color: var(--trips-ink-3, #5c6a82);
-  background: var(--trips-surface, #ffffff);
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
+  padding: 0 4px 0 13px;
+  color: #526580;
+  background: #ffffff;
+  border: 1px solid rgba(8, 66, 140, 0.16);
   border-radius: 12px;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .search:focus-within {
-  border-color: var(--trips-accent, #08428c);
+  border-color: #08428c;
   box-shadow: 0 0 0 3px rgba(8, 66, 140, 0.12);
 }
 
@@ -149,137 +144,212 @@
   min-width: 0;
   height: 42px;
   padding: 0;
-  color: var(--trips-ink, #12223a);
+  color: #12223a;
   background: transparent;
   border: 0;
   outline: none;
   font: inherit;
-  font-size: 0.86rem;
+  font-size: 0.85rem;
 }
 
 .search input::placeholder {
-  color: var(--trips-ink-3, #5c6a82);
+  color: #64748b;
 }
 
 .search input::-webkit-search-cancel-button {
   display: none;
 }
 
-.searchClear {
-  display: grid;
+:global(#zanzibar-attractions) .searchClear {
+  display: grid !important;
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
   place-items: center;
-  color: var(--trips-ink-2, #44546c);
-  background: transparent;
-  border: 0;
-  border-radius: 10px;
+  color: #44546c !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
   cursor: pointer;
 }
 
-.searchClear:hover {
-  color: var(--trips-accent, #08428c);
-  background: var(--trips-accent-soft, #e7eef9);
+:global(#zanzibar-attractions) .searchClear:hover {
+  color: #08428c !important;
+  background: #edf4fc !important;
 }
 
-.searchClear:focus-visible {
-  outline: 2px solid var(--trips-accent, #08428c);
-  outline-offset: -2px;
+:global(#zanzibar-attractions) .highlightsToggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px !important;
+  padding: 0 14px !important;
+  color: #12223a !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(8, 66, 140, 0.18) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  font-size: 0.76rem !important;
+  font-weight: 750 !important;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+:global(#zanzibar-attractions) .highlightsToggle:hover {
+  border-color: #08428c !important;
+  color: #08428c !important;
+  background: #edf4fc !important;
+}
+
+:global(#zanzibar-attractions) .highlightsToggleActive,
+:global(#zanzibar-attractions) .highlightsToggleActive:hover {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+  color: #ffffff !important;
 }
 
 .resultCount {
   margin: 0;
-  color: var(--trips-ink-2, #44546c);
+  color: #44546c;
   font-size: 0.74rem;
-  font-weight: 700;
+  font-weight: 750;
   white-space: nowrap;
 }
 
-.reset {
-  min-height: 44px;
-  padding: 0 12px;
-  color: var(--trips-accent, #08428c);
-  background: transparent;
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
-  border-radius: 10px;
-  font: inherit;
-  font-size: 0.74rem;
-  font-weight: 800;
+:global(#zanzibar-attractions) .reset {
+  min-height: 44px !important;
+  padding: 0 13px !important;
+  color: #08428c !important;
+  background: #ffffff !important;
+  border: 1px solid #bfd7f4 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
   cursor: pointer;
 }
 
-.reset:hover {
-  background: var(--trips-accent-soft, #e7eef9);
-}
-
-.reset:focus-visible {
-  outline: 2px solid var(--trips-accent, #08428c);
-  outline-offset: 2px;
+:global(#zanzibar-attractions) .reset:hover {
+  background: #edf4fc !important;
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding-bottom: 2px;
 }
 
-.chip {
-  display: inline-flex;
+:global(#zanzibar-attractions) .chip {
+  display: inline-flex !important;
   flex: none;
   align-items: center;
-  gap: 7px;
-  min-height: 44px;
-  padding: 0 12px;
-  color: var(--trips-ink-2, #44546c);
-  background: var(--trips-surface, #ffffff);
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
-  border-radius: 999px;
-  font: inherit;
-  font-size: 0.76rem;
-  font-weight: 700;
+  gap: 6px;
+  min-height: 38px !important;
+  padding: 0 12px !important;
+  color: #334763 !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(8, 66, 140, 0.14) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    color 160ms ease,
-    background 160ms ease,
-    border-color 160ms ease;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 }
 
-.chip:hover {
-  color: var(--trips-accent, #08428c);
-  border-color: var(--trips-line-strong, rgba(8, 66, 140, 0.3));
+:global(#zanzibar-attractions) .chip:hover {
+  color: #08428c !important;
+  border-color: rgba(8, 66, 140, 0.34) !important;
+  background: #edf4fc !important;
 }
 
-.chip:focus-visible {
-  outline: 2px solid var(--trips-accent, #08428c);
-  outline-offset: 2px;
+:global(#zanzibar-attractions) .chipActive,
+:global(#zanzibar-attractions) .chipActive:hover {
+  color: #ffffff !important;
+  background: #08428c !important;
+  border-color: #08428c !important;
 }
 
-.chipActive,
-.chipActive:hover {
-  color: #ffffff;
-  background: var(--trips-accent, #08428c);
-  border-color: var(--trips-accent, #08428c);
+.chipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
 }
 
 .chipCount {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 20px;
-  padding-inline: 5px;
+  min-width: 22px;
+  height: 19px;
+  padding-inline: 6px;
   color: inherit;
   background: rgba(18, 34, 58, 0.08);
   border-radius: 999px;
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   font-weight: 800;
 }
 
 .chipActive .chipCount {
   background: rgba(255, 255, 255, 0.22);
+}
+
+/* Quick Unguja area jump strip */
+.quickAreas {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(8, 66, 140, 0.14);
+}
+
+.quickAreasLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 2px;
+  color: #526580;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+:global(#zanzibar-attractions) .areaPill {
+  display: inline-flex !important;
+  align-items: center;
+  min-height: 32px !important;
+  padding: 0 11px !important;
+  color: #334763 !important;
+  background: #ffffff !important;
+  border: 1px solid #d5e2f2 !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+:global(#zanzibar-attractions) .areaPill:hover:not(:disabled) {
+  color: #08428c !important;
+  border-color: #93b8e8 !important;
+  background: #eaf2fd !important;
+}
+
+:global(#zanzibar-attractions) .areaPillActive,
+:global(#zanzibar-attractions) .areaPillActive:hover {
+  color: #ffffff !important;
+  background: #08428c !important;
+  border-color: #08428c !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -288,9 +358,9 @@
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 355px);
   gap: 16px;
-  height: clamp(540px, 66vh, 680px);
+  height: clamp(560px, 70vh, 720px);
   min-width: 0;
 }
 
@@ -299,9 +369,10 @@
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  background: #dfe9ec;
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
-  border-radius: 18px;
+  background: #cfe5ee;
+  border: 1.5px solid rgba(8, 66, 140, 0.16);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 .map {
@@ -309,8 +380,8 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(700px 340px at 50% 20%, rgba(255, 255, 255, 0.8), transparent 70%),
-    #dbe7ea;
+    radial-gradient(640px 320px at 50% 20%, rgba(255, 255, 255, 0.55), transparent 72%),
+    #cde4ee;
 }
 
 .map :global(.leaflet-container) {
@@ -319,38 +390,51 @@
 
 .map :global(.leaflet-control-attribution) {
   font-size: 10px;
+  background: rgba(255, 255, 255, 0.86);
+  border-top-left-radius: 8px;
+}
+
+.map :global(.leaflet-control-zoom) {
+  border: 1px solid rgba(18, 34, 58, 0.12) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14) !important;
 }
 
 .map :global(.leaflet-control-zoom a) {
   color: #12223a;
+  width: 34px;
+  height: 34px;
+  line-height: 34px;
+  font-weight: 700;
 }
 
 .map :global(.leaflet-tooltip) {
-  padding: 4px 7px;
+  padding: 5px 9px;
   color: #12223a;
-  background: #ffffff;
-  border: 1px solid rgba(18, 34, 58, 0.12);
-  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(18, 34, 58, 0.14);
+  border-radius: 8px;
   font-size: 11px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(18, 34, 58, 0.14);
+  font-weight: 750;
+  box-shadow: 0 6px 16px rgba(18, 34, 58, 0.16);
 }
 
 .map :global(.leaflet-tooltip-top::before) {
-  border-top-color: rgba(18, 34, 58, 0.12);
+  border-top-color: rgba(18, 34, 58, 0.14);
 }
 
 .map :global(.leaflet-popup-content-wrapper) {
   padding: 0;
   overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.24);
+  border-radius: 14px;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.25);
 }
 
 .map :global(.leaflet-popup-content) {
   width: auto !important;
   margin: 0;
-  line-height: 1.35;
+  line-height: 1.38;
 }
 
 .map :global(.leaflet-popup-tip) {
@@ -358,16 +442,16 @@
 }
 
 .map :global(.leaflet-popup-close-button) {
-  top: 5px;
-  right: 5px;
+  top: 7px;
+  right: 7px;
   display: grid;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   place-items: center;
   color: #64748b;
   border-radius: 50%;
-  font-size: 16px;
-  line-height: 18px;
+  font-size: 17px;
+  line-height: 22px;
 }
 
 .map :global(.leaflet-popup-close-button:hover) {
@@ -375,6 +459,7 @@
   background: #f1f5f9;
 }
 
+/* Floating top-left scope controls */
 .mapTop {
   position: absolute;
   top: 12px;
@@ -382,57 +467,95 @@
   z-index: 650;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 4px 4px 10px;
+  gap: 3px;
+  padding: 4px;
   background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(18, 34, 58, 0.1);
+  border: 1px solid rgba(18, 34, 58, 0.12);
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(18, 34, 58, 0.14);
-  backdrop-filter: blur(4px);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
-.mapKicker {
-  display: inline-flex;
+:global(#zanzibar-attractions) .mapAction {
+  display: inline-flex !important;
   align-items: center;
-  gap: 4px;
-  color: #0b5f63;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.mapAction {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 44px;
-  padding: 0 10px;
-  color: #12223a;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 0.66rem;
-  font-weight: 800;
+  gap: 5px;
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  color: #1e293b !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
   white-space: nowrap;
   cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
 }
 
-.mapAction:hover:not(:disabled) {
-  color: #08428c;
-  background: #e7eef9;
+:global(#zanzibar-attractions) .mapAction:hover:not(:disabled) {
+  color: #08428c !important;
+  background: #eaf2fd !important;
 }
 
-.mapAction:focus-visible {
-  outline: 2px solid #08428c;
-  outline-offset: 1px;
+:global(#zanzibar-attractions) .mapActionActive,
+:global(#zanzibar-attractions) .mapActionActive:hover {
+  color: #ffffff !important;
+  background: #08428c !important;
 }
 
-.mapAction:disabled {
+:global(#zanzibar-attractions) .mapAction:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* Floating top-right basemap switcher (sits neatly left of Leaflet zoom controls) */
+.mapStyleBar {
+  position: absolute;
+  top: 12px;
+  right: 54px;
+  z-index: 650;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(18, 34, 58, 0.12);
+  border-radius: 999px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+:global(#zanzibar-attractions) .styleBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px !important;
+  padding: 0 11px !important;
+  color: #334155 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+:global(#zanzibar-attractions) .styleBtn:hover:not(:disabled) {
+  color: #08428c !important;
+  background: #eaf2fd !important;
+}
+
+:global(#zanzibar-attractions) .styleBtnActive,
+:global(#zanzibar-attractions) .styleBtnActive:hover {
+  color: #ffffff !important;
+  background: #08428c !important;
 }
 
 .mapStatus {
@@ -443,68 +566,129 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  color: var(--trips-ink-2, #44546c);
-  background: rgba(243, 247, 249, 0.88);
+  color: #44546c;
+  background: rgba(243, 247, 250, 0.9);
   font-size: 0.88rem;
   font-weight: 700;
   text-align: center;
 }
 
-.legend {
+/* Compact collapsible legend dock at bottom-left */
+.legendDock {
   position: absolute;
   left: 12px;
   bottom: 12px;
-  z-index: 640;
+  z-index: 650;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  max-width: calc(100% - 96px);
-  max-height: 44%;
-  padding: 8px 10px;
-  overflow-y: auto;
-  background: rgba(255, 255, 255, 0.93);
-  border: 1px solid rgba(18, 34, 58, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 4px 14px rgba(18, 34, 58, 0.12);
-  backdrop-filter: blur(4px);
-  pointer-events: none;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: calc(100% - 120px);
+}
+
+:global(#zanzibar-attractions) .legendToggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px !important;
+  padding: 0 13px !important;
+  color: #12223a !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(18, 34, 58, 0.14) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15) !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+:global(#zanzibar-attractions) .legendToggle:hover {
+  color: #08428c !important;
+  background: #ffffff !important;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(320px, calc(100vw - 56px));
+  padding: 11px 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(18, 34, 58, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.legendHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #12223a;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+:global(#zanzibar-attractions) .legendClose {
+  display: grid !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 0 !important;
+  place-items: center;
+  color: #526580 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+:global(#zanzibar-attractions) .legendClose:hover {
+  background: #edf4fc !important;
+  color: #08428c !important;
 }
 
 .legendGroups,
 .legendRules {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 10px;
+  gap: 6px 11px;
 }
 
 .legendRules {
-  padding-top: 5px;
+  padding-top: 7px;
   border-top: 1px solid rgba(18, 34, 58, 0.08);
 }
 
 .legendItem {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   color: #334155;
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .roadLine {
   width: 16px;
-  height: 3px;
+  height: 2.5px;
   background: #64748b;
   border-radius: 2px;
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
 .roadLineMain {
-  height: 4px;
-  background: #334155;
-  opacity: 0.95;
-  box-shadow: 0 0 0 1.5px rgba(248, 250, 252, 0.9);
+  height: 3.5px;
+  background: #1e3a5f;
+  opacity: 0.9;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
 }
 
 .townSignSample {
@@ -517,7 +701,7 @@
   border-radius: 999px;
 }
 
-/* Leaflet marker icons */
+/* Leaflet marker icon badges */
 .marker {
   background: transparent;
   border: 0;
@@ -525,43 +709,42 @@
 
 .markerGlyph {
   display: grid;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   place-items: center;
-  filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.3));
-  transform-origin: 50% 100%;
-  transition: transform 0.16s ease;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.75px solid var(--marker-color, #08428c);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.markerCurated {
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 4px 10px rgba(15, 23, 42, 0.28);
 }
 
 .markerGlyph > svg {
   overflow: visible;
 }
 
-.markerStay {
-  width: 20px;
-  height: 20px;
-  background: #ffffff;
-  border: 1.5px solid var(--marker-color);
-  border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.24);
-  transform-origin: 50% 50%;
-}
-
 .marker:hover .markerGlyph {
-  transform: scale(1.08);
+  transform: scale(1.14);
 }
 
 .markerGlyph.markerSelected {
-  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.4));
-  transform: scale(1.12);
-}
-
-.markerStay.markerSelected {
-  transform: scale(1.08);
+  transform: scale(1.24);
+  box-shadow:
+    0 0 0 3px rgba(8, 66, 140, 0.32),
+    0 6px 16px rgba(15, 23, 42, 0.36);
 }
 
 .islandShape {
-  filter: drop-shadow(0 1px 2px rgba(11, 95, 99, 0.25));
+  filter: drop-shadow(0 1px 2px rgba(11, 95, 99, 0.2));
 }
 
 .islandLabel {
@@ -574,14 +757,14 @@
 }
 
 .islandLabel span {
-  color: #0b5f63;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
+  color: #0b4f6c;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   text-shadow:
-    0 0 3px #ffffff,
-    0 0 6px #ffffff,
+    0 0 4px #ffffff,
+    0 0 8px #ffffff,
     0 1px 0 #ffffff;
   white-space: nowrap;
 }
@@ -592,24 +775,36 @@
   justify-content: center;
   background: transparent;
   border: 0;
-  pointer-events: none;
+  cursor: pointer;
 }
 
 .townSign span {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   color: #12223a;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(18, 34, 58, 0.18);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(8, 66, 140, 0.22);
   border-radius: 999px;
-  font-size: 0.54rem;
-  font-weight: 800;
-  letter-spacing: 0.09em;
+  font-size: 0.57rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  box-shadow: 0 1px 4px rgba(18, 34, 58, 0.16);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+  transition: transform 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.townSign:hover span {
+  transform: translateY(-1px);
+  background: #08428c;
+  color: #ffffff;
+  border-color: #08428c;
+}
+
+.townSign:hover i {
+  background: #ffffff;
 }
 
 .townSign i {
@@ -634,11 +829,12 @@
 .selectedCard {
   position: relative;
   flex: none;
-  padding: 14px;
-  background: linear-gradient(145deg, #f4f8fd, #ffffff);
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
-  border-top: 3px solid var(--place-color, #08428c);
-  border-radius: 16px;
+  padding: 15px;
+  background: linear-gradient(155deg, #f3f8fe 0%, #ffffff 78%);
+  border: 1px solid rgba(8, 66, 140, 0.16);
+  border-top: 3.5px solid var(--place-color, #08428c);
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(8, 66, 140, 0.08);
 }
 
 .selectedHead {
@@ -651,43 +847,42 @@
 .selectedPill {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
+  padding: 3px 9px;
   color: var(--place-color, #08428c);
-  background: color-mix(in srgb, var(--place-color, #08428c) 13%, white);
+  background: color-mix(in srgb, var(--place-color, #08428c) 12%, white);
   border-radius: 999px;
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-.selectedClose {
-  display: grid;
+:global(#zanzibar-attractions) .selectedClose {
+  display: grid !important;
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
   place-items: center;
-  color: var(--trips-ink-2, #44546c);
-  background: transparent;
-  border: 0;
-  border-radius: 10px;
+  color: #526580 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
   cursor: pointer;
 }
 
-.selectedClose:hover {
-  color: var(--trips-accent, #08428c);
-  background: var(--trips-accent-soft, #e7eef9);
-}
-
-.selectedClose:focus-visible {
-  outline: 2px solid var(--trips-accent, #08428c);
-  outline-offset: 1px;
+:global(#zanzibar-attractions) .selectedClose:hover {
+  color: #08428c !important;
+  background: #e7eef9 !important;
 }
 
 .selectedName {
   margin: 8px 0 3px;
-  color: var(--trips-ink, #12223a);
-  font-size: 1.04rem;
+  color: #12223a;
+  font-size: 1.02rem;
+  font-weight: 750;
   line-height: 1.25;
 }
 
@@ -696,9 +891,9 @@
   align-items: center;
   gap: 4px;
   margin: 0;
-  color: var(--trips-ink-2, #44546c);
+  color: #44546c;
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .selectedRating {
@@ -707,24 +902,24 @@
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 6px;
-  color: var(--trips-ink-3, #5c6a82);
-  font-size: 0.68rem;
+  color: #526580;
+  font-size: 0.69rem;
 }
 
 .selectedRating strong {
-  color: var(--trips-ink, #12223a);
+  color: #12223a;
 }
 
 .stars {
   color: #b45309;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   white-space: nowrap;
 }
 
 .selectedNote {
-  margin: 8px 0 0;
-  color: var(--trips-ink-2, #44546c);
-  font-size: 0.74rem;
+  margin: 7px 0 0;
+  color: #44546c;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -734,9 +929,10 @@
   gap: 4px 12px;
   margin-top: 8px;
   padding-top: 8px;
-  color: var(--trips-ink-3, #5c6a82);
-  border-top: 1px dashed var(--trips-line, rgba(8, 66, 140, 0.14));
-  font-size: 0.66rem;
+  color: #526580;
+  border-top: 1px dashed rgba(8, 66, 140, 0.14);
+  font-size: 0.67rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .selectedCoords em {
@@ -747,26 +943,56 @@
   text-transform: uppercase;
 }
 
+.selectedActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+:global(#zanzibar-attractions) .measureAction {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-height: 38px !important;
+  padding: 0 13px !important;
+  color: #ffffff !important;
+  background: #08428c !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(8, 66, 140, 0.2) !important;
+  font-size: 0.74rem !important;
+  font-weight: 750 !important;
+  cursor: pointer;
+}
+
+:global(#zanzibar-attractions) .measureAction:hover {
+  background: #063570 !important;
+}
+
 .mapsLink {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  min-height: 44px;
-  margin-top: 6px;
-  color: var(--trips-accent, #08428c);
-  font-size: 0.75rem;
-  font-weight: 800;
+  flex: 1 1 auto;
+  min-height: 38px;
+  padding: 0 12px;
+  color: #08428c;
+  background: #ffffff;
+  border: 1px solid #c5daf4;
+  border-radius: 10px;
+  font-size: 0.74rem;
+  font-weight: 750;
   text-decoration: none;
+  transition: background-color 140ms ease, border-color 140ms ease;
 }
 
 .mapsLink:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.mapsLink:focus-visible {
-  outline: 2px solid var(--trips-accent, #08428c);
-  outline-offset: 2px;
+  background: #edf4fc;
+  border-color: #93b8e8;
 }
 
 .hintCard {
@@ -775,11 +1001,11 @@
   align-items: flex-start;
   gap: 10px;
   padding: 13px 14px;
-  color: var(--trips-ink-2, #44546c);
-  background: var(--trips-surface-soft, #f2f2f2);
-  border: 1px dashed var(--trips-line-strong, rgba(8, 66, 140, 0.3));
+  color: #44546c;
+  background: #f6f9fe;
+  border: 1px dashed rgba(8, 66, 140, 0.26);
   border-radius: 16px;
-  font-size: 0.78rem;
+  font-size: 0.77rem;
   line-height: 1.5;
 }
 
@@ -790,11 +1016,11 @@
 .hintIcon {
   display: grid;
   flex: none;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   place-items: center;
-  color: var(--trips-accent, #08428c);
-  background: var(--trips-accent-soft, #e7eef9);
+  color: #08428c;
+  background: #e7eef9;
   border-radius: 50%;
 }
 
@@ -804,9 +1030,9 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  background: var(--trips-surface, #ffffff);
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
-  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(8, 66, 140, 0.14);
+  border-radius: 18px;
 }
 
 .listHead {
@@ -814,16 +1040,17 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--trips-line-soft, rgba(8, 66, 140, 0.08));
+  padding: 11px 13px;
+  background: #f8fbff;
+  border-bottom: 1px solid rgba(8, 66, 140, 0.1);
 }
 
 .listTitle {
   margin: 0;
-  color: var(--trips-ink, #12223a);
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.07em;
+  color: #12223a;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -833,11 +1060,11 @@
   justify-content: center;
   min-width: 30px;
   height: 22px;
-  padding-inline: 7px;
-  color: var(--trips-accent, #08428c);
-  background: var(--trips-accent-soft, #e7eef9);
+  padding-inline: 8px;
+  color: #08428c;
+  background: #e7eef9;
   border-radius: 999px;
-  font-size: 0.66rem;
+  font-size: 0.67rem;
   font-weight: 800;
 }
 
@@ -847,51 +1074,45 @@
   flex-direction: column;
   gap: 3px;
   margin: 0;
-  padding: 6px;
+  padding: 7px;
   overflow-y: auto;
   list-style: none;
   scrollbar-width: thin;
 }
 
-.listButton {
-  display: flex;
+:global(#zanzibar-attractions) .listButton {
+  display: flex !important;
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 52px;
-  padding: 7px 9px;
-  color: var(--trips-ink, #12223a);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 10px;
+  min-height: 50px !important;
+  padding: 7px 10px !important;
+  color: #12223a !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 11px !important;
+  box-shadow: none !important;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition:
-    background 150ms ease,
-    border-color 150ms ease;
+  transition: background-color 140ms ease, border-color 140ms ease;
 }
 
-.listButton:hover {
-  background: var(--trips-accent-soft, #e7eef9);
+:global(#zanzibar-attractions) .listButton:hover {
+  background: #f1f6fd !important;
 }
 
-.listButton:focus-visible {
-  outline: 2px solid var(--trips-accent, #08428c);
-  outline-offset: -2px;
-}
-
-.listButtonActive,
-.listButtonActive:hover {
-  background: var(--trips-accent-soft, #e7eef9);
-  border-color: var(--trips-line-strong, rgba(8, 66, 140, 0.3));
+:global(#zanzibar-attractions) .listButtonActive,
+:global(#zanzibar-attractions) .listButtonActive:hover {
+  background: #e7f0fc !important;
+  border-color: rgba(8, 66, 140, 0.3) !important;
 }
 
 .listRank {
   flex: none;
-  min-width: 20px;
-  color: var(--trips-ink-3, #5c6a82);
-  font-size: 0.62rem;
+  min-width: 22px;
+  color: #64748b;
+  font-size: 0.63rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -917,18 +1138,17 @@
   align-items: center;
   gap: 5px;
   overflow: hidden;
-  color: var(--trips-ink-2, #44546c);
-  font-size: 0.65rem;
+  color: #526580;
+  font-size: 0.66rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .listMeta i {
   flex: none;
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
 }
 
 .listRating {
@@ -936,7 +1156,7 @@
   flex: none;
   align-items: center;
   gap: 3px;
-  color: var(--trips-ink-2, #44546c);
+  color: #334763;
   font-size: 0.7rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -944,6 +1164,29 @@
 
 .listRating svg {
   color: #b45309;
+  fill: #b45309;
+}
+
+.loadMoreRow {
+  padding: 6px 4px 2px;
+}
+
+:global(#zanzibar-attractions) .loadMoreBtn {
+  width: 100%;
+  min-height: 38px !important;
+  padding: 0 12px !important;
+  color: #08428c !important;
+  background: #f1f6fd !important;
+  border: 1px solid #cfe0f4 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  cursor: pointer;
+}
+
+:global(#zanzibar-attractions) .loadMoreBtn:hover {
+  background: #e3eefc !important;
 }
 
 .emptyList {
@@ -954,7 +1197,7 @@
   justify-content: center;
   gap: 10px;
   padding: 22px 16px;
-  color: var(--trips-ink-2, #44546c);
+  color: #44546c;
   font-size: 0.8rem;
 }
 
@@ -962,16 +1205,16 @@
   margin: 0;
 }
 
-.emptyList button {
-  min-height: 44px;
-  padding: 0 14px;
-  color: var(--trips-accent, #08428c);
-  background: var(--trips-accent-soft, #e7eef9);
-  border: 1px solid var(--trips-line, rgba(8, 66, 140, 0.14));
-  border-radius: 10px;
-  font: inherit;
-  font-size: 0.76rem;
-  font-weight: 800;
+:global(#zanzibar-attractions) .emptyList button {
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  color: #08428c !important;
+  background: #e7eef9 !important;
+  border: 1px solid #bfd7f4 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  font-size: 0.76rem !important;
+  font-weight: 800 !important;
   cursor: pointer;
 }
 
@@ -982,25 +1225,25 @@
 .popup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 252px;
-  max-width: calc(100vw - 84px);
-  padding: 12px 12px 11px;
+  gap: 5px;
+  width: 262px;
+  max-width: calc(100vw - 76px);
+  padding: 13px 13px 12px;
   color: #12223a;
   background: #ffffff;
-  border-top: 3px solid var(--popup-accent, #08428c);
+  border-top: 3.5px solid var(--popup-accent, #08428c);
 }
 
 .popupHead {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-right: 20px;
+  padding-right: 22px;
 }
 
 .popupGroup {
   color: var(--popup-accent, #08428c);
-  font-size: 0.56rem;
+  font-size: 0.58rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1008,36 +1251,38 @@
 
 .popupCategory {
   margin-left: auto;
-  padding: 2px 6px;
+  padding: 2px 7px;
   color: #475569;
   background: #f1f5f9;
   border-radius: 999px;
-  font-size: 0.55rem;
+  font-size: 0.56rem;
   font-weight: 800;
   white-space: nowrap;
 }
 
 .popupTitle {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 800;
   line-height: 1.25;
 }
 
 .popupArea {
-  color: #5c6a82;
-  font-size: 0.68rem;
+  color: #526580;
+  font-size: 0.69rem;
+  font-weight: 650;
 }
 
 .popupRating {
-  color: #44546c;
-  font-size: 0.64rem;
+  color: #334763;
+  font-size: 0.66rem;
+  font-weight: 700;
 }
 
 .popupNote {
-  margin: 2px 0;
+  margin: 1px 0;
   color: #44546c;
-  font-size: 0.68rem;
-  line-height: 1.4;
+  font-size: 0.69rem;
+  line-height: 1.42;
 }
 
 .popupFacts {
@@ -1045,18 +1290,18 @@
   gap: 3px;
   margin: 2px 0 0;
   padding: 6px 0 0;
-  border-top: 1px solid rgba(8, 66, 140, 0.08);
+  border-top: 1px solid rgba(8, 66, 140, 0.09);
 }
 
 .popupFacts div {
   display: grid;
-  grid-template-columns: 78px minmax(0, 1fr);
+  grid-template-columns: 62px minmax(0, 1fr);
   gap: 6px;
 }
 
 .popupFacts dt {
-  color: #5c6a82;
-  font-size: 0.55rem;
+  color: #64748b;
+  font-size: 0.56rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1065,40 +1310,80 @@
 .popupFacts dd {
   margin: 0;
   color: #12223a;
-  font-size: 0.64rem;
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
 
+.popupActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.popupMeasureBtn {
+  flex: 1;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #08428c;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.popupMeasureBtn:hover {
+  background: #063570;
+}
+
 .popupLink {
-  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid #c5daf4;
+  border-radius: 8px;
   color: #08428c;
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   font-weight: 800;
   text-decoration: none;
 }
 
 .popupLink:hover {
-  text-decoration: underline;
+  background: #edf4fc;
+}
+
+/* Focus rings */
+:global(#zanzibar-attractions) button:focus-visible,
+.mapsLink:focus-visible,
+.popupLink:focus-visible {
+  outline: 2.5px solid rgba(8, 66, 140, 0.45) !important;
+  outline-offset: 2px !important;
 }
 
 /* --------------------------------------------------------------------------
    Responsive
    -------------------------------------------------------------------------- */
 
-@media (max-width: 1180px) {
+@media (max-width: 1120px) {
   .layout {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+    grid-template-columns: minmax(0, 1fr) minmax(275px, 315px);
   }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 960px) {
   .layout {
     grid-template-columns: 1fr;
     height: auto;
   }
 
   .mapCard {
-    height: 480px;
+    height: 510px;
   }
 
   .aside {
@@ -1110,11 +1395,6 @@
   .listPanel {
     max-height: 420px;
   }
-
-  .hintCard,
-  .selectedCard {
-    height: 100%;
-  }
 }
 
 @media (max-width: 720px) {
@@ -1123,18 +1403,24 @@
   }
 
   .mapCard {
-    height: 420px;
+    height: 450px;
   }
 
   .stats {
     width: 100%;
   }
+
+  .mapStyleBar {
+    top: 58px;
+    left: 12px;
+    right: auto;
+  }
 }
 
 @media (max-width: 640px) {
   .section {
-    padding: 14px;
-    border-radius: 16px;
+    padding: 15px;
+    border-radius: 18px;
     gap: 14px;
   }
 
@@ -1151,56 +1437,23 @@
   }
 
   .stat strong {
-    font-size: 1.05rem;
-  }
-
-  .stat span {
-    font-size: 0.6rem;
-  }
-
-  .mapTop {
-    padding: 4px;
-  }
-
-  .mapKicker {
-    display: none;
-  }
-
-  .legend {
-    max-width: calc(100% - 24px);
-    max-height: none;
-    padding: 6px 8px;
-  }
-
-  .legendGroups {
-    display: none;
-  }
-
-  .legendRules {
-    padding-top: 0;
-    border-top: 0;
-  }
-
-  .legendItem {
-    font-size: 0.58rem;
+    font-size: 0.98rem;
   }
 
   .listPanel {
-    max-height: 380px;
+    max-height: 390px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .search,
-  .chip,
   .markerGlyph,
-  .listButton {
+  .townSign span {
     transition: none;
   }
 
   .marker:hover .markerGlyph,
-  .markerGlyph.markerSelected,
-  .markerStay.markerSelected {
+  .markerGlyph.markerSelected {
     transform: none;
   }
 }

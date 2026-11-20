@@ -1175,8 +1175,16 @@ export default function TripsPage() {
       </section>
 
       {/* SECTION 3: ZANZIBAR ATTRACTIONS & PLACES */}
-      <div id="zanzibar-attractions" className={styles.explorerSection}>
-        <ZanzibarAttractions />
+      <div className={styles.explorerSection}>
+        <ZanzibarAttractions
+          onMeasurePlace={(place) =>
+            loadIntoMeasurer(AIRPORT_HUB, {
+              label: `${place.name}, ${place.area}`,
+              lat: place.latitude,
+              lng: place.longitude,
+            })
+          }
+        />
       </div>
 
       {/* SECTION 4: MOST BOOKED TRIPS */}

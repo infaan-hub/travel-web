@@ -345,3 +345,8 @@ export const ZANZIBAR_ISLAND_LABELS: { name: string; at: [number, number] }[] = 
 ];
 
 export const ZANZIBAR_ARCHIPELAGO_BOUNDS: [[number, number], [number, number]] = [[-6.47806,39.18166],[-4.86436,39.87613]];
+
+export const UNGUJA_BOUNDS: [[number, number], [number, number]] = [
+  [-6.485, 39.135],
+  [-5.71, 39.59],
+];
