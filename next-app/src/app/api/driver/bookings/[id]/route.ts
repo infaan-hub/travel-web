@@ -281,6 +281,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         status: true,
         driverStage: true,
         driverId: true,
+        vehicleId: true,
         companyId: true,
       },
     });
@@ -337,6 +338,15 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (action === "confirm") {
       updateData.driverId = driver.id;
       updateData.confirmedAt = now;
+      if (!existing.vehicleId && driver.isPublic && !driver.companyId) {
+        const ownVehicle = await prisma.privateHireVehicle.findUnique({
+          where: { driverId: driver.id },
+          select: { id: true },
+        });
+        if (ownVehicle) {
+          updateData.vehicleId = ownVehicle.id;
+        }
+      }
     } else if (action === "start") {
       updateData.startedAt = now;
     } else if (action === "arrived") {

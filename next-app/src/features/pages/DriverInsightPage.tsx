@@ -139,6 +139,10 @@ export default function DriverInsightPage({ initialDriver, initialInsights }: Pr
               <Compass size={15} aria-hidden="true" />
               Trips
             </Link>
+            <Link href="/driver/vehicle/" className={styles.topNavLink}>
+              <Car size={15} aria-hidden="true" />
+              Vehicle
+            </Link>
             <Link
               href="/driver/insight/"
               className={`${styles.topNavLink} ${styles.topNavLinkActive}`}

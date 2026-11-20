@@ -40,6 +40,7 @@ export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
   return {
     id: vehicle.id,
     company_id: vehicle.companyId,
+    driver_id: vehicle.driverId ?? null,
     name: vehicle.name,
     plate_number: vehicle.plateNumber,
     category: vehicle.category,

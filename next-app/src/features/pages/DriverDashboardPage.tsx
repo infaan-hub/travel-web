@@ -180,6 +180,10 @@ export default function DriverDashboardPage({
               <Compass size={15} aria-hidden="true" />
               Trips
             </Link>
+            <Link href="/driver/vehicle/" className={styles.topNavLink}>
+              <Car size={15} aria-hidden="true" />
+              Vehicle
+            </Link>
             <Link href="/driver/insight/" className={styles.topNavLink}>
               <BarChart3 size={15} aria-hidden="true" />
               Insight

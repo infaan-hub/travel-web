@@ -708,6 +708,7 @@ model FunnelEvent {
 model PrivateHireVehicle {
   id              Int      @id @default(autoincrement())
   companyId       Int?     @map("company_id")
+  driverId        Int?     @unique @map("driver_id")
   name            String
   plateNumber     String   @map("plate_number")
   category        String   @default("Sedan")
@@ -724,6 +725,7 @@ model PrivateHireVehicle {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   company           Company?             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  ownerDriver       PrivateHireDriver?   @relation("PublicDriverVehicle", fields: [driverId], references: [id], onDelete: Cascade)
   services          PrivateHireService[]
   transportBookings TransportBooking[]
 
@@ -749,6 +751,7 @@ model PrivateHireDriver {
 
   company               Company?               @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user                  User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ownVehicle            PrivateHireVehicle?    @relation("PublicDriverVehicle")
   services              PrivateHireService[]
   transportBookings     TransportBooking[]
   transportTripRequests TransportTripRequest[]

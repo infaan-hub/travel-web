@@ -294,6 +294,12 @@ export const driverAPI = {
   getBooking: (id: string | number) => api.get(`/driver/bookings/${id}/`),
   getInsights: (month?: string) =>
     api.get("/driver/insight/", { params: month ? { month } : undefined }),
+  getVehicle: () => api.get("/driver/vehicle/"),
+  createVehicle: (data: FormData | Record<string, unknown>) =>
+    api.post("/driver/vehicle/", data, formDataConfig(data)),
+  updateVehicle: (data: FormData | Record<string, unknown>) =>
+    api.put("/driver/vehicle/", data, formDataConfig(data)),
+  deleteVehicle: () => api.delete("/driver/vehicle/"),
   getTripRequests: () => api.get("/driver/trip-requests/"),
   updateBooking: (id: string | number, status: "confirmed" | "in_progress" | "completed") =>
     api.patch(`/driver/bookings/${id}/`, { status }),

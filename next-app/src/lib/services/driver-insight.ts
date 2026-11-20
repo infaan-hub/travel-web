@@ -33,6 +33,7 @@ export async function getDriverFullContext(driverId: number): Promise<DriverFull
     where: { id: driverId },
     include: {
       company: { select: { id: true, name: true } },
+      ownVehicle: true,
       services: {
         where: { isActive: true },
         include: { vehicle: true },
@@ -44,6 +45,18 @@ export async function getDriverFullContext(driverId: number): Promise<DriverFull
 
   const seenVehicles = new Set<number>();
   const vehicles: DriverVehicleOption[] = [];
+  if (driver.ownVehicle) {
+    seenVehicles.add(driver.ownVehicle.id);
+    vehicles.push({
+      id: driver.ownVehicle.id,
+      name: driver.ownVehicle.name,
+      plate_number: driver.ownVehicle.plateNumber,
+      category: driver.ownVehicle.category,
+      capacity: driver.ownVehicle.capacity,
+      luggage_capacity: driver.ownVehicle.luggageCapacity,
+      service_title: "Registered driver vehicle",
+    });
+  }
   for (const service of driver.services) {
     if (!service.vehicle || seenVehicles.has(service.vehicle.id)) continue;
     seenVehicles.add(service.vehicle.id);

@@ -144,6 +144,7 @@ export default function Sidebar() {
     { to: "/driver/dashboard/", label: "Driver dashboard", icon: LayoutDashboard, exact: true },
     { to: "/driver/bookings/", label: "Bookings", icon: ClipboardList },
     { to: "/driver/trips/", label: "Trips", icon: Map },
+    { to: "/driver/vehicle/", label: "Vehicle", icon: Car },
     { to: "/driver/insight/", label: "Insight", icon: TrendingUp },
     { to: "/profile/", label: "Account profile", icon: User },
   ];
@@ -323,7 +324,7 @@ const profileHref = isAdmin
                     {isAdmin && <span className={styles.badge}>Admin</span>}
                     {activeCompany && (
                       <span className={styles.badge}>
-                        "Company account"
+                        Company account
                       </span>
                     )}
                   </span>

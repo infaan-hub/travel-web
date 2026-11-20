@@ -1,0 +1,965 @@
+/* ==========================================================================
+   Driver Vehicle Management & Assigned Fleet View (/driver/vehicle/)
+   - Public Hire Drivers: register, edit, and delete 1 own vehicle directly.
+   - Private Hire Drivers: view-only showcase of company-assigned vehicle(s).
+   ========================================================================== */
+
+.sectionStack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.2vw, 24px);
+}
+
+/* Badges & Policy Banner */
+.lockBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid var(--dw-amber-border);
+  border-radius: 999px;
+  background: var(--dw-amber-soft);
+  color: var(--dw-amber);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.slotBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid var(--dw-line-strong);
+  border-radius: 999px;
+  background: var(--dw-blue-soft);
+  color: var(--dw-blue);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.slotBadgeFull {
+  border-color: var(--dw-emerald-border);
+  background: var(--dw-emerald-soft);
+  color: var(--dw-emerald);
+}
+
+.policyBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 15px 18px;
+  border: 1.5px solid var(--dw-amber-border);
+  border-radius: 16px;
+  background: var(--dw-amber-soft);
+  color: var(--dw-ink);
+}
+
+.policyBannerInfo {
+  border-color: var(--dw-line-strong);
+  background: var(--dw-blue-tint);
+}
+
+.policyIcon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--dw-surface);
+  color: var(--dw-amber);
+  border: 1px solid var(--dw-amber-border);
+}
+
+.policyBannerInfo .policyIcon {
+  color: var(--dw-blue);
+  border-color: var(--dw-line);
+}
+
+.policyCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.policyCopy strong {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--dw-ink);
+}
+
+.policyCopy p {
+  margin: 0;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--dw-ink-2);
+}
+
+/* Main 2-Column Layout */
+.vehicleLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(270px, 0.85fr);
+  gap: clamp(16px, 2.2vw, 24px);
+  align-items: start;
+}
+
+.vehicleColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* Showcase Vehicle Card */
+.vehicleCard {
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid var(--dw-line);
+  border-radius: 22px;
+  background: var(--dw-surface);
+  box-shadow: var(--dw-shadow-sm);
+  overflow: hidden;
+}
+
+.galleryWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 360px;
+  background: linear-gradient(135deg, #0d213d 0%, #163a66 100%);
+  overflow: hidden;
+}
+
+.galleryMainImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.galleryFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.galleryTopBadges {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.galleryBadgeCluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.categoryPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(8, 22, 44, 0.78);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.platePill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.94);
+  color: #0b2447;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.availPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.availOn {
+  background: rgba(21, 128, 61, 0.92);
+  color: #ffffff;
+}
+
+.availOff {
+  background: rgba(190, 18, 60, 0.92);
+  color: #ffffff;
+}
+
+.thumbStrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--dw-line);
+  background: var(--dw-surface-soft);
+}
+
+:global(#driver-vehicle-root) .thumbBtn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px !important;
+  padding: 4px 10px 4px 5px !important;
+  border: 1.5px solid var(--dw-line) !important;
+  border-radius: 11px !important;
+  background: var(--dw-surface) !important;
+  color: var(--dw-ink-2) !important;
+  font-size: 0.76rem !important;
+  font-weight: 750 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease !important;
+}
+
+:global(#driver-vehicle-root) .thumbBtn:hover {
+  border-color: var(--dw-blue) !important;
+  transform: none !important;
+}
+
+:global(#driver-vehicle-root) .thumbBtnActive {
+  border-color: var(--dw-blue) !important;
+  background: var(--dw-blue-soft) !important;
+  color: var(--dw-blue) !important;
+}
+
+.thumbImg {
+  width: 44px;
+  height: 32px;
+  border-radius: 7px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Card Body */
+.vehicleBody {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(18px, 2.6vw, 24px);
+}
+
+.vehicleHeadingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vehicleTitle {
+  margin: 0;
+  color: var(--dw-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.6vw, 1.65rem);
+  font-weight: 650;
+  line-height: 1.18;
+}
+
+.vehicleSub {
+  margin: 4px 0 0;
+  color: var(--dw-muted);
+  font-size: 0.84rem;
+}
+
+.specsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.specBox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 13px;
+  border: 1px solid var(--dw-line);
+  border-radius: 13px;
+  background: var(--dw-surface-soft);
+}
+
+.specLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--dw-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.specValue {
+  color: var(--dw-ink);
+  font-size: 0.94rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.descriptionBox {
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid var(--dw-line);
+  border-radius: 13px;
+  background: var(--dw-surface-soft);
+  color: var(--dw-ink-2);
+  font-size: 0.88rem;
+  line-height: 1.58;
+}
+
+.amenitiesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.amenityCard {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px;
+  border: 1px solid var(--dw-line);
+  border-radius: 14px;
+  background: var(--dw-surface-soft);
+}
+
+.amenityHeading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--dw-ink-2);
+}
+
+.amenityHeadingInc {
+  color: var(--dw-emerald);
+}
+
+.amenityHeadingExc {
+  color: var(--dw-rose);
+}
+
+.pillList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pillInc {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--dw-emerald-border);
+  border-radius: 999px;
+  background: var(--dw-emerald-soft);
+  color: var(--dw-emerald);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.pillExc {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--dw-rose-border);
+  border-radius: 999px;
+  background: var(--dw-rose-soft);
+  color: var(--dw-rose);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.emptyHint {
+  color: var(--dw-muted);
+  font-size: 0.8rem;
+}
+
+/* Assigned Services List (Private Hire Read-Only View) */
+.servicesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--dw-line);
+}
+
+.servicesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.servicesHeader h4 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--dw-ink-2);
+}
+
+.serviceList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.serviceItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 13px;
+  border: 1px solid var(--dw-line);
+  border-radius: 12px;
+  background: var(--dw-surface-soft);
+}
+
+.serviceItemTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.serviceItemTitle {
+  color: var(--dw-ink);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.serviceItemMeta {
+  color: var(--dw-muted);
+  font-size: 0.77rem;
+  font-weight: 650;
+}
+
+.serviceTagActive {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--dw-emerald-soft);
+  color: var(--dw-emerald);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.serviceTagPaused {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--dw-amber-soft);
+  color: var(--dw-amber);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+/* Card Footer Actions (Public Hire Driver Only) */
+.vehicleFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px clamp(18px, 2.6vw, 24px);
+  border-top: 1px solid var(--dw-line);
+  background: var(--dw-surface-soft);
+}
+
+.vehicleFooterNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--dw-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.vehicleFooterActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Form Card (Public Hire Driver Add / Edit) */
+.formCard {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(18px, 2.6vw, 26px);
+  border: 1.5px solid var(--dw-line);
+  border-radius: 22px;
+  background: var(--dw-surface);
+  box-shadow: var(--dw-shadow-sm);
+}
+
+.formHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--dw-line);
+}
+
+.formHeader h2 {
+  margin: 0;
+  color: var(--dw-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-weight: 650;
+}
+
+.formHeader p {
+  margin: 4px 0 0;
+  color: var(--dw-muted);
+  font-size: 0.85rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.formGridCompact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fieldLabel {
+  color: var(--dw-ink-2) !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.03em;
+}
+
+.requiredMark {
+  color: var(--dw-rose);
+}
+
+:global(#driver-vehicle-root) .input,
+:global(#driver-vehicle-root) .select,
+:global(#driver-vehicle-root) .textarea {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 11px 13px !important;
+  border: 1.5px solid var(--dw-line-strong) !important;
+  border-radius: 12px !important;
+  background: var(--dw-surface) !important;
+  color: var(--dw-ink) !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+:global(#driver-vehicle-root) .input,
+:global(#driver-vehicle-root) .select {
+  min-height: 46px !important;
+}
+
+:global(#driver-vehicle-root) .textarea {
+  min-height: 92px !important;
+  line-height: 1.5 !important;
+  resize: vertical;
+}
+
+:global(#driver-vehicle-root) .input:focus,
+:global(#driver-vehicle-root) .select:focus,
+:global(#driver-vehicle-root) .textarea:focus {
+  outline: none !important;
+  border-color: var(--dw-blue) !important;
+  box-shadow: 0 0 0 3px rgba(8, 66, 140, 0.14) !important;
+}
+
+/* 3-Slot Photo Upload Grid */
+.uploadGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.uploadSlot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 158px;
+  padding: 12px;
+  border: 1.5px dashed var(--dw-line-strong);
+  border-radius: 15px;
+  background: var(--dw-surface-soft);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.uploadSlot:hover {
+  border-color: var(--dw-blue);
+  background: var(--dw-blue-tint);
+}
+
+.uploadSlotFilled {
+  border-style: solid;
+  border-color: var(--dw-blue);
+  background: var(--dw-surface);
+}
+
+.uploadPreview {
+  width: 100%;
+  height: 96px;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+}
+
+.uploadTitle {
+  color: var(--dw-ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.uploadHint {
+  color: var(--dw-muted);
+  font-size: 0.72rem;
+}
+
+.hiddenInput {
+  display: none !important;
+}
+
+:global(#driver-vehicle-root) .removePhotoBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  border-radius: 999px !important;
+  background: rgba(15, 23, 42, 0.78) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  cursor: pointer;
+}
+
+:global(#driver-vehicle-root) .removePhotoBtn:hover {
+  background: #be123c !important;
+  transform: none !important;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--dw-line);
+  border-radius: 13px;
+  background: var(--dw-surface-soft);
+}
+
+.checkboxRow input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  accent-color: var(--dw-blue);
+  cursor: pointer;
+}
+
+.checkboxRow label {
+  margin: 0;
+  color: var(--dw-ink) !important;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+}
+
+.formFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--dw-line);
+}
+
+/* Danger Button & Inline Confirm Box */
+:global(#driver-vehicle-root) .btnDanger {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px !important;
+  padding: 0 16px !important;
+  border: 1.5px solid var(--dw-rose-border) !important;
+  border-radius: 12px !important;
+  background: var(--dw-rose-soft) !important;
+  color: var(--dw-rose) !important;
+  font-size: 0.84rem !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease !important;
+}
+
+:global(#driver-vehicle-root) .btnDanger:hover:not(:disabled) {
+  background: #ffe4e6 !important;
+  border-color: var(--dw-rose) !important;
+  transform: none !important;
+}
+
+:global(#driver-vehicle-root) .btnDangerSolid {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px !important;
+  padding: 0 18px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: #be123c !important;
+  color: #ffffff !important;
+  font-size: 0.84rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 8px 20px rgba(190, 18, 60, 0.24) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  cursor: pointer;
+}
+
+:global(#driver-vehicle-root) .btnDangerSolid:hover:not(:disabled) {
+  background: #9f1239 !important;
+  transform: none !important;
+}
+
+.deleteConfirmCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1.5px solid var(--dw-rose-border);
+  border-radius: 16px;
+  background: var(--dw-rose-soft);
+}
+
+.deleteConfirmCard strong {
+  color: var(--dw-rose);
+  font-size: 0.94rem;
+}
+
+.deleteConfirmCard p {
+  margin: 0;
+  color: var(--dw-ink-2);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.deleteConfirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Aside Info Cards */
+.asideStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.infoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1.5px solid var(--dw-line);
+  border-radius: 20px;
+  background: var(--dw-surface);
+  box-shadow: var(--dw-shadow-sm);
+}
+
+.infoCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--dw-ink);
+  font-size: 0.96rem;
+  font-weight: 800;
+}
+
+.detailList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.detailRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px dashed var(--dw-line);
+  font-size: 0.83rem;
+}
+
+.detailRow:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.detailRow span {
+  color: var(--dw-muted);
+  font-weight: 650;
+}
+
+.detailRow strong,
+.detailRow a {
+  color: var(--dw-ink);
+  font-weight: 750;
+  text-align: right;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.detailRow a:hover {
+  color: var(--dw-blue);
+  text-decoration: underline;
+}
+
+.ruleList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ruleItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--dw-ink-2);
+  font-size: 0.82rem;
+  line-height: 1.48;
+}
+
+.ruleItem svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--dw-blue);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 960px) {
+  .vehicleLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .specsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .amenitiesGrid,
+  .formGrid,
+  .uploadGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .formGridCompact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vehicleFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vehicleFooterActions {
+    width: 100%;
+  }
+
+  .vehicleFooterActions > * {
+    flex: 1 1 auto;
+  }
+}
