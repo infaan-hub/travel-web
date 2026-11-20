@@ -151,6 +151,8 @@
         "src/components/MoreExperiencesEmptyState.module.css",
         "src/components/ZanzibarAttractions.tsx",
         "src/components/zanzibar-attractions.module.css",
+        "src/components/PlaceAutocomplete.tsx",
+        "src/components/place-autocomplete.module.css",
         "src/components/CountUp.tsx"
       ]
     },

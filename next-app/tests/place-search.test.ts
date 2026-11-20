@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { searchTripPlaces } from "@/lib/services/place-search";
+import {
+  getPopularTripPlaces,
+  searchTripPlaces,
+  suggestTripPlaces,
+} from "@/lib/services/place-search";
 import { isInZanzibar } from "@/lib/zanzibar";
 
 describe("searchTripPlaces", () => {
@@ -79,5 +83,36 @@ describe("searchTripPlaces", () => {
 
   it("returns no results for unknown text", () => {
     expect(searchTripPlaces("zzzz-not-a-real-place")).toEqual([]);
+  });
+});
+
+describe("getPopularTripPlaces and suggestTripPlaces", () => {
+  it("returns curated popular Zanzibar hubs with valid coordinates", () => {
+    const popular = getPopularTripPlaces(8);
+    expect(popular.length).toBeGreaterThanOrEqual(6);
+    expect(
+      popular.some((place) => place.name.toLowerCase().includes("airport")),
+    ).toBe(true);
+    expect(
+      popular.some((place) => place.name.toLowerCase().includes("stone town")),
+    ).toBe(true);
+    for (const place of popular) {
+      expect(isInZanzibar(place.latitude, place.longitude)).toBe(true);
+    }
+  });
+
+  it("returns popular hubs when empty and prefix matches on a single character", () => {
+    const empty = suggestTripPlaces("", 6);
+    expect(empty.length).toBe(6);
+
+    const singleChar = suggestTripPlaces("n", 6);
+    expect(singleChar.length).toBeGreaterThan(0);
+    expect(
+      singleChar.some((place) => place.name.toLowerCase().startsWith("nungwi")),
+    ).toBe(true);
+  });
+
+  it("delegates 2+ character queries to full search", () => {
+    expect(suggestTripPlaces("Kendwa", 5)).toEqual(searchTripPlaces("Kendwa", 5));
   });
 });

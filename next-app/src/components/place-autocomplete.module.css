@@ -7,10 +7,11 @@
   min-width: 0;
 }
 
-.label {
-  color: #334155;
-  font-size: 0.78rem;
-  font-weight: 700;
+.label,
+:global(#booking-trip-root) .label {
+  color: #24364e !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
   line-height: 1.35;
 }
 
@@ -21,7 +22,7 @@
 .inputRow {
   display: flex;
   align-items: stretch;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -31,88 +32,171 @@
   min-width: 0;
 }
 
-.inputIcon {
+.inputIcon,
+.destIcon {
   position: absolute;
   top: 50%;
-  left: 13px;
-  z-index: 1;
-  color: #7c8da6;
+  left: 14px;
+  z-index: 2;
   pointer-events: none;
   transform: translateY(-50%);
 }
 
-.input {
-  width: 100%;
-  min-height: 48px;
-  padding: 0 38px;
-  border: 1px solid #d8e2ef;
-  border-radius: 12px;
-  background: #fbfdff;
-  color: #0f172a;
-  font-size: 0.9rem;
-  line-height: 1.2;
-  outline: none;
-  transition:
-    border-color 0.16s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease;
+.inputIcon {
+  color: #6b7f9c;
 }
 
-.input::placeholder {
-  color: #94a3b8;
-}
-
-.input:hover {
-  border-color: #b9cbe3;
-}
-
-.input:focus {
-  border-color: #08428c;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(8, 66, 140, 0.12);
-}
-
-.input:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
-  cursor: not-allowed;
-}
-
-.inputError {
-  border-color: #e11d48;
-  background: #fff7f9;
-}
-
-.inputError:focus {
-  border-color: #be123c;
-  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
-}
-
-.clearButton {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  display: grid;
-  width: 26px;
-  height: 26px;
-  place-items: center;
-  border: 0;
-  border-radius: 8px;
-  background: #eef3fa;
-  color: #5b6b84;
-  cursor: pointer;
-  transform: translateY(-50%);
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.clearButton:hover {
-  background: #e2eaf5;
+.destIcon {
   color: #08428c;
 }
 
-.clearButton:focus-visible {
-  outline: 3px solid rgba(8, 66, 140, 0.28);
-  outline-offset: 1px;
+.originMarker {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  z-index: 2;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #15803d;
+  box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.16);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.input,
+:global(#booking-trip-root) .input {
+  width: 100%;
+  min-height: 50px !important;
+  padding: 0 40px 0 40px !important;
+  border: 1.5px solid #cbd9ea !important;
+  border-radius: 13px !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 0.92rem !important;
+  line-height: 1.25 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  outline: none !important;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease !important;
+}
+
+.inputHasValue,
+:global(#booking-trip-root) .inputHasValue {
+  padding-right: 44px !important;
+}
+
+.inputPinned,
+:global(#booking-trip-root) .inputPinned {
+  padding-right: 114px !important;
+  border-color: #86c7a1 !important;
+  background: #f9fdfb !important;
+}
+
+.input::placeholder,
+:global(#booking-trip-root) .input::placeholder {
+  color: #8696ad !important;
+  opacity: 1 !important;
+}
+
+.input:hover:not(:disabled),
+:global(#booking-trip-root) .input:hover:not(:disabled) {
+  border-color: #9cb6d6 !important;
+  background: #ffffff !important;
+}
+
+.input:focus,
+.input:focus-visible,
+:global(#booking-trip-root) .input:focus,
+:global(#booking-trip-root) .input:focus-visible {
+  border-color: #08428c !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.13) !important;
+}
+
+.input:disabled,
+:global(#booking-trip-root) .input:disabled {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed;
+}
+
+.inputError,
+:global(#booking-trip-root) .inputError {
+  border-color: #dc2626 !important;
+  background: #fff7f8 !important;
+}
+
+.inputError:focus,
+.inputError:focus-visible,
+:global(#booking-trip-root) .inputError:focus,
+:global(#booking-trip-root) .inputError:focus-visible {
+  border-color: #b91c1c !important;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.14) !important;
+}
+
+.trailingControls {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transform: translateY(-50%);
+}
+
+.pinnedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid #b7e4c7;
+  border-radius: 999px;
+  background: #ecfdf3;
+  color: #166534;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.clearButton,
+:global(#booking-trip-root) .clearButton {
+  display: grid !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: #edf3fa !important;
+  color: #475569 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.clearButton:hover,
+:global(#booking-trip-root) .clearButton:hover {
+  background: #dce8f6 !important;
+  color: #08428c !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.clearButton:focus-visible,
+:global(#booking-trip-root) .clearButton:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.3) !important;
+  outline-offset: 2px;
 }
 
 .actionSlot {
@@ -122,20 +206,34 @@
 
 .popover {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 7px);
   right: 0;
   left: 0;
-  z-index: 40;
-  max-height: 290px;
+  z-index: 60;
+  max-height: 310px;
   overflow-y: auto;
   padding: 6px;
-  border: 1px solid #dbe5f1;
-  border-radius: 14px;
+  border: 1px solid #cddceb;
+  border-radius: 15px;
   background: #ffffff;
   box-shadow:
-    0 20px 44px rgba(8, 66, 140, 0.18),
-    0 2px 8px rgba(15, 23, 42, 0.06);
+    0 22px 48px rgba(8, 66, 140, 0.18),
+    0 3px 10px rgba(15, 23, 42, 0.08);
   animation: place-pop 0.14s ease-out;
+}
+
+.popoverHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 7px;
+  border-bottom: 1px solid #eef3f9;
+  margin-bottom: 4px;
+  color: #5b6e89;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .state {
@@ -143,7 +241,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 10px;
-  color: #64748b;
+  color: #52647d;
   font-size: 0.8rem;
   line-height: 1.45;
 }
@@ -160,6 +258,7 @@
   padding: 10px;
   border-radius: 10px;
   cursor: pointer;
+  transition: background-color 0.12s ease;
 }
 
 .optionActive {
@@ -169,13 +268,31 @@
 .optionIcon {
   display: grid;
   flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   margin-top: 1px;
   place-items: center;
   border-radius: 9px;
-  background: #e7eef9;
+  background: #e8f0fa;
   color: #08428c;
+}
+
+.customOption {
+  margin-top: 4px;
+  border-top: 1px solid #eef3f9;
+  border-radius: 0 0 10px 10px;
+}
+
+.customOptionIcon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  margin-top: 1px;
+  place-items: center;
+  border-radius: 9px;
+  background: #ecfdf3;
+  color: #15803d;
 }
 
 .optionText {
@@ -187,31 +304,32 @@
 
 .optionName {
   color: #0f172a;
-  font-size: 0.84rem;
+  font-size: 0.85rem;
   font-weight: 650;
   line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
 .optionMeta {
-  color: #64748b;
-  font-size: 0.71rem;
+  color: #5d708a;
+  font-size: 0.72rem;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
 .hint {
   margin: 0;
-  color: #64748b;
-  font-size: 0.71rem;
-  line-height: 1.4;
+  color: #5b6e89;
+  font-size: 0.72rem;
+  line-height: 1.45;
 }
 
 .error {
   margin: 0;
-  color: #be123c;
-  font-size: 0.71rem;
-  line-height: 1.4;
+  color: #b91c1c;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 @keyframes place-spin {
@@ -231,7 +349,7 @@
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 600px) {
   .inputRow {
     flex-direction: column;
   }
@@ -249,7 +367,8 @@
   }
 
   .input,
-  .clearButton {
-    transition: none;
+  .clearButton,
+  .option {
+    transition: none !important;
   }
 }

@@ -4,10 +4,12 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
 import { useParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -19,18 +21,28 @@ import {
   Car,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
+  FileText,
   Loader2,
   LocateFixed,
+  LogIn,
+  Mail,
+  MailCheck,
+  Map as MapIcon,
   MapPin,
   Navigation,
   Phone,
   Route as RouteIcon,
   ShieldCheck,
   Sparkles,
+  User,
   Users,
 } from "lucide-react";
 import {
+  geocodeAPI,
+  profileAPI,
   publicPrivateHireAPI,
   routeAPI,
   transportBookingsAPI,
@@ -40,6 +52,19 @@ import { getImageUrl } from "@/lib/utils/image-url";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import type { PlaceSuggestion } from "@/lib/place-types";
 import styles from "@/features/pages/booking-trip.module.css";
+
+const TripRouteOverlayMap = dynamic(
+  () => import("@/components/TripRouteOverlayMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className={styles.mapLoading}>
+        <Loader2 className={styles.spin} size={18} aria-hidden="true" />
+        <span>Loading Zanzibar route map…</span>
+      </div>
+    ),
+  },
+);
 
 type Service = {
   id: number;
@@ -63,6 +88,12 @@ type Service = {
   } | null;
 };
 
+type AccountProfile = {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+};
+
 type BookingResult = {
   id: number;
   reference: string | null;
@@ -79,19 +110,22 @@ type BookingResult = {
   service: { title: string } | null;
 };
 
+type LocationSource = "none" | "suggestion" | "gps" | "custom";
+
 type FormState = {
   full_name: string;
   phone: string;
-  email: string;
   passengers: string;
   travel_date: string;
   pickup_time: string;
   origin: string;
   originLat: number | null;
   originLng: number | null;
+  originSource: LocationSource;
   destination: string;
   destLat: number | null;
   destLng: number | null;
+  destSource: LocationSource;
   notes: string;
 };
 
@@ -104,11 +138,11 @@ type RouteEstimate = {
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-const STEPS = [
-  { id: 1, label: "Contact" },
-  { id: 2, label: "Journey" },
-  { id: 3, label: "Route" },
-  { id: 4, label: "Confirm" },
+const PARTITIONS = [
+  { id: 1, sectionId: "partition-contact", label: "Contact", caption: "Name, phone & email" },
+  { id: 2, sectionId: "partition-schedule", label: "Schedule", caption: "Passengers, date & time" },
+  { id: 3, sectionId: "partition-route", label: "Trip Route", caption: "Origin & destination" },
+  { id: 4, sectionId: "partition-confirm", label: "Confirm", caption: "Notes & submit" },
 ] as const;
 
 function localDateIso(date = new Date()): string {
@@ -178,22 +212,43 @@ function extractErrorMessage(cause: unknown): string {
   return (
     data?.message ||
     fieldError ||
-    "We could not send your request. Please try again."
+    "We could not send your request. Please check your details and try again."
   );
+}
+
+function scrollSectionIntoView(sectionId: string, force = false) {
+  if (typeof window === "undefined") return;
+  const element = document.getElementById(sectionId);
+  if (!element) return;
+  if (!force) {
+    const rect = element.getBoundingClientRect();
+    const alreadyComfortablyVisible =
+      rect.top >= 76 && rect.top <= window.innerHeight * 0.72;
+    if (alreadyComfortablyVisible) return;
+  }
+  element.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 export default function BookingPage() {
   const params = useParams<Record<string, string>>();
   const serviceId = params.serviceId;
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [service, setService] = useState<Service | null>(null);
   const [loadedServiceId, setLoadedServiceId] = useState<string | null>(null);
+  const [profileResult, setProfileResult] = useState<{
+    userId: number;
+    profile: AccountProfile | null;
+  } | null>(null);
+  const [customEmail, setCustomEmail] = useState<string | null>(null);
+  const [editingEmail, setEditingEmail] = useState(false);
+
   const [sending, setSending] = useState(false);
   const [booking, setBooking] = useState<BookingResult | null>(null);
   const [formError, setFormError] = useState("");
   const [locationError, setLocationError] = useState("");
   const [locating, setLocating] = useState(false);
+  const [showRouteMap, setShowRouteMap] = useState(false);
   const [routeResult, setRouteResult] = useState<{
     key: string;
     route: RouteEstimate | null;
@@ -204,16 +259,17 @@ export default function BookingPage() {
   const [form, setForm] = useState<FormState>({
     full_name: "",
     phone: "",
-    email: "",
     passengers: "1",
     travel_date: "",
     pickup_time: "",
     origin: "",
     originLat: null,
     originLng: null,
+    originSource: "none",
     destination: "",
     destLat: null,
     destLng: null,
+    destSource: "none",
     notes: "",
   });
 
@@ -241,15 +297,48 @@ export default function BookingPage() {
 
   useEffect(() => {
     if (!user) return;
-    // Auth resolves after the first paint. Sync the prefilled contact fields
-    // once the signed-in user is available, without overwriting typed values.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setForm((current) => ({
-      ...current,
-      full_name: current.full_name || user.username || "",
-      email: current.email || user.email || "",
-    }));
+    let active = true;
+    const currentUserId = user.id;
+    profileAPI
+      .get()
+      .then((response) => {
+        if (active) {
+          setProfileResult({
+            userId: currentUserId,
+            profile: (response.data ?? null) as AccountProfile | null,
+          });
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setProfileResult({ userId: currentUserId, profile: null });
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, [user]);
+
+  const accountProfile =
+    user && profileResult?.userId === user.id ? profileResult.profile : null;
+  const profileLoading = Boolean(user) && profileResult?.userId !== user?.id;
+
+  const fetchedEmail = (
+    accountProfile?.email?.trim() ||
+    user?.email?.trim() ||
+    ""
+  ).trim();
+  const effectiveEmail = customEmail !== null ? customEmail : fetchedEmail;
+  const hasFetchedEmail =
+    Boolean(fetchedEmail) && EMAIL_PATTERN.test(fetchedEmail);
+  const showingFetchedEmailCard = hasFetchedEmail && !editingEmail;
+
+  const savedProfileName = accountProfile?.full_name?.trim() || "";
+  const savedProfilePhone = accountProfile?.phone?.trim() || "";
+  const canFillFromProfile =
+    Boolean(user) &&
+    ((Boolean(savedProfileName) && !form.full_name.trim()) ||
+      (Boolean(savedProfilePhone) && !form.phone.trim()));
 
   const maxPassengers =
     service?.vehicle?.capacity && service.vehicle.capacity > 0
@@ -257,30 +346,59 @@ export default function BookingPage() {
       : 100;
 
   const passengersCount = Number(form.passengers);
+  const fullNameValid = form.full_name.trim().length >= 2;
+  const phoneValid = form.phone.replace(/\D/g, "").length >= 7;
+  const emailValid = EMAIL_PATTERN.test(effectiveEmail.trim());
+  const contactComplete = fullNameValid && phoneValid && emailValid;
+
   const passengersValid =
     Number.isInteger(passengersCount) &&
     passengersCount >= 1 &&
     passengersCount <= maxPassengers;
   const travelDateValid =
     Boolean(form.travel_date) && form.travel_date >= today;
-  const pickupTimeValid = TIME_PATTERN.test(form.pickup_time);
-  const contactComplete =
-    form.full_name.trim().length >= 2 &&
-    form.phone.replace(/\D/g, "").length >= 7 &&
-    EMAIL_PATTERN.test(form.email.trim());
-  const journeyComplete = passengersValid && travelDateValid && pickupTimeValid;
+  const travelTimeValid = TIME_PATTERN.test(form.pickup_time);
+  const journeyComplete =
+    passengersValid && travelDateValid && travelTimeValid;
+
   const sameRoute =
-    form.origin.trim().toLowerCase() ===
-    form.destination.trim().toLowerCase();
-  const routeComplete =
     form.origin.trim().length >= 2 &&
     form.destination.trim().length >= 2 &&
-    !sameRoute &&
-    form.originLat != null &&
-    form.originLng != null &&
-    form.destLat != null &&
-    form.destLng != null;
+    form.origin.trim().toLowerCase() ===
+      form.destination.trim().toLowerCase();
+  const originConfirmed =
+    form.origin.trim().length >= 2 && form.originSource !== "none";
+  const destConfirmed =
+    form.destination.trim().length >= 2 && form.destSource !== "none";
+  const routeComplete = originConfirmed && destConfirmed && !sameRoute;
+
   const allComplete = contactComplete && journeyComplete && routeComplete;
+
+  // Progressive partition visibility: each partition appears automatically below
+  // once the prior partition is complete, and stays mounted if already started
+  // so editing an earlier typo never collapses the form.
+  const hasJourneyProgress = Boolean(
+    form.travel_date || form.pickup_time || form.passengers !== "1",
+  );
+  const hasRouteProgress = Boolean(
+    form.origin.trim() || form.destination.trim(),
+  );
+  const hasNotesProgress = Boolean(form.notes.trim());
+
+  const showSchedulePartition = contactComplete || hasJourneyProgress;
+  const showRoutePartition =
+    (contactComplete && journeyComplete) || hasRouteProgress;
+  const showConfirmPartition =
+    (contactComplete && journeyComplete && routeComplete) || hasNotesProgress;
+
+  const visibleStepCount = showConfirmPartition
+    ? 4
+    : showRoutePartition
+      ? 3
+      : showSchedulePartition
+        ? 2
+        : 1;
+
   const currentStep = !contactComplete
     ? 1
     : !journeyComplete
@@ -289,24 +407,25 @@ export default function BookingPage() {
         ? 3
         : 4;
 
+  const prevVisibleStepRef = useRef(1);
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (currentStep <= 1) return;
-    const id =
-      currentStep === 2
-        ? "step-journey"
-        : currentStep === 3
-          ? "step-route"
-          : "step-notes";
-    const element = document.getElementById(id);
-    if (element) {
-      // Defer to allow the new section to render and animate in.
-      const timer = window.setTimeout(() => {
-        element.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 250);
-      return () => window.clearTimeout(timer);
-    }
-  }, [currentStep]);
+    const previous = prevVisibleStepRef.current;
+    prevVisibleStepRef.current = visibleStepCount;
+    if (visibleStepCount <= previous) return;
+
+    const targetId =
+      visibleStepCount === 2
+        ? "partition-schedule"
+        : visibleStepCount === 3
+          ? "partition-route"
+          : "partition-confirm";
+
+    const delay = visibleStepCount === 2 ? 420 : 220;
+    const timer = window.setTimeout(() => {
+      scrollSectionIntoView(targetId, false);
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [visibleStepCount]);
 
   const { originLat, originLng, destLat, destLng } = form;
   const hasRouteCoords =
@@ -367,7 +486,7 @@ export default function BookingPage() {
           key: requestKey,
           route: null,
           error:
-            "The route service is unavailable right now. You can still send your trip; the provider will confirm distance and timing.",
+            "Distance lookup is temporarily unavailable. Your trip is still ready — the provider will confirm exact timing.",
         });
       });
 
@@ -384,17 +503,13 @@ export default function BookingPage() {
 
   const errors = {
     full_name:
-      touched.full_name && form.full_name.trim().length < 2
-        ? "Enter your full name."
-        : "",
+      touched.full_name && !fullNameValid ? "Enter your full name." : "",
     phone:
-      touched.phone && form.phone.replace(/\D/g, "").length < 7
+      touched.phone && !phoneValid
         ? "Enter a phone number with at least 7 digits."
         : "",
     email:
-      touched.email && !EMAIL_PATTERN.test(form.email.trim())
-        ? "Enter a valid email address."
-        : "",
+      touched.email && !emailValid ? "Enter a valid email address." : "",
     passengers:
       touched.passengers && !passengersValid
         ? `Choose between 1 and ${maxPassengers} passengers.`
@@ -406,16 +521,18 @@ export default function BookingPage() {
           : "Choose your travel date."
         : "",
     pickup_time:
-      touched.pickup_time && !pickupTimeValid ? "Choose a pickup time." : "",
+      touched.pickup_time && !travelTimeValid
+        ? "Choose your travel time."
+        : "",
     origin:
       touched.origin && form.origin.trim().length < 2
-        ? "Enter or select a pickup point."
+        ? "Choose or enter a pickup location."
         : "",
     destination:
-      touched.destination && !form.destination.trim()
-        ? "Enter or select a destination."
-        : touched.destination && sameRoute
-          ? "Destination must be different from the pickup point."
+      touched.destination && form.destination.trim().length < 2
+        ? "Choose or enter a destination."
+        : sameRoute
+          ? "Destination must be different from your pickup location."
           : "",
   };
 
@@ -424,14 +541,101 @@ export default function BookingPage() {
     : "";
   const providerName = service?.company?.name?.trim() || "The provider";
   const driverName = service?.driver?.name?.trim() || "Assigned driver";
+  const loginReturnUrl = `/login/?from=${encodeURIComponent(
+    `/booking/${serviceId ?? ""}/`,
+  )}`;
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
+  function fillFromProfile() {
+    setForm((current) => ({
+      ...current,
+      full_name: current.full_name.trim() || savedProfileName,
+      phone: current.phone.trim() || savedProfilePhone,
+    }));
+  }
+
+  function tryGeocodeCustomPlace(target: "origin" | "destination", text: string) {
+    const cleaned = text.trim();
+    if (cleaned.length < 3) return;
+    geocodeAPI
+      .search(cleaned)
+      .then((response) => {
+        const lat = Number(response.data?.lat);
+        const lng = Number(response.data?.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        setForm((current) => {
+          if (target === "origin") {
+            if (current.origin.trim() !== cleaned || current.originLat != null) {
+              return current;
+            }
+            return { ...current, originLat: lat, originLng: lng };
+          }
+          if (current.destination.trim() !== cleaned || current.destLat != null) {
+            return current;
+          }
+          return { ...current, destLat: lat, destLng: lng };
+        });
+      })
+      .catch(() => {
+        // Custom location remains valid even when forward geocoding has no match.
+      });
+  }
+
+  function confirmCustomLocation(target: "origin" | "destination", text: string) {
+    const cleaned = text.trim().slice(0, 255);
+    if (cleaned.length < 2) return;
+    if (target === "origin") {
+      setForm((current) => ({
+        ...current,
+        origin: cleaned,
+        originLat: null,
+        originLng: null,
+        originSource: "custom",
+      }));
+    } else {
+      setForm((current) => ({
+        ...current,
+        destination: cleaned,
+        destLat: null,
+        destLng: null,
+        destSource: "custom",
+      }));
+    }
+    tryGeocodeCustomPlace(target, cleaned);
+  }
+
+  function handlePlaceBlur(target: "origin" | "destination") {
+    touch(target);
+    if (target === "origin") {
+      if (form.origin.trim().length >= 2 && form.originSource === "none") {
+        setForm((current) =>
+          current.origin.trim().length >= 2 && current.originSource === "none"
+            ? { ...current, originSource: "custom" }
+            : current,
+        );
+        tryGeocodeCustomPlace("origin", form.origin);
+      }
+    } else if (
+      form.destination.trim().length >= 2 &&
+      form.destSource === "none"
+    ) {
+      setForm((current) =>
+        current.destination.trim().length >= 2 && current.destSource === "none"
+          ? { ...current, destSource: "custom" }
+          : current,
+      );
+      tryGeocodeCustomPlace("destination", form.destination);
+    }
+  }
+
   function useCurrentLocation() {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setLocationError("Your browser does not support location access.");
+      setLocationError(
+        "Your browser does not support location access. Search for your pickup location instead.",
+      );
       return;
     }
 
@@ -472,6 +676,7 @@ export default function BookingPage() {
           origin: label,
           originLat: lat,
           originLng: lng,
+          originSource: "gps",
         }));
         setLocating(false);
       },
@@ -479,8 +684,8 @@ export default function BookingPage() {
         setLocating(false);
         setLocationError(
           error.code === error.PERMISSION_DENIED
-            ? "Location permission was denied. Type your pickup point instead."
-            : "We could not access your location. Type your pickup point instead.",
+            ? "Location access was denied. Choose a suggested pickup location or type your address."
+            : "We could not detect your current location. Choose a suggested pickup location instead.",
         );
       },
       { enableHighAccuracy: true, timeout: 12_000, maximumAge: 60_000 },
@@ -493,9 +698,11 @@ export default function BookingPage() {
       origin: current.destination,
       originLat: current.destLat,
       originLng: current.destLng,
+      originSource: current.destSource,
       destination: current.origin,
       destLat: current.originLat,
       destLng: current.originLng,
+      destSource: current.originSource,
     }));
   }
 
@@ -515,7 +722,15 @@ export default function BookingPage() {
     });
 
     if (!allComplete) {
-      setFormError("Please complete all required details before sending your request.");
+      const targetSection = !contactComplete
+        ? "partition-contact"
+        : !journeyComplete
+          ? "partition-schedule"
+          : "partition-route";
+      setFormError(
+        "Please complete all required fields in the highlighted section before submitting.",
+      );
+      scrollSectionIntoView(targetSection, true);
       return;
     }
 
@@ -526,7 +741,7 @@ export default function BookingPage() {
       const response = await transportBookingsAPI.create({
         service_id: service.id,
         full_name: form.full_name.trim(),
-        email: form.email.trim(),
+        email: effectiveEmail.trim(),
         phone: form.phone.trim(),
         passengers: Number(form.passengers),
         travel_date: form.travel_date,
@@ -554,14 +769,14 @@ export default function BookingPage() {
 
   if (loading) {
     return (
-      <div className={`page ${styles.page}`}>
+      <div id="booking-trip-root" className={`page ${styles.page}`}>
         <div className={styles.stateCard} role="status" aria-live="polite">
           <span className={styles.stateIcon}>
             <Loader2 className={styles.spin} size={26} aria-hidden="true" />
           </span>
           <h1 className={styles.stateTitle}>Loading private hire service…</h1>
           <p className={styles.stateText}>
-            We are preparing your trip details.
+            Preparing your vehicle details and trip booking form.
           </p>
         </div>
       </div>
@@ -570,7 +785,7 @@ export default function BookingPage() {
 
   if (!service) {
     return (
-      <div className={`page ${styles.page}`}>
+      <div id="booking-trip-root" className={`page ${styles.page}`}>
         <div className={styles.stateCard}>
           <span className={styles.stateIcon}>
             <Car size={26} aria-hidden="true" />
@@ -578,7 +793,7 @@ export default function BookingPage() {
           <h1 className={styles.stateTitle}>Service unavailable</h1>
           <p className={styles.stateText}>
             This private hire service is no longer available. Browse the
-            directory to find another verified vehicle.
+            directory to choose another verified vehicle.
           </p>
           <Link href="/transport/" className={styles.stateLink}>
             Browse private hire services
@@ -589,41 +804,51 @@ export default function BookingPage() {
   }
 
   if (booking) {
+    const tripId = booking.trip?.id ?? booking.trip_request_id;
     return (
-      <div className={`page ${styles.page}`}>
+      <div id="booking-trip-root" className={`page ${styles.page}`}>
         <div className={styles.successWrap}>
           <div className={styles.successCard}>
             <span className={styles.successIcon}>
               <CheckCircle2 size={34} aria-hidden="true" />
             </span>
-            <span className={styles.eyebrow}>Request received</span>
+            <span className={styles.successEyebrow}>Trip created &amp; request sent</span>
             <h1 className={styles.successTitle}>
-              Your trip request is on its way
+              Your private hire trip is on its way
             </h1>
             <p className={styles.successLead}>
-              {providerName} will review your journey and confirm availability,
-              the final price, and your pickup details.
+              We generated your trip and sent it to {providerName}. They will
+              review availability and confirm your pickup details and final fare.
             </p>
 
-            <div className={styles.referenceBox}>
-              <span className={styles.referenceLabel}>Booking reference</span>
-              <strong className={styles.referenceValue}>
-                {booking.reference ?? `#${booking.id}`}
-              </strong>
+            <div className={styles.referenceRow}>
+              <div className={styles.referenceBox}>
+                <span className={styles.referenceLabel}>Booking reference</span>
+                <strong className={styles.referenceValue}>
+                  {booking.reference ?? `#${booking.id}`}
+                </strong>
+              </div>
+              {tripId ? (
+                <div className={styles.referenceBox}>
+                  <span className={styles.referenceLabel}>Linked Trip ID</span>
+                  <strong className={styles.referenceValue}>TRIP-{tripId}</strong>
+                </div>
+              ) : null}
             </div>
 
             <dl className={styles.successSummary}>
               <div className={styles.successSummaryRow}>
-                <dt className={styles.successSummaryLabel}>Route</dt>
+                <dt className={styles.successSummaryLabel}>Trip route</dt>
                 <dd className={styles.successSummaryValue}>
                   {booking.origin || form.origin} →{" "}
                   {booking.destination || form.destination}
                 </dd>
               </div>
               <div className={styles.successSummaryRow}>
-                <dt className={styles.successSummaryLabel}>Date &amp; time</dt>
+                <dt className={styles.successSummaryLabel}>Travel date &amp; time</dt>
                 <dd className={styles.successSummaryValue}>
-                  {formatIsoDate(booking.travel_date) || formatFormDate(form.travel_date)}
+                  {formatIsoDate(booking.travel_date) ||
+                    formatFormDate(form.travel_date)}
                   {booking.pickup_time ? ` at ${booking.pickup_time}` : ""}
                 </dd>
               </div>
@@ -644,7 +869,7 @@ export default function BookingPage() {
               </div>
               {booking.distance_km != null || booking.duration_mins != null ? (
                 <div className={styles.successSummaryRow}>
-                  <dt className={styles.successSummaryLabel}>Journey</dt>
+                  <dt className={styles.successSummaryLabel}>Estimated journey</dt>
                   <dd className={styles.successSummaryValue}>
                     {[
                       formatDistance(booking.distance_km),
@@ -657,9 +882,7 @@ export default function BookingPage() {
               ) : null}
               <div className={styles.successSummaryRow}>
                 <dt className={styles.successSummaryLabel}>Provider</dt>
-                <dd className={styles.successSummaryValue}>
-                  {providerName}
-                </dd>
+                <dd className={styles.successSummaryValue}>{providerName}</dd>
               </div>
             </dl>
 
@@ -668,26 +891,28 @@ export default function BookingPage() {
                 <span className={styles.nextStepNumber}>1</span>
                 <strong>Provider review</strong>
                 <p>
-                  {providerName} checks availability for your date and route.
+                  {providerName} verifies vehicle availability for your trip
+                  date and route.
                 </p>
               </div>
               <div className={styles.nextStep}>
                 <span className={styles.nextStepNumber}>2</span>
                 <strong>Confirmation</strong>
                 <p>
-                  You receive the confirmed pickup details and final price.
+                  You receive confirmed pickup details and final fare at{" "}
+                  {effectiveEmail}.
                 </p>
               </div>
               <div className={styles.nextStep}>
                 <span className={styles.nextStepNumber}>3</span>
                 <strong>Enjoy your trip</strong>
-                <p>Meet your driver at the agreed pickup point.</p>
+                <p>Meet your driver at your selected pickup point.</p>
               </div>
             </div>
 
             <div className={styles.successActions}>
               <Link href="/my-transport/" className={styles.primaryLink}>
-                View my trips
+                Track my trips
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <Link href="/transport/" className={styles.secondaryLink}>
@@ -701,7 +926,7 @@ export default function BookingPage() {
   }
 
   return (
-    <div className={`page ${styles.page}`}>
+    <div id="booking-trip-root" className={`page ${styles.page}`}>
       <header className={styles.hero}>
         {service.vehicle?.front_image_url ? (
           <div className={styles.heroMedia} aria-hidden="true">
@@ -721,25 +946,33 @@ export default function BookingPage() {
         )}
 
         <div className={styles.heroInner}>
-          <Link href="/transport/" className={styles.backLink}>
-            <ArrowLeft size={15} aria-hidden="true" />
-            All private hire services
-          </Link>
+          <div className={styles.heroTopBar}>
+            <Link href="/transport/" className={styles.backLink}>
+              <ArrowLeft size={15} aria-hidden="true" />
+              All private hire services
+            </Link>
+            <Link
+              href={`/transport/service/${service.id}/`}
+              className={styles.backLink}
+            >
+              View vehicle details
+            </Link>
+          </div>
 
           <div className={styles.heroMain}>
             <div className={styles.heroCopy}>
               <span className={styles.eyebrow}>
                 <Sparkles size={14} aria-hidden="true" />
-                Trip-first private hire
+                Private hire trip request
               </span>
               <h1 className={styles.heroTitle}>{service.title}</h1>
               {service.company ? (
                 <p className={styles.heroCompany}>{service.company.name}</p>
               ) : null}
               <p className={styles.heroLead}>
-                Tell us who is travelling and where you are going. We create a
-                trip request and send it to the provider so they can confirm
-                availability.
+                Complete each short section below. Your trip is generated
+                automatically from your pickup and destination and linked
+                directly to this private hire vehicle.
               </p>
               <ul className={styles.heroFacts}>
                 {service.vehicle ? (
@@ -775,7 +1008,7 @@ export default function BookingPage() {
               <span className={styles.priceValue}>${service.price}</span>
               <span className={styles.priceUnit}>/ {pricingLabel}</span>
               <p className={styles.priceNote}>
-                No payment now. The provider confirms the final price.
+                No payment now. {providerName} confirms the final fare.
               </p>
             </div>
           </div>
@@ -784,33 +1017,66 @@ export default function BookingPage() {
 
       <div className={styles.layout}>
         <main className={styles.main}>
-          <ol className={styles.progress} aria-label="Booking progress">
-            {STEPS.map((step) => {
-              const done = currentStep > step.id;
-              const active = currentStep === step.id;
-              return (
-                <li
-                  key={step.id}
-                  className={`${styles.progressStep} ${
-                    done ? styles.progressStepDone : ""
-                  } ${active ? styles.progressStepActive : ""}`}
-                  aria-current={active ? "step" : undefined}
-                >
-                  <span className={styles.progressDot}>
-                    {done ? (
-                      <Check size={14} aria-hidden="true" />
-                    ) : (
-                      step.id
-                    )}
-                  </span>
-                  <span className={styles.progressLabel}>{step.label}</span>
-                </li>
-              );
-            })}
-          </ol>
+          <nav aria-label="Booking sections">
+            <ol className={styles.progress}>
+              {PARTITIONS.map((step) => {
+                const done =
+                  (step.id === 1 && contactComplete) ||
+                  (step.id === 2 && contactComplete && journeyComplete) ||
+                  (step.id === 3 &&
+                    contactComplete &&
+                    journeyComplete &&
+                    routeComplete);
+                const unlocked = step.id <= visibleStepCount;
+                const active = currentStep === step.id;
+
+                return (
+                  <li
+                    key={step.id}
+                    className={`${styles.progressStep} ${
+                      done ? styles.progressStepDone : ""
+                    } ${active ? styles.progressStepActive : ""} ${
+                      !unlocked ? styles.progressStepLocked : ""
+                    }`}
+                    aria-current={active ? "step" : undefined}
+                  >
+                    <button
+                      type="button"
+                      className={styles.progressButton}
+                      disabled={!unlocked}
+                      onClick={() => scrollSectionIntoView(step.sectionId, true)}
+                    >
+                      <span className={styles.progressDot}>
+                        {done ? (
+                          <Check size={14} aria-hidden="true" />
+                        ) : (
+                          step.id
+                        )}
+                      </span>
+                      <span className={styles.progressText}>
+                        <span className={styles.progressLabel}>
+                          {step.label}
+                        </span>
+                        <span className={styles.progressCaption}>
+                          {step.caption}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
 
           <form className={styles.form} onSubmit={handleSubmit} noValidate>
-            <section className={styles.card} aria-labelledby="step-contact">
+            {/* PARTITION 1: Contact Details (Name + Phone, Email auto-fetched) */}
+            <section
+              id="partition-contact"
+              className={`${styles.card} ${
+                contactComplete ? styles.cardComplete : styles.cardActive
+              }`}
+              aria-labelledby="step-contact-heading"
+            >
               <header className={styles.cardHead}>
                 <span
                   className={`${styles.stepBadge} ${
@@ -820,17 +1086,44 @@ export default function BookingPage() {
                 >
                   {contactComplete ? <Check size={17} /> : "1"}
                 </span>
-                <div>
-                  <span className={styles.cardKicker}>Step 1 of 4</span>
-                  <h2 id="step-contact" className={styles.cardTitle}>
-                    Your contact details
+                <div className={styles.cardHeadCopy}>
+                  <div className={styles.cardKickerRow}>
+                    <span className={styles.cardKicker}>Section 1 of 4</span>
+                    <span
+                      className={`${styles.statusPill} ${
+                        contactComplete
+                          ? styles.statusPillDone
+                          : styles.statusPillActive
+                      }`}
+                    >
+                      {contactComplete ? "Completed" : "Step 1"}
+                    </span>
+                  </div>
+                  <h2 id="step-contact-heading" className={styles.cardTitle}>
+                    Passenger contact details
                   </h2>
                   <p className={styles.cardLead}>
-                    We use these to send the trip confirmation and keep you
-                    updated. Signed-in details are filled in for you.
+                    Fill in your full name and phone number. Your email is
+                    fetched automatically from your account.
                   </p>
                 </div>
               </header>
+
+              {canFillFromProfile ? (
+                <div className={styles.profileHelperBar}>
+                  <span className={styles.profileHelperText}>
+                    <User size={15} aria-hidden="true" />
+                    Saved contact details found on your profile
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.profileFillButton}
+                    onClick={fillFromProfile}
+                  >
+                    Use saved details
+                  </button>
+                </div>
+              ) : null}
 
               <div className={styles.fieldGrid}>
                 <div className={styles.field}>
@@ -864,7 +1157,7 @@ export default function BookingPage() {
 
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="booking-phone">
-                    Phone <span aria-hidden="true">*</span>
+                    Phone number <span aria-hidden="true">*</span>
                   </label>
                   <input
                     id="booking-phone"
@@ -889,43 +1182,140 @@ export default function BookingPage() {
                     </p>
                   ) : null}
                 </div>
-
-                <div className={`${styles.field} ${styles.fieldFull}`}>
-                  <label className={styles.label} htmlFor="booking-email">
-                    Email <span aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    id="booking-email"
-                    className={`${styles.input} ${
-                      errors.email ? styles.inputError : ""
-                    }`}
-                    type="email"
-                    name="email"
-                    inputMode="email"
-                    autoComplete="email"
-                    maxLength={254}
-                    required
-                    value={form.email}
-                    placeholder="you@example.com"
-                    aria-invalid={Boolean(errors.email)}
-                    onChange={(event) => update("email", event.target.value)}
-                    onBlur={() => touch("email")}
-                  />
-                  {errors.email ? (
-                    <p className={styles.errorText} role="alert">
-                      {errors.email}
-                    </p>
-                  ) : (
-                    <p className={styles.hintText}>
-                      We will send your booking confirmation to this address.
-                    </p>
-                  )}
-                </div>
               </div>
+
+              {/* Email fetched from account */}
+              <div className={styles.emailBlock}>
+                {authLoading || profileLoading ? (
+                  <div className={styles.fetchedEmailCard} role="status">
+                    <span className={styles.fetchedEmailIcon}>
+                      <Loader2
+                        className={styles.spin}
+                        size={17}
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <div className={styles.fetchedEmailCopy}>
+                      <span className={styles.fetchedEmailLabel}>Email</span>
+                      <span className={styles.fetchedEmailValue}>
+                        Fetching your account email…
+                      </span>
+                    </div>
+                  </div>
+                ) : showingFetchedEmailCard ? (
+                  <div className={styles.fetchedEmailCard}>
+                    <span className={styles.fetchedEmailIconReady}>
+                      <MailCheck size={17} aria-hidden="true" />
+                    </span>
+                    <div className={styles.fetchedEmailCopy}>
+                      <div className={styles.fetchedEmailHeader}>
+                        <span className={styles.fetchedEmailLabel}>
+                          Confirmation email
+                        </span>
+                        <span className={styles.fetchedBadge}>
+                          Fetched from account
+                        </span>
+                      </div>
+                      <strong className={styles.fetchedEmailValue}>
+                        {effectiveEmail}
+                      </strong>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.emailEditButton}
+                      onClick={() => {
+                        setCustomEmail(effectiveEmail);
+                        setEditingEmail(true);
+                      }}
+                    >
+                      Change
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.guestEmailWrap}>
+                    {!user ? (
+                      <div className={styles.signInBanner}>
+                        <span className={styles.signInBannerCopy}>
+                          <Mail size={15} aria-hidden="true" />
+                          Sign in to fetch your email automatically, or enter it
+                          below.
+                        </span>
+                        <Link href={loginReturnUrl} className={styles.signInLink}>
+                          <LogIn size={14} aria-hidden="true" />
+                          Sign in
+                        </Link>
+                      </div>
+                    ) : null}
+
+                    <div className={styles.field}>
+                      <div className={styles.emailInputHead}>
+                        <label className={styles.label} htmlFor="booking-email">
+                          Email address <span aria-hidden="true">*</span>
+                        </label>
+                        {hasFetchedEmail ? (
+                          <button
+                            type="button"
+                            className={styles.emailResetLink}
+                            onClick={() => {
+                              setCustomEmail(null);
+                              setEditingEmail(false);
+                            }}
+                          >
+                            Use account email ({fetchedEmail})
+                          </button>
+                        ) : null}
+                      </div>
+                      <input
+                        id="booking-email"
+                        className={`${styles.input} ${
+                          errors.email ? styles.inputError : ""
+                        }`}
+                        type="email"
+                        name="email"
+                        inputMode="email"
+                        autoComplete="email"
+                        maxLength={254}
+                        required
+                        value={effectiveEmail}
+                        placeholder="you@example.com"
+                        aria-invalid={Boolean(errors.email)}
+                        onChange={(event) => setCustomEmail(event.target.value)}
+                        onBlur={() => touch("email")}
+                      />
+                      {errors.email ? (
+                        <p className={styles.errorText} role="alert">
+                          {errors.email}
+                        </p>
+                      ) : (
+                        <p className={styles.hintText}>
+                          We will send your trip confirmation to this email.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {!showSchedulePartition ? (
+                <div className={styles.nextPartitionCue}>
+                  <ArrowRight size={14} aria-hidden="true" />
+                  <span>
+                    Complete your name and phone number to reveal{" "}
+                    <strong>Passengers, Travel Date &amp; Time</strong> below.
+                  </span>
+                </div>
+              ) : null}
             </section>
 
-            {contactComplete ? (
-              <section className={styles.card} aria-labelledby="step-journey">
+            {/* PARTITION 2: Passengers, Travel Date, Travel Time */}
+            {showSchedulePartition ? (
+              <section
+                id="partition-schedule"
+                className={`${styles.card} ${
+                  journeyComplete ? styles.cardComplete : styles.cardActive
+                }`}
+                aria-labelledby="step-schedule-heading"
+              >
                 <header className={styles.cardHead}>
                   <span
                     className={`${styles.stepBadge} ${
@@ -935,19 +1325,30 @@ export default function BookingPage() {
                   >
                     {journeyComplete ? <Check size={17} /> : "2"}
                   </span>
-                  <div>
-                    <span className={styles.cardKicker}>Step 2 of 4</span>
-                    <h2 id="step-journey" className={styles.cardTitle}>
-                      Journey details
+                  <div className={styles.cardHeadCopy}>
+                    <div className={styles.cardKickerRow}>
+                      <span className={styles.cardKicker}>Section 2 of 4</span>
+                      <span
+                        className={`${styles.statusPill} ${
+                          journeyComplete
+                            ? styles.statusPillDone
+                            : styles.statusPillActive
+                        }`}
+                      >
+                        {journeyComplete ? "Completed" : "Step 2"}
+                      </span>
+                    </div>
+                    <h2 id="step-schedule-heading" className={styles.cardTitle}>
+                      Passengers, travel date &amp; travel time
                     </h2>
                     <p className={styles.cardLead}>
-                      When are you travelling, how many passengers are with you,
-                      and what time should the driver arrive?
+                      Choose how many passengers are travelling and when you
+                      would like the driver to pick you up.
                     </p>
                   </div>
                 </header>
 
-                <div className={styles.fieldGrid}>
+                <div className={styles.scheduleGrid}>
                   <div className={styles.field}>
                     <label
                       className={styles.label}
@@ -961,12 +1362,13 @@ export default function BookingPage() {
                         className={styles.counterButton}
                         aria-label="Decrease passengers"
                         disabled={passengersCount <= 1}
-                        onClick={() =>
+                        onClick={() => {
+                          touch("passengers");
                           update(
                             "passengers",
-                            String(Math.max(1, passengersCount - 1)),
-                          )
-                        }
+                            String(Math.max(1, (passengersCount || 1) - 1)),
+                          );
+                        }}
                       >
                         −
                       </button>
@@ -993,12 +1395,15 @@ export default function BookingPage() {
                         className={styles.counterButton}
                         aria-label="Increase passengers"
                         disabled={passengersCount >= maxPassengers}
-                        onClick={() =>
+                        onClick={() => {
+                          touch("passengers");
                           update(
                             "passengers",
-                            String(Math.min(maxPassengers, passengersCount + 1)),
-                          )
-                        }
+                            String(
+                              Math.min(maxPassengers, (passengersCount || 0) + 1),
+                            ),
+                          );
+                        }}
                       >
                         +
                       </button>
@@ -1009,7 +1414,7 @@ export default function BookingPage() {
                       </p>
                     ) : (
                       <p className={styles.hintText}>
-                        This vehicle seats up to {maxPassengers} passengers.
+                        Max {maxPassengers} seats for this vehicle.
                       </p>
                     )}
                   </div>
@@ -1041,7 +1446,13 @@ export default function BookingPage() {
                       <p className={styles.errorText} role="alert">
                         {errors.travel_date}
                       </p>
-                    ) : null}
+                    ) : form.travel_date ? (
+                      <p className={styles.hintText}>
+                        {formatFormDate(form.travel_date)}
+                      </p>
+                    ) : (
+                      <p className={styles.hintText}>Today or any future date.</p>
+                    )}
                   </div>
 
                   <div className={styles.field}>
@@ -1049,7 +1460,7 @@ export default function BookingPage() {
                       className={styles.label}
                       htmlFor="booking-pickup-time"
                     >
-                      Pickup time <span aria-hidden="true">*</span>
+                      Travel time <span aria-hidden="true">*</span>
                     </label>
                     <input
                       id="booking-pickup-time"
@@ -1071,17 +1482,33 @@ export default function BookingPage() {
                         {errors.pickup_time}
                       </p>
                     ) : (
-                      <p className={styles.hintText}>
-                        Local Zanzibar time.
-                      </p>
+                      <p className={styles.hintText}>Local Zanzibar time (EAT).</p>
                     )}
                   </div>
                 </div>
+
+                {!showRoutePartition ? (
+                  <div className={styles.nextPartitionCue}>
+                    <ArrowRight size={14} aria-hidden="true" />
+                    <span>
+                      Select your travel date and time to unlock{" "}
+                      <strong>Origin &amp; Destination (Trip Generator)</strong>{" "}
+                      below.
+                    </span>
+                  </div>
+                ) : null}
               </section>
             ) : null}
 
-            {contactComplete && journeyComplete ? (
-              <section className={styles.card} aria-labelledby="step-route">
+            {/* PARTITION 3: Origin & Destination (Trip Generated) */}
+            {showRoutePartition ? (
+              <section
+                id="partition-route"
+                className={`${styles.card} ${
+                  routeComplete ? styles.cardComplete : styles.cardActive
+                }`}
+                aria-labelledby="step-route-heading"
+              >
                 <header className={styles.cardHead}>
                   <span
                     className={`${styles.stepBadge} ${
@@ -1091,28 +1518,48 @@ export default function BookingPage() {
                   >
                     {routeComplete ? <Check size={17} /> : "3"}
                   </span>
-                  <div>
-                    <span className={styles.cardKicker}>Step 3 of 4</span>
-                    <h2 id="step-route" className={styles.cardTitle}>
-                      Your route
+                  <div className={styles.cardHeadCopy}>
+                    <div className={styles.cardKickerRow}>
+                      <span className={styles.cardKicker}>Section 3 of 4</span>
+                      <span
+                        className={`${styles.statusPill} ${
+                          routeComplete
+                            ? styles.statusPillDone
+                            : styles.statusPillActive
+                        }`}
+                      >
+                        {routeComplete ? "Trip generated" : "Step 3"}
+                      </span>
+                    </div>
+                    <h2 id="step-route-heading" className={styles.cardTitle}>
+                      Origin &amp; destination
                     </h2>
                     <p className={styles.cardLead}>
-                      Start typing to see Zanzibar places, streets, hotels, and
-                      beaches. Pick the closest match so we can estimate the
-                      journey.
+                      Tap or start typing to choose from Zanzibar places,
+                      hotels, beaches, and streets — or use your current
+                      location for pickup. Your trip generates automatically.
                     </p>
                   </div>
                 </header>
 
                 <div className={styles.routeFields}>
                   <PlaceAutocomplete
-                    label="Pickup point"
+                    label="Origin (Pickup location)"
                     name="origin"
+                    variant="origin"
                     value={form.origin}
                     required
                     maxLength={255}
-                    placeholder="e.g. Abeid Amani Karume International Airport"
-                    hint="Choose a suggestion to attach coordinates to your trip."
+                    pinned={form.originSource !== "none"}
+                    pinnedLabel={
+                      form.originSource === "gps"
+                        ? "GPS"
+                        : form.originSource === "custom"
+                          ? "Custom"
+                          : "Selected"
+                    }
+                    placeholder="Start typing or pick e.g. Abeid Amani Karume Airport"
+                    hint="Start typing for instant suggestions, or tap Use current location."
                     error={errors.origin}
                     onChange={(value) =>
                       setForm((current) => ({
@@ -1120,6 +1567,7 @@ export default function BookingPage() {
                         origin: value,
                         originLat: null,
                         originLng: null,
+                        originSource: "none",
                       }))
                     }
                     onSelect={(place) =>
@@ -1128,8 +1576,13 @@ export default function BookingPage() {
                         origin: placeLabel(place),
                         originLat: place.latitude,
                         originLng: place.longitude,
+                        originSource: "suggestion",
                       }))
                     }
+                    onCustomConfirm={(value) =>
+                      confirmCustomLocation("origin", value)
+                    }
+                    onBlur={() => handlePlaceBlur("origin")}
                     action={
                       <button
                         type="button"
@@ -1146,7 +1599,7 @@ export default function BookingPage() {
                         ) : (
                           <LocateFixed size={15} aria-hidden="true" />
                         )}
-                        {locating ? "Locating…" : "Use my location"}
+                        {locating ? "Locating…" : "Use current location"}
                       </button>
                     }
                   />
@@ -1160,17 +1613,24 @@ export default function BookingPage() {
                       disabled={!form.origin.trim() && !form.destination.trim()}
                     >
                       <ArrowUpDown size={13} aria-hidden="true" />
-                      Swap
+                      Swap origin &amp; destination
                     </button>
+                    <span className={styles.swapLine} aria-hidden="true" />
                   </div>
 
                   <PlaceAutocomplete
-                    label="Destination"
+                    label="Destination (Drop-off location)"
                     name="destination"
+                    variant="destination"
                     value={form.destination}
                     required
                     maxLength={255}
-                    placeholder="e.g. Kendwa Rocks Hotel"
+                    pinned={form.destSource !== "none" && !sameRoute}
+                    pinnedLabel={
+                      form.destSource === "custom" ? "Custom" : "Selected"
+                    }
+                    placeholder="Start typing or pick e.g. Nungwi, Kendwa, Paje"
+                    hint="Choose a suggested Zanzibar destination to compute distance & travel time."
                     error={errors.destination}
                     onChange={(value) =>
                       setForm((current) => ({
@@ -1178,6 +1638,7 @@ export default function BookingPage() {
                         destination: value,
                         destLat: null,
                         destLng: null,
+                        destSource: "none",
                       }))
                     }
                     onSelect={(place) =>
@@ -1186,146 +1647,298 @@ export default function BookingPage() {
                         destination: placeLabel(place),
                         destLat: place.latitude,
                         destLng: place.longitude,
+                        destSource: "suggestion",
                       }))
                     }
+                    onCustomConfirm={(value) =>
+                      confirmCustomLocation("destination", value)
+                    }
+                    onBlur={() => handlePlaceBlur("destination")}
                   />
                 </div>
 
                 {locationError ? (
                   <p className={styles.locationError} role="alert">
-                    {locationError}
+                    <AlertCircle size={15} aria-hidden="true" />
+                    <span>{locationError}</span>
                   </p>
                 ) : null}
 
-                <div className={styles.routePreview} aria-live="polite">
-                  {visibleRouteLoading ? (
-                    <div className={styles.routeMetric}>
-                      <span className={styles.routeMetricIcon}>
-                        <Loader2
-                          className={styles.spin}
-                          size={15}
-                          aria-hidden="true"
-                        />
-                      </span>
-                      <span className={styles.routeMetricText}>
-                        <span className={styles.routeMetricLabel}>
-                          Route
-                        </span>
-                        <span className={styles.routeMetricValue}>
-                          Calculating distance…
-                        </span>
+                {/* Generated Trip Card */}
+                {routeComplete ? (
+                  <div className={styles.generatedTripCard} aria-live="polite">
+                    <div className={styles.generatedTripHead}>
+                      <div className={styles.generatedTripBadge}>
+                        <span className={styles.liveDot} aria-hidden="true" />
+                        Trip generated
+                      </div>
+                      <span className={styles.generatedTripSub}>
+                        Connected to {service.title}
                       </span>
                     </div>
-                  ) : visibleRoute ? (
-                    <>
-                      <div className={styles.routeMetric}>
-                        <span className={styles.routeMetricIcon}>
-                          <RouteIcon size={15} aria-hidden="true" />
+
+                    <div className={styles.generatedStops}>
+                      <div className={styles.generatedStop}>
+                        <span
+                          className={`${styles.stopMarker} ${styles.stopMarkerOrigin}`}
+                          aria-hidden="true"
+                        >
+                          A
                         </span>
-                        <span className={styles.routeMetricText}>
-                          <span className={styles.routeMetricLabel}>
-                            Distance
+                        <div className={styles.stopInfo}>
+                          <span className={styles.stopLabel}>
+                            Origin
+                            {form.originSource === "gps"
+                              ? " · Current GPS location"
+                              : ""}
                           </span>
-                          <span className={styles.routeMetricValue}>
-                            {formatDistance(visibleRoute.distanceKm)}
-                          </span>
-                        </span>
+                          <strong className={styles.stopName}>
+                            {form.origin}
+                          </strong>
+                        </div>
                       </div>
-                      <div className={styles.routeMetric}>
-                        <span className={styles.routeMetricIcon}>
-                          <Clock size={15} aria-hidden="true" />
+
+                      <div className={styles.stopConnector} aria-hidden="true" />
+
+                      <div className={styles.generatedStop}>
+                        <span
+                          className={`${styles.stopMarker} ${styles.stopMarkerDest}`}
+                          aria-hidden="true"
+                        >
+                          B
                         </span>
-                        <span className={styles.routeMetricText}>
-                          <span className={styles.routeMetricLabel}>
-                            Estimated time
-                          </span>
-                          <span className={styles.routeMetricValue}>
-                            {formatDuration(visibleRoute.durationMins)}
-                          </span>
-                        </span>
+                        <div className={styles.stopInfo}>
+                          <span className={styles.stopLabel}>Destination</span>
+                          <strong className={styles.stopName}>
+                            {form.destination}
+                          </strong>
+                        </div>
                       </div>
-                      <div className={styles.routeMetric}>
-                        <span className={styles.routeMetricIcon}>
-                          <Navigation size={15} aria-hidden="true" />
-                        </span>
-                        <span className={styles.routeMetricText}>
-                          <span className={styles.routeMetricLabel}>
-                            Estimate
+                    </div>
+
+                    <div className={styles.routePreview}>
+                      {visibleRouteLoading ? (
+                        <div className={styles.routeMetric}>
+                          <span className={styles.routeMetricIcon}>
+                            <Loader2
+                              className={styles.spin}
+                              size={15}
+                              aria-hidden="true"
+                            />
                           </span>
-                          <span className={styles.routeMetricValue}>
-                            {visibleRoute.source === "osrm"
-                              ? "Road route"
-                              : "Straight-line"}
+                          <span className={styles.routeMetricText}>
+                            <span className={styles.routeMetricLabel}>
+                              Calculating trip
+                            </span>
+                            <span className={styles.routeMetricValue}>
+                              Computing road distance &amp; duration…
+                            </span>
                           </span>
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <p className={styles.routePreviewNote}>
-                      {visibleRouteError ? (
-                        <span className={styles.routePreviewError}>
-                          {visibleRouteError}
-                        </span>
+                        </div>
+                      ) : visibleRoute ? (
+                        <>
+                          <div className={styles.routeMetric}>
+                            <span className={styles.routeMetricIcon}>
+                              <RouteIcon size={15} aria-hidden="true" />
+                            </span>
+                            <span className={styles.routeMetricText}>
+                              <span className={styles.routeMetricLabel}>
+                                Distance
+                              </span>
+                              <span className={styles.routeMetricValue}>
+                                {formatDistance(visibleRoute.distanceKm)}
+                              </span>
+                            </span>
+                          </div>
+                          <div className={styles.routeMetric}>
+                            <span className={styles.routeMetricIcon}>
+                              <Clock size={15} aria-hidden="true" />
+                            </span>
+                            <span className={styles.routeMetricText}>
+                              <span className={styles.routeMetricLabel}>
+                                Est. travel time
+                              </span>
+                              <span className={styles.routeMetricValue}>
+                                {formatDuration(visibleRoute.durationMins)}
+                              </span>
+                            </span>
+                          </div>
+                          <div className={styles.routeMetric}>
+                            <span className={styles.routeMetricIcon}>
+                              <Navigation size={15} aria-hidden="true" />
+                            </span>
+                            <span className={styles.routeMetricText}>
+                              <span className={styles.routeMetricLabel}>
+                                Route type
+                              </span>
+                              <span className={styles.routeMetricValue}>
+                                {visibleRoute.source === "osrm"
+                                  ? "Road route"
+                                  : "Direct estimate"}
+                              </span>
+                            </span>
+                          </div>
+                        </>
                       ) : (
-                        "Select a suggestion for both points to see distance and travel time."
+                        <p className={styles.routePreviewNote}>
+                          {visibleRouteError ? (
+                            <span className={styles.routePreviewError}>
+                              {visibleRouteError}
+                            </span>
+                          ) : (
+                            "Trip route saved. Your provider will confirm exact driving distance and pickup timing."
+                          )}
+                        </p>
                       )}
-                    </p>
-                  )}
-                </div>
+                    </div>
+
+                    {hasRouteCoords &&
+                    originLat != null &&
+                    originLng != null &&
+                    destLat != null &&
+                    destLng != null ? (
+                      <div className={styles.mapToggleWrap}>
+                        <button
+                          type="button"
+                          className={styles.mapToggleButton}
+                          aria-expanded={showRouteMap}
+                          onClick={() => setShowRouteMap((open) => !open)}
+                        >
+                          <MapIcon size={15} aria-hidden="true" />
+                          {showRouteMap ? "Hide trip route map" : "Preview trip on Zanzibar map"}
+                          {showRouteMap ? (
+                            <ChevronUp size={15} aria-hidden="true" />
+                          ) : (
+                            <ChevronDown size={15} aria-hidden="true" />
+                          )}
+                        </button>
+
+                        {showRouteMap ? (
+                          <div className={styles.mapContainer}>
+                            <TripRouteOverlayMap
+                              originLat={originLat}
+                              originLng={originLng}
+                              destinationLat={destLat}
+                              destinationLng={destLng}
+                              originLabel={form.origin}
+                              destinationLabel={form.destination}
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className={styles.nextPartitionCue}>
+                    <ArrowRight size={14} aria-hidden="true" />
+                    <span>
+                      Pick both an origin and destination to generate your trip
+                      and reveal <strong>Description &amp; Submit</strong> below.
+                    </span>
+                  </div>
+                )}
               </section>
             ) : null}
 
-            {contactComplete && journeyComplete && routeComplete ? (
-              <section className={styles.card} aria-labelledby="step-notes">
+            {/* PARTITION 4: Add Description (Optional) & Submit */}
+            {showConfirmPartition ? (
+              <section
+                id="partition-confirm"
+                className={`${styles.card} ${styles.cardActive}`}
+                aria-labelledby="step-notes-heading"
+              >
                 <header className={styles.cardHead}>
                   <span className={styles.stepBadge} aria-hidden="true">
                     4
                   </span>
-                  <div>
-                    <span className={styles.cardKicker}>Step 4 of 4</span>
-                    <h2 id="step-notes" className={styles.cardTitle}>
-                      Anything else we should know?
+                  <div className={styles.cardHeadCopy}>
+                    <div className={styles.cardKickerRow}>
+                      <span className={styles.cardKicker}>Section 4 of 4</span>
+                      <span className={styles.statusPillOptional}>Optional notes</span>
+                    </div>
+                    <h2 id="step-notes-heading" className={styles.cardTitle}>
+                      Add trip description &amp; send request
                     </h2>
                     <p className={styles.cardLead}>
-                      Add optional notes for the driver, then send your trip
-                      request.
+                      Add any extra details for your driver (optional), review
+                      your trip, and submit your private hire request.
                     </p>
                   </div>
                 </header>
 
-                <div className={styles.fieldGrid}>
-                  <div className={`${styles.field} ${styles.fieldFull}`}>
-                    <label className={styles.label} htmlFor="booking-notes">
-                      Journey Notes <span aria-hidden="true">(Optional)</span>
-                    </label>
-                    <textarea
-                      id="booking-notes"
-                      className={styles.textarea}
-                      name="notes"
-                      rows={4}
-                      maxLength={5000}
-                      value={form.notes}
-                      placeholder="Share additional information about your journey, luggage requirements, preferred pickup arrangements, special requests or other details..."
-                      onChange={(event) => update("notes", event.target.value)}
-                    />
-                    <p className={styles.hintText}>
-                      {form.notes.length}/5000 characters
-                    </p>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="booking-notes">
+                    <span className={styles.optionalLabelRow}>
+                      <FileText size={14} aria-hidden="true" />
+                      Description <em>(Optional)</em>
+                    </span>
+                  </label>
+                  <textarea
+                    id="booking-notes"
+                    className={styles.textarea}
+                    name="notes"
+                    rows={4}
+                    maxLength={5000}
+                    value={form.notes}
+                    placeholder="Share luggage needs, flight number, hotel gate/entrance, child seat requests, or any special instructions for your trip…"
+                    onChange={(event) => update("notes", event.target.value)}
+                  />
+                  <p className={styles.hintText}>
+                    {form.notes.length} / 5000 characters
+                  </p>
+                </div>
+
+                {/* Compact Trip Recap */}
+                <div className={styles.recapBox}>
+                  <span className={styles.recapTitle}>Generated trip ready to book</span>
+                  <div className={styles.recapGrid}>
+                    <div>
+                      <span className={styles.recapLabel}>Route</span>
+                      <strong className={styles.recapValue}>
+                        {form.origin || "—"} → {form.destination || "—"}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className={styles.recapLabel}>Schedule</span>
+                      <strong className={styles.recapValue}>
+                        {travelDateValid ? formatFormDate(form.travel_date) : "—"}
+                        {travelTimeValid ? ` · ${form.pickup_time}` : ""}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className={styles.recapLabel}>Passengers</span>
+                      <strong className={styles.recapValue}>
+                        {passengersValid
+                          ? `${form.passengers} ${
+                              passengersCount === 1 ? "passenger" : "passengers"
+                            }`
+                          : "—"}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className={styles.recapLabel}>Contact</span>
+                      <strong className={styles.recapValue}>
+                        {form.full_name.trim() || "—"} ·{" "}
+                        {form.phone.trim() || "—"}
+                      </strong>
+                    </div>
                   </div>
                 </div>
 
                 {formError ? (
                   <p className={styles.alert} role="alert">
                     <AlertCircle size={17} aria-hidden="true" />
-                    {formError}
+                    <span>{formError}</span>
                   </p>
                 ) : null}
 
                 <div className={styles.submitRow}>
                   <p className={styles.submitNote}>
                     <ShieldCheck size={16} aria-hidden="true" />
-                    No payment is taken now. {providerName} confirms
-                    availability and the final price before your trip.
+                    <span>
+                      No payment is taken now. {providerName} reviews your
+                      generated trip and confirms availability &amp; final fare.
+                    </span>
                   </p>
                   <button
                     type="submit"
@@ -1354,6 +1967,7 @@ export default function BookingPage() {
           </form>
         </main>
 
+        {/* STICKY LIVE TRIP SUMMARY SIDEBAR */}
         <aside className={styles.aside}>
           <div className={styles.summaryCard}>
             <div className={styles.summaryMedia}>
@@ -1362,7 +1976,7 @@ export default function BookingPage() {
                   src={getImageUrl(service.vehicle.front_image_url)}
                   alt={service.vehicle.name}
                   fill
-                  sizes="350px"
+                  sizes="360px"
                   className={styles.summaryImage}
                   unoptimized
                 />
@@ -1371,9 +1985,16 @@ export default function BookingPage() {
                   <Car size={30} aria-hidden="true" />
                 </span>
               )}
+              <span
+                className={`${styles.summaryTripStatus} ${
+                  routeComplete ? styles.summaryTripStatusReady : ""
+                }`}
+              >
+                {routeComplete ? "Trip generated" : "Building trip"}
+              </span>
             </div>
 
-            <span className={styles.summaryKicker}>Private hire</span>
+            <span className={styles.summaryKicker}>Private hire trip</span>
             <h2 className={styles.summaryTitle}>{service.title}</h2>
             {service.company ? (
               <p className={styles.summaryCompany}>{service.company.name}</p>
@@ -1386,13 +2007,25 @@ export default function BookingPage() {
 
             <div className={styles.summaryList}>
               <div className={styles.summaryRow}>
-                <MapPin size={15} aria-hidden="true" />
+                <User size={15} aria-hidden="true" />
                 <span className={styles.summaryRowText}>
-                  <span className={styles.summaryRowLabel}>Route</span>
+                  <span className={styles.summaryRowLabel}>Passenger</span>
                   <span className={styles.summaryRowValue}>
-                    {routeComplete
-                      ? `${form.origin} → ${form.destination}`
-                      : "Choose your pickup point and destination"}
+                    {form.full_name.trim()
+                      ? `${form.full_name.trim()}${
+                          form.phone.trim() ? ` · ${form.phone.trim()}` : ""
+                        }`
+                      : "Enter name & phone"}
+                  </span>
+                </span>
+              </div>
+
+              <div className={styles.summaryRow}>
+                <Mail size={15} aria-hidden="true" />
+                <span className={styles.summaryRowText}>
+                  <span className={styles.summaryRowLabel}>Email</span>
+                  <span className={styles.summaryRowValue}>
+                    {effectiveEmail || (authLoading ? "Fetching…" : "Not set")}
                   </span>
                 </span>
               </div>
@@ -1400,21 +2033,13 @@ export default function BookingPage() {
               <div className={styles.summaryRow}>
                 <CalendarDays size={15} aria-hidden="true" />
                 <span className={styles.summaryRowText}>
-                  <span className={styles.summaryRowLabel}>Date</span>
+                  <span className={styles.summaryRowLabel}>Date &amp; time</span>
                   <span className={styles.summaryRowValue}>
                     {travelDateValid
-                      ? formatFormDate(form.travel_date)
-                      : "Not selected"}
-                  </span>
-                </span>
-              </div>
-
-              <div className={styles.summaryRow}>
-                <Clock size={15} aria-hidden="true" />
-                <span className={styles.summaryRowText}>
-                  <span className={styles.summaryRowLabel}>Pickup</span>
-                  <span className={styles.summaryRowValue}>
-                    {pickupTimeValid ? form.pickup_time : "Not selected"}
+                      ? `${formatFormDate(form.travel_date)}${
+                          travelTimeValid ? ` at ${form.pickup_time}` : ""
+                        }`
+                      : "Not selected yet"}
                   </span>
                 </span>
               </div>
@@ -1424,7 +2049,23 @@ export default function BookingPage() {
                 <span className={styles.summaryRowText}>
                   <span className={styles.summaryRowLabel}>Passengers</span>
                   <span className={styles.summaryRowValue}>
-                    {passengersValid ? form.passengers : "Not selected"}
+                    {passengersValid
+                      ? `${form.passengers} of ${maxPassengers} max`
+                      : "Not selected"}
+                  </span>
+                </span>
+              </div>
+
+              <div className={styles.summaryRow}>
+                <MapPin size={15} aria-hidden="true" />
+                <span className={styles.summaryRowText}>
+                  <span className={styles.summaryRowLabel}>Trip route</span>
+                  <span className={styles.summaryRowValue}>
+                    {routeComplete
+                      ? `${form.origin} → ${form.destination}`
+                      : form.origin.trim()
+                        ? `${form.origin} → Choose destination`
+                        : "Origin & destination"}
                   </span>
                 </span>
               </div>
@@ -1433,7 +2074,7 @@ export default function BookingPage() {
                 <div className={styles.summaryRow}>
                   <RouteIcon size={15} aria-hidden="true" />
                   <span className={styles.summaryRowText}>
-                    <span className={styles.summaryRowLabel}>Journey</span>
+                    <span className={styles.summaryRowLabel}>Journey estimate</span>
                     <span className={styles.summaryRowValue}>
                       {formatDistance(visibleRoute.distanceKm)} ·{" "}
                       {formatDuration(visibleRoute.durationMins)}
@@ -1445,7 +2086,7 @@ export default function BookingPage() {
               <div className={styles.summaryRow}>
                 <Car size={15} aria-hidden="true" />
                 <span className={styles.summaryRowText}>
-                  <span className={styles.summaryRowLabel}>Vehicle</span>
+                  <span className={styles.summaryRowLabel}>Vehicle &amp; driver</span>
                   <span className={styles.summaryRowValue}>
                     {service.vehicle
                       ? `${service.vehicle.name} · ${driverName}`
@@ -1456,8 +2097,8 @@ export default function BookingPage() {
             </div>
 
             <p className={styles.summaryNote}>
-              Your request creates a trip. {providerName} confirms
-              availability before the journey.
+              Submitting creates a linked trip record and sends your request to{" "}
+              {providerName} for confirmation.
             </p>
           </div>
 
@@ -1465,7 +2106,7 @@ export default function BookingPage() {
             <h2 className={styles.helpTitle}>Need help?</h2>
             <p className={styles.helpText}>
               {service.company?.contact_phone || service.driver?.phone
-                ? "Call the provider directly if you have questions about this vehicle."
+                ? "Call the provider directly if you have questions about this vehicle or route."
                 : "Questions about this vehicle? Contact the provider through their profile."}
             </p>
             {service.company?.contact_phone ? (
