@@ -632,11 +632,6 @@ export default function DriverVehiclePage({ initialData }: Props) {
             <h1 className={ws.heroTitle}>
               {isPublicDriver ? "My Registered Vehicle" : "Assigned Company Vehicle"}
             </h1>
-            <p className={ws.heroLead}>
-              {isPublicDriver
-                ? "Register your vehicle directly with photos, plate number, seat capacity, and inclusions. Public hire drivers are limited to 1 registered vehicle at a time and can edit or remove it anytime."
-                : `View the vehicle assigned to your driver profile by ${company?.name ?? "your company"}. Editing and deleting fleet vehicles is managed by your company.`}
-            </p>
           </div>
 
           <div className={ws.heroActions}>

@@ -406,11 +406,6 @@ const persistPreference = (key: string, value: string) => {
           </nav>
           <p className={styles.settingsEyebrow}>Your Travel account</p>
           <h1 className={styles.settingsTitle}>Account settings</h1>
-          <p className={styles.settingsLead}>
-            Keep your personal details and profile photo current, and manage the
-            credentials used to sign in. Your contact information stays private
-            and is shared only as part of the bookings you make.
-          </p>
         </div>
         <div className={styles.settingsActions}>
           <span className={styles.settingsPill}>

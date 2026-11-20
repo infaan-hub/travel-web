@@ -67,7 +67,6 @@ const STAGE_SORT_RANK: Record<string, number> = {
 };
 
 export default function DriverBookingsPage({
-  driverName,
   companyName,
   isPublicDriver,
 }: Props) {
@@ -284,11 +283,6 @@ export default function DriverBookingsPage({
               </span>
             </div>
             <h1 className={styles.heroTitle}>Assigned &amp; Public Pending Bookings</h1>
-            <p className={styles.heroLead}>
-              Hi {driverName} — review pending bookings assigned to you or shared publicly by
-              companies, confirm to notify the customer and company, then tap{" "}
-              <strong>Start trip</strong> to open live pickup navigation.
-            </p>
           </div>
           <div className={styles.heroActions}>
             {activeRouteHref ? (

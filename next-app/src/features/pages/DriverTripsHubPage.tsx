@@ -32,13 +32,11 @@ import {
   AIRPORT_HUB,
   CURATED_DESTINATIONS,
   CURATED_TOP_RATED_TRIPS,
-  DESTINATION_FILTERS,
   MEASURE_PRESETS,
   formatTripDistance,
   formatTripDuration,
   type CuratedDestination,
   type CuratedTripRoute,
-  type DestinationCategory,
   type TripEndpoint,
 } from "@/lib/trip-discovery";
 import {
@@ -135,7 +133,6 @@ export default function DriverTripsHubPage({ driver }: Props) {
     manualGeocoding || Boolean(routeCoordsKey && routeMetrics?.key !== routeCoordsKey);
 
   // Discovery lists
-  const [destCategory, setDestCategory] = useState<"all" | DestinationCategory>("all");
   const [companyTrips, setCompanyTrips] = useState<PublicTripRecord[]>([]);
   const [reviewStats, setReviewStats] = useState<ReviewStat[]>([]);
 
@@ -414,11 +411,6 @@ export default function DriverTripsHubPage({ driver }: Props) {
     }
   };
 
-  const filteredDestinations = useMemo(() => {
-    if (destCategory === "all") return CURATED_DESTINATIONS;
-    return CURATED_DESTINATIONS.filter((d) => d.category === destCategory);
-  }, [destCategory]);
-
   const topRatedTrips = useMemo<CuratedTripRoute[]>(() => {
     const statByTripId = new Map<number, { rating: number; count: number }>();
     for (const s of reviewStats) {
@@ -529,11 +521,6 @@ export default function DriverTripsHubPage({ driver }: Props) {
               </span>
             </div>
             <h1 className={styles.heroTitle}>Generate &amp; Send Trips to Customers</h1>
-            <p className={styles.heroLead}>
-              Build a custom route, preview the full road map in its own dedicated card, and send a
-              complete WhatsApp trip card with your driver info, vehicle details, and Google Maps
-              route link directly to any contact.
-            </p>
           </div>
         </header>
 
@@ -1034,30 +1021,11 @@ export default function DriverTripsHubPage({ driver }: Props) {
               <h2 id="driver-suggested-heading" className={styles.panelTitle}>
                 Suggested Zanzibar Destinations
               </h2>
-              <p className={styles.panelSub}>
-                Popular Zanzibar beaches, heritage spots, and resorts — load into the generator or
-                send directly to a customer on WhatsApp.
-              </p>
-            </div>
-            <div className={styles.filterTabs} role="group" aria-label="Filter suggested destinations">
-              {DESTINATION_FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  className={`${styles.filterChip} ${
-                    destCategory === f.id ? styles.filterChipActive : ""
-                  }`}
-                  aria-pressed={destCategory === f.id}
-                  onClick={() => setDestCategory(f.id)}
-                >
-                  {f.label}
-                </button>
-              ))}
             </div>
           </header>
 
           <div className={styles.discoveryGrid}>
-            {filteredDestinations.map((dest) => {
+            {CURATED_DESTINATIONS.map((dest) => {
               const directWa = buildWhatsAppForRoute(
                 AIRPORT_HUB,
                 { label: `${dest.name}, ${dest.area}`, lat: dest.lat, lng: dest.lng },

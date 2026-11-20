@@ -184,10 +184,6 @@ export default function DriverInsightPage({ initialDriver, initialInsights }: Pr
               ) : null}
             </div>
             <h1 className={styles.heroTitle}>Work Insights — {insights.monthLabel}</h1>
-            <p className={styles.heroLead}>
-              Inspect monthly trip performance, driving distance, route breakdown, and export a
-              designed full-month PDF work report for {driver.name}.
-            </p>
           </div>
 
           <div className={styles.heroActions}>

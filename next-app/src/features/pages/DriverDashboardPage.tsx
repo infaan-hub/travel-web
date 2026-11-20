@@ -224,10 +224,6 @@ export default function DriverDashboardPage({
               </span>
             </div>
             <h1 className={styles.heroTitle}>Welcome back, {driverName}</h1>
-            <p className={styles.heroLead}>
-              Confirm incoming bookings, notify customers and {companyName} automatically, and run
-              live GPS-guided trips from pickup to drop-off.
-            </p>
           </div>
 
           <div className={styles.heroActions}>
