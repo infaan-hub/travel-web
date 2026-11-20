@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI, publicPrivateHireAPI } from '@/lib/api/client';
-import { ArrowRight, Star, MapPin, Send, X, Car } from '@/components/icons';
+import { ArrowRight, Star, Send, X, Car, Users, Briefcase, Shield } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
@@ -14,12 +14,11 @@ import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import styles from "@/features/pages/home-page.module.css";
-import cardStyles from "@/features/pages/company-private-service.module.css";
 
 import DestinationCard from "@/components/DestinationCard";
 
 import type { HomeSettings, Review, Tour } from "@/features/pages/types";
-import { PRICING_LABELS, SAMPLE_PRIVATE_HIRE_SERVICES, type PrivateHireService } from "@/features/transport/private-hire-data";
+import { PRICING_LABELS, SAMPLE_PRIVATE_HIRE_SERVICES } from "@/features/transport/private-hire-data";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
 
 type FeaturedCompany = {
@@ -293,70 +292,131 @@ export default function HomePage() {
         featuredTour={allTours.find((tour) => tour.featured) || allTours[0] || null}
       />
 
-      <section className="all-tours-section">
-        <div className="section-header">
-          <h2>Private hire for your journey</h2>
-          <Link href="/transport/" className="btn btn-primary btn-sm">Browse vehicles <ArrowRight size={14} /></Link>
+      <section className={styles.hireSection} aria-labelledby="home-private-hire-heading">
+        <div className={styles.hireHeader}>
+          <div className={styles.hireHeading}>
+            <span className={styles.hireEyebrow}>
+              <Car size={14} aria-hidden="true" /> Private hire
+            </span>
+            <h2 id="home-private-hire-heading" className={styles.hireTitle}>
+              Private hire for your journey
+            </h2>
+          </div>
+          <Link href="/transport/" className={styles.hireBrowse}>
+            Browse vehicles <ArrowRight size={15} aria-hidden="true" />
+          </Link>
         </div>
-        <div className={`${cardStyles.servicesGrid} ${cardStyles.transportFleet}`}>
-          {privateServices.slice(0, 6).map((svc) => {
-            const vehicleName = svc.vehicle?.name ?? "Vehicle";
-            const plateNumber = svc.vehicle?.plate_number ?? svc.vehicle?.plateNumber ?? "";
-            const companyName = svc.company?.name ?? "Company";
-            const capacityPax = svc.vehicle?.capacity ?? svc.vehicle?.capacity ?? 0;
-            const luggageBags = svc.vehicle?.luggage_capacity ?? svc.vehicle?.luggageCapacity ?? 0;
-            return (
-              <div key={svc.id} className={cardStyles.serviceCard}>
-                <div className={cardStyles.serviceHeader}>
-                  <div className={cardStyles.serviceTitleGroup}>
-                    <h3 className={cardStyles.cardVehicleTitle}>
-                      {vehicleName}
-                      {plateNumber && <span className={cardStyles.plateBadgeInline}>{plateNumber}</span>}
-                    </h3>
-                    {svc.title && <p className={cardStyles.tagline}>{svc.title}</p>}
-                    {companyName && <span className={cardStyles.companyNameBadge}>{companyName}</span>}
-                  </div>
-                  <div className={cardStyles.priceTag}>
-                    ${svc.price}
-                    <span className={cardStyles.pricingUnit}>
-                      /{svc.pricing_type ? (PRICING_LABELS[svc.pricing_type] || svc.pricing_type) : (svc.pricingType ? (PRICING_LABELS[svc.pricingType] || svc.pricingType) : "per trip")}
-                    </span>
-                  </div>
-                </div>
-                <div className={cardStyles.serviceBody}>
-                  <div className={cardStyles.specsLine}>
-                    <span>{capacityPax} pax</span>
-                    <span>•</span>
-                    <span>{luggageBags} bags</span>
-                  </div>
-                  <div className={cardStyles.pairedBlock}>
-                    <div className={cardStyles.subSectionCard}>
-                      <div className={cardStyles.sectionHeaderRow}>
-                        <Car size={13} /> Private Hire transport
+
+        {privateServices.length > 0 ? (
+          <ul
+            className={`${styles.hireGrid} ${
+              privateServices.length === 1 ? styles.hireGridSingle : ""
+            }`}
+          >
+            {privateServices.slice(0, 6).map((svc) => {
+              const vehicle = svc.vehicle ?? {};
+              const vehicleName: string = vehicle.name ?? "Private vehicle";
+              const plateNumber: string = vehicle.plate_number ?? vehicle.plateNumber ?? "";
+              const category: string = vehicle.category ?? "";
+              const companyName: string = svc.company?.name ?? "";
+              const companyLogo: string | null = svc.company?.logo_image_url ?? null;
+              const capacityPax = Number(vehicle.capacity ?? 0);
+              const luggageBags = Number(vehicle.luggage_capacity ?? vehicle.luggageCapacity ?? 0);
+              const imageUrl: string | null = vehicle.front_image_url || vehicle.frontImage || null;
+              const pricingKey: string = svc.pricing_type ?? svc.pricingType ?? "per_trip";
+              const pricingLabel = PRICING_LABELS[pricingKey] || pricingKey.replace(/_/g, " ");
+              const priceAmount = Number(svc.price);
+              const priceLabel = Number.isFinite(priceAmount)
+                ? `$${Number.isInteger(priceAmount) ? priceAmount : priceAmount.toFixed(2)}`
+                : `$${svc.price}`;
+              const detailsHref = `/transport/service/${svc.id}/`;
+
+              return (
+                <li key={svc.id} className={styles.hireCard}>
+                  <Link href={detailsHref} className={styles.hireMedia} aria-label={`View ${vehicleName} details`}>
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 84vw, (max-width: 1024px) 50vw, 33vw"
+                        className={styles.hireImage}
+                        unoptimized
+                      />
+                    ) : (
+                      <span className={styles.hireImageFallback} aria-hidden="true">
+                        <Car size={40} />
+                      </span>
+                    )}
+                    <span className={styles.hireShade} aria-hidden="true" />
+                    {category ? <span className={styles.hireCategory}>{category}</span> : null}
+                    {plateNumber ? <span className={styles.hirePlate}>{plateNumber}</span> : null}
+                  </Link>
+
+                  <div className={styles.hireBody}>
+                    <div className={styles.hireTopRow}>
+                      <div className={styles.hireNameGroup}>
+                        <h3 className={styles.hireVehicle}>{vehicleName}</h3>
+                        {svc.title ? <p className={styles.hireService}>{svc.title}</p> : null}
                       </div>
-                      <div className={cardStyles.vehicleThumbArea}>
-                        {svc.vehicle?.front_image_url || svc.vehicle?.frontImage ? (
-                          <Image src={svc.vehicle?.front_image_url || svc.vehicle?.frontImage} alt={vehicleName} fill className={cardStyles.thumbImg} unoptimized />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-slate-200">
-                            <Car size={24} color="#64748b" />
-                          </div>
-                        )}
-                        {plateNumber && <span className={cardStyles.plateMiniBadge}>{plateNumber}</span>}
+                      <div className={styles.hirePrice}>
+                        <strong>{priceLabel}</strong>
+                        <span>{pricingLabel}</span>
                       </div>
                     </div>
+
+                    <ul className={styles.hireSpecs} aria-label="Vehicle capacity">
+                      <li>
+                        <Users size={14} aria-hidden="true" />
+                        {capacityPax} {capacityPax === 1 ? "seat" : "seats"}
+                      </li>
+                      <li>
+                        <Briefcase size={14} aria-hidden="true" />
+                        {luggageBags} {luggageBags === 1 ? "bag" : "bags"}
+                      </li>
+                      {svc.driver ? (
+                        <li>
+                          <Shield size={14} aria-hidden="true" />
+                          Driver included
+                        </li>
+                      ) : null}
+                    </ul>
+
+                    {companyName ? (
+                      <div className={styles.hireCompany}>
+                        <span className={styles.hireCompanyLogo} aria-hidden="true">
+                          {companyLogo ? (
+                            <Image src={getImageUrl(companyLogo)} alt="" fill sizes="28px" unoptimized />
+                          ) : (
+                            companyName.charAt(0).toUpperCase()
+                          )}
+                        </span>
+                        <span className={styles.hireCompanyName}>{companyName}</span>
+                      </div>
+                    ) : null}
+
+                    <div className={styles.hireActions}>
+                      <Link href={detailsHref} className={styles.hireBtnGhost}>
+                        View details
+                      </Link>
+                      <Link href={`/booking/${svc.id}/`} className={styles.hireBtnPrimary}>
+                        Book now <ArrowRight size={15} aria-hidden="true" />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-                <div className={cardStyles.serviceFooter}>
-                  <Link href={`/transport/service/${svc.id}/`} className={cardStyles.btnPreview} style={{ textDecoration: "none" }}>View full details</Link>
-                  <div className="flex items-center gap-2">
-                    <Link href={`/booking/${svc.id}/`} className={cardStyles.primaryBtn} style={{ textDecoration: "none" }}>Book now</Link>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className={styles.hireEmpty}>
+            <Car size={26} aria-hidden="true" />
+            <p>No private hire vehicles are listed right now.</p>
+            <Link href="/transport/" className={styles.hireBtnPrimary}>
+              Browse transport <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+        )}
       </section>
 
 
