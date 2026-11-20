@@ -747,12 +747,12 @@ model PrivateHireDriver {
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
 
-  company           Company?             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  user              User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
-  services          PrivateHireService[]
-  transportBookings TransportBooking[]
+  company               Company?               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user                  User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  services              PrivateHireService[]
+  transportBookings     TransportBooking[]
   transportTripRequests TransportTripRequest[]
-  joinRequest PartnerJoinRequest?
+  joinRequest           PartnerJoinRequest?
 
   @@index([companyId, isActive])
   @@map("private_hire_drivers")
@@ -846,11 +846,11 @@ model TransportBooking {
   createdAt     DateTime               @default(now()) @map("created_at")
   updatedAt     DateTime               @updatedAt @map("updated_at")
 
-  user        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
-  service     PrivateHireService? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  company     Company?            @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  vehicle     PrivateHireVehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
-  driver      PrivateHireDriver?  @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  user        User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+  service     PrivateHireService?   @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  company     Company?              @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  vehicle     PrivateHireVehicle?   @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  driver      PrivateHireDriver?    @relation(fields: [driverId], references: [id], onDelete: SetNull)
   tripRequest TransportTripRequest? @relation(fields: [tripRequestId], references: [id], onDelete: SetNull)
   reviews     Review[]
 
@@ -870,29 +870,32 @@ enum TransportTripRequestStatus {
 }
 
 model TransportTripRequest {
-  id          Int                        @id @default(autoincrement())
-  userId      Int?                       @map("user_id")
-  driverId    Int?                       @map("driver_id")
-  origin      String
-  originLat   Float?                     @map("origin_lat")
-  originLng   Float?                     @map("origin_lng")
-  destination String
+  id           Int                        @id @default(autoincrement())
+  userId       Int?                       @map("user_id")
+  driverId     Int?                       @map("driver_id")
+  origin       String
+  originLat    Float?                     @map("origin_lat")
+  originLng    Float?                     @map("origin_lng")
+  destination  String
   contactName  String?                    @map("contact_name")
   contactEmail String?                    @map("contact_email")
   contactPhone String?                    @map("contact_phone")
-  destLat     Float?                     @map("dest_lat")
-  destLng     Float?                     @map("dest_lng")
-  travelDate  DateTime                   @map("travel_date") @db.Date
-  passengers  Int                        @default(1)
-  luggage     Int                        @default(0)
-  notes       String                     @default("")
-  status      TransportTripRequestStatus @default(requested)
-  createdAt   DateTime                   @default(now()) @map("created_at")
-  updatedAt   DateTime                   @updatedAt @map("updated_at")
+  destLat      Float?                     @map("dest_lat")
+  destLng      Float?                     @map("dest_lng")
+  travelDate   DateTime                   @map("travel_date") @db.Date
+  pickupTime   String?                    @map("pickup_time")
+  passengers   Int                        @default(1)
+  luggage      Int                        @default(0)
+  distanceKm   Float?                     @map("distance_km")
+  durationMins Int?                       @map("duration_mins")
+  notes        String                     @default("")
+  status       TransportTripRequestStatus @default(requested)
+  createdAt    DateTime                   @default(now()) @map("created_at")
+  updatedAt    DateTime                   @updatedAt @map("updated_at")
 
-  user       User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
-  driver     PrivateHireDriver? @relation(fields: [driverId], references: [id], onDelete: SetNull)
-  bookings   TransportBooking[]
+  user     User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  driver   PrivateHireDriver? @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  bookings TransportBooking[]
 
   @@index([userId, createdAt])
   @@index([status, createdAt])

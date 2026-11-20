@@ -1,0 +1,255 @@
+/* Accessible place combobox used by the trip-first booking form. */
+
+.field {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.label span {
+  color: #be123c;
+}
+
+.inputRow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+
+.inputWrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.inputIcon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  z-index: 1;
+  color: #7c8da6;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 38px;
+  border: 1px solid #d8e2ef;
+  border-radius: 12px;
+  background: #fbfdff;
+  color: #0f172a;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  outline: none;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.input::placeholder {
+  color: #94a3b8;
+}
+
+.input:hover {
+  border-color: #b9cbe3;
+}
+
+.input:focus {
+  border-color: #08428c;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(8, 66, 140, 0.12);
+}
+
+.input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.inputError {
+  border-color: #e11d48;
+  background: #fff7f9;
+}
+
+.inputError:focus {
+  border-color: #be123c;
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+}
+
+.clearButton {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: #eef3fa;
+  color: #5b6b84;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.clearButton:hover {
+  background: #e2eaf5;
+  color: #08428c;
+}
+
+.clearButton:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.28);
+  outline-offset: 1px;
+}
+
+.actionSlot {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 40;
+  max-height: 290px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid #dbe5f1;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 20px 44px rgba(8, 66, 140, 0.18),
+    0 2px 8px rgba(15, 23, 42, 0.06);
+  animation: place-pop 0.14s ease-out;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.spinner {
+  flex: 0 0 auto;
+  animation: place-spin 1s linear infinite;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.optionActive {
+  background: #edf4fd;
+}
+
+.optionIcon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  margin-top: 1px;
+  place-items: center;
+  border-radius: 9px;
+  background: #e7eef9;
+  color: #08428c;
+}
+
+.optionText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.optionName {
+  color: #0f172a;
+  font-size: 0.84rem;
+  font-weight: 650;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.optionMeta {
+  color: #64748b;
+  font-size: 0.71rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.71rem;
+  line-height: 1.4;
+}
+
+.error {
+  margin: 0;
+  color: #be123c;
+  font-size: 0.71rem;
+  line-height: 1.4;
+}
+
+@keyframes place-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes place-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 560px) {
+  .inputRow {
+    flex-direction: column;
+  }
+
+  .actionSlot,
+  .actionSlot > * {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .popover {
+    animation: none;
+  }
+
+  .input,
+  .clearButton {
+    transition: none;
+  }
+}

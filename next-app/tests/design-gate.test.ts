@@ -121,7 +121,7 @@ describe("design scope file classification", () => {
     expect(classifyFile("src/features/pages/HomePage.tsx").scope).toBe("P0");
     expect(classifyFile("src/features/pages/ToursPage.tsx").scope).toBe("P0");
     expect(classifyFile("src/features/pages/BookingPage.tsx").scope).toBe("P0");
-    expect(classifyFile("src/app/(public)/booking/[tourId]/page.tsx").scope).toBe("P0");
+    expect(classifyFile("src/app/(public)/booking/[serviceId]/page.tsx").scope).toBe("P0");
   });
 
   it("maps shared tokens and shell files to SYSTEM", () => {
