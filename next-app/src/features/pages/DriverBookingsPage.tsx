@@ -503,6 +503,14 @@ export default function DriverBookingsPage({
                           </strong>
                         </div>
                       </div>
+                    ) : isUnclaimedPublicOffer ? (
+                      <div className={styles.metaItem}>
+                        <Car size={15} aria-hidden="true" />
+                        <div>
+                          <span>Driver &amp; vehicle</span>
+                          <strong>Unassigned · yours on confirm</strong>
+                        </div>
+                      </div>
                     ) : null}
                     {booking.total_price ? (
                       <div className={styles.metaItem}>
@@ -549,9 +557,11 @@ export default function DriverBookingsPage({
                     {stage === "pending" ? (
                       <>
                         <span className={styles.footerHint}>
-                          {booking.company?.name
-                            ? `Confirm to notify the customer and mark verified for ${booking.company.name}.`
-                            : "Confirm to claim this booking and notify the customer."}
+                          {isUnclaimedPublicOffer
+                            ? "Unassigned public booking — confirm to assign yourself and your vehicle, and notify the customer and company."
+                            : booking.company?.name
+                              ? `Confirm to notify the customer and mark verified for ${booking.company.name}.`
+                              : "Confirm to claim this booking and notify the customer."}
                         </span>
                         <div className={styles.footerActions}>
                           <button

@@ -72,7 +72,10 @@ export async function GET(request: NextRequest) {
           email: "",
           customer_account: null,
           driver: null,
-          service: serialized.service ? { ...serialized.service, driver: null } : null,
+          vehicle: null,
+          service: serialized.service
+            ? { ...serialized.service, driver: null, vehicle: null }
+            : null,
         };
       }),
     });

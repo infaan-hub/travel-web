@@ -4,6 +4,7 @@ import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 import { transportBookingSerializer } from "@/lib/serializers/private-hire";
 import { broadcastRealtime } from "@/lib/realtime/connections";
+import { buildCompanyPublicToggleData } from "@/lib/driver-workflow";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -15,16 +16,31 @@ export async function PATCH(request: NextRequest, context: Context) {
     if (typeof body.is_public !== "boolean") throw new ApiError(400, "A public visibility choice is required.");
     const booking = await prisma.transportBooking.findFirst({
       where: { id, companyId: company.company.id },
-      select: { id: true, status: true },
+      select: {
+        id: true,
+        status: true,
+        service: { select: { driverId: true, vehicleId: true } },
+      },
     });
     if (!booking) throw new ApiError(404, "Company transport booking not found.");
-    if (body.is_public && booking.status !== "pending") {
-      throw new ApiError(409, "Only pending trips can be offered to public drivers.");
+    if (booking.status !== "pending") {
+      throw new ApiError(409, "Only pending trips can change public driver visibility.");
     }
-    await prisma.transportBooking.updateMany({
-      where: { id, companyId: company.company.id },
-      data: { isPublic: body.is_public },
+
+    const updateData = buildCompanyPublicToggleData({
+      isPublic: body.is_public,
+      serviceDriverId: booking.service?.driverId ?? null,
+      serviceVehicleId: booking.service?.vehicleId ?? null,
     });
+
+    const guarded = await prisma.transportBooking.updateMany({
+      where: { id, companyId: company.company.id, status: "pending" },
+      data: updateData,
+    });
+    if (guarded.count !== 1) {
+      throw new ApiError(409, "This booking was already updated. Please refresh.");
+    }
+
     const updated = await prisma.transportBooking.findFirst({
       where: { id, companyId: company.company.id },
       include: {
@@ -32,6 +48,7 @@ export async function PATCH(request: NextRequest, context: Context) {
         vehicle: true,
         driver: true,
         company: true,
+        tripRequest: true,
       },
     });
     if (!updated) throw new ApiError(404, "Company transport booking not found.");

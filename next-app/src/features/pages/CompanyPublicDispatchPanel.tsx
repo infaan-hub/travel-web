@@ -61,8 +61,8 @@ export default function CompanyPublicDispatchPanel() {
       );
       toast.success(
         isPublic
-          ? "Trip shared with approved public drivers."
-          : "Trip is limited to your assigned driver.",
+          ? "Trip is now public. Previous driver and vehicle were unassigned while waiting for a driver to confirm."
+          : "Trip is private again and restored to your company driver and vehicle.",
       );
     } catch (error: unknown) {
       const axiosErr = error as { response?: { data?: { message?: string } } };
@@ -201,6 +201,11 @@ export default function CompanyPublicDispatchPanel() {
                             minute: "2-digit",
                           })}`
                         : ""}
+                    </span>
+                  ) : booking.is_public && booking.status === "pending" ? (
+                    <span className={styles.publicDispatchDriver}>
+                      <Radio size={12} aria-hidden="true" />
+                      Unassigned · Waiting for a driver &amp; vehicle to confirm
                     </span>
                   ) : null}
                 </div>

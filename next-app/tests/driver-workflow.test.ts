@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Prisma } from "@prisma/client";
 import {
+  buildCompanyPublicToggleData,
   buildDriverBookingsWhere,
   buildDriverConfirmFilter,
   driverStageRoute,
@@ -295,5 +296,99 @@ describe("driver live trip workflow state machine", () => {
     expect(serialized.service?.driver?.name).toBe("Confirmed Public Driver");
     expect(serialized.service?.vehicle?.name).toBe("Toyota Alphard VIP");
     expect(serialized.service?.vehicle?.plate_number).toBe("Z 999 NEW");
+
+    // When made public and waiting in pending without an assigned driver/vehicle, both are removed cleanly
+    expect(
+      buildCompanyPublicToggleData({
+        isPublic: true,
+        serviceDriverId: oldDriver.id,
+        serviceVehicleId: oldVehicle.id,
+      }),
+    ).toEqual({
+      isPublic: true,
+      driverId: null,
+      vehicleId: null,
+      driverStage: "pending",
+    });
+
+    // Switching back to private while still pending restores the company's service driver & vehicle
+    expect(
+      buildCompanyPublicToggleData({
+        isPublic: false,
+        serviceDriverId: oldDriver.id,
+        serviceVehicleId: oldVehicle.id,
+      }),
+    ).toEqual({
+      isPublic: false,
+      driverId: oldDriver.id,
+      vehicleId: oldVehicle.id,
+      driverStage: "pending",
+    });
+
+    // Serialized public pending unassigned booking has null driver and null vehicle everywhere
+    const publicPendingSerialized = transportBookingSerializer({
+      id: 501,
+      reference: "TR-2026-50002",
+      userId: 7,
+      serviceId: 20,
+      companyId: 5,
+      vehicleId: null,
+      driverId: null,
+      tripRequestId: null,
+      fullName: "Amina Customer",
+      email: "amina@example.com",
+      phone: "+255712345678",
+      passengers: 3,
+      travelDate: now,
+      endDate: null,
+      pickupTime: "09:00",
+      totalPrice: new Prisma.Decimal("55.00"),
+      status: "pending",
+      isPublic: true,
+      notes: "",
+      origin: "Airport",
+      originLat: -6.222,
+      originLng: 39.2249,
+      destination: "Nungwi",
+      destLat: -5.7265,
+      destLng: 39.2987,
+      distanceKm: 62,
+      durationMins: 75,
+      driverStage: "pending",
+      confirmedAt: null,
+      startedAt: null,
+      arrivedAt: null,
+      pickedUpAt: null,
+      reachedDestAt: null,
+      completedAt: null,
+      driverLat: null,
+      driverLng: null,
+      driverLocationUpdatedAt: null,
+      driverNotes: "",
+      createdAt: now,
+      updatedAt: now,
+      driver: null,
+      vehicle: null,
+      service: {
+        id: 20,
+        companyId: 5,
+        vehicleId: oldVehicle.id,
+        driverId: oldDriver.id,
+        title: "Airport Transfer",
+        description: "",
+        price: new Prisma.Decimal("55.00"),
+        pricingType: "per_trip",
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+        driver: oldDriver,
+        vehicle: oldVehicle,
+      },
+    });
+
+    expect(publicPendingSerialized.driver).toBeNull();
+    expect(publicPendingSerialized.vehicle).toBeNull();
+    expect(publicPendingSerialized.service?.driver).toBeNull();
+    expect(publicPendingSerialized.service?.vehicle).toBeNull();
   });
 });

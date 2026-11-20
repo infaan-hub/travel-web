@@ -309,3 +309,35 @@ export function resolveConfirmedVehicleId(params: {
     vehicleId: params.existingVehicleId,
   };
 }
+
+/**
+ * Payload applied when a company switches a pending booking between public
+ * dispatch and private company assignment. Making a booking public clears its
+ * assigned driver and vehicle so it waits in pending until a confirming driver
+ * claims it with their own driver profile and vehicle.
+ */
+export function buildCompanyPublicToggleData(params: {
+  isPublic: boolean;
+  serviceDriverId: number | null;
+  serviceVehicleId: number | null;
+}): {
+  isPublic: boolean;
+  driverId: number | null;
+  vehicleId: number | null;
+  driverStage: "pending";
+} {
+  if (params.isPublic) {
+    return {
+      isPublic: true,
+      driverId: null,
+      vehicleId: null,
+      driverStage: "pending",
+    };
+  }
+  return {
+    isPublic: false,
+    driverId: params.serviceDriverId,
+    vehicleId: params.serviceVehicleId,
+    driverStage: "pending",
+  };
+}
