@@ -278,3 +278,34 @@ export function isUnclaimedPublicBookingOffer(
       booking.driverId !== viewingDriverId,
   );
 }
+
+/**
+ * Determines which vehicleId should be stored when a driver confirms a booking.
+ * When a new driver claims/confirms a public booking, their own/assigned vehicle
+ * replaces the previous driver's vehicle (or clears it if they have none yet)
+ * so customers and companies never see stale vehicle details.
+ */
+export function resolveConfirmedVehicleId(params: {
+  existingDriverId: number | null;
+  existingVehicleId: number | null;
+  confirmingDriverId: number;
+  confirmingDriverVehicleId: number | null;
+}): { shouldUpdateVehicle: boolean; vehicleId: number | null } {
+  const isNewDriver = params.existingDriverId !== params.confirmingDriverId;
+  if (isNewDriver) {
+    return {
+      shouldUpdateVehicle: true,
+      vehicleId: params.confirmingDriverVehicleId,
+    };
+  }
+  if (!params.existingVehicleId && params.confirmingDriverVehicleId) {
+    return {
+      shouldUpdateVehicle: true,
+      vehicleId: params.confirmingDriverVehicleId,
+    };
+  }
+  return {
+    shouldUpdateVehicle: false,
+    vehicleId: params.existingVehicleId,
+  };
+}

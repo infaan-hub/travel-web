@@ -11,6 +11,7 @@ import {
   buildDriverBookingsWhere,
   buildDriverConfirmFilter,
   isUnclaimedPublicBookingOffer,
+  resolveConfirmedVehicleId,
   validateDriverTransition,
   type DriverTripAction,
 } from "@/lib/driver-workflow";
@@ -67,6 +68,34 @@ function parseValidCoord(raw: unknown, min: number, max: number): number | null 
   return num;
 }
 
+async function resolveDriverVehicleId(driver: {
+  id: number;
+  isPublic: boolean;
+  companyId: number | null;
+}): Promise<number | null> {
+  if (driver.isPublic && !driver.companyId) {
+    const ownVehicle = await prisma.privateHireVehicle.findUnique({
+      where: { driverId: driver.id },
+      select: { id: true },
+    });
+    if (ownVehicle) return ownVehicle.id;
+  }
+
+  const activeService = await prisma.privateHireService.findFirst({
+    where: { driverId: driver.id, isActive: true },
+    select: { vehicleId: true },
+    orderBy: { updatedAt: "desc" },
+  });
+  if (activeService?.vehicleId) return activeService.vehicleId;
+
+  const anyService = await prisma.privateHireService.findFirst({
+    where: { driverId: driver.id },
+    select: { vehicleId: true },
+    orderBy: { updatedAt: "desc" },
+  });
+  return anyService?.vehicleId ?? null;
+}
+
 async function notifyTripParticipants(
   booking: NotifiableBooking,
   driverName: string,
@@ -101,7 +130,7 @@ async function notifyTripParticipants(
       customerTitle: "Your trip is confirmed",
       customerBody: `Your trip ${reference} — ${trip}${routeSummary} on ${date}${timeText} — has been confirmed by your driver ${driverName}${vehicle}.`,
       companyTitle: "Driver confirmed trip",
-      companyBody: `Driver ${driverName} verified and confirmed booking ${reference} (${booking.fullName || "Customer"}${routeSummary} on ${date}${timeText}).`,
+      companyBody: `Driver ${driverName}${vehicle} verified and confirmed booking ${reference} (${booking.fullName || "Customer"}${routeSummary} on ${date}${timeText}).`,
       emailCustomer: true,
       emailCompany: true,
     },
@@ -345,25 +374,20 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (action === "confirm") {
       updateData.driverId = driver.id;
       updateData.confirmedAt = now;
-      if (!existing.vehicleId) {
-        if (driver.isPublic && !driver.companyId) {
-          const ownVehicle = await prisma.privateHireVehicle.findUnique({
-            where: { driverId: driver.id },
-            select: { id: true },
-          });
-          if (ownVehicle) {
-            updateData.vehicleId = ownVehicle.id;
-          }
-        } else {
-          const primaryService = await prisma.privateHireService.findFirst({
-            where: { driverId: driver.id, isActive: true },
-            select: { vehicleId: true },
-            orderBy: { updatedAt: "desc" },
-          });
-          if (primaryService?.vehicleId) {
-            updateData.vehicleId = primaryService.vehicleId;
-          }
-        }
+
+      const confirmingDriverVehicleId = await resolveDriverVehicleId({
+        id: driver.id,
+        isPublic: driver.isPublic,
+        companyId: driver.companyId,
+      });
+      const vehicleDecision = resolveConfirmedVehicleId({
+        existingDriverId: existing.driverId,
+        existingVehicleId: existing.vehicleId,
+        confirmingDriverId: driver.id,
+        confirmingDriverVehicleId,
+      });
+      if (vehicleDecision.shouldUpdateVehicle) {
+        updateData.vehicleId = vehicleDecision.vehicleId;
       }
     } else if (action === "start") {
       updateData.startedAt = now;

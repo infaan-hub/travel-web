@@ -213,7 +213,7 @@ export default function DriverTripStagePage({ pageStage, driverName, companyName
     }
   };
 
-  const vehicle = booking?.service?.vehicle ?? booking?.vehicle ?? null;
+  const vehicle = booking?.vehicle ?? booking?.service?.vehicle ?? null;
   const customer = booking?.customer_account;
   const displayName = customer?.full_name || booking?.full_name || "Customer";
   const displayPhone = customer?.phone || booking?.phone || "";

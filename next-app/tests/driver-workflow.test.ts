@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Prisma } from "@prisma/client";
 import {
   buildDriverBookingsWhere,
   buildDriverConfirmFilter,
@@ -8,9 +9,11 @@ import {
   haversineMeters,
   isActiveExecutionStage,
   isUnclaimedPublicBookingOffer,
+  resolveConfirmedVehicleId,
   resolveDriverStage,
   validateDriverTransition,
 } from "@/lib/driver-workflow";
+import { transportBookingSerializer } from "@/lib/serializers/private-hire";
 
 describe("driver live trip workflow state machine", () => {
   it("resolves stages safely including legacy null driver_stage records", () => {
@@ -120,5 +123,177 @@ describe("driver live trip workflow state machine", () => {
     expect(
       isUnclaimedPublicBookingOffer({ isPublic: false, status: "pending", driverId: 42 }, 42),
     ).toBe(false);
+  });
+
+  it("replaces driver and vehicle with the confirming driver's vehicle when a new driver claims a public booking", () => {
+    // New driver (id 88, vehicle 301) confirms a public booking originally assigned to driver 10 / vehicle 105
+    expect(
+      resolveConfirmedVehicleId({
+        existingDriverId: 10,
+        existingVehicleId: 105,
+        confirmingDriverId: 88,
+        confirmingDriverVehicleId: 301,
+      }),
+    ).toEqual({ shouldUpdateVehicle: true, vehicleId: 301 });
+
+    // New driver with no registered vehicle yet clears old driver's stale vehicle instead of keeping it
+    expect(
+      resolveConfirmedVehicleId({
+        existingDriverId: 10,
+        existingVehicleId: 105,
+        confirmingDriverId: 88,
+        confirmingDriverVehicleId: null,
+      }),
+    ).toEqual({ shouldUpdateVehicle: true, vehicleId: null });
+
+    // Same driver confirming their own booking keeps their assigned vehicle
+    expect(
+      resolveConfirmedVehicleId({
+        existingDriverId: 10,
+        existingVehicleId: 105,
+        confirmingDriverId: 10,
+        confirmingDriverVehicleId: 105,
+      }),
+    ).toEqual({ shouldUpdateVehicle: false, vehicleId: 105 });
+
+    // Same driver with no vehicle on booking yet attaches their vehicle
+    expect(
+      resolveConfirmedVehicleId({
+        existingDriverId: 10,
+        existingVehicleId: null,
+        confirmingDriverId: 10,
+        confirmingDriverVehicleId: 105,
+      }),
+    ).toEqual({ shouldUpdateVehicle: true, vehicleId: 105 });
+  });
+
+  it("serializes the confirmed driver and vehicle instead of the original service's stale driver and vehicle", () => {
+    const now = new Date("2026-11-21T08:00:00.000Z");
+    const oldDriver = {
+      id: 10,
+      companyId: 5,
+      userId: 101,
+      isPublic: false,
+      name: "Original Company Driver",
+      phone: "+255700000001",
+      email: "old@company.tz",
+      image: null,
+      licenseNumber: "OLD-LIC",
+      idType: "ZAN_ID" as const,
+      idNumber: "ID-1",
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const oldVehicle = {
+      id: 105,
+      companyId: 5,
+      driverId: null,
+      name: "Old Sedan",
+      plateNumber: "Z 100 OLD",
+      category: "Sedan",
+      capacity: 4,
+      luggageCapacity: 2,
+      description: "",
+      includes: [],
+      excludes: [],
+      frontImage: "vehicles/old.jpg",
+      sideImage: null,
+      backImage: null,
+      isAvailable: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const newDriver = {
+      ...oldDriver,
+      id: 88,
+      companyId: null,
+      isPublic: true,
+      name: "Confirmed Public Driver",
+      phone: "+255777888999",
+      email: "newdriver@zanzibar.tz",
+      licenseNumber: "NEW-LIC",
+    };
+    const newVehicle = {
+      ...oldVehicle,
+      id: 301,
+      companyId: null,
+      driverId: 88,
+      name: "Toyota Alphard VIP",
+      plateNumber: "Z 999 NEW",
+      category: "Minivan",
+      capacity: 7,
+      luggageCapacity: 5,
+      frontImage: "vehicles/new.jpg",
+    };
+
+    const serialized = transportBookingSerializer({
+      id: 500,
+      reference: "TR-2026-50001",
+      userId: 7,
+      serviceId: 20,
+      companyId: 5,
+      vehicleId: newVehicle.id,
+      driverId: newDriver.id,
+      tripRequestId: null,
+      fullName: "Amina Customer",
+      email: "amina@example.com",
+      phone: "+255712345678",
+      passengers: 3,
+      travelDate: now,
+      endDate: null,
+      pickupTime: "09:00",
+      totalPrice: new Prisma.Decimal("55.00"),
+      status: "confirmed",
+      isPublic: true,
+      notes: "",
+      origin: "Airport",
+      originLat: -6.222,
+      originLng: 39.2249,
+      destination: "Nungwi",
+      destLat: -5.7265,
+      destLng: 39.2987,
+      distanceKm: 62,
+      durationMins: 75,
+      driverStage: "confirmed",
+      confirmedAt: now,
+      startedAt: null,
+      arrivedAt: null,
+      pickedUpAt: null,
+      reachedDestAt: null,
+      completedAt: null,
+      driverLat: null,
+      driverLng: null,
+      driverLocationUpdatedAt: null,
+      driverNotes: "",
+      createdAt: now,
+      updatedAt: now,
+      driver: newDriver,
+      vehicle: newVehicle,
+      service: {
+        id: 20,
+        companyId: 5,
+        vehicleId: oldVehicle.id,
+        driverId: oldDriver.id,
+        title: "Airport Transfer",
+        description: "",
+        price: new Prisma.Decimal("55.00"),
+        pricingType: "per_trip",
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+        driver: oldDriver,
+        vehicle: oldVehicle,
+      },
+    });
+
+    expect(serialized.driver?.name).toBe("Confirmed Public Driver");
+    expect(serialized.driver?.phone).toBe("+255777888999");
+    expect(serialized.vehicle?.name).toBe("Toyota Alphard VIP");
+    expect(serialized.vehicle?.plate_number).toBe("Z 999 NEW");
+    // Embedded service snapshot also reflects the confirmed driver & vehicle (not stale original ones)
+    expect(serialized.service?.driver?.name).toBe("Confirmed Public Driver");
+    expect(serialized.service?.vehicle?.name).toBe("Toyota Alphard VIP");
+    expect(serialized.service?.vehicle?.plate_number).toBe("Z 999 NEW");
   });
 });

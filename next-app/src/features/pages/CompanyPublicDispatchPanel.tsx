@@ -21,7 +21,8 @@ type DispatchBooking = {
   origin?: string | null;
   destination?: string | null;
   is_public: boolean;
-  service: { title: string } | null;
+  service: { title: string; vehicle?: { name: string; plate_number: string } | null } | null;
+  vehicle?: { id: number; name: string; plate_number: string } | null;
   driver?: { id: number; name: string; phone?: string } | null;
 };
 
@@ -190,6 +191,10 @@ export default function CompanyPublicDispatchPanel() {
                     <span className={styles.publicDispatchDriver}>
                       <UserCheck size={12} aria-hidden="true" />
                       Driver: {booking.driver.name}
+                      {booking.driver.phone ? ` (${booking.driver.phone})` : ""}
+                      {(booking.vehicle ?? booking.service?.vehicle)
+                        ? ` · ${(booking.vehicle ?? booking.service?.vehicle)?.name} (${(booking.vehicle ?? booking.service?.vehicle)?.plate_number})`
+                        : ""}
                       {booking.confirmed_at
                         ? ` · Verified ${new Date(booking.confirmed_at).toLocaleTimeString([], {
                             hour: "2-digit",

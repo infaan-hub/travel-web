@@ -365,7 +365,7 @@ export default function DriverDashboardPage({
                   const stage = resolveDriverStage(booking);
                   const isPending = stage === "pending";
                   const isBusy = busyId === booking.id;
-                  const vehicle = booking.service?.vehicle ?? booking.vehicle;
+                  const vehicle = booking.vehicle ?? booking.service?.vehicle;
 
                   return (
                     <article className={styles.bookingCard} key={booking.id}>

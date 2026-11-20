@@ -138,6 +138,30 @@ export function transportBookingSerializer(
     [booking.user?.firstName, booking.user?.lastName].filter(Boolean).join(" ").trim() ||
     booking.fullName;
 
+  const serializedDriver = booking.driver ? privateHireDriverSerializer(booking.driver) : null;
+  const serializedVehicle = booking.vehicle ? privateHireVehicleSerializer(booking.vehicle) : null;
+  const isReassignedDriver = Boolean(
+    booking.driverId && booking.service && booking.service.driverId !== booking.driverId,
+  );
+  const rawSerializedService = booking.service
+    ? privateHireServiceSerializer(booking.service)
+    : null;
+  const serializedService = rawSerializedService
+    ? isReassignedDriver
+      ? {
+          ...rawSerializedService,
+          driver_id: booking.driverId ?? rawSerializedService.driver_id,
+          vehicle_id: booking.vehicleId ?? rawSerializedService.vehicle_id,
+          driver: serializedDriver,
+          vehicle: serializedVehicle,
+        }
+      : {
+          ...rawSerializedService,
+          driver: serializedDriver ?? rawSerializedService.driver,
+          vehicle: serializedVehicle ?? rawSerializedService.vehicle,
+        }
+    : null;
+
   return {
     id: booking.id,
     reference: booking.reference,
@@ -222,9 +246,9 @@ export function transportBookingSerializer(
       : null,
     created_at: booking.createdAt.toISOString(),
     updated_at: booking.updatedAt.toISOString(),
-    service: booking.service ? privateHireServiceSerializer(booking.service) : null,
-    vehicle: booking.vehicle ? privateHireVehicleSerializer(booking.vehicle) : null,
-    driver: booking.driver ? privateHireDriverSerializer(booking.driver) : null,
+    service: serializedService,
+    vehicle: serializedVehicle,
+    driver: serializedDriver,
     company: booking.company ? {
       id: booking.company.id,
       name: booking.company.name,

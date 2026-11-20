@@ -382,7 +382,7 @@ export default function DriverBookingsPage({
                 stage === "pending" &&
                 Boolean(booking.is_public_offer ?? (booking.is_public && !booking.driver));
               const isLive = isActiveExecutionStage(stage);
-              const vehicle = booking.service?.vehicle ?? booking.vehicle;
+              const vehicle = booking.vehicle ?? booking.service?.vehicle;
               const phoneHref = formatPhoneHref(booking.phone);
               const stageHref = driverStageRoute(booking.id, stage);
               const confirmingThis = busyKey === `confirm-${booking.id}`;

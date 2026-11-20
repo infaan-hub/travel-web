@@ -555,8 +555,8 @@ export default function MyTransportPage() {
                   trip.duration_mins ?? booking.duration_mins,
                 );
                 const journey = [distance, duration].filter(Boolean).join(" · ");
-                const vehicle = booking.service?.vehicle ?? booking.vehicle;
-                const driver = booking.service?.driver ?? booking.driver;
+                const vehicle = booking.vehicle ?? booking.service?.vehicle;
+                const driver = booking.driver ?? booking.service?.driver;
                 const company = booking.service?.company ?? booking.company;
                 const tripId = booking.trip?.id ?? booking.trip_request_id;
                 const meta = STATUS_META[booking.status] ?? {
