@@ -239,3 +239,42 @@ export function formatDurationLabel(mins: number | null | undefined): string {
   const rem = rounded % 60;
   return rem === 0 ? `${hours} h` : `${hours} h ${rem} min`;
 }
+
+/**
+ * Every active driver (both public hire and company private hire drivers) can see:
+ * 1) bookings directly assigned to them, and
+ * 2) any pending booking that a company decided to share publicly.
+ */
+export function buildDriverBookingsWhere(driverId: number) {
+  return {
+    OR: [
+      { driverId },
+      { isPublic: true, status: "pending" as const },
+    ],
+  };
+}
+
+/**
+ * Filter used when a driver confirms a pending trip: either assigned directly
+ * to that driver or shared publicly by a company.
+ */
+export function buildDriverConfirmFilter(driverId: number) {
+  return {
+    OR: [{ driverId }, { isPublic: true }],
+  };
+}
+
+/**
+ * True when a driver is viewing a company-shared public pending booking that
+ * has not yet been assigned/claimed by them (customer contact stays masked until confirmed).
+ */
+export function isUnclaimedPublicBookingOffer(
+  booking: { isPublic: boolean; status: string; driverId: number | null },
+  viewingDriverId: number,
+): boolean {
+  return Boolean(
+    booking.isPublic &&
+      booking.status === "pending" &&
+      booking.driverId !== viewingDriverId,
+  );
+}

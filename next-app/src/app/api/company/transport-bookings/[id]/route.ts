@@ -3,6 +3,7 @@ import { ApiError, handleApiError, ok, parseId, readJson } from "@/lib/api/http"
 import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 import { transportBookingSerializer } from "@/lib/serializers/private-hire";
+import { broadcastRealtime } from "@/lib/realtime/connections";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -34,6 +35,12 @@ export async function PATCH(request: NextRequest, context: Context) {
       },
     });
     if (!updated) throw new ApiError(404, "Company transport booking not found.");
+    broadcastRealtime({
+      type: "transport_booking_updated",
+      booking_id: updated.id,
+      company_id: updated.companyId,
+      is_public: updated.isPublic,
+    });
     return ok(transportBookingSerializer(updated));
   } catch (error) {
     return handleApiError(error);

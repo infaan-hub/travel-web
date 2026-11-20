@@ -49,6 +49,7 @@ export type DriverBookingRecord = {
   driver_location_updated_at?: string | null;
   driver_notes?: string;
   is_public: boolean;
+  is_public_offer?: boolean;
   notes: string;
   origin: string | null;
   origin_lat: number | null;

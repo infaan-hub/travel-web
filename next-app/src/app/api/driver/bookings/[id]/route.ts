@@ -8,6 +8,9 @@ import { notifyCompanyAccount } from "@/lib/services/notifications";
 import { sendEmail } from "@/lib/email";
 import { broadcastRealtime } from "@/lib/realtime/connections";
 import {
+  buildDriverBookingsWhere,
+  buildDriverConfirmFilter,
+  isUnclaimedPublicBookingOffer,
   validateDriverTransition,
   type DriverTripAction,
 } from "@/lib/driver-workflow";
@@ -204,10 +207,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const booking = await prisma.transportBooking.findFirst({
       where: {
         id,
-        OR: [
-          { driverId: driver.id },
-          ...(driver.isPublic && !driver.companyId ? [{ isPublic: true, status: "pending" as const }] : []),
-        ],
+        ...buildDriverBookingsWhere(driver.id),
       },
       include: BOOKING_DETAIL_INCLUDE,
     });
@@ -215,16 +215,23 @@ export async function GET(request: NextRequest, context: RouteContext) {
     if (!booking) throw new ApiError(404, "Assigned trip not found.");
 
     const serialized = transportBookingSerializer(booking);
-    if (driver.isPublic && !driver.companyId && booking.driverId !== driver.id) {
+    const isPublicOffer = isUnclaimedPublicBookingOffer(booking, driver.id);
+    if (isPublicOffer) {
       return ok({
         ...serialized,
+        is_public_offer: true,
         full_name: "Customer",
         phone: "",
         email: "",
         customer_account: null,
+        driver: null,
+        service: serialized.service ? { ...serialized.service, driver: null } : null,
       });
     }
-    return ok(serialized);
+    return ok({
+      ...serialized,
+      is_public_offer: false,
+    });
   } catch (error) {
     return handleApiError(error);
   }
@@ -270,8 +277,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     const assignmentFilter =
-      action === "confirm" && driver.isPublic && !driver.companyId
-        ? { OR: [{ driverId: driver.id }, { isPublic: true }] }
+      action === "confirm"
+        ? buildDriverConfirmFilter(driver.id)
         : { driverId: driver.id };
 
     const existing = await prisma.transportBooking.findFirst({
@@ -338,13 +345,24 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (action === "confirm") {
       updateData.driverId = driver.id;
       updateData.confirmedAt = now;
-      if (!existing.vehicleId && driver.isPublic && !driver.companyId) {
-        const ownVehicle = await prisma.privateHireVehicle.findUnique({
-          where: { driverId: driver.id },
-          select: { id: true },
-        });
-        if (ownVehicle) {
-          updateData.vehicleId = ownVehicle.id;
+      if (!existing.vehicleId) {
+        if (driver.isPublic && !driver.companyId) {
+          const ownVehicle = await prisma.privateHireVehicle.findUnique({
+            where: { driverId: driver.id },
+            select: { id: true },
+          });
+          if (ownVehicle) {
+            updateData.vehicleId = ownVehicle.id;
+          }
+        } else {
+          const primaryService = await prisma.privateHireService.findFirst({
+            where: { driverId: driver.id, isActive: true },
+            select: { vehicleId: true },
+            orderBy: { updatedAt: "desc" },
+          });
+          if (primaryService?.vehicleId) {
+            updateData.vehicleId = primaryService.vehicleId;
+          }
         }
       }
     } else if (action === "start") {
@@ -382,7 +400,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (!updated) throw new ApiError(404, "Assigned trip not found.");
 
     await notifyTripParticipants(updated, driver.name, action);
-    return ok(transportBookingSerializer(updated));
+    return ok({
+      ...transportBookingSerializer(updated),
+      is_public_offer: false,
+    });
   } catch (error) {
     return handleApiError(error);
   }

@@ -385,6 +385,9 @@ export default function DriverDashboardPage({
                         </div>
 
                         <div className={styles.badgeGroup}>
+                          {booking.is_public && isPending ? (
+                            <span className={styles.companyTag}>Public booking</span>
+                          ) : null}
                           <span
                             className={`${styles.statusBadge} ${
                               isPending ? styles.statusPending : styles.statusConfirmed

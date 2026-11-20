@@ -21,6 +21,7 @@ import {
   Navigation,
   Phone,
   Play,
+  Radio,
   RefreshCw,
   Search,
   Truck,
@@ -46,7 +47,7 @@ import {
 import { useToast } from "@/components/ToastProvider";
 import styles from "@/features/pages/driver-workspace.module.css";
 
-type FilterMode = "all" | "pending" | "confirmed" | "active" | "completed";
+type FilterMode = "all" | "pending" | "public" | "confirmed" | "active" | "completed";
 
 type Props = {
   driverName: string;
@@ -110,17 +111,20 @@ export default function DriverBookingsPage({
 
   const counts = useMemo(() => {
     let pending = 0;
+    let publicPending = 0;
     let confirmed = 0;
     let active = 0;
     let completed = 0;
     for (const b of bookings) {
       const st = resolveDriverStage(b);
-      if (st === "pending") pending += 1;
-      else if (st === "confirmed") confirmed += 1;
+      if (st === "pending") {
+        pending += 1;
+        if (b.is_public) publicPending += 1;
+      } else if (st === "confirmed") confirmed += 1;
       else if (isActiveExecutionStage(st)) active += 1;
       else if (st === "completed") completed += 1;
     }
-    return { all: bookings.length, pending, confirmed, active, completed };
+    return { all: bookings.length, pending, publicPending, confirmed, active, completed };
   }, [bookings]);
 
   const filteredBookings = useMemo(() => {
@@ -129,6 +133,7 @@ export default function DriverBookingsPage({
       .filter((b) => {
         const st = resolveDriverStage(b);
         if (filter === "pending" && st !== "pending") return false;
+        if (filter === "public" && !(st === "pending" && b.is_public)) return false;
         if (filter === "confirmed" && st !== "confirmed") return false;
         if (filter === "active" && !isActiveExecutionStage(st)) return false;
         if (filter === "completed" && st !== "completed") return false;
@@ -278,10 +283,11 @@ export default function DriverBookingsPage({
                 Driver bookings &amp; verification
               </span>
             </div>
-            <h1 className={styles.heroTitle}>Assigned &amp; Pending Bookings</h1>
+            <h1 className={styles.heroTitle}>Assigned &amp; Public Pending Bookings</h1>
             <p className={styles.heroLead}>
-              Hi {driverName} — review pending trips, confirm to notify the customer and{" "}
-              {companyName}, then tap <strong>Start trip</strong> to open live pickup navigation.
+              Hi {driverName} — review pending bookings assigned to you or shared publicly by
+              companies, confirm to notify the customer and company, then tap{" "}
+              <strong>Start trip</strong> to open live pickup navigation.
             </p>
           </div>
           <div className={styles.heroActions}>
@@ -301,6 +307,7 @@ export default function DriverBookingsPage({
               [
                 { id: "all", label: `All (${counts.all})` },
                 { id: "pending", label: `Pending (${counts.pending})` },
+                { id: "public", label: `Public (${counts.publicPending})` },
                 { id: "confirmed", label: `Confirmed (${counts.confirmed})` },
                 { id: "active", label: `In progress (${counts.active})` },
                 { id: "completed", label: `Completed (${counts.completed})` },
@@ -349,7 +356,7 @@ export default function DriverBookingsPage({
             <p>
               {filter !== "all" || search.trim()
                 ? "Try switching back to All bookings or clearing your search query."
-                : `When ${companyName} assigns a booking to you, it will appear here ready for confirmation.`}
+                : `When ${companyName} assigns a booking to you or a company shares a pending booking publicly, it will appear here ready for confirmation.`}
             </p>
             {filter !== "all" || search.trim() ? (
               <div className={styles.stateActions}>
@@ -370,8 +377,10 @@ export default function DriverBookingsPage({
           <section className={styles.bookingList} aria-label="Booking trips">
             {filteredBookings.map((booking) => {
               const stage = resolveDriverStage(booking);
-              const isPublicOffer =
-                isPublicDriver && booking.is_public && stage === "pending" && !booking.driver;
+              const isPublicPending = stage === "pending" && booking.is_public;
+              const isUnclaimedPublicOffer =
+                stage === "pending" &&
+                Boolean(booking.is_public_offer ?? (booking.is_public && !booking.driver));
               const isLive = isActiveExecutionStage(stage);
               const vehicle = booking.service?.vehicle ?? booking.vehicle;
               const phoneHref = formatPhoneHref(booking.phone);
@@ -403,6 +412,12 @@ export default function DriverBookingsPage({
                           {booking.company.name}
                         </span>
                       ) : null}
+                      {isPublicPending ? (
+                        <span className={styles.companyTag}>
+                          <Radio size={12} aria-hidden="true" />
+                          Public booking
+                        </span>
+                      ) : null}
                       <span
                         className={`${styles.statusBadge} ${
                           stage === "pending"
@@ -414,7 +429,7 @@ export default function DriverBookingsPage({
                                 : styles.statusCompleted
                         }`}
                       >
-                        {isPublicOffer ? "Public offer" : DRIVER_STAGE_LABELS[stage]}
+                        {DRIVER_STAGE_LABELS[stage]}
                       </span>
                     </div>
                   </div>
@@ -501,14 +516,14 @@ export default function DriverBookingsPage({
                     <div className={styles.metaItem}>
                       <Users size={15} aria-hidden="true" />
                       <div>
-                        <span>{isPublicOffer ? "Customer (after confirm)" : "Customer"}</span>
+                        <span>{isUnclaimedPublicOffer ? "Customer (after confirm)" : "Customer"}</span>
                         <strong>{booking.full_name || "Customer"}</strong>
                       </div>
                     </div>
                   </div>
 
                   {/* Direct contact pills once assigned */}
-                  {!isPublicOffer && (phoneHref || booking.email) ? (
+                  {!isUnclaimedPublicOffer && (phoneHref || booking.email) ? (
                     <div className={styles.contactActions}>
                       {phoneHref ? (
                         <a href={phoneHref} className={styles.contactPillLink}>

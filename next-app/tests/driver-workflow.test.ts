@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildDriverBookingsWhere,
+  buildDriverConfirmFilter,
   driverStageRoute,
   formatDistanceLabel,
   formatDurationLabel,
   haversineMeters,
   isActiveExecutionStage,
+  isUnclaimedPublicBookingOffer,
   resolveDriverStage,
   validateDriverTransition,
 } from "@/lib/driver-workflow";
@@ -88,5 +91,34 @@ describe("driver live trip workflow state machine", () => {
     expect(formatDistanceLabel(58.2)).toBe("58 km");
     expect(formatDurationLabel(14)).toBe("14 min");
     expect(formatDurationLabel(75)).toBe("1 h 15 min");
+  });
+
+  it("exposes company-shared public pending bookings to any active driver and masks unclaimed PII", () => {
+    expect(buildDriverBookingsWhere(42)).toEqual({
+      OR: [{ driverId: 42 }, { isPublic: true, status: "pending" }],
+    });
+
+    expect(buildDriverConfirmFilter(42)).toEqual({
+      OR: [{ driverId: 42 }, { isPublic: true }],
+    });
+
+    // Public pending booking originally unassigned or assigned to another driver -> unclaimed public offer
+    expect(
+      isUnclaimedPublicBookingOffer({ isPublic: true, status: "pending", driverId: null }, 42),
+    ).toBe(true);
+    expect(
+      isUnclaimedPublicBookingOffer({ isPublic: true, status: "pending", driverId: 99 }, 42),
+    ).toBe(true);
+
+    // Same driver already assigned OR booking already confirmed -> full details visible
+    expect(
+      isUnclaimedPublicBookingOffer({ isPublic: true, status: "pending", driverId: 42 }, 42),
+    ).toBe(false);
+    expect(
+      isUnclaimedPublicBookingOffer({ isPublic: true, status: "confirmed", driverId: 42 }, 42),
+    ).toBe(false);
+    expect(
+      isUnclaimedPublicBookingOffer({ isPublic: false, status: "pending", driverId: 42 }, 42),
+    ).toBe(false);
   });
 });
