@@ -459,36 +459,80 @@
   background: #f1f5f9;
 }
 
-/* Floating top-left scope controls */
-.mapTop {
+/* Unified top map overlay bar */
+.mapOverlayBar {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 650;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 12px 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 34, 68, 0.22) 0%,
+    rgba(8, 34, 68, 0.06) 62%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.mapTop,
+.mapStyleBar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 3px;
   padding: 4px;
   background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(18, 34, 58, 0.12);
+  border: 1px solid rgba(18, 34, 58, 0.13);
   border-radius: 999px;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.15);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+}
+
+.mapLivePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px 0 11px;
+  margin-right: 2px;
+  color: #0b5f63;
+  background: #e6f5f4;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.mapLiveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #15803d;
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.22);
 }
 
 :global(#zanzibar-attractions) .mapAction {
   display: inline-flex !important;
   align-items: center;
   gap: 5px;
-  min-height: 36px !important;
-  padding: 0 12px !important;
+  min-height: 34px !important;
+  padding: 0 11px !important;
   color: #1e293b !important;
   background: transparent !important;
   border: 0 !important;
   border-radius: 999px !important;
   box-shadow: none !important;
-  font-size: 0.72rem !important;
+  font-size: 0.71rem !important;
   font-weight: 800 !important;
   white-space: nowrap;
   cursor: pointer;
@@ -509,24 +553,6 @@
 :global(#zanzibar-attractions) .mapAction:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-/* Floating top-right basemap switcher (sits neatly left of Leaflet zoom controls) */
-.mapStyleBar {
-  position: absolute;
-  top: 12px;
-  right: 54px;
-  z-index: 650;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 4px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(18, 34, 58, 0.12);
-  border-radius: 999px;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
 }
 
 :global(#zanzibar-attractions) .styleBtn {
@@ -1410,10 +1436,13 @@
     width: 100%;
   }
 
-  .mapStyleBar {
-    top: 58px;
-    left: 12px;
-    right: auto;
+  .mapOverlayBar {
+    padding: 10px 10px 14px;
+    gap: 6px;
+  }
+
+  .mapLivePill {
+    display: none;
   }
 }
 

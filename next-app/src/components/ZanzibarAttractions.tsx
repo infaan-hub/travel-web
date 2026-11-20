@@ -51,7 +51,7 @@ import {
 import styles from "@/components/zanzibar-attractions.module.css";
 
 type PlaceGroupId = Exclude<TripPlaceGroupId, "all">;
-type BasemapId = "voyager" | "satellite" | "streets";
+type BasemapId = "atlas" | "satellite" | "streets";
 type IslandScope = "unguja" | "archipelago";
 
 type IconSvgObject = readonly (readonly [
@@ -77,18 +77,18 @@ const BASEMAPS: Record<
   BasemapId,
   { label: string; url: string; attribution: string; maxZoom: number }
 > = {
-  voyager: {
+  atlas: {
     label: "Map",
-    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',
-    maxZoom: 19,
+      'Tiles &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a> — World Topographic Map',
+    maxZoom: 18,
   },
   satellite: {
     label: "Satellite",
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     attribution:
-      'Imagery &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>',
+      'Imagery &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a> — World Imagery',
     maxZoom: 18,
   },
   streets: {
@@ -381,7 +381,7 @@ export default function ZanzibarAttractions({
   const [ready, setReady] = useState(false);
   const [mapError, setMapError] = useState(false);
   const [detail, setDetail] = useState(false);
-  const [basemap, setBasemap] = useState<BasemapId>("voyager");
+  const [basemap, setBasemap] = useState<BasemapId>("atlas");
   const [islandScope, setIslandScope] = useState<IslandScope>("unguja");
   const [showRoads, setShowRoads] = useState(true);
   const [showLegend, setShowLegend] = useState(false);
@@ -588,12 +588,12 @@ export default function ZanzibarAttractions({
           zoomControl: false,
         });
 
-        leaflet.control.zoom({ position: "topright" }).addTo(map);
         leaflet
           .control.scale({ position: "bottomright", imperial: false })
           .addTo(map);
+        leaflet.control.zoom({ position: "bottomright" }).addTo(map);
 
-        const initialBase = BASEMAPS.voyager;
+        const initialBase = BASEMAPS.atlas;
         tileLayerRef.current = leaflet
           .tileLayer(initialBase.url, {
             maxZoom: initialBase.maxZoom,
@@ -1160,84 +1160,89 @@ export default function ZanzibarAttractions({
             aria-label="Interactive map of Unguja and Zanzibar places"
           />
 
-          {/* Top-left scope controls */}
-          <div className={styles.mapTop}>
-            <button
-              type="button"
-              className={`${styles.mapAction} ${
-                islandScope === "unguja" && !activeQuickArea
-                  ? styles.mapActionActive
-                  : ""
-              }`}
-              onClick={() => {
-                setSelectedId(null);
-                mapRef.current?.closePopup();
-                fitUnguja(true);
-              }}
-              disabled={!ready}
-            >
-              <MapPin size={13} aria-hidden="true" />
-              Unguja
-            </button>
-            <button
-              type="button"
-              className={`${styles.mapAction} ${
-                islandScope === "archipelago" ? styles.mapActionActive : ""
-              }`}
-              onClick={() => {
-                setSelectedId(null);
-                mapRef.current?.closePopup();
-                fitArchipelago();
-              }}
-              disabled={!ready}
-            >
-              <Locate size={13} aria-hidden="true" />
-              Unguja &amp; Pemba
-            </button>
-            {filtersActive ? (
+          {/* Unified top map overlay bar */}
+          <div className={styles.mapOverlayBar}>
+            <div className={styles.mapTop} role="group" aria-label="Map region view">
+              <span className={styles.mapLivePill}>
+                <i className={styles.mapLiveDot} aria-hidden="true" />
+                {filteredPlaces.length.toLocaleString("en-US")} pins
+              </span>
               <button
                 type="button"
-                className={styles.mapAction}
+                className={`${styles.mapAction} ${
+                  islandScope === "unguja" && !activeQuickArea
+                    ? styles.mapActionActive
+                    : ""
+                }`}
                 onClick={() => {
                   setSelectedId(null);
                   mapRef.current?.closePopup();
-                  fitFilteredPlaces(true);
+                  fitUnguja(true);
                 }}
                 disabled={!ready}
               >
-                Fit results
+                <MapPin size={13} aria-hidden="true" />
+                Unguja
               </button>
-            ) : null}
-          </div>
-
-          {/* Top-right basemap + road toggle */}
-          <div className={styles.mapStyleBar} role="group" aria-label="Map style">
-            {(Object.keys(BASEMAPS) as BasemapId[]).map((id) => (
               <button
-                key={id}
                 type="button"
-                className={`${styles.styleBtn} ${
-                  basemap === id ? styles.styleBtnActive : ""
+                className={`${styles.mapAction} ${
+                  islandScope === "archipelago" ? styles.mapActionActive : ""
                 }`}
-                aria-pressed={basemap === id}
-                onClick={() => setBasemap(id)}
+                onClick={() => {
+                  setSelectedId(null);
+                  mapRef.current?.closePopup();
+                  fitArchipelago();
+                }}
                 disabled={!ready}
               >
-                {BASEMAPS[id].label}
+                <Locate size={13} aria-hidden="true" />
+                Unguja &amp; Pemba
               </button>
-            ))}
-            <button
-              type="button"
-              className={`${styles.styleBtn} ${
-                showRoads ? styles.styleBtnActive : ""
-              }`}
-              aria-pressed={showRoads}
-              onClick={() => setShowRoads((prev) => !prev)}
-              disabled={!ready}
-              title="Toggle Zanzibar road network overlay"
-            >
-              Roads
-            </button>
+              {filtersActive ? (
+                <button
+                  type="button"
+                  className={styles.mapAction}
+                  onClick={() => {
+                    setSelectedId(null);
+                    mapRef.current?.closePopup();
+                    fitFilteredPlaces(true);
+                  }}
+                  disabled={!ready}
+                >
+                  Fit results
+                </button>
+              ) : null}
+            </div>
+
+            <div className={styles.mapStyleBar} role="group" aria-label="Map style">
+              {(Object.keys(BASEMAPS) as BasemapId[]).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`${styles.styleBtn} ${
+                    basemap === id ? styles.styleBtnActive : ""
+                  }`}
+                  aria-pressed={basemap === id}
+                  onClick={() => setBasemap(id)}
+                  disabled={!ready}
+                >
+                  {BASEMAPS[id].label}
+                </button>
+              ))}
+              <button
+                type="button"
+                className={`${styles.styleBtn} ${
+                  showRoads ? styles.styleBtnActive : ""
+                }`}
+                aria-pressed={showRoads}
+                onClick={() => setShowRoads((prev) => !prev)}
+                disabled={!ready}
+                title="Toggle Zanzibar road network overlay"
+              >
+                Roads
+              </button>
+            </div>
           </div>
 
           {!ready && !mapError ? (
