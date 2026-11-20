@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
         vehicle: true,
         driver: true,
         company: true,
+        tripRequest: true,
       },
       orderBy: [{ travelDate: "desc" }, { createdAt: "desc" }],
       take: 100,

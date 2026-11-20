@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, context: Context) {
     const body = await request.json().catch(() => null) as { action?: unknown } | null;
     if (body?.action !== "accept") throw new ApiError(400, "Choose accept to claim this trip request.");
     const result = await prisma.transportTripRequest.updateMany({
-      where: { id, driverId: null, status: "requested" },
+      where: { id, driverId: null, status: "requested", bookings: { none: {} } },
       data: { driverId: driver.id, status: "accepted" },
     });
     if (result.count !== 1) throw new ApiError(409, "This trip request has already been claimed or is no longer available.");

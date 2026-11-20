@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { publicPrivateHireAPI, transportBookingsAPI } from "@/lib/api/client";
-import { useToast } from "@/components/ToastProvider";
+import { publicPrivateHireAPI } from "@/lib/api/client";
 import { PageHero } from "@/components/PageHero";
 import {
   Car,
@@ -13,8 +12,6 @@ import {
   Briefcase,
   Users,
   Eye,
-  X,
-  Loader,
 } from "lucide-react";
 import styles from "@/features/pages/company-public.module.css";
 import cardStyles from "@/features/pages/company-private-service.module.css";
@@ -27,30 +24,13 @@ import {
 const PAGE_SIZE = 12;
 
 export default function TransportServicesPage() {
-  const toast = useToast();
   const [services, setServices] = useState<PrivateHireService[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  // Booking states
-  const [bookingOpen, setBookingOpen] = useState(false);
-  const [bookingService, setBookingService] = useState<PrivateHireService | null>(null);
-  const [bookingForm, setBookingForm] = useState({
-    full_name: "",
-    email: "",
-    phone: "",
-    passengers: "1",
-    travel_date: "",
-    end_date: "",
-    pickup_time: "",
-    notes: "",
-  });
-  const [bookingSubmitting, setBookingSubmitting] = useState(false);
-
   const load = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await publicPrivateHireAPI.getAll({
         search: search.trim() || undefined,
@@ -100,46 +80,14 @@ export default function TransportServicesPage() {
   }, [search, page]);
 
   useEffect(() => {
+    // Fetching the directory whenever the search or page changes is the
+    // external synchronization this effect exists for.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasFilters = Boolean(search.trim());
-
-  const openBooking = (svc: PrivateHireService) => {
-    setBookingService(svc);
-    setBookingForm({
-        full_name: "",
-      email: "",
-      phone: "",
-      passengers: String(svc.vehicle?.capacity || 1),
-      travel_date: "",
-      end_date: "",
-      pickup_time: "",
-      notes: "",
-    });
-    setBookingOpen(true);
-  };
-
-  const handleBookingSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!bookingService) return;
-    try {
-      setBookingSubmitting(true);
-      await transportBookingsAPI.create({
-        service_id: bookingService.id,
-        ...bookingForm,
-      });
-      toast.success("Booking request submitted! The transport company will confirm shortly.");
-      setBookingOpen(false);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to submit booking";
-      toast.error(msg);
-    } finally {
-      setBookingSubmitting(false);
-    }
-  };
 
   return (
     <div className={`page ${styles.page} ${styles.listingRoot}`}>
@@ -155,6 +103,7 @@ export default function TransportServicesPage() {
           <input
             value={search}
             onChange={(e) => {
+              setLoading(true);
               setPage(1);
               setSearch(e.target.value);
             }}
@@ -211,6 +160,7 @@ export default function TransportServicesPage() {
                 className="btn btn-secondary"
                 type="button"
                 onClick={() => {
+                  setLoading(true);
                   setSearch("");
                   setPage(1);
                 }}
@@ -329,13 +279,13 @@ export default function TransportServicesPage() {
                       </Link>
 
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
+                        <Link
+                          href={`/booking/${svc.id}/`}
                           className={cardStyles.primaryBtn}
-                          onClick={() => openBooking(svc)}
+                          style={{ textDecoration: "none" }}
                         >
-                          Book now
-                        </button>
+                          Book this trip
+                        </Link>
                         {svc.company?.contact_phone && (
                           <a
                             href={`https://wa.me/${svc.company.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
@@ -362,7 +312,10 @@ export default function TransportServicesPage() {
                 <button
                   type="button"
                   disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => {
+                    setLoading(true);
+                    setPage((p) => Math.max(1, p - 1));
+                  }}
                 >
                   Previous
                 </button>
@@ -372,7 +325,10 @@ export default function TransportServicesPage() {
                 <button
                   type="button"
                   disabled={page >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => {
+                    setLoading(true);
+                    setPage((p) => Math.min(totalPages, p + 1));
+                  }}
                 >
                   Next
                 </button>
@@ -381,140 +337,6 @@ export default function TransportServicesPage() {
           </>
         )}
       </div>
-
-
-      {/* ── Booking Form Modal ── */}
-      {bookingOpen && bookingService && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 60,
-            background: "rgba(8,34,58,0.72)",
-            backdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-          }}
-          onClick={() => setBookingOpen(false)}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "20px",
-              width: "min(100%,560px)",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              boxShadow: "0 24px 64px rgba(8,66,140,0.22)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Booking header */}
-            <div
-              style={{
-                background: "linear-gradient(145deg,#08428c,#063a78)",
-                borderRadius: "20px 20px 0 0",
-                padding: "18px 22px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                color: "#fff",
-                gap: "12px",
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: "1.08rem", fontWeight: 700 }}>
-                Book {bookingService.title}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setBookingOpen(false)}
-                style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <form onSubmit={handleBookingSubmit}>
-              <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: "14px" }}>
-                {/* Service summary */}
-                <div style={{ padding: "12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.82rem" }}>
-                  <div>
-                    <strong style={{ display: "block", color: "#0f172a" }}>{bookingService.vehicle?.name ?? bookingService.title}</strong>
-                    <span style={{ color: "#64748b" }}>
-                      Plate: {bookingService.vehicle?.plate_number} &bull; Driver: {bookingService.driver?.name}
-                    </span>
-                  </div>
-                  <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#08428c" }}>
-                    ${bookingService.price} / {PRICING_LABELS[bookingService.pricing_type] ?? bookingService.pricing_type}
-                  </span>
-                </div>
-
-                {/* Form grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  {[
-                    { label: "Your Full Name *", type: "text", key: "full_name", placeholder: "e.g. John Smith", required: true },
-                    { label: "Email Address *", type: "email", key: "email", placeholder: "john@example.com", required: true },
-                    { label: "Phone (WhatsApp) *", type: "tel", key: "phone", placeholder: "+255 777 000 111", required: true },
-                    { label: "Passengers", type: "number", key: "passengers", placeholder: "1", required: true },
-                    { label: "Travel / Pickup Date *", type: "date", key: "travel_date", placeholder: "", required: true },
-                    { label: "Pickup Time", type: "time", key: "pickup_time", placeholder: "", required: false },
-                  ].map(({ label, type, key, placeholder, required }) => (
-                    <div key={key} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <label style={{ fontSize: "0.76rem", fontWeight: 700, color: "#334155" }}>{label}</label>
-                      <input
-                        required={required}
-                        type={type}
-                        placeholder={placeholder}
-                        value={bookingForm[key as keyof typeof bookingForm]}
-                        onChange={(e) => setBookingForm({ ...bookingForm, [key]: e.target.value })}
-                        style={{ minHeight: "40px", padding: "0 10px", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "0.84rem", color: "#0f172a", background: "#fafafa", outline: "none" }}
-                        {...(type === "number" ? { min: 1, max: bookingService.vehicle?.capacity ?? 10 } : {})}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                {/* Notes */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <label style={{ fontSize: "0.76rem", fontWeight: 700, color: "#334155" }}>Pickup &amp; Drop-off / Flight Notes</label>
-                  <textarea
-                    rows={3}
-                    placeholder="e.g. Flight QR 1487 arriving ZNZ at 14:20. Drop-off at Kendwa Rocks Resort."
-                    value={bookingForm.notes}
-                    onChange={(e) => setBookingForm({ ...bookingForm, notes: e.target.value })}
-                    style={{ padding: "10px 12px", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "0.84rem", color: "#0f172a", background: "#fafafa", resize: "vertical", outline: "none" }}
-                  />
-                </div>
-              </div>
-
-              {/* Booking footer */}
-              <div style={{ padding: "14px 22px 20px", display: "flex", gap: "10px", justifyContent: "flex-end", borderTop: "1px solid #f1f5f9" }}>
-                <button
-                  type="button"
-                  onClick={() => setBookingOpen(false)}
-                  style={{ minHeight: "44px", padding: "0 18px", borderRadius: "12px", border: "1px solid #e2e8f0", background: "#f8fafc", color: "#334155", fontWeight: 700, cursor: "pointer", fontSize: "0.84rem" }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={bookingSubmitting}
-                  style={{ minHeight: "44px", padding: "0 20px", borderRadius: "12px", background: "linear-gradient(145deg,#08428c,#063a78)", color: "#fff", fontWeight: 800, cursor: bookingSubmitting ? "not-allowed" : "pointer", fontSize: "0.84rem", border: "none", display: "flex", alignItems: "center", gap: "8px", opacity: bookingSubmitting ? 0.7 : 1 }}
-                >
-                  {bookingSubmitting ? (
-                    <>
-                      <Loader size={15} style={{ animation: "spin 1s linear infinite" }} /> Submitting...
-                    </>
-                  ) : (
-                    "Confirm Booking Request"
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

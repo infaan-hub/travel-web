@@ -15,21 +15,26 @@ const CATEGORIES: TripPlaceCategory[] = [
   "Bar",
   "Beach / Sandbank",
   "Cafe",
+  "City",
+  "District",
   "Health / Pharmacy",
   "Hotel",
   "Kitesurf School",
+  "Region",
   "Restaurant",
   "Shop / Market",
   "Spa / Wellness",
   "Spice Farm",
+  "Street",
   "Tour / Activity",
   "Transport",
+  "Ward",
   "Wildlife / Turtles",
 ];
 
 describe("Zanzibar trip places", () => {
   it("contains every row from the CSV/GeoJSON export", () => {
-    expect(ZANZIBAR_TRIP_PLACES).toHaveLength(326);
+    expect(ZANZIBAR_TRIP_PLACES).toHaveLength(1096);
   });
 
   it("has unique ids and names", () => {

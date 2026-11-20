@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
     const { driver } = await requirePrivateHireDriver(request);
     if (!driver.isPublic || driver.companyId !== null) return ok({ results: [] });
     const [requests, assignedRequests] = await Promise.all([prisma.transportTripRequest.findMany({
-      where: { driverId: null, status: "requested" },
-      select: { id: true, origin: true, destination: true, travelDate: true, passengers: true, luggage: true, notes: true, status: true },
+      where: { driverId: null, status: "requested", bookings: { none: {} } },
+      select: { id: true, origin: true, destination: true, travelDate: true, pickupTime: true, passengers: true, luggage: true, notes: true, status: true },
       orderBy: [{ travelDate: "asc" }, { createdAt: "asc" }],
       take: 50,
     }), prisma.transportTripRequest.findMany({

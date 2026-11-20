@@ -5,6 +5,7 @@ import type {
   PrivateHireService,
   Company,
   TransportBooking,
+  TransportTripRequest,
   User,
 } from "@prisma/client";
 
@@ -118,6 +119,7 @@ export function transportBookingSerializer(
     vehicle?: PrivateHireVehicle | null;
     driver?: PrivateHireDriver | null;
     company?: Company | null;
+    tripRequest?: TransportTripRequest | null;
   },
 ) {
   return {
@@ -137,6 +139,33 @@ export function transportBookingSerializer(
     status: booking.status,
     is_public: booking.isPublic,
     notes: booking.notes,
+    origin: booking.origin,
+    origin_lat: booking.originLat,
+    origin_lng: booking.originLng,
+    destination: booking.destination,
+    dest_lat: booking.destLat,
+    dest_lng: booking.destLng,
+    distance_km: booking.distanceKm,
+    duration_mins: booking.durationMins,
+    trip_request_id: booking.tripRequestId,
+    trip: booking.tripRequest
+      ? {
+          id: booking.tripRequest.id,
+          origin: booking.tripRequest.origin,
+          origin_lat: booking.tripRequest.originLat,
+          origin_lng: booking.tripRequest.originLng,
+          destination: booking.tripRequest.destination,
+          dest_lat: booking.tripRequest.destLat,
+          dest_lng: booking.tripRequest.destLng,
+          travel_date: booking.tripRequest.travelDate.toISOString(),
+          pickup_time: booking.tripRequest.pickupTime,
+          passengers: booking.tripRequest.passengers,
+          distance_km: booking.tripRequest.distanceKm,
+          duration_mins: booking.tripRequest.durationMins,
+          status: booking.tripRequest.status,
+          created_at: booking.tripRequest.createdAt.toISOString(),
+        }
+      : null,
     created_at: booking.createdAt.toISOString(),
     updated_at: booking.updatedAt.toISOString(),
     service: booking.service ? privateHireServiceSerializer(booking.service) : null,
