@@ -504,6 +504,43 @@
   box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
 }
 
+.passengerCounter {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.counterButton {
+  min-height: 48px;
+  border: 1px solid #d8e2ef;
+  border-radius: 12px;
+  background: #f4f8fd;
+  color: #08428c;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.counterButton:hover:not(:disabled) {
+  background: #e8f0fa;
+  border-color: #b9cbe3;
+}
+
+.counterButton:disabled {
+  color: #94a3b8;
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.counterInput {
+  text-align: center;
+  padding: 0 8px;
+}
+
 .textarea {
   width: 100%;
   min-height: 112px;

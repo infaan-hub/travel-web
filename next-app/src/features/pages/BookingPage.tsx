@@ -263,20 +263,23 @@ export default function BookingPage() {
     passengersCount <= maxPassengers;
   const travelDateValid =
     Boolean(form.travel_date) && form.travel_date >= today;
-  const pickupTimeValid =
-    form.pickup_time.trim() === "" || TIME_PATTERN.test(form.pickup_time);
+  const pickupTimeValid = TIME_PATTERN.test(form.pickup_time);
   const contactComplete =
     form.full_name.trim().length >= 2 &&
     form.phone.replace(/\D/g, "").length >= 7 &&
     EMAIL_PATTERN.test(form.email.trim());
-  const journeyComplete = passengersValid && travelDateValid;
+  const journeyComplete = passengersValid && travelDateValid && pickupTimeValid;
   const sameRoute =
     form.origin.trim().toLowerCase() ===
     form.destination.trim().toLowerCase();
   const routeComplete =
     form.origin.trim().length >= 2 &&
     form.destination.trim().length >= 2 &&
-    !sameRoute;
+    !sameRoute &&
+    form.originLat != null &&
+    form.originLng != null &&
+    form.destLat != null &&
+    form.destLng != null;
   const allComplete = contactComplete && journeyComplete && routeComplete;
   const currentStep = !contactComplete
     ? 1
@@ -285,6 +288,25 @@ export default function BookingPage() {
       : !routeComplete
         ? 3
         : 4;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (currentStep <= 1) return;
+    const id =
+      currentStep === 2
+        ? "step-journey"
+        : currentStep === 3
+          ? "step-route"
+          : "step-notes";
+    const element = document.getElementById(id);
+    if (element) {
+      // Defer to allow the new section to render and animate in.
+      const timer = window.setTimeout(() => {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 250);
+      return () => window.clearTimeout(timer);
+    }
+  }, [currentStep]);
 
   const { originLat, originLng, destLat, destLng } = form;
   const hasRouteCoords =
@@ -508,7 +530,7 @@ export default function BookingPage() {
         phone: form.phone.trim(),
         passengers: Number(form.passengers),
         travel_date: form.travel_date,
-        pickup_time: form.pickup_time || undefined,
+        pickup_time: form.pickup_time,
         notes: form.notes.trim() || undefined,
         origin: form.origin.trim(),
         destination: form.destination.trim(),
@@ -895,7 +917,7 @@ export default function BookingPage() {
                     </p>
                   ) : (
                     <p className={styles.hintText}>
-                      Prefilled from your account when you are signed in.
+                      We will send your booking confirmation to this address.
                     </p>
                   )}
                 </div>
@@ -933,24 +955,54 @@ export default function BookingPage() {
                     >
                       Passengers <span aria-hidden="true">*</span>
                     </label>
-                    <input
-                      id="booking-passengers"
-                      className={`${styles.input} ${
-                        errors.passengers ? styles.inputError : ""
-                      }`}
-                      type="number"
-                      name="passengers"
-                      inputMode="numeric"
-                      min={1}
-                      max={maxPassengers}
-                      required
-                      value={form.passengers}
-                      aria-invalid={Boolean(errors.passengers)}
-                      onChange={(event) =>
-                        update("passengers", event.target.value)
-                      }
-                      onBlur={() => touch("passengers")}
-                    />
+                    <div className={styles.passengerCounter}>
+                      <button
+                        type="button"
+                        className={styles.counterButton}
+                        aria-label="Decrease passengers"
+                        disabled={passengersCount <= 1}
+                        onClick={() =>
+                          update(
+                            "passengers",
+                            String(Math.max(1, passengersCount - 1)),
+                          )
+                        }
+                      >
+                        −
+                      </button>
+                      <input
+                        id="booking-passengers"
+                        className={`${styles.input} ${styles.counterInput} ${
+                          errors.passengers ? styles.inputError : ""
+                        }`}
+                        type="number"
+                        name="passengers"
+                        inputMode="numeric"
+                        min={1}
+                        max={maxPassengers}
+                        required
+                        value={form.passengers}
+                        aria-invalid={Boolean(errors.passengers)}
+                        onChange={(event) =>
+                          update("passengers", event.target.value)
+                        }
+                        onBlur={() => touch("passengers")}
+                      />
+                      <button
+                        type="button"
+                        className={styles.counterButton}
+                        aria-label="Increase passengers"
+                        disabled={passengersCount >= maxPassengers}
+                        onClick={() =>
+                          update(
+                            "passengers",
+                            String(Math.min(maxPassengers, passengersCount + 1)),
+                          )
+                        }
+                      >
+                        +
+                      </button>
+                    </div>
                     {errors.passengers ? (
                       <p className={styles.errorText} role="alert">
                         {errors.passengers}
@@ -1232,7 +1284,7 @@ export default function BookingPage() {
                   <div>
                     <span className={styles.cardKicker}>Step 4 of 4</span>
                     <h2 id="step-notes" className={styles.cardTitle}>
-                      Anything else?
+                      Anything else we should know?
                     </h2>
                     <p className={styles.cardLead}>
                       Add optional notes for the driver, then send your trip
@@ -1244,7 +1296,7 @@ export default function BookingPage() {
                 <div className={styles.fieldGrid}>
                   <div className={`${styles.field} ${styles.fieldFull}`}>
                     <label className={styles.label} htmlFor="booking-notes">
-                      Trip notes <span aria-hidden="true">(optional)</span>
+                      Journey Notes <span aria-hidden="true">(Optional)</span>
                     </label>
                     <textarea
                       id="booking-notes"
@@ -1253,7 +1305,7 @@ export default function BookingPage() {
                       rows={4}
                       maxLength={5000}
                       value={form.notes}
-                      placeholder="Flight number, luggage, hotel entrance, child seat, or anything the driver should know."
+                      placeholder="Share additional information about your journey, luggage requirements, preferred pickup arrangements, special requests or other details..."
                       onChange={(event) => update("notes", event.target.value)}
                     />
                     <p className={styles.hintText}>
@@ -1291,7 +1343,7 @@ export default function BookingPage() {
                       </>
                     ) : (
                       <>
-                        Send trip request
+                        Send Private Hire Request
                         <ArrowRight size={17} aria-hidden="true" />
                       </>
                     )}
