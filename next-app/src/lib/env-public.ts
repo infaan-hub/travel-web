@@ -6,6 +6,6 @@ export const publicEnv = {
   vapidPublicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "",
   pushEnabled: process.env.NEXT_PUBLIC_PUSH_ENABLED !== "false",
   multiCurrency: process.env.NEXT_PUBLIC_FEATURE_MULTI_CURRENCY !== "false",
-  guestBooking: process.env.NEXT_PUBLIC_FEATURE_GUEST_BOOKING !== "false",
+  guestBooking: process.env.NEXT_PUBLIC_FEATURE_GUEST_BOOKING === "true",
   defaultCurrency: process.env.NEXT_PUBLIC_DEFAULT_CURRENCY ?? "TZS",
 } as const;

@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok, readJson } from "@/lib/api/http";
-import { optionalAuth, requireUser } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
 import prisma from "@/lib/db/prisma";
 import { transportBookingSerializer } from "@/lib/serializers/private-hire";
 import {
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const context = await optionalAuth(request);
+    const user = await requireUser(request);
     const body = createSchema.parse(await readJson(request));
     const travelDate = new Date(`${body.travel_date}T00:00:00.000Z`);
     const endDate = body.end_date
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       return prisma.$transaction(async (tx) => {
         const tripRequest = await tx.transportTripRequest.create({
           data: {
-            userId: context?.user?.id ?? null,
+            userId: user.id,
             origin: body.origin,
             originLat: body.origin_lat ?? null,
             originLng: body.origin_lng ?? null,
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
         return tx.transportBooking.create({
           data: {
             reference,
-            userId: context?.user?.id ?? null,
+            userId: user.id,
             serviceId: hireService.id,
             companyId: hireService.companyId,
             vehicleId: hireService.vehicleId,

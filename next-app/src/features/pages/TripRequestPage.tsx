@@ -2,12 +2,33 @@
 
 import { useState } from "react";
 import { transportTripRequestsAPI } from "@/lib/api/client";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ToastProvider";
 import { PageHero } from "@/components/PageHero";
 import { MapPin, Users, Calendar, Loader, CheckCircle } from "lucide-react";
 
 export default function TripRequestPage() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const toast = useToast();
+
+  if (!authLoading && !isAuthenticated) {
+    return (
+      <div className="page">
+        <PageHero
+          eyebrow="Custom Trip Request"
+          title="Sign in to request a trip"
+          subtitle="You need to be signed in to submit a custom transport trip request."
+          backgroundImageKey="feature"
+          patternImageKey="thumb"
+        />
+        <div className="page-container page-section max-w-2xl text-center">
+          <a href="/login/?from=%2Ftrip-request%2F" className="glass-button-primary inline-block px-6 py-2.5 rounded-xl text-sm font-semibold">
+            Sign in
+          </a>
+        </div>
+      </div>
+    );
+  }
   const [form, setForm] = useState({
     origin: "",
     destination: "",

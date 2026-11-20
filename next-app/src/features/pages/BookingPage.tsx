@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useCallback,
@@ -8,7 +8,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
@@ -36,7 +36,6 @@ import {
   Phone,
   Route as RouteIcon,
   ShieldCheck,
-  Sparkles,
   User,
   Users,
 } from "lucide-react";
@@ -60,7 +59,7 @@ const TripRouteOverlayMap = dynamic(
     loading: () => (
       <div className={styles.mapLoading}>
         <Loader2 className={styles.spin} size={18} aria-hidden="true" />
-        <span>Loading Zanzibar route map…</span>
+        <span>Loading Zanzibar route mapâ€¦</span>
       </div>
     ),
   },
@@ -232,7 +231,8 @@ function scrollSectionIntoView(sectionId: string, force = false) {
 export default function BookingPage() {
   const params = useParams<Record<string, string>>();
   const serviceId = params.serviceId;
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const [service, setService] = useState<Service | null>(null);
   const [loadedServiceId, setLoadedServiceId] = useState<string | null>(null);
@@ -486,7 +486,7 @@ export default function BookingPage() {
           key: requestKey,
           route: null,
           error:
-            "Distance lookup is temporarily unavailable. Your trip is still ready — the provider will confirm exact timing.",
+            "Distance lookup is temporarily unavailable. Your trip is still ready â€” the provider will confirm exact timing.",
         });
       });
 
@@ -767,6 +767,30 @@ export default function BookingPage() {
     }
   }
 
+  if (!authLoading && !isAuthenticated) {
+    return (
+      <div id="booking-trip-root" className={`page ${styles.page}`}>
+        <div className={styles.stateCard}>
+          <span className={styles.stateIcon}>
+            <Car size={26} aria-hidden="true" />
+          </span>
+          <h1 className={styles.stateTitle}>Sign in to book</h1>
+          <p className={styles.stateText}>
+            You need to be signed in to request a private hire trip. Please log
+            in or create an account, then return to this page to complete your
+            booking.
+          </p>
+          <Link
+            href={`/login/?from=${encodeURIComponent(`/booking/${serviceId ?? ""}/`)}`}
+            className={styles.stateLink}
+          >
+            Sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div id="booking-trip-root" className={`page ${styles.page}`}>
@@ -774,7 +798,7 @@ export default function BookingPage() {
           <span className={styles.stateIcon}>
             <Loader2 className={styles.spin} size={26} aria-hidden="true" />
           </span>
-          <h1 className={styles.stateTitle}>Loading private hire service…</h1>
+          <h1 className={styles.stateTitle}>Loading private hire serviceâ€¦</h1>
           <p className={styles.stateText}>
             Preparing your vehicle details and trip booking form.
           </p>
@@ -840,7 +864,7 @@ export default function BookingPage() {
               <div className={styles.successSummaryRow}>
                 <dt className={styles.successSummaryLabel}>Trip route</dt>
                 <dd className={styles.successSummaryValue}>
-                  {booking.origin || form.origin} →{" "}
+                  {booking.origin || form.origin} â†’{" "}
                   {booking.destination || form.destination}
                 </dd>
               </div>
@@ -863,7 +887,7 @@ export default function BookingPage() {
                 <dd className={styles.successSummaryValue}>
                   {service.vehicle?.name || service.title}
                   {service.vehicle?.plate_number
-                    ? ` · ${service.vehicle.plate_number}`
+                    ? ` Â· ${service.vehicle.plate_number}`
                     : ""}
                 </dd>
               </div>
@@ -876,7 +900,7 @@ export default function BookingPage() {
                       formatDuration(booking.duration_mins),
                     ]
                       .filter(Boolean)
-                      .join(" · ")}
+                      .join(" Â· ")}
                   </dd>
                 </div>
               ) : null}
@@ -961,26 +985,17 @@ export default function BookingPage() {
 
           <div className={styles.heroMain}>
             <div className={styles.heroCopy}>
-              <span className={styles.eyebrow}>
-                <Sparkles size={14} aria-hidden="true" />
-                Private hire trip request
-              </span>
               <h1 className={styles.heroTitle}>{service.title}</h1>
               {service.company ? (
                 <p className={styles.heroCompany}>{service.company.name}</p>
               ) : null}
-              <p className={styles.heroLead}>
-                Complete each short section below. Your trip is generated
-                automatically from your pickup and destination and linked
-                directly to this private hire vehicle.
-              </p>
               <ul className={styles.heroFacts}>
                 {service.vehicle ? (
                   <li>
                     <Car size={14} aria-hidden="true" />
                     {service.vehicle.name}
                     {service.vehicle.plate_number
-                      ? ` · ${service.vehicle.plate_number}`
+                      ? ` Â· ${service.vehicle.plate_number}`
                       : ""}
                   </li>
                 ) : null}
@@ -1102,10 +1117,6 @@ export default function BookingPage() {
                   <h2 id="step-contact-heading" className={styles.cardTitle}>
                     Passenger contact details
                   </h2>
-                  <p className={styles.cardLead}>
-                    Fill in your full name and phone number. Your email is
-                    fetched automatically from your account.
-                  </p>
                 </div>
               </header>
 
@@ -1198,7 +1209,7 @@ export default function BookingPage() {
                     <div className={styles.fetchedEmailCopy}>
                       <span className={styles.fetchedEmailLabel}>Email</span>
                       <span className={styles.fetchedEmailValue}>
-                        Fetching your account email…
+                        Fetching your account emailâ€¦
                       </span>
                     </div>
                   </div>
@@ -1341,10 +1352,7 @@ export default function BookingPage() {
                     <h2 id="step-schedule-heading" className={styles.cardTitle}>
                       Passengers, travel date &amp; travel time
                     </h2>
-                    <p className={styles.cardLead}>
-                      Choose how many passengers are travelling and when you
-                      would like the driver to pick you up.
-                    </p>
+
                   </div>
                 </header>
 
@@ -1370,7 +1378,7 @@ export default function BookingPage() {
                           );
                         }}
                       >
-                        −
+                        âˆ’
                       </button>
                       <input
                         id="booking-passengers"
@@ -1534,11 +1542,6 @@ export default function BookingPage() {
                     <h2 id="step-route-heading" className={styles.cardTitle}>
                       Origin &amp; destination
                     </h2>
-                    <p className={styles.cardLead}>
-                      Tap or start typing to choose from Zanzibar places,
-                      hotels, beaches, and streets — or use your current
-                      location for pickup. Your trip generates automatically.
-                    </p>
                   </div>
                 </header>
 
@@ -1599,7 +1602,7 @@ export default function BookingPage() {
                         ) : (
                           <LocateFixed size={15} aria-hidden="true" />
                         )}
-                        {locating ? "Locating…" : "Use current location"}
+                        {locating ? "Locatingâ€¦" : "Use current location"}
                       </button>
                     }
                   />
@@ -1689,7 +1692,7 @@ export default function BookingPage() {
                           <span className={styles.stopLabel}>
                             Origin
                             {form.originSource === "gps"
-                              ? " · Current GPS location"
+                              ? " Â· Current GPS location"
                               : ""}
                           </span>
                           <strong className={styles.stopName}>
@@ -1731,7 +1734,7 @@ export default function BookingPage() {
                               Calculating trip
                             </span>
                             <span className={styles.routeMetricValue}>
-                              Computing road distance &amp; duration…
+                              Computing road distance &amp; durationâ€¦
                             </span>
                           </span>
                         </div>
@@ -1859,10 +1862,6 @@ export default function BookingPage() {
                     <h2 id="step-notes-heading" className={styles.cardTitle}>
                       Add trip description &amp; send request
                     </h2>
-                    <p className={styles.cardLead}>
-                      Add any extra details for your driver (optional), review
-                      your trip, and submit your private hire request.
-                    </p>
                   </div>
                 </header>
 
@@ -1880,7 +1879,7 @@ export default function BookingPage() {
                     rows={4}
                     maxLength={5000}
                     value={form.notes}
-                    placeholder="Share luggage needs, flight number, hotel gate/entrance, child seat requests, or any special instructions for your trip…"
+                    placeholder="Share luggage needs, flight number, hotel gate/entrance, child seat requests, or any special instructions for your tripâ€¦"
                     onChange={(event) => update("notes", event.target.value)}
                   />
                   <p className={styles.hintText}>
@@ -1895,14 +1894,14 @@ export default function BookingPage() {
                     <div>
                       <span className={styles.recapLabel}>Route</span>
                       <strong className={styles.recapValue}>
-                        {form.origin || "—"} → {form.destination || "—"}
+                        {form.origin || "â€”"} â†’ {form.destination || "â€”"}
                       </strong>
                     </div>
                     <div>
                       <span className={styles.recapLabel}>Schedule</span>
                       <strong className={styles.recapValue}>
-                        {travelDateValid ? formatFormDate(form.travel_date) : "—"}
-                        {travelTimeValid ? ` · ${form.pickup_time}` : ""}
+                        {travelDateValid ? formatFormDate(form.travel_date) : "â€”"}
+                        {travelTimeValid ? ` Â· ${form.pickup_time}` : ""}
                       </strong>
                     </div>
                     <div>
@@ -1912,14 +1911,14 @@ export default function BookingPage() {
                           ? `${form.passengers} ${
                               passengersCount === 1 ? "passenger" : "passengers"
                             }`
-                          : "—"}
+                          : "â€”"}
                       </strong>
                     </div>
                     <div>
                       <span className={styles.recapLabel}>Contact</span>
                       <strong className={styles.recapValue}>
-                        {form.full_name.trim() || "—"} ·{" "}
-                        {form.phone.trim() || "—"}
+                        {form.full_name.trim() || "â€”"} Â·{" "}
+                        {form.phone.trim() || "â€”"}
                       </strong>
                     </div>
                   </div>
@@ -1952,7 +1951,7 @@ export default function BookingPage() {
                           size={17}
                           aria-hidden="true"
                         />
-                        Sending request…
+                        Sending requestâ€¦
                       </>
                     ) : (
                       <>
@@ -2013,7 +2012,7 @@ export default function BookingPage() {
                   <span className={styles.summaryRowValue}>
                     {form.full_name.trim()
                       ? `${form.full_name.trim()}${
-                          form.phone.trim() ? ` · ${form.phone.trim()}` : ""
+                          form.phone.trim() ? ` Â· ${form.phone.trim()}` : ""
                         }`
                       : "Enter name & phone"}
                   </span>
@@ -2025,7 +2024,7 @@ export default function BookingPage() {
                 <span className={styles.summaryRowText}>
                   <span className={styles.summaryRowLabel}>Email</span>
                   <span className={styles.summaryRowValue}>
-                    {effectiveEmail || (authLoading ? "Fetching…" : "Not set")}
+                    {effectiveEmail || (authLoading ? "Fetchingâ€¦" : "Not set")}
                   </span>
                 </span>
               </div>
@@ -2062,9 +2061,9 @@ export default function BookingPage() {
                   <span className={styles.summaryRowLabel}>Trip route</span>
                   <span className={styles.summaryRowValue}>
                     {routeComplete
-                      ? `${form.origin} → ${form.destination}`
+                      ? `${form.origin} â†’ ${form.destination}`
                       : form.origin.trim()
-                        ? `${form.origin} → Choose destination`
+                        ? `${form.origin} â†’ Choose destination`
                         : "Origin & destination"}
                   </span>
                 </span>
@@ -2076,7 +2075,7 @@ export default function BookingPage() {
                   <span className={styles.summaryRowText}>
                     <span className={styles.summaryRowLabel}>Journey estimate</span>
                     <span className={styles.summaryRowValue}>
-                      {formatDistance(visibleRoute.distanceKm)} ·{" "}
+                      {formatDistance(visibleRoute.distanceKm)} Â·{" "}
                       {formatDuration(visibleRoute.durationMins)}
                     </span>
                   </span>
@@ -2089,7 +2088,7 @@ export default function BookingPage() {
                   <span className={styles.summaryRowLabel}>Vehicle &amp; driver</span>
                   <span className={styles.summaryRowValue}>
                     {service.vehicle
-                      ? `${service.vehicle.name} · ${driverName}`
+                      ? `${service.vehicle.name} Â· ${driverName}`
                       : driverName}
                   </span>
                 </span>

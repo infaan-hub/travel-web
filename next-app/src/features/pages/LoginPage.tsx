@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { AlertCircle, ArrowRight, CheckCircle, Palmtree, Compass, Map, Star, Sparkles } from '@/components/icons';
+import { AlertCircle, ArrowRight, CheckCircle, Palmtree, Compass, Map, Star } from '@/components/icons';
 import styles from './auth-page.module.css';
 import type { ChangeEvent, FormEvent } from "react";
 import {
@@ -184,7 +184,7 @@ export default function LoginPage() {
 
         <div className={styles.banner}>
           <div className={styles.bannerTop}>
-            <span className={styles.bannerBadge}><Sparkles size={14} /> Handpicked travel</span>
+            <span className={styles.bannerBadge}><Compass size={14} /> Handpicked travel</span>
             <span className={styles.bannerMeta}>Zanzibar Â· TZ</span>
           </div>
           <div className={styles.bannerBody}>

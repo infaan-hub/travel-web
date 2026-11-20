@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { AlertCircle, ArrowRight, ClipboardList, FileEdit, Gem, MessageSquare, RefreshCw, Sparkles } from '@/components/icons';
+import { AlertCircle, ArrowRight, ClipboardList, FileEdit, Gem, MessageSquare, RefreshCw, Palmtree } from '@/components/icons';
 import styles from './auth-page.module.css';
 import type { ChangeEvent, FormEvent } from "react";
 
@@ -151,7 +151,7 @@ export default function RegisterPage() {
 
         <div className={`${styles.banner} ${styles.bannerRegister}`}>
           <div className={styles.bannerTop}>
-            <span className={styles.bannerBadge}><Sparkles size={14} /> Start exploring</span>
+            <span className={styles.bannerBadge}><Palmtree size={14} /> Start exploring</span>
             <span className={styles.bannerMeta}>Kilimanjaro · TZ</span>
           </div>
           <div className={styles.bannerBody}>

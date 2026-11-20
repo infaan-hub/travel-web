@@ -20,7 +20,7 @@ const EnvSchema = z.object({
   SENTRY_DSN: z.string().optional(),
   /** Feature flags. */
   FEATURE_BOOKING_REFERENCE: z.enum(["true", "false"]).default("true"),
-  FEATURE_GUEST_BOOKING: z.enum(["true", "false"]).default("true"),
+  FEATURE_GUEST_BOOKING: z.enum(["true", "false"]).default("false"),
   FEATURE_WORKSPACE_TEMPLATES: z.enum(["true", "false"]).default("true"),
   FEATURE_MULTI_CURRENCY: z.enum(["true", "false"]).default("true"),
   FEATURE_AUDIT_LOG: z.enum(["true", "false"]).default("true"),

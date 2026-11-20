@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { ApiError, handleApiError, ok, readJson } from "@/lib/api/http";
-import { optionalAuth, requireUser } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
 import prisma from "@/lib/db/prisma";
 import {
   isPastTravelDate,
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const context = await optionalAuth(request);
+    const user = await requireUser(request);
     const body = createSchema.parse(await readJson(request));
     const travelDate = new Date(`${body.travel_date}T00:00:00.000Z`);
     if (Number.isNaN(travelDate.getTime())) {
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     const created = await prisma.transportTripRequest.create({
       data: {
-        userId: context?.user?.id ?? null,
+        userId: user.id,
         origin: body.origin,
         originLat: body.origin_lat ?? null,
         originLng: body.origin_lng ?? null,

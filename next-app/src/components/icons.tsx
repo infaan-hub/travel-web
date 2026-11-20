@@ -75,7 +75,7 @@ export const Send = iconComponent(H.Send);
 export const Settings = iconComponent(H.Settings);
 export const Shield = iconComponent(H.Shield);
 export const Smartphone = iconComponent(H.Smartphone);
-export const Sparkles = iconComponent(H.Sparkles);
+
 export const Square = iconComponent(H.Square);
 export const Star = iconComponent(H.Star);
 export const Trash2 = iconComponent(H.Trash2);
