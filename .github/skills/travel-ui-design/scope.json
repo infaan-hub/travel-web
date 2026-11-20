@@ -200,6 +200,7 @@
         "src/features/pages/TripsPage.tsx",
         "src/features/pages/TripDetailPage.tsx",
         "src/features/pages/trips-page.module.css",
+        "src/features/pages/trips-hub.module.css",
         "src/features/pages/LoginPage.tsx",
         "src/features/pages/RegisterPage.tsx",
         "src/features/pages/ForgotPasswordPage.tsx",

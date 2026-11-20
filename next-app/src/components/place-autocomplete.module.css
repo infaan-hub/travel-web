@@ -8,7 +8,7 @@
 }
 
 .label,
-:global(#booking-trip-root) .label {
+:global(:is(#booking-trip-root, #trips-hub-root)) .label {
   color: #24364e !important;
   font-size: 0.78rem !important;
   font-weight: 700 !important;
@@ -65,7 +65,7 @@
 }
 
 .input,
-:global(#booking-trip-root) .input {
+:global(:is(#booking-trip-root, #trips-hub-root)) .input {
   width: 100%;
   min-height: 50px !important;
   padding: 0 40px 0 40px !important;
@@ -86,55 +86,55 @@
 }
 
 .inputHasValue,
-:global(#booking-trip-root) .inputHasValue {
+:global(:is(#booking-trip-root, #trips-hub-root)) .inputHasValue {
   padding-right: 44px !important;
 }
 
 .inputPinned,
-:global(#booking-trip-root) .inputPinned {
+:global(:is(#booking-trip-root, #trips-hub-root)) .inputPinned {
   padding-right: 114px !important;
   border-color: #86c7a1 !important;
   background: #f9fdfb !important;
 }
 
 .input::placeholder,
-:global(#booking-trip-root) .input::placeholder {
+:global(:is(#booking-trip-root, #trips-hub-root)) .input::placeholder {
   color: #8696ad !important;
   opacity: 1 !important;
 }
 
 .input:hover:not(:disabled),
-:global(#booking-trip-root) .input:hover:not(:disabled) {
+:global(:is(#booking-trip-root, #trips-hub-root)) .input:hover:not(:disabled) {
   border-color: #9cb6d6 !important;
   background: #ffffff !important;
 }
 
 .input:focus,
 .input:focus-visible,
-:global(#booking-trip-root) .input:focus,
-:global(#booking-trip-root) .input:focus-visible {
+:global(:is(#booking-trip-root, #trips-hub-root)) .input:focus,
+:global(:is(#booking-trip-root, #trips-hub-root)) .input:focus-visible {
   border-color: #08428c !important;
   background: #ffffff !important;
   box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.13) !important;
 }
 
 .input:disabled,
-:global(#booking-trip-root) .input:disabled {
+:global(:is(#booking-trip-root, #trips-hub-root)) .input:disabled {
   background: #f1f5f9 !important;
   color: #94a3b8 !important;
   cursor: not-allowed;
 }
 
 .inputError,
-:global(#booking-trip-root) .inputError {
+:global(:is(#booking-trip-root, #trips-hub-root)) .inputError {
   border-color: #dc2626 !important;
   background: #fff7f8 !important;
 }
 
 .inputError:focus,
 .inputError:focus-visible,
-:global(#booking-trip-root) .inputError:focus,
-:global(#booking-trip-root) .inputError:focus-visible {
+:global(:is(#booking-trip-root, #trips-hub-root)) .inputError:focus,
+:global(:is(#booking-trip-root, #trips-hub-root)) .inputError:focus-visible {
   border-color: #b91c1c !important;
   box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.14) !important;
 }
@@ -167,7 +167,7 @@
 }
 
 .clearButton,
-:global(#booking-trip-root) .clearButton {
+:global(:is(#booking-trip-root, #trips-hub-root)) .clearButton {
   display: grid !important;
   width: 28px !important;
   height: 28px !important;
@@ -186,7 +186,7 @@
 }
 
 .clearButton:hover,
-:global(#booking-trip-root) .clearButton:hover {
+:global(:is(#booking-trip-root, #trips-hub-root)) .clearButton:hover {
   background: #dce8f6 !important;
   color: #08428c !important;
   transform: none !important;
@@ -194,7 +194,7 @@
 }
 
 .clearButton:focus-visible,
-:global(#booking-trip-root) .clearButton:focus-visible {
+:global(:is(#booking-trip-root, #trips-hub-root)) .clearButton:focus-visible {
   outline: 3px solid rgba(8, 66, 140, 0.3) !important;
   outline-offset: 2px;
 }
