@@ -87,6 +87,7 @@
         "src/components/ModalA11y.tsx",
         "src/components/icons.tsx",
         "src/components/Pwa*.tsx",
+        "src/components/pwa-download-badge.module.css",
         "src/components/PushPrompt.tsx",
         "src/components/ServiceWorkerRegister.tsx",
         "src/components/ui/**",

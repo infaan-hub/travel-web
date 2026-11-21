@@ -8,6 +8,7 @@ import { CurrencyProvider } from "@/context/CurrencyContext";
 import { RealtimeProvider } from "@/context/RealtimeContext";
 import { PushPrompt } from "@/components/PushPrompt";
 import PwaSplash from "@/components/PwaSplash";
+import PwaDownloadBadge from "@/components/PwaDownloadBadge";
 import PwaPermissionPopups from "@/components/PwaPermissionPopups";
 import PwaBottomNav from "@/components/PwaBottomNav";
 import PwaUpdatePrompt from "@/components/PwaUpdatePrompt";
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AppFrame>{children}</AppFrame>
             <PushPrompt />
             <PwaSplash />
+            <PwaDownloadBadge />
             <PwaPermissionPopups />
             <PwaBottomNav />
             <PwaUpdatePrompt />

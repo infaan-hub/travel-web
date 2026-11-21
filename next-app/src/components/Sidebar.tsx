@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import NextImage from "next/image";
+import { Download } from "lucide-react";
 import type { AppIcon } from "@/components/icons";
 import {
   Briefcase,
@@ -28,6 +29,7 @@ import {
   X,
 } from "@/components/icons";
 import { useAuth } from "@/context/AuthContext";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { profileAPI } from "@/lib/api/client";
 import {
   getRoleHomeHref,
@@ -73,6 +75,7 @@ export default function Sidebar() {
   const mobileOpenRef = useRef(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { showWebInstallUI, installing, triggerInstall } = usePwaInstall();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -260,6 +263,21 @@ export default function Sidebar() {
               </Link>
             </div>
           )}
+
+          {showWebInstallUI ? (
+            <button
+              type="button"
+              className={styles.downloadApp}
+              disabled={installing}
+              onClick={() => {
+                closeAll();
+                void triggerInstall();
+              }}
+            >
+              <Download size={16} aria-hidden="true" />
+              <span>{installing ? "Installing…" : "Download app"}</span>
+            </button>
+          ) : null}
         </div>
       </aside>
 

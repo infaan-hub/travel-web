@@ -480,6 +480,47 @@
   transform: translateY(-1px);
 }
 
+.downloadApp {
+  margin-top: 10px;
+  display: flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 1px solid rgba(8, 66, 140, 0.24);
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(8, 66, 140, 0.1), rgba(8, 66, 140, 0.04));
+  color: var(--sb-blue);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.downloadApp:hover:not(:disabled) {
+  border-color: var(--sb-blue);
+  background: linear-gradient(145deg, var(--sb-blue-bright), var(--sb-blue-deep));
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 10px 20px rgba(8, 66, 140, 0.22);
+  transform: translateY(-1px);
+}
+
+.downloadApp:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 /* -------------------------------------------------------------------------
    Overlay and focus states
    ------------------------------------------------------------------------- */
@@ -504,7 +545,8 @@
 .close:focus-visible,
 .item:focus-visible,
 .accessAction:focus-visible,
-.logout:focus-visible {
+.logout:focus-visible,
+.downloadApp:focus-visible {
   outline: 3px solid rgba(8, 66, 140, 0.34) !important;
   outline-offset: 2px !important;
 }
