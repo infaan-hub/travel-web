@@ -80,9 +80,15 @@ export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
   };
 }
 
-export async function getPublicCompany(slug: string) {
+export async function getPublicCompany(slugOrId: string) {
+  const numericId = /^\d+$/.test(slugOrId) ? Number(slugOrId) : null;
   const company = await prisma.company.findFirst({
-    where: { ...PUBLIC_COMPANY_WHERE, slug },
+    where: {
+      ...PUBLIC_COMPANY_WHERE,
+      ...(numericId != null
+        ? { OR: [{ slug: slugOrId }, { id: numericId }] }
+        : { slug: slugOrId }),
+    },
     include: {
       privateHireServices: {
         where: { isActive: true },

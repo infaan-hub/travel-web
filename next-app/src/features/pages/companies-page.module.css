@@ -2133,12 +2133,10 @@
   }
 
   .fpDesc {
-    display: none;
-  }
-
-  .fpGridSingle .fpDesc {
     display: -webkit-box;
-    font-size: 0.68rem;
+    font-size: 0.64rem;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
   }
 
   .fpAnglePills {

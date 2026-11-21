@@ -197,16 +197,20 @@ function getCompanyInitials(name: string): string {
 function formatCompanyLocation(company: FeaturedCompany): string {
   const seen = new Set<string>();
   const parts: string[] = [];
-  for (const value of [company.locality, company.district, company.region, company.country]) {
+  for (const value of [company.locality, company.district, company.region]) {
     const cleaned = value?.trim();
     if (!cleaned) continue;
     const key = cleaned.toLowerCase();
-    if (seen.has(key)) continue;
+    if (key === "tanzania" || seen.has(key)) continue;
     seen.add(key);
     parts.push(cleaned);
-    if (parts.length >= 2) break;
+    if (parts.length >= 1) break;
   }
-  return parts.join(", ") || "Zanzibar, Tanzania";
+  if (parts.length === 0) return "Zanzibar";
+  if (!parts.some((part) => part.toLowerCase().includes("zanzibar"))) {
+    parts.push("Zanzibar");
+  }
+  return parts.join(", ");
 }
 
 export default function HomePage() {
@@ -804,24 +808,11 @@ export default function HomePage() {
                       </ul>
 
                       <div className={styles.fpActionsRow}>
-                        {directService ? (
-                          <>
-                            <Link href={company.public_path} className={styles.fpGhostBtn}>
-                              Company
-                            </Link>
-                            <Link
-                              href={`/booking/${directService.id}/`}
-                              className={styles.fpPrimaryBtn}
-                            >
-                              <CalendarCheck2 size={14} aria-hidden="true" />
-                              Book This Service
-                            </Link>
-                          </>
-                        ) : (
-                          <Link href={company.public_path} className={styles.fpPrimaryBtn}>
-                            Explore Company <ArrowRight size={14} aria-hidden="true" />
-                          </Link>
-                        )}
+                        <Link href={company.public_path} className={styles.fpPrimaryBtn}>
+                          <span className={styles.fpLabelFull}>View Company</span>
+                          <span className={styles.fpLabelShort}>View company</span>
+                          <ArrowRight size={14} aria-hidden="true" />
+                        </Link>
                       </div>
                     </div>
                   </div>

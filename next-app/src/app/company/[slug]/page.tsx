@@ -5,7 +5,9 @@ import { getPublicCompany } from "@/lib/services/public-companies";
 import Link from "next/link";
 import {
   ArrowLeft,
+  Briefcase,
   Building2,
+  Car,
   Clock,
   Compass,
   ExternalLink,
@@ -14,7 +16,9 @@ import {
   MapPin,
   Phone,
   Star,
+  Users,
 } from "@/components/icons";
+import { CalendarCheck2 } from "lucide-react";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { openingHoursEntries } from "@/lib/company-opening-hours";
 import styles from "@/features/pages/company-profile-page.module.css";
@@ -39,14 +43,23 @@ export default async function CompanyProfilePage({ params }: Props) {
   const services = Array.isArray(company.services) ? company.services : [];
   const trips = Array.isArray(company.trips) ? company.trips : [];
   const companyHours = openingHoursEntries(company.opening_hours);
-  const locationLabel = [
-    company.locality,
-    company.district,
-    company.region,
-    company.country,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const locationParts: string[] = [];
+  const seenLoc = new Set<string>();
+  for (const value of [company.locality, company.district, company.region]) {
+    const cleaned = typeof value === "string" ? value.trim() : "";
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (key === "tanzania" || seenLoc.has(key)) continue;
+    seenLoc.add(key);
+    locationParts.push(cleaned);
+    if (locationParts.length >= 2) break;
+  }
+  if (locationParts.length === 0) {
+    locationParts.push("Zanzibar");
+  } else if (!locationParts.some((p) => p.toLowerCase().includes("zanzibar"))) {
+    locationParts.push("Zanzibar");
+  }
+  const locationLabel = locationParts.join(", ");
   const hasCoordinates = company.latitude != null && company.longitude != null;
 
   return (
@@ -273,16 +286,85 @@ export default async function CompanyProfilePage({ params }: Props) {
             </div>
           ) : (
             <div className={styles.toursGrid}>
-              {services.map((service: any) => (
-                <Link className={styles.tripCard} key={service.id} href={`/private-hire/${service.id}/`}>
-                  <div className={styles.tripBody}>
-                    <h3>{service.title}</h3>
-                    <p className={styles.tripPlace}>{service.vehicle?.name || "Private hire service"} · {service.vehicle?.capacity || 1} passengers</p>
-                    {service.description ? <p className={styles.tripDesc}>{service.description}</p> : null}
-                    <p className={styles.tripPrice}><span>From</span> ${Number(service.price).toLocaleString("en-US")} / {String(service.pricing_type || "trip").replace("_", " ")}</p>
-                  </div>
-                </Link>
-              ))}
+              {services.map((service: any) => {
+                const vehicle = service.vehicle;
+                const photoUrl = vehicle?.front_image_url
+                  ? getImageUrl(vehicle.front_image_url)
+                  : null;
+                const pricingLabel = String(service.pricing_type || "per_trip").replaceAll("_", " ");
+                const seats = Number(vehicle?.capacity ?? 0);
+                const bags = Number(vehicle?.luggage_capacity ?? 0);
+
+                return (
+                  <article className={styles.tripCard} key={service.id}>
+                    <Link href={`/transport/service/${service.id}/`} className={styles.tripMedia}>
+                      {photoUrl ? (
+                        <Image
+                          src={photoUrl}
+                          alt={vehicle?.name || service.title}
+                          fill
+                          sizes="(max-width: 560px) 92vw, (max-width: 1024px) 45vw, 360px"
+                          className={styles.tripImage}
+                          unoptimized
+                        />
+                      ) : (
+                        <span className={styles.tripFallback}>
+                          <Car size={28} aria-hidden="true" />
+                        </span>
+                      )}
+                    </Link>
+                    <div className={styles.tripBody}>
+                      <h3>
+                        <Link href={`/transport/service/${service.id}/`} className={styles.serviceTitleLink}>
+                          {service.title}
+                        </Link>
+                      </h3>
+                      <p className={styles.tripPlace}>
+                        <Car size={14} aria-hidden="true" />
+                        <span>{vehicle?.name || "Private hire vehicle"}</span>
+                        {vehicle?.plate_number ? (
+                          <span className={styles.servicePlate}>{vehicle.plate_number}</span>
+                        ) : null}
+                      </p>
+                      <div className={styles.serviceSpecs}>
+                        {seats > 0 ? (
+                          <span>
+                            <Users size={13} aria-hidden="true" />
+                            {seats} pax
+                          </span>
+                        ) : null}
+                        {bags > 0 ? (
+                          <span>
+                            <Briefcase size={13} aria-hidden="true" />
+                            {bags} bags
+                          </span>
+                        ) : null}
+                      </div>
+                      {service.description ? (
+                        <p className={styles.tripDesc}>{service.description}</p>
+                      ) : null}
+                      <p className={styles.tripPrice}>
+                        <span>From</span> ${Number(service.price).toLocaleString("en-US")} / {pricingLabel}
+                      </p>
+                      <div className={styles.serviceActions}>
+                        <Link
+                          href={`/transport/service/${service.id}/`}
+                          className={styles.serviceDetailBtn}
+                        >
+                          Details
+                        </Link>
+                        <Link
+                          href={`/booking/${service.id}/`}
+                          className={styles.serviceBookBtn}
+                        >
+                          <CalendarCheck2 size={14} aria-hidden="true" />
+                          Book This Service
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>

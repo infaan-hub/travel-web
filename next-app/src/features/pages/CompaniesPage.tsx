@@ -3,14 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarCheck2, LayoutGrid, List, ShieldCheck } from "lucide-react";
+import { LayoutGrid, List, ShieldCheck } from "lucide-react";
 import { publicCompaniesAPI } from "@/lib/api/client";
 import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
 import { getImageUrl } from "@/lib/utils/image-url";
 import {
   AlertCircle,
   ArrowRight,
-  Briefcase,
   Building2,
   Car,
   ChevronLeft,
@@ -19,29 +18,13 @@ import {
   MapPin,
   RefreshCw,
   Shield,
-  Users,
 } from "@/components/icons";
-import { PRICING_LABELS } from "@/features/transport/private-hire-data";
 import styles from "@/features/pages/companies-page.module.css";
 
-type CompanyPrivateService = {
+type CompanyServicePreview = {
   id: number;
-  title: string;
-  description?: string | null;
-  price: string | number;
-  pricing_type?: string | null;
   vehicle?: {
-    name?: string | null;
-    plate_number?: string | null;
-    category?: string | null;
-    capacity?: number | null;
-    luggage_capacity?: number | null;
     front_image_url?: string | null;
-    side_image_url?: string | null;
-    back_image_url?: string | null;
-  } | null;
-  driver?: {
-    name?: string | null;
   } | null;
 };
 
@@ -63,27 +46,30 @@ type Company = {
   services_count: number;
   trips_count?: number;
   website: string | null;
-  services?: CompanyPrivateService[];
+  services?: CompanyServicePreview[];
 };
 
 type ViewMode = "grid" | "list";
 
 const PAGE_SIZE = 100;
 
-function formatLocation(company: Company): string {
-  const parts = [company.locality, company.district, company.region, company.country]
-    .map((part) => part?.trim() || "")
-    .filter(Boolean);
+function formatCompanyLocation(company: Company): string {
   const seen = new Set<string>();
-  const unique: string[] = [];
-  for (const part of parts) {
-    const key = part.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(part);
-    }
+  const parts: string[] = [];
+  for (const value of [company.locality, company.district, company.region]) {
+    const cleaned = value?.trim();
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (key === "tanzania" || seen.has(key)) continue;
+    seen.add(key);
+    parts.push(cleaned);
+    if (parts.length >= 1) break;
   }
-  return unique.join(", ") || "Tanzania";
+  if (parts.length === 0) return "Zanzibar";
+  if (!parts.some((part) => part.toLowerCase().includes("zanzibar"))) {
+    parts.push("Zanzibar");
+  }
+  return parts.join(", ");
 }
 
 function companyMonogram(name: string): string {
@@ -109,64 +95,25 @@ function buildPageNumbers(current: number, total: number): number[] {
 }
 
 function CompanyFeaturedCard({ company }: { company: Company }) {
-  const [serviceIndex, setServiceIndex] = useState(0);
-  const [angleIndex, setAngleIndex] = useState(0);
-
-  const services = Array.isArray(company.services) ? company.services : [];
-  const activeService = services[serviceIndex] ?? services[0] ?? null;
-  const locationLabel = formatLocation(company);
-  const regionBadge = company.region?.trim() || company.country?.trim() || "Zanzibar";
-  const tripsCount = company.trips_count ?? 0;
-  const servicesCount = Number(company.services_count ?? services.length);
+  const locationLabel = formatCompanyLocation(company);
+  const servicesCount = Number(company.services_count ?? company.services?.length ?? 0);
+  const tripsCount = Number(company.trips_count ?? 0);
   const logoUrl = company.logo_image_url ? getImageUrl(company.logo_image_url) : null;
-
-  const vehicle = activeService?.vehicle ?? null;
-  const vehicleName = vehicle?.name?.trim() || activeService?.title || "Private vehicle";
-  const plateNumber = vehicle?.plate_number?.trim() || "";
-  const seats = Number(vehicle?.capacity ?? 0);
-  const bags = Number(vehicle?.luggage_capacity ?? 0);
-
-  const priceNum = activeService ? Number(activeService.price) : NaN;
-  const priceText = activeService
-    ? Number.isFinite(priceNum)
-      ? `$${Number.isInteger(priceNum) ? priceNum : priceNum.toFixed(2)}`
-      : `$${activeService.price}`
-    : "";
-  const pricingKey = activeService?.pricing_type || "per_trip";
-  const pricingLabel = PRICING_LABELS[pricingKey] || pricingKey.replace(/_/g, " ");
-
-  const vehiclePhotos = [
-    { label: "Front", url: vehicle?.front_image_url ?? null },
-    { label: "Side", url: vehicle?.side_image_url ?? null },
-    { label: "Back", url: vehicle?.back_image_url ?? null },
-  ].filter((item): item is { label: string; url: string } => Boolean(item.url));
-
-  const activeVehiclePhoto = vehiclePhotos[angleIndex] ?? vehiclePhotos[0] ?? null;
-  const bgUrl = activeVehiclePhoto?.url
-    ? getImageUrl(activeVehiclePhoto.url)
-    : company.cover_image_url
-      ? getImageUrl(company.cover_image_url)
-      : null;
-
-  const subtitle =
-    activeService?.title?.trim() ||
+  const coverRaw =
+    company.cover_image_url ||
+    company.services?.[0]?.vehicle?.front_image_url ||
+    null;
+  const coverUrl = coverRaw ? getImageUrl(coverRaw) : null;
+  const description =
     company.description?.trim() ||
-    "Verified local tourism and transport provider offering direct bookings.";
-
-  const kickerParts = [
-    locationLabel,
-    `${servicesCount} ${servicesCount === 1 ? "hire service" : "hire services"}`,
-    ...(tripsCount > 0
-      ? [`${tripsCount} ${tripsCount === 1 ? "trip" : "trips"}`]
-      : []),
-  ];
+    "Licensed local transport partner in Zanzibar offering verified private hire vehicles and experienced island drivers.";
 
   return (
     <article className={styles.fpCard}>
       <div className={styles.fpMedia} aria-hidden="true">
-        {bgUrl ? (
+        {coverUrl ? (
           <Image
-            src={bgUrl}
+            src={coverUrl}
             alt=""
             fill
             sizes="(max-width: 640px) 48vw, (max-width: 1024px) 48vw, 380px"
@@ -201,145 +148,60 @@ function CompanyFeaturedCard({ company }: { company: Company }) {
           </span>
           <span className={styles.fpGlassBadge}>
             <ShieldCheck size={12} aria-hidden="true" />
-            <span className={styles.fpLabelFull}>Verified · {regionBadge}</span>
+            <span className={styles.fpLabelFull}>Verified company</span>
             <span className={styles.fpLabelShort}>Verified</span>
           </span>
         </div>
 
-        {activeService ? (
-          <div className={styles.fpPriceBox}>
-            <span className={styles.fpPriceValue}>{priceText}</span>
-            <span className={styles.fpPriceUnit}>/ {pricingLabel}</span>
-          </div>
-        ) : (
-          <span className={styles.fpRatingPill}>
-            <Compass size={11} aria-hidden="true" />
-            {tripsCount > 0
-              ? `${tripsCount} ${tripsCount === 1 ? "trip" : "trips"}`
-              : regionBadge}
-          </span>
-        )}
+        <span className={styles.fpRatingPill}>
+          <Car size={11} aria-hidden="true" />
+          {servicesCount > 0
+            ? `${servicesCount} ${servicesCount === 1 ? "vehicle" : "vehicles"}`
+            : "Private hire"}
+        </span>
       </div>
 
       <div className={styles.fpSheet}>
-        <div className={styles.fpBodyRow}>
-          <div className={styles.fpCopy}>
-            <span className={styles.fpKicker}>{kickerParts.join(" · ")}</span>
-            <h3 className={styles.fpTitle}>
-              <Link href={company.public_path} className={styles.fpTitleLink}>
-                {company.name}
-              </Link>
-            </h3>
-            {subtitle ? <p className={styles.fpDesc}>{subtitle}</p> : null}
-          </div>
-
-          {services.length > 1 ? (
-            <div className={styles.fpAnglePills} role="tablist" aria-label="Company services">
-              {services.slice(0, 4).map((svc, idx) => (
-                <button
-                  key={svc.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={idx === serviceIndex}
-                  className={`${styles.fpAngleBtn} ${
-                    idx === serviceIndex ? styles.fpAngleBtnActive : ""
-                  }`}
-                  onClick={() => {
-                    setServiceIndex(idx);
-                    setAngleIndex(0);
-                  }}
-                >
-                  {svc.vehicle?.name?.trim() || `Option ${idx + 1}`}
-                </button>
-              ))}
-            </div>
-          ) : vehiclePhotos.length > 1 ? (
-            <div className={styles.fpAnglePills} role="tablist" aria-label="Vehicle photo angle">
-              {vehiclePhotos.map((photo, index) => (
-                <button
-                  key={photo.label}
-                  type="button"
-                  role="tab"
-                  aria-selected={index === angleIndex}
-                  className={`${styles.fpAngleBtn} ${
-                    index === angleIndex ? styles.fpAngleBtnActive : ""
-                  }`}
-                  onClick={() => setAngleIndex(index)}
-                >
-                  {photo.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
+        <div className={styles.fpCopy}>
+          <span className={styles.fpKicker}>{locationLabel} · Local Provider</span>
+          <h3 className={styles.fpTitle}>
+            <Link href={company.public_path} className={styles.fpTitleLink}>
+              {company.name}
+            </Link>
+          </h3>
+          <p className={styles.fpDesc}>{description}</p>
         </div>
 
         <div className={styles.fpBottomRow}>
           <ul className={styles.fpFacts} aria-label="Company highlights">
-            {activeService ? (
-              <>
-                <li>
-                  <Car size={12} aria-hidden="true" />
-                  <span>{vehicleName}</span>
-                  {plateNumber ? <em>{plateNumber}</em> : null}
-                </li>
-                {seats > 0 ? (
-                  <li>
-                    <Users size={12} aria-hidden="true" />
-                    <span>{seats} pax</span>
-                  </li>
-                ) : null}
-                {bags > 0 ? (
-                  <li>
-                    <Briefcase size={12} aria-hidden="true" />
-                    <span>{bags} bags</span>
-                  </li>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <li>
-                  <MapPin size={12} aria-hidden="true" />
-                  <span>{locationLabel}</span>
-                </li>
-                <li>
-                  <Car size={12} aria-hidden="true" />
-                  <span>0 hire services</span>
-                </li>
-                <li>
-                  <Compass size={12} aria-hidden="true" />
-                  <span>
-                    {tripsCount} {tripsCount === 1 ? "trip" : "trips"}
-                  </span>
-                </li>
-              </>
-            )}
+            <li>
+              <MapPin size={12} aria-hidden="true" />
+              <span>{locationLabel}</span>
+            </li>
+            <li>
+              <Car size={12} aria-hidden="true" />
+              <span>
+                {servicesCount > 0
+                  ? `${servicesCount} ${servicesCount === 1 ? "service" : "services"}`
+                  : "Private fleet"}
+              </span>
+            </li>
+            {tripsCount > 0 ? (
+              <li>
+                <Compass size={12} aria-hidden="true" />
+                <span>
+                  {tripsCount} {tripsCount === 1 ? "trip" : "trips"}
+                </span>
+              </li>
+            ) : null}
           </ul>
 
           <div className={styles.fpActionsRow}>
-            {activeService ? (
-              <>
-                <Link href={company.public_path} className={styles.fpGhostBtn}>
-                  Profile
-                </Link>
-                <Link
-                  href={`/transport/service/${activeService.id}/`}
-                  className={`${styles.fpGhostBtn} ${styles.fpDetailsGhost}`}
-                >
-                  Details
-                </Link>
-                <Link href={`/booking/${activeService.id}/`} className={styles.fpPrimaryBtn}>
-                  <CalendarCheck2 size={14} aria-hidden="true" />
-                  <span className={styles.fpLabelFull}>Book This Service</span>
-                  <span className={styles.fpLabelShort}>Book now</span>
-                </Link>
-              </>
-            ) : (
-              <Link href={company.public_path} className={styles.fpPrimaryBtn}>
-                <span className={styles.fpLabelFull}>View company profile</span>
-                <span className={styles.fpLabelShort}>Profile</span>
-                <ArrowRight size={14} aria-hidden="true" />
-              </Link>
-            )}
+            <Link href={company.public_path} className={styles.fpPrimaryBtn}>
+              <span className={styles.fpLabelFull}>View Company</span>
+              <span className={styles.fpLabelShort}>View company</span>
+              <ArrowRight size={14} aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </div>
@@ -440,7 +302,7 @@ export default function CompaniesPage() {
             </span>
             <h1 className={styles.sectionTitle}>All companies</h1>
             <p className={styles.sectionLead}>
-              Browse all verified companies, compare their private hire services, and book directly.
+              Browse verified local providers in Zanzibar and open any company to see all private hire services assigned to it.
             </p>
           </div>
 
