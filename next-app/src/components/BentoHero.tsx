@@ -28,7 +28,7 @@ export default function BentoHero({ mainImage, secondImage, featuredImage, thumb
           <h1 id="bento-hero-title">Find your<br />next trip</h1>
           <p className={styles.tagline}>Book trusted drivers and verified vehicles for airport transfers and local journeys across Tanzania.</p>
           <div className={styles.actions}>
-            <Link className={styles.explore} href="/tours/">Explore</Link>
+            <Link className={styles.explore} href="/booking/create/">Explore</Link>
             <Link className={styles.companies} href="/companies/">Companies</Link>
           </div>
         </div>
