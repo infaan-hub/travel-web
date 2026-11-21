@@ -64,11 +64,6 @@ type PhotoAngle = "front" | "side" | "back";
 const DEFAULT_INCLUDES = "A/C\nFuel\nMineral Water\nLuggage Assistance";
 const DEFAULT_EXCLUDES = "Driver Tips\nPark Entry Fees";
 
-function formatPricingType(type: string): string {
-  const clean = type.replace(/_/g, " ").trim();
-  return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : "Per trip";
-}
-
 function formatDateLabel(iso: string): string {
   const dt = new Date(iso);
   if (Number.isNaN(dt.getTime())) return "Recently";
@@ -338,9 +333,6 @@ function VehicleShowcaseCard({
                       {svc.is_active ? "Active" : "Paused"}
                     </span>
                   </div>
-                  <span className={styles.serviceItemMeta}>
-                    ${svc.price} · {formatPricingType(svc.pricing_type)}
-                  </span>
                 </div>
               ))}
             </div>

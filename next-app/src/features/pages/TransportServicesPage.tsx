@@ -17,7 +17,6 @@ import {
 import styles from "@/features/pages/company-public.module.css";
 import cardStyles from "@/features/pages/company-private-service.module.css";
 import {
-  PRICING_LABELS,
   SAMPLE_PRIVATE_HIRE_SERVICES,
   type PrivateHireService,
 } from "@/features/transport/private-hire-data";
@@ -105,7 +104,6 @@ export default function TransportServicesPage() {
                 const companyName = svc.company?.name ?? "";
                 const capacityPax = svc.vehicle?.capacity ?? 0;
                 const luggageBags = svc.vehicle?.luggage_capacity ?? 0;
-                const pricingUnit = PRICING_LABELS[svc.pricing_type] || svc.pricing_type || "per trip";
                 const bgImage = svc.vehicle?.front_image_url
                   ? getImageUrl(svc.vehicle.front_image_url)
                   : null;
@@ -144,11 +142,6 @@ export default function TransportServicesPage() {
                         {plateNumber ? (
                           <span className={cardStyles.featuredPlatePill}>{plateNumber}</span>
                         ) : null}
-                      </div>
-
-                      <div className={cardStyles.featuredPricePill}>
-                        <span className={cardStyles.featuredPriceNum}>${svc.price}</span>
-                        <span className={cardStyles.featuredPriceUnit}>/{pricingUnit}</span>
                       </div>
                     </div>
 

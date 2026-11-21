@@ -69,12 +69,6 @@ type PrivateHireService = {
   created_at: string;
 };
 
-const PRICING_TYPE_LABELS: Record<string, string> = {
-  per_trip: "per trip",
-  per_day: "per day",
-  per_hour: "per hour",
-};
-
 export default function CompanyPrivateServicePage() {
   const toast = useToast();
   const [services, setServices] = useState<PrivateHireService[]>([]);
@@ -287,10 +281,6 @@ export default function CompanyPrivateServicePage() {
                   <span className="text-xs text-slate-500">
                     Service #{svc.id} • {svc.is_active ? "Active" : "Paused"}
                   </span>
-                </div>
-                <div className={styles.priceTag}>
-                  ${svc.price}
-                  <span className={styles.pricingUnit}>/{PRICING_TYPE_LABELS[svc.pricing_type] || svc.pricing_type}</span>
                 </div>
               </div>
 
@@ -566,12 +556,6 @@ export default function CompanyPrivateServicePage() {
                 <h2 className={styles.previewHeaderTitle}>{previewService.title}</h2>
               </div>
               <div className="flex items-center gap-3">
-                <span className={styles.previewPriceBadge}>
-                  ${previewService.price}
-                  <span className="text-xs font-normal opacity-85">
-                    /{PRICING_TYPE_LABELS[previewService.pricing_type] || previewService.pricing_type}
-                  </span>
-                </span>
                 <button
                   className="text-white hover:opacity-75 p-1"
                   onClick={() => setPreviewService(null)}

@@ -22,7 +22,6 @@ import {
 } from "@/components/icons";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { openingHoursEntries } from "@/lib/company-opening-hours";
-import { PRICING_LABELS } from "@/features/transport/private-hire-data";
 import styles from "@/features/pages/company-profile-page.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -362,9 +361,6 @@ export default async function CompanyProfilePage({ params }: Props) {
                 const photoUrl = vehicle?.front_image_url
                   ? getImageUrl(vehicle.front_image_url)
                   : null;
-                const pricingKey = String(service.pricing_type || "per_trip");
-                const pricingLabel =
-                  PRICING_LABELS[pricingKey] || pricingKey.replaceAll("_", " ");
                 const vehicleName = vehicle?.name?.trim() || "Private vehicle";
                 const plate = vehicle?.plate_number?.trim() || "";
                 const seats = Number(vehicle?.capacity ?? 0);
@@ -401,13 +397,6 @@ export default async function CompanyProfilePage({ params }: Props) {
                         <span className={styles.fpLabelFull}>Verified private hire</span>
                         <span className={styles.fpLabelShort}>Verified</span>
                       </span>
-
-                      <div className={styles.fpPriceBox}>
-                        <span className={styles.fpPriceValue}>
-                          {formatPrice(service.price)}
-                        </span>
-                        <span className={styles.fpPriceUnit}>/ {pricingLabel}</span>
-                      </div>
                     </div>
 
                     <div className={styles.fpSheet}>

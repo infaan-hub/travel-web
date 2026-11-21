@@ -19,7 +19,6 @@ import {
 import { publicPrivateHireAPI } from "@/lib/api/client";
 import { getImageUrl } from "@/lib/utils/image-url";
 import {
-  PRICING_LABELS,
   SAMPLE_PRIVATE_HIRE_SERVICES,
   type PrivateHireService,
 } from "@/features/transport/private-hire-data";
@@ -90,9 +89,6 @@ export default function TransportServiceDetailPage({ id }: Props) {
   }
 
   const { vehicle, driver, company } = service;
-  const pricingType = service.pricing_type || "";
-  const pricingLabel =
-    PRICING_LABELS[pricingType] ?? (pricingType ? pricingType.replaceAll("_", " ") : "per trip");
   const includes = vehicle?.includes ?? [];
   const excludes = vehicle?.excludes ?? [];
   const driverName = driver?.name?.trim() || "Assigned driver";
@@ -137,10 +133,6 @@ export default function TransportServiceDetailPage({ id }: Props) {
             <span className={styles.heroBadge}>
               <ShieldCheck size={13} /> Verified private hire
             </span>
-            <div className={styles.heroPrice}>
-              <span className={styles.priceValue}>${service.price}</span>
-              <span className={styles.priceUnit}>/ {pricingLabel}</span>
-            </div>
           </div>
         </div>
 

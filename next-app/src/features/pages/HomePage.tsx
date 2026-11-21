@@ -15,7 +15,7 @@ import styles from "@/features/pages/home-page.module.css";
 
 import type { HomeSettings, Tour } from "@/features/pages/types";
 import type { PublicDriverCard } from "@/lib/featured-drivers";
-import { PRICING_LABELS, SAMPLE_PRIVATE_HIRE_SERVICES } from "@/features/transport/private-hire-data";
+import { SAMPLE_PRIVATE_HIRE_SERVICES } from "@/features/transport/private-hire-data";
 
 type FeaturedCompany = {
   id: number;
@@ -47,12 +47,6 @@ function HomePrivateHireFeaturedCard({ svc }: { svc: any }) {
   const companyName: string = svc.company?.name ?? "";
   const capacityPax = Number(vehicle.capacity ?? 0);
   const luggageBags = Number(vehicle.luggage_capacity ?? vehicle.luggageCapacity ?? 0);
-  const pricingKey: string = svc.pricing_type ?? svc.pricingType ?? "per_trip";
-  const pricingLabel = PRICING_LABELS[pricingKey] || pricingKey.replace(/_/g, " ");
-  const priceAmount = Number(svc.price);
-  const priceLabel = Number.isFinite(priceAmount)
-    ? `$${Number.isInteger(priceAmount) ? priceAmount : priceAmount.toFixed(2)}`
-    : `$${svc.price}`;
   const detailsHref = `/transport/service/${svc.id}/`;
   const description: string =
     (typeof svc.description === "string" && svc.description.trim()) ||
@@ -93,11 +87,6 @@ function HomePrivateHireFeaturedCard({ svc }: { svc: any }) {
           <span className={styles.fpLabelFull}>Verified private hire</span>
           <span className={styles.fpLabelShort}>Verified</span>
         </span>
-
-        <div className={styles.fpPriceBox}>
-          <span className={styles.fpPriceValue}>{priceLabel}</span>
-          <span className={styles.fpPriceUnit}>/ {pricingLabel}</span>
-        </div>
       </div>
 
       <div className={styles.fpSheet}>

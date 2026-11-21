@@ -730,9 +730,6 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
           : "",
   };
 
-  const pricingLabel = service
-    ? service.pricing_type.replaceAll("_", " ")
-    : "per trip";
   const providerName = isPublicBooking
     ? "Available drivers"
     : service?.company?.name?.trim() || "The provider";
@@ -2394,11 +2391,6 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
                 <span className={styles.summaryUnit}>
                   {formatTzs(selectedFareTzs)} · {selectedOptionMeta.shortLabel}
                 </span>
-              </div>
-            ) : !isPublicBooking && service ? (
-              <div className={styles.summaryPriceRow}>
-                <span className={styles.summaryPrice}>${service.price}</span>
-                <span className={styles.summaryUnit}>/ {pricingLabel}</span>
               </div>
             ) : null}
 

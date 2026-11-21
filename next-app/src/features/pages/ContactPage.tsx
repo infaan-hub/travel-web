@@ -33,7 +33,7 @@ interface PathwayItem {
 const PATHWAYS: readonly PathwayItem[] = [
   {
     id: "support",
-    href: "/contact/support/",
+    href: "/support/",
     variant: "ocean",
     badge: "Travelers · 24h",
     kicker: "General Support",
@@ -41,7 +41,7 @@ const PATHWAYS: readonly PathwayItem[] = [
     description:
       "Ask about Zanzibar airport transfers, private hire availability, custom island routes, or updates to an existing booking.",
     facts: ["Booking help", "Route advice", "Reply within 24h"],
-    cta: "Open support form",
+    cta: "Message support",
   },
   {
     id: "company",
@@ -117,7 +117,7 @@ export default function ContactPage() {
     } else if (tabParam === "driver" || hash === "driver") {
       router.replace("/request/driver/");
     } else if (tabParam === "inquiry" || tabParam === "support" || hash === "support") {
-      router.replace("/contact/support/");
+      router.replace("/support/");
     }
   }, [router]);
 
