@@ -126,12 +126,21 @@ describe("driver vehicle access & 1-vehicle-per-driver policy", () => {
         description: "Executive coastal transfer van",
         includes: ["A/C", "Fuel"],
         excludes: ["Driver Tips", "Park Fees"],
+        oneWayPriceUsd: null,
+        waitReturnPriceUsd: null,
+        fullDayPriceUsd: null,
         isAvailable: true,
       });
 
-      // Partial edit inherits existing values cleanly
+      // Partial edit inherits existing values cleanly and updates vehicle fares
       const edited = parseVehicleFields(
-        { is_available: "false", capacity: "99" },
+        {
+          is_available: "false",
+          capacity: "99",
+          one_way_price_usd: "45",
+          wait_return_price_usd: "75",
+          full_day_price_usd: "130",
+        },
         created.data,
       );
       expect(edited.ok).toBe(true);
@@ -140,6 +149,9 @@ describe("driver vehicle access & 1-vehicle-per-driver policy", () => {
         expect(edited.data.plateNumber).toBe("Z 441 AB");
         expect(edited.data.capacity).toBe(60);
         expect(edited.data.isAvailable).toBe(false);
+        expect(edited.data.oneWayPriceUsd).toBe(45);
+        expect(edited.data.waitReturnPriceUsd).toBe(75);
+        expect(edited.data.fullDayPriceUsd).toBe(130);
       }
     }
   });

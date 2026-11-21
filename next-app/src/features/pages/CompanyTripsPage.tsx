@@ -6,6 +6,7 @@ import {
   ArrowUpDown,
   Award,
   BarChart3,
+  DollarSign,
   Building2,
   Car,
   Check,
@@ -569,6 +570,10 @@ export default function CompanyTripsPage({ company }: Props) {
             <Link href="/company/private-driver/" className={styles.topNavLink}>
               <Users size={15} aria-hidden="true" />
               Drivers
+            </Link>
+            <Link href="/company/prices/" className={styles.topNavLink}>
+              <DollarSign size={15} aria-hidden="true" />
+              Prices
             </Link>
             <Link href="/company/analytics/" className={styles.topNavLink}>
               <BarChart3 size={15} aria-hidden="true" />

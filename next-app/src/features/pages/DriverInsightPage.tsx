@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import {
   BarChart3,
+  DollarSign,
   Building2,
   CalendarDays,
   Car,
@@ -142,6 +143,10 @@ export default function DriverInsightPage({ initialDriver, initialInsights }: Pr
             <Link href="/driver/vehicle/" className={styles.topNavLink}>
               <Car size={15} aria-hidden="true" />
               Vehicle
+            </Link>
+            <Link href="/driver/price/" className={styles.topNavLink}>
+              <DollarSign size={15} aria-hidden="true" />
+              Price
             </Link>
             <Link
               href="/driver/insight/"

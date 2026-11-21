@@ -303,6 +303,12 @@ export const driverAPI = {
   updateVehicle: (data: FormData | Record<string, unknown>) =>
     api.put("/driver/vehicle/", data, formDataConfig(data)),
   deleteVehicle: () => api.delete("/driver/vehicle/"),
+  getPrices: () => api.get("/driver/prices/"),
+  createPrice: (data: Record<string, unknown>) => api.post("/driver/prices/", data),
+  updatePrice: (id: string | number, data: Record<string, unknown>) =>
+    api.patch(`/driver/prices/${id}/`, data),
+  deletePrice: (id: string | number) => api.delete(`/driver/prices/${id}/`),
+  resetDefaultPrices: () => api.post("/driver/prices/", { action: "reset_defaults" }),
   getTripRequests: () => api.get("/driver/trip-requests/"),
   updateBooking: (id: string | number, status: "confirmed" | "in_progress" | "completed") =>
     api.patch(`/driver/bookings/${id}/`, { status }),
@@ -328,6 +334,22 @@ export const companyTransportBookingsAPI = {
   getAll: () => api.get("/company/transport-bookings/"),
   setPublic: (id: string | number, isPublic: boolean) =>
     api.patch(`/company/transport-bookings/${id}/`, { is_public: isPublic }),
+};
+export const companyPricesAPI = {
+  getAll: () => api.get("/company/prices/"),
+  create: (data: Record<string, unknown>) => api.post("/company/prices/", data),
+  update: (id: string | number, data: Record<string, unknown>) =>
+    api.patch(`/company/prices/${id}/`, data),
+  delete: (id: string | number) => api.delete(`/company/prices/${id}/`),
+  resetDefaults: () => api.post("/company/prices/", { action: "reset_defaults" }),
+};
+export const routePricesAPI = {
+  quote: (params: {
+    origin: string;
+    destination: string;
+    service_id?: number;
+    distance_km?: number;
+  }) => api.get("/route-prices/quote/", { params }),
 };
 export const transportTripRequestsAPI = {
   getAll: () => api.get("/transport-trip-requests/"),

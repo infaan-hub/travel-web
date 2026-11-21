@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   BarChart3,
+  DollarSign,
   Building2,
   CalendarDays,
   Car,
@@ -246,6 +247,10 @@ export default function DriverBookingsPage({
             <Link href="/driver/vehicle/" className={styles.topNavLink}>
               <Car size={15} aria-hidden="true" />
               Vehicle
+            </Link>
+            <Link href="/driver/price/" className={styles.topNavLink}>
+              <DollarSign size={15} aria-hidden="true" />
+              Price
             </Link>
             <Link href="/driver/insight/" className={styles.topNavLink}>
               <BarChart3 size={15} aria-hidden="true" />

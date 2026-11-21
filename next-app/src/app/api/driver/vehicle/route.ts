@@ -96,6 +96,9 @@ export async function POST(request: NextRequest) {
         frontImage,
         sideImage,
         backImage,
+        oneWayPriceUsd: parsed.data.oneWayPriceUsd,
+        waitReturnPriceUsd: parsed.data.waitReturnPriceUsd,
+        fullDayPriceUsd: parsed.data.fullDayPriceUsd,
         isAvailable: parsed.data.isAvailable,
       },
     });
@@ -156,6 +159,10 @@ async function handleUpdate(request: NextRequest) {
       description: existing.description,
       includes: existingIncludes,
       excludes: existingExcludes,
+      oneWayPriceUsd: existing.oneWayPriceUsd != null ? Number(existing.oneWayPriceUsd) : null,
+      waitReturnPriceUsd:
+        existing.waitReturnPriceUsd != null ? Number(existing.waitReturnPriceUsd) : null,
+      fullDayPriceUsd: existing.fullDayPriceUsd != null ? Number(existing.fullDayPriceUsd) : null,
       isAvailable: existing.isAvailable,
     });
     if (!parsed.ok) {
@@ -216,6 +223,9 @@ async function handleUpdate(request: NextRequest) {
         frontImage,
         sideImage,
         backImage,
+        oneWayPriceUsd: parsed.data.oneWayPriceUsd,
+        waitReturnPriceUsd: parsed.data.waitReturnPriceUsd,
+        fullDayPriceUsd: parsed.data.fullDayPriceUsd,
         isAvailable: parsed.data.isAvailable,
       },
     });

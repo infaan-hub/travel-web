@@ -166,6 +166,7 @@ model Company {
   privateHireVehicles PrivateHireVehicle[]
   privateHireDrivers  PrivateHireDriver[]
   privateHireServices PrivateHireService[]
+  routePrices         RoutePrice[]
   transportBookings   TransportBooking[]
   bookings            Booking[]
   auditLogs           AuditLog[]
@@ -723,10 +724,13 @@ model PrivateHireVehicle {
   description     String   @default("")
   includes        Json     @default("[]")
   excludes        Json     @default("[]")
-  frontImage      String   @map("front_image")
-  sideImage       String?  @map("side_image")
-  backImage       String?  @map("back_image")
-  isAvailable     Boolean  @default(true) @map("is_available")
+  frontImage         String   @map("front_image")
+  sideImage          String?  @map("side_image")
+  backImage          String?  @map("back_image")
+  oneWayPriceUsd     Decimal? @map("one_way_price_usd") @db.Decimal(10, 2)
+  waitReturnPriceUsd Decimal? @map("wait_return_price_usd") @db.Decimal(10, 2)
+  fullDayPriceUsd    Decimal? @map("full_day_price_usd") @db.Decimal(10, 2)
+  isAvailable        Boolean  @default(true) @map("is_available")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -759,6 +763,7 @@ model PrivateHireDriver {
   user                  User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
   ownVehicle            PrivateHireVehicle?    @relation("PublicDriverVehicle")
   services              PrivateHireService[]
+  routePrices           RoutePrice[]
   transportBookings     TransportBooking[]
   transportTripRequests TransportTripRequest[]
   joinRequest           PartnerJoinRequest?
@@ -789,6 +794,28 @@ model PrivateHireService {
   @@index([vehicleId])
   @@index([driverId])
   @@map("private_hire_services")
+}
+
+model RoutePrice {
+  id                 Int      @id @default(autoincrement())
+  driverId           Int?     @map("driver_id")
+  companyId          Int?     @map("company_id")
+  origin             String
+  destination        String
+  oneWayPriceUsd     Decimal  @map("one_way_price_usd") @db.Decimal(10, 2)
+  waitReturnPriceUsd Decimal  @map("wait_return_price_usd") @db.Decimal(10, 2)
+  fullDayPriceUsd    Decimal  @map("full_day_price_usd") @db.Decimal(10, 2)
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  driver  PrivateHireDriver? @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  company Company?           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([driverId, isActive])
+  @@index([companyId, isActive])
+  @@index([origin, destination])
+  @@map("route_prices")
 }
 
 model PartnerJoinRequest {
@@ -840,6 +867,7 @@ model TransportBooking {
   endDate       DateTime?              @map("end_date") @db.Date
   pickupTime    String?                @map("pickup_time")
   totalPrice    Decimal?               @map("total_price") @db.Decimal(12, 2)
+  tripOption    String                 @default("one_way") @map("trip_option")
   status        TransportBookingStatus @default(pending)
   isPublic      Boolean                @default(false) @map("is_public")
   notes         String                 @default("")

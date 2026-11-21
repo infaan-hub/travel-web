@@ -10,8 +10,15 @@ import type {
   User,
 } from "@prisma/client";
 import { resolveDriverStage } from "@/lib/driver-workflow";
+import { usdToTzs } from "@/lib/zanzibar-route-pricing";
 
-export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
+export type PrivateHireVehicleSerializable = Omit<
+  PrivateHireVehicle,
+  "oneWayPriceUsd" | "waitReturnPriceUsd" | "fullDayPriceUsd"
+> &
+  Partial<Pick<PrivateHireVehicle, "oneWayPriceUsd" | "waitReturnPriceUsd" | "fullDayPriceUsd">>;
+
+export function privateHireVehicleSerializer(vehicle: PrivateHireVehicleSerializable) {
   let includes: string[] = [];
   let excludes: string[] = [];
 
@@ -37,6 +44,13 @@ export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
     }
   }
 
+  const oneWayUsd =
+    vehicle.oneWayPriceUsd != null ? Number(vehicle.oneWayPriceUsd) : null;
+  const waitReturnUsd =
+    vehicle.waitReturnPriceUsd != null ? Number(vehicle.waitReturnPriceUsd) : null;
+  const fullDayUsd =
+    vehicle.fullDayPriceUsd != null ? Number(vehicle.fullDayPriceUsd) : null;
+
   return {
     id: vehicle.id,
     company_id: vehicle.companyId,
@@ -49,6 +63,12 @@ export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
     description: vehicle.description,
     includes,
     excludes,
+    one_way_price_usd: oneWayUsd,
+    wait_return_price_usd: waitReturnUsd,
+    full_day_price_usd: fullDayUsd,
+    one_way_price_tzs: oneWayUsd != null ? usdToTzs(oneWayUsd) : null,
+    wait_return_price_tzs: waitReturnUsd != null ? usdToTzs(waitReturnUsd) : null,
+    full_day_price_tzs: fullDayUsd != null ? usdToTzs(fullDayUsd) : null,
     front_image: vehicle.frontImage,
     front_image_url: publicImageUrl(vehicle.frontImage),
     side_image: vehicle.sideImage,
@@ -86,7 +106,7 @@ export type SerializedPrivateHireService = ReturnType<typeof privateHireServiceS
 
 export function privateHireServiceSerializer(
   service: PrivateHireService & {
-    vehicle?: PrivateHireVehicle;
+    vehicle?: PrivateHireVehicleSerializable;
     driver?: PrivateHireDriver;
     company?: Pick<Company, "id" | "name" | "slug" | "contactPhone" | "contactEmail" | "logoImageKey"> | null;
   },
@@ -117,9 +137,10 @@ export function privateHireServiceSerializer(
 }
 
 export function transportBookingSerializer(
-  booking: TransportBooking & {
-    service?: (PrivateHireService & { vehicle?: PrivateHireVehicle; driver?: PrivateHireDriver; company?: Company | null }) | null;
-    vehicle?: PrivateHireVehicle | null;
+  booking: Omit<TransportBooking, "tripOption"> &
+    Partial<Pick<TransportBooking, "tripOption">> & {
+    service?: (PrivateHireService & { vehicle?: PrivateHireVehicleSerializable; driver?: PrivateHireDriver; company?: Company | null }) | null;
+    vehicle?: PrivateHireVehicleSerializable | null;
     driver?: PrivateHireDriver | null;
     company?: Company | null;
     tripRequest?: TransportTripRequest | null;
@@ -191,6 +212,9 @@ export function transportBookingSerializer(
     end_date: booking.endDate?.toISOString() ?? null,
     pickup_time: booking.pickupTime,
     total_price: booking.totalPrice?.toString() ?? null,
+    total_price_tzs:
+      booking.totalPrice != null ? usdToTzs(Number(booking.totalPrice)) : null,
+    trip_option: booking.tripOption ?? "one_way",
     status: booking.status,
     driver_stage: effectiveStage,
     confirmed_at: booking.confirmedAt?.toISOString() ?? null,

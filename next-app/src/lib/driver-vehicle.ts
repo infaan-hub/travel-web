@@ -115,6 +115,9 @@ export type ParsedVehicleFields = {
   description: string;
   includes: string[];
   excludes: string[];
+  oneWayPriceUsd: number | null;
+  waitReturnPriceUsd: number | null;
+  fullDayPriceUsd: number | null;
   isAvailable: boolean;
 };
 
@@ -127,8 +130,33 @@ export type ExistingVehicleDefaults = {
   description: string;
   includes: string[];
   excludes: string[];
+  oneWayPriceUsd?: number | null;
+  waitReturnPriceUsd?: number | null;
+  fullDayPriceUsd?: number | null;
   isAvailable: boolean;
 };
+
+function parseOptionalPriceUsd(
+  raw: unknown,
+  fallback: number | null | undefined,
+  label: string,
+): { ok: true; value: number | null } | { ok: false; message: string } {
+  if (raw === undefined) {
+    return { ok: true, value: fallback ?? null };
+  }
+  if (raw === null) {
+    return { ok: true, value: null };
+  }
+  const str = String(raw).trim();
+  if (!str) {
+    return { ok: true, value: null };
+  }
+  const num = Number(str);
+  if (!Number.isFinite(num) || num <= 0 || num > 100000) {
+    return { ok: false, message: `${label} must be a valid positive USD amount.` };
+  }
+  return { ok: true, value: Math.round(num * 100) / 100 };
+}
 
 export function parseVehicleFields(
   payload: Record<string, unknown>,
@@ -186,6 +214,27 @@ export function parseVehicleFields(
       ? parseVehicleStringList(payload.excludes)
       : existing?.excludes ?? [];
 
+  const oneWayParsed = parseOptionalPriceUsd(
+    payload.one_way_price_usd,
+    existing?.oneWayPriceUsd,
+    "One-way price",
+  );
+  if (!oneWayParsed.ok) return oneWayParsed;
+
+  const waitReturnParsed = parseOptionalPriceUsd(
+    payload.wait_return_price_usd,
+    existing?.waitReturnPriceUsd,
+    "Wait & return price",
+  );
+  if (!waitReturnParsed.ok) return waitReturnParsed;
+
+  const fullDayParsed = parseOptionalPriceUsd(
+    payload.full_day_price_usd,
+    existing?.fullDayPriceUsd,
+    "Full day private charter price",
+  );
+  if (!fullDayParsed.ok) return fullDayParsed;
+
   const isAvailable =
     payload.is_available !== undefined
       ? payload.is_available !== false && payload.is_available !== "false" && payload.is_available !== "0"
@@ -202,6 +251,9 @@ export function parseVehicleFields(
       description,
       includes,
       excludes,
+      oneWayPriceUsd: oneWayParsed.value,
+      waitReturnPriceUsd: waitReturnParsed.value,
+      fullDayPriceUsd: fullDayParsed.value,
       isAvailable,
     },
   };

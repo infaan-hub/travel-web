@@ -963,3 +963,163 @@
     flex: 1 1 auto;
   }
 }
+
+/* Vehicle Pricing Panel ($ & TSh) */
+.pricingPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--dw-line);
+  border-radius: 15px;
+  background: var(--dw-surface-soft);
+}
+
+.pricingPanelHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pricingPanelTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dw-blue);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pricingManageLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--dw-line-strong);
+  background: var(--dw-surface);
+  color: var(--dw-blue);
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.pricingManageLink:hover {
+  border-color: var(--dw-blue);
+  background: var(--dw-blue);
+  color: #ffffff;
+}
+
+.pricingTiersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pricingTierCard {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 12px;
+  border: 1px solid var(--dw-line);
+  border-radius: 12px;
+  background: var(--dw-surface);
+}
+
+.pricingTierLabel {
+  color: var(--dw-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pricingTierUsd {
+  color: var(--dw-ink);
+  font-size: 1.05rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.pricingTierTzs {
+  color: var(--dw-blue);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.pricingTierUnset {
+  color: var(--dw-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.pricingFormSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--dw-line);
+  border-radius: 15px;
+  background: var(--dw-surface-soft);
+}
+
+.pricingFormHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pricingRateHint {
+  color: var(--dw-blue);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.pricingInputsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pricingInputCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--dw-line);
+  border-radius: 12px;
+  background: var(--dw-surface);
+}
+
+.pricingInputTitle {
+  color: var(--dw-ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.pricingDualRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pricingCurrencyField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--dw-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+@media (max-width: 820px) {
+  .pricingTiersGrid,
+  .pricingInputsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

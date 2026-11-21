@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  DollarSign,
   FileText,
   Loader2,
   LocateFixed,
@@ -44,6 +45,7 @@ import {
   profileAPI,
   publicPrivateHireAPI,
   routeAPI,
+  routePricesAPI,
   transportBookingsAPI,
 } from "@/lib/api/client";
 import { useAuth } from "@/context/AuthContext";
@@ -51,6 +53,17 @@ import { getImageUrl } from "@/lib/utils/image-url";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import type { PlaceSuggestion } from "@/lib/place-types";
 import { parseBookingDestinationParams } from "@/lib/trip-discovery";
+import {
+  formatTzs,
+  formatUsd,
+  getOptionPriceUsd,
+  resolveRoutePriceQuote,
+  TRIP_PRICING_OPTIONS,
+  USD_TO_TZS_RATE,
+  usdToTzs,
+  type RoutePriceQuote,
+  type TripPricingOption,
+} from "@/lib/zanzibar-route-pricing";
 import styles from "@/features/pages/booking-trip.module.css";
 
 const TripRouteOverlayMap = dynamic(
@@ -105,6 +118,8 @@ type BookingResult = {
   destination: string | null;
   distance_km: number | null;
   duration_mins: number | null;
+  total_price_tzs?: number | null;
+  trip_option?: TripPricingOption | null;
   trip_request_id: number | null;
   trip: { id: number; status: string } | null;
   service: { title: string } | null;
@@ -270,6 +285,11 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
     key: string;
     route: RouteEstimate | null;
     error: string;
+  } | null>(null);
+  const [tripOption, setTripOption] = useState<TripPricingOption>("one_way");
+  const [serverQuoteResult, setServerQuoteResult] = useState<{
+    key: string;
+    quote: RoutePriceQuote;
   } | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [destinationEditedByUser, setDestinationEditedByUser] = useState(false);
@@ -589,6 +609,82 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
     };
   }, [routeKey, originLat, originLng, destLat, destLng]);
 
+  const quoteKey = routeComplete
+    ? `${form.origin.trim().toLowerCase()}|${form.destination.trim().toLowerCase()}|${
+        service?.id ?? "public"
+      }|${visibleRoute?.distanceKm != null ? Math.round(visibleRoute.distanceKm) : ""}`
+    : "";
+
+  const fallbackRouteQuote = useMemo<RoutePriceQuote | null>(() => {
+    if (!routeComplete) return null;
+    return resolveRoutePriceQuote({
+      origin: form.origin,
+      destination: form.destination,
+      distanceKm: visibleRoute?.distanceKm ?? null,
+      fallbackServicePriceUsd:
+        !isPublicBooking && service?.price != null ? Number(service.price) : null,
+    });
+  }, [routeComplete, form.origin, form.destination, visibleRoute?.distanceKm, isPublicBooking, service?.price]);
+
+  useEffect(() => {
+    if (!quoteKey || !routeComplete) return;
+    let active = true;
+    const requestKey = quoteKey;
+
+    routePricesAPI
+      .quote({
+        origin: form.origin.trim(),
+        destination: form.destination.trim(),
+        service_id: !isPublicBooking && service?.id ? service.id : undefined,
+        distance_km: visibleRoute?.distanceKm ?? undefined,
+      })
+      .then((response) => {
+        if (!active) return;
+        const d = response.data ?? {};
+        const oneWayUsd = Number(d.one_way_usd);
+        const waitReturnUsd = Number(d.wait_return_usd);
+        const fullDayUsd = Number(d.full_day_usd);
+        if (!Number.isFinite(oneWayUsd) || !Number.isFinite(waitReturnUsd) || !Number.isFinite(fullDayUsd)) {
+          return;
+        }
+        setServerQuoteResult({
+          key: requestKey,
+          quote: {
+            matched: Boolean(d.matched),
+            source: d.source || "standard",
+            matchedLabel: String(d.matched_label || `${form.origin} – ${form.destination}`),
+            origin: String(d.origin || form.origin),
+            destination: String(d.destination || form.destination),
+            exchangeRate: Number(d.exchange_rate) || USD_TO_TZS_RATE,
+            oneWayUsd,
+            waitReturnUsd,
+            fullDayUsd,
+            oneWayTzs: Number(d.one_way_tzs) || usdToTzs(oneWayUsd),
+            waitReturnTzs: Number(d.wait_return_tzs) || usdToTzs(waitReturnUsd),
+            fullDayTzs: Number(d.full_day_tzs) || usdToTzs(fullDayUsd),
+          },
+        });
+      })
+      .catch(() => {
+        // Keep instant local fallbackRouteQuote cleanly when quote lookup fails.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [quoteKey, routeComplete, form.origin, form.destination, isPublicBooking, service?.id, visibleRoute?.distanceKm]);
+
+  const activeRouteQuote =
+    quoteKey && serverQuoteResult?.key === quoteKey
+      ? serverQuoteResult.quote
+      : fallbackRouteQuote;
+  const selectedFareUsd = activeRouteQuote
+    ? getOptionPriceUsd(activeRouteQuote, tripOption)
+    : null;
+  const selectedFareTzs = selectedFareUsd != null ? usdToTzs(selectedFareUsd) : null;
+  const selectedOptionMeta =
+    TRIP_PRICING_OPTIONS.find((opt) => opt.key === tripOption) ?? TRIP_PRICING_OPTIONS[0];
+
   const touch = useCallback((field: string) => {
     setTouched((current) =>
       current[field] ? current : { ...current, [field]: true },
@@ -865,6 +961,7 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
         dest_lng: form.destLng ?? undefined,
         distance_km: visibleRoute?.distanceKm ?? undefined,
         duration_mins: visibleRoute?.durationMins ?? undefined,
+        trip_option: tripOption,
       });
       setBooking(response.data as BookingResult);
       if (typeof window !== "undefined") {
@@ -1014,6 +1111,18 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
                     ]
                       .filter(Boolean)
                       .join(" · ")}
+                  </dd>
+                </div>
+              ) : null}
+              {booking.total_price != null ? (
+                <div className={styles.successSummaryRow}>
+                  <dt className={styles.successSummaryLabel}>Estimated fare</dt>
+                  <dd className={styles.successSummaryValue}>
+                    {formatUsd(Number(booking.total_price))} ·{" "}
+                    {formatTzs(
+                      booking.total_price_tzs ?? usdToTzs(Number(booking.total_price)),
+                    )}{" "}
+                    ({selectedOptionMeta.label})
                   </dd>
                 </div>
               ) : null}
@@ -2018,6 +2127,49 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
                         ) : null}
                       </div>
                     ) : null}
+
+                    {/* LIVE ROUTE FARE PREVIEW & OPTION SELECTOR ($ & TSh) */}
+                    {activeRouteQuote ? (
+                      <div className={styles.fareQuoteCard}>
+                        <div className={styles.fareQuoteHead}>
+                          <span className={styles.fareQuoteTitle}>
+                            <DollarSign size={14} aria-hidden="true" />
+                            Trip price ($ &amp; TSh)
+                          </span>
+                          <span className={styles.fareQuoteSub}>
+                            {activeRouteQuote.matchedLabel} · $1 = {formatTzs(activeRouteQuote.exchangeRate)}
+                          </span>
+                        </div>
+
+                        <div
+                          className={styles.fareOptionsGrid}
+                          role="radiogroup"
+                          aria-label="Choose trip pricing option"
+                        >
+                          {TRIP_PRICING_OPTIONS.map((opt) => {
+                            const usd = getOptionPriceUsd(activeRouteQuote, opt.key);
+                            const tzs = usdToTzs(usd);
+                            const active = tripOption === opt.key;
+                            return (
+                              <button
+                                key={opt.key}
+                                type="button"
+                                role="radio"
+                                aria-checked={active}
+                                className={`${styles.fareOptionCard} ${
+                                  active ? styles.fareOptionCardActive : ""
+                                }`}
+                                onClick={() => setTripOption(opt.key)}
+                              >
+                                <span className={styles.fareOptionName}>{opt.label}</span>
+                                <strong className={styles.fareOptionUsd}>{formatUsd(usd)}</strong>
+                                <span className={styles.fareOptionTzs}>{formatTzs(tzs)}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ) : (
                   <div className={styles.nextPartitionCue}>
@@ -2116,10 +2268,20 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
                     <div>
                       <span className={styles.recapLabel}>Contact</span>
                       <strong className={styles.recapValue}>
-                        {form.full_name.trim() || "â€”"} Â·{" "}
-                        {form.phone.trim() || "â€”"}
+                        {form.full_name.trim() || "—"} ·{" "}
+                        {form.phone.trim() || "—"}
                       </strong>
                     </div>
+                    {selectedFareUsd != null && selectedFareTzs != null ? (
+                      <div className={styles.recapPriceSpan}>
+                        <span className={styles.recapLabel}>
+                          Trip price ({selectedOptionMeta.label})
+                        </span>
+                        <strong className={styles.recapPriceValue}>
+                          {formatUsd(selectedFareUsd)} · {formatTzs(selectedFareTzs)}
+                        </strong>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -2205,7 +2367,14 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
               <p className={styles.summaryCompany}>{service.company.name}</p>
             ) : null}
 
-            {!isPublicBooking && service ? (
+            {selectedFareUsd != null && selectedFareTzs != null ? (
+              <div className={styles.summaryPriceRow}>
+                <span className={styles.summaryPrice}>{formatUsd(selectedFareUsd)}</span>
+                <span className={styles.summaryUnit}>
+                  {formatTzs(selectedFareTzs)} · {selectedOptionMeta.shortLabel}
+                </span>
+              </div>
+            ) : !isPublicBooking && service ? (
               <div className={styles.summaryPriceRow}>
                 <span className={styles.summaryPrice}>${service.price}</span>
                 <span className={styles.summaryUnit}>/ {pricingLabel}</span>

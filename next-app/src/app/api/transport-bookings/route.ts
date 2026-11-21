@@ -16,6 +16,12 @@ import {
   selectNearbyDrivers,
   type DriverLocationCandidate,
 } from "@/lib/unguja-nearby";
+import {
+  getOptionPriceUsd,
+  resolveRoutePriceQuote,
+  type RoutePriceRecord,
+  type TripPricingOption,
+} from "@/lib/zanzibar-route-pricing";
 import { z } from "zod";
 
 const isoDate = z
@@ -49,6 +55,7 @@ const createSchema = z
     dest_lng: z.coerce.number().min(-180).max(180).optional(),
     distance_km: z.coerce.number().min(0).max(5000).optional(),
     duration_mins: z.coerce.number().int().min(0).max(10080).optional(),
+    trip_option: z.enum(["one_way", "wait_and_return", "full_day"]).optional(),
     // Optional background-detected customer GPS coordinates (used on /booking/create/
     // to notify nearby drivers only when the customer is in Unguja or near a system place).
     customer_lat: z.coerce.number().min(-90).max(90).optional(),
@@ -271,13 +278,19 @@ export async function POST(request: NextRequest) {
     }
 
     const isPublicRequest = body.service_id == null && body.is_public === true;
+    const tripOption: TripPricingOption = body.trip_option ?? "one_way";
     let hireService: {
       id: number;
       companyId: number | null;
       vehicleId: number | null;
       driverId: number | null;
       price: unknown;
-      vehicle: { capacity: number } | null;
+      vehicle: {
+        capacity: number;
+        oneWayPriceUsd?: unknown;
+        waitReturnPriceUsd?: unknown;
+        fullDayPriceUsd?: unknown;
+      } | null;
     } | null = null;
 
     if (!isPublicRequest) {
@@ -309,6 +322,55 @@ export async function POST(request: NextRequest) {
       distanceKm: body.distance_km,
       durationMins: body.duration_mins,
     });
+
+    let companyRoutePrices: RoutePriceRecord[] = [];
+    if (!isPublicRequest && hireService?.companyId != null) {
+      const rows = await prisma.routePrice.findMany({
+        where: { companyId: hireService.companyId, isActive: true },
+        select: {
+          id: true,
+          origin: true,
+          destination: true,
+          oneWayPriceUsd: true,
+          waitReturnPriceUsd: true,
+          fullDayPriceUsd: true,
+        },
+      });
+      companyRoutePrices = rows.map((row) => ({
+        id: row.id,
+        origin: row.origin,
+        destination: row.destination,
+        oneWayUsd: Number(row.oneWayPriceUsd),
+        waitReturnUsd: Number(row.waitReturnPriceUsd),
+        fullDayUsd: Number(row.fullDayPriceUsd),
+      }));
+    }
+
+    const fareQuote = resolveRoutePriceQuote({
+      origin: body.origin,
+      destination: body.destination,
+      customPrices: companyRoutePrices,
+      distanceKm: metrics.distanceKm,
+      vehicleDefaults: hireService?.vehicle
+        ? {
+            oneWayUsd:
+              hireService.vehicle.oneWayPriceUsd != null
+                ? Number(hireService.vehicle.oneWayPriceUsd)
+                : null,
+            waitReturnUsd:
+              hireService.vehicle.waitReturnPriceUsd != null
+                ? Number(hireService.vehicle.waitReturnPriceUsd)
+                : null,
+            fullDayUsd:
+              hireService.vehicle.fullDayPriceUsd != null
+                ? Number(hireService.vehicle.fullDayPriceUsd)
+                : null,
+          }
+        : null,
+      fallbackServicePriceUsd:
+        !isPublicRequest && hireService?.price != null ? Number(hireService.price) : null,
+    });
+    const resolvedTotalPriceUsd = getOptionPriceUsd(fareQuote, tripOption);
 
     // The trip and its booking must be created together. Otherwise a failed
     // booking insert leaves an orphaned trip request behind.
@@ -353,7 +415,8 @@ export async function POST(request: NextRequest) {
             travelDate,
             endDate,
             pickupTime: body.pickup_time,
-            totalPrice: isPublicRequest ? null : (hireService?.price as never),
+            totalPrice: resolvedTotalPriceUsd,
+            tripOption,
             status: "pending",
             isPublic: isPublicRequest,
             driverStage: "pending",

@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Compass,
+  DollarSign,
   Info,
   LayoutDashboard,
   LoaderCircle,
@@ -38,6 +39,13 @@ import {
 } from "lucide-react";
 import { driverAPI } from "@/lib/api/client";
 import { VEHICLE_CATEGORIES } from "@/lib/driver-vehicle";
+import {
+  formatTzs,
+  formatUsd,
+  tzsToUsd,
+  USD_TO_TZS_RATE,
+  usdToTzs,
+} from "@/lib/zanzibar-route-pricing";
 import type {
   AssignedDriverVehicleRecord,
   DriverVehiclePortalData,
@@ -219,6 +227,71 @@ function VehicleShowcaseCard({
           </div>
         </div>
 
+        {!readOnly ? (
+          <div className={styles.pricingPanel}>
+            <div className={styles.pricingPanelHead}>
+              <span className={styles.pricingPanelTitle}>
+                <DollarSign size={14} aria-hidden="true" />
+                Vehicle Standard Prices ($ &amp; TSh)
+              </span>
+              <Link href="/driver/price/" className={styles.pricingManageLink}>
+                All route prices →
+              </Link>
+            </div>
+            <div className={styles.pricingTiersGrid}>
+              <div className={styles.pricingTierCard}>
+                <span className={styles.pricingTierLabel}>One-way</span>
+                {vehicle.one_way_price_usd != null ? (
+                  <>
+                    <strong className={styles.pricingTierUsd}>
+                      {formatUsd(vehicle.one_way_price_usd)}
+                    </strong>
+                    <span className={styles.pricingTierTzs}>
+                      {formatTzs(vehicle.one_way_price_tzs ?? usdToTzs(vehicle.one_way_price_usd))}
+                    </span>
+                  </>
+                ) : (
+                  <span className={styles.pricingTierUnset}>Uses route table</span>
+                )}
+              </div>
+              <div className={styles.pricingTierCard}>
+                <span className={styles.pricingTierLabel}>Wait &amp; return</span>
+                {vehicle.wait_return_price_usd != null ? (
+                  <>
+                    <strong className={styles.pricingTierUsd}>
+                      {formatUsd(vehicle.wait_return_price_usd)}
+                    </strong>
+                    <span className={styles.pricingTierTzs}>
+                      {formatTzs(
+                        vehicle.wait_return_price_tzs ?? usdToTzs(vehicle.wait_return_price_usd),
+                      )}
+                    </span>
+                  </>
+                ) : (
+                  <span className={styles.pricingTierUnset}>Uses route table</span>
+                )}
+              </div>
+              <div className={styles.pricingTierCard}>
+                <span className={styles.pricingTierLabel}>Full day Private charter</span>
+                {vehicle.full_day_price_usd != null ? (
+                  <>
+                    <strong className={styles.pricingTierUsd}>
+                      {formatUsd(vehicle.full_day_price_usd)}
+                    </strong>
+                    <span className={styles.pricingTierTzs}>
+                      {formatTzs(
+                        vehicle.full_day_price_tzs ?? usdToTzs(vehicle.full_day_price_usd),
+                      )}
+                    </span>
+                  </>
+                ) : (
+                  <span className={styles.pricingTierUnset}>Uses route table</span>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {vehicle.description ? <p className={styles.descriptionBox}>{vehicle.description}</p> : null}
 
         <div className={styles.amenitiesGrid}>
@@ -338,6 +411,9 @@ export default function DriverVehiclePage({ initialData }: Props) {
   const [description, setDescription] = useState("");
   const [includesText, setIncludesText] = useState(DEFAULT_INCLUDES);
   const [excludesText, setExcludesText] = useState(DEFAULT_EXCLUDES);
+  const [oneWayUsd, setOneWayUsd] = useState("");
+  const [waitReturnUsd, setWaitReturnUsd] = useState("");
+  const [fullDayUsd, setFullDayUsd] = useState("");
   const [isAvailable, setIsAvailable] = useState(true);
 
   const [frontFile, setFrontFile] = useState<File | null>(null);
@@ -396,6 +472,9 @@ export default function DriverVehiclePage({ initialData }: Props) {
     setDescription("");
     setIncludesText(DEFAULT_INCLUDES);
     setExcludesText(DEFAULT_EXCLUDES);
+    setOneWayUsd("");
+    setWaitReturnUsd("");
+    setFullDayUsd("");
     setIsAvailable(true);
     setFrontFile(null);
     setFrontPreview(null);
@@ -421,6 +500,9 @@ export default function DriverVehiclePage({ initialData }: Props) {
     setDescription(v.description || "");
     setIncludesText(v.includes.join("\n"));
     setExcludesText(v.excludes.join("\n"));
+    setOneWayUsd(v.one_way_price_usd != null ? String(v.one_way_price_usd) : "");
+    setWaitReturnUsd(v.wait_return_price_usd != null ? String(v.wait_return_price_usd) : "");
+    setFullDayUsd(v.full_day_price_usd != null ? String(v.full_day_price_usd) : "");
     setIsAvailable(v.is_available);
     setFrontFile(null);
     setFrontPreview(v.front_image_url || null);
@@ -486,6 +568,9 @@ export default function DriverVehiclePage({ initialData }: Props) {
       formData.append("capacity", String(capacity));
       formData.append("luggage_capacity", String(luggageCapacity));
       formData.append("description", description.trim());
+      formData.append("one_way_price_usd", oneWayUsd.trim());
+      formData.append("wait_return_price_usd", waitReturnUsd.trim());
+      formData.append("full_day_price_usd", fullDayUsd.trim());
       formData.append("is_available", String(isAvailable));
 
       const includesArray = includesText
@@ -579,6 +664,10 @@ export default function DriverVehiclePage({ initialData }: Props) {
             >
               <Car size={15} aria-hidden="true" />
               Vehicle
+            </Link>
+            <Link href="/driver/price/" className={ws.topNavLink}>
+              <DollarSign size={15} aria-hidden="true" />
+              Price
             </Link>
             <Link href="/driver/insight/" className={ws.topNavLink}>
               <BarChart3 size={15} aria-hidden="true" />
@@ -789,6 +878,93 @@ export default function DriverVehiclePage({ initialData }: Props) {
                           onChange={(e) => setLuggageCapacity(parseInt(e.target.value, 10) || 0)}
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Vehicle Standard Pricing ($ and TSh) */}
+                  <div className={styles.pricingFormSection}>
+                    <div className={styles.pricingFormHeader}>
+                      <span className={styles.fieldLabel}>
+                        Price ($ &amp; TSh) — One-way, Wait &amp; return, Full day Private charter
+                      </span>
+                      <span className={styles.pricingRateHint}>
+                        Rate: $1 = {formatTzs(USD_TO_TZS_RATE)}
+                      </span>
+                    </div>
+
+                    <div className={styles.pricingInputsGrid}>
+                      {[
+                        {
+                          id: "one-way",
+                          label: "One-way",
+                          usd: oneWayUsd,
+                          setUsd: setOneWayUsd,
+                          placeholderUsd: "35",
+                        },
+                        {
+                          id: "wait-return",
+                          label: "Wait & return",
+                          usd: waitReturnUsd,
+                          setUsd: setWaitReturnUsd,
+                          placeholderUsd: "60",
+                        },
+                        {
+                          id: "full-day",
+                          label: "Full day Private charter",
+                          usd: fullDayUsd,
+                          setUsd: setFullDayUsd,
+                          placeholderUsd: "120",
+                        },
+                      ].map((tier) => {
+                        const parsedUsd = Number(tier.usd);
+                        const tzsDisplay =
+                          tier.usd.trim() !== "" && Number.isFinite(parsedUsd) && parsedUsd > 0
+                            ? String(usdToTzs(parsedUsd))
+                            : "";
+                        return (
+                          <div key={tier.id} className={styles.pricingInputCard}>
+                            <span className={styles.pricingInputTitle}>{tier.label}</span>
+                            <div className={styles.pricingDualRow}>
+                              <label className={styles.pricingCurrencyField}>
+                                <span>USD ($)</span>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={100000}
+                                  step="any"
+                                  className={styles.input}
+                                  placeholder={tier.placeholderUsd}
+                                  value={tier.usd}
+                                  onChange={(e) => tier.setUsd(e.target.value)}
+                                />
+                              </label>
+                              <label className={styles.pricingCurrencyField}>
+                                <span>TSh</span>
+                                <input
+                                  type="number"
+                                  min={1000}
+                                  max={260000000}
+                                  step={1000}
+                                  className={styles.input}
+                                  placeholder={String(usdToTzs(Number(tier.placeholderUsd)))}
+                                  value={tzsDisplay}
+                                  onChange={(e) => {
+                                    const raw = e.target.value.trim();
+                                    if (!raw) {
+                                      tier.setUsd("");
+                                      return;
+                                    }
+                                    const tzsNum = Number(raw);
+                                    if (Number.isFinite(tzsNum) && tzsNum > 0) {
+                                      tier.setUsd(String(tzsToUsd(tzsNum)));
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
