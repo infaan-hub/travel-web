@@ -62,12 +62,12 @@
 }
 
 .content {
-  width: min(100%, 1100px);
+  width: min(100%, 1160px);
   margin-inline: auto;
-  padding-top: clamp(20px, 3vw, 32px);
+  padding-top: clamp(14px, 2.2vw, 24px);
   display: flex;
   flex-direction: column;
-  gap: clamp(20px, 2.8vw, 30px);
+  gap: clamp(16px, 2.4vw, 24px);
 }
 
 /* -------------------------------------------------------------------------
@@ -1570,6 +1570,643 @@
   }
 }
 
+/* ==========================================================================
+   Featured Property Card Style (matches Home "Private hire for your journey")
+   ========================================================================== */
+
+.fpGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+}
+
+.fpGridDouble {
+  grid-template-columns: repeat(2, minmax(0, 440px));
+}
+
+.fpGridSingle {
+  grid-template-columns: minmax(0, 440px);
+}
+
+.fpList {
+  display: grid;
+  grid-template-columns: minmax(0, 760px);
+  align-items: stretch;
+  gap: 16px;
+}
+
+.fpSkeletonCard {
+  height: 282px;
+  border-radius: 22px;
+  background: linear-gradient(
+    90deg,
+    rgba(8, 66, 140, 0.08) 25%,
+    rgba(8, 66, 140, 0.16) 50%,
+    rgba(8, 66, 140, 0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: companies-shimmer 1.4s ease-in-out infinite;
+}
+
+.fpCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  row-gap: 18px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 282px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 22px;
+  background:
+    radial-gradient(460px 240px at 86% 12%, rgba(56, 189, 248, 0.34), transparent 64%),
+    linear-gradient(150deg, #072042 0%, #0b4182 52%, #06162b 100%);
+  color: #ffffff;
+  box-shadow:
+    0 18px 40px rgba(6, 23, 46, 0.18),
+    0 4px 12px rgba(6, 23, 46, 0.1);
+  isolation: isolate;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s ease;
+}
+
+.fpCard:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 24px 48px rgba(6, 23, 46, 0.24),
+    0 6px 16px rgba(6, 23, 46, 0.13);
+}
+
+.fpMedia {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.fpImage {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fpCard:hover .fpImage {
+  transform: scale(1.04);
+}
+
+.fpFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(440px 220px at 82% 16%, rgba(56, 189, 248, 0.34), transparent 64%),
+    linear-gradient(155deg, #072244 0%, #0b4182 54%, #06172d 100%);
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.fpFallbackCircle {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.94);
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.fpTopScrim {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 78px;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(4, 13, 28, 0.72) 0%, rgba(4, 13, 28, 0) 100%);
+  pointer-events: none;
+}
+
+.fpTopBar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 13px 0;
+}
+
+.fpTopLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.fpLogoBadge {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: rgba(8, 66, 140, 0.92);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 850;
+  box-shadow: 0 4px 12px rgba(4, 13, 28, 0.35);
+}
+
+.fpLogoImg {
+  object-fit: cover;
+}
+
+.fpGlassBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(6, 18, 36, 0.58);
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.fpPriceBox {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  padding: 5px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 14px;
+  background: rgba(6, 18, 36, 0.7);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.fpPriceValue {
+  color: #ffffff;
+  font-size: 1.06rem;
+  font-weight: 850;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.fpPriceUnit {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.6rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.fpRatingPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(6, 18, 36, 0.68);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.fpSheet {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding: 26px 13px 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 14, 29, 0) 0%,
+    rgba(5, 14, 29, 0.58) 20%,
+    rgba(5, 14, 29, 0.9) 50%,
+    rgba(4, 11, 24, 0.98) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fpBodyRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 5px 8px;
+}
+
+.fpCopy {
+  min-width: 0;
+}
+
+.fpBodyRow > .fpCopy {
+  flex: 1 1 150px;
+}
+
+.fpKicker {
+  display: block;
+  color: #bae6fd;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(#companies-directory-root) .fpCard h3.fpTitle,
+:global(#companies-directory-root) .fpCard .fpTitle {
+  margin: 2px 0 0;
+  color: #ffffff !important;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.38vw, 1.2rem);
+  font-weight: 750;
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 12px rgba(3, 10, 24, 0.72);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:global(#companies-directory-root) .fpCard .fpTitleLink {
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+:global(#companies-directory-root) .fpCard .fpTitleLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.fpDesc {
+  margin: 2px 0 0;
+  color: rgba(241, 247, 255, 0.88);
+  font-size: 0.74rem;
+  line-height: 1.34;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fpAnglePills {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+:global(#companies-directory-root) .fpAngleBtn {
+  min-height: 22px !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+  font-size: 0.62rem !important;
+  font-weight: 750 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease !important;
+}
+
+:global(#companies-directory-root) .fpAngleBtn:hover {
+  background: rgba(255, 255, 255, 0.26) !important;
+  transform: none !important;
+}
+
+:global(#companies-directory-root) .fpAngleBtnActive {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #08428c !important;
+}
+
+.fpBottomRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.fpFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fpFacts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.fpFacts li svg {
+  flex: 0 0 auto;
+  color: #bae6fd;
+}
+
+.fpFacts em {
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #0b2447;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+}
+
+.fpActionsRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.fpGhostBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.fpGhostBtn:hover {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.52);
+}
+
+.fpPrimaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 1 1 auto;
+  min-height: 36px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #08428c;
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(2, 18, 38, 0.28);
+  transition: transform 0.18s ease, background-color 0.18s ease;
+}
+
+.fpPrimaryBtn:hover {
+  background: #edf4fc;
+  transform: translateY(-1px);
+}
+
+.fpLabelFull {
+  display: inline;
+}
+
+.fpLabelShort {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .fpGrid:not(.fpGridSingle):not(.fpGridDouble) .fpDetailsGhost {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .fpGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .fpGridSingle {
+    grid-template-columns: minmax(0, 440px);
+  }
+}
+
+@media (max-width: 640px) {
+  .fpGrid,
+  .fpGridDouble,
+  .fpList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .fpGridSingle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fpSkeletonCard {
+    height: 226px;
+    border-radius: 18px;
+  }
+
+  .fpCard {
+    height: auto;
+    min-height: 226px;
+    row-gap: 12px;
+    border-radius: 18px;
+  }
+
+  .fpTopBar {
+    padding: 9px 9px 0;
+    gap: 4px;
+  }
+
+  .fpLogoBadge {
+    display: none;
+  }
+
+  .fpGridSingle .fpLogoBadge {
+    display: inline-grid;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    font-size: 0.6rem;
+  }
+
+  .fpGlassBadge {
+    min-height: 22px;
+    padding: 0 7px;
+    font-size: 0.53rem;
+    letter-spacing: 0.04em;
+  }
+
+  .fpPriceBox {
+    padding: 3px 7px;
+    border-radius: 10px;
+  }
+
+  .fpPriceValue {
+    font-size: 0.85rem;
+  }
+
+  .fpPriceUnit {
+    font-size: 0.51rem;
+  }
+
+  .fpRatingPill {
+    min-height: 22px;
+    padding: 0 7px;
+    font-size: 0.6rem;
+  }
+
+  .fpSheet {
+    padding: 18px 9px 9px;
+    gap: 5px;
+  }
+
+  .fpKicker {
+    font-size: 0.53rem;
+    letter-spacing: 0.05em;
+  }
+
+  :global(#companies-directory-root) .fpCard h3.fpTitle,
+  :global(#companies-directory-root) .fpCard .fpTitle {
+    font-size: 0.88rem;
+    line-height: 1.16;
+  }
+
+  :global(#companies-directory-root) .fpGridSingle .fpCard h3.fpTitle,
+  :global(#companies-directory-root) .fpGridSingle .fpCard .fpTitle {
+    font-size: 1.06rem;
+  }
+
+  .fpDesc {
+    display: none;
+  }
+
+  .fpGridSingle .fpDesc {
+    display: -webkit-box;
+    font-size: 0.68rem;
+  }
+
+  .fpAnglePills {
+    gap: 3px;
+  }
+
+  :global(#companies-directory-root) .fpAngleBtn {
+    min-height: 20px !important;
+    padding: 0 6px !important;
+    font-size: 0.55rem !important;
+  }
+
+  .fpBottomRow {
+    gap: 5px;
+    padding-top: 4px;
+  }
+
+  .fpFacts {
+    gap: 3px;
+  }
+
+  .fpFacts li {
+    padding: 2px 6px;
+    font-size: 0.57rem;
+    gap: 3px;
+  }
+
+  .fpFacts em {
+    display: none;
+  }
+
+  .fpGridSingle .fpFacts em {
+    display: inline;
+  }
+
+  .fpGhostBtn,
+  .fpDetailsGhost {
+    display: none;
+  }
+
+  .fpGridSingle .fpGhostBtn:not(.fpDetailsGhost) {
+    display: inline-flex;
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 0.7rem;
+  }
+
+  .fpPrimaryBtn {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 0.68rem;
+    gap: 4px;
+  }
+
+  .fpGridSingle .fpPrimaryBtn {
+    min-height: 34px;
+    font-size: 0.74rem;
+  }
+
+  .fpLabelFull {
+    display: none;
+  }
+
+  .fpLabelShort {
+    display: inline;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card,
   .coverImage,
@@ -1580,7 +2217,12 @@
   .skeletonAvatar,
   .skeletonLine,
   .skeletonTile,
-  .skeletonBtn {
+  .skeletonBtn,
+  .fpCard,
+  .fpImage,
+  .fpPrimaryBtn,
+  .fpGhostBtn,
+  .fpSkeletonCard {
     animation: none !important;
     transition: none !important;
     transform: none !important;

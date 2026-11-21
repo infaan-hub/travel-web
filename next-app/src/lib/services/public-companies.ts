@@ -20,7 +20,7 @@ const PUBLIC_COMPANY_WHERE = {
 
 export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
   const page = Math.max(1, filters.page ?? 1);
-  const pageSize = Math.min(50, Math.max(1, filters.page_size ?? 12));
+  const pageSize = Math.min(200, Math.max(1, filters.page_size ?? 12));
   const search = filters.search?.trim();
 
   const where: any = { ...PUBLIC_COMPANY_WHERE };

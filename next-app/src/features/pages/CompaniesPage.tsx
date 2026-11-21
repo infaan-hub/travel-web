@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutGrid, List } from "lucide-react";
+import { CalendarCheck2, LayoutGrid, List, ShieldCheck } from "lucide-react";
 import { publicCompaniesAPI } from "@/lib/api/client";
 import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
 import { getImageUrl } from "@/lib/utils/image-url";
@@ -13,14 +13,10 @@ import {
   Briefcase,
   Building2,
   Car,
-  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Compass,
-  Globe,
   MapPin,
-  Navigation,
-  Phone,
   RefreshCw,
   Shield,
   Users,
@@ -31,6 +27,7 @@ import styles from "@/features/pages/companies-page.module.css";
 type CompanyPrivateService = {
   id: number;
   title: string;
+  description?: string | null;
   price: string | number;
   pricing_type?: string | null;
   vehicle?: {
@@ -40,6 +37,8 @@ type CompanyPrivateService = {
     capacity?: number | null;
     luggage_capacity?: number | null;
     front_image_url?: string | null;
+    side_image_url?: string | null;
+    back_image_url?: string | null;
   } | null;
   driver?: {
     name?: string | null;
@@ -69,7 +68,7 @@ type Company = {
 
 type ViewMode = "grid" | "list";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 100;
 
 function formatLocation(company: Company): string {
   const parts = [company.locality, company.district, company.region, company.country]
@@ -84,7 +83,7 @@ function formatLocation(company: Company): string {
       unique.push(part);
     }
   }
-  return unique.join(", ") || "Verified operator profile";
+  return unique.join(", ") || "Tanzania";
 }
 
 function companyMonogram(name: string): string {
@@ -97,28 +96,6 @@ function companyMonogram(name: string): string {
   return `${words[0][0]}${words[1][0]}`.toUpperCase();
 }
 
-function safeExternalUrl(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-  try {
-    const parsed = new URL(candidate);
-    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-      return parsed.toString();
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function safeTelHref(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  const cleaned = raw.replace(/[^\d+]/g, "");
-  return cleaned.length >= 6 ? `tel:${cleaned}` : null;
-}
-
 function buildPageNumbers(current: number, total: number): number[] {
   const maxVisible = 5;
   if (total <= maxVisible) {
@@ -129,6 +106,245 @@ function buildPageNumbers(current: number, total: number): number[] {
   const end = Math.min(total, start + maxVisible - 1);
   start = Math.max(1, end - maxVisible + 1);
   return Array.from({ length: end - start + 1 }, (_, idx) => start + idx);
+}
+
+function CompanyFeaturedCard({ company }: { company: Company }) {
+  const [serviceIndex, setServiceIndex] = useState(0);
+  const [angleIndex, setAngleIndex] = useState(0);
+
+  const services = Array.isArray(company.services) ? company.services : [];
+  const activeService = services[serviceIndex] ?? services[0] ?? null;
+  const locationLabel = formatLocation(company);
+  const regionBadge = company.region?.trim() || company.country?.trim() || "Zanzibar";
+  const tripsCount = company.trips_count ?? 0;
+  const servicesCount = Number(company.services_count ?? services.length);
+  const logoUrl = company.logo_image_url ? getImageUrl(company.logo_image_url) : null;
+
+  const vehicle = activeService?.vehicle ?? null;
+  const vehicleName = vehicle?.name?.trim() || activeService?.title || "Private vehicle";
+  const plateNumber = vehicle?.plate_number?.trim() || "";
+  const seats = Number(vehicle?.capacity ?? 0);
+  const bags = Number(vehicle?.luggage_capacity ?? 0);
+
+  const priceNum = activeService ? Number(activeService.price) : NaN;
+  const priceText = activeService
+    ? Number.isFinite(priceNum)
+      ? `$${Number.isInteger(priceNum) ? priceNum : priceNum.toFixed(2)}`
+      : `$${activeService.price}`
+    : "";
+  const pricingKey = activeService?.pricing_type || "per_trip";
+  const pricingLabel = PRICING_LABELS[pricingKey] || pricingKey.replace(/_/g, " ");
+
+  const vehiclePhotos = [
+    { label: "Front", url: vehicle?.front_image_url ?? null },
+    { label: "Side", url: vehicle?.side_image_url ?? null },
+    { label: "Back", url: vehicle?.back_image_url ?? null },
+  ].filter((item): item is { label: string; url: string } => Boolean(item.url));
+
+  const activeVehiclePhoto = vehiclePhotos[angleIndex] ?? vehiclePhotos[0] ?? null;
+  const bgUrl = activeVehiclePhoto?.url
+    ? getImageUrl(activeVehiclePhoto.url)
+    : company.cover_image_url
+      ? getImageUrl(company.cover_image_url)
+      : null;
+
+  const subtitle =
+    activeService?.title?.trim() ||
+    company.description?.trim() ||
+    "Verified local tourism and transport provider offering direct bookings.";
+
+  const kickerParts = [
+    locationLabel,
+    `${servicesCount} ${servicesCount === 1 ? "hire service" : "hire services"}`,
+    ...(tripsCount > 0
+      ? [`${tripsCount} ${tripsCount === 1 ? "trip" : "trips"}`]
+      : []),
+  ];
+
+  return (
+    <article className={styles.fpCard}>
+      <div className={styles.fpMedia} aria-hidden="true">
+        {bgUrl ? (
+          <Image
+            src={bgUrl}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 48vw, (max-width: 1024px) 48vw, 380px"
+            className={styles.fpImage}
+            unoptimized
+          />
+        ) : (
+          <div className={styles.fpFallback}>
+            <span className={styles.fpFallbackCircle}>
+              {companyMonogram(company.name)}
+            </span>
+          </div>
+        )}
+      </div>
+      <span className={styles.fpTopScrim} aria-hidden="true" />
+
+      <div className={styles.fpTopBar}>
+        <div className={styles.fpTopLeft}>
+          <span className={styles.fpLogoBadge} aria-hidden="true">
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt=""
+                fill
+                sizes="32px"
+                className={styles.fpLogoImg}
+                unoptimized
+              />
+            ) : (
+              companyMonogram(company.name)
+            )}
+          </span>
+          <span className={styles.fpGlassBadge}>
+            <ShieldCheck size={12} aria-hidden="true" />
+            <span className={styles.fpLabelFull}>Verified · {regionBadge}</span>
+            <span className={styles.fpLabelShort}>Verified</span>
+          </span>
+        </div>
+
+        {activeService ? (
+          <div className={styles.fpPriceBox}>
+            <span className={styles.fpPriceValue}>{priceText}</span>
+            <span className={styles.fpPriceUnit}>/ {pricingLabel}</span>
+          </div>
+        ) : (
+          <span className={styles.fpRatingPill}>
+            <Compass size={11} aria-hidden="true" />
+            {tripsCount > 0
+              ? `${tripsCount} ${tripsCount === 1 ? "trip" : "trips"}`
+              : regionBadge}
+          </span>
+        )}
+      </div>
+
+      <div className={styles.fpSheet}>
+        <div className={styles.fpBodyRow}>
+          <div className={styles.fpCopy}>
+            <span className={styles.fpKicker}>{kickerParts.join(" · ")}</span>
+            <h3 className={styles.fpTitle}>
+              <Link href={company.public_path} className={styles.fpTitleLink}>
+                {company.name}
+              </Link>
+            </h3>
+            {subtitle ? <p className={styles.fpDesc}>{subtitle}</p> : null}
+          </div>
+
+          {services.length > 1 ? (
+            <div className={styles.fpAnglePills} role="tablist" aria-label="Company services">
+              {services.slice(0, 4).map((svc, idx) => (
+                <button
+                  key={svc.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={idx === serviceIndex}
+                  className={`${styles.fpAngleBtn} ${
+                    idx === serviceIndex ? styles.fpAngleBtnActive : ""
+                  }`}
+                  onClick={() => {
+                    setServiceIndex(idx);
+                    setAngleIndex(0);
+                  }}
+                >
+                  {svc.vehicle?.name?.trim() || `Option ${idx + 1}`}
+                </button>
+              ))}
+            </div>
+          ) : vehiclePhotos.length > 1 ? (
+            <div className={styles.fpAnglePills} role="tablist" aria-label="Vehicle photo angle">
+              {vehiclePhotos.map((photo, index) => (
+                <button
+                  key={photo.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === angleIndex}
+                  className={`${styles.fpAngleBtn} ${
+                    index === angleIndex ? styles.fpAngleBtnActive : ""
+                  }`}
+                  onClick={() => setAngleIndex(index)}
+                >
+                  {photo.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <div className={styles.fpBottomRow}>
+          <ul className={styles.fpFacts} aria-label="Company highlights">
+            {activeService ? (
+              <>
+                <li>
+                  <Car size={12} aria-hidden="true" />
+                  <span>{vehicleName}</span>
+                  {plateNumber ? <em>{plateNumber}</em> : null}
+                </li>
+                {seats > 0 ? (
+                  <li>
+                    <Users size={12} aria-hidden="true" />
+                    <span>{seats} pax</span>
+                  </li>
+                ) : null}
+                {bags > 0 ? (
+                  <li>
+                    <Briefcase size={12} aria-hidden="true" />
+                    <span>{bags} bags</span>
+                  </li>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <li>
+                  <MapPin size={12} aria-hidden="true" />
+                  <span>{locationLabel}</span>
+                </li>
+                <li>
+                  <Car size={12} aria-hidden="true" />
+                  <span>0 hire services</span>
+                </li>
+                <li>
+                  <Compass size={12} aria-hidden="true" />
+                  <span>
+                    {tripsCount} {tripsCount === 1 ? "trip" : "trips"}
+                  </span>
+                </li>
+              </>
+            )}
+          </ul>
+
+          <div className={styles.fpActionsRow}>
+            {activeService ? (
+              <>
+                <Link href={company.public_path} className={styles.fpGhostBtn}>
+                  Profile
+                </Link>
+                <Link
+                  href={`/transport/service/${activeService.id}/`}
+                  className={`${styles.fpGhostBtn} ${styles.fpDetailsGhost}`}
+                >
+                  Details
+                </Link>
+                <Link href={`/booking/${activeService.id}/`} className={styles.fpPrimaryBtn}>
+                  <CalendarCheck2 size={14} aria-hidden="true" />
+                  <span className={styles.fpLabelFull}>Book This Service</span>
+                  <span className={styles.fpLabelShort}>Book now</span>
+                </Link>
+              </>
+            ) : (
+              <Link href={company.public_path} className={styles.fpPrimaryBtn}>
+                <span className={styles.fpLabelFull}>View company profile</span>
+                <span className={styles.fpLabelShort}>Profile</span>
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </article>
+  );
 }
 
 export default function CompaniesPage() {
@@ -149,7 +365,7 @@ export default function CompaniesPage() {
       page_size: PAGE_SIZE,
     };
 
-    const cacheKey = `travel.companies.v2.${JSON.stringify(params)}`;
+    const cacheKey = `travel.companies.v3.${JSON.stringify(params)}`;
     const cached = readClientCache<{ companies: Company[]; total: number }>(cacheKey);
     setError("");
 
@@ -193,8 +409,6 @@ export default function CompaniesPage() {
     void load(); // eslint-disable-line react-hooks/set-state-in-effect
   }, [load]);
 
-  const sortedCompanies = companies;
-
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers = useMemo(() => buildPageNumbers(page, totalPages), [page, totalPages]);
 
@@ -202,6 +416,17 @@ export default function CompaniesPage() {
     setPage(nextPage);
     directoryTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const gridClassName =
+    viewMode === "list"
+      ? styles.fpList
+      : `${styles.fpGrid} ${
+          companies.length === 1
+            ? styles.fpGridSingle
+            : companies.length === 2
+              ? styles.fpGridDouble
+              : ""
+        }`;
 
   return (
     <div id="companies-directory-root" className={`page ${styles.page}`}>
@@ -213,9 +438,9 @@ export default function CompaniesPage() {
               <Building2 size={13} aria-hidden="true" />
               Provider directory
             </span>
-            <h1 className={styles.sectionTitle}>Published companies</h1>
+            <h1 className={styles.sectionTitle}>All companies</h1>
             <p className={styles.sectionLead}>
-              Browse verified companies, compare all their private hire services, and select a vehicle to book directly.
+              Browse all verified companies, compare their private hire services, and book directly.
             </p>
           </div>
 
@@ -257,23 +482,9 @@ export default function CompaniesPage() {
 
         {/* LOADING / ERROR / EMPTY / COMPANY CARDS */}
         {loading ? (
-          <div className={styles.grid} aria-busy="true" aria-label="Loading companies">
+          <div className={styles.fpGrid} aria-busy="true" aria-label="Loading companies">
             {Array.from({ length: 6 }).map((_, index) => (
-              <article className={styles.card} key={index}>
-                <div className={styles.skeletonCover} />
-                <div className={styles.cardBody}>
-                  <div className={styles.skeletonAvatar} />
-                  <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
-                  <div className={`${styles.skeletonLine} ${styles.skeletonMeta}`} />
-                  <div className={styles.skeletonLine} />
-                  <div className={`${styles.skeletonLine} ${styles.skeletonShort}`} />
-                  <div className={styles.skeletonTiles}>
-                    <div className={styles.skeletonTile} />
-                    <div className={styles.skeletonTile} />
-                  </div>
-                  <div className={styles.skeletonBtn} />
-                </div>
-              </article>
+              <div className={styles.fpSkeletonCard} key={index} />
             ))}
           </div>
         ) : error && companies.length === 0 ? (
@@ -294,7 +505,7 @@ export default function CompaniesPage() {
               </button>
             </div>
           </div>
-        ) : sortedCompanies.length === 0 ? (
+        ) : companies.length === 0 ? (
           <div className={styles.stateBox}>
             <span className={styles.stateIcon} aria-hidden="true">
               <Building2 size={26} />
@@ -321,276 +532,10 @@ export default function CompaniesPage() {
               </div>
             ) : null}
 
-            <div className={viewMode === "list" ? styles.list : styles.grid}>
-              {sortedCompanies.map((company) => {
-                const locationLabel = formatLocation(company);
-                const websiteUrl = safeExternalUrl(company.website);
-                const mapUrl = safeExternalUrl(company.map_url);
-                const telHref = safeTelHref(company.contact_phone);
-                const tripsCount = company.trips_count ?? 0;
-                const regionBadge = company.region?.trim() || company.country?.trim() || "Zanzibar";
-
-                return (
-                  <article className={styles.card} key={company.id}>
-                    <Link
-                      href={company.public_path}
-                      className={styles.coverStage}
-                      aria-label={`Open ${company.name} profile`}
-                    >
-                      {company.cover_image_url ? (
-                        <Image
-                          className={styles.coverImage}
-                          src={getImageUrl(company.cover_image_url)}
-                          alt=""
-                          fill
-                          unoptimized
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      ) : (
-                        <div className={styles.coverFallback}>
-                          <span className={styles.coverFallbackPattern} aria-hidden="true" />
-                          <span className={styles.coverFallbackMark} aria-hidden="true">
-                            <Building2 size={26} />
-                          </span>
-                        </div>
-                      )}
-                      <span className={styles.coverScrim} aria-hidden="true" />
-                      <div className={styles.coverTopBadges}>
-                        <span className={styles.verifiedPill}>
-                          <CheckCircle size={12} aria-hidden="true" />
-                          Verified
-                        </span>
-                        <span className={styles.regionPill}>{regionBadge}</span>
-                      </div>
-                    </Link>
-
-                    <div className={styles.cardBody}>
-                      <div className={styles.avatarRow}>
-                        <div className={styles.logoWrap}>
-                          {company.logo_image_url ? (
-                            <Image
-                              className={styles.logoImage}
-                              src={getImageUrl(company.logo_image_url)}
-                              alt={`${company.name} logo`}
-                              width={56}
-                              height={56}
-                              unoptimized
-                            />
-                          ) : (
-                            <span className={styles.logoMonogram} aria-hidden="true">
-                              {companyMonogram(company.name)}
-                            </span>
-                          )}
-                        </div>
-
-                        {(websiteUrl || mapUrl || telHref) ? (
-                          <div className={styles.quickLinks}>
-                            {websiteUrl ? (
-                              <a
-                                href={websiteUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className={styles.quickLink}
-                                aria-label={`Visit ${company.name} website`}
-                                title="Website"
-                              >
-                                <Globe size={15} aria-hidden="true" />
-                              </a>
-                            ) : null}
-                            {mapUrl ? (
-                              <a
-                                href={mapUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className={styles.quickLink}
-                                aria-label={`View ${company.name} on map`}
-                                title="View on map"
-                              >
-                                <Navigation size={15} aria-hidden="true" />
-                              </a>
-                            ) : null}
-                            {telHref ? (
-                              <a
-                                href={telHref}
-                                className={styles.quickLink}
-                                aria-label={`Call ${company.name}`}
-                                title="Call company"
-                              >
-                                <Phone size={15} aria-hidden="true" />
-                              </a>
-                            ) : null}
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className={styles.identityBlock}>
-                        <h3 className={styles.cardTitle}>
-                          <Link href={company.public_path} className={styles.cardTitleLink}>
-                            {company.name}
-                          </Link>
-                        </h3>
-                        <p className={styles.locationLine}>
-                          <MapPin size={13} aria-hidden="true" />
-                          <span>{locationLabel}</span>
-                        </p>
-                      </div>
-
-                      <p className={styles.description}>
-                        {company.description?.trim() ||
-                          "Verified local tourism and transport provider offering direct bookings and regional coverage."}
-                      </p>
-
-                      <div className={styles.metricsStrip}>
-                        <div className={styles.metricTile}>
-                          <span className={styles.metricIcon} aria-hidden="true">
-                            <Car size={14} />
-                          </span>
-                          <div className={styles.metricCopy}>
-                            <strong className={styles.metricValue}>
-                              {company.services_count}
-                            </strong>
-                            <span className={styles.metricLabel}>
-                              {company.services_count === 1 ? "Hire service" : "Hire services"}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className={styles.metricTile}>
-                          <span className={styles.metricIcon} aria-hidden="true">
-                            <Compass size={14} />
-                          </span>
-                          <div className={styles.metricCopy}>
-                            <strong className={styles.metricValue}>{tripsCount}</strong>
-                            <span className={styles.metricLabel}>
-                              {tripsCount === 1 ? "Published trip" : "Published trips"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {Array.isArray(company.services) && company.services.length > 0 ? (
-                        <div className={styles.companyServicesBlock}>
-                          <div className={styles.companyServicesHead}>
-                            <span className={styles.companyServicesTitle}>
-                              <Car size={13} aria-hidden="true" />
-                              Private hire services
-                            </span>
-                            <span className={styles.companyServicesCount}>
-                              {company.services.length}{" "}
-                              {company.services.length === 1 ? "option" : "options"}
-                            </span>
-                          </div>
-
-                          <ul className={styles.companyServicesList}>
-                            {company.services.map((svc) => {
-                              const vehicleName = svc.vehicle?.name?.trim() || svc.title;
-                              const plate = svc.vehicle?.plate_number?.trim() || "";
-                              const seats = Number(svc.vehicle?.capacity ?? 0);
-                              const bags = Number(svc.vehicle?.luggage_capacity ?? 0);
-                              const thumb = svc.vehicle?.front_image_url
-                                ? getImageUrl(svc.vehicle.front_image_url)
-                                : null;
-                              const priceNum = Number(svc.price);
-                              const priceText = Number.isFinite(priceNum)
-                                ? `$${Number.isInteger(priceNum) ? priceNum : priceNum.toFixed(2)}`
-                                : `$${svc.price}`;
-                              const pricingKey = svc.pricing_type || "per_trip";
-                              const pricingLabel =
-                                PRICING_LABELS[pricingKey] || pricingKey.replace(/_/g, " ");
-
-                              return (
-                                <li key={svc.id} className={styles.companyServiceItem}>
-                                  <div className={styles.companyServiceMain}>
-                                    <Link
-                                      href={`/booking/${svc.id}/`}
-                                      className={styles.companyServiceThumb}
-                                      aria-label={`Book ${vehicleName} with ${company.name}`}
-                                    >
-                                      {thumb ? (
-                                        <Image
-                                          src={thumb}
-                                          alt=""
-                                          fill
-                                          sizes="56px"
-                                          className={styles.companyServiceThumbImg}
-                                          unoptimized
-                                        />
-                                      ) : (
-                                        <Car size={18} aria-hidden="true" />
-                                      )}
-                                    </Link>
-
-                                    <div className={styles.companyServiceInfo}>
-                                      <div className={styles.companyServiceTop}>
-                                        <Link
-                                          href={`/booking/${svc.id}/`}
-                                          className={styles.companyServiceName}
-                                        >
-                                          {vehicleName}
-                                        </Link>
-                                        {plate ? (
-                                          <span className={styles.companyServicePlate}>{plate}</span>
-                                        ) : null}
-                                      </div>
-
-                                      {svc.title &&
-                                      svc.title.trim().toLowerCase() !==
-                                        vehicleName.toLowerCase() ? (
-                                        <p className={styles.companyServiceSub}>{svc.title}</p>
-                                      ) : null}
-
-                                      <div className={styles.companyServiceMeta}>
-                                        <span className={styles.companyServicePrice}>
-                                          <strong>{priceText}</strong>/{pricingLabel}
-                                        </span>
-                                        {seats > 0 ? (
-                                          <span className={styles.companyServiceSpec}>
-                                            <Users size={12} aria-hidden="true" />
-                                            {seats}
-                                          </span>
-                                        ) : null}
-                                        {bags > 0 ? (
-                                          <span className={styles.companyServiceSpec}>
-                                            <Briefcase size={12} aria-hidden="true" />
-                                            {bags}
-                                          </span>
-                                        ) : null}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className={styles.companyServiceActions}>
-                                    <Link
-                                      href={`/transport/service/${svc.id}/`}
-                                      className={styles.serviceDetailLink}
-                                    >
-                                      Details
-                                    </Link>
-                                    <Link
-                                      href={`/booking/${svc.id}/`}
-                                      className={styles.serviceBookLink}
-                                    >
-                                      Book now
-                                      <ArrowRight size={13} aria-hidden="true" />
-                                    </Link>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      ) : null}
-
-                      <div className={styles.cardFooter}>
-                        <Link className={styles.profileCta} href={company.public_path}>
-                          View company profile
-                          <ArrowRight size={15} aria-hidden="true" />
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
+            <div className={gridClassName}>
+              {companies.map((company) => (
+                <CompanyFeaturedCard key={company.id} company={company} />
+              ))}
             </div>
 
             {totalPages > 1 ? (
