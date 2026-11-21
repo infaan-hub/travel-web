@@ -86,8 +86,6 @@ export default function CompanyPrivateServicePage() {
   const [title, setTitle] = useState("");
   const [vehicleId, setVehicleId] = useState<number | "">("");
   const [driverId, setDriverId] = useState<number | "">("");
-  const [price, setPrice] = useState("45.00");
-  const [pricingType, setPricingType] = useState("per_trip");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
 
@@ -119,8 +117,6 @@ export default function CompanyPrivateServicePage() {
     setTitle("");
     setVehicleId(vehicles.length > 0 ? vehicles[0].id : "");
     setDriverId(drivers.length > 0 ? drivers[0].id : "");
-    setPrice("45.00");
-    setPricingType("per_trip");
     setDescription("");
     setIsActive(true);
     setModalOpen(true);
@@ -131,8 +127,6 @@ export default function CompanyPrivateServicePage() {
     setTitle(s.title);
     setVehicleId(s.vehicle_id);
     setDriverId(s.driver_id);
-    setPrice(s.price);
-    setPricingType(s.pricing_type || "per_trip");
     setDescription(s.description || "");
     setIsActive(s.is_active);
     setModalOpen(true);
@@ -159,8 +153,6 @@ export default function CompanyPrivateServicePage() {
         title: title.trim(),
         vehicle_id: vehicleId,
         driver_id: driverId,
-        price,
-        pricing_type: pricingType,
         description: description.trim(),
         is_active: isActive,
       };
@@ -455,37 +447,6 @@ export default function CompanyPrivateServicePage() {
                           {d.name} ({d.phone})
                         </option>
                       ))}
-                    </select>
-                  </div>
-
-                  {/* Price */}
-                  <div className={styles.formField}>
-                    <label>
-                      Price (USD $) <span className={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      className={styles.inputControl}
-                      placeholder="45.00"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {/* Pricing Type */}
-                  <div className={styles.formField}>
-                    <label>Pricing Rate Type</label>
-                    <select
-                      className={styles.selectControl}
-                      value={pricingType}
-                      onChange={(e) => setPricingType(e.target.value)}
-                    >
-                      <option value="per_trip">Per Trip (One-way / Transfer)</option>
-                      <option value="per_day">Per Day (Full Day Chauffeur)</option>
-                      <option value="per_hour">Per Hour</option>
                     </select>
                   </div>
                 </div>
