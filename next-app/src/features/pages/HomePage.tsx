@@ -1,24 +1,21 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import Image from "next/image";
-import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI, publicPrivateHireAPI, publicDriversAPI } from '@/lib/api/client';
-import { ArrowRight, Star, Send, X, Car, Users, Briefcase, Shield, Compass, Navigation, Building2, CheckCircle, ChevronRight, MapPin } from '@/components/icons';
+import { toursAPI, homeSettingsAPI, publicCompaniesAPI, publicPrivateHireAPI, publicDriversAPI } from '@/lib/api/client';
+import { ArrowRight, Star, Car, Users, Briefcase, Compass, Navigation, Building2, CheckCircle, ChevronRight, MapPin } from '@/components/icons';
+import { CalendarCheck2, ShieldCheck } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
-import { useAuth } from '@/context/AuthContext';
 
-import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import styles from "@/features/pages/home-page.module.css";
 
-import type { HomeSettings, Review, Tour } from "@/features/pages/types";
+import type { HomeSettings, Tour } from "@/features/pages/types";
 import type { PublicDriverCard } from "@/lib/featured-drivers";
 import { PRICING_LABELS, SAMPLE_PRIVATE_HIRE_SERVICES } from "@/features/transport/private-hire-data";
-import type { ChangeEvent, FormEvent, MouseEvent } from "react";
 
 type FeaturedCompany = {
   id: number;
@@ -34,8 +31,141 @@ type FeaturedCompany = {
   public_path: string;
   services_count: number;
   trips_count: number;
-  services?: Array<{ id: number }>;
+  services?: Array<{
+    id: number;
+    vehicle?: { front_image_url?: string | null } | null;
+  }>;
 };
+
+function HomePrivateHireFeaturedCard({ svc }: { svc: any }) {
+  const [angleIndex, setAngleIndex] = useState(0);
+
+  const vehicle = svc.vehicle ?? {};
+  const vehicleName: string = vehicle.name ?? "Private vehicle";
+  const plateNumber: string = vehicle.plate_number ?? vehicle.plateNumber ?? "";
+  const category: string = vehicle.category ?? "";
+  const companyName: string = svc.company?.name ?? "";
+  const capacityPax = Number(vehicle.capacity ?? 0);
+  const luggageBags = Number(vehicle.luggage_capacity ?? vehicle.luggageCapacity ?? 0);
+  const pricingKey: string = svc.pricing_type ?? svc.pricingType ?? "per_trip";
+  const pricingLabel = PRICING_LABELS[pricingKey] || pricingKey.replace(/_/g, " ");
+  const priceAmount = Number(svc.price);
+  const priceLabel = Number.isFinite(priceAmount)
+    ? `$${Number.isInteger(priceAmount) ? priceAmount : priceAmount.toFixed(2)}`
+    : `$${svc.price}`;
+  const detailsHref = `/transport/service/${svc.id}/`;
+  const description: string =
+    (typeof svc.description === "string" && svc.description.trim()) ||
+    (typeof vehicle.description === "string" && vehicle.description.trim()) ||
+    "";
+
+  const photos = [
+    { label: "Front", url: vehicle.front_image_url || vehicle.frontImage || null },
+    { label: "Side", url: vehicle.side_image_url || vehicle.sideImage || null },
+    { label: "Back", url: vehicle.back_image_url || vehicle.backImage || null },
+  ].filter((item): item is { label: string; url: string } => Boolean(item.url));
+
+  const activePhoto = photos[angleIndex] ?? photos[0] ?? null;
+
+  return (
+    <li className={styles.fpCard}>
+      <div className={styles.fpMedia} aria-hidden="true">
+        {activePhoto ? (
+          <Image
+            src={getImageUrl(activePhoto.url)}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 92vw, (max-width: 1100px) 48vw, 560px"
+            className={styles.fpImage}
+            unoptimized
+          />
+        ) : (
+          <div className={styles.fpFallback}>
+            <Car size={54} />
+          </div>
+        )}
+      </div>
+      <span className={styles.fpTopScrim} aria-hidden="true" />
+
+      <div className={styles.fpTopBar}>
+        <span className={styles.fpGlassBadge}>
+          <ShieldCheck size={13} aria-hidden="true" />
+          Verified private hire
+        </span>
+
+        <div className={styles.fpPriceBox}>
+          <span className={styles.fpPriceValue}>{priceLabel}</span>
+          <span className={styles.fpPriceUnit}>/ {pricingLabel}</span>
+        </div>
+      </div>
+
+      <div className={styles.fpSheet}>
+        <div className={styles.fpBodyRow}>
+          <div className={styles.fpCopy}>
+            <span className={styles.fpKicker}>
+              {companyName
+                ? `${companyName} · ${category || "Private Hire"}`
+                : category || "Verified Private Hire"}
+            </span>
+            <h3 className={styles.fpTitle}>
+              <Link href={detailsHref} className={styles.fpTitleLink}>
+                {svc.title || vehicleName}
+              </Link>
+            </h3>
+            {description ? <p className={styles.fpDesc}>{description}</p> : null}
+          </div>
+
+          {photos.length > 1 ? (
+            <div className={styles.fpAnglePills} role="tablist" aria-label="Vehicle photo angle">
+              {photos.map((photo, index) => (
+                <button
+                  key={photo.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === angleIndex}
+                  className={`${styles.fpAngleBtn} ${
+                    index === angleIndex ? styles.fpAngleBtnActive : ""
+                  }`}
+                  onClick={() => setAngleIndex(index)}
+                >
+                  {photo.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <div className={styles.fpBottomRow}>
+          <ul className={styles.fpFacts} aria-label="Vehicle specifications">
+            <li>
+              <Car size={14} aria-hidden="true" />
+              <span>{vehicleName}</span>
+              {plateNumber ? <em>{plateNumber}</em> : null}
+            </li>
+            <li>
+              <Users size={14} aria-hidden="true" />
+              <span>{capacityPax} pax</span>
+            </li>
+            <li>
+              <Briefcase size={14} aria-hidden="true" />
+              <span>{luggageBags} bags</span>
+            </li>
+          </ul>
+
+          <div className={styles.fpActionsRow}>
+            <Link href={detailsHref} className={styles.fpGhostBtn}>
+              Details
+            </Link>
+            <Link href={`/booking/${svc.id}/`} className={styles.fpPrimaryBtn}>
+              <CalendarCheck2 size={16} aria-hidden="true" />
+              Book This Service
+            </Link>
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
 
 function uniqueSampleServicesByCompany(limit = 4) {
   const seen = new Set<number>();
@@ -78,11 +208,8 @@ function formatCompanyLocation(company: FeaturedCompany): string {
 }
 
 export default function HomePage() {
-  const toast = useToast();
-  const { isAuthenticated } = useAuth();
   const [allTours, setAllTours] = useState<Tour[]>(() => readClientCache<Tour[]>("travel.homeTours") ?? []);
   const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(() => readClientCache<HomeSettings>("travel.homeSettings"));
-  const [reviews, setReviews] = useState<Review[]>(() => readClientCache<Review[]>("travel.homeReviews") ?? []);
   const [companies, setCompanies] = useState<FeaturedCompany[]>(() => readClientCache<FeaturedCompany[]>("travel.homeCompanies") ?? []);
   const [topDrivers, setTopDrivers] = useState<PublicDriverCard[]>(() => readClientCache<PublicDriverCard[]>("travel.homeTopDrivers.v1") ?? []);
   const [privateServices, setPrivateServices] = useState<any[]>(() => readClientCache<any[]>("travel.homeFeaturedPrivateServices.v1") ?? []);
@@ -90,14 +217,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState<boolean>(() => !(
     readClientCache<Tour[]>("travel.homeTours") ||
     readClientCache<HomeSettings>("travel.homeSettings") ||
-    readClientCache<Review[]>("travel.homeReviews") ||
     readClientCache<FeaturedCompany[]>("travel.homeCompanies")
   ));
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
-  const [reviewSaving, setReviewSaving] = useState(false);
-  const [reviewSuccess, setReviewSuccess] = useState('');
-  const router = useRouter();
 
   const companyServiceOptions = livePrivateServices.filter((svc) => svc && typeof svc.id === "number");
 
@@ -125,10 +246,9 @@ export default function HomePage() {
     void Promise.allSettled([
       toursAPI.getAll({}),
       homeSettingsAPI.get(),
-      reviewsAPI.getAll({ status: 'approved' }),
       publicCompaniesAPI.getAll({ page: 1, page_size: 50 }),
       publicDriversAPI.getAll({ featured_home: "1", limit: 4 }),
-    ]).then(([toursRes, homeRes, reviewsRes, companiesRes, driversRes]) => {
+    ]).then(([toursRes, homeRes, companiesRes, driversRes]) => {
       const readList = (value: unknown) => {
         if (Array.isArray(value)) return value;
         if (value && typeof value === "object" && "results" in value && Array.isArray(value.results)) return value.results;
@@ -151,12 +271,6 @@ export default function HomePage() {
         }
       }
       else console.error(homeRes.reason);
-      if (reviewsRes.status === "fulfilled") {
-        const reviews = readList(reviewsRes.value.data) as Review[];
-        setReviews(reviews);
-        writeClientCache("travel.homeReviews", reviews);
-      }
-      else console.error(reviewsRes.reason);
       if (companiesRes.status === "fulfilled") {
         const publicCompanyList = readList(companiesRes.value.data) as FeaturedCompany[];
         setCompanies(publicCompanyList.slice(0, 6));
@@ -174,23 +288,6 @@ export default function HomePage() {
       setLoading(false);
     });
   }, []);
-
-  const handleReviewSubmit = async (e: FormEvent<HTMLElement>) => {
-    e.preventDefault();
-    if (!reviewForm.content.trim()) { toast.error('Review message is required'); return; }
-    setReviewSaving(true);
-    try {
-      await reviewsAPI.create({
-        rating: reviewForm.rating,
-        content: reviewForm.content.trim(),
-      });
-      setReviewSuccess('Thank you! Your review has been submitted and will appear after approval.');
-      setReviewForm({ rating: 5, content: '' });
-      setTimeout(() => setReviewSuccess(''), 5000);
-      setShowReviewForm(false);
-    } catch { toast.error('Failed to submit review. Please try again.'); }
-    finally { setReviewSaving(false); }
-  };
 
   if (loading) {
     return (
@@ -396,130 +493,17 @@ export default function HomePage() {
 
         {privateServices.length > 0 ? (
           <ul
-            className={`${styles.hireGrid} ${
+            className={`${styles.fpGrid} ${
               privateServices.length === 1
-                ? styles.hireGridSingle
+                ? styles.fpGridSingle
                 : privateServices.length === 2
-                  ? styles.hireGridDouble
-                  : privateServices.length === 3
-                    ? styles.hireGridTriple
-                    : ""
+                  ? styles.fpGridDouble
+                  : ""
             }`}
           >
-            {privateServices.slice(0, 4).map((svc) => {
-              const vehicle = svc.vehicle ?? {};
-              const vehicleName: string = vehicle.name ?? "Private vehicle";
-              const plateNumber: string = vehicle.plate_number ?? vehicle.plateNumber ?? "";
-              const category: string = vehicle.category ?? "";
-              const companyName: string = svc.company?.name ?? "";
-              const companyLogo: string | null = svc.company?.logo_image_url ?? null;
-              const capacityPax = Number(vehicle.capacity ?? 0);
-              const luggageBags = Number(vehicle.luggage_capacity ?? vehicle.luggageCapacity ?? 0);
-              const imageUrl: string | null = vehicle.front_image_url || vehicle.frontImage || null;
-              const pricingKey: string = svc.pricing_type ?? svc.pricingType ?? "per_trip";
-              const pricingLabel = PRICING_LABELS[pricingKey] || pricingKey.replace(/_/g, " ");
-              const priceAmount = Number(svc.price);
-              const priceLabel = Number.isFinite(priceAmount)
-                ? `$${Number.isInteger(priceAmount) ? priceAmount : priceAmount.toFixed(2)}`
-                : `$${svc.price}`;
-              const detailsHref = `/transport/service/${svc.id}/`;
-              const avgRating =
-                typeof svc.company_stats?.average_rating === "number" &&
-                svc.company_stats.average_rating > 0
-                  ? svc.company_stats.average_rating
-                  : null;
-              const bookingsCount =
-                typeof svc.company_stats?.bookings_count === "number" &&
-                svc.company_stats.bookings_count > 0
-                  ? svc.company_stats.bookings_count
-                  : 0;
-
-              return (
-                <li key={svc.id} className={styles.hireCard}>
-                  <Link href={detailsHref} className={styles.hireMedia} aria-label={`View ${vehicleName} details`}>
-                    {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt=""
-                        fill
-                        sizes="(max-width: 640px) 84vw, (max-width: 1100px) 50vw, 25vw"
-                        className={styles.hireImage}
-                        unoptimized
-                      />
-                    ) : (
-                      <span className={styles.hireImageFallback} aria-hidden="true">
-                        <Car size={40} />
-                      </span>
-                    )}
-                    <span className={styles.hireShade} aria-hidden="true" />
-                    {category ? <span className={styles.hireCategory}>{category}</span> : null}
-                    {plateNumber ? <span className={styles.hirePlate}>{plateNumber}</span> : null}
-                  </Link>
-
-                  <div className={styles.hireBody}>
-                    <div className={styles.hireTopRow}>
-                      <div className={styles.hireNameGroup}>
-                        <h3 className={styles.hireVehicle}>{vehicleName}</h3>
-                        {svc.title ? <p className={styles.hireService}>{svc.title}</p> : null}
-                      </div>
-                      <div className={styles.hirePrice}>
-                        <strong>{priceLabel}</strong>
-                        <span>{pricingLabel}</span>
-                      </div>
-                    </div>
-
-                    <ul className={styles.hireSpecs} aria-label="Vehicle capacity">
-                      <li>
-                        <Users size={14} aria-hidden="true" />
-                        {capacityPax} {capacityPax === 1 ? "seat" : "seats"}
-                      </li>
-                      <li>
-                        <Briefcase size={14} aria-hidden="true" />
-                        {luggageBags} {luggageBags === 1 ? "bag" : "bags"}
-                      </li>
-                      {svc.driver ? (
-                        <li>
-                          <Shield size={14} aria-hidden="true" />
-                          Driver
-                        </li>
-                      ) : null}
-                    </ul>
-
-                    {companyName ? (
-                      <div className={styles.hireCompany}>
-                        <span className={styles.hireCompanyLogo} aria-hidden="true">
-                          {companyLogo ? (
-                            <Image src={getImageUrl(companyLogo)} alt="" fill sizes="28px" unoptimized />
-                          ) : (
-                            companyName.charAt(0).toUpperCase()
-                          )}
-                        </span>
-                        <span className={styles.hireCompanyName}>{companyName}</span>
-                        {avgRating != null ? (
-                          <span className={styles.hireCompanyRating} aria-label={`Rated ${avgRating.toFixed(1)} out of 5`}>
-                            <Star size={12} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
-                            {avgRating.toFixed(1)}
-                          </span>
-                        ) : bookingsCount > 0 ? (
-                          <span className={styles.hireCompanyBookings}>
-                            {bookingsCount} {bookingsCount === 1 ? "trip" : "trips"}
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : null}
-
-                    <div className={styles.hireActions}>
-                      <Link href={detailsHref} className={styles.hireBtnGhost}>
-                        Details
-                      </Link>
-                      <Link href={`/booking/${svc.id}/`} className={styles.hireBtnPrimary}>
-                        Book now <ArrowRight size={14} aria-hidden="true" />
-                      </Link>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
+            {privateServices.slice(0, 4).map((svc) => (
+              <HomePrivateHireFeaturedCard key={svc.id} svc={svc} />
+            ))}
           </ul>
         ) : (
           <div className={styles.hireEmpty}>
@@ -550,94 +534,117 @@ export default function HomePage() {
           </div>
 
           <ul
-            className={`${styles.driversGrid} ${
+            className={`${styles.fpGrid} ${styles.fpGridDrivers} ${
               topDrivers.length === 1
-                ? styles.driversGridSingle
+                ? styles.fpGridDriversSingle
                 : topDrivers.length === 2
-                  ? styles.driversGridDouble
+                  ? styles.fpGridDriversDouble
                   : topDrivers.length === 3
-                    ? styles.driversGridTriple
+                    ? styles.fpGridDriversTriple
                     : ""
             }`}
           >
             {topDrivers.slice(0, 4).map((driver) => {
               const avatarUrl = driver.image_url ? getImageUrl(driver.image_url) : null;
+              const vehicleImgUrl = driver.vehicle?.front_image_url
+                ? getImageUrl(driver.vehicle.front_image_url)
+                : null;
+              const bgUrl = avatarUrl || vehicleImgUrl;
               const bookHref = driver.service_id
                 ? `/booking/${driver.service_id}/`
                 : "/booking/create/";
-              const bookLabel = driver.service_id ? "Book driver" : "Request trip";
+              const bookLabel = driver.service_id ? "Book This Driver" : "Request Trip";
 
               return (
-                <li key={driver.id} className={styles.driverCard}>
-                  <div className={styles.driverMedia}>
-                    {avatarUrl ? (
+                <li key={driver.id} className={`${styles.fpCard} ${styles.fpCardCompact}`}>
+                  <div className={styles.fpMedia} aria-hidden="true">
+                    {bgUrl ? (
                       <Image
-                        src={avatarUrl}
-                        alt={driver.name}
+                        src={bgUrl}
+                        alt=""
                         fill
-                        sizes="(max-width: 640px) 46vw, (max-width: 1080px) 46vw, 24vw"
-                        className={styles.driverPhoto}
+                        sizes="(max-width: 640px) 92vw, (max-width: 1180px) 46vw, 25vw"
+                        className={`${styles.fpImage} ${avatarUrl ? styles.fpImagePortrait : ""}`}
                         unoptimized
                       />
                     ) : (
-                      <span className={styles.driverAvatarFallback} aria-hidden="true">
-                        <span className={styles.driverAvatarCircle}>
+                      <div className={styles.fpFallback}>
+                        <span className={styles.fpFallbackCircle}>
                           {getCompanyInitials(driver.name)}
                         </span>
-                      </span>
+                      </div>
                     )}
-                    <span className={styles.driverMediaShade} aria-hidden="true" />
-                    <span className={styles.driverVerified}>
-                      <Shield size={11} aria-hidden="true" />
-                      Verified
+                  </div>
+                  <span className={styles.fpTopScrim} aria-hidden="true" />
+
+                  <div className={styles.fpTopBar}>
+                    <span className={styles.fpGlassBadge}>
+                      <ShieldCheck size={13} aria-hidden="true" />
+                      Verified driver
                     </span>
+
                     {driver.average_rating != null ? (
                       <span
-                        className={styles.driverRating}
+                        className={styles.fpRatingPill}
                         aria-label={`Rated ${driver.average_rating.toFixed(1)} out of 5`}
                       >
-                        <Star size={11} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
+                        <Star size={12} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
                         {driver.average_rating.toFixed(1)}
                       </span>
-                    ) : null}
-                  </div>
-
-                  <div className={styles.driverBody}>
-                    <div className={styles.driverNameBlock}>
-                      <h3 className={styles.driverName}>{driver.name}</h3>
-                      <p className={styles.driverAffiliation}>
-                        {driver.company ? (
-                          <>
-                            <Building2 size={12} aria-hidden="true" />
-                            <span>{driver.company.name}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Navigation size={12} aria-hidden="true" />
-                            <span>Public hire driver</span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-
-                    <div className={styles.driverMeta}>
-                      {driver.vehicle ? (
-                        <span className={styles.driverMetaChip}>
-                          <Car size={12} aria-hidden="true" />
-                          <span>{driver.vehicle.name}</span>
-                        </span>
-                      ) : null}
-                      <span className={styles.driverMetaChip}>
+                    ) : (
+                      <span className={styles.fpRatingPill}>
                         {driver.trips_count > 0
                           ? `${driver.trips_count} ${driver.trips_count === 1 ? "trip" : "trips"}`
                           : "Available"}
                       </span>
+                    )}
+                  </div>
+
+                  <div className={styles.fpSheet}>
+                    <div className={styles.fpCopy}>
+                      <span className={styles.fpKicker}>
+                        {driver.company
+                          ? `${driver.company.name} · Private Hire`
+                          : "Public Hire Driver · Zanzibar"}
+                      </span>
+                      <h3 className={styles.fpTitle}>{driver.name}</h3>
                     </div>
 
-                    <div className={styles.driverFooter}>
-                      <Link href={bookHref} className={styles.driverActionLink}>
-                        {bookLabel} <ArrowRight size={13} aria-hidden="true" />
-                      </Link>
+                    <div className={styles.fpBottomRow}>
+                      <ul className={styles.fpFacts} aria-label="Driver highlights">
+                        {driver.vehicle ? (
+                          <li>
+                            <Car size={13} aria-hidden="true" />
+                            <span>{driver.vehicle.name}</span>
+                          </li>
+                        ) : null}
+                        {driver.vehicle && driver.vehicle.capacity > 0 ? (
+                          <li>
+                            <Users size={13} aria-hidden="true" />
+                            <span>{driver.vehicle.capacity} pax</span>
+                          </li>
+                        ) : null}
+                        {driver.trips_count > 0 ? (
+                          <li>
+                            <CheckCircle size={13} aria-hidden="true" />
+                            <span>
+                              {driver.trips_count} {driver.trips_count === 1 ? "trip" : "trips"}
+                            </span>
+                          </li>
+                        ) : (
+                          <li>
+                            <Navigation size={13} aria-hidden="true" />
+                            <span>Ready now</span>
+                          </li>
+                        )}
+                      </ul>
+
+                      <div className={styles.fpActionsRow}>
+                        <Link href={bookHref} className={styles.fpPrimaryBtn}>
+                          <CalendarCheck2 size={15} aria-hidden="true" />
+                          {bookLabel}
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -665,18 +672,23 @@ export default function HomePage() {
           </div>
 
           <ul
-            className={`${styles.providersGrid} ${
+            className={`${styles.fpGrid} ${styles.fpGridProviders} ${
               companies.length === 1
-                ? styles.providersGridSingle
+                ? styles.fpGridProvidersSingle
                 : companies.length === 2
-                  ? styles.providersGridDouble
+                  ? styles.fpGridProvidersDouble
                   : ""
             }`}
           >
             {companies.slice(0, 6).map((company) => {
-              const coverUrl = company.cover_image_url
-                ? getImageUrl(company.cover_image_url)
-                : null;
+              const directService =
+                company.services?.[0] ??
+                companyServiceOptions.find((svc) => svc.company?.id === company.id);
+              const coverRaw =
+                company.cover_image_url ||
+                directService?.vehicle?.front_image_url ||
+                null;
+              const coverUrl = coverRaw ? getImageUrl(coverRaw) : null;
               const logoUrl = company.logo_image_url
                 ? getImageUrl(company.logo_image_url)
                 : null;
@@ -684,126 +696,116 @@ export default function HomePage() {
               const description =
                 company.description?.trim() ||
                 "Licensed local transport partner offering verified private hire vehicles and experienced island drivers.";
-              const directService =
-                company.services?.[0] ??
-                companyServiceOptions.find((svc) => svc.company?.id === company.id);
               const servicesCount = Number(company.services_count ?? 0);
               const tripsCount = Number(company.trips_count ?? 0);
 
               return (
-                <li
-                  key={company.id}
-                  className={`${styles.providerCard} ${
-                    companies.length === 1 ? styles.providerCardSpotlight : ""
-                  }`}
-                >
-                  <Link
-                    href={company.public_path}
-                    className={styles.providerMedia}
-                    aria-label={`View ${company.name}`}
-                  >
+                <li key={company.id} className={styles.fpCard}>
+                  <div className={styles.fpMedia} aria-hidden="true">
                     {coverUrl ? (
                       <Image
                         src={coverUrl}
                         alt=""
                         fill
-                        sizes="(max-width: 640px) 84vw, (max-width: 1024px) 50vw, 33vw"
-                        className={styles.providerCoverImage}
+                        sizes="(max-width: 640px) 92vw, (max-width: 1180px) 46vw, 33vw"
+                        className={styles.fpImage}
                         unoptimized
                       />
                     ) : (
-                      <span className={styles.providerCoverFallback} aria-hidden="true">
-                        <span className={styles.providerCoverPattern} />
-                        <span className={styles.providerCoverWatermark}>
+                      <div className={styles.fpFallback}>
+                        <span className={styles.fpFallbackCircle}>
                           {getCompanyInitials(company.name)}
                         </span>
-                      </span>
+                      </div>
                     )}
-                    <span className={styles.providerMediaShade} aria-hidden="true" />
-                    <span className={styles.providerVerifiedBadge}>
-                      <Shield size={12} aria-hidden="true" />
-                      Verified company
-                    </span>
-                  </Link>
+                  </div>
+                  <span className={styles.fpTopScrim} aria-hidden="true" />
 
-                  <div className={styles.providerBody}>
-                    <div className={styles.providerIdentity}>
-                      <Link
-                        href={company.public_path}
-                        className={styles.providerEmblem}
-                        aria-label={`${company.name} profile`}
-                      >
+                  <div className={styles.fpTopBar}>
+                    <div className={styles.fpTopLeft}>
+                      <span className={styles.fpLogoBadge} aria-hidden="true">
                         {logoUrl ? (
                           <Image
                             src={logoUrl}
-                            alt={`${company.name} logo`}
+                            alt=""
                             fill
-                            sizes="56px"
-                            className={styles.providerLogoImage}
+                            sizes="36px"
+                            className={styles.fpLogoImg}
                             unoptimized
                           />
                         ) : (
-                          <span className={styles.providerMonogram}>
-                            {getCompanyInitials(company.name)}
-                          </span>
+                          getCompanyInitials(company.name)
                         )}
-                      </Link>
-                      <div className={styles.providerTitleGroup}>
-                        <h3 className={styles.providerName}>
-                          <Link href={company.public_path} className={styles.providerNameLink}>
-                            {company.name}
-                          </Link>
-                        </h3>
-                        <p className={styles.providerLocation}>
-                          <MapPin size={13} aria-hidden="true" />
-                          <span>{locationLabel}</span>
-                        </p>
-                      </div>
+                      </span>
+                      <span className={styles.fpGlassBadge}>
+                        <ShieldCheck size={13} aria-hidden="true" />
+                        Verified company
+                      </span>
                     </div>
 
-                    <p className={styles.providerDesc}>{description}</p>
+                    <span className={styles.fpRatingPill}>
+                      <Car size={12} aria-hidden="true" />
+                      {servicesCount > 0
+                        ? `${servicesCount} ${servicesCount === 1 ? "vehicle" : "vehicles"}`
+                        : "Private hire"}
+                    </span>
+                  </div>
 
-                    <ul className={styles.providerStats} aria-label="Company highlights">
-                      <li>
-                        <Car size={14} aria-hidden="true" />
-                        {servicesCount > 0
-                          ? `${servicesCount} ${servicesCount === 1 ? "vehicle" : "vehicles"}`
-                          : "Private hire fleet"}
-                      </li>
-                      {tripsCount > 0 ? (
-                        <li>
-                          <Compass size={14} aria-hidden="true" />
-                          {tripsCount} {tripsCount === 1 ? "trip" : "trips"}
-                        </li>
-                      ) : null}
-                      <li>
-                        <CheckCircle size={14} aria-hidden="true" />
-                        Local provider
-                      </li>
-                    </ul>
-
-                    <div
-                      className={`${styles.providerActions} ${
-                        directService ? styles.providerActionsSplit : ""
-                      }`}
-                    >
-                      {directService ? (
-                        <>
-                          <Link href={company.public_path} className={styles.providerLinkGhost}>
-                            View company
-                          </Link>
-                          <Link
-                            href={`/booking/${directService.id}/`}
-                            className={styles.providerLinkPrimary}
-                          >
-                            Book now <ArrowRight size={15} aria-hidden="true" />
-                          </Link>
-                        </>
-                      ) : (
-                        <Link href={company.public_path} className={styles.providerLinkPrimary}>
-                          Explore company <ArrowRight size={15} aria-hidden="true" />
+                  <div className={styles.fpSheet}>
+                    <div className={styles.fpCopy}>
+                      <span className={styles.fpKicker}>{locationLabel} · Local Provider</span>
+                      <h3 className={styles.fpTitle}>
+                        <Link href={company.public_path} className={styles.fpTitleLink}>
+                          {company.name}
                         </Link>
-                      )}
+                      </h3>
+                      <p className={styles.fpDesc}>{description}</p>
+                    </div>
+
+                    <div className={styles.fpBottomRow}>
+                      <ul className={styles.fpFacts} aria-label="Company highlights">
+                        <li>
+                          <MapPin size={13} aria-hidden="true" />
+                          <span>{locationLabel}</span>
+                        </li>
+                        <li>
+                          <Car size={13} aria-hidden="true" />
+                          <span>
+                            {servicesCount > 0
+                              ? `${servicesCount} ${servicesCount === 1 ? "service" : "services"}`
+                              : "Private fleet"}
+                          </span>
+                        </li>
+                        {tripsCount > 0 ? (
+                          <li>
+                            <Compass size={13} aria-hidden="true" />
+                            <span>
+                              {tripsCount} {tripsCount === 1 ? "trip" : "trips"}
+                            </span>
+                          </li>
+                        ) : null}
+                      </ul>
+
+                      <div className={styles.fpActionsRow}>
+                        {directService ? (
+                          <>
+                            <Link href={company.public_path} className={styles.fpGhostBtn}>
+                              Company
+                            </Link>
+                            <Link
+                              href={`/booking/${directService.id}/`}
+                              className={styles.fpPrimaryBtn}
+                            >
+                              <CalendarCheck2 size={15} aria-hidden="true" />
+                              Book This Service
+                            </Link>
+                          </>
+                        ) : (
+                          <Link href={company.public_path} className={styles.fpPrimaryBtn}>
+                            Explore Company <ArrowRight size={15} aria-hidden="true" />
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -815,89 +817,11 @@ export default function HomePage() {
 
 
 
-      {reviews.length > 0 && (
-        <section className="testimonials-section">
-          <div className="section-header">
-            <h2>Notes from our customers</h2>
-            <p>Read feedback shared after private-hire journeys.</p>
-          </div>
-          <div className="testimonials-grid">
-            {reviews.slice(0, 6).map(review => (
-              <div key={review.id} className="testimonial-card">
-                <div className="testimonial-stars">
-                  {Array.from({ length: 5 }, (_: any, i: number) => (
-                    <Star key={i} size={16} fill={i < review.rating ? '#f59e0b' : 'none'} color={i < review.rating ? '#f59e0b' : '#d1d5db'} />
-                  ))}
-                </div>
-                <p>&quot;{review.content}&quot;</p>
-                <div className="testimonial-author-row">
-                  <div className="testimonial-avatar">
-                    {review.user_name?.charAt(0).toUpperCase() || '?'}
-                  </div>
-                  <div>
-                    <span className="testimonial-author">{review.user_name}</span>
-                    <span className="testimonial-date">{new Date(review.created_at ?? 0).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="section-footer">
-            {isAuthenticated ? (
-              <button className="btn btn-primary" onClick={() => setShowReviewForm(true)}>
-                Write a Review
-              </button>
-            ) : (
-              <button className="btn btn-primary" onClick={() => router.push('/login')}>
-                Signin to Write a Review
-              </button>
-            )}
-          </div>
-        </section>
-      )}
-
       {!loading && (allTours.length === 0 || homeSettings?.more_experiences_image_urls?.some((image) => Boolean(image))) && (
         <MoreExperiencesEmptyState
           imageUrls={homeSettings?.more_experiences_image_urls?.slice(0, 5).map((image) => image ? getImageUrl(image) : null)}
         />
       )}
-
-
-
-      {showReviewForm && (
-        <div className="modal-overlay" onClick={(e: MouseEvent<HTMLElement>) => { if (e.target === e.currentTarget) setShowReviewForm(false); }}>
-          <div className="modal-content review-form-modal">
-            <div className="modal-header">
-              <h3>Share Your Experience</h3>
-              <button className="modal-close" onClick={() => setShowReviewForm(false)}><X size={18} /></button>
-            </div>
-            {reviewSuccess && <div className="alert alert-success">{reviewSuccess}</div>}
-            <form onSubmit={handleReviewSubmit} className="review-form">
-              <div className="form-group">
-                <label>Rating</label>
-                <div className="star-rating-input">
-                  {[1, 2, 3, 4, 5].map(s => (
-                    <button key={s} type="button" className={`star-btn ${s <= reviewForm.rating ? 'active' : ''}`}
-                      onClick={() => setReviewForm({ ...reviewForm, rating: s })}>
-                      <Star size={24} fill={s <= reviewForm.rating ? '#f59e0b' : 'none'}
-                        color={s <= reviewForm.rating ? '#f59e0b' : '#d1d5db'} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Your Review</label>
-                <textarea placeholder="Share your experience..." rows={4} value={reviewForm.content}
-                  onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setReviewForm({ ...reviewForm, content: e.target.value })} required />
-              </div>
-              <button type="submit" className="btn btn-primary btn-block" disabled={reviewSaving}>
-                <Send size={16} /> {reviewSaving ? 'Submitting...' : 'Submit Review'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
