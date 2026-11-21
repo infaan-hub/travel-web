@@ -1890,6 +1890,7 @@
 .fpGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 440px));
+  align-items: stretch;
   gap: 16px;
   margin: 0;
   padding: 0;
@@ -1942,11 +1943,13 @@
 .fpSwipeTrack {
   display: flex;
   flex-wrap: nowrap;
+  align-items: stretch;
   gap: 18px;
   margin: 0;
-  padding: 4px 2px 12px;
+  padding: 6px 2px 20px;
   list-style: none;
   overflow-x: auto;
+  overflow-y: visible;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
@@ -1977,11 +1980,12 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  row-gap: 18px;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  height: 296px;
-  min-height: 280px;
+  height: auto;
+  min-height: 272px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 22px;
@@ -2004,18 +2008,15 @@
 }
 
 .fpCardTrip {
-  height: 276px;
-  min-height: 266px;
+  min-height: 248px;
 }
 
 .fpCardDriver {
-  height: 286px;
-  min-height: 276px;
+  min-height: 258px;
 }
 
 .fpCardProvider {
-  height: 316px;
-  min-height: 304px;
+  min-height: 282px;
 }
 
 .fpMedia {
@@ -2076,7 +2077,7 @@
 .fpTopScrim {
   position: absolute;
   inset: 0 0 auto 0;
-  height: 92px;
+  height: 78px;
   z-index: 1;
   background: linear-gradient(180deg, rgba(4, 13, 28, 0.72) 0%, rgba(4, 13, 28, 0) 100%);
   pointer-events: none;
@@ -2090,7 +2091,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
-  padding: 14px 14px 0;
+  padding: 12px 13px 0;
 }
 
 .fpTopLeft {
@@ -2199,22 +2200,22 @@
   backdrop-filter: blur(12px);
 }
 
-/* Bottom Gradient Sheet matching /transport/service/[id]/ */
+/* Bottom Gradient Sheet matching /transport/service/[id]/ — compact spacing so every element stays 100% visible */
 .fpSheet {
   position: relative;
   z-index: 2;
   margin-top: auto;
-  padding: 42px 15px 14px;
+  padding: 26px 13px 12px;
   background: linear-gradient(
     180deg,
     rgba(5, 14, 29, 0) 0%,
-    rgba(5, 14, 29, 0.56) 24%,
-    rgba(5, 14, 29, 0.88) 54%,
+    rgba(5, 14, 29, 0.58) 20%,
+    rgba(5, 14, 29, 0.9) 50%,
     rgba(4, 11, 24, 0.98) 100%
   );
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .fpBodyRow {
@@ -2222,20 +2223,23 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 6px 10px;
+  gap: 5px 8px;
 }
 
 .fpCopy {
-  flex: 1 1 160px;
   min-width: 0;
+}
+
+.fpBodyRow > .fpCopy {
+  flex: 1 1 150px;
 }
 
 .fpKicker {
   display: block;
   color: #bae6fd;
-  font-size: 0.62rem;
+  font-size: 0.61rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -2246,12 +2250,12 @@
    so driver names, vehicle titles, trip titles, and company names are ALWAYS crisp bright white. */
 .homePageRoot .fpCard h3.fpTitle,
 .homePageRoot .fpCard .fpTitle {
-  margin: 3px 0 0;
+  margin: 2px 0 0;
   color: #ffffff !important;
   font-family: var(--font-display);
-  font-size: clamp(1.04rem, 1.45vw, 1.24rem);
+  font-size: clamp(1rem, 1.38vw, 1.2rem);
   font-weight: 750;
-  line-height: 1.18;
+  line-height: 1.16;
   letter-spacing: -0.02em;
   text-shadow: 0 2px 12px rgba(3, 10, 24, 0.72);
   display: -webkit-box;
@@ -2271,10 +2275,10 @@
 }
 
 .fpDesc {
-  margin: 3px 0 0;
+  margin: 2px 0 0;
   color: rgba(241, 247, 255, 0.88);
-  font-size: 0.76rem;
-  line-height: 1.38;
+  font-size: 0.74rem;
+  line-height: 1.34;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -2289,13 +2293,13 @@
 }
 
 .fpAngleBtn {
-  min-height: 24px;
+  min-height: 22px;
   padding: 0 8px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
   color: #ffffff;
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 750;
   cursor: pointer;
   -webkit-backdrop-filter: blur(8px);
@@ -2316,15 +2320,15 @@
 .fpBottomRow {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-top: 7px;
+  gap: 6px;
+  padding-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .fpFacts {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2334,12 +2338,12 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.13);
   color: #ffffff;
-  font-size: 0.67rem;
+  font-size: 0.65rem;
   font-weight: 700;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -2356,7 +2360,7 @@
   background: rgba(255, 255, 255, 0.94);
   color: #0b2447;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-style: normal;
   font-weight: 850;
   letter-spacing: 0.02em;
@@ -2374,13 +2378,13 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-height: 38px;
-  padding: 0 12px;
+  min-height: 36px;
+  padding: 0 11px;
   border: 1px solid rgba(255, 255, 255, 0.32);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
   color: #ffffff;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 750;
   text-decoration: none;
   white-space: nowrap;
@@ -2398,14 +2402,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   flex: 1 1 auto;
-  min-height: 38px;
-  padding: 0 14px;
+  min-height: 36px;
+  padding: 0 13px;
   border-radius: 999px;
   background: #ffffff;
   color: #08428c;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 850;
   text-decoration: none;
   white-space: nowrap;
@@ -2458,31 +2462,29 @@
   }
 
   .fpCard {
-    height: 254px;
-    min-height: 244px;
+    height: auto;
+    min-height: 222px;
+    row-gap: 12px;
     border-radius: 18px;
   }
 
   .fpCardTrip {
-    height: 224px;
-    min-height: 214px;
+    min-height: 204px;
   }
 
   .fpCardDriver {
-    height: 244px;
-    min-height: 236px;
+    min-height: 214px;
   }
 
   .fpCardProvider {
-    height: 292px;
-    min-height: 280px;
+    min-height: 256px;
     border-radius: 22px;
   }
 
   .fpSwipeTrack {
     gap: 12px;
     margin-inline: calc(var(--page-padding-mobile, 16px) * -1);
-    padding: 4px var(--page-padding-mobile, 16px) 12px;
+    padding: 6px var(--page-padding-mobile, 16px) 20px;
     scroll-padding-inline: var(--page-padding-mobile, 16px);
   }
 
@@ -2501,60 +2503,73 @@
   }
 
   .fpTopBar {
-    padding: 10px 10px 0;
+    padding: 9px 9px 0;
     gap: 4px;
   }
 
   .fpGlassBadge {
-    min-height: 24px;
+    min-height: 22px;
     padding: 0 7px;
-    font-size: 0.54rem;
+    font-size: 0.53rem;
     letter-spacing: 0.04em;
   }
 
   .fpIconPill {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+  }
+
+  .fpLogoBadge {
     width: 26px;
     height: 26px;
     flex: 0 0 26px;
+    font-size: 0.6rem;
   }
 
   .fpPriceBox {
-    padding: 3px 8px;
-    border-radius: 11px;
+    padding: 3px 7px;
+    border-radius: 10px;
   }
 
   .fpPriceValue {
-    font-size: 0.88rem;
+    font-size: 0.85rem;
   }
 
   .fpPriceUnit {
-    font-size: 0.52rem;
+    font-size: 0.51rem;
   }
 
   .fpRatingPill {
-    min-height: 24px;
+    min-height: 22px;
     padding: 0 7px;
-    font-size: 0.62rem;
+    font-size: 0.6rem;
   }
 
   .fpSheet {
-    padding: 30px 10px 10px;
-    gap: 6px;
+    padding: 18px 9px 9px;
+    gap: 5px;
   }
 
   .fpKicker {
-    font-size: 0.54rem;
-    letter-spacing: 0.06em;
+    font-size: 0.53rem;
+    letter-spacing: 0.05em;
   }
 
   .homePageRoot .fpCard h3.fpTitle,
   .homePageRoot .fpCard .fpTitle {
-    font-size: 0.88rem;
-    line-height: 1.18;
+    font-size: 0.86rem;
+    line-height: 1.16;
   }
 
-  .fpCardProvider .fpTitle {
-    font-size: 1.08rem;
+  .homePageRoot .fpCardTrip h3.fpTitle,
+  .homePageRoot .fpCardTrip .fpTitle {
+    -webkit-line-clamp: 3;
+  }
+
+  .homePageRoot .fpCardProvider h3.fpTitle,
+  .homePageRoot .fpCardProvider .fpTitle {
+    font-size: 1.02rem;
   }
 
   .fpDesc {
@@ -2564,9 +2579,9 @@
   .fpCardTrip .fpDesc,
   .fpCardProvider .fpDesc {
     display: -webkit-box;
-    font-size: 0.67rem;
-    line-height: 1.32;
-    -webkit-line-clamp: 2;
+    font-size: 0.65rem;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
   }
 
   .fpAnglePills {
@@ -2574,23 +2589,23 @@
   }
 
   .fpAngleBtn {
-    min-height: 21px;
+    min-height: 20px;
     padding: 0 6px;
-    font-size: 0.56rem;
+    font-size: 0.55rem;
   }
 
   .fpBottomRow {
-    gap: 6px;
-    padding-top: 5px;
+    gap: 5px;
+    padding-top: 4px;
   }
 
   .fpFacts {
-    gap: 4px;
+    gap: 3px;
   }
 
   .fpFacts li {
-    padding: 3px 6px;
-    font-size: 0.58rem;
+    padding: 2px 6px;
+    font-size: 0.57rem;
     gap: 3px;
   }
 
@@ -2604,21 +2619,21 @@
 
   .fpCardProvider .fpGhostBtn {
     display: inline-flex;
-    min-height: 36px;
+    min-height: 34px;
     padding: 0 11px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
   }
 
   .fpPrimaryBtn {
-    min-height: 34px;
-    padding: 0 10px;
-    font-size: 0.7rem;
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 0.68rem;
     gap: 4px;
   }
 
   .fpCardProvider .fpPrimaryBtn {
-    min-height: 36px;
-    font-size: 0.75rem;
+    min-height: 34px;
+    font-size: 0.73rem;
   }
 
   .fpLabelFull {
