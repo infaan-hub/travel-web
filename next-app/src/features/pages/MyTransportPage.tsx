@@ -35,7 +35,7 @@ import {
 } from "@/lib/api/client";
 import { useToast } from "@/components/ToastProvider";
 import { useAuth } from "@/context/AuthContext";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import styles from "@/features/pages/my-transport.module.css";
 
 type TransportBookingItem = {
@@ -480,7 +480,7 @@ export default function MyTransportPage() {
                           fill
                           sizes="(max-width: 960px) 92vw, 46vw"
                           className={styles.featuredBgImg}
-                          unoptimized
+                          unoptimized={isUnoptimizableImage(bgImage)}
                         />
                       ) : (
                         <div className={styles.featuredBgFallback}>

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { LayoutGrid, List, ShieldCheck } from "lucide-react";
 import { publicCompaniesAPI } from "@/lib/api/client";
 import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import {
   AlertCircle,
   ArrowRight,
@@ -118,7 +118,7 @@ function CompanyFeaturedCard({ company }: { company: Company }) {
             fill
             sizes="(max-width: 640px) 48vw, (max-width: 1024px) 48vw, 380px"
             className={styles.fpImage}
-            unoptimized
+            unoptimized={isUnoptimizableImage(coverUrl)}
           />
         ) : (
           <div className={styles.fpFallback}>
@@ -140,7 +140,7 @@ function CompanyFeaturedCard({ company }: { company: Company }) {
                 fill
                 sizes="32px"
                 className={styles.fpLogoImg}
-                unoptimized
+                unoptimized={isUnoptimizableImage(logoUrl)}
               />
             ) : (
               companyMonogram(company.name)

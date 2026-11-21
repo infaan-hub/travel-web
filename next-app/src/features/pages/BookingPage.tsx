@@ -50,7 +50,7 @@ import {
   transportBookingsAPI,
 } from "@/lib/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import type { PlaceSuggestion } from "@/lib/place-types";
 import { parseBookingDestinationParams } from "@/lib/trip-discovery";
@@ -1196,7 +1196,7 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
               sizes="(max-width: 768px) 96vw, 1180px"
               className={styles.heroImage}
               priority
-              unoptimized
+              unoptimized={isUnoptimizableImage(getImageUrl(activeHeroPhoto.url))}
             />
           ) : (
             <div className={styles.heroMediaFallback}>
@@ -2357,7 +2357,7 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
                   fill
                   sizes="360px"
                   className={styles.summaryImage}
-                  unoptimized
+                  unoptimized={isUnoptimizableImage(getImageUrl(service.vehicle.front_image_url))}
                 />
               ) : (
                 <span className={styles.summaryMediaEmpty}>

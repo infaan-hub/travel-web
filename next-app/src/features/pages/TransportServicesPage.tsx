@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { publicPrivateHireAPI } from "@/lib/api/client";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import {
   ArrowRight,
   Briefcase,
@@ -122,7 +122,7 @@ export default function TransportServicesPage() {
                           fill
                           sizes="(max-width: 820px) 92vw, (max-width: 1220px) 46vw, 31vw"
                           className={cardStyles.featuredBgImg}
-                          unoptimized
+                          unoptimized={isUnoptimizableImage(bgImage)}
                         />
                       ) : (
                         <div className={cardStyles.featuredBgFallback}>
@@ -174,7 +174,7 @@ export default function TransportServicesPage() {
                               width={22}
                               height={22}
                               className={cardStyles.featuredDriverAvatar}
-                              unoptimized
+                              unoptimized={isUnoptimizableImage(driverImage)}
                             />
                           ) : (
                             <span className={cardStyles.featuredDriverInitials} aria-hidden="true">

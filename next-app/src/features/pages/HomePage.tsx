@@ -6,7 +6,7 @@ import Image from "next/image";
 import { toursAPI, homeSettingsAPI, publicCompaniesAPI, publicPrivateHireAPI, publicDriversAPI } from '@/lib/api/client';
 import { ArrowRight, Star, Car, Users, Briefcase, Compass, Navigation, Building2, CheckCircle, ChevronLeft, ChevronRight, MapPin } from '@/components/icons';
 import { CalendarCheck2, ShieldCheck } from 'lucide-react';
-import { getImageUrl } from '@/lib/utils/image-url';
+import { getImageUrl, isUnoptimizableImage } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 
 import BentoHero from "@/components/BentoHero";
@@ -71,7 +71,7 @@ function HomePrivateHireFeaturedCard({ svc }: { svc: any }) {
             fill
             sizes="(max-width: 640px) 92vw, (max-width: 1100px) 48vw, 560px"
             className={styles.fpImage}
-            unoptimized
+            unoptimized={isUnoptimizableImage(getImageUrl(activePhoto.url))}
           />
         ) : (
           <div className={styles.fpFallback}>
@@ -366,7 +366,7 @@ export default function HomePage() {
                       fill
                       sizes="(max-width: 640px) 48vw, 440px"
                       className={styles.fpImage}
-                      unoptimized
+                      unoptimized={isUnoptimizableImage(tripPublicBg)}
                     />
                   ) : (
                     <div className={styles.fpFallback}>
@@ -418,7 +418,7 @@ export default function HomePage() {
                       fill
                       sizes="(max-width: 640px) 48vw, 440px"
                       className={styles.fpImage}
-                      unoptimized
+                      unoptimized={isUnoptimizableImage(tripCompanyBg)}
                     />
                   ) : (
                     <div className={`${styles.fpFallback} ${styles.fpFallbackAlt}`}>
@@ -547,7 +547,7 @@ export default function HomePage() {
                         fill
                         sizes="(max-width: 640px) 48vw, 440px"
                         className={`${styles.fpImage} ${avatarUrl ? styles.fpImagePortrait : ""}`}
-                        unoptimized
+                        unoptimized={isUnoptimizableImage(bgUrl)}
                       />
                     ) : (
                       <div className={styles.fpFallback}>
@@ -719,7 +719,7 @@ export default function HomePage() {
                         fill
                         sizes="(max-width: 640px) 84vw, (max-width: 1024px) 48vw, 33vw"
                         className={styles.fpImage}
-                        unoptimized
+                        unoptimized={isUnoptimizableImage(coverUrl)}
                       />
                     ) : (
                       <div className={styles.fpFallback}>
@@ -741,7 +741,7 @@ export default function HomePage() {
                             fill
                             sizes="32px"
                             className={styles.fpLogoImg}
-                            unoptimized
+                            unoptimized={isUnoptimizableImage(logoUrl)}
                           />
                         ) : (
                           getCompanyInitials(company.name)

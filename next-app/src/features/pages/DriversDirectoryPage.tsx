@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { publicDriversAPI } from "@/lib/api/client";
 import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import type { PublicDriverCard } from "@/lib/featured-drivers";
 import {
   AlertCircle,
@@ -256,7 +256,7 @@ export default function DriversDirectoryPage() {
                         fill
                         sizes="(max-width: 640px) 46vw, (max-width: 1024px) 32vw, 24vw"
                         className={styles.driverPhoto}
-                        unoptimized
+                        unoptimized={isUnoptimizableImage(avatarUrl)}
                       />
                     ) : (
                       <div className={styles.avatarFallback} aria-hidden="true">

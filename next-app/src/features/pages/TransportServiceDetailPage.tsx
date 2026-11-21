@@ -17,7 +17,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { publicPrivateHireAPI } from "@/lib/api/client";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import {
   SAMPLE_PRIVATE_HIRE_SERVICES,
   type PrivateHireService,
@@ -115,7 +115,7 @@ export default function TransportServiceDetailPage({ id }: Props) {
               sizes="(max-width: 768px) 92vw, 1180px"
               className={styles.heroImage}
               priority
-              unoptimized
+              unoptimized={isUnoptimizableImage(getImageUrl(activeHeroPhoto.url))}
             />
           ) : (
             <div className={styles.heroMediaFallback}>
@@ -231,7 +231,7 @@ export default function TransportServiceDetailPage({ id }: Props) {
                             sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 340px"
                             className={styles.photoImage}
                             loading={photo.main ? "eager" : "lazy"}
-                            unoptimized
+                            unoptimized={isUnoptimizableImage(getImageUrl(photo.url))}
                           />
                         ) : (
                           <div className={styles.photoEmpty}>
@@ -325,7 +325,7 @@ export default function TransportServiceDetailPage({ id }: Props) {
                     width={76}
                     height={76}
                     className={styles.driverAvatar}
-                    unoptimized
+                    unoptimized={isUnoptimizableImage(getImageUrl(driver.image_url))}
                   />
                 ) : (
                   <div className={styles.driverAvatarFallback} aria-hidden="true">

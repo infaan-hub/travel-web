@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { access, rm } from "node:fs/promises";
+import { access } from "node:fs/promises";
 import path from "node:path";
-import { deleteImage, saveImage } from "@/lib/storage/images";
+import sharp from "sharp";
+import { deleteImage, saveImage, validatedImage } from "@/lib/storage/images";
 
 const PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
@@ -35,5 +36,28 @@ describe("image storage", () => {
       type: "image/png",
     });
     await expect(saveImage(file, "tours")).rejects.toThrow(/too large/);
+  });
+
+  it("resizes and compresses large uploaded photos while preserving format", async () => {
+    const largeJpeg = await sharp({
+      create: {
+        width: 2400,
+        height: 1600,
+        channels: 3,
+        background: { r: 20, g: 110, b: 170 },
+      },
+    })
+      .jpeg({ quality: 100 })
+      .toBuffer();
+
+    const file = new File([new Uint8Array(largeJpeg)], "photo.jpg", { type: "image/jpeg" });
+    const result = await validatedImage(file);
+    const meta = await sharp(result.buffer).metadata();
+
+    expect(result.mimeType).toBe("image/jpeg");
+    expect(result.extension).toBe("jpg");
+    expect(meta.width).toBeLessThanOrEqual(1920);
+    expect(meta.height).toBeLessThanOrEqual(1920);
+    expect(result.buffer.length).toBeLessThan(largeJpeg.length);
   });
 });

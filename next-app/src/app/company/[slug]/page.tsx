@@ -20,7 +20,7 @@ import {
   Star,
   Users,
 } from "@/components/icons";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import { openingHoursEntries } from "@/lib/company-opening-hours";
 import styles from "@/features/pages/company-profile-page.module.css";
 
@@ -182,7 +182,7 @@ export default async function CompanyProfilePage({ params }: Props) {
                 priority
                 sizes="(max-width: 768px) 96vw, 1180px"
                 className={styles.heroImage}
-                unoptimized
+                unoptimized={isUnoptimizableImage(heroCoverUrl)}
               />
             ) : (
               <div className={styles.heroFallback}>
@@ -232,7 +232,7 @@ export default async function CompanyProfilePage({ params }: Props) {
                     fill
                     sizes="68px"
                     className={styles.heroLogoImg}
-                    unoptimized
+                    unoptimized={isUnoptimizableImage(logoUrl)}
                   />
                 ) : (
                   companyInitials(company.name)
@@ -381,7 +381,7 @@ export default async function CompanyProfilePage({ params }: Props) {
                           fill
                           sizes="(max-width: 640px) 48vw, (max-width: 1024px) 48vw, 380px"
                           className={styles.fpImage}
-                          unoptimized
+                          unoptimized={isUnoptimizableImage(photoUrl)}
                         />
                       ) : (
                         <div className={styles.fpFallback}>
@@ -509,7 +509,7 @@ export default async function CompanyProfilePage({ params }: Props) {
                           fill
                           sizes="(max-width: 640px) 48vw, (max-width: 1024px) 48vw, 380px"
                           className={styles.fpImage}
-                          unoptimized
+                          unoptimized={isUnoptimizableImage(tripImg)}
                         />
                       ) : (
                         <div className={styles.fpFallback}>

@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { geocodeAPI, routeAPI, tripsAPI } from "@/lib/api/client";
 import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import { tripPlaceNameForCoords } from "@/lib/trips";
 import { useToast } from "@/components/ToastProvider";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
@@ -1700,7 +1700,7 @@ export default function TripsPage() {
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
                         className={styles.companyTripImg}
-                        unoptimized
+                        unoptimized={isUnoptimizableImage(getImageUrl(trip.image_url))}
                       />
                     ) : (
                       <span className={styles.companyTripMediaEmpty}>

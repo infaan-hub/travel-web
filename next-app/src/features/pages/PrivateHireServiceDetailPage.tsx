@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { publicPrivateHireAPI } from "@/lib/api/client";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 
 type Service = { id: number; title: string; description: string; price: string; pricing_type: string; vehicle: { name: string; category: string; capacity: number; luggage_capacity: number; description: string; includes: string[]; excludes: string[]; front_image_url: string | null; side_image_url: string | null; back_image_url: string | null } | null; driver: { name: string; image_url: string | null } | null; company: { name: string; slug: string; contact_phone: string; contact_email: string } | null };
 
@@ -21,7 +21,7 @@ export default function PrivateHireServiceDetailPage() {
     <Link href="/transport/" className="text-sm text-teal-700">← Browse private hire</Link>
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-8 mt-5">
       <section>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{images.map((image, index) => <div key={image} className={(index === 0 ? "sm:col-span-2 h-80" : "h-44") + " relative overflow-hidden rounded-2xl bg-slate-100"}><Image src={getImageUrl(image)} alt={service.vehicle?.name || service.title} fill className="object-cover" unoptimized /></div>)}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{images.map((image, index) => { const src = getImageUrl(image); return <div key={image} className={(index === 0 ? "sm:col-span-2 h-80" : "h-44") + " relative overflow-hidden rounded-2xl bg-slate-100"}><Image src={src} alt={service.vehicle?.name || service.title} fill sizes={index === 0 ? "(max-width: 1024px) 100vw, 800px" : "(max-width: 640px) 100vw, 400px"} priority={index === 0} className="object-cover" unoptimized={isUnoptimizableImage(src)} /></div>; })}</div>
         <p className="text-xs font-bold tracking-widest uppercase text-teal-700 mt-7">Private hire service</p>
         <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mt-2">{service.title}</h1>
         <p className="text-slate-600 leading-7 mt-4">{service.description || "Arrange a private vehicle and driver for your journey."}</p>
