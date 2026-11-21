@@ -2448,6 +2448,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .fpAnglePills {
+    display: none;
+  }
+}
+
 /* Mobile (<= 640px): Matches compact 2-in-a-row Trips card size without thin tall cards,
    while Providers stays a right-side horizontal swipe carousel. */
 @media (max-width: 640px) {
@@ -2582,16 +2588,6 @@
     font-size: 0.65rem;
     line-height: 1.3;
     -webkit-line-clamp: 1;
-  }
-
-  .fpAnglePills {
-    gap: 3px;
-  }
-
-  .fpAngleBtn {
-    min-height: 20px;
-    padding: 0 6px;
-    font-size: 0.55rem;
   }
 
   .fpBottomRow {
