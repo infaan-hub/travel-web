@@ -9,7 +9,6 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import TripPlaceMapPicker from "@/components/TripPlaceMapPicker";
 import OpeningHoursEditor from "@/components/OpeningHoursEditor";
 import {
   Building2,
@@ -801,63 +800,6 @@ export default function CompanyProfilePage() {
                     }
                     disabled={!canUpdate}
                   />
-                </div>
-
-                <div
-                  className={`${styles.profileField} ${styles.profileFieldFull} ${styles.profileMapField} ${styles.profileMapNoRoute}`}
-                >
-                  <span className={styles.profileMapLabel}>Location map</span>
-                  <TripPlaceMapPicker
-                    latitude={form.latitude ? Number(form.latitude) : null}
-                    longitude={form.longitude ? Number(form.longitude) : null}
-                    disabled={!canUpdate}
-                    onSelectPlace={(place) =>
-                      setForm((current) =>
-                        current
-                          ? {
-                              ...current,
-                              address: place.name,
-                              locality: place.area,
-                              latitude: String(place.latitude),
-                              longitude: String(place.longitude),
-                            }
-                          : current,
-                      )
-                    }
-                    onPickPoint={(latitude, longitude) =>
-                      setForm((current) =>
-                        current
-                          ? {
-                              ...current,
-                              latitude: String(latitude),
-                              longitude: String(longitude),
-                            }
-                          : current,
-                      )
-                    }
-                    onClearPoint={() => {}}
-                  />
-                  <p className={styles.profileHint}>
-                    Select the company location on the map. Clear both fields
-                    below to remove the marker.
-                  </p>
-                  {form.latitude || form.longitude ? (
-                    canUpdate ? (
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        type="button"
-                        onClick={() =>
-                          setForm((current) =>
-                            current
-                              ? { ...current, latitude: "", longitude: "" }
-                              : current,
-                          )
-                        }
-                      >
-                        <MapPin size={14} aria-hidden="true" /> Clear map marker
-                      </button>
-                    ) : null
-                  ) : null}
                 </div>
               </div>
             </section>
