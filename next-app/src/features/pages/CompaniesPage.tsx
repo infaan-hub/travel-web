@@ -10,6 +10,7 @@ import { getImageUrl } from "@/lib/utils/image-url";
 import {
   AlertCircle,
   ArrowRight,
+  Briefcase,
   Building2,
   Car,
   CheckCircle,
@@ -23,10 +24,30 @@ import {
   RefreshCw,
   Search,
   Shield,
+  Users,
   X,
 } from "@/components/icons";
 import { PageHero } from "@/components/PageHero";
+import { PRICING_LABELS } from "@/features/transport/private-hire-data";
 import styles from "@/features/pages/companies-page.module.css";
+
+type CompanyPrivateService = {
+  id: number;
+  title: string;
+  price: string | number;
+  pricing_type?: string | null;
+  vehicle?: {
+    name?: string | null;
+    plate_number?: string | null;
+    category?: string | null;
+    capacity?: number | null;
+    luggage_capacity?: number | null;
+    front_image_url?: string | null;
+  } | null;
+  driver?: {
+    name?: string | null;
+  } | null;
+};
 
 type Company = {
   id: number;
@@ -46,6 +67,7 @@ type Company = {
   services_count: number;
   trips_count?: number;
   website: string | null;
+  services?: CompanyPrivateService[];
 };
 
 type SortMode = "name" | "services" | "trips";
@@ -154,7 +176,7 @@ export default function CompaniesPage() {
     if (debouncedSearch) params.search = debouncedSearch;
     if (debouncedRegion) params.region = debouncedRegion;
 
-    const cacheKey = `travel.companies.${JSON.stringify(params)}`;
+    const cacheKey = `travel.companies.v2.${JSON.stringify(params)}`;
     const cached = readClientCache<{ companies: Company[]; total: number }>(cacheKey);
     setError("");
 
@@ -448,7 +470,7 @@ export default function CompaniesPage() {
             </span>
             <h2 className={styles.sectionTitle}>Published companies</h2>
             <p className={styles.sectionLead}>
-              Inspect verified operator profiles, coverage areas, private-hire fleets, and published trips.
+              Browse verified companies, compare all their private hire services, and select a vehicle to book directly.
             </p>
           </div>
 
@@ -717,6 +739,119 @@ export default function CompaniesPage() {
                           </div>
                         </div>
                       </div>
+
+                      {Array.isArray(company.services) && company.services.length > 0 ? (
+                        <div className={styles.companyServicesBlock}>
+                          <div className={styles.companyServicesHead}>
+                            <span className={styles.companyServicesTitle}>
+                              <Car size={13} aria-hidden="true" />
+                              Private hire services
+                            </span>
+                            <span className={styles.companyServicesCount}>
+                              {company.services.length}{" "}
+                              {company.services.length === 1 ? "option" : "options"}
+                            </span>
+                          </div>
+
+                          <ul className={styles.companyServicesList}>
+                            {company.services.map((svc) => {
+                              const vehicleName = svc.vehicle?.name?.trim() || svc.title;
+                              const plate = svc.vehicle?.plate_number?.trim() || "";
+                              const seats = Number(svc.vehicle?.capacity ?? 0);
+                              const bags = Number(svc.vehicle?.luggage_capacity ?? 0);
+                              const thumb = svc.vehicle?.front_image_url
+                                ? getImageUrl(svc.vehicle.front_image_url)
+                                : null;
+                              const priceNum = Number(svc.price);
+                              const priceText = Number.isFinite(priceNum)
+                                ? `$${Number.isInteger(priceNum) ? priceNum : priceNum.toFixed(2)}`
+                                : `$${svc.price}`;
+                              const pricingKey = svc.pricing_type || "per_trip";
+                              const pricingLabel =
+                                PRICING_LABELS[pricingKey] || pricingKey.replace(/_/g, " ");
+
+                              return (
+                                <li key={svc.id} className={styles.companyServiceItem}>
+                                  <div className={styles.companyServiceMain}>
+                                    <Link
+                                      href={`/booking/${svc.id}/`}
+                                      className={styles.companyServiceThumb}
+                                      aria-label={`Book ${vehicleName} with ${company.name}`}
+                                    >
+                                      {thumb ? (
+                                        <Image
+                                          src={thumb}
+                                          alt=""
+                                          fill
+                                          sizes="56px"
+                                          className={styles.companyServiceThumbImg}
+                                          unoptimized
+                                        />
+                                      ) : (
+                                        <Car size={18} aria-hidden="true" />
+                                      )}
+                                    </Link>
+
+                                    <div className={styles.companyServiceInfo}>
+                                      <div className={styles.companyServiceTop}>
+                                        <Link
+                                          href={`/booking/${svc.id}/`}
+                                          className={styles.companyServiceName}
+                                        >
+                                          {vehicleName}
+                                        </Link>
+                                        {plate ? (
+                                          <span className={styles.companyServicePlate}>{plate}</span>
+                                        ) : null}
+                                      </div>
+
+                                      {svc.title &&
+                                      svc.title.trim().toLowerCase() !==
+                                        vehicleName.toLowerCase() ? (
+                                        <p className={styles.companyServiceSub}>{svc.title}</p>
+                                      ) : null}
+
+                                      <div className={styles.companyServiceMeta}>
+                                        <span className={styles.companyServicePrice}>
+                                          <strong>{priceText}</strong>/{pricingLabel}
+                                        </span>
+                                        {seats > 0 ? (
+                                          <span className={styles.companyServiceSpec}>
+                                            <Users size={12} aria-hidden="true" />
+                                            {seats}
+                                          </span>
+                                        ) : null}
+                                        {bags > 0 ? (
+                                          <span className={styles.companyServiceSpec}>
+                                            <Briefcase size={12} aria-hidden="true" />
+                                            {bags}
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className={styles.companyServiceActions}>
+                                    <Link
+                                      href={`/transport/service/${svc.id}/`}
+                                      className={styles.serviceDetailLink}
+                                    >
+                                      Details
+                                    </Link>
+                                    <Link
+                                      href={`/booking/${svc.id}/`}
+                                      className={styles.serviceBookLink}
+                                    >
+                                      Book now
+                                      <ArrowRight size={13} aria-hidden="true" />
+                                    </Link>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      ) : null}
 
                       <div className={styles.cardFooter}>
                         <Link className={styles.profileCta} href={company.public_path}>

@@ -660,8 +660,14 @@ export function companyWorkspaceProfileSerializer(company: Company): Json {
 }
 
 export function companyPublicSerializer(
-  company: Company & { _count?: { privateHireServices?: number; trips?: number } },
+  company: Company & {
+    _count?: { privateHireServices?: number; trips?: number };
+    privateHireServices?: Array<Parameters<typeof privateHireServiceSerializer>[0]>;
+  },
 ): Json {
+  const services = Array.isArray(company.privateHireServices)
+    ? company.privateHireServices.map(privateHireServiceSerializer)
+    : undefined;
   return {
     id: company.id,
     name: company.name,
@@ -685,8 +691,10 @@ export function companyPublicSerializer(
       company.latitude !== null && company.longitude !== null
         ? `https://www.openstreetmap.org/?mlat=${company.latitude}&mlon=${company.longitude}#map=15/${company.latitude}/${company.longitude}`
         : null,
-    services_count: company._count?.privateHireServices ?? 0,
+    services_count:
+      company._count?.privateHireServices ?? company.privateHireServices?.length ?? 0,
     trips_count: company._count?.trips ?? 0,
+    ...(services ? { services } : {}),
   };
 }
 

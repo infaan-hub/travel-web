@@ -102,7 +102,7 @@ async function notifyTripParticipants(
   action: Exclude<DriverTripAction, "location">,
 ) {
   const reference = booking.reference ?? `#${booking.id}`;
-  const trip = booking.service?.title || "Private hire trip";
+  const trip = booking.service?.title || "Private hire request";
   const date = booking.travelDate.toISOString().slice(0, 10);
   const timeText = booking.pickupTime ? ` at ${booking.pickupTime}` : "";
   const vehicle = booking.vehicle

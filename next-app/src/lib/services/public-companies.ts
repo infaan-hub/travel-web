@@ -43,6 +43,24 @@ export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
+        privateHireServices: {
+          where: { isActive: true },
+          orderBy: [{ createdAt: "desc" }],
+          include: {
+            vehicle: true,
+            driver: true,
+            company: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                contactPhone: true,
+                contactEmail: true,
+                logoImageKey: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             privateHireServices: { where: { isActive: true } },

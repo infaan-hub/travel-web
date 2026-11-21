@@ -8,6 +8,14 @@ import {
   isPastTravelDate,
   journeyMetrics,
 } from "@/lib/services/journey";
+import { createInAppNotification, sendPushToUsers } from "@/lib/push";
+import { sendEmail } from "@/lib/email";
+import { broadcastRealtime } from "@/lib/realtime/connections";
+import {
+  evaluateCustomerLocationForNearbyDrivers,
+  selectNearbyDrivers,
+  type DriverLocationCandidate,
+} from "@/lib/unguja-nearby";
 import { z } from "zod";
 
 const isoDate = z
@@ -22,7 +30,8 @@ const pickupTime = z
 
 const createSchema = z
   .object({
-    service_id: z.coerce.number().int().positive(),
+    service_id: z.coerce.number().int().positive().optional(),
+    is_public: z.boolean().optional(),
     full_name: z.string().trim().min(2).max(160),
     email: z.string().trim().email().max(254),
     phone: z.string().trim().min(7).max(40),
@@ -40,8 +49,19 @@ const createSchema = z
     dest_lng: z.coerce.number().min(-180).max(180).optional(),
     distance_km: z.coerce.number().min(0).max(5000).optional(),
     duration_mins: z.coerce.number().int().min(0).max(10080).optional(),
+    // Optional background-detected customer GPS coordinates (used on /booking/create/
+    // to notify nearby drivers only when the customer is in Unguja or near a system place).
+    customer_lat: z.coerce.number().min(-90).max(90).optional(),
+    customer_lng: z.coerce.number().min(-180).max(180).optional(),
   })
   .superRefine((data, context) => {
+    if (data.service_id == null && data.is_public !== true) {
+      context.addIssue({
+        code: "custom",
+        message: "Select a private hire service or submit a public private hire request.",
+        path: ["service_id"],
+      });
+    }
     if ((data.origin_lat == null) !== (data.origin_lng == null)) {
       context.addIssue({
         code: "custom",
@@ -54,6 +74,13 @@ const createSchema = z
         code: "custom",
         message: "Destination coordinates must include both latitude and longitude.",
         path: ["dest_lat"],
+      });
+    }
+    if ((data.customer_lat == null) !== (data.customer_lng == null)) {
+      context.addIssue({
+        code: "custom",
+        message: "Customer coordinates must include both latitude and longitude.",
+        path: ["customer_lat"],
       });
     }
     if (data.origin.toLowerCase() === data.destination.toLowerCase()) {
@@ -101,6 +128,129 @@ export async function GET(request: NextRequest) {
   }
 }
 
+async function notifyNearbyDriversForPublicRequest(params: {
+  bookingId: number;
+  reference: string | null;
+  origin: string;
+  destination: string;
+  travelDate: Date;
+  pickupTime: string | null;
+  passengers: number;
+  customerLat: number | undefined;
+  customerLng: number | undefined;
+}): Promise<number> {
+  const evaluation = evaluateCustomerLocationForNearbyDrivers(
+    params.customerLat,
+    params.customerLng,
+  );
+  if (!evaluation.eligible || params.customerLat == null || params.customerLng == null) {
+    return 0;
+  }
+
+  try {
+    const activeDrivers = await prisma.privateHireDriver.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        userId: true,
+        name: true,
+        email: true,
+        company: {
+          select: {
+            latitude: true,
+            longitude: true,
+          },
+        },
+        transportBookings: {
+          where: {
+            driverLat: { not: null },
+            driverLng: { not: null },
+          },
+          orderBy: [{ driverLocationUpdatedAt: "desc" }, { updatedAt: "desc" }],
+          take: 1,
+          select: {
+            driverLat: true,
+            driverLng: true,
+          },
+        },
+      },
+    });
+
+    const candidates: DriverLocationCandidate[] = activeDrivers.map((driver) => {
+      const latestPing = driver.transportBookings[0];
+      const lat = latestPing?.driverLat ?? driver.company?.latitude ?? null;
+      const lng = latestPing?.driverLng ?? driver.company?.longitude ?? null;
+      return {
+        id: driver.id,
+        userId: driver.userId,
+        name: driver.name,
+        email: driver.email,
+        lat,
+        lng,
+      };
+    });
+
+    const nearbyDrivers = selectNearbyDrivers(
+      params.customerLat,
+      params.customerLng,
+      candidates,
+    );
+    if (nearbyDrivers.length === 0) return 0;
+
+    const ref = params.reference ?? `#${params.bookingId}`;
+    const dateText = params.travelDate.toISOString().slice(0, 10);
+    const timeText = params.pickupTime ? ` at ${params.pickupTime}` : "";
+    const areaHint = evaluation.nearestPlace
+      ? ` near ${evaluation.nearestPlace.name}`
+      : " in Unguja";
+    const payload = {
+      title: "New private hire request nearby",
+      body: `Private hire request ${ref}${areaHint}: ${params.origin} → ${params.destination} on ${dateText}${timeText} (${params.passengers} ${params.passengers === 1 ? "passenger" : "passengers"}). Open Bookings to confirm.`,
+      url: "/driver/bookings/",
+      tag: `transport-booking-${params.bookingId}-nearby`,
+    };
+
+    const userIds = Array.from(
+      new Set(
+        nearbyDrivers
+          .map((driver) => driver.userId)
+          .filter((id): id is number => typeof id === "number"),
+      ),
+    );
+
+    await Promise.all(
+      userIds.map((driverUserId) => createInAppNotification(driverUserId, payload)),
+    );
+    if (userIds.length > 0) {
+      await sendPushToUsers(userIds, payload);
+    }
+
+    await Promise.all(
+      nearbyDrivers
+        .filter((driver) => Boolean(driver.email?.trim()))
+        .map((driver) =>
+          sendEmail({
+            to: driver.email.trim(),
+            subject: `New private hire request nearby (${ref})`,
+            text: `Hi ${driver.name || "Driver"},\n\n${payload.body}\n\nOpen /driver/bookings/ to review and confirm this private hire request.\n`,
+          }).catch(() => {}),
+        ),
+    );
+
+    broadcastRealtime({
+      type: "transport_booking_updated",
+      booking_id: params.bookingId,
+      is_public: true,
+      nearby_driver_ids: nearbyDrivers.map((d) => d.id),
+    });
+
+    return nearbyDrivers.length;
+  } catch (error) {
+    console.error("Could not notify nearby drivers for public private hire request", error);
+    return 0;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request);
@@ -120,23 +270,35 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, "Travel date cannot be in the past.");
     }
 
-    const service = await prisma.privateHireService.findFirst({
-      where: {
-        id: body.service_id,
-        isActive: true,
-        OR: [{ companyId: null }, { company: { status: "ACTIVE", isPublic: true } }],
-      },
-      include: { vehicle: true, driver: true, company: true },
-    });
-    if (!service) throw new ApiError(404, "Private hire service is unavailable.");
-    const hireService = service;
+    const isPublicRequest = body.service_id == null && body.is_public === true;
+    let hireService: {
+      id: number;
+      companyId: number | null;
+      vehicleId: number | null;
+      driverId: number | null;
+      price: unknown;
+      vehicle: { capacity: number } | null;
+    } | null = null;
 
-    const capacity = hireService.vehicle?.capacity ?? 100;
-    if (body.passengers > capacity) {
-      throw new ApiError(
-        400,
-        `This vehicle can carry up to ${capacity} passengers.`,
-      );
+    if (!isPublicRequest) {
+      const service = await prisma.privateHireService.findFirst({
+        where: {
+          id: body.service_id,
+          isActive: true,
+          OR: [{ companyId: null }, { company: { status: "ACTIVE", isPublic: true } }],
+        },
+        include: { vehicle: true, driver: true, company: true },
+      });
+      if (!service) throw new ApiError(404, "Private hire service is unavailable.");
+      hireService = service;
+
+      const capacity = hireService.vehicle?.capacity ?? 100;
+      if (body.passengers > capacity) {
+        throw new ApiError(
+          400,
+          `This vehicle can carry up to ${capacity} passengers.`,
+        );
+      }
     }
 
     const metrics = journeyMetrics({
@@ -179,10 +341,10 @@ export async function POST(request: NextRequest) {
           data: {
             reference,
             userId: user.id,
-            serviceId: hireService.id,
-            companyId: hireService.companyId,
-            vehicleId: hireService.vehicleId,
-            driverId: hireService.driverId,
+            serviceId: isPublicRequest ? null : (hireService?.id ?? null),
+            companyId: isPublicRequest ? null : (hireService?.companyId ?? null),
+            vehicleId: isPublicRequest ? null : (hireService?.vehicleId ?? null),
+            driverId: isPublicRequest ? null : (hireService?.driverId ?? null),
             tripRequestId: tripRequest.id,
             fullName: body.full_name,
             email: body.email.toLowerCase(),
@@ -191,8 +353,10 @@ export async function POST(request: NextRequest) {
             travelDate,
             endDate,
             pickupTime: body.pickup_time,
-            totalPrice: hireService.price,
+            totalPrice: isPublicRequest ? null : (hireService?.price as never),
             status: "pending",
+            isPublic: isPublicRequest,
+            driverStage: "pending",
             notes: body.notes ?? "",
             origin: body.origin,
             originLat: body.origin_lat ?? null,
@@ -224,7 +388,28 @@ export async function POST(request: NextRequest) {
       throw new ApiError(500, "Could not create the booking. Please try again.");
     }
 
-    return ok(transportBookingSerializer(booking), 201);
+    let nearbyDriversNotified = 0;
+    if (isPublicRequest) {
+      nearbyDriversNotified = await notifyNearbyDriversForPublicRequest({
+        bookingId: booking.id,
+        reference: booking.reference,
+        origin: body.origin,
+        destination: body.destination,
+        travelDate,
+        pickupTime: body.pickup_time,
+        passengers: body.passengers,
+        customerLat: body.customer_lat,
+        customerLng: body.customer_lng,
+      });
+    }
+
+    return ok(
+      {
+        ...transportBookingSerializer(booking),
+        ...(isPublicRequest ? { nearby_drivers_notified: nearbyDriversNotified } : {}),
+      },
+      201,
+    );
   } catch (error) {
     return handleApiError(error);
   }

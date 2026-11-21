@@ -738,7 +738,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin-top: auto;
   padding-top: 2px;
 }
 
@@ -789,11 +788,239 @@
   text-overflow: ellipsis;
 }
 
+.companyServicesBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--co-line);
+  border-radius: 15px;
+  background: var(--co-surface-soft);
+}
+
+.companyServicesHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.companyServicesTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--co-blue);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.companyServicesCount {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--co-blue-soft);
+  color: var(--co-blue);
+  font-size: 0.69rem;
+  font-weight: 750;
+}
+
+.companyServicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.companyServiceItem {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--co-line);
+  border-radius: 12px;
+  background: var(--co-surface);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.companyServiceItem:hover {
+  border-color: var(--co-line-strong);
+  box-shadow: 0 4px 14px rgba(8, 66, 140, 0.08);
+}
+
+.companyServiceMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.companyServiceThumb {
+  position: relative;
+  display: grid;
+  flex: 0 0 54px;
+  width: 54px;
+  height: 44px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--co-blue-soft);
+  color: var(--co-blue);
+  text-decoration: none;
+}
+
+.companyServiceThumbImg {
+  object-fit: cover;
+}
+
+.companyServiceInfo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.companyServiceTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.companyServiceName {
+  color: var(--co-ink);
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.companyServiceName:hover {
+  color: var(--co-blue);
+}
+
+.companyServicePlate {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: #facc15;
+  color: #111827;
+  font-size: 0.65rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.companyServiceSub {
+  margin: 0;
+  color: var(--co-muted);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.companyServiceMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1px;
+}
+
+.companyServicePrice {
+  color: var(--co-blue);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.companyServicePrice strong {
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.companyServiceSpec {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--co-muted);
+  font-size: 0.73rem;
+  font-weight: 650;
+}
+
+.companyServiceActions {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 8px;
+}
+
+.serviceDetailLink,
+.serviceBookLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.14s ease;
+}
+
+.serviceDetailLink {
+  border: 1px solid var(--co-line-strong);
+  background: var(--co-surface);
+  color: var(--co-ink);
+}
+
+.serviceDetailLink:hover {
+  border-color: var(--co-blue);
+  background: var(--co-blue-tint);
+  color: var(--co-blue);
+}
+
+.serviceBookLink {
+  border: 1px solid #0a0a2a;
+  background: #0a0a2a;
+  color: #ffffff;
+}
+
+.serviceBookLink:hover {
+  border-color: #08428c;
+  background: #08428c;
+  color: #ffffff;
+}
+
+:global(.dark) .serviceBookLink {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+:global(.dark) .serviceBookLink:hover {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+}
+
 .cardFooter {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 2px;
+  margin-top: auto;
+  padding-top: 4px;
 }
 
 .profileCta {

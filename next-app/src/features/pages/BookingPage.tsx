@@ -229,9 +229,15 @@ function scrollSectionIntoView(sectionId: string, force = false) {
   element.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-export default function BookingPage() {
+type BookingPageProps = {
+  /** "service" = specific company/service booking (/booking/:id); "public" = open private hire request (/booking/create). */
+  mode?: "service" | "public";
+};
+
+export default function BookingPage({ mode = "service" }: BookingPageProps = {}) {
+  const isPublicBooking = mode === "public";
   const params = useParams<Record<string, string>>();
-  const serviceId = params.serviceId;
+  const serviceId = isPublicBooking ? undefined : params.serviceId;
   const searchParams = useSearchParams();
   const initialPrefill = useMemo(
     () => parseBookingDestinationParams(searchParams),
@@ -255,6 +261,11 @@ export default function BookingPage() {
   const [locationError, setLocationError] = useState("");
   const [locating, setLocating] = useState(false);
   const [showRouteMap, setShowRouteMap] = useState(false);
+  const bgLocationCheckedRef = useRef(false);
+  const [backgroundLocation, setBackgroundLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [routeResult, setRouteResult] = useState<{
     key: string;
     route: RouteEstimate | null;
@@ -321,10 +332,10 @@ export default function BookingPage() {
   }, [initialPrefill]);
 
   const today = useMemo(() => localDateIso(), []);
-  const loading = Boolean(serviceId) && loadedServiceId !== serviceId;
+  const loading = !isPublicBooking && Boolean(serviceId) && loadedServiceId !== serviceId;
 
   useEffect(() => {
-    if (!serviceId) return;
+    if (isPublicBooking || !serviceId) return;
     let active = true;
     publicPrivateHireAPI
       .getById(serviceId)
@@ -340,7 +351,7 @@ export default function BookingPage() {
     return () => {
       active = false;
     };
-  }, [serviceId]);
+  }, [isPublicBooking, serviceId]);
 
   useEffect(() => {
     if (!user) return;
@@ -387,8 +398,9 @@ export default function BookingPage() {
     ((Boolean(savedProfileName) && !form.full_name.trim()) ||
       (Boolean(savedProfilePhone) && !form.phone.trim()));
 
-  const maxPassengers =
-    service?.vehicle?.capacity && service.vehicle.capacity > 0
+  const maxPassengers = isPublicBooking
+    ? 50
+    : service?.vehicle?.capacity && service.vehicle.capacity > 0
       ? service.vehicle.capacity
       : 100;
 
@@ -478,6 +490,36 @@ export default function BookingPage() {
     }, delay);
     return () => window.clearTimeout(timer);
   }, [visibleStepCount]);
+
+  // Background current-location check when Section 3 of 4 (Origin & destination)
+  // opens on /booking/create/. Used on submit to notify nearby drivers only when
+  // the customer is in Unguja or near a known system place.
+  useEffect(() => {
+    if (!isPublicBooking || !showRoutePartition || bgLocationCheckedRef.current) {
+      return;
+    }
+    bgLocationCheckedRef.current = true;
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+
+    let active = true;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (!active) return;
+        const lat = Number(position.coords.latitude.toFixed(6));
+        const lng = Number(position.coords.longitude.toFixed(6));
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          setBackgroundLocation({ lat, lng });
+        }
+      },
+      () => {
+        // Silent fallback: request stays public without nearby driver notification.
+      },
+      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 120_000 },
+    );
+    return () => {
+      active = false;
+    };
+  }, [isPublicBooking, showRoutePartition]);
 
   const { originLat, originLng, destLat, destLng } = form;
   const hasRouteCoords =
@@ -590,12 +632,19 @@ export default function BookingPage() {
 
   const pricingLabel = service
     ? service.pricing_type.replaceAll("_", " ")
-    : "";
-  const providerName = service?.company?.name?.trim() || "The provider";
-  const driverName = service?.driver?.name?.trim() || "Assigned driver";
+    : "per trip";
+  const providerName = isPublicBooking
+    ? "Available drivers"
+    : service?.company?.name?.trim() || "The provider";
+  const driverName = isPublicBooking
+    ? "Assigned on confirmation"
+    : service?.driver?.name?.trim() || "Assigned driver";
   const bookingSearch = searchParams.toString();
+  const bookingBasePath = isPublicBooking
+    ? "/booking/create/"
+    : `/booking/${serviceId ?? ""}/`;
   const loginReturnUrl = `/login/?from=${encodeURIComponent(
-    `/booking/${serviceId ?? ""}/${bookingSearch ? `?${bookingSearch}` : ""}`,
+    `${bookingBasePath}${bookingSearch ? `?${bookingSearch}` : ""}`,
   )}`;
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -724,6 +773,7 @@ export default function BookingPage() {
           // Keep the coordinate label when reverse geocoding is unavailable.
         }
 
+        setBackgroundLocation({ lat, lng });
         setForm((current) => ({
           ...current,
           origin: label,
@@ -762,7 +812,7 @@ export default function BookingPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!service) return;
+    if (!isPublicBooking && !service) return;
 
     setTouched({
       full_name: true,
@@ -793,7 +843,13 @@ export default function BookingPage() {
 
     try {
       const response = await transportBookingsAPI.create({
-        service_id: service.id,
+        ...(isPublicBooking
+          ? {
+              is_public: true,
+              customer_lat: backgroundLocation?.lat,
+              customer_lng: backgroundLocation?.lng,
+            }
+          : { service_id: service!.id }),
         full_name: form.full_name.trim(),
         email: effectiveEmail.trim(),
         phone: form.phone.trim(),
@@ -834,10 +890,7 @@ export default function BookingPage() {
             in or create an account, then return to this page to complete your
             booking.
           </p>
-          <Link
-            href={`/login/?from=${encodeURIComponent(`/booking/${serviceId ?? ""}/`)}`}
-            className={styles.stateLink}
-          >
+          <Link href={loginReturnUrl} className={styles.stateLink}>
             Sign in
           </Link>
         </div>
@@ -852,7 +905,7 @@ export default function BookingPage() {
           <span className={styles.stateIcon}>
             <Loader2 className={styles.spin} size={26} aria-hidden="true" />
           </span>
-          <h1 className={styles.stateTitle}>Loading private hire serviceâ€¦</h1>
+          <h1 className={styles.stateTitle}>Loading private hire service…</h1>
           <p className={styles.stateText}>
             Preparing your vehicle details and trip booking form.
           </p>
@@ -861,7 +914,7 @@ export default function BookingPage() {
     );
   }
 
-  if (!service) {
+  if (!isPublicBooking && !service) {
     return (
       <div id="booking-trip-root" className={`page ${styles.page}`}>
         <div className={styles.stateCard}>
@@ -895,8 +948,9 @@ export default function BookingPage() {
               Your private hire trip is on its way
             </h1>
             <p className={styles.successLead}>
-              We generated your trip and sent it to {providerName}. They will
-              review availability and confirm your pickup details and final fare.
+              {isPublicBooking
+                ? "We generated your private hire request and shared it with available drivers. Once a driver confirms, you will receive your driver, vehicle, and pickup details."
+                : `We generated your trip and sent it to ${providerName}. They will review availability and confirm your pickup details and final fare.`}
             </p>
 
             <div className={styles.referenceRow}>
@@ -918,7 +972,7 @@ export default function BookingPage() {
               <div className={styles.successSummaryRow}>
                 <dt className={styles.successSummaryLabel}>Trip route</dt>
                 <dd className={styles.successSummaryValue}>
-                  {booking.origin || form.origin} â†’{" "}
+                  {booking.origin || form.origin} →{" "}
                   {booking.destination || form.destination}
                 </dd>
               </div>
@@ -937,12 +991,17 @@ export default function BookingPage() {
                 </dd>
               </div>
               <div className={styles.successSummaryRow}>
-                <dt className={styles.successSummaryLabel}>Vehicle</dt>
+                <dt className={styles.successSummaryLabel}>
+                  {isPublicBooking ? "Request type" : "Vehicle"}
+                </dt>
                 <dd className={styles.successSummaryValue}>
-                  {service.vehicle?.name || service.title}
-                  {service.vehicle?.plate_number
-                    ? ` Â· ${service.vehicle.plate_number}`
-                    : ""}
+                  {isPublicBooking
+                    ? "Private hire request"
+                    : `${service?.vehicle?.name || service?.title || "Private hire"}${
+                        service?.vehicle?.plate_number
+                          ? ` · ${service.vehicle.plate_number}`
+                          : ""
+                      }`}
                 </dd>
               </div>
               {booking.distance_km != null || booking.duration_mins != null ? (
@@ -954,30 +1013,33 @@ export default function BookingPage() {
                       formatDuration(booking.duration_mins),
                     ]
                       .filter(Boolean)
-                      .join(" Â· ")}
+                      .join(" · ")}
                   </dd>
                 </div>
               ) : null}
-              <div className={styles.successSummaryRow}>
-                <dt className={styles.successSummaryLabel}>Provider</dt>
-                <dd className={styles.successSummaryValue}>{providerName}</dd>
-              </div>
+              {!isPublicBooking ? (
+                <div className={styles.successSummaryRow}>
+                  <dt className={styles.successSummaryLabel}>Provider</dt>
+                  <dd className={styles.successSummaryValue}>{providerName}</dd>
+                </div>
+              ) : null}
             </dl>
 
             <div className={styles.nextSteps}>
               <div className={styles.nextStep}>
                 <span className={styles.nextStepNumber}>1</span>
-                <strong>Provider review</strong>
+                <strong>{isPublicBooking ? "Driver review" : "Provider review"}</strong>
                 <p>
-                  {providerName} verifies vehicle availability for your trip
-                  date and route.
+                  {isPublicBooking
+                    ? "Approved private hire drivers review your trip route, schedule, and passenger count."
+                    : `${providerName} verifies vehicle availability for your trip date and route.`}
                 </p>
               </div>
               <div className={styles.nextStep}>
                 <span className={styles.nextStepNumber}>2</span>
                 <strong>Confirmation</strong>
                 <p>
-                  You receive confirmed pickup details and final fare at{" "}
+                  You receive confirmed pickup details and driver info at{" "}
                   {effectiveEmail}.
                 </p>
               </div>
@@ -1006,7 +1068,7 @@ export default function BookingPage() {
   return (
     <div id="booking-trip-root" className={`page ${styles.page}`}>
       <header className={styles.hero}>
-        {service.vehicle?.front_image_url ? (
+        {service?.vehicle?.front_image_url ? (
           <div className={styles.heroMedia} aria-hidden="true">
             <Image
               src={getImageUrl(service.vehicle.front_image_url)}
@@ -1029,56 +1091,100 @@ export default function BookingPage() {
               <ArrowLeft size={15} aria-hidden="true" />
               All private hire services
             </Link>
-            <Link
-              href={`/transport/service/${service.id}/`}
-              className={styles.backLink}
-            >
-              View vehicle details
-            </Link>
+            {service ? (
+              <Link
+                href={`/transport/service/${service.id}/`}
+                className={styles.backLink}
+              >
+                View vehicle details
+              </Link>
+            ) : null}
           </div>
 
           <div className={styles.heroMain}>
             <div className={styles.heroCopy}>
-              <h1 className={styles.heroTitle}>{service.title}</h1>
-              {service.company ? (
+              <h1 className={styles.heroTitle}>
+                {isPublicBooking
+                  ? "Request Private Hire Transport"
+                  : service?.title || "Private Hire Request"}
+              </h1>
+              {isPublicBooking ? (
+                <p className={styles.heroCompany}>Private hire request</p>
+              ) : service?.company ? (
                 <p className={styles.heroCompany}>{service.company.name}</p>
               ) : null}
               <ul className={styles.heroFacts}>
-                {service.vehicle ? (
-                  <li>
-                    <Car size={14} aria-hidden="true" />
-                    {service.vehicle.name}
-                    {service.vehicle.plate_number
-                      ? ` Â· ${service.vehicle.plate_number}`
-                      : ""}
-                  </li>
-                ) : null}
-                {service.vehicle ? (
-                  <li>
-                    <Users size={14} aria-hidden="true" />
-                    Up to {service.vehicle.capacity} passengers
-                  </li>
-                ) : null}
-                {service.vehicle ? (
-                  <li>
-                    <ShieldCheck size={14} aria-hidden="true" />
-                    {service.vehicle.luggage_capacity} luggage bags
-                  </li>
-                ) : null}
-                <li>
-                  <CheckCircle2 size={14} aria-hidden="true" />
-                  Verified driver
-                </li>
+                {isPublicBooking ? (
+                  <>
+                    <li>
+                      <Car size={14} aria-hidden="true" />
+                      Private hire request
+                    </li>
+                    <li>
+                      <Users size={14} aria-hidden="true" />
+                      Up to {maxPassengers} passengers
+                    </li>
+                    <li>
+                      <ShieldCheck size={14} aria-hidden="true" />
+                      Verified local drivers
+                    </li>
+                    <li>
+                      <CheckCircle2 size={14} aria-hidden="true" />
+                      No payment now
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    {service?.vehicle ? (
+                      <li>
+                        <Car size={14} aria-hidden="true" />
+                        {service.vehicle.name}
+                        {service.vehicle.plate_number
+                          ? ` · ${service.vehicle.plate_number}`
+                          : ""}
+                      </li>
+                    ) : null}
+                    {service?.vehicle ? (
+                      <li>
+                        <Users size={14} aria-hidden="true" />
+                        Up to {service.vehicle.capacity} passengers
+                      </li>
+                    ) : null}
+                    {service?.vehicle ? (
+                      <li>
+                        <ShieldCheck size={14} aria-hidden="true" />
+                        {service.vehicle.luggage_capacity} luggage bags
+                      </li>
+                    ) : null}
+                    <li>
+                      <CheckCircle2 size={14} aria-hidden="true" />
+                      Verified driver
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
 
             <div className={styles.priceCard}>
-              <span className={styles.priceLabel}>Starting price</span>
-              <span className={styles.priceValue}>${service.price}</span>
-              <span className={styles.priceUnit}>/ {pricingLabel}</span>
-              <p className={styles.priceNote}>
-                No payment now. {providerName} confirms the final fare.
-              </p>
+              {isPublicBooking ? (
+                <>
+                  <span className={styles.priceLabel}>Private hire request</span>
+                  <span className={styles.priceValue}>Open</span>
+                  <span className={styles.priceUnit}>per trip</span>
+                  <p className={styles.priceNote}>
+                    No payment now. An approved driver confirms your trip details.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className={styles.priceLabel}>Starting price</span>
+                  <span className={styles.priceValue}>${service?.price}</span>
+                  <span className={styles.priceUnit}>/ {pricingLabel}</span>
+                  <p className={styles.priceNote}>
+                    No payment now. {providerName} confirms the final fare.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1476,7 +1582,9 @@ export default function BookingPage() {
                       </p>
                     ) : (
                       <p className={styles.hintText}>
-                        Max {maxPassengers} seats for this vehicle.
+                        {isPublicBooking
+                          ? `Up to ${maxPassengers} passengers.`
+                          : `Max ${maxPassengers} seats for this vehicle.`}
                       </p>
                     )}
                   </div>
@@ -1753,7 +1861,9 @@ export default function BookingPage() {
                         Trip generated
                       </div>
                       <span className={styles.generatedTripSub}>
-                        Connected to {service.title}
+                        {isPublicBooking
+                          ? "Connected to Private hire request"
+                          : `Connected to ${service?.title || "Private hire"}`}
                       </span>
                     </div>
 
@@ -1902,6 +2012,7 @@ export default function BookingPage() {
                               destinationLng={destLng}
                               originLabel={form.origin}
                               destinationLabel={form.destination}
+                              routeOnly={isPublicBooking}
                             />
                           </div>
                         ) : null}
@@ -2023,8 +2134,9 @@ export default function BookingPage() {
                   <p className={styles.submitNote}>
                     <ShieldCheck size={16} aria-hidden="true" />
                     <span>
-                      No payment is taken now. {providerName} reviews your
-                      generated trip and confirms availability &amp; final fare.
+                      {isPublicBooking
+                        ? "No payment is taken now. Your private hire request is published for verified drivers to confirm availability and pickup details."
+                        : `No payment is taken now. ${providerName} reviews your generated trip and confirms availability & final fare.`}
                     </span>
                   </p>
                   <button
@@ -2058,7 +2170,7 @@ export default function BookingPage() {
         <aside className={styles.aside}>
           <div className={styles.summaryCard}>
             <div className={styles.summaryMedia}>
-              {service.vehicle?.front_image_url ? (
+              {service?.vehicle?.front_image_url ? (
                 <Image
                   src={getImageUrl(service.vehicle.front_image_url)}
                   alt={service.vehicle.name}
@@ -2081,16 +2193,24 @@ export default function BookingPage() {
               </span>
             </div>
 
-            <span className={styles.summaryKicker}>Private hire trip</span>
-            <h2 className={styles.summaryTitle}>{service.title}</h2>
-            {service.company ? (
+            <span className={styles.summaryKicker}>
+              {isPublicBooking ? "Private hire request" : "Private hire trip"}
+            </span>
+            <h2 className={styles.summaryTitle}>
+              {isPublicBooking
+                ? "Request Private Hire Transport"
+                : service?.title || "Private hire request"}
+            </h2>
+            {!isPublicBooking && service?.company ? (
               <p className={styles.summaryCompany}>{service.company.name}</p>
             ) : null}
 
-            <div className={styles.summaryPriceRow}>
-              <span className={styles.summaryPrice}>${service.price}</span>
-              <span className={styles.summaryUnit}>/ {pricingLabel}</span>
-            </div>
+            {!isPublicBooking && service ? (
+              <div className={styles.summaryPriceRow}>
+                <span className={styles.summaryPrice}>${service.price}</span>
+                <span className={styles.summaryUnit}>/ {pricingLabel}</span>
+              </div>
+            ) : null}
 
             <div className={styles.summaryList}>
               <div className={styles.summaryRow}>
@@ -2177,53 +2297,69 @@ export default function BookingPage() {
                 <span className={styles.summaryRowText}>
                   <span className={styles.summaryRowLabel}>Vehicle &amp; driver</span>
                   <span className={styles.summaryRowValue}>
-                    {service.vehicle
-                      ? `${service.vehicle.name} Â· ${driverName}`
-                      : driverName}
+                    {isPublicBooking
+                      ? "Private hire · assigned on confirmation"
+                      : service?.vehicle
+                        ? `${service.vehicle.name} · ${driverName}`
+                        : driverName}
                   </span>
                 </span>
               </div>
             </div>
 
             <p className={styles.summaryNote}>
-              Submitting creates a linked trip record and sends your request to{" "}
-              {providerName} for confirmation.
+              {isPublicBooking
+                ? "Submitting creates a linked trip record and sends your private hire request for confirmation."
+                : `Submitting creates a linked trip record and sends your request to ${providerName} for confirmation.`}
             </p>
           </div>
 
-          <div className={styles.helpCard}>
-            <h2 className={styles.helpTitle}>Need help?</h2>
-            <p className={styles.helpText}>
-              {service.company?.contact_phone || service.driver?.phone
-                ? "Call the provider directly if you have questions about this vehicle or route."
-                : "Questions about this vehicle? Contact the provider through their profile."}
-            </p>
-            {service.company?.contact_phone ? (
-              <a
-                href={`tel:${service.company.contact_phone.replace(/\D/g, "")}`}
-                className={styles.helpPhone}
-              >
-                <Phone size={14} aria-hidden="true" />
-                {service.company.contact_phone}
-              </a>
-            ) : service.driver?.phone ? (
-              <a
-                href={`tel:${service.driver.phone.replace(/\D/g, "")}`}
-                className={styles.helpPhone}
-              >
-                <Phone size={14} aria-hidden="true" />
-                {service.driver.phone}
-              </a>
-            ) : service.company ? (
-              <Link
-                href={`/company/${service.company.slug}/`}
-                className={styles.helpPhone}
-              >
-                View provider profile
+          {!isPublicBooking && service ? (
+            <div className={styles.helpCard}>
+              <h2 className={styles.helpTitle}>Need help?</h2>
+              <p className={styles.helpText}>
+                {service.company?.contact_phone || service.driver?.phone
+                  ? "Call the provider directly if you have questions about this vehicle or route."
+                  : "Questions about this vehicle? Contact the provider through their profile."}
+              </p>
+              {service.company?.contact_phone ? (
+                <a
+                  href={`tel:${service.company.contact_phone.replace(/\D/g, "")}`}
+                  className={styles.helpPhone}
+                >
+                  <Phone size={14} aria-hidden="true" />
+                  {service.company.contact_phone}
+                </a>
+              ) : service.driver?.phone ? (
+                <a
+                  href={`tel:${service.driver.phone.replace(/\D/g, "")}`}
+                  className={styles.helpPhone}
+                >
+                  <Phone size={14} aria-hidden="true" />
+                  {service.driver.phone}
+                </a>
+              ) : service.company ? (
+                <Link
+                  href={`/company/${service.company.slug}/`}
+                  className={styles.helpPhone}
+                >
+                  View provider profile
+                  <ArrowRight size={14} aria-hidden="true" />
+                </Link>
+              ) : null}
+            </div>
+          ) : (
+            <div className={styles.helpCard}>
+              <h2 className={styles.helpTitle}>Prefer a specific company?</h2>
+              <p className={styles.helpText}>
+                Browse verified transport providers to choose a specific vehicle and company directly.
+              </p>
+              <Link href="/transport/" className={styles.helpPhone}>
+                Browse vehicles
                 <ArrowRight size={14} aria-hidden="true" />
               </Link>
-            ) : null}
-          </div>
+            </div>
+          )}
         </aside>
       </div>
     </div>

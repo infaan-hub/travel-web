@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI, publicPrivateHireAPI } from '@/lib/api/client';
-import { ArrowRight, Star, Send, X, Car, Users, Briefcase, Shield } from '@/components/icons';
+import { ArrowRight, Star, Send, X, Car, Users, Briefcase, Shield, Compass, Navigation, Building2, CheckCircle, MapPin } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
@@ -14,8 +14,6 @@ import { useToast } from "@/components/ToastProvider";
 import BentoHero from "@/components/BentoHero";
 import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import styles from "@/features/pages/home-page.module.css";
-
-import DestinationCard from "@/components/DestinationCard";
 
 import type { HomeSettings, Review, Tour } from "@/features/pages/types";
 import { PRICING_LABELS, SAMPLE_PRIVATE_HIRE_SERVICES } from "@/features/transport/private-hire-data";
@@ -27,24 +25,40 @@ type FeaturedCompany = {
   slug: string;
   description: string | null;
   logo_image_url: string | null;
+  cover_image_url?: string | null;
   locality: string | null;
+  district?: string | null;
   region: string | null;
+  country?: string | null;
   public_path: string;
   services_count: number;
   trips_count: number;
 };
 
-type CompanyPostedTrip = {
-  id: number;
-  company_id: number;
-  company_name: string;
-  company_public_path: string;
-  title: string;
-  place: string;
-  description: string;
-  image_url: string | null;
-  price?: number | null;
-};
+function getCompanyInitials(name: string): string {
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return "TP";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
+
+function formatCompanyLocation(company: FeaturedCompany): string {
+  const seen = new Set<string>();
+  const parts: string[] = [];
+  for (const value of [company.locality, company.district, company.region, company.country]) {
+    const cleaned = value?.trim();
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    parts.push(cleaned);
+    if (parts.length >= 2) break;
+  }
+  return parts.join(", ") || "Zanzibar, Tanzania";
+}
 
 export default function HomePage() {
   const toast = useToast();
@@ -54,76 +68,32 @@ export default function HomePage() {
   const [reviews, setReviews] = useState<Review[]>(() => readClientCache<Review[]>("travel.homeReviews") ?? []);
   const [companies, setCompanies] = useState<FeaturedCompany[]>(() => readClientCache<FeaturedCompany[]>("travel.homeCompanies") ?? []);
   const [privateServices, setPrivateServices] = useState<any[]>(() => readClientCache<any[]>("travel.homePrivateServices") ?? []);
-  const [postedTrips, setPostedTrips] = useState<CompanyPostedTrip[]>(() => readClientCache<CompanyPostedTrip[]>("travel.homePostedTrips") ?? []);
-  const [postedTripsLoading, setPostedTripsLoading] = useState<boolean>(() => readClientCache<CompanyPostedTrip[]>("travel.homePostedTrips") === null);
+  const [livePrivateServices, setLivePrivateServices] = useState<any[]>(() => readClientCache<any[]>("travel.homeLivePrivateServices") ?? []);
   const [loading, setLoading] = useState<boolean>(() => !(
     readClientCache<Tour[]>("travel.homeTours") ||
     readClientCache<HomeSettings>("travel.homeSettings") ||
     readClientCache<Review[]>("travel.homeReviews") ||
-    readClientCache<FeaturedCompany[]>("travel.homeCompanies") ||
-    readClientCache<CompanyPostedTrip[]>("travel.homePostedTrips")
+    readClientCache<FeaturedCompany[]>("travel.homeCompanies")
   ));
-  const [tourLoadError, setTourLoadError] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
   const [reviewSaving, setReviewSaving] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState('');
-  const [matchDestination, setMatchDestination] = useState<string>('all');
-  const [matchIndex, setMatchIndex] = useState(0);
-  const [matchPaused, setMatchPaused] = useState(false);
-  const [matchEngaged, setMatchEngaged] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [isMobileHome, setIsMobileHome] = useState(false);
-  const [matchCardWidth, setMatchCardWidth] = useState(240);
-  const [matchInView, setMatchInView] = useState(false);
-  const matchStageRef = useRef<HTMLDivElement | null>(null);
-  const matchDragStart = useRef<number | null>(null);
-  const matchSwiped = useRef(false);
   const router = useRouter();
-  const matchDestinations = [
-    { value: 'all', label: 'All destinations' },
-    ...Array.from(new Set(postedTrips.map((trip) => trip.place.trim()).filter(Boolean)))
-      .slice(0, 8)
-      .map((place) => ({ value: place, label: place })),
-  ];
-  const matchTrips = postedTrips
-    .filter((trip) => matchDestination === 'all' || trip.place.trim() === matchDestination)
-    .slice(0, 5);
 
-  const homeCardLimit = isMobileHome ? 3 : 5;
+  const companyServiceOptions = livePrivateServices.filter((svc) => svc && typeof svc.id === "number");
 
   // Cache hydration is handled by lazy state initializers above.
-
-
-  useEffect(() => {
-    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const updateMotionPreference = () => setReducedMotion(motionPreference.matches);
-    updateMotionPreference();
-    motionPreference.addEventListener('change', updateMotionPreference);
-    return () => motionPreference.removeEventListener('change', updateMotionPreference);
-  }, []);
-
-  useEffect(() => {
-    const mobileLayout = window.matchMedia('(max-width: 560px)');
-    const updateCardWidth = () => setMatchCardWidth(mobileLayout.matches ? 190 : 240);
-    updateCardWidth();
-    mobileLayout.addEventListener('change', updateCardWidth);
-    return () => mobileLayout.removeEventListener('change', updateCardWidth);
-  }, []);
-
-  useEffect(() => {
-    const mobileLayout = window.matchMedia('(max-width: 640px)');
-    const update = () => setIsMobileHome(mobileLayout.matches);
-    update();
-    mobileLayout.addEventListener('change', update);
-    return () => mobileLayout.removeEventListener('change', update);
-  }, []);
 
   useEffect(() => {
     publicPrivateHireAPI.getAll({ page_size: 6 })
       .then((res) => {
         const data = res.data;
         const list = Array.isArray(data) ? data : data?.results || [];
+        if (list.length > 0) {
+          setLivePrivateServices(list);
+          writeClientCache("travel.homeLivePrivateServices", list);
+        }
         const services = list.length ? list : SAMPLE_PRIVATE_HIRE_SERVICES.slice(0, 6);
         setPrivateServices(services);
         writeClientCache("travel.homePrivateServices", services);
@@ -132,28 +102,6 @@ export default function HomePage() {
         setPrivateServices(SAMPLE_PRIVATE_HIRE_SERVICES.slice(0, 6));
       });
   }, []);
-
-  useEffect(() => {
-    if (matchPaused || matchEngaged || reducedMotion || !matchInView || matchTrips.length < 2) return;
-    const timer = window.setInterval(() => {
-      setMatchIndex((current) => (current + 1) % matchTrips.length);
-    }, 3000);
-    return () => window.clearInterval(timer);
-  }, [matchEngaged, matchPaused, matchTrips.length, reducedMotion, matchInView]);
-
-  useEffect(() => {
-    const node = matchStageRef.current;
-    if (!node || typeof IntersectionObserver === 'undefined') {
-      setMatchInView(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => setMatchInView(entry.isIntersecting),
-      { threshold: 0.25 },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [postedTripsLoading]);
 
   useEffect(() => {
     void Promise.allSettled([
@@ -172,7 +120,7 @@ export default function HomePage() {
         setAllTours(tours);
         writeClientCache("travel.homeTours", tours);
       }
-      else { setTourLoadError(true); console.error(toursRes.reason); }
+      else console.error(toursRes.reason);
       if (homeRes.status === "fulfilled") {
         const settings = homeRes.value.data as HomeSettings;
         setHomeSettings(settings);
@@ -192,47 +140,12 @@ export default function HomePage() {
       else console.error(reviewsRes.reason);
       if (companiesRes.status === "fulfilled") {
         const publicCompanyList = readList(companiesRes.value.data) as FeaturedCompany[];
-        setCompanies(publicCompanyList.slice(0, 4));
-        writeClientCache("travel.homeCompanies", publicCompanyList.slice(0, 4));
-        const companiesWithTrips = publicCompanyList.filter((company) => company.trips_count > 0);
-        void Promise.allSettled(
-          companiesWithTrips.map((company) => publicCompaniesAPI.getBySlug(company.slug)),
-        ).then((companyResults) => {
-          const tripsByCompany = companyResults.flatMap((result, index) => {
-            if (result.status === "rejected") {
-              console.error(result.reason);
-              return [];
-            }
-            const company = companiesWithTrips[index];
-            const companyTrips = result.value.data?.trips;
-            if (!Array.isArray(companyTrips)) {
-              console.error(`Public trip list missing for company ${company.name}.`);
-              return [];
-            }
-            return [companyTrips.map((trip: Omit<CompanyPostedTrip, "company_name" | "company_public_path">) => ({
-                ...trip,
-                company_name: company.name,
-                company_public_path: company.public_path,
-                image_url: trip.image_url ?? null,
-              }))];
-          });
-          const trips: CompanyPostedTrip[] = [];
-          const maxTripsPerCompany = Math.max(0, ...tripsByCompany.map((companyTrips) => companyTrips.length));
-          for (let tripIndex = 0; tripIndex < maxTripsPerCompany; tripIndex += 1) {
-            for (const companyTrips of tripsByCompany) {
-              if (companyTrips[tripIndex]) trips.push(companyTrips[tripIndex]);
-            }
-          }
-          setPostedTrips(trips);
-          setPostedTripsLoading(false);
-          setLoading(false);
-          writeClientCache("travel.homePostedTrips", trips);
-        });
+        setCompanies(publicCompanyList.slice(0, 6));
+        writeClientCache("travel.homeCompanies", publicCompanyList.slice(0, 6));
       } else {
         console.error(companiesRes.reason);
-        setPostedTripsLoading(false);
-        setLoading(false);
       }
+      setLoading(false);
     });
   }, []);
 
@@ -420,174 +333,266 @@ export default function HomePage() {
       </section>
 
 
-      {!loading && !postedTripsLoading && (
-        <section
-          className={`cta-section ${styles.matchSection}`}
-          onFocusCapture={() => setMatchEngaged(true)}
-          onBlurCapture={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-              setMatchEngaged(false);
-            }
-          }}
-        >
-          <div className={styles.matchHeader}>
-            <div>
-              <span className={styles.matchEyebrow}>Trips posted by local companies</span>
-              <h2>Your next trip begins with a good match.</h2>
-            </div>
+      <section className={styles.tripsSection} aria-labelledby="home-trips-heading">
+        <div className={styles.tripsHeader}>
+          <div className={styles.tripsHeading}>
+            <span className={styles.tripsEyebrow}>
+              <Compass size={14} aria-hidden="true" /> Trips
+            </span>
+            <h2 id="home-trips-heading" className={styles.tripsTitle}>
+              Request your private hire trip
+            </h2>
           </div>
-          {matchTrips.length > 0 ? (
-            <>
-              <nav className={styles.matchFilters} aria-label="Filter company trips by destination">
-                {matchDestinations.map((destination) => {
-                  return (
-                    <button
-                      key={destination.value}
-                      type="button"
-                      className={`${styles.matchFilter} ${matchDestination === destination.value ? styles.matchFilterActive : ''}`}
-                      aria-pressed={matchDestination === destination.value}
-                      onClick={() => {
-                        setMatchDestination(destination.value);
-                        setMatchIndex(0);
-                      }}
-                    >
-                      {destination.label}
-                    </button>
-                  );
-                })}
-                <Link href="/companies/" className={`${styles.matchFilter} ${styles.matchMore}`}>
-                  View more <ArrowRight size={14} />
-                </Link>
-              </nav>
-              <div
-                ref={matchStageRef}
-                className={styles.matchStage}
-                role="region"
-                aria-roledescription="carousel"
-                aria-label="Company-posted trips"
-                tabIndex={0}
-                onMouseEnter={() => setMatchEngaged(true)}
-                onMouseLeave={() => setMatchEngaged(false)}
-                onKeyDown={(event) => {
-                  if (event.key === 'ArrowRight') setMatchIndex((current) => (current + 1) % matchTrips.length);
-                  if (event.key === 'ArrowLeft') setMatchIndex((current) => (current - 1 + matchTrips.length) % matchTrips.length);
-                }}
-                onPointerDown={(event) => {
-                  matchDragStart.current = event.clientX;
-                  matchSwiped.current = false;
-                  setMatchEngaged(true);
-                }}
-                onPointerUp={(event) => {
-                  if (matchDragStart.current === null) return;
-                  const distance = event.clientX - matchDragStart.current;
-                  matchDragStart.current = null;
-                  if (Math.abs(distance) > 40 && matchTrips.length > 1) {
-                    matchSwiped.current = true;
-                    setMatchIndex((current) => (current + (distance < 0 ? 1 : -1) + matchTrips.length) % matchTrips.length);
-                  }
-                  setMatchEngaged(false);
-                }}
-                onPointerCancel={() => {
-                  matchDragStart.current = null;
-                  matchSwiped.current = false;
-                  setMatchEngaged(false);
-                }}
-              >
-                {matchTrips.map((trip, index) => {
-                  let offset = index - matchIndex;
-                  if (offset > matchTrips.length / 2) offset -= matchTrips.length;
-                  if (offset < -matchTrips.length / 2) offset += matchTrips.length;
-                  const distance = Math.abs(offset);
-                  const horizontalOffset = distance === 0 ? 0 : distance === 1 ? 0.72 : 1.28;
-                  return (
-                    <Link
-                      key={`${trip.company_id}-${trip.id}`}
-                      href={`/trips/${trip.id}/`}
-                      className={styles.matchCard}
-                      data-distance={distance}
-                      style={{
-                        transform: `translate(-50%, -50%) translateX(${Math.sign(offset) * matchCardWidth * horizontalOffset}px)`,
-                        zIndex: 10 - distance,
-                        opacity: distance > 2 ? 0 : distance === 2 ? 0.85 : 1,
-                        pointerEvents: distance > 2 ? 'none' : 'auto',
-                      }}
-                      tabIndex={distance === 0 ? 0 : -1}
-                      aria-hidden={distance > 2}
-                      aria-label={`${trip.title} in ${trip.place}, posted by ${trip.company_name}`}
-                      title={`${trip.title} — ${trip.company_name}`}
-                      onClick={(event) => {
-                        if (matchSwiped.current) {
-                          event.preventDefault();
-                          matchSwiped.current = false;
-                        }
-                      }}
-                    >
-                      {trip.image_url ? (
-                        <Image
-                          src={getImageUrl(trip.image_url)}
-                          alt={trip.title}
-                          fill
-                          sizes="(max-width: 560px) 190px, 240px"
-                          priority={distance === 0}
-                          style={{ objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <div className={styles.matchCardFallback} aria-hidden="true" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-              <div className={styles.matchControls}>
-                <div className={styles.matchDots} aria-label="Choose an experience">
-                  {matchTrips.map((trip, index) => (
-                    <button
-                      key={`${trip.company_id}-${trip.id}`}
-                      type="button"
-                      className={`${styles.matchDot} ${matchIndex === index ? styles.matchDotActive : ''}`}
-                      aria-label={`Show ${trip.title}`}
-                      aria-current={matchIndex === index ? 'true' : undefined}
-                      onClick={() => setMatchIndex(index)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : (
-            <p className={styles.matchEmpty}>No company-posted trips are available right now. Meet the companies to discover their experiences.</p>
-          )}
-        </section>
-      )}
+        </div>
+
+        <div className={styles.tripsGrid}>
+          {/* Card 1: Open Public Private Hire Request -> /booking/create/ */}
+          <article className={`${styles.tripOptionCard} ${styles.tripOptionCardPublic}`}>
+            <div className={styles.tripOptionTop}>
+              <span className={styles.tripOptionIconLight} aria-hidden="true">
+                <Navigation size={20} />
+              </span>
+              <span className={styles.tripOptionBadgeLight}>Open private hire request</span>
+            </div>
+
+            <div className={styles.tripOptionCopy}>
+              <h3 className={styles.tripOptionTitleLight}>Request Private hire Transport</h3>
+              <p className={styles.tripOptionDescLight}>
+                Set your pickup, destination, and schedule once — approved drivers confirm your
+                private hire trip directly.
+              </p>
+            </div>
+
+            <ul className={styles.tripOptionListLight}>
+              <li>
+                <CheckCircle size={15} aria-hidden="true" />
+                Pick any pickup &amp; drop-off with live route distance
+              </li>
+              <li>
+                <CheckCircle size={15} aria-hidden="true" />
+                Notifies nearby drivers automatically when you are in Unguja
+              </li>
+              <li>
+                <CheckCircle size={15} aria-hidden="true" />
+                No upfront payment required
+              </li>
+            </ul>
+
+            <div className={styles.tripOptionFooter}>
+              <Link href="/booking/create/" className={styles.tripActionLight}>
+                Request Private hire Transport
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
+          </article>
+
+          {/* Card 2: Specific Company Private Hire Request -> /companies/ */}
+          <article className={`${styles.tripOptionCard} ${styles.tripOptionCardCompany}`}>
+            <div className={styles.tripOptionTop}>
+              <span className={styles.tripOptionIconDark} aria-hidden="true">
+                <Building2 size={20} />
+              </span>
+              <span className={styles.tripOptionBadgeDark}>Specific company</span>
+            </div>
+
+            <div className={styles.tripOptionCopy}>
+              <h3 className={styles.tripOptionTitleDark}>
+                Request Private hire Transport by specific company
+              </h3>
+              <p className={styles.tripOptionDescDark}>
+                Browse verified local companies, view all their private hire services, and select a
+                vehicle to book directly.
+              </p>
+            </div>
+
+            <ul className={styles.tripOptionListDark}>
+              <li>
+                <CheckCircle size={15} aria-hidden="true" />
+                View all private hire services offered by each company
+              </li>
+              <li>
+                <CheckCircle size={15} aria-hidden="true" />
+                Compare dedicated vehicles and upfront starting prices
+              </li>
+              <li>
+                <CheckCircle size={15} aria-hidden="true" />
+                Select a service to go straight to direct booking
+              </li>
+            </ul>
+
+            <div className={styles.tripOptionFooter}>
+              <Link href="/companies/" className={styles.tripActionDark}>
+                Request by specific company
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
+          </article>
+        </div>
+      </section>
 
 
       {!loading && companies.length > 0 && (
-        <section className="home-companies-section">
-          <div className="section-header">
-            <div>
-              <span className="section-kicker">Meet the providers</span>
-              <h2>Travel with people who know the place</h2>
+        <section className={styles.providersSection} aria-labelledby="home-providers-heading">
+          <div className={styles.providersHeader}>
+            <div className={styles.providersHeading}>
+              <span className={styles.providersEyebrow}>
+                <Building2 size={14} aria-hidden="true" /> Meet the providers
+              </span>
+              <h2 id="home-providers-heading" className={styles.providersTitle}>
+                Travel with people who know the place
+              </h2>
             </div>
-            <Link href="/companies/" className="section-text-link">All companies <ArrowRight size={16} /></Link>
+            <Link href="/companies/" className={styles.providersBrowse}>
+              All companies <ArrowRight size={15} aria-hidden="true" />
+            </Link>
           </div>
-          <div className="home-companies-grid">
-            {companies.slice(0, homeCardLimit).map((company) => (
-              <DestinationCard
-                key={company.id}
-                image={company.logo_image_url ? getImageUrl(company.logo_image_url) : undefined}
-                title={company.name}
-                location={[company.locality, company.region].filter(Boolean).join(", ") || "Private hire provider"}
-                description={company.description || `${company.services_count} private-hire services`}
-                stats={[
-                  { value: String(company.services_count), label: "Services" },
-                  { value: "Local", label: "Provider" },
-                  { value: "Verified", label: "Company" },
-                ]}
-                hideCta
-                boldText
-                href={company.public_path}
-              />
-            ))}
-          </div>
+
+          <ul
+            className={`${styles.providersGrid} ${
+              companies.length === 1
+                ? styles.providersGridSingle
+                : companies.length === 2
+                  ? styles.providersGridDouble
+                  : ""
+            }`}
+          >
+            {companies.slice(0, 6).map((company) => {
+              const coverUrl = company.cover_image_url
+                ? getImageUrl(company.cover_image_url)
+                : null;
+              const logoUrl = company.logo_image_url
+                ? getImageUrl(company.logo_image_url)
+                : null;
+              const locationLabel = formatCompanyLocation(company);
+              const description =
+                company.description?.trim() ||
+                "Licensed local transport partner offering verified private hire vehicles and experienced island drivers.";
+              const directService = companyServiceOptions.find(
+                (svc) => svc.company?.id === company.id,
+              );
+              const servicesCount = Number(company.services_count ?? 0);
+              const tripsCount = Number(company.trips_count ?? 0);
+
+              return (
+                <li
+                  key={company.id}
+                  className={`${styles.providerCard} ${
+                    companies.length === 1 ? styles.providerCardSpotlight : ""
+                  }`}
+                >
+                  <Link
+                    href={company.public_path}
+                    className={styles.providerMedia}
+                    aria-label={`View ${company.name}`}
+                  >
+                    {coverUrl ? (
+                      <Image
+                        src={coverUrl}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 84vw, (max-width: 1024px) 50vw, 33vw"
+                        className={styles.providerCoverImage}
+                        unoptimized
+                      />
+                    ) : (
+                      <span className={styles.providerCoverFallback} aria-hidden="true">
+                        <span className={styles.providerCoverPattern} />
+                        <span className={styles.providerCoverWatermark}>
+                          {getCompanyInitials(company.name)}
+                        </span>
+                      </span>
+                    )}
+                    <span className={styles.providerMediaShade} aria-hidden="true" />
+                    <span className={styles.providerVerifiedBadge}>
+                      <Shield size={12} aria-hidden="true" />
+                      Verified company
+                    </span>
+                  </Link>
+
+                  <div className={styles.providerBody}>
+                    <div className={styles.providerIdentity}>
+                      <Link
+                        href={company.public_path}
+                        className={styles.providerEmblem}
+                        aria-label={`${company.name} profile`}
+                      >
+                        {logoUrl ? (
+                          <Image
+                            src={logoUrl}
+                            alt={`${company.name} logo`}
+                            fill
+                            sizes="56px"
+                            className={styles.providerLogoImage}
+                            unoptimized
+                          />
+                        ) : (
+                          <span className={styles.providerMonogram}>
+                            {getCompanyInitials(company.name)}
+                          </span>
+                        )}
+                      </Link>
+                      <div className={styles.providerTitleGroup}>
+                        <h3 className={styles.providerName}>
+                          <Link href={company.public_path} className={styles.providerNameLink}>
+                            {company.name}
+                          </Link>
+                        </h3>
+                        <p className={styles.providerLocation}>
+                          <MapPin size={13} aria-hidden="true" />
+                          <span>{locationLabel}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className={styles.providerDesc}>{description}</p>
+
+                    <ul className={styles.providerStats} aria-label="Company highlights">
+                      <li>
+                        <Car size={14} aria-hidden="true" />
+                        {servicesCount > 0
+                          ? `${servicesCount} ${servicesCount === 1 ? "vehicle" : "vehicles"}`
+                          : "Private hire fleet"}
+                      </li>
+                      {tripsCount > 0 ? (
+                        <li>
+                          <Compass size={14} aria-hidden="true" />
+                          {tripsCount} {tripsCount === 1 ? "trip" : "trips"}
+                        </li>
+                      ) : null}
+                      <li>
+                        <CheckCircle size={14} aria-hidden="true" />
+                        Local provider
+                      </li>
+                    </ul>
+
+                    <div
+                      className={`${styles.providerActions} ${
+                        directService ? styles.providerActionsSplit : ""
+                      }`}
+                    >
+                      {directService ? (
+                        <>
+                          <Link href={company.public_path} className={styles.providerLinkGhost}>
+                            View company
+                          </Link>
+                          <Link
+                            href={`/booking/${directService.id}/`}
+                            className={styles.providerLinkPrimary}
+                          >
+                            Book now <ArrowRight size={15} aria-hidden="true" />
+                          </Link>
+                        </>
+                      ) : (
+                        <Link href={company.public_path} className={styles.providerLinkPrimary}>
+                          Explore company <ArrowRight size={15} aria-hidden="true" />
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </section>
       )}
 

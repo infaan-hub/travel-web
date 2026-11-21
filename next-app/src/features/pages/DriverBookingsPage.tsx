@@ -394,7 +394,7 @@ export default function DriverBookingsPage({
                           {booking.reference || `Booking #${booking.id}`}
                         </span>
                         <h2 className={styles.bookingTitle}>
-                          {booking.service?.title || "Private hire transfer"}
+                          {booking.service?.title || "Private hire request"}
                         </h2>
                       </div>
                     </div>

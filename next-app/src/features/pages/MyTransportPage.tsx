@@ -611,7 +611,7 @@ export default function MyTransportPage() {
                             ) : null}
                           </div>
                           <h3 className={styles.serviceTitle}>
-                            {booking.service?.title || "Private hire trip"}
+                            {booking.service?.title || "Private hire request"}
                           </h3>
                           {company?.name ? (
                             <p className={styles.companyMeta}>{company.name}</p>
