@@ -62,14 +62,14 @@ function HomePrivateHireFeaturedCard({ svc }: { svc: any }) {
   const activePhoto = photos[angleIndex] ?? photos[0] ?? null;
 
   return (
-    <li className={styles.fpCard}>
+    <li className={`${styles.fpCard} ${styles.fpCardHire}`}>
       <div className={styles.fpMedia} aria-hidden="true">
         {activePhoto ? (
           <Image
             src={getImageUrl(activePhoto.url)}
             alt=""
             fill
-            sizes="(max-width: 640px) 92vw, (max-width: 1100px) 48vw, 560px"
+            sizes="(max-width: 640px) 84vw, (max-width: 1100px) 48vw, 560px"
             className={styles.fpImage}
             unoptimized={isUnoptimizableImage(getImageUrl(activePhoto.url))}
           />
@@ -484,7 +484,7 @@ export default function HomePage() {
 
         {privateServices.length > 0 ? (
           <ul
-            className={`${styles.fpGrid} ${
+            className={`${styles.fpGrid} ${styles.fpHireTrack} ${
               privateServices.length === 1 ? styles.fpGridSingle : ""
             }`}
           >
