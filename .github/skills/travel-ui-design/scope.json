@@ -167,6 +167,7 @@
       "routePatterns": [
         "/companies",
         "/company/:slug",
+        "/drivers",
         "/trips",
         "/trips/:id",
         "/login",
@@ -183,6 +184,7 @@
       "fileGlobs": [
         "src/app/companies/**",
         "src/app/company/[slug]/**",
+        "src/app/(public)/drivers/**",
         "src/app/(public)/trips/**",
         "src/app/(public)/login/**",
         "src/app/(public)/register/**",
@@ -196,6 +198,8 @@
         "src/app/tour-company/**",
         "src/features/pages/CompaniesPage.tsx",
         "src/features/pages/companies-page.module.css",
+        "src/features/pages/DriversDirectoryPage.tsx",
+        "src/features/pages/drivers-directory.module.css",
         "src/features/pages/company-public.module.css",
         "src/features/pages/company-profile-page.module.css",
         "src/features/pages/TripsPage.tsx",

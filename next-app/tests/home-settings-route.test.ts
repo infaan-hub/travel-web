@@ -80,6 +80,12 @@ const originalSetting = {
   moreExperiencesImageMime3: null,
   moreExperiencesImageMime4: null,
   moreExperiencesImageMime5: null,
+  tripPublicCardImage: null,
+  tripPublicCardImageData: null,
+  tripPublicCardImageMime: null,
+  tripCompanyCardImage: null,
+  tripCompanyCardImageData: null,
+  tripCompanyCardImageMime: null,
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
 };
 
@@ -169,6 +175,42 @@ describe("PATCH /api/home-settings/admin", () => {
     expect(homeSettingUpdate.mock.calls[0][0].data).toMatchObject({
       heroThumbImage: null,
       heroThumbImageMime: "image/jpeg",
+    });
+  });
+
+  it("persists uploaded trip card background images and clears them", async () => {
+    const uploadResponse = await PATCH(
+      createRequest({
+        trip_public_card_image: new File(["pub"], "pub.jpg", { type: "image/jpeg" }),
+        trip_company_card_image: new File(["co"], "co.jpg", { type: "image/jpeg" }),
+      }),
+    );
+
+    expect(uploadResponse.status).toBe(200);
+    expect(homeSettingUpdate.mock.calls[0][0].data).toMatchObject({
+      tripPublicCardImage: null,
+      tripPublicCardImageData: new Uint8Array(Buffer.from("validated image")),
+      tripPublicCardImageMime: "image/jpeg",
+      tripCompanyCardImage: null,
+      tripCompanyCardImageData: new Uint8Array(Buffer.from("validated image")),
+      tripCompanyCardImageMime: "image/jpeg",
+    });
+
+    const clearResponse = await PATCH(
+      createRequest({
+        clear_trip_public_card_image: "true",
+        clear_trip_company_card_image: "true",
+      }),
+    );
+
+    expect(clearResponse.status).toBe(200);
+    expect(homeSettingUpdate.mock.calls[1][0].data).toMatchObject({
+      tripPublicCardImage: null,
+      tripPublicCardImageData: null,
+      tripPublicCardImageMime: null,
+      tripCompanyCardImage: null,
+      tripCompanyCardImageData: null,
+      tripCompanyCardImageMime: null,
     });
   });
 

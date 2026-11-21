@@ -284,6 +284,9 @@ export const publicPrivateHireAPI = {
   getAll: (params?: Params) => api.get("/private-services/", { params }),
   getById: (id: string | number) => api.get(`/private-services/${id}/`),
 };
+export const publicDriversAPI = {
+  getAll: (params?: Params) => api.get("/drivers/", { params }),
+};
 export const transportBookingsAPI = {
   getAll: () => api.get("/transport-bookings/"),
   create: (data: Record<string, unknown>) => api.post("/transport-bookings/", data),

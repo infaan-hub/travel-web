@@ -388,6 +388,16 @@ export function homeSettingSerializer(setting: HomeSetting): Json {
     hero_secondary_image_url: heroImage(setting.heroSecondaryImageData, setting.heroSecondaryImage, "secondary"),
     hero_feature_image_url: heroImage(setting.heroFeatureImageData, setting.heroFeatureImage, "feature"),
     hero_thumb_image_url: heroImage(setting.heroThumbImageData, setting.heroThumbImage, "thumb"),
+    trip_public_card_image_url: heroImage(
+      setting.tripPublicCardImageData,
+      setting.tripPublicCardImage,
+      "trip-public",
+    ),
+    trip_company_card_image_url: heroImage(
+      setting.tripCompanyCardImageData,
+      setting.tripCompanyCardImage,
+      "trip-company",
+    ),
     zanzibar_image_url: publicImageUrl(setting.zanzibarImage),
     tanzania_image_url: publicImageUrl(setting.tanzaniaImage),
     more_experiences_image_url: publicImageUrl(setting.moreExperiencesImage),

@@ -469,6 +469,12 @@ model HomeSetting {
   moreExperiencesImageMime3 String?  @map("more_experiences_image_mime_3")
   moreExperiencesImageMime4 String?  @map("more_experiences_image_mime_4")
   moreExperiencesImageMime5 String?  @map("more_experiences_image_mime_5")
+  tripPublicCardImage       String?  @map("trip_public_card_image")
+  tripPublicCardImageData   Bytes?   @map("trip_public_card_image_data") @db.ByteA
+  tripPublicCardImageMime   String?  @map("trip_public_card_image_mime")
+  tripCompanyCardImage      String?  @map("trip_company_card_image")
+  tripCompanyCardImageData  Bytes?   @map("trip_company_card_image_data") @db.ByteA
+  tripCompanyCardImageMime  String?  @map("trip_company_card_image_mime")
   updatedAt                 DateTime @updatedAt @map("updated_at")
 
   @@map("home_settings")

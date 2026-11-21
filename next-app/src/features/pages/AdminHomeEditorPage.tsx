@@ -28,6 +28,10 @@ export default function AdminHomeEditorPage() {
   const [heroFeaturePreview, setHeroFeaturePreview] = useState<string | null>(null);
   const [heroThumbFile, setHeroThumbFile] = useState<File | null>(null);
   const [heroThumbPreview, setHeroThumbPreview] = useState<string | null>(null);
+  const [tripPublicCardFile, setTripPublicCardFile] = useState<File | null>(null);
+  const [tripPublicCardPreview, setTripPublicCardPreview] = useState<string | null>(null);
+  const [tripCompanyCardFile, setTripCompanyCardFile] = useState<File | null>(null);
+  const [tripCompanyCardPreview, setTripCompanyCardPreview] = useState<string | null>(null);
   const [zanzibarFile, setZanzibarFile] = useState<File | null>(null);
   const [zanzibarPreview, setZanzibarPreview] = useState<string | null>(null);
   const [tanzaniaFile, setTanzaniaFile] = useState<File | null>(null);
@@ -75,6 +79,8 @@ export default function AdminHomeEditorPage() {
     else if (field === 'hero-secondary') { setHeroSecondaryFile(null); setHeroSecondaryPreview(null); }
     else if (field === 'hero-feature') { setHeroFeatureFile(null); setHeroFeaturePreview(null); }
     else if (field === 'hero-thumb') { setHeroThumbFile(null); setHeroThumbPreview(null); }
+    else if (field === 'trip-public-card') { setTripPublicCardFile(null); setTripPublicCardPreview(null); }
+    else if (field === 'trip-company-card') { setTripCompanyCardFile(null); setTripCompanyCardPreview(null); }
     else if (field === 'zanzibar') { setZanzibarFile(null); setZanzibarPreview(null); }
     else if (field === 'tanzania') { setTanzaniaFile(null); setTanzaniaPreview(null); }
     else if (field.startsWith('more-experiences-')) {
@@ -94,6 +100,8 @@ export default function AdminHomeEditorPage() {
         [heroSecondaryFile, 'hero_secondary_image'],
         [heroFeatureFile, 'hero_feature_image'],
         [heroThumbFile, 'hero_thumb_image'],
+        [tripPublicCardFile, 'trip_public_card_image'],
+        [tripCompanyCardFile, 'trip_company_card_image'],
         [zanzibarFile, 'zanzibar_image'],
         [tanzaniaFile, 'tanzania_image'],
         ...moreExperiencesFiles.map((file, index) => [file, `more_experiences_image_${index + 1}`] as [File | null, string]),
@@ -108,6 +116,8 @@ export default function AdminHomeEditorPage() {
       setHeroSecondaryFile(null); setHeroSecondaryPreview(null);
       setHeroFeatureFile(null); setHeroFeaturePreview(null);
       setHeroThumbFile(null); setHeroThumbPreview(null);
+      setTripPublicCardFile(null); setTripPublicCardPreview(null);
+      setTripCompanyCardFile(null); setTripCompanyCardPreview(null);
       setZanzibarFile(null); setZanzibarPreview(null);
       setTanzaniaFile(null); setTanzaniaPreview(null);
       setMoreExperiencesFiles(Array(5).fill(null)); setMoreExperiencesPreviews(Array(5).fill(null));
@@ -134,7 +144,7 @@ export default function AdminHomeEditorPage() {
     try {
       const formData = new FormData();
       const portfolioIndex = field.startsWith('more-experiences-') ? Number(field.slice('more-experiences-'.length)) : null;
-      const inputName = field === 'hero' ? 'hero_image' : field === 'hero-secondary' ? 'hero_secondary_image' : field === 'hero-feature' ? 'hero_feature_image' : field === 'hero-thumb' ? 'hero_thumb_image' : field === 'zanzibar' ? 'zanzibar_image' : field === 'tanzania' ? 'tanzania_image' : `more_experiences_image_${portfolioIndex}`;
+      const inputName = field === 'hero' ? 'hero_image' : field === 'hero-secondary' ? 'hero_secondary_image' : field === 'hero-feature' ? 'hero_feature_image' : field === 'hero-thumb' ? 'hero_thumb_image' : field === 'trip-public-card' ? 'trip_public_card_image' : field === 'trip-company-card' ? 'trip_company_card_image' : field === 'zanzibar' ? 'zanzibar_image' : field === 'tanzania' ? 'tanzania_image' : `more_experiences_image_${portfolioIndex}`;
       formData.append(`clear_${inputName}`, 'true');
       const res = await homeSettingsAPI.update(formData);
       setSettings(res.data);
@@ -162,6 +172,8 @@ export default function AdminHomeEditorPage() {
     if (field === 'hero-secondary') return heroSecondaryPreview || settings?.hero_secondary_image_url || null;
     if (field === 'hero-feature') return heroFeaturePreview || settings?.hero_feature_image_url || null;
     if (field === 'hero-thumb') return heroThumbPreview || settings?.hero_thumb_image_url || null;
+    if (field === 'trip-public-card') return tripPublicCardPreview || settings?.trip_public_card_image_url || null;
+    if (field === 'trip-company-card') return tripCompanyCardPreview || settings?.trip_company_card_image_url || null;
     if (field === 'zanzibar') return zanzibarPreview || settings?.zanzibar_image_url || null;
     if (field === 'tanzania') return tanzaniaPreview || settings?.tanzania_image_url || null;
     return settings?.more_experiences_image_url || null;
@@ -173,6 +185,8 @@ export default function AdminHomeEditorPage() {
     heroSecondaryFile ||
     heroFeatureFile ||
     heroThumbFile ||
+    tripPublicCardFile ||
+    tripCompanyCardFile ||
     zanzibarFile ||
     tanzaniaFile ||
     moreExperiencesFiles.some(Boolean),
@@ -284,6 +298,74 @@ export default function AdminHomeEditorPage() {
             <label className="btn btn-sm btn-outline"><Upload size={14} /> Upload<input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e: ChangeEvent<HTMLInputElement>) => handleFileChange(e, setHeroThumbFile, setHeroThumbPreview)} /></label>
             {(heroThumbPreview || settings?.hero_thumb_image_url) && <button className="btn btn-sm btn-danger" onClick={() => handleDelete('hero-thumb')}><Trash2 size={14} /> Delete</button>}
             {heroThumbFile && <button className="btn btn-sm btn-ghost" onClick={() => clearField('hero-thumb')}>Cancel</button>}
+          </div>
+        </div>
+
+        <div className="home-editor-card">
+          <h3>Trips Card: Request Private Hire Background</h3>
+          <div className="editor-preview">
+            {previewUrl('trip-public-card') ? (
+              <img src={previewUrl('trip-public-card')} alt="Request Private hire Transport card background" />
+            ) : (
+              <div className="editor-placeholder"><ImageIcon size={32} /><p>Default navy gradient</p></div>
+            )}
+          </div>
+          <div className="editor-actions">
+            <label className="btn btn-sm btn-outline">
+              <Upload size={14} /> Upload
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  handleFileChange(e, setTripPublicCardFile, setTripPublicCardPreview)
+                }
+              />
+            </label>
+            {(tripPublicCardPreview || settings?.trip_public_card_image_url) && (
+              <button className="btn btn-sm btn-danger" onClick={() => handleDelete('trip-public-card')}>
+                <Trash2 size={14} /> Delete
+              </button>
+            )}
+            {tripPublicCardFile && (
+              <button className="btn btn-sm btn-ghost" onClick={() => clearField('trip-public-card')}>
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="home-editor-card">
+          <h3>Trips Card: Specific Company Background</h3>
+          <div className="editor-preview">
+            {previewUrl('trip-company-card') ? (
+              <img src={previewUrl('trip-company-card')} alt="Request Private hire Transport by specific company card background" />
+            ) : (
+              <div className="editor-placeholder"><ImageIcon size={32} /><p>Default light card</p></div>
+            )}
+          </div>
+          <div className="editor-actions">
+            <label className="btn btn-sm btn-outline">
+              <Upload size={14} /> Upload
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  handleFileChange(e, setTripCompanyCardFile, setTripCompanyCardPreview)
+                }
+              />
+            </label>
+            {(tripCompanyCardPreview || settings?.trip_company_card_image_url) && (
+              <button className="btn btn-sm btn-danger" onClick={() => handleDelete('trip-company-card')}>
+                <Trash2 size={14} /> Delete
+              </button>
+            )}
+            {tripCompanyCardFile && (
+              <button className="btn btn-sm btn-ghost" onClick={() => clearField('trip-company-card')}>
+                Cancel
+              </button>
+            )}
           </div>
         </div>
 

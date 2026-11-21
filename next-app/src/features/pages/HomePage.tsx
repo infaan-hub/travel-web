@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import Image from "next/image";
-import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI, publicPrivateHireAPI } from '@/lib/api/client';
-import { ArrowRight, Star, Send, X, Car, Users, Briefcase, Shield, Compass, Navigation, Building2, CheckCircle, MapPin } from '@/components/icons';
+import { toursAPI, homeSettingsAPI, reviewsAPI, publicCompaniesAPI, publicPrivateHireAPI, publicDriversAPI } from '@/lib/api/client';
+import { ArrowRight, Star, Send, X, Car, Users, Briefcase, Shield, Compass, Navigation, Building2, CheckCircle, ChevronRight, MapPin } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
@@ -16,6 +16,7 @@ import MoreExperiencesEmptyState from "@/components/MoreExperiencesEmptyState";
 import styles from "@/features/pages/home-page.module.css";
 
 import type { HomeSettings, Review, Tour } from "@/features/pages/types";
+import type { PublicDriverCard } from "@/lib/featured-drivers";
 import { PRICING_LABELS, SAMPLE_PRIVATE_HIRE_SERVICES } from "@/features/transport/private-hire-data";
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
 
@@ -83,6 +84,7 @@ export default function HomePage() {
   const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(() => readClientCache<HomeSettings>("travel.homeSettings"));
   const [reviews, setReviews] = useState<Review[]>(() => readClientCache<Review[]>("travel.homeReviews") ?? []);
   const [companies, setCompanies] = useState<FeaturedCompany[]>(() => readClientCache<FeaturedCompany[]>("travel.homeCompanies") ?? []);
+  const [topDrivers, setTopDrivers] = useState<PublicDriverCard[]>(() => readClientCache<PublicDriverCard[]>("travel.homeTopDrivers.v1") ?? []);
   const [privateServices, setPrivateServices] = useState<any[]>(() => readClientCache<any[]>("travel.homeFeaturedPrivateServices.v1") ?? []);
   const [livePrivateServices, setLivePrivateServices] = useState<any[]>(() => readClientCache<any[]>("travel.homeLivePrivateServices.v1") ?? []);
   const [loading, setLoading] = useState<boolean>(() => !(
@@ -125,7 +127,8 @@ export default function HomePage() {
       homeSettingsAPI.get(),
       reviewsAPI.getAll({ status: 'approved' }),
       publicCompaniesAPI.getAll({ page: 1, page_size: 50 }),
-    ]).then(([toursRes, homeRes, reviewsRes, companiesRes]) => {
+      publicDriversAPI.getAll({ featured_home: "1", limit: 4 }),
+    ]).then(([toursRes, homeRes, reviewsRes, companiesRes, driversRes]) => {
       const readList = (value: unknown) => {
         if (Array.isArray(value)) return value;
         if (value && typeof value === "object" && "results" in value && Array.isArray(value.results)) return value.results;
@@ -160,6 +163,13 @@ export default function HomePage() {
         writeClientCache("travel.homeCompanies", publicCompanyList.slice(0, 6));
       } else {
         console.error(companiesRes.reason);
+      }
+      if (driversRes.status === "fulfilled") {
+        const featuredDrivers = readList(driversRes.value.data) as PublicDriverCard[];
+        setTopDrivers(featuredDrivers.slice(0, 4));
+        writeClientCache("travel.homeTopDrivers.v1", featuredDrivers.slice(0, 4));
+      } else {
+        console.error(driversRes.reason);
       }
       setLoading(false);
     });
@@ -221,104 +231,152 @@ export default function HomePage() {
         featuredTour={allTours.find((tour) => tour.featured) || allTours[0] || null}
       />
 
-      <section className={styles.tripsSection} aria-labelledby="home-trips-heading">
-        <div className={styles.tripsHeader}>
-          <div className={styles.tripsHeading}>
-            <span className={styles.tripsEyebrow}>
-              <Compass size={14} aria-hidden="true" /> Trips
-            </span>
-            <h2 id="home-trips-heading" className={styles.tripsTitle}>
-              Request your private hire trip
-            </h2>
-          </div>
-        </div>
+      {(() => {
+        const tripPublicBg = homeSettings?.trip_public_card_image_url
+          ? getImageUrl(homeSettings.trip_public_card_image_url)
+          : null;
+        const tripCompanyBg = homeSettings?.trip_company_card_image_url
+          ? getImageUrl(homeSettings.trip_company_card_image_url)
+          : null;
+        const companyHasBg = Boolean(tripCompanyBg);
 
-        <div className={styles.tripsGrid}>
-          {/* Card 1: Open Public Private Hire Request -> /booking/create/ */}
-          <article className={`${styles.tripOptionCard} ${styles.tripOptionCardPublic}`}>
-            <div className={styles.tripOptionTop}>
-              <span className={styles.tripOptionIconLight} aria-hidden="true">
-                <Navigation size={18} />
-              </span>
-              <span className={styles.tripOptionBadgeLight}>Open private hire request</span>
+        return (
+          <section className={styles.tripsSection} aria-labelledby="home-trips-heading">
+            <div className={styles.tripsHeader}>
+              <div className={styles.tripsHeading}>
+                <span className={styles.tripsEyebrow}>
+                  <Compass size={14} aria-hidden="true" /> Trips
+                </span>
+                <h2 id="home-trips-heading" className={styles.tripsTitle}>
+                  Request your private hire trip
+                </h2>
+              </div>
             </div>
 
-            <div className={styles.tripOptionCopy}>
-              <h3 className={styles.tripOptionTitleLight}>Request Private hire Transport</h3>
-              <p className={styles.tripOptionDescLight}>
-                Set your pickup, destination, and schedule once — approved drivers confirm your
-                private hire trip directly.
-              </p>
+            <div className={styles.tripsGrid}>
+              {/* Card 1: Open Public Private Hire Request -> /booking/create/ */}
+              <article
+                className={`${styles.tripOptionCard} ${styles.tripOptionCardPublic} ${
+                  tripPublicBg ? styles.tripOptionHasBg : ""
+                }`}
+              >
+                {tripPublicBg ? (
+                  <>
+                    <Image
+                      src={tripPublicBg}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 48vw, 460px"
+                      className={styles.tripOptionBgImage}
+                      unoptimized
+                    />
+                    <span className={styles.tripOptionBgScrim} aria-hidden="true" />
+                  </>
+                ) : null}
+
+                <div className={styles.tripOptionContent}>
+                  <div className={styles.tripOptionTop}>
+                    <span className={styles.tripOptionIconLight} aria-hidden="true">
+                      <Navigation size={18} />
+                    </span>
+                    <span className={styles.tripOptionBadgeLight}>Open private hire</span>
+                  </div>
+
+                  <div className={styles.tripOptionCopy}>
+                    <h3 className={styles.tripOptionTitleLight}>Request Private hire Transport</h3>
+                    <p className={styles.tripOptionDescLight}>
+                      Set pickup, drop-off &amp; schedule — nearby drivers confirm your private hire
+                      trip directly.
+                    </p>
+                  </div>
+
+                  <div className={styles.tripOptionFooter}>
+                    <Link href="/booking/create/" className={styles.tripActionLight}>
+                      <span className={styles.tripActionLabelFull}>
+                        Request Private hire Transport
+                      </span>
+                      <span className={styles.tripActionLabelShort}>Request now</span>
+                      <ArrowRight size={15} aria-hidden="true" />
+                    </Link>
+                  </div>
+                </div>
+              </article>
+
+              {/* Card 2: Specific Company Private Hire Request -> /companies/ */}
+              <article
+                className={`${styles.tripOptionCard} ${
+                  companyHasBg ? styles.tripOptionCardPublic : styles.tripOptionCardCompany
+                } ${companyHasBg ? styles.tripOptionHasBg : ""}`}
+              >
+                {tripCompanyBg ? (
+                  <>
+                    <Image
+                      src={tripCompanyBg}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 48vw, 460px"
+                      className={styles.tripOptionBgImage}
+                      unoptimized
+                    />
+                    <span className={styles.tripOptionBgScrim} aria-hidden="true" />
+                  </>
+                ) : null}
+
+                <div className={styles.tripOptionContent}>
+                  <div className={styles.tripOptionTop}>
+                    <span
+                      className={
+                        companyHasBg ? styles.tripOptionIconLight : styles.tripOptionIconDark
+                      }
+                      aria-hidden="true"
+                    >
+                      <Building2 size={18} />
+                    </span>
+                    <span
+                      className={
+                        companyHasBg ? styles.tripOptionBadgeLight : styles.tripOptionBadgeDark
+                      }
+                    >
+                      Specific company
+                    </span>
+                  </div>
+
+                  <div className={styles.tripOptionCopy}>
+                    <h3
+                      className={
+                        companyHasBg ? styles.tripOptionTitleLight : styles.tripOptionTitleDark
+                      }
+                    >
+                      Request Private hire Transport by specific company
+                    </h3>
+                    <p
+                      className={
+                        companyHasBg ? styles.tripOptionDescLight : styles.tripOptionDescDark
+                      }
+                    >
+                      Browse verified local companies, view all their private hire services, and
+                      book directly.
+                    </p>
+                  </div>
+
+                  <div className={styles.tripOptionFooter}>
+                    <Link
+                      href="/companies/"
+                      className={companyHasBg ? styles.tripActionLight : styles.tripActionDark}
+                    >
+                      <span className={styles.tripActionLabelFull}>
+                        Request by specific company
+                      </span>
+                      <span className={styles.tripActionLabelShort}>By company</span>
+                      <ArrowRight size={15} aria-hidden="true" />
+                    </Link>
+                  </div>
+                </div>
+              </article>
             </div>
-
-            <ul className={styles.tripOptionListLight}>
-              <li>
-                <CheckCircle size={15} aria-hidden="true" />
-                Pick any pickup &amp; drop-off with live route distance
-              </li>
-              <li>
-                <CheckCircle size={15} aria-hidden="true" />
-                Notifies nearby drivers automatically when you are in Unguja
-              </li>
-              <li>
-                <CheckCircle size={15} aria-hidden="true" />
-                No upfront payment required
-              </li>
-            </ul>
-
-            <div className={styles.tripOptionFooter}>
-              <Link href="/booking/create/" className={styles.tripActionLight}>
-                <span className={styles.tripActionLabelFull}>Request Private hire Transport</span>
-                <span className={styles.tripActionLabelShort}>Request now</span>
-                <ArrowRight size={15} aria-hidden="true" />
-              </Link>
-            </div>
-          </article>
-
-          {/* Card 2: Specific Company Private Hire Request -> /companies/ */}
-          <article className={`${styles.tripOptionCard} ${styles.tripOptionCardCompany}`}>
-            <div className={styles.tripOptionTop}>
-              <span className={styles.tripOptionIconDark} aria-hidden="true">
-                <Building2 size={18} />
-              </span>
-              <span className={styles.tripOptionBadgeDark}>Specific company</span>
-            </div>
-
-            <div className={styles.tripOptionCopy}>
-              <h3 className={styles.tripOptionTitleDark}>
-                Request Private hire Transport by specific company
-              </h3>
-              <p className={styles.tripOptionDescDark}>
-                Browse verified local companies, view all their private hire services, and select a
-                vehicle to book directly.
-              </p>
-            </div>
-
-            <ul className={styles.tripOptionListDark}>
-              <li>
-                <CheckCircle size={15} aria-hidden="true" />
-                View all private hire services offered by each company
-              </li>
-              <li>
-                <CheckCircle size={15} aria-hidden="true" />
-                Compare dedicated vehicles and upfront starting prices
-              </li>
-              <li>
-                <CheckCircle size={15} aria-hidden="true" />
-                Select a service to go straight to direct booking
-              </li>
-            </ul>
-
-            <div className={styles.tripOptionFooter}>
-              <Link href="/companies/" className={styles.tripActionDark}>
-                <span className={styles.tripActionLabelFull}>Request by specific company</span>
-                <span className={styles.tripActionLabelShort}>By company</span>
-                <ArrowRight size={15} aria-hidden="true" />
-              </Link>
-            </div>
-          </article>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
 
       <section className={styles.hireSection} aria-labelledby="home-private-hire-heading">
@@ -473,6 +531,121 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+
+      {!loading && topDrivers.length > 0 && (
+        <section className={styles.driversSection} aria-labelledby="home-drivers-heading">
+          <div className={styles.driversHeader}>
+            <div className={styles.driversHeading}>
+              <span className={styles.driversEyebrow}>
+                <Users size={14} aria-hidden="true" /> Drivers
+              </span>
+              <h2 id="home-drivers-heading" className={styles.driversTitle}>
+                Top drivers
+              </h2>
+            </div>
+            <Link href="/drivers/" className={styles.driversSeeMore}>
+              See more <ChevronRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+
+          <ul
+            className={`${styles.driversGrid} ${
+              topDrivers.length === 1
+                ? styles.driversGridSingle
+                : topDrivers.length === 2
+                  ? styles.driversGridDouble
+                  : topDrivers.length === 3
+                    ? styles.driversGridTriple
+                    : ""
+            }`}
+          >
+            {topDrivers.slice(0, 4).map((driver) => {
+              const avatarUrl = driver.image_url ? getImageUrl(driver.image_url) : null;
+              const bookHref = driver.service_id
+                ? `/booking/${driver.service_id}/`
+                : "/booking/create/";
+              const bookLabel = driver.service_id ? "Book driver" : "Request trip";
+
+              return (
+                <li key={driver.id} className={styles.driverCard}>
+                  <div className={styles.driverMedia}>
+                    {avatarUrl ? (
+                      <Image
+                        src={avatarUrl}
+                        alt={driver.name}
+                        fill
+                        sizes="(max-width: 640px) 46vw, (max-width: 1080px) 46vw, 24vw"
+                        className={styles.driverPhoto}
+                        unoptimized
+                      />
+                    ) : (
+                      <span className={styles.driverAvatarFallback} aria-hidden="true">
+                        <span className={styles.driverAvatarCircle}>
+                          {getCompanyInitials(driver.name)}
+                        </span>
+                      </span>
+                    )}
+                    <span className={styles.driverMediaShade} aria-hidden="true" />
+                    <span className={styles.driverVerified}>
+                      <Shield size={11} aria-hidden="true" />
+                      Verified
+                    </span>
+                    {driver.average_rating != null ? (
+                      <span
+                        className={styles.driverRating}
+                        aria-label={`Rated ${driver.average_rating.toFixed(1)} out of 5`}
+                      >
+                        <Star size={11} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
+                        {driver.average_rating.toFixed(1)}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className={styles.driverBody}>
+                    <div className={styles.driverNameBlock}>
+                      <h3 className={styles.driverName}>{driver.name}</h3>
+                      <p className={styles.driverAffiliation}>
+                        {driver.company ? (
+                          <>
+                            <Building2 size={12} aria-hidden="true" />
+                            <span>{driver.company.name}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Navigation size={12} aria-hidden="true" />
+                            <span>Public hire driver</span>
+                          </>
+                        )}
+                      </p>
+                    </div>
+
+                    <div className={styles.driverMeta}>
+                      {driver.vehicle ? (
+                        <span className={styles.driverMetaChip}>
+                          <Car size={12} aria-hidden="true" />
+                          <span>{driver.vehicle.name}</span>
+                        </span>
+                      ) : null}
+                      <span className={styles.driverMetaChip}>
+                        {driver.trips_count > 0
+                          ? `${driver.trips_count} ${driver.trips_count === 1 ? "trip" : "trips"}`
+                          : "Available"}
+                      </span>
+                    </div>
+
+                    <div className={styles.driverFooter}>
+                      <Link href={bookHref} className={styles.driverActionLink}>
+                        {bookLabel} <ArrowRight size={13} aria-hidden="true" />
+                      </Link>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
 
       {!loading && companies.length > 0 && (
