@@ -14,9 +14,15 @@ import {
 } from "lucide-react";
 import { driverAPI, geocodeAPI, routeAPI } from "@/lib/api/client";
 import {
+  estimateLiveSpeedKmh,
   formatDistanceLabel,
   formatDurationLabel,
   haversineMeters,
+  resolveLiveHeadingDegrees,
+  shouldAcceptGpsTimestamp,
+  shouldRecalculateLiveRoute,
+  shouldSyncDriverLocation,
+  type TimedGeoPoint,
 } from "@/lib/driver-workflow";
 import styles from "@/components/driver-live-map.module.css";
 
@@ -27,6 +33,8 @@ export type LiveDriverTelemetry = {
   lng: number;
   accuracy: number | null;
   speedKmh: number | null;
+  headingDeg?: number | null;
+  updatedAt?: number;
 };
 
 export type LiveRouteSummary = {
@@ -44,7 +52,9 @@ type Props = {
   destinationLat?: number | null;
   destinationLng?: number | null;
   destinationLabel?: string;
+  /** @deprecated Ignored so the driver location is never pinned to a stale DB coordinate. */
   initialDriverLat?: number | null;
+  /** @deprecated Ignored so the driver location is never pinned to a stale DB coordinate. */
   initialDriverLng?: number | null;
   onPositionUpdate?: (telemetry: LiveDriverTelemetry) => void;
   onRouteMetrics?: (metrics: LiveRouteSummary) => void;
@@ -66,10 +76,11 @@ const BASEMAPS: Record<BasemapId, { label: string; url: string; attribution: str
 };
 
 const ZANZIBAR_DEFAULT_CENTER: [number, number] = [-6.1659, 39.2026];
-const REROUTE_MIN_METERS = 25;
-const REROUTE_MIN_INTERVAL_MS = 5_500;
-const SYNC_MIN_METERS = 40;
-const SYNC_MIN_INTERVAL_MS = 15_000;
+const GPS_WATCHDOG_INTERVAL_MS = 5_000;
+const GPS_STALE_REFRESH_MS = 6_000;
+const GPS_HIGH_ACCURACY_UPGRADE_MS = 25_000;
+const GPS_ERROR_RETRY_MS = 8_000;
+const MARKER_GLIDE_DURATION_MS = 600;
 
 function isValidPair(lat: number | null | undefined, lng: number | null | undefined): boolean {
   return (
@@ -84,6 +95,14 @@ function isValidPair(lat: number | null | undefined, lng: number | null | undefi
   );
 }
 
+function driverMarkerHtml(headingDeg: number | null | undefined): string {
+  const inner =
+    typeof headingDeg === "number" && Number.isFinite(headingDeg)
+      ? `<span class="driver-live-marker__arrow" style="transform:rotate(${Math.round(headingDeg)}deg)"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 2L19 20L12 16.2L5 20L12 2Z"/></svg></span>`
+      : `<span class="driver-live-marker__dot"></span>`;
+  return `<div class="driver-live-marker"><span class="driver-live-marker__pulse"></span><span class="driver-live-marker__core">${inner}</span></div>`;
+}
+
 export default function DriverLiveRouteMap({
   mode,
   bookingId,
@@ -93,8 +112,6 @@ export default function DriverLiveRouteMap({
   destinationLat,
   destinationLng,
   destinationLabel,
-  initialDriverLat,
-  initialDriverLng,
   onPositionUpdate,
   onRouteMetrics,
 }: Props) {
@@ -102,6 +119,7 @@ export default function DriverLiveRouteMap({
   const leafletRef = useRef<typeof Leaflet | null>(null);
   const mapRef = useRef<Leaflet.Map | null>(null);
   const tileLayerRef = useRef<Leaflet.TileLayer | null>(null);
+  const isMountedRef = useRef(true);
 
   const driverMarkerRef = useRef<Leaflet.Marker | null>(null);
   const accuracyCircleRef = useRef<Leaflet.Circle | null>(null);
@@ -111,11 +129,18 @@ export default function DriverLiveRouteMap({
   const activeCasingLineRef = useRef<Leaflet.Polyline | null>(null);
   const activeRoadLineRef = useRef<Leaflet.Polyline | null>(null);
 
-  const lastRoutedPosRef = useRef<{ lat: number; lng: number; at: number } | null>(null);
-  const lastSyncedPosRef = useRef<{ lat: number; lng: number; at: number } | null>(null);
-  const hasAutoFittedRef = useRef(false);
+  const driverPosRef = useRef<LiveDriverTelemetry | null>(null);
+  const renderedPosRef = useRef<LatLngPoint | null>(null);
+  const lastTimedFixRef = useRef<TimedGeoPoint | null>(null);
+  const lastHeadingRef = useRef<number | null>(null);
+  const lastRoutedPosRef = useRef<TimedGeoPoint | null>(null);
+  const lastSyncedPosRef = useRef<TimedGeoPoint | null>(null);
+  const routeSeqRef = useRef(0);
+  const hasFramedLiveDriverRef = useRef(false);
+  const hasFittedPlannedRef = useRef(false);
   const autoFollowRef = useRef(true);
   const activeGeometryRef = useRef<[number, number][]>([]);
+  const animFrameRef = useRef<number | null>(null);
 
   const [basemap, setBasemap] = useState<BasemapId>("topo");
   const [autoFollow, setAutoFollow] = useState(true);
@@ -134,11 +159,9 @@ export default function DriverLiveRouteMap({
         : geocodedDest,
     [destinationLat, destinationLng, geocodedDest],
   );
-  const [driverPos, setDriverPos] = useState<LiveDriverTelemetry | null>(() =>
-    isValidPair(initialDriverLat, initialDriverLng)
-      ? { lat: initialDriverLat!, lng: initialDriverLng!, accuracy: null, speedKmh: null }
-      : null,
-  );
+
+  // Never pin a stale DB coordinate as the driver's live position — wait for real device GPS.
+  const [driverPos, setDriverPos] = useState<LiveDriverTelemetry | null>(null);
   const hasGeolocationApi =
     typeof window !== "undefined" && typeof navigator !== "undefined" && "geolocation" in navigator;
   const [gpsStatus, setGpsStatus] = useState<"searching" | "live" | "error">(() =>
@@ -157,6 +180,13 @@ export default function DriverLiveRouteMap({
     onPositionUpdateRef.current = onPositionUpdate;
     onRouteMetricsRef.current = onRouteMetrics;
   }, [onPositionUpdate, onRouteMetrics]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     autoFollowRef.current = autoFollow;
@@ -202,6 +232,16 @@ export default function DriverLiveRouteMap({
     [mode, resolvedDest, resolvedOrigin],
   );
 
+  // Reset route calculation tracking whenever trip or target changes
+  useEffect(() => {
+    lastRoutedPosRef.current = null;
+    lastSyncedPosRef.current = null;
+    activeGeometryRef.current = [];
+    routeSeqRef.current += 1;
+    hasFramedLiveDriverRef.current = false;
+    hasFittedPlannedRef.current = false;
+  }, [bookingId, mode, targetPoint?.lat, targetPoint?.lng]);
+
   // Initialize Leaflet map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -239,6 +279,10 @@ export default function DriverLiveRouteMap({
 
     return () => {
       mounted = false;
+      if (animFrameRef.current != null) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -250,6 +294,7 @@ export default function DriverLiveRouteMap({
       basePlannedLineRef.current = null;
       activeCasingLineRef.current = null;
       activeRoadLineRef.current = null;
+      renderedPosRef.current = null;
       setMapReady(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -270,63 +315,196 @@ export default function DriverLiveRouteMap({
     }).addTo(map);
   }, [basemap, mapReady]);
 
-  // Live Geolocation watchPosition — tracks driver movement continuously
+  // Resilient continuous live Geolocation engine — moves strictly with live GPS, auto-recovers
+  // from timeout/unavailable errors, and stays fresh when returning from background apps.
   useEffect(() => {
     if (typeof window === "undefined" || !("geolocation" in navigator)) {
       return;
     }
 
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const lat = Number(position.coords.latitude.toFixed(6));
-        const lng = Number(position.coords.longitude.toFixed(6));
-        const accuracy = Number.isFinite(position.coords.accuracy)
-          ? Math.round(position.coords.accuracy)
-          : null;
-        const speedKmh =
-          typeof position.coords.speed === "number" &&
-          Number.isFinite(position.coords.speed) &&
-          position.coords.speed >= 0
-            ? Math.round(position.coords.speed * 3.6)
-            : null;
+    let disposed = false;
+    let watchId: number | null = null;
+    let highAccuracy = true;
+    let permissionDenied = false;
+    let lastCoordsTimestamp = 0;
+    let lastFixWallTime = 0;
+    let upgradeTimer: number | null = null;
+    let retryTimer: number | null = null;
 
-        const telemetry: LiveDriverTelemetry = { lat, lng, accuracy, speedKmh };
-        setDriverPos(telemetry);
-        setGpsStatus("live");
-        setGpsError("");
-        onPositionUpdateRef.current?.(telemetry);
+    const clearCurrentWatch = () => {
+      if (watchId != null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+    };
 
-        // Throttled live location sync to backend so company & booking stay current
-        const now = Date.now();
-        const prevSync = lastSyncedPosRef.current;
-        const movedEnough =
-          !prevSync || haversineMeters(prevSync.lat, prevSync.lng, lat, lng) >= SYNC_MIN_METERS;
-        const elapsedEnough = !prevSync || now - prevSync.at >= SYNC_MIN_INTERVAL_MS;
+    const handlePosition = (position: GeolocationPosition) => {
+      if (disposed) return;
 
-        if (movedEnough && elapsedEnough) {
-          lastSyncedPosRef.current = { lat, lng, at: now };
-          void driverAPI
-            .transitionBooking(bookingId, { action: "location", lat, lng })
-            .catch(() => {});
-        }
-      },
-      (err) => {
+      const lat = Number(position.coords.latitude.toFixed(6));
+      const lng = Number(position.coords.longitude.toFixed(6));
+      if (!isValidPair(lat, lng)) return;
+
+      const incomingTs =
+        typeof position.timestamp === "number" && Number.isFinite(position.timestamp)
+          ? position.timestamp
+          : Date.now();
+      if (!shouldAcceptGpsTimestamp(lastCoordsTimestamp, incomingTs)) {
+        return;
+      }
+      lastCoordsTimestamp = incomingTs;
+
+      const now = Date.now();
+      lastFixWallTime = now;
+
+      const accuracy = Number.isFinite(position.coords.accuracy)
+        ? Math.round(position.coords.accuracy)
+        : null;
+      const prevTimed = lastTimedFixRef.current;
+      const speedKmh = estimateLiveSpeedKmh({
+        coordsSpeedMps: position.coords.speed,
+        prev: prevTimed,
+        next: { lat, lng, at: now },
+      });
+      const headingDeg = resolveLiveHeadingDegrees({
+        coordsHeading: position.coords.heading,
+        speedKmh,
+        prev: prevTimed,
+        next: { lat, lng },
+        fallbackHeading: lastHeadingRef.current,
+      });
+
+      lastTimedFixRef.current = { lat, lng, at: now };
+      lastHeadingRef.current = headingDeg;
+
+      const telemetry: LiveDriverTelemetry = {
+        lat,
+        lng,
+        accuracy,
+        speedKmh,
+        headingDeg,
+        updatedAt: now,
+      };
+      driverPosRef.current = telemetry;
+      setDriverPos(telemetry);
+      setGpsStatus("live");
+      setGpsError("");
+      onPositionUpdateRef.current?.(telemetry);
+
+      // Sync live driver position to backend immediately on first fix and briskly as driver moves
+      if (shouldSyncDriverLocation(lastSyncedPosRef.current, { lat, lng }, now)) {
+        lastSyncedPosRef.current = { lat, lng, at: now };
+        void driverAPI
+          .transitionBooking(bookingId, { action: "location", lat, lng })
+          .catch(() => {});
+      }
+    };
+
+    const handleError = (err: GeolocationPositionError) => {
+      if (disposed) return;
+
+      if (err.code === err.PERMISSION_DENIED) {
+        permissionDenied = true;
+        clearCurrentWatch();
         setGpsStatus("error");
         setGpsError(
-          err.code === err.PERMISSION_DENIED
-            ? "Location access denied — enable GPS permissions for live turn-by-turn tracking."
-            : "Could not acquire live GPS signal. Tap Retry GPS when outdoors or moving.",
+          "Location access denied — enable GPS permissions in your browser to track live movement.",
         );
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 3_000,
-        timeout: 15_000,
-      },
-    );
+        return;
+      }
+
+      // Auto-fallback from high-accuracy GPS to standard accuracy instead of freezing
+      if (highAccuracy) {
+        startWatch(false);
+        if (upgradeTimer != null) window.clearTimeout(upgradeTimer);
+        upgradeTimer = window.setTimeout(() => {
+          upgradeTimer = null;
+          if (!disposed && !permissionDenied) {
+            startWatch(true);
+          }
+        }, GPS_HIGH_ACCURACY_UPGRADE_MS);
+        return;
+      }
+
+      // Only show error banner if we have no live fix yet, and keep auto-retrying
+      if (!driverPosRef.current) {
+        setGpsStatus("error");
+        setGpsError(
+          "Searching for a live GPS signal — retrying automatically when outdoors or moving.",
+        );
+      }
+
+      if (retryTimer != null) window.clearTimeout(retryTimer);
+      retryTimer = window.setTimeout(() => {
+        retryTimer = null;
+        if (!disposed && !permissionDenied) {
+          startWatch(true);
+        }
+      }, GPS_ERROR_RETRY_MS);
+    };
+
+    const startWatch = (useHighAccuracy: boolean) => {
+      if (disposed || permissionDenied) return;
+      clearCurrentWatch();
+      highAccuracy = useHighAccuracy;
+
+      // Kick off an immediate fresh non-cached fix alongside the continuous watcher
+      navigator.geolocation.getCurrentPosition(
+        handlePosition,
+        () => {
+          // Let watchPosition handle fallback/error transitions
+        },
+        {
+          enableHighAccuracy: useHighAccuracy,
+          maximumAge: 0,
+          timeout: useHighAccuracy ? 10_000 : 12_000,
+        },
+      );
+
+      watchId = navigator.geolocation.watchPosition(handlePosition, handleError, {
+        enableHighAccuracy: useHighAccuracy,
+        maximumAge: 0,
+        timeout: useHighAccuracy ? 12_000 : 18_000,
+      });
+    };
+
+    startWatch(true);
+
+    // Watchdog: mobile browsers sometimes throttle watchPosition callbacks — nudge cleanly
+    const watchdogId = window.setInterval(() => {
+      if (disposed || permissionDenied) return;
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+      if (Date.now() - lastFixWallTime < GPS_STALE_REFRESH_MS) return;
+
+      navigator.geolocation.getCurrentPosition(
+        handlePosition,
+        () => {},
+        {
+          enableHighAccuracy: highAccuracy,
+          maximumAge: 0,
+          timeout: 8_000,
+        },
+      );
+    }, GPS_WATCHDOG_INTERVAL_MS);
+
+    // Resume live GPS immediately when returning from WhatsApp, phone call, or Google Maps
+    const handleResume = () => {
+      if (disposed || permissionDenied) return;
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      startWatch(true);
+    };
+
+    document.addEventListener("visibilitychange", handleResume);
+    window.addEventListener("focus", handleResume);
 
     return () => {
-      navigator.geolocation.clearWatch(watchId);
+      disposed = true;
+      clearCurrentWatch();
+      window.clearInterval(watchdogId);
+      if (upgradeTimer != null) window.clearTimeout(upgradeTimer);
+      if (retryTimer != null) window.clearTimeout(retryTimer);
+      document.removeEventListener("visibilitychange", handleResume);
+      window.removeEventListener("focus", handleResume);
     };
   }, [bookingId, gpsRetryTick]);
 
@@ -374,7 +552,7 @@ export default function DriverLiveRouteMap({
     }
   }, [destinationLabel, mapReady, mode, originLabel, resolvedDest, resolvedOrigin]);
 
-  // In "to_destination" mode, draw full planned Origin -> Destination road corridor underneath
+  // In "to_destination" mode, draw full planned Origin -> Destination corridor ONCE (never on every GPS tick)
   useEffect(() => {
     const L = leafletRef.current;
     const map = mapRef.current;
@@ -411,8 +589,8 @@ export default function DriverLiveRouteMap({
           })
           .addTo(mapRef.current);
 
-        // If driver hasn't acquired live GPS yet, show the full planned route metrics & bounds
-        if (!driverPos) {
+        // Only preview planned route bounds/metrics while waiting for the first live GPS fix
+        if (!driverPosRef.current) {
           const distanceKm = Number(res.data?.distance_km);
           const durationMins = Number(res.data?.duration_mins ?? res.data?.estimated_time_mins);
           if (Number.isFinite(distanceKm) && Number.isFinite(durationMins)) {
@@ -424,8 +602,8 @@ export default function DriverLiveRouteMap({
             setRouteMetrics(summary);
             onRouteMetricsRef.current?.(summary);
           }
-          if (!hasAutoFittedRef.current && geometry.length >= 2) {
-            hasAutoFittedRef.current = true;
+          if (!hasFittedPlannedRef.current && !hasFramedLiveDriverRef.current && geometry.length >= 2) {
+            hasFittedPlannedRef.current = true;
             mapRef.current.fitBounds(basePlannedLineRef.current.getBounds(), {
               padding: [42, 42],
               maxZoom: 15,
@@ -438,37 +616,55 @@ export default function DriverLiveRouteMap({
     return () => {
       active = false;
     };
-  }, [driverPos, mapReady, mode, resolvedDest, resolvedOrigin]);
+  }, [mapReady, mode, resolvedDest, resolvedOrigin]);
 
-  // Update live Driver Vehicle Marker + GPS accuracy halo + Dynamic Road Polyline on every move
+  // Smoothly move & rotate the live driver vehicle marker, accuracy halo, road head & camera
   useEffect(() => {
     const L = leafletRef.current;
     const map = mapRef.current;
     if (!L || !map || !mapReady || !driverPos) return;
 
-    const currentLatLng: [number, number] = [driverPos.lat, driverPos.lng];
+    const targetLatLng: [number, number] = [driverPos.lat, driverPos.lng];
+
+    const applyVisualPosition = (lat: number, lng: number) => {
+      const pt: [number, number] = [lat, lng];
+      driverMarkerRef.current?.setLatLng(pt);
+      accuracyCircleRef.current?.setLatLng(pt);
+      if (
+        activeGeometryRef.current.length >= 2 &&
+        activeRoadLineRef.current &&
+        activeCasingLineRef.current
+      ) {
+        const anchored: [number, number][] = [pt, ...activeGeometryRef.current.slice(1)];
+        activeCasingLineRef.current.setLatLngs(anchored);
+        activeRoadLineRef.current.setLatLngs(anchored);
+      }
+      renderedPosRef.current = { lat, lng };
+    };
+
+    const nextIcon = L.divIcon({
+      className: "",
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+      html: driverMarkerHtml(driverPos.headingDeg),
+    });
 
     if (!driverMarkerRef.current) {
-      const driverIcon = L.divIcon({
-        className: "",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
-        html: `<div class="driver-live-marker"><span class="driver-live-marker__pulse"></span><span class="driver-live-marker__core">●</span></div>`,
-      });
-      driverMarkerRef.current = L.marker(currentLatLng, {
-        icon: driverIcon,
+      driverMarkerRef.current = L.marker(targetLatLng, {
+        icon: nextIcon,
         zIndexOffset: 900,
       })
-        .bindPopup("<strong>Your live location</strong>")
+        .bindPopup("<strong>Your live moving location</strong>")
         .addTo(map);
+      renderedPosRef.current = { lat: driverPos.lat, lng: driverPos.lng };
     } else {
-      driverMarkerRef.current.setLatLng(currentLatLng);
+      driverMarkerRef.current.setIcon(nextIcon);
     }
 
     if (driverPos.accuracy && driverPos.accuracy > 5) {
       const radius = Math.min(driverPos.accuracy, 220);
       if (!accuracyCircleRef.current) {
-        accuracyCircleRef.current = L.circle(currentLatLng, {
+        accuracyCircleRef.current = L.circle(targetLatLng, {
           radius,
           color: "#08428c",
           weight: 1,
@@ -476,36 +672,82 @@ export default function DriverLiveRouteMap({
           fillOpacity: 0.1,
         }).addTo(map);
       } else {
-        accuracyCircleRef.current.setLatLng(currentLatLng);
         accuracyCircleRef.current.setRadius(radius);
       }
     }
 
-    // Immediately anchor the start of any existing road line to the driver's live position
-    if (activeGeometryRef.current.length >= 2 && activeRoadLineRef.current && activeCasingLineRef.current) {
-      const anchored: [number, number][] = [currentLatLng, ...activeGeometryRef.current.slice(1)];
-      activeCasingLineRef.current.setLatLngs(anchored);
-      activeRoadLineRef.current.setLatLngs(anchored);
+    // Smoothly glide the live marker from previous rendered coordinate to new live GPS fix
+    if (animFrameRef.current != null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
     }
 
-    if (autoFollowRef.current && hasAutoFittedRef.current) {
-      map.panTo(currentLatLng, { animate: true, duration: 0.6 });
+    const from = renderedPosRef.current;
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const movedMeters = from ? haversineMeters(from.lat, from.lng, driverPos.lat, driverPos.lng) : 0;
+
+    if (!from || prefersReducedMotion || movedMeters < 0.5 || movedMeters > 2_000) {
+      applyVisualPosition(driverPos.lat, driverPos.lng);
+    } else {
+      const startLat = from.lat;
+      const startLng = from.lng;
+      const startTime = performance.now();
+
+      const step = (now: number) => {
+        if (!isMountedRef.current || !driverMarkerRef.current) {
+          animFrameRef.current = null;
+          return;
+        }
+        const progress = Math.min(1, (now - startTime) / MARKER_GLIDE_DURATION_MS);
+        // Ease-out cubic for natural vehicle motion
+        const eased = 1 - (1 - progress) ** 3;
+        const curLat = startLat + (driverPos.lat - startLat) * eased;
+        const curLng = startLng + (driverPos.lng - startLng) * eased;
+        applyVisualPosition(curLat, curLng);
+        if (progress < 1) {
+          animFrameRef.current = requestAnimationFrame(step);
+        } else {
+          animFrameRef.current = null;
+        }
+      };
+
+      animFrameRef.current = requestAnimationFrame(step);
     }
 
-    if (!targetPoint) return;
+    // Follow live driver movement smoothly — never stay stuck on an old view
+    if (autoFollowRef.current) {
+      if (!hasFramedLiveDriverRef.current) {
+        hasFramedLiveDriverRef.current = true;
+        map.setView(targetLatLng, Math.max(map.getZoom(), 15), {
+          animate: true,
+          duration: 0.7,
+        });
+      } else {
+        map.panTo(targetLatLng, {
+          animate: true,
+          duration: 0.65,
+          easeLinearity: 0.4,
+        });
+      }
+    }
+  }, [driverPos, mapReady]);
 
-    // Recalculate live road polyline from driver's current GPS -> target whenever moved >= 25m
+  // Recalculate live road polyline from driver's moving GPS -> target without cancelling in-flight requests on GPS ticks
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+    if (!L || !map || !mapReady || !driverPos || !targetPoint) return;
+
     const now = Date.now();
-    const prev = lastRoutedPosRef.current;
-    const shouldRecalculate =
-      !prev ||
-      (haversineMeters(prev.lat, prev.lng, driverPos.lat, driverPos.lng) >= REROUTE_MIN_METERS &&
-        now - prev.at >= REROUTE_MIN_INTERVAL_MS);
-
-    if (!shouldRecalculate) return;
+    if (!shouldRecalculateLiveRoute(lastRoutedPosRef.current, driverPos, now)) {
+      return;
+    }
 
     lastRoutedPosRef.current = { lat: driverPos.lat, lng: driverPos.lng, at: now };
-    let active = true;
+    const reqId = ++routeSeqRef.current;
     setRouting(true);
 
     routeAPI
@@ -516,10 +758,16 @@ export default function DriverLiveRouteMap({
         destination_lng: targetPoint.lng,
       })
       .then((res) => {
-        if (!active || !mapRef.current || !leafletRef.current) return;
-        const geometry: [number, number][] = Array.isArray(res.data?.geometry)
+        if (!isMountedRef.current || reqId !== routeSeqRef.current || !mapRef.current || !leafletRef.current) {
+          return;
+        }
+        const liveNow = renderedPosRef.current ?? driverPosRef.current ?? driverPos;
+        const currentLatLng: [number, number] = [liveNow.lat, liveNow.lng];
+        const rawGeometry: [number, number][] = Array.isArray(res.data?.geometry)
           ? res.data.geometry
           : [currentLatLng, [targetPoint.lat, targetPoint.lng]];
+        const geometry: [number, number][] =
+          rawGeometry.length >= 2 ? [currentLatLng, ...rawGeometry.slice(1)] : rawGeometry;
 
         activeGeometryRef.current = geometry;
         const lineColor = mode === "to_origin" ? "#08428c" : "#0f766e";
@@ -564,23 +812,17 @@ export default function DriverLiveRouteMap({
           setRouteMetrics(summary);
           onRouteMetricsRef.current?.(summary);
         }
-
-        if (!hasAutoFittedRef.current && activeRoadLineRef.current) {
-          hasAutoFittedRef.current = true;
-          mapRef.current.fitBounds(activeRoadLineRef.current.getBounds(), {
-            padding: [48, 48],
-            maxZoom: 16,
-          });
+      })
+      .catch(() => {
+        if (reqId === routeSeqRef.current) {
+          lastRoutedPosRef.current = null;
         }
       })
-      .catch(() => {})
       .finally(() => {
-        if (active) setRouting(false);
+        if (isMountedRef.current && reqId === routeSeqRef.current) {
+          setRouting(false);
+        }
       });
-
-    return () => {
-      active = false;
-    };
   }, [driverPos, mapReady, mode, targetPoint]);
 
   const handleFitRoute = useCallback(() => {
@@ -605,12 +847,15 @@ export default function DriverLiveRouteMap({
     const next = !autoFollow;
     setAutoFollow(next);
     autoFollowRef.current = next;
-    if (next && driverPos && mapRef.current) {
-      mapRef.current.setView([driverPos.lat, driverPos.lng], Math.max(mapRef.current.getZoom(), 15), {
-        animate: true,
-      });
+    if (next && driverPosRef.current && mapRef.current) {
+      hasFramedLiveDriverRef.current = true;
+      mapRef.current.setView(
+        [driverPosRef.current.lat, driverPosRef.current.lng],
+        Math.max(mapRef.current.getZoom(), 15),
+        { animate: true },
+      );
     }
-  }, [autoFollow, driverPos]);
+  }, [autoFollow]);
 
   const externalNavUrl = useMemo(() => {
     if (!targetPoint) return null;
@@ -648,7 +893,7 @@ export default function DriverLiveRouteMap({
               {gpsStatus === "live"
                 ? "Live GPS"
                 : gpsStatus === "searching"
-                  ? "Locating GPS…"
+                  ? "Locating live GPS…"
                   : "GPS paused"}
             </span>
             {gpsStatus === "live" && driverPos?.accuracy ? (
@@ -665,10 +910,10 @@ export default function DriverLiveRouteMap({
               className={`${styles.mapCtrlBtn} ${autoFollow ? styles.mapCtrlBtnActive : ""}`}
               onClick={handleFollowToggle}
               aria-pressed={autoFollow}
-              title="Follow my live location"
+              title="Follow my live moving location"
             >
               <Crosshair size={14} aria-hidden="true" />
-              Follow
+              {autoFollow ? "Following" : "Follow live"}
             </button>
             <button
               type="button"
@@ -748,10 +993,14 @@ export default function DriverLiveRouteMap({
             {gpsStatus === "live" ? (
               <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
                 <Navigation size={13} aria-hidden="true" />
-                {routeMetrics?.source === "osrm" ? "Live road" : "Live GPS"}
+                {driverPos?.speedKmh != null && driverPos.speedKmh >= 3
+                  ? "Live moving"
+                  : routeMetrics?.source === "osrm"
+                    ? "Live road"
+                    : "Live GPS"}
               </span>
             ) : (
-              "Standby"
+              "Locating…"
             )}
           </strong>
         </div>

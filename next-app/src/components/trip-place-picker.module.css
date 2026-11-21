@@ -492,6 +492,32 @@
   font-size: 0.72rem;
 }
 
+.routeBadgeLive {
+  background: #08428c;
+  box-shadow:
+    0 0 0 6px rgba(8, 66, 140, 0.24),
+    0 4px 14px rgba(8, 66, 140, 0.42);
+  animation: route-badge-live-pulse 1.8s ease-out infinite;
+}
+
+@keyframes route-badge-live-pulse {
+  0% {
+    box-shadow:
+      0 0 0 2px rgba(8, 66, 140, 0.34),
+      0 4px 14px rgba(8, 66, 140, 0.42);
+  }
+  70% {
+    box-shadow:
+      0 0 0 11px rgba(8, 66, 140, 0),
+      0 4px 14px rgba(8, 66, 140, 0.42);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(8, 66, 140, 0),
+      0 4px 14px rgba(8, 66, 140, 0.42);
+  }
+}
+
 .map :global(.leaflet-tooltip).routeStopTooltip {
   max-width: 220px;
   padding: 4px 10px;

@@ -406,6 +406,8 @@ type TripPlaceMapPickerProps = {
   readOnly?: boolean;
   /** Focused trip route view: show only origin pin, road line, and destination pin (no POI markers or side list). */
   routeOnly?: boolean;
+  /** When true, origin A represents a live moving GPS position rather than a fixed static pin. */
+  liveOrigin?: boolean;
   /** Fixed trip route to draw automatically in read-only mode. */
   viewerRoute?: TripMapViewerRoute | null;
 };
@@ -420,6 +422,7 @@ export default function TripPlaceMapPicker({
   singleLocation = false,
   readOnly = false,
   routeOnly = false,
+  liveOrigin = false,
   viewerRoute = null,
 }: TripPlaceMapPickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -432,6 +435,7 @@ export default function TripPlaceMapPicker({
   const lastPointRef = useRef<[number, number] | null>(null);
   const routeLayerRef = useRef<Leaflet.LayerGroup | null>(null);
   const initialFitRef = useRef(false);
+  const lastLiveFittedDestKeyRef = useRef<string | null>(null);
   const disabledRef = useRef(disabled);
   const routeModeRef = useRef(false);
   const onSelectRef = useRef<(place: TripPlace) => void>(() => {});
@@ -444,7 +448,7 @@ export default function TripPlaceMapPicker({
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"islands" | "places">("islands");
   const [routeMode, setRouteMode] = useState(() => Boolean(readOnly && viewerRoute));
-  const [routeStops, setRouteStops] = useState<RouteEndpoint[]>(() =>
+  const [manualRouteStops, setRouteStops] = useState<RouteEndpoint[]>(() =>
     readOnly && viewerRoute ? viewerRouteStops(viewerRoute) : [],
   );
   const [route, setRoute] = useState<RouteResult | null>(null);
@@ -452,6 +456,43 @@ export default function TripPlaceMapPicker({
   const [routeAttempt, setRouteAttempt] = useState(0);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+
+  const hasViewerRoute = Boolean(readOnly && viewerRoute);
+  const viewerOriginLat = viewerRoute?.originLat;
+  const viewerOriginLng = viewerRoute?.originLng;
+  const viewerDestLat = viewerRoute?.destinationLat;
+  const viewerDestLng = viewerRoute?.destinationLng;
+  const viewerOriginLabel = viewerRoute?.originLabel;
+  const viewerDestLabel = viewerRoute?.destinationLabel;
+
+  const viewerStops = useMemo(
+    () =>
+      hasViewerRoute &&
+      viewerOriginLat != null &&
+      viewerOriginLng != null &&
+      viewerDestLat != null &&
+      viewerDestLng != null
+        ? viewerRouteStops({
+            originLat: viewerOriginLat,
+            originLng: viewerOriginLng,
+            destinationLat: viewerDestLat,
+            destinationLng: viewerDestLng,
+            originLabel: viewerOriginLabel,
+            destinationLabel: viewerDestLabel,
+          })
+        : [],
+    [
+      hasViewerRoute,
+      viewerOriginLat,
+      viewerOriginLng,
+      viewerDestLat,
+      viewerDestLng,
+      viewerOriginLabel,
+      viewerDestLabel,
+    ],
+  );
+  const routeStops: RouteEndpoint[] =
+    readOnly && viewerRoute ? viewerStops : manualRouteStops;
 
   const routeLoading =
     routeMode &&
@@ -465,8 +506,6 @@ export default function TripPlaceMapPicker({
     if (!hasPoint) return null;
     return placeAtCoords(latitude as number, longitude as number);
   }, [hasPoint, latitude, longitude]);
-
-  const viewerStops = readOnly && viewerRoute ? viewerRouteStops(viewerRoute) : [];
 
   const pointContext = useMemo(
     () =>
@@ -1115,8 +1154,9 @@ export default function TripPlaceMapPicker({
         const trimmedLabel =
           shortLabel.length > 28 ? `${shortLabel.slice(0, 27)}…` : shortLabel;
         const badgeColor =
-          stopKey === "A" ? ROUTE_START_COLOR : ROUTE_ONLY_END_COLOR;
-        const rolePrefix = stopKey === "A" ? "Origin" : "Destination";
+          stopKey === "A" ? (liveOrigin ? "#08428c" : ROUTE_START_COLOR) : ROUTE_ONLY_END_COLOR;
+        const rolePrefix =
+          stopKey === "A" ? (liveOrigin ? "Live GPS" : "Origin") : "Destination";
         const isNorthOfOther = otherStop
           ? stop.lat > otherStop.lat ||
             (stop.lat === otherStop.lat && stopKey === "A")
@@ -1125,12 +1165,14 @@ export default function TripPlaceMapPicker({
         const tooltipOffset: [number, number] = isNorthOfOther
           ? [0, -16]
           : [0, 16];
+        const liveBadgeClass =
+          stopKey === "A" && liveOrigin ? ` ${styles.routeBadgeLive}` : "";
 
         leaflet
           .marker([stop.lat, stop.lng], {
             icon: leaflet.divIcon({
               className: styles.routeMarker,
-              html: `<span class="${styles.routeBadge} ${styles.routeBadgeLarge}" style="--route-badge:${badgeColor}">${stopKey}</span>`,
+              html: `<span class="${styles.routeBadge} ${styles.routeBadgeLarge}${liveBadgeClass}" style="--route-badge:${badgeColor}">${stopKey}</span>`,
               iconSize: [28, 28],
               iconAnchor: [14, 14],
             }),
@@ -1205,14 +1247,24 @@ export default function TripPlaceMapPicker({
       : route.geometry;
 
     map.invalidateSize();
-    map.fitBounds(leaflet.latLngBounds(fitPoints), {
-      // Keep the A/B badges clear of the top view switch and bottom legend.
-      paddingTopLeft: routeOnly ? [48, 60] : [28, 64],
-      paddingBottomRight: routeOnly ? [48, 64] : [28, 84],
-      maxZoom: routeOnly ? 15 : 14,
-      animate: true,
-    });
-  }, [ready, route, routeMode, routeOnly, routeStops]);
+    const destStop = routeStops[1];
+    const destKey = destStop ? `${destStop.lat}:${destStop.lng}` : "";
+    if (liveOrigin && lastLiveFittedDestKeyRef.current === destKey) {
+      const originStop = routeStops[0];
+      if (originStop && !map.getBounds().contains([originStop.lat, originStop.lng])) {
+        map.panTo([originStop.lat, originStop.lng], { animate: true });
+      }
+    } else {
+      lastLiveFittedDestKeyRef.current = liveOrigin ? destKey : null;
+      map.fitBounds(leaflet.latLngBounds(fitPoints), {
+        // Keep the A/B badges clear of the top view switch and bottom legend.
+        paddingTopLeft: routeOnly ? [48, 60] : [28, 64],
+        paddingBottomRight: routeOnly ? [48, 64] : [28, 84],
+        maxZoom: routeOnly ? 15 : 14,
+        animate: true,
+      });
+    }
+  }, [liveOrigin, ready, route, routeMode, routeOnly, routeStops]);
 
   const toggleRouteMode = useCallback(() => {
     if (routeMode) {
@@ -1259,30 +1311,43 @@ export default function TripPlaceMapPicker({
     }
 
     setLocating(true);
+    const onSuccess = (position: GeolocationPosition) => {
+      const lat = roundCoordinate(position.coords.latitude);
+      const lng = roundCoordinate(position.coords.longitude);
+      if (!singleLocation && !isInZanzibar(lat, lng)) {
+        setLocationError("Your current location is outside Zanzibar.");
+        setLocating(false);
+        return;
+      }
+      onPickPoint(lat, lng, "current");
+      mapRef.current?.flyTo([lat, lng], 13, { animate: true, duration: 0.8 });
+      setLocating(false);
+    };
+    const onFail = (error: GeolocationPositionError) => {
+      setLocationError(
+        error.code === error.PERMISSION_DENIED
+          ? "Allow location access in your browser and try again."
+          : error.code === error.POSITION_UNAVAILABLE
+            ? "Your current location could not be determined."
+            : "Location request timed out. Please try again.",
+      );
+      setLocating(false);
+    };
+
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = roundCoordinate(position.coords.latitude);
-        const lng = roundCoordinate(position.coords.longitude);
-        if (!singleLocation && !isInZanzibar(lat, lng)) {
-          setLocationError("Your current location is outside Zanzibar.");
-          setLocating(false);
+      onSuccess,
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          onFail(error);
           return;
         }
-        onPickPoint(lat, lng, "current");
-        mapRef.current?.flyTo([lat, lng], 13, { animate: true, duration: 0.8 });
-        setLocating(false);
+        navigator.geolocation.getCurrentPosition(onSuccess, onFail, {
+          enableHighAccuracy: false,
+          timeout: 12000,
+          maximumAge: 0,
+        });
       },
-      (error) => {
-        setLocationError(
-          error.code === error.PERMISSION_DENIED
-            ? "Allow location access in your browser and try again."
-            : error.code === error.POSITION_UNAVAILABLE
-              ? "Your current location could not be determined."
-              : "Location request timed out. Please try again.",
-        );
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }, [disabled, locating, onPickPoint, singleLocation]);
 

@@ -214,8 +214,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
 }
 
 :global(.driver-live-marker__pulse) {
@@ -231,13 +231,29 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border: 3px solid #ffffff;
   border-radius: 50%;
   background: #08428c;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(8, 66, 140, 0.45);
+  box-shadow: 0 4px 14px rgba(8, 66, 140, 0.48);
+}
+
+:global(.driver-live-marker__arrow) {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  transition: transform 0.35s ease-out;
+  will-change: transform;
+}
+
+:global(.driver-live-marker__dot) {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffffff;
 }
 
 :global(.driver-stop-pin) {

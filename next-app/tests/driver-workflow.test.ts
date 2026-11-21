@@ -4,7 +4,9 @@ import {
   buildCompanyPublicToggleData,
   buildDriverBookingsWhere,
   buildDriverConfirmFilter,
+  computeBearingDegrees,
   driverStageRoute,
+  estimateLiveSpeedKmh,
   formatDistanceLabel,
   formatDurationLabel,
   haversineMeters,
@@ -12,6 +14,10 @@ import {
   isUnclaimedPublicBookingOffer,
   resolveConfirmedVehicleId,
   resolveDriverStage,
+  resolveLiveHeadingDegrees,
+  shouldAcceptGpsTimestamp,
+  shouldRecalculateLiveRoute,
+  shouldSyncDriverLocation,
   validateDriverTransition,
 } from "@/lib/driver-workflow";
 import { transportBookingSerializer } from "@/lib/serializers/private-hire";
@@ -390,5 +396,120 @@ describe("driver live trip workflow state machine", () => {
     expect(publicPendingSerialized.vehicle).toBeNull();
     expect(publicPendingSerialized.service?.driver).toBeNull();
     expect(publicPendingSerialized.service?.vehicle).toBeNull();
+  });
+
+  it("computes compass bearings and resolves live vehicle heading cleanly without stationary jitter", () => {
+    // North, East, South, West bearings near Zanzibar
+    expect(computeBearingDegrees(-6.2, 39.2, -6.1, 39.2)).toBe(0);
+    expect(computeBearingDegrees(-6.2, 39.2, -6.2, 39.3)).toBe(90);
+    expect(computeBearingDegrees(-6.1, 39.2, -6.2, 39.2)).toBe(180);
+    expect(computeBearingDegrees(-6.2, 39.3, -6.2, 39.2)).toBe(270);
+
+    // Prefers native device heading when moving
+    expect(
+      resolveLiveHeadingDegrees({
+        coordsHeading: 134.6,
+        speedKmh: 28,
+        prev: { lat: -6.2, lng: 39.2 },
+        next: { lat: -6.199, lng: 39.2 },
+        fallbackHeading: 10,
+      }),
+    ).toBe(135);
+
+    // Derives bearing from live displacement when device heading is unavailable
+    expect(
+      resolveLiveHeadingDegrees({
+        coordsHeading: null,
+        speedKmh: null,
+        prev: { lat: -6.2, lng: 39.2 },
+        next: { lat: -6.2, lng: 39.2005 },
+        fallbackHeading: 0,
+      }),
+    ).toBe(90);
+
+    // Retains previous heading when stationary (< 3m drift)
+    expect(
+      resolveLiveHeadingDegrees({
+        coordsHeading: null,
+        speedKmh: 0,
+        prev: { lat: -6.2, lng: 39.2 },
+        next: { lat: -6.200005, lng: 39.2 },
+        fallbackHeading: 215,
+      }),
+    ).toBe(215);
+  });
+
+  it("estimates live speed and gates route recalculation, backend sync, and stale GPS timestamps", () => {
+    // Uses device m/s speed directly when reported
+    expect(
+      estimateLiveSpeedKmh({
+        coordsSpeedMps: 10,
+        prev: null,
+        next: { lat: -6.1659, lng: 39.2026, at: 10_000 },
+      }),
+    ).toBe(36);
+
+    // Derives speed from consecutive GPS fixes when device speed is null
+    expect(
+      estimateLiveSpeedKmh({
+        coordsSpeedMps: null,
+        prev: { lat: -6.1659, lng: 39.2026, at: 10_000 },
+        next: { lat: -6.165, lng: 39.2026, at: 20_000 },
+      }),
+    ).toBe(36);
+
+    // Reroute: immediate on first fix, throttled on tiny jitter, brisk on movement >= 12m after 4s, instant on >= 60m
+    expect(shouldRecalculateLiveRoute(null, { lat: -6.1659, lng: 39.2026 }, 1_000)).toBe(true);
+    expect(
+      shouldRecalculateLiveRoute(
+        { lat: -6.1659, lng: 39.2026, at: 1_000 },
+        { lat: -6.16585, lng: 39.2026 },
+        6_000,
+      ),
+    ).toBe(false);
+    expect(
+      shouldRecalculateLiveRoute(
+        { lat: -6.1659, lng: 39.2026, at: 1_000 },
+        { lat: -6.16575, lng: 39.2026 },
+        5_500,
+      ),
+    ).toBe(true);
+    expect(
+      shouldRecalculateLiveRoute(
+        { lat: -6.1659, lng: 39.2026, at: 1_000 },
+        { lat: -6.1652, lng: 39.2026 },
+        2_000,
+      ),
+    ).toBe(true);
+
+    // Backend live sync: immediate on first fix, brisk at >= 15m/8s, gentle heartbeat at >= 5m/15s
+    expect(shouldSyncDriverLocation(null, { lat: -6.1659, lng: 39.2026 }, 1_000)).toBe(true);
+    expect(
+      shouldSyncDriverLocation(
+        { lat: -6.1659, lng: 39.2026, at: 1_000 },
+        { lat: -6.1657, lng: 39.2026 },
+        9_500,
+      ),
+    ).toBe(true);
+    expect(
+      shouldSyncDriverLocation(
+        { lat: -6.1659, lng: 39.2026, at: 1_000 },
+        { lat: -6.16583, lng: 39.2026 },
+        16_500,
+      ),
+    ).toBe(true);
+    expect(
+      shouldSyncDriverLocation(
+        { lat: -6.1659, lng: 39.2026, at: 1_000 },
+        { lat: -6.16589, lng: 39.2026 },
+        16_500,
+      ),
+    ).toBe(false);
+
+    // Timestamp guard rejects stale out-of-order cached fixes
+    expect(shouldAcceptGpsTimestamp(0, 1_000)).toBe(true);
+    expect(shouldAcceptGpsTimestamp(5_000, 6_000)).toBe(true);
+    expect(shouldAcceptGpsTimestamp(5_000, 5_000)).toBe(true);
+    expect(shouldAcceptGpsTimestamp(5_000, 4_999)).toBe(false);
   });
 });

@@ -39,8 +39,10 @@ import {
   formatDurationLabel,
   isActiveExecutionStage,
   resolveDriverStage,
+  shouldSyncDriverLocation,
   stageStepIndex,
   type ActiveDriverPageStage,
+  type TimedGeoPoint,
 } from "@/lib/driver-workflow";
 import {
   formatClockTime,
@@ -136,6 +138,51 @@ export default function DriverTripStagePage({ pageStage, driverName, companyName
   const handleRouteMetrics = useCallback((metrics: LiveRouteSummary) => {
     setLiveRoute(metrics);
   }, []);
+
+  // Keep live GPS coordinates flowing on non-map stages (pickup & finalize) so
+  // driver current location never stalls or falls back to an old pinned coordinate.
+  useEffect(() => {
+    if (pageStage === "start" || pageStage === "trip") return;
+    if (!booking || completedDone || currentStage === "completed") return;
+    if (typeof window === "undefined" || !("geolocation" in navigator)) return;
+
+    let disposed = false;
+    let lastSynced: TimedGeoPoint | null = null;
+    const bookingId = booking.id;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        if (disposed) return;
+        const lat = Number(position.coords.latitude.toFixed(6));
+        const lng = Number(position.coords.longitude.toFixed(6));
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        const accuracy = Number.isFinite(position.coords.accuracy)
+          ? Math.round(position.coords.accuracy)
+          : null;
+        const speedKmh =
+          typeof position.coords.speed === "number" &&
+          Number.isFinite(position.coords.speed) &&
+          position.coords.speed >= 0
+            ? Math.round(position.coords.speed * 3.6)
+            : null;
+        latestPosRef.current = { lat, lng, accuracy, speedKmh, updatedAt: Date.now() };
+        const now = Date.now();
+        if (shouldSyncDriverLocation(lastSynced, { lat, lng }, now)) {
+          lastSynced = { lat, lng, at: now };
+          void driverAPI
+            .transitionBooking(bookingId, { action: "location", lat, lng })
+            .catch(() => {});
+        }
+      },
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15_000 },
+    );
+
+    return () => {
+      disposed = true;
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [booking, completedDone, currentStage, pageStage]);
 
   const handleArrived = async () => {
     if (!booking) return;
@@ -481,8 +528,6 @@ export default function DriverTripStagePage({ pageStage, driverName, companyName
                   originLat={booking.origin_lat}
                   originLng={booking.origin_lng}
                   originLabel={booking.origin || "Pickup Origin"}
-                  initialDriverLat={booking.driver_lat}
-                  initialDriverLng={booking.driver_lng}
                   onPositionUpdate={handlePositionUpdate}
                   onRouteMetrics={handleRouteMetrics}
                 />
@@ -807,8 +852,6 @@ export default function DriverTripStagePage({ pageStage, driverName, companyName
                   destinationLat={booking.dest_lat}
                   destinationLng={booking.dest_lng}
                   destinationLabel={booking.destination || "Destination"}
-                  initialDriverLat={booking.driver_lat}
-                  initialDriverLng={booking.driver_lng}
                   onPositionUpdate={handlePositionUpdate}
                   onRouteMetrics={handleRouteMetrics}
                 />

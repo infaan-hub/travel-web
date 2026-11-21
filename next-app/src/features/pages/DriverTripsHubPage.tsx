@@ -46,6 +46,7 @@ import {
   buildWhatsAppDirectContactPickerUrl,
 } from "@/lib/driver-trip-share";
 import { tripPlaceNameForCoords } from "@/lib/trips";
+import { haversineMeters, shouldAcceptGpsTimestamp } from "@/lib/driver-workflow";
 import type { PlaceSuggestion } from "@/lib/place-types";
 import type { DriverFullContext } from "@/lib/services/driver-insight";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
@@ -119,6 +120,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
   } | null>(null);
   const [manualGeocoding, setManualGeocoding] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [liveGpsActive, setLiveGpsActive] = useState(false);
   const [showMap, setShowMap] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -225,39 +227,134 @@ export default function DriverTripsHubPage({ driver }: Props) {
     }
   };
 
+  // Continuous live GPS origin tracking when enabled — moves with the driver instead of staying pinned
+  useEffect(() => {
+    if (!liveGpsActive) return;
+    if (typeof window === "undefined" || !("geolocation" in navigator)) return;
+
+    let disposed = false;
+    let watchId: number | null = null;
+    let highAccuracy = true;
+    let lastTimestamp = 0;
+    let lastCoords: { lat: number; lng: number } | null = null;
+    let lastGeocoded: { lat: number; lng: number } | null = null;
+
+    const clearWatch = () => {
+      if (watchId != null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+    };
+
+    const handlePos = (pos: GeolocationPosition) => {
+      if (disposed) return;
+      const lat = Number(pos.coords.latitude.toFixed(6));
+      const lng = Number(pos.coords.longitude.toFixed(6));
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+      if (!shouldAcceptGpsTimestamp(lastTimestamp, pos.timestamp)) return;
+      lastTimestamp = pos.timestamp || Date.now();
+
+      const isFirst = !lastCoords;
+      if (!isFirst && haversineMeters(lastCoords!.lat, lastCoords!.lng, lat, lng) < 15) {
+        setLocating(false);
+        return;
+      }
+
+      lastCoords = { lat, lng };
+      originGeocodeSeqRef.current += 1;
+      const seq = originGeocodeSeqRef.current;
+      setOriginCoords({ lat, lng });
+      setLocating(false);
+
+      const shouldReverse =
+        !lastGeocoded || haversineMeters(lastGeocoded.lat, lastGeocoded.lng, lat, lng) >= 120;
+      if (isFirst) {
+        setOriginLabel(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      }
+      if (shouldReverse) {
+        lastGeocoded = { lat, lng };
+        void geocodeAPI
+          .reverse(lat, lng)
+          .then((rev) => {
+            if (disposed || originGeocodeSeqRef.current !== seq) return;
+            if (rev.data?.display_name) {
+              setOriginLabel(String(rev.data.display_name).trim().slice(0, 140));
+            }
+          })
+          .catch(() => {});
+      }
+    };
+
+    const startWatch = (useHighAccuracy: boolean) => {
+      if (disposed) return;
+      clearWatch();
+      highAccuracy = useHighAccuracy;
+
+      navigator.geolocation.getCurrentPosition(
+        handlePos,
+        () => {},
+        { enableHighAccuracy: useHighAccuracy, maximumAge: 0, timeout: 10_000 },
+      );
+
+      watchId = navigator.geolocation.watchPosition(
+        handlePos,
+        (err) => {
+          if (disposed) return;
+          if (err.code === err.PERMISSION_DENIED) {
+            setLocating(false);
+            setLiveGpsActive(false);
+            toast.error("Location permission denied. Allow GPS to track your live origin.");
+            return;
+          }
+          if (highAccuracy) {
+            startWatch(false);
+            return;
+          }
+          setLocating(false);
+          if (!lastCoords) {
+            setLiveGpsActive(false);
+            toast.error("Could not detect current GPS location.");
+          }
+        },
+        {
+          enableHighAccuracy: useHighAccuracy,
+          maximumAge: 0,
+          timeout: useHighAccuracy ? 12_000 : 18_000,
+        },
+      );
+    };
+
+    startWatch(true);
+
+    const handleVisibility = () => {
+      if (disposed || document.visibilityState !== "visible") return;
+      startWatch(true);
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      disposed = true;
+      clearWatch();
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [liveGpsActive, toast]);
+
   const handleUseCurrentGps = () => {
     if (typeof window === "undefined" || !("geolocation" in navigator)) {
       toast.error("GPS location is not available on this device.");
       return;
     }
+    if (liveGpsActive) {
+      setLiveGpsActive(false);
+      setLocating(false);
+      return;
+    }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = Number(pos.coords.latitude.toFixed(6));
-        const lng = Number(pos.coords.longitude.toFixed(6));
-        let label = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-        try {
-          const rev = await geocodeAPI.reverse(lat, lng);
-          if (rev.data?.display_name) {
-            label = String(rev.data.display_name).trim().slice(0, 140);
-          }
-        } catch {
-          // Keep coordinate label
-        }
-        originGeocodeSeqRef.current += 1;
-        setOriginLabel(label);
-        setOriginCoords({ lat, lng });
-        setLocating(false);
-      },
-      () => {
-        setLocating(false);
-        toast.error("Could not detect current GPS location.");
-      },
-      { enableHighAccuracy: true, timeout: 12_000 },
-    );
+    setLiveGpsActive(true);
   };
 
   const handleSwap = () => {
+    setLiveGpsActive(false);
     originGeocodeSeqRef.current += 1;
     destGeocodeSeqRef.current += 1;
     setOriginLabel(destLabel);
@@ -267,6 +364,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
   };
 
   const handleClearLocations = () => {
+    setLiveGpsActive(false);
     originGeocodeSeqRef.current += 1;
     destGeocodeSeqRef.current += 1;
     setOriginLabel("");
@@ -318,6 +416,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
   };
 
   const loadRouteIntoGenerator = useCallback((origin: TripEndpoint, destination: TripEndpoint) => {
+    setLiveGpsActive(false);
     originGeocodeSeqRef.current += 1;
     destGeocodeSeqRef.current += 1;
     setOriginLabel(origin.label);
@@ -582,20 +681,23 @@ export default function DriverTripsHubPage({ driver }: Props) {
                 variant="origin"
                 value={originLabel}
                 pinned={originCoords != null}
-                pinnedLabel="Selected"
+                pinnedLabel={liveGpsActive ? "Live GPS" : "Selected"}
                 placeholder="Select or search any origin e.g. Airport, Stone Town, Ferry…"
                 onChange={(val) => {
+                  setLiveGpsActive(false);
                   originGeocodeSeqRef.current += 1;
                   setOriginLabel(val);
                   setOriginCoords(null);
                 }}
                 onSelect={(place) => {
+                  setLiveGpsActive(false);
                   originGeocodeSeqRef.current += 1;
                   setOriginLabel(placeLabel(place));
                   setOriginCoords({ lat: place.latitude, lng: place.longitude });
                   setShowMap(true);
                 }}
                 onCustomConfirm={(val) => {
+                  setLiveGpsActive(false);
                   setOriginLabel(val);
                   setOriginCoords(null);
                   void resolveCustomEndpoint("origin", val);
@@ -605,14 +707,19 @@ export default function DriverTripsHubPage({ driver }: Props) {
                     type="button"
                     className={styles.presetBtn}
                     onClick={handleUseCurrentGps}
-                    disabled={locating}
+                    aria-pressed={liveGpsActive}
+                    title={
+                      liveGpsActive
+                        ? "Tracking live GPS movement — click to stop"
+                        : "Track your live moving GPS location"
+                    }
                   >
                     {locating ? (
                       <LoaderCircle size={13} className={styles.spin} aria-hidden="true" />
                     ) : (
                       <LocateFixed size={13} aria-hidden="true" />
                     )}
-                    {locating ? "Locating…" : "Use GPS"}
+                    {locating ? "Locating…" : liveGpsActive ? "Live GPS" : "Use GPS"}
                   </button>
                 }
               />
@@ -893,6 +1000,7 @@ export default function DriverTripsHubPage({ driver }: Props) {
                 originLabel={originLabel}
                 destinationLabel={destLabel}
                 routeOnly
+                liveOrigin={liveGpsActive}
               />
             </div>
           ) : !originCoords || !destCoords ? (

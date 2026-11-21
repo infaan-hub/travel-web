@@ -15,6 +15,8 @@ type Props = {
   destinationLabel?: string;
   /** Show only origin pin, road route line, and destination pin without Zanzibar POI clutter. */
   routeOnly?: boolean;
+  /** When true, origin represents a continuously moving live GPS position instead of a fixed pin. */
+  liveOrigin?: boolean;
 };
 
 /**
@@ -30,6 +32,7 @@ export default function TripRouteOverlayMap({
   originLabel,
   destinationLabel,
   routeOnly = false,
+  liveOrigin = false,
 }: Props) {
   const [selectedPlace, setSelectedPlace] = useState<TripPlace | null>(null);
 
@@ -44,11 +47,12 @@ export default function TripRouteOverlayMap({
 
   return (
     <TripPlaceMapPicker
-      key={`${routeOnly ? "route" : "full"}:${originLat}:${originLng}:${destinationLat}:${destinationLng}:${originLabel ?? ""}:${destinationLabel ?? ""}`}
+      key={routeOnly ? "route" : "full"}
       latitude={selectedPlace?.latitude ?? null}
       longitude={selectedPlace?.longitude ?? null}
       readOnly
       routeOnly={routeOnly}
+      liveOrigin={liveOrigin}
       viewerRoute={viewerRoute}
       onSelectPlace={setSelectedPlace}
       onPickPoint={() => {}}
