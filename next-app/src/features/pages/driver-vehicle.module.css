@@ -1123,3 +1123,345 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ==========================================================================
+   Featured Property Card Redesign — /driver/vehicle/
+   Main card: 90–92% width, 440–470px height, 28–32px radius,
+   full-bleed background image + bottom gradient sheet with transport details.
+   ========================================================================== */
+
+.featuredVehicleWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.featuredVehicleHero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: clamp(446px, 56vh, 468px);
+  min-height: 444px;
+  max-height: 470px;
+  border-radius: 30px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(150deg, #071e3d 0%, #0b3c75 52%, #06162b 100%);
+  box-shadow:
+    0 24px 52px rgba(7, 25, 48, 0.22),
+    0 6px 18px rgba(7, 25, 48, 0.12);
+  color: #ffffff;
+  isolation: isolate;
+}
+
+.featuredVehicleMedia {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.featuredVehicleImg {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.featuredVehicleHero:hover .featuredVehicleImg {
+  transform: scale(1.04);
+}
+
+.featuredVehicleFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(500px 260px at 80% 18%, rgba(56, 189, 248, 0.34), transparent 64%),
+    linear-gradient(155deg, #072244 0%, #0b4182 54%, #06172d 100%);
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.featuredVehicleTopScrim {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 112px;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(4, 13, 28, 0.72) 0%, rgba(4, 13, 28, 0) 100%);
+  pointer-events: none;
+}
+
+.featuredVehicleTopBar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 10px;
+  padding: 18px 18px 0;
+}
+
+.featuredVehicleTopCluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.featuredVehicleAngleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+:global(#driver-vehicle-root) .featuredAngleBtn {
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 999px !important;
+  background: rgba(6, 18, 36, 0.56) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  font-size: 0.7rem !important;
+  font-weight: 750 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
+  cursor: pointer;
+}
+
+:global(#driver-vehicle-root) .featuredAngleBtnActive {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #08428c !important;
+}
+
+.featuredVehicleSheet {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding: 58px 22px 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 14, 29, 0) 0%,
+    rgba(5, 14, 29, 0.46) 20%,
+    rgba(5, 14, 29, 0.86) 52%,
+    rgba(4, 11, 24, 0.97) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.featuredVehicleTitleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 14px;
+}
+
+.featuredVehicleTitle {
+  margin: 0;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: clamp(1.38rem, 2.5vw, 1.8rem);
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+}
+
+.featuredVehicleSub {
+  margin: 3px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.78rem;
+  font-weight: 550;
+}
+
+.featuredVehicleSpecs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.featuredVehicleChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.73rem;
+  font-weight: 700;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.featuredVehiclePrices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.featuredVehiclePriceItems {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.featuredVehiclePriceItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.featuredVehiclePriceLabel {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.featuredVehiclePriceVal {
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.featuredVehiclePriceSub {
+  color: #93c5fd;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.featuredVehiclePriceLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.featuredVehiclePriceLink:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.featuredVehicleActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.featuredVehicleActionBtns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+:global(#driver-vehicle-root) .featuredEditBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  color: #08428c !important;
+  font-size: 0.8rem !important;
+  font-weight: 850 !important;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24) !important;
+  cursor: pointer;
+}
+
+:global(#driver-vehicle-root) .featuredDeleteBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px !important;
+  padding: 0 15px !important;
+  border: 1px solid rgba(251, 113, 133, 0.52) !important;
+  border-radius: 999px !important;
+  background: rgba(190, 18, 60, 0.75) !important;
+  color: #ffffff !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.featuredReadonlyNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.featuredDetailsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(18px, 2.5vw, 24px);
+  border: 1.5px solid var(--dw-line);
+  border-radius: 28px;
+  background: var(--dw-surface);
+  box-shadow: var(--dw-shadow-sm);
+}
+
+@media (max-width: 768px) {
+  .featuredVehicleHero {
+    width: 91vw;
+    max-width: 100%;
+    height: 458px;
+    margin-inline: auto;
+  }
+
+  .featuredVehicleSheet {
+    padding: 46px 16px 16px;
+    gap: 8px;
+  }
+
+  .featuredVehiclePriceItems {
+    gap: 6px 10px;
+  }
+
+  .featuredVehicleActionBtns {
+    width: 100%;
+  }
+
+  .featuredVehicleActionBtns > * {
+    flex: 1 1 auto;
+  }
+}

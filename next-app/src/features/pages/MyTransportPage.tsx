@@ -499,13 +499,9 @@ export default function MyTransportPage() {
           </header>
 
           {loading ? (
-            <div className={styles.cardList} aria-busy="true" aria-label="Loading bookings">
+            <div className={styles.featuredGrid} aria-busy="true" aria-label="Loading bookings">
               {[0, 1].map((index) => (
-                <div key={index} className={styles.skeletonCard}>
-                  <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
-                  <div className={`${styles.skeletonLine} ${styles.skeletonRoute}`} />
-                  <div className={`${styles.skeletonLine} ${styles.skeletonMeta}`} />
-                </div>
+                <div key={index} className={styles.featuredSkeleton} />
               ))}
             </div>
           ) : bookings.length === 0 ? (
@@ -542,7 +538,7 @@ export default function MyTransportPage() {
               </button>
             </div>
           ) : (
-            <div className={styles.cardList}>
+            <div className={styles.featuredGrid}>
               {filteredBookings.map((booking) => {
                 const trip = booking.trip ?? booking;
                 const origin = trip.origin ?? booking.origin;
@@ -565,61 +561,53 @@ export default function MyTransportPage() {
                 };
                 const isConfirmingCancel = confirmCancelId === booking.id;
                 const isCancelling = cancellingId === booking.id;
+                const bgImage = vehicle?.front_image_url
+                  ? getImageUrl(vehicle.front_image_url)
+                  : null;
 
                 return (
                   <article
                     key={booking.id}
-                    className={`${styles.bookingCard} ${
+                    className={`${styles.featuredCard} ${
                       booking.status === "cancelled"
-                        ? styles.bookingCardCancelled
+                        ? styles.featuredCardCancelled
                         : ""
                     }`}
                   >
-                    {/* Top Row: Identity + Status & Price */}
-                    <div className={styles.cardTop}>
-                      <div className={styles.cardIdentity}>
-                        <div className={styles.vehicleThumb}>
-                          {vehicle?.front_image_url ? (
-                            <Image
-                              src={getImageUrl(vehicle.front_image_url)}
-                              alt={vehicle.name}
-                              fill
-                              sizes="60px"
-                              className={styles.vehicleThumbImg}
-                              unoptimized
-                            />
-                          ) : (
-                            <Car size={24} aria-hidden="true" />
-                          )}
+                    {/* Full-bleed background image */}
+                    <div className={styles.featuredBgMedia}>
+                      {bgImage ? (
+                        <Image
+                          src={bgImage}
+                          alt={vehicle?.name || "Private hire vehicle"}
+                          fill
+                          sizes="(max-width: 960px) 92vw, 46vw"
+                          className={styles.featuredBgImg}
+                          unoptimized
+                        />
+                      ) : (
+                        <div className={styles.featuredBgFallback}>
+                          <Car size={54} aria-hidden="true" />
                         </div>
-                        <div className={styles.identityCopy}>
-                          <div className={styles.badgeRow}>
-                            {booking.reference ? (
-                              <span className={styles.refBadge}>
-                                {booking.reference}
-                              </span>
-                            ) : (
-                              <span className={styles.refBadge}>
-                                #{booking.id}
-                              </span>
-                            )}
-                            {tripId ? (
-                              <span className={styles.tripTag}>
-                                <RouteIcon size={11} aria-hidden="true" />
-                                TRIP-{tripId}
-                              </span>
-                            ) : null}
-                          </div>
-                          <h3 className={styles.serviceTitle}>
-                            {booking.service?.title || "Private hire request"}
-                          </h3>
-                          {company?.name ? (
-                            <p className={styles.companyMeta}>{company.name}</p>
-                          ) : null}
-                        </div>
+                      )}
+                    </div>
+                    <span className={styles.featuredTopScrim} aria-hidden="true" />
+
+                    {/* Top frosted bar */}
+                    <div className={styles.featuredTopBar}>
+                      <div className={styles.featuredTopLeft}>
+                        <span className={styles.featuredRefPill}>
+                          {booking.reference || `#${booking.id}`}
+                        </span>
+                        {tripId ? (
+                          <span className={styles.featuredTripPill}>
+                            <RouteIcon size={11} aria-hidden="true" />
+                            TRIP-{tripId}
+                          </span>
+                        ) : null}
                       </div>
 
-                      <div className={styles.cardPriceStatus}>
+                      <div className={styles.featuredTopRight}>
                         <span
                           className={`${styles.statusBadge} ${statusClassName(
                             booking.status,
@@ -629,224 +617,184 @@ export default function MyTransportPage() {
                           {meta.label}
                         </span>
                         {booking.total_price ? (
-                          <div className={styles.priceDisplay}>
-                            <span className={styles.priceAmount}>
-                              ${booking.total_price}
-                            </span>
+                          <span className={styles.featuredPriceBadge}>
+                            ${booking.total_price}
                             {booking.service?.pricing_type ? (
-                              <span className={styles.priceUnit}>
-                                /{" "}
-                                {booking.service.pricing_type.replaceAll(
-                                  "_",
-                                  " ",
-                                )}
+                              <span className={styles.featuredPriceUnit}>
+                                /{booking.service.pricing_type.replaceAll("_", " ")}
                               </span>
                             ) : null}
-                          </div>
+                          </span>
                         ) : null}
                       </div>
                     </div>
 
-                    {/* Trip Route Strip (A -> B) */}
-                    {origin || destination ? (
-                      <div className={styles.routePanel}>
-                        <div className={styles.routeStops}>
-                          <div className={styles.routeStop}>
-                            <span
-                              className={`${styles.stopPin} ${styles.stopPinOrigin}`}
-                              aria-hidden="true"
-                            >
-                              A
-                            </span>
-                            <div className={styles.stopText}>
-                              <span className={styles.stopKind}>Origin</span>
-                              <span className={styles.stopAddress}>
-                                {origin || "Pickup point"}
-                              </span>
-                            </div>
-                          </div>
-                          <span className={styles.stopRail} aria-hidden="true" />
-                          <div className={styles.routeStop}>
-                            <span
-                              className={`${styles.stopPin} ${styles.stopPinDest}`}
-                              aria-hidden="true"
-                            >
-                              B
-                            </span>
-                            <div className={styles.stopText}>
-                              <span className={styles.stopKind}>Destination</span>
-                              <span className={styles.stopAddress}>
-                                {destination || "Drop-off point"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {journey ? (
-                          <div className={styles.routeMetricsPill}>
-                            <Navigation size={14} aria-hidden="true" />
-                            <span>{journey}</span>
-                          </div>
+                    {/* Bottom gradient sheet with transport details */}
+                    <div className={styles.featuredSheet}>
+                      <div className={styles.featuredTitleGroup}>
+                        {company?.name ? (
+                          <span className={styles.featuredCompanyLabel}>{company.name}</span>
                         ) : null}
-                      </div>
-                    ) : null}
-
-                    {/* Structured Schedule & Vehicle Details */}
-                    <div className={styles.metaGrid}>
-                      <div className={styles.metaCell}>
-                        <CalendarDays size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Travel date</span>
-                          <span className={styles.metaValue}>
-                            {formatTravelDate(booking.travel_date)}
-                          </span>
-                        </div>
+                        <h3 className={styles.featuredTitle}>
+                          {booking.service?.title || vehicle?.name || "Private hire request"}
+                        </h3>
                       </div>
 
-                      <div className={styles.metaCell}>
-                        <Clock size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Pickup time</span>
-                          <span className={styles.metaValue}>
-                            {pickupTime || "To be arranged"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <Users size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Passengers</span>
-                          <span className={styles.metaValue}>
-                            {booking.passengers}{" "}
-                            {booking.passengers === 1 ? "passenger" : "passengers"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <Car size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Vehicle</span>
-                          <span className={styles.metaValue}>
-                            {vehicle?.name || "Assigned vehicle"}
-                          </span>
-                          {vehicle?.plate_number ? (
-                            <span className={styles.plateChip}>
-                              {vehicle.plate_number}
+                      {origin || destination ? (
+                        <div className={styles.featuredRouteBox}>
+                          <div className={styles.featuredRouteFlow}>
+                            <span className={styles.featuredPinA} aria-hidden="true">A</span>
+                            <span className={styles.featuredStopName}>
+                              {origin || "Pickup point"}
+                            </span>
+                            <span className={styles.featuredRouteArrow} aria-hidden="true">→</span>
+                            <span className={styles.featuredPinB} aria-hidden="true">B</span>
+                            <span className={styles.featuredStopName}>
+                              {destination || "Drop-off point"}
+                            </span>
+                          </div>
+                          {journey ? (
+                            <span className={styles.featuredJourneyPill}>
+                              <Navigation size={12} aria-hidden="true" />
+                              {journey}
                             </span>
                           ) : null}
                         </div>
-                      </div>
-                    </div>
+                      ) : null}
 
-                    {driver &&
-                    ["confirmed", "in_progress"].includes(booking.status) ? (
-                      <div className={styles.driverBar}>
-                        <span className={styles.badgeRow}>
-                          <UserCheck size={15} aria-hidden="true" />
-                          Driver: <strong>{driver.name}</strong>
+                      <div className={styles.featuredSpecsRow}>
+                        <span className={styles.featuredChip}>
+                          <CalendarDays size={13} aria-hidden="true" />
+                          {formatTravelDate(booking.travel_date)}
                         </span>
-                        {driver.phone ? (
-                          <a href={`tel:${driver.phone.replace(/\D/g, "")}`}>
-                            <Phone size={14} aria-hidden="true" />
-                            {driver.phone}
-                          </a>
+                        <span className={styles.featuredChip}>
+                          <Clock size={13} aria-hidden="true" />
+                          {pickupTime || "Time TBD"}
+                        </span>
+                        <span className={styles.featuredChip}>
+                          <Users size={13} aria-hidden="true" />
+                          {booking.passengers} pax
+                        </span>
+                        {vehicle ? (
+                          <span className={styles.featuredChip}>
+                            <Car size={13} aria-hidden="true" />
+                            {vehicle.name}
+                            {vehicle.plate_number ? (
+                              <span className={styles.featuredChipPlate}>
+                                {vehicle.plate_number}
+                              </span>
+                            ) : null}
+                          </span>
                         ) : null}
                       </div>
-                    ) : null}
 
-                    {booking.notes?.trim() ? (
-                      <p className={styles.notesBox}>{booking.notes}</p>
-                    ) : null}
+                      {driver &&
+                      ["confirmed", "in_progress"].includes(booking.status) ? (
+                        <div className={styles.featuredDriverStrip}>
+                          <span className={styles.badgeRow}>
+                            <UserCheck size={14} aria-hidden="true" />
+                            Driver: <strong>{driver.name}</strong>
+                          </span>
+                          {driver.phone ? (
+                            <a href={`tel:${driver.phone.replace(/\D/g, "")}`}>
+                              <Phone size={13} aria-hidden="true" />
+                              {driver.phone}
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : null}
 
-                    {/* Footer Actions */}
-                    <footer className={styles.cardFooter}>
-                      <span className={styles.footerHint}>
-                        <ShieldCheck size={15} aria-hidden="true" />
-                        {meta.hint}
-                      </span>
+                      {booking.notes?.trim() ? (
+                        <p className={styles.featuredNotes}>{booking.notes}</p>
+                      ) : null}
 
-                      <div className={styles.footerActions}>
-                        {booking.service?.id ? (
-                          <Link
-                            href={`/transport/service/${booking.service.id}/`}
-                            className={styles.actionLink}
-                          >
-                            <ExternalLink size={14} aria-hidden="true" />
-                            View vehicle
-                          </Link>
-                        ) : null}
+                      <footer className={styles.featuredFooter}>
+                        <span className={styles.featuredHint}>
+                          <ShieldCheck size={14} aria-hidden="true" />
+                          {meta.hint}
+                        </span>
 
-                        {company?.contact_phone &&
-                        booking.status !== "cancelled" ? (
-                          <a
-                            href={`tel:${company.contact_phone.replace(/\D/g, "")}`}
-                            className={styles.actionLink}
-                          >
-                            <Phone size={14} aria-hidden="true" />
-                            Call provider
-                          </a>
-                        ) : null}
+                        <div className={styles.featuredActions}>
+                          {booking.service?.id ? (
+                            <Link
+                              href={`/transport/service/${booking.service.id}/`}
+                              className={styles.featuredActionLink}
+                            >
+                              <ExternalLink size={13} aria-hidden="true" />
+                              Vehicle
+                            </Link>
+                          ) : null}
 
-                        {booking.status === "pending" ? (
-                          isConfirmingCancel ? (
-                            <>
+                          {company?.contact_phone &&
+                          booking.status !== "cancelled" ? (
+                            <a
+                              href={`tel:${company.contact_phone.replace(/\D/g, "")}`}
+                              className={styles.featuredActionLink}
+                            >
+                              <Phone size={13} aria-hidden="true" />
+                              Call
+                            </a>
+                          ) : null}
+
+                          {booking.status === "pending" ? (
+                            isConfirmingCancel ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className={styles.featuredActionKeep}
+                                  disabled={isCancelling}
+                                  onClick={() => setConfirmCancelId(null)}
+                                >
+                                  Keep
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.featuredActionDanger}
+                                  disabled={isCancelling}
+                                  onClick={() => void cancelBooking(booking.id)}
+                                >
+                                  {isCancelling ? (
+                                    <>
+                                      <Loader2
+                                        size={13}
+                                        className={styles.spin}
+                                        aria-hidden="true"
+                                      />
+                                      Cancelling…
+                                    </>
+                                  ) : (
+                                    <>
+                                      <XCircle size={13} aria-hidden="true" />
+                                      Confirm cancel
+                                    </>
+                                  )}
+                                </button>
+                              </>
+                            ) : (
                               <button
                                 type="button"
-                                className={styles.keepButton}
-                                disabled={isCancelling}
-                                onClick={() => setConfirmCancelId(null)}
+                                className={styles.featuredActionDanger}
+                                onClick={() => setConfirmCancelId(booking.id)}
                               >
-                                Keep booking
+                                <XCircle size={13} aria-hidden="true" />
+                                Cancel
                               </button>
-                              <button
-                                type="button"
-                                className={styles.confirmCancelButton}
-                                disabled={isCancelling}
-                                onClick={() => void cancelBooking(booking.id)}
-                              >
-                                {isCancelling ? (
-                                  <>
-                                    <Loader2
-                                      size={14}
-                                      className={styles.spin}
-                                      aria-hidden="true"
-                                    />
-                                    Cancelling…
-                                  </>
-                                ) : (
-                                  <>
-                                    <XCircle size={14} aria-hidden="true" />
-                                    Confirm cancel
-                                  </>
-                                )}
-                              </button>
-                            </>
-                          ) : (
+                            )
+                          ) : null}
+
+                          {booking.status === "completed" ? (
                             <button
                               type="button"
-                              className={styles.cancelButton}
-                              onClick={() => setConfirmCancelId(booking.id)}
+                              className={styles.featuredActionPrimary}
+                              onClick={() => openReview(booking)}
                             >
-                              <XCircle size={14} aria-hidden="true" />
-                              Cancel request
+                              <Star size={13} aria-hidden="true" />
+                              Review
                             </button>
-                          )
-                        ) : null}
-
-                        {booking.status === "completed" ? (
-                          <button
-                            type="button"
-                            className={styles.reviewButton}
-                            onClick={() => openReview(booking)}
-                          >
-                            <Star size={14} aria-hidden="true" />
-                            Leave review
-                          </button>
-                        ) : null}
-                      </div>
-                    </footer>
+                          ) : null}
+                        </div>
+                      </footer>
+                    </div>
                   </article>
                 );
               })}
@@ -892,7 +840,7 @@ export default function MyTransportPage() {
               </Link>
             </div>
           ) : (
-            <div className={styles.cardList}>
+            <div className={styles.featuredGrid}>
               {requests.map((request) => {
                 const travelDate = request.travel_date ?? request.travelDate;
                 const pickupTime = request.pickup_time ?? request.pickupTime;
@@ -908,25 +856,19 @@ export default function MyTransportPage() {
                 };
 
                 return (
-                  <article key={request.id} className={styles.bookingCard}>
-                    <div className={styles.cardTop}>
-                      <div className={styles.cardIdentity}>
-                        <div className={styles.vehicleThumb}>
-                          <Navigation size={22} aria-hidden="true" />
-                        </div>
-                        <div className={styles.identityCopy}>
-                          <div className={styles.badgeRow}>
-                            <span className={styles.refBadge}>
-                              REQ-{request.id}
-                            </span>
-                          </div>
-                          <h3 className={styles.serviceTitle}>
-                            {request.origin} → {request.destination}
-                          </h3>
-                        </div>
+                  <article key={request.id} className={styles.featuredCard}>
+                    <div className={styles.featuredBgMedia}>
+                      <div className={styles.featuredBgFallback}>
+                        <Navigation size={52} aria-hidden="true" />
                       </div>
+                    </div>
+                    <span className={styles.featuredTopScrim} aria-hidden="true" />
 
-                      <div className={styles.cardPriceStatus}>
+                    <div className={styles.featuredTopBar}>
+                      <div className={styles.featuredTopLeft}>
+                        <span className={styles.featuredRefPill}>REQ-{request.id}</span>
+                      </div>
+                      <div className={styles.featuredTopRight}>
                         <span
                           className={`${styles.statusBadge} ${statusClassName(
                             request.status,
@@ -938,109 +880,75 @@ export default function MyTransportPage() {
                       </div>
                     </div>
 
-                    <div className={styles.routePanel}>
-                      <div className={styles.routeStops}>
-                        <div className={styles.routeStop}>
-                          <span
-                            className={`${styles.stopPin} ${styles.stopPinOrigin}`}
-                            aria-hidden="true"
-                          >
-                            A
-                          </span>
-                          <div className={styles.stopText}>
-                            <span className={styles.stopKind}>Origin</span>
-                            <span className={styles.stopAddress}>
-                              {request.origin}
-                            </span>
-                          </div>
-                        </div>
-                        <span className={styles.stopRail} aria-hidden="true" />
-                        <div className={styles.routeStop}>
-                          <span
-                            className={`${styles.stopPin} ${styles.stopPinDest}`}
-                            aria-hidden="true"
-                          >
-                            B
-                          </span>
-                          <div className={styles.stopText}>
-                            <span className={styles.stopKind}>Destination</span>
-                            <span className={styles.stopAddress}>
-                              {request.destination}
-                            </span>
-                          </div>
-                        </div>
+                    <div className={styles.featuredSheet}>
+                      <div className={styles.featuredTitleGroup}>
+                        <span className={styles.featuredCompanyLabel}>Open driver network</span>
+                        <h3 className={styles.featuredTitle}>
+                          {request.origin} → {request.destination}
+                        </h3>
                       </div>
 
-                      {journey ? (
-                        <div className={styles.routeMetricsPill}>
-                          <Navigation size={14} aria-hidden="true" />
-                          <span>{journey}</span>
+                      <div className={styles.featuredRouteBox}>
+                        <div className={styles.featuredRouteFlow}>
+                          <span className={styles.featuredPinA} aria-hidden="true">A</span>
+                          <span className={styles.featuredStopName}>{request.origin}</span>
+                          <span className={styles.featuredRouteArrow} aria-hidden="true">→</span>
+                          <span className={styles.featuredPinB} aria-hidden="true">B</span>
+                          <span className={styles.featuredStopName}>{request.destination}</span>
                         </div>
-                      ) : null}
-                    </div>
-
-                    <div className={styles.metaGrid}>
-                      <div className={styles.metaCell}>
-                        <CalendarDays size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Travel date</span>
-                          <span className={styles.metaValue}>
-                            {formatTravelDate(travelDate)}
+                        {journey ? (
+                          <span className={styles.featuredJourneyPill}>
+                            <Navigation size={12} aria-hidden="true" />
+                            {journey}
                           </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <Clock size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Pickup time</span>
-                          <span className={styles.metaValue}>
-                            {pickupTime || "Flexible"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <Users size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Passengers</span>
-                          <span className={styles.metaValue}>
-                            {request.passengers}{" "}
-                            {request.passengers === 1 ? "passenger" : "passengers"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <ClipboardList size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Luggage</span>
-                          <span className={styles.metaValue}>
-                            {request.luggage ?? 0}{" "}
-                            {(request.luggage ?? 0) === 1 ? "bag" : "bags"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {request.notes?.trim() ? (
-                      <p className={styles.notesBox}>{request.notes}</p>
-                    ) : null}
-
-                    {request.driver ? (
-                      <div className={styles.driverBar}>
-                        <span className={styles.badgeRow}>
-                          <UserCheck size={15} aria-hidden="true" />
-                          Accepted by <strong>{request.driver.name}</strong>
-                        </span>
-                        {request.driver.phone ? (
-                          <a href={`tel:${request.driver.phone.replace(/\D/g, "")}`}>
-                            <Phone size={14} aria-hidden="true" />
-                            {request.driver.phone}
-                          </a>
                         ) : null}
                       </div>
-                    ) : null}
+
+                      <div className={styles.featuredSpecsRow}>
+                        <span className={styles.featuredChip}>
+                          <CalendarDays size={13} aria-hidden="true" />
+                          {formatTravelDate(travelDate)}
+                        </span>
+                        <span className={styles.featuredChip}>
+                          <Clock size={13} aria-hidden="true" />
+                          {pickupTime || "Flexible"}
+                        </span>
+                        <span className={styles.featuredChip}>
+                          <Users size={13} aria-hidden="true" />
+                          {request.passengers} pax
+                        </span>
+                        <span className={styles.featuredChip}>
+                          <ClipboardList size={13} aria-hidden="true" />
+                          {request.luggage ?? 0} {(request.luggage ?? 0) === 1 ? "bag" : "bags"}
+                        </span>
+                      </div>
+
+                      {request.notes?.trim() ? (
+                        <p className={styles.featuredNotes}>{request.notes}</p>
+                      ) : null}
+
+                      {request.driver ? (
+                        <div className={styles.featuredDriverStrip}>
+                          <span className={styles.badgeRow}>
+                            <UserCheck size={14} aria-hidden="true" />
+                            Accepted by <strong>{request.driver.name}</strong>
+                          </span>
+                          {request.driver.phone ? (
+                            <a href={`tel:${request.driver.phone.replace(/\D/g, "")}`}>
+                              <Phone size={13} aria-hidden="true" />
+                              {request.driver.phone}
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <footer className={styles.featuredFooter}>
+                          <span className={styles.featuredHint}>
+                            <ShieldCheck size={14} aria-hidden="true" />
+                            {meta.hint}
+                          </span>
+                        </footer>
+                      )}
+                    </div>
                   </article>
                 );
               })}

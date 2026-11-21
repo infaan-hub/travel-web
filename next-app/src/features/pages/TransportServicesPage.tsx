@@ -5,13 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { publicPrivateHireAPI } from "@/lib/api/client";
 import { PageHero } from "@/components/PageHero";
+import { getImageUrl } from "@/lib/utils/image-url";
 import {
-  Car,
-  UserCheck,
-  Phone,
+  ArrowRight,
   Briefcase,
-  Users,
+  Car,
   Eye,
+  Phone,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
 import styles from "@/features/pages/company-public.module.css";
 import cardStyles from "@/features/pages/company-private-service.module.css";
@@ -90,8 +92,7 @@ export default function TransportServicesPage() {
   const hasFilters = Boolean(search.trim());
 
   return (
-    <div className={`page ${styles.page} ${styles.listingRoot}`}>
-      {/* Page Hero — same pattern as /companies/ */}
+    <div className={`page ${styles.page} ${styles.listingRoot} ${cardStyles.featuredPageFlush}`}>
       <PageHero
         eyebrow="Private hire transport"
         title="Available private hire services"
@@ -113,9 +114,8 @@ export default function TransportServicesPage() {
         </div>
       </PageHero>
 
-      <div className={`${styles.content} ${cardStyles.transportFleet}`}>
-        {/* Listing head — identical structure to /companies/ */}
-        <div className={styles.listingHead}>
+      <section className={cardStyles.featuredShell} aria-label="Private hire services">
+        <div className={cardStyles.featuredHead}>
           <div>
             <span className={styles.listingKicker}>Transport directory</span>
             <h2 className={styles.listingTitle}>Private hire services</h2>
@@ -125,26 +125,13 @@ export default function TransportServicesPage() {
           </span>
         </div>
 
-        {/* Grid — loading skeletons */}
         {loading ? (
-          <div className={cardStyles.servicesGrid} aria-busy="true">
+          <div className={cardStyles.featuredGrid} aria-busy="true">
             {Array.from({ length: 6 }).map((_, index) => (
-              <div className={cardStyles.serviceCard} key={index}>
-                <div className={cardStyles.serviceHeader}>
-                  <div className={cardStyles.serviceTitleGroup}>
-                    <div className="company-skeleton-line company-skeleton-line--title" />
-                    <div className="company-skeleton-line company-skeleton-line--short" />
-                  </div>
-                </div>
-                <div className={cardStyles.serviceBody}>
-                  <div className="company-skeleton-line" />
-                  <div className="company-skeleton-line company-skeleton-line--short" />
-                </div>
-              </div>
+              <div className={cardStyles.featuredSkeleton} key={index} />
             ))}
           </div>
         ) : services.length === 0 ? (
-          /* Empty state */
           <div className={styles.empty}>
             <span className={styles.emptyIcon}>
               <Car size={28} />
@@ -171,142 +158,138 @@ export default function TransportServicesPage() {
           </div>
         ) : (
           <>
-            {/* Service Cards Grid — card style from commit 16886eb */}
-            <div className={cardStyles.servicesGrid}>
+            <div className={cardStyles.featuredGrid}>
               {services.map((svc) => {
                 const vehicleName = svc.vehicle?.name ?? "Vehicle";
                 const plateNumber = svc.vehicle?.plate_number ?? "";
-                const driverName = svc.driver?.name ?? "Driver";
+                const category = svc.vehicle?.category || "Private Hire";
+                const driverName = svc.driver?.name ?? "Verified Driver";
                 const companyName = svc.company?.name ?? "";
                 const capacityPax = svc.vehicle?.capacity ?? 0;
                 const luggageBags = svc.vehicle?.luggage_capacity ?? 0;
+                const pricingUnit = PRICING_LABELS[svc.pricing_type] || svc.pricing_type || "per trip";
+                const bgImage = svc.vehicle?.front_image_url
+                  ? getImageUrl(svc.vehicle.front_image_url)
+                  : null;
+                const driverImage = svc.driver?.image_url
+                  ? getImageUrl(svc.driver.image_url)
+                  : null;
 
                 return (
-                  <div key={svc.id} className={cardStyles.serviceCard}>
-                    {/* Header */}
-                    <div className={cardStyles.serviceHeader}>
-                      <div className={cardStyles.serviceTitleGroup}>
-                        <h3 className={cardStyles.cardVehicleTitle}>
-                          {vehicleName}
-                          {plateNumber && <span className={cardStyles.plateBadgeInline}>{plateNumber}</span>}
-                        </h3>
-                        {svc.title && <p className={cardStyles.tagline}>{svc.title}</p>}
-                        {companyName && <span className={cardStyles.companyNameBadge}>{companyName}</span>}
+                  <article key={svc.id} className={cardStyles.featuredCard}>
+                    {/* Full-bleed background image */}
+                    <div className={cardStyles.featuredBgMedia}>
+                      {bgImage ? (
+                        <Image
+                          src={bgImage}
+                          alt={vehicleName}
+                          fill
+                          sizes="(max-width: 820px) 92vw, (max-width: 1220px) 46vw, 31vw"
+                          className={cardStyles.featuredBgImg}
+                          unoptimized
+                        />
+                      ) : (
+                        <div className={cardStyles.featuredBgFallback}>
+                          <Car size={54} aria-hidden="true" />
+                        </div>
+                      )}
+                    </div>
+                    <span className={cardStyles.featuredTopScrim} aria-hidden="true" />
+
+                    {/* Top frosted bar */}
+                    <div className={cardStyles.featuredTopBar}>
+                      <div className={cardStyles.featuredTopLeft}>
+                        <span className={cardStyles.featuredGlassBadge}>
+                          <ShieldCheck size={12} aria-hidden="true" />
+                          {category}
+                        </span>
+                        {plateNumber ? (
+                          <span className={cardStyles.featuredPlatePill}>{plateNumber}</span>
+                        ) : null}
                       </div>
 
-                      <div className={cardStyles.priceTag}>
-                        ${svc.price}
-                        <span className={cardStyles.pricingUnit}>
-                          /{PRICING_LABELS[svc.pricing_type] || svc.pricing_type}
+                      <div className={cardStyles.featuredPricePill}>
+                        <span className={cardStyles.featuredPriceNum}>${svc.price}</span>
+                        <span className={cardStyles.featuredPriceUnit}>/{pricingUnit}</span>
+                      </div>
+                    </div>
+
+                    {/* Bottom gradient sheet with transport details */}
+                    <div className={cardStyles.featuredSheet}>
+                      <div className={cardStyles.featuredHeadingGroup}>
+                        {companyName ? (
+                          <span className={cardStyles.featuredCompanyEyebrow}>{companyName}</span>
+                        ) : null}
+                        <h3 className={cardStyles.featuredTitle}>{vehicleName}</h3>
+                        {svc.title ? (
+                          <p className={cardStyles.featuredSubtitle}>{svc.title}</p>
+                        ) : null}
+                      </div>
+
+                      <div className={cardStyles.featuredDetailsStrip}>
+                        <span className={cardStyles.featuredSpecChip}>
+                          <Users size={13} aria-hidden="true" />
+                          {capacityPax} pax
+                        </span>
+                        <span className={cardStyles.featuredSpecChip}>
+                          <Briefcase size={13} aria-hidden="true" />
+                          {luggageBags} bags
+                        </span>
+                        <span className={cardStyles.featuredDriverPill}>
+                          {driverImage ? (
+                            <Image
+                              src={driverImage}
+                              alt={driverName}
+                              width={22}
+                              height={22}
+                              className={cardStyles.featuredDriverAvatar}
+                              unoptimized
+                            />
+                          ) : (
+                            <span className={cardStyles.featuredDriverInitials} aria-hidden="true">
+                              {(driverName || "DR").slice(0, 2).toUpperCase()}
+                            </span>
+                          )}
+                          <span className={cardStyles.featuredDriverName}>{driverName}</span>
                         </span>
                       </div>
-                    </div>
 
-                    {/* Body */}
-                    <div className={cardStyles.serviceBody}>
-                      {/* Specs line: 5 pax • 5 bags */}
-                      <div className={cardStyles.specsLine}>
-                        <Users size={15} color="#08428c" />
-                        <span>{capacityPax} pax</span>
-                        <span>•</span>
-                        <Briefcase size={15} color="#08428c" />
-                        <span>{luggageBags} bags</span>
-                      </div>
-
-                      {/* Paired blocks: vehicle image + driver thumbnail */}
-                      <div className={cardStyles.pairedBlock}>
-                        <div className={cardStyles.subSectionCard}>
-                          <div className={cardStyles.sectionHeaderRow}>
-                            <Car size={13} /> Vehicle Photo
-                          </div>
-                          <div className={cardStyles.vehicleThumbArea}>
-                            {svc.vehicle?.front_image_url ? (
-                              <Image
-                                src={svc.vehicle.front_image_url}
-                                alt={vehicleName}
-                                fill
-                                className={cardStyles.thumbImg}
-                                unoptimized
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-slate-200">
-                                <Car size={24} color="#64748b" />
-                              </div>
-                            )}
-                            {plateNumber && <span className={cardStyles.plateMiniBadge}>{plateNumber}</span>}
-                          </div>
-                        </div>
-
-                        <div className={cardStyles.subSectionCard}>
-                          <div className={cardStyles.sectionHeaderRow}>
-                            <UserCheck size={13} /> Assigned Driver
-                          </div>
-                          <div className={cardStyles.driverInfoArea}>
-                            {svc.driver?.image_url ? (
-                              <Image
-                                src={svc.driver.image_url}
-                                alt={driverName}
-                                width={46}
-                                height={46}
-                                className={cardStyles.driverAvatarMini}
-                                unoptimized
-                              />
-                            ) : (
-                              <div className={cardStyles.driverAvatarFallback}>
-                                {(driverName || "DR").slice(0, 2).toUpperCase()}
-                              </div>
-                            )}
-                            <div className={cardStyles.driverDetailsMini}>
-                              <span className={cardStyles.driverNameMini}>{driverName}</span>
-                              {svc.driver?.phone && (
-                                <span className={cardStyles.driverContactMini}>{svc.driver.phone}</span>
-                              )}
-                              <span className="text-[10px] font-semibold text-emerald-700">Verified Driver</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className={cardStyles.serviceFooter}>
-                      <Link
-                        href={`/transport/service/${svc.id}/`}
-                        className={cardStyles.btnPreview}
-                        style={{ textDecoration: "none" }}
-                      >
-                        <Eye size={14} /> View full details
-                      </Link>
-
-                      <div className="flex items-center gap-2">
+                      <div className={cardStyles.featuredActions}>
+                        <Link
+                          href={`/transport/service/${svc.id}/`}
+                          className={cardStyles.featuredBtnGlass}
+                        >
+                          <Eye size={14} aria-hidden="true" />
+                          Details
+                        </Link>
                         <Link
                           href={`/booking/${svc.id}/`}
-                          className={cardStyles.primaryBtn}
-                          style={{ textDecoration: "none" }}
+                          className={cardStyles.featuredBtnPrimary}
                         >
-                          Book this trip
+                          Book now
+                          <ArrowRight size={14} aria-hidden="true" />
                         </Link>
-                        {svc.company?.contact_phone && (
+                        {svc.company?.contact_phone ? (
                           <a
                             href={`https://wa.me/${svc.company.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
                               `Hi, I would like to book private hire service ${svc.title} (${vehicleName})`,
                             )}`}
                             target="_blank"
                             rel="noreferrer"
-                            className={cardStyles.btnSecondary}
+                            className={cardStyles.featuredBtnIcon}
                             title="Chat on WhatsApp"
+                            aria-label={`Chat with ${companyName || "provider"} on WhatsApp`}
                           >
-                            <Phone size={14} />
+                            <Phone size={15} aria-hidden="true" />
                           </a>
-                        )}
+                        ) : null}
                       </div>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className={styles.pagination}>
                 <button
@@ -336,7 +319,7 @@ export default function TransportServicesPage() {
             )}
           </>
         )}
-      </div>
+      </section>
     </div>
   );
 }

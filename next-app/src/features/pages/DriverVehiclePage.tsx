@@ -94,204 +94,196 @@ function VehicleShowcaseCard({
 }) {
   const [angle, setAngle] = useState<PhotoAngle>("front");
 
-  const photos: Array<{ key: PhotoAngle; label: string; url: string }> = [
+  const photos: Array<{ key: PhotoAngle; label: string; shortLabel: string; url: string }> = [
     ...(vehicle.front_image_url
-      ? [{ key: "front" as const, label: "Front view", url: vehicle.front_image_url }]
+      ? [{ key: "front" as const, label: "Front view", shortLabel: "Front", url: vehicle.front_image_url }]
       : []),
     ...(vehicle.side_image_url
-      ? [{ key: "side" as const, label: "Side view", url: vehicle.side_image_url }]
+      ? [{ key: "side" as const, label: "Side view", shortLabel: "Side", url: vehicle.side_image_url }]
       : []),
     ...(vehicle.back_image_url
-      ? [{ key: "back" as const, label: "Back view", url: vehicle.back_image_url }]
+      ? [{ key: "back" as const, label: "Back view", shortLabel: "Back", url: vehicle.back_image_url }]
       : []),
   ];
 
   const activePhoto = photos.find((p) => p.key === angle) ?? photos[0] ?? null;
 
   return (
-    <article className={styles.vehicleCard}>
-      <div className={styles.galleryWrap}>
-        {activePhoto ? (
-          <Image
-            src={activePhoto.url}
-            alt={`${vehicle.name} — ${activePhoto.label}`}
-            fill
-            sizes="(max-width: 960px) 100vw, 720px"
-            className={styles.galleryMainImg}
-            unoptimized
-          />
-        ) : (
-          <div className={styles.galleryFallback}>
-            <Car size={46} aria-hidden="true" />
-          </div>
-        )}
-
-        <div className={styles.galleryTopBadges}>
-          <div className={styles.galleryBadgeCluster}>
-            <span className={styles.categoryPill}>{vehicle.category}</span>
-            <span className={styles.platePill}>{vehicle.plate_number}</span>
-          </div>
-          <span
-            className={`${styles.availPill} ${
-              vehicle.is_available ? styles.availOn : styles.availOff
-            }`}
-          >
-            {vehicle.is_available ? (
-              <CheckCircle2 size={13} aria-hidden="true" />
-            ) : (
-              <XCircle size={13} aria-hidden="true" />
-            )}
-            {vehicle.is_available ? "Available" : "Unavailable"}
-          </span>
-        </div>
-      </div>
-
-      {photos.length > 1 ? (
-        <div className={styles.thumbStrip} role="tablist" aria-label="Vehicle photo angles">
-          {photos.map((photo) => (
-            <button
-              key={photo.key}
-              type="button"
-              role="tab"
-              aria-selected={activePhoto?.key === photo.key}
-              className={`${styles.thumbBtn} ${
-                activePhoto?.key === photo.key ? styles.thumbBtnActive : ""
-              }`}
-              onClick={() => setAngle(photo.key)}
-            >
-              <Image
-                src={photo.url}
-                alt={photo.label}
-                width={44}
-                height={32}
-                className={styles.thumbImg}
-                unoptimized
-              />
-              <span>{photo.label}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      <div className={styles.vehicleBody}>
-        <div className={styles.vehicleHeadingRow}>
-          <div>
-            <h2 className={styles.vehicleTitle}>{vehicle.name}</h2>
-            <p className={styles.vehicleSub}>
-              {readOnly
-                ? `Assigned by ${companyName || "your company"} · Updated ${formatDateLabel(vehicle.updated_at)}`
-                : `Registered directly by you · Updated ${formatDateLabel(vehicle.updated_at)}`}
-            </p>
-          </div>
-          {readOnly ? (
-            <span className={styles.lockBadge}>
-              <Lock size={12} aria-hidden="true" />
-              Company managed
-            </span>
+    <div className={styles.featuredVehicleWrap}>
+      {/* MAIN FEATURED PROPERTY CARD (90–92% width, 440–470px height, 30px radius, full-bleed photo + bottom gradient sheet) */}
+      <article className={styles.featuredVehicleHero}>
+        <div className={styles.featuredVehicleMedia}>
+          {activePhoto ? (
+            <Image
+              src={activePhoto.url}
+              alt={`${vehicle.name} — ${activePhoto.label}`}
+              fill
+              sizes="(max-width: 960px) 92vw, 760px"
+              className={styles.featuredVehicleImg}
+              unoptimized
+            />
           ) : (
-            <span className={`${styles.slotBadge} ${styles.slotBadgeFull}`}>
-              <ShieldCheck size={12} aria-hidden="true" />
-              1 / 1 registered
-            </span>
+            <div className={styles.featuredVehicleFallback}>
+              <Car size={54} aria-hidden="true" />
+            </div>
           )}
         </div>
+        <span className={styles.featuredVehicleTopScrim} aria-hidden="true" />
 
-        <div className={styles.specsGrid}>
-          <div className={styles.specBox}>
-            <span className={styles.specLabel}>
-              <Car size={12} aria-hidden="true" />
-              Plate
+        {/* Floating Top Glass Bar */}
+        <div className={styles.featuredVehicleTopBar}>
+          <div className={styles.featuredVehicleTopCluster}>
+            <span className={styles.categoryPill}>{vehicle.category}</span>
+            <span className={styles.platePill}>{vehicle.plate_number}</span>
+            <span
+              className={`${styles.availPill} ${
+                vehicle.is_available ? styles.availOn : styles.availOff
+              }`}
+            >
+              {vehicle.is_available ? (
+                <CheckCircle2 size={13} aria-hidden="true" />
+              ) : (
+                <XCircle size={13} aria-hidden="true" />
+              )}
+              {vehicle.is_available ? "Available" : "Unavailable"}
             </span>
-            <strong className={styles.specValue}>{vehicle.plate_number}</strong>
           </div>
-          <div className={styles.specBox}>
-            <span className={styles.specLabel}>
-              <Users size={12} aria-hidden="true" />
-              Passengers
-            </span>
-            <strong className={styles.specValue}>{vehicle.capacity} Seats</strong>
-          </div>
-          <div className={styles.specBox}>
-            <span className={styles.specLabel}>
-              <Briefcase size={12} aria-hidden="true" />
-              Luggage
-            </span>
-            <strong className={styles.specValue}>{vehicle.luggage_capacity} Bags</strong>
-          </div>
-          <div className={styles.specBox}>
-            <span className={styles.specLabel}>
-              <ShieldCheck size={12} aria-hidden="true" />
-              Category
-            </span>
-            <strong className={styles.specValue}>{vehicle.category}</strong>
-          </div>
+
+          {photos.length > 1 ? (
+            <div className={styles.featuredVehicleAngleRow} role="tablist" aria-label="Vehicle photo angles">
+              {photos.map((photo) => (
+                <button
+                  key={photo.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={activePhoto?.key === photo.key}
+                  className={`${styles.featuredAngleBtn} ${
+                    activePhoto?.key === photo.key ? styles.featuredAngleBtnActive : ""
+                  }`}
+                  onClick={() => setAngle(photo.key)}
+                >
+                  {photo.shortLabel}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
-        {!readOnly ? (
-          <div className={styles.pricingPanel}>
-            <div className={styles.pricingPanelHead}>
-              <span className={styles.pricingPanelTitle}>
-                <DollarSign size={14} aria-hidden="true" />
-                Vehicle Standard Prices ($ &amp; TSh)
-              </span>
-              <Link href="/driver/price/" className={styles.pricingManageLink}>
-                All route prices →
-              </Link>
-            </div>
-            <div className={styles.pricingTiersGrid}>
-              <div className={styles.pricingTierCard}>
-                <span className={styles.pricingTierLabel}>One-way</span>
-                {vehicle.one_way_price_usd != null ? (
-                  <>
-                    <strong className={styles.pricingTierUsd}>
-                      {formatUsd(vehicle.one_way_price_usd)}
-                    </strong>
-                    <span className={styles.pricingTierTzs}>
-                      {formatTzs(vehicle.one_way_price_tzs ?? usdToTzs(vehicle.one_way_price_usd))}
-                    </span>
-                  </>
-                ) : (
-                  <span className={styles.pricingTierUnset}>Uses route table</span>
-                )}
-              </div>
-              <div className={styles.pricingTierCard}>
-                <span className={styles.pricingTierLabel}>Wait &amp; return</span>
-                {vehicle.wait_return_price_usd != null ? (
-                  <>
-                    <strong className={styles.pricingTierUsd}>
-                      {formatUsd(vehicle.wait_return_price_usd)}
-                    </strong>
-                    <span className={styles.pricingTierTzs}>
-                      {formatTzs(
-                        vehicle.wait_return_price_tzs ?? usdToTzs(vehicle.wait_return_price_usd),
-                      )}
-                    </span>
-                  </>
-                ) : (
-                  <span className={styles.pricingTierUnset}>Uses route table</span>
-                )}
-              </div>
-              <div className={styles.pricingTierCard}>
-                <span className={styles.pricingTierLabel}>Full day Private charter</span>
-                {vehicle.full_day_price_usd != null ? (
-                  <>
-                    <strong className={styles.pricingTierUsd}>
-                      {formatUsd(vehicle.full_day_price_usd)}
-                    </strong>
-                    <span className={styles.pricingTierTzs}>
-                      {formatTzs(
-                        vehicle.full_day_price_tzs ?? usdToTzs(vehicle.full_day_price_usd),
-                      )}
-                    </span>
-                  </>
-                ) : (
-                  <span className={styles.pricingTierUnset}>Uses route table</span>
-                )}
-              </div>
+        {/* Bottom Gradient Sheet with Transport Details */}
+        <div className={styles.featuredVehicleSheet}>
+          <div className={styles.featuredVehicleTitleRow}>
+            <div>
+              <h2 className={styles.featuredVehicleTitle}>{vehicle.name}</h2>
+              <p className={styles.featuredVehicleSub}>
+                {readOnly
+                  ? `Assigned by ${companyName || "your company"} · Updated ${formatDateLabel(vehicle.updated_at)}`
+                  : `Registered directly by you · Updated ${formatDateLabel(vehicle.updated_at)}`}
+              </p>
             </div>
           </div>
-        ) : null}
 
+          <div className={styles.featuredVehicleSpecs}>
+            <span className={styles.featuredVehicleChip}>
+              <Car size={13} aria-hidden="true" />
+              {vehicle.plate_number}
+            </span>
+            <span className={styles.featuredVehicleChip}>
+              <Users size={13} aria-hidden="true" />
+              {vehicle.capacity} Seats
+            </span>
+            <span className={styles.featuredVehicleChip}>
+              <Briefcase size={13} aria-hidden="true" />
+              {vehicle.luggage_capacity} Bags
+            </span>
+            <span className={styles.featuredVehicleChip}>
+              <ShieldCheck size={13} aria-hidden="true" />
+              {readOnly ? "Company managed" : "1 / 1 registered"}
+            </span>
+          </div>
+
+          {!readOnly ? (
+            <div className={styles.featuredVehiclePrices}>
+              <div className={styles.featuredVehiclePriceItems}>
+                <div className={styles.featuredVehiclePriceItem}>
+                  <span className={styles.featuredVehiclePriceLabel}>One-way</span>
+                  {vehicle.one_way_price_usd != null ? (
+                    <span className={styles.featuredVehiclePriceVal}>
+                      {formatUsd(vehicle.one_way_price_usd)}{" "}
+                      <span className={styles.featuredVehiclePriceSub}>
+                        ({formatTzs(vehicle.one_way_price_tzs ?? usdToTzs(vehicle.one_way_price_usd))})
+                      </span>
+                    </span>
+                  ) : (
+                    <span className={styles.featuredVehiclePriceSub}>Route table</span>
+                  )}
+                </div>
+
+                <div className={styles.featuredVehiclePriceItem}>
+                  <span className={styles.featuredVehiclePriceLabel}>Wait &amp; return</span>
+                  {vehicle.wait_return_price_usd != null ? (
+                    <span className={styles.featuredVehiclePriceVal}>
+                      {formatUsd(vehicle.wait_return_price_usd)}{" "}
+                      <span className={styles.featuredVehiclePriceSub}>
+                        ({formatTzs(vehicle.wait_return_price_tzs ?? usdToTzs(vehicle.wait_return_price_usd))})
+                      </span>
+                    </span>
+                  ) : (
+                    <span className={styles.featuredVehiclePriceSub}>Route table</span>
+                  )}
+                </div>
+
+                <div className={styles.featuredVehiclePriceItem}>
+                  <span className={styles.featuredVehiclePriceLabel}>Full day</span>
+                  {vehicle.full_day_price_usd != null ? (
+                    <span className={styles.featuredVehiclePriceVal}>
+                      {formatUsd(vehicle.full_day_price_usd)}{" "}
+                      <span className={styles.featuredVehiclePriceSub}>
+                        ({formatTzs(vehicle.full_day_price_tzs ?? usdToTzs(vehicle.full_day_price_usd))})
+                      </span>
+                    </span>
+                  ) : (
+                    <span className={styles.featuredVehiclePriceSub}>Route table</span>
+                  )}
+                </div>
+              </div>
+
+              <Link href="/driver/price/" className={styles.featuredVehiclePriceLink}>
+                <DollarSign size={12} aria-hidden="true" />
+                Route prices →
+              </Link>
+            </div>
+          ) : null}
+
+          <footer className={styles.featuredVehicleActions}>
+            {!readOnly && onEdit && onRequestDelete ? (
+              <>
+                <span className={styles.featuredReadonlyNote}>
+                  <Info size={13} aria-hidden="true" />
+                  1 vehicle slot active
+                </span>
+                <div className={styles.featuredVehicleActionBtns}>
+                  <button type="button" className={styles.featuredEditBtn} onClick={onEdit}>
+                    <Pencil size={14} aria-hidden="true" />
+                    Edit Vehicle
+                  </button>
+                  <button type="button" className={styles.featuredDeleteBtn} onClick={onRequestDelete}>
+                    <Trash2 size={14} aria-hidden="true" />
+                    Delete
+                  </button>
+                </div>
+              </>
+            ) : (
+              <span className={styles.featuredReadonlyNote}>
+                <Lock size={13} aria-hidden="true" />
+                View only — managed by {companyName || "your company"}.
+              </span>
+            )}
+          </footer>
+        </div>
+      </article>
+
+      {/* COMPANION DETAILS PANEL (Description, Amenities & Assigned Services) */}
+      <section className={styles.featuredDetailsPanel} aria-label="Vehicle amenities and details">
         {vehicle.description ? <p className={styles.descriptionBox}>{vehicle.description}</p> : null}
 
         <div className={styles.amenitiesGrid}>
@@ -360,34 +352,8 @@ function VehicleShowcaseCard({
             </span>
           </div>
         ) : null}
-      </div>
-
-      {!readOnly && onEdit && onRequestDelete ? (
-        <footer className={styles.vehicleFooter}>
-          <span className={styles.vehicleFooterNote}>
-            <Info size={14} aria-hidden="true" />
-            1 vehicle limit active — edit details or delete to register another vehicle.
-          </span>
-          <div className={styles.vehicleFooterActions}>
-            <button type="button" className={ws.btnPrimary} onClick={onEdit}>
-              <Pencil size={15} aria-hidden="true" />
-              Edit Vehicle
-            </button>
-            <button type="button" className={styles.btnDanger} onClick={onRequestDelete}>
-              <Trash2 size={15} aria-hidden="true" />
-              Delete Vehicle
-            </button>
-          </div>
-        </footer>
-      ) : (
-        <footer className={styles.vehicleFooter}>
-          <span className={styles.vehicleFooterNote}>
-            <Lock size={14} aria-hidden="true" />
-            View only — edits and removal are managed by {companyName || "your company"}.
-          </span>
-        </footer>
-      )}
-    </article>
+      </section>
+    </div>
   );
 }
 
