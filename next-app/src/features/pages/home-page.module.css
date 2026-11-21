@@ -85,11 +85,25 @@
 
 .hireGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.hireGridTriple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.hireGridDouble {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.hireGridSingle {
+  grid-template-columns: minmax(0, 420px);
 }
 
 .hireCard {
@@ -177,15 +191,15 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px 18px 18px;
+  gap: 12px;
+  padding: 15px 15px 16px;
 }
 
 .hireTopRow {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
 .hireNameGroup {
@@ -195,10 +209,10 @@
   min-width: 0;
 }
 
-.hireVehicle {
+.hireSection .hireVehicle {
   margin: 0;
   color: #0a0a2a;
-  font-size: 1.12rem;
+  font-size: 1.02rem;
   font-weight: 800;
   line-height: 1.25;
   overflow-wrap: anywhere;
@@ -209,8 +223,8 @@
   margin: 0;
   overflow: hidden;
   color: #5b6475;
-  font-size: 0.84rem;
-  line-height: 1.45;
+  font-size: 0.81rem;
+  line-height: 1.42;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -220,7 +234,7 @@
   flex: none;
   flex-direction: column;
   align-items: flex-end;
-  padding: 7px 11px;
+  padding: 6px 9px;
   border-radius: var(--travel-radius-md, 12px);
   background: rgba(8, 66, 140, 0.07);
   text-align: right;
@@ -296,20 +310,46 @@
 }
 
 .hireCompanyName {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   color: #2b3445;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-overflow: ellipsis;
   text-transform: capitalize;
   white-space: nowrap;
 }
 
+.hireCompanyRating,
+.hireCompanyBookings {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--travel-radius-pill, 999px);
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.hireCompanyRating {
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+}
+
+.hireCompanyBookings {
+  border: 1px solid rgba(8, 66, 140, 0.16);
+  background: rgba(8, 66, 140, 0.06);
+  color: #08428c;
+}
+
 .hireActions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 8px;
   margin-top: auto;
 }
 
@@ -318,11 +358,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 0 14px;
+  gap: 5px;
+  box-sizing: border-box;
+  min-height: 42px;
+  padding: 0 10px;
   border-radius: var(--travel-radius-md, 12px);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 750;
   text-decoration: none;
   white-space: nowrap;
@@ -383,9 +424,14 @@
   font-size: 0.92rem;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
   .hireGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .hireGridSingle {
+    grid-template-columns: minmax(0, 420px);
   }
 }
 
@@ -756,14 +802,110 @@
   outline-offset: 3px;
 }
 
+.tripActionLabelFull {
+  display: inline;
+}
+
+.tripActionLabelShort {
+  display: none;
+}
+
 @media (max-width: 820px) {
   .tripsGrid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .tripOptionCard {
+    padding: 18px 16px;
+    gap: 14px;
   }
 
   .tripOptionCard:hover {
     transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .tripsSection {
+    margin-top: 24px;
+  }
+
+  .tripsHeader {
+    margin-bottom: 14px;
+  }
+
+  .tripsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .tripOptionCard {
+    padding: 13px 12px;
+    gap: 9px;
+    border-radius: 16px;
+  }
+
+  .tripOptionTop {
+    gap: 6px;
+  }
+
+  .tripOptionIconLight,
+  .tripOptionIconDark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .tripOptionBadgeLight,
+  .tripOptionBadgeDark {
+    display: none;
+  }
+
+  .tripOptionCopy {
+    gap: 5px;
+  }
+
+  .tripsSection .tripOptionTitleLight,
+  .tripsSection .tripOptionTitleDark {
+    font-size: 0.88rem;
+    line-height: 1.22;
+  }
+
+  .tripOptionDescLight,
+  .tripOptionDescDark {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .tripOptionListLight,
+  .tripOptionListDark {
+    display: none;
+  }
+
+  .tripOptionFooter {
+    padding-top: 2px;
+  }
+
+  .tripActionLight,
+  .tripActionDark {
+    min-height: 36px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    font-size: 0.74rem;
+    gap: 4px;
+  }
+
+  .tripActionLabelFull {
+    display: none;
+  }
+
+  .tripActionLabelShort {
+    display: inline;
   }
 }
 
