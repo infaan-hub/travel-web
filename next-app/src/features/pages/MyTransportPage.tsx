@@ -15,7 +15,6 @@ import {
   CalendarDays,
   Car,
   CheckCircle2,
-  ClipboardList,
   Clock,
   ExternalLink,
   Loader2,
@@ -33,11 +32,9 @@ import {
 import {
   transportBookingsAPI,
   transportReviewsAPI,
-  transportTripRequestsAPI,
 } from "@/lib/api/client";
 import { useToast } from "@/components/ToastProvider";
 import { useAuth } from "@/context/AuthContext";
-import { PageHero } from "@/components/PageHero";
 import { getImageUrl } from "@/lib/utils/image-url";
 import styles from "@/features/pages/my-transport.module.css";
 
@@ -97,29 +94,6 @@ type TransportBookingItem = {
     name: string;
     slug: string;
     contact_phone?: string | null;
-  } | null;
-};
-
-type CustomTripRequestItem = {
-  id: number;
-  origin: string;
-  destination: string;
-  travel_date?: string | null;
-  travelDate?: string | null;
-  pickup_time?: string | null;
-  pickupTime?: string | null;
-  passengers: number;
-  luggage?: number;
-  distance_km?: number | null;
-  distanceKm?: number | null;
-  duration_mins?: number | null;
-  durationMins?: number | null;
-  notes?: string | null;
-  status: string;
-  bookings?: { id: number }[];
-  driver?: {
-    name: string;
-    phone?: string | null;
   } | null;
 };
 
@@ -200,7 +174,6 @@ export default function MyTransportPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
 
   const [bookings, setBookings] = useState<TransportBookingItem[]>([]);
-  const [requests, setRequests] = useState<CustomTripRequestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<StatusFilter>("all");
@@ -216,25 +189,11 @@ export default function MyTransportPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const fetchTransportData = useCallback(async () => {
-    const [bRes, rRes] = await Promise.all([
-      transportBookingsAPI.getAll().catch(() => ({ data: [] })),
-      transportTripRequestsAPI.getAll().catch(() => ({ data: [] })),
-    ]);
-
+    const bRes = await transportBookingsAPI.getAll().catch(() => ({ data: [] }));
     const nextBookings: TransportBookingItem[] = Array.isArray(bRes.data)
       ? bRes.data
       : bRes.data?.results || [];
-    const rawRequests: CustomTripRequestItem[] = Array.isArray(rRes.data)
-      ? rRes.data
-      : rRes.data?.results || [];
-
-    // Trip-first bookings create a linked trip request. Keep the booking as
-    // the single visible record instead of showing the same journey twice.
-    const standaloneRequests = rawRequests.filter(
-      (request) => !Array.isArray(request.bookings) || request.bookings.length === 0,
-    );
-
-    return { nextBookings, standaloneRequests };
+    return nextBookings;
   }, []);
 
   useEffect(() => {
@@ -246,10 +205,9 @@ export default function MyTransportPage() {
 
     let active = true;
     fetchTransportData()
-      .then(({ nextBookings, standaloneRequests }) => {
+      .then((nextBookings) => {
         if (!active) return;
         setBookings(nextBookings);
-        setRequests(standaloneRequests);
       })
       .catch((err: unknown) => {
         if (!active) return;
@@ -277,9 +235,8 @@ export default function MyTransportPage() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      const { nextBookings, standaloneRequests } = await fetchTransportData();
+      const nextBookings = await fetchTransportData();
       setBookings(nextBookings);
-      setRequests(standaloneRequests);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Could not refresh transport trips";
       toast.error(msg);
@@ -370,68 +327,8 @@ export default function MyTransportPage() {
 
   return (
     <div id="my-transport-root" className={`page ${styles.page}`}>
-      <PageHero
-        eyebrow="My Transport"
-        title="Track your bookings and trip requests"
-        subtitle="Review routes, schedules, assigned vehicles, and live status updates for your private hire trips."
-        backgroundImageKey="feature"
-        patternImageKey="thumb"
-        ctaPrimary={{ label: "Book private hire", href: "/transport/" }}
-        ctaSecondary={{ label: "Request custom trip", href: "/trip-request/" }}
-      />
-
       <div className={styles.content}>
-        {/* KPI Summary Strip */}
-        <section className={styles.statsGrid} aria-label="Transport summary">
-          <article className={styles.statCard}>
-            <span className={styles.statIcon} aria-hidden="true">
-              <Car size={20} />
-            </span>
-            <div className={styles.statCopy}>
-              <span className={styles.statLabel}>Private hire bookings</span>
-              <strong className={styles.statValue}>
-                {loading ? "—" : bookings.length}
-              </strong>
-              <span className={styles.statSub}>
-                {bookings.length === 1 ? "Booked vehicle trip" : "Booked vehicle trips"}
-              </span>
-            </div>
-          </article>
-
-          <article className={styles.statCard}>
-            <span
-              className={`${styles.statIcon} ${styles.statIconAmber}`}
-              aria-hidden="true"
-            >
-              <Clock size={20} />
-            </span>
-            <div className={styles.statCopy}>
-              <span className={styles.statLabel}>Active &amp; pending</span>
-              <strong className={styles.statValue}>
-                {loading ? "—" : activeBookingsCount}
-              </strong>
-              <span className={styles.statSub}>Awaiting or upcoming journeys</span>
-            </div>
-          </article>
-
-          <article className={styles.statCard}>
-            <span
-              className={`${styles.statIcon} ${styles.statIconEmerald}`}
-              aria-hidden="true"
-            >
-              <ClipboardList size={20} />
-            </span>
-            <div className={styles.statCopy}>
-              <span className={styles.statLabel}>Custom trip requests</span>
-              <strong className={styles.statValue}>
-                {loading ? "—" : requests.length}
-              </strong>
-              <span className={styles.statSub}>Open public driver requests</span>
-            </div>
-          </article>
-        </section>
-
-        {/* SECTION 1: Private Hire Bookings */}
+        {/* Private Hire Bookings */}
         <section className={styles.section} aria-labelledby="private-hire-heading">
           <header className={styles.sectionHead}>
             <div className={styles.sectionTitleGroup}>
@@ -440,9 +337,9 @@ export default function MyTransportPage() {
                 Booked vehicles
               </span>
               <div className={styles.sectionTitleRow}>
-                <h2 id="private-hire-heading" className={styles.sectionTitle}>
+                <h1 id="private-hire-heading" className={styles.sectionTitle}>
                   Private Hire Bookings
-                </h2>
+                </h1>
                 {!loading ? (
                   <span className={styles.countBadge}>
                     {filteredBookings.length}{" "}
@@ -794,160 +691,6 @@ export default function MyTransportPage() {
                           ) : null}
                         </div>
                       </footer>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* SECTION 2: Custom Trip Requests */}
-        <section className={styles.section} aria-labelledby="custom-requests-heading">
-          <header className={styles.sectionHead}>
-            <div className={styles.sectionTitleGroup}>
-              <span className={styles.sectionEyebrow}>
-                <ClipboardList size={13} aria-hidden="true" />
-                Open driver network
-              </span>
-              <div className={styles.sectionTitleRow}>
-                <h2 id="custom-requests-heading" className={styles.sectionTitle}>
-                  Custom Trip Requests
-                </h2>
-                {!loading ? (
-                  <span className={styles.countBadge}>
-                    {requests.length}{" "}
-                    {requests.length === 1 ? "request" : "requests"}
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          </header>
-
-          {loading ? null : requests.length === 0 ? (
-            <div className={styles.emptyCard}>
-              <span className={styles.emptyIcon} aria-hidden="true">
-                <ClipboardList size={24} />
-              </span>
-              <h3 className={styles.emptyTitle}>No custom trip requests yet</h3>
-              <p className={styles.emptyCopy}>
-                Want approved independent drivers across Zanzibar to respond to
-                a custom itinerary? Post a custom trip request anytime.
-              </p>
-              <Link href="/trip-request/" className={styles.emptyCta}>
-                Create a custom trip request
-                <ArrowRight size={15} aria-hidden="true" />
-              </Link>
-            </div>
-          ) : (
-            <div className={styles.featuredGrid}>
-              {requests.map((request) => {
-                const travelDate = request.travel_date ?? request.travelDate;
-                const pickupTime = request.pickup_time ?? request.pickupTime;
-                const journey = [
-                  formatDistance(request.distance_km ?? request.distanceKm),
-                  formatDuration(request.duration_mins ?? request.durationMins),
-                ]
-                  .filter(Boolean)
-                  .join(" · ");
-                const meta = STATUS_META[request.status] ?? {
-                  label: request.status.replaceAll("_", " "),
-                  hint: "Custom trip request.",
-                };
-
-                return (
-                  <article key={request.id} className={styles.featuredCard}>
-                    <div className={styles.featuredBgMedia}>
-                      <div className={styles.featuredBgFallback}>
-                        <Navigation size={52} aria-hidden="true" />
-                      </div>
-                    </div>
-                    <span className={styles.featuredTopScrim} aria-hidden="true" />
-
-                    <div className={styles.featuredTopBar}>
-                      <div className={styles.featuredTopLeft}>
-                        <span className={styles.featuredRefPill}>REQ-{request.id}</span>
-                      </div>
-                      <div className={styles.featuredTopRight}>
-                        <span
-                          className={`${styles.statusBadge} ${statusClassName(
-                            request.status,
-                          )}`}
-                        >
-                          <span className={styles.statusDot} aria-hidden="true" />
-                          {meta.label}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className={styles.featuredSheet}>
-                      <div className={styles.featuredTitleGroup}>
-                        <span className={styles.featuredCompanyLabel}>Open driver network</span>
-                        <h3 className={styles.featuredTitle}>
-                          {request.origin} → {request.destination}
-                        </h3>
-                      </div>
-
-                      <div className={styles.featuredRouteBox}>
-                        <div className={styles.featuredRouteFlow}>
-                          <span className={styles.featuredPinA} aria-hidden="true">A</span>
-                          <span className={styles.featuredStopName}>{request.origin}</span>
-                          <span className={styles.featuredRouteArrow} aria-hidden="true">→</span>
-                          <span className={styles.featuredPinB} aria-hidden="true">B</span>
-                          <span className={styles.featuredStopName}>{request.destination}</span>
-                        </div>
-                        {journey ? (
-                          <span className={styles.featuredJourneyPill}>
-                            <Navigation size={12} aria-hidden="true" />
-                            {journey}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className={styles.featuredSpecsRow}>
-                        <span className={styles.featuredChip}>
-                          <CalendarDays size={13} aria-hidden="true" />
-                          {formatTravelDate(travelDate)}
-                        </span>
-                        <span className={styles.featuredChip}>
-                          <Clock size={13} aria-hidden="true" />
-                          {pickupTime || "Flexible"}
-                        </span>
-                        <span className={styles.featuredChip}>
-                          <Users size={13} aria-hidden="true" />
-                          {request.passengers} pax
-                        </span>
-                        <span className={styles.featuredChip}>
-                          <ClipboardList size={13} aria-hidden="true" />
-                          {request.luggage ?? 0} {(request.luggage ?? 0) === 1 ? "bag" : "bags"}
-                        </span>
-                      </div>
-
-                      {request.notes?.trim() ? (
-                        <p className={styles.featuredNotes}>{request.notes}</p>
-                      ) : null}
-
-                      {request.driver ? (
-                        <div className={styles.featuredDriverStrip}>
-                          <span className={styles.badgeRow}>
-                            <UserCheck size={14} aria-hidden="true" />
-                            Accepted by <strong>{request.driver.name}</strong>
-                          </span>
-                          {request.driver.phone ? (
-                            <a href={`tel:${request.driver.phone.replace(/\D/g, "")}`}>
-                              <Phone size={13} aria-hidden="true" />
-                              {request.driver.phone}
-                            </a>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <footer className={styles.featuredFooter}>
-                          <span className={styles.featuredHint}>
-                            <ShieldCheck size={14} aria-hidden="true" />
-                            {meta.hint}
-                          </span>
-                        </footer>
-                      )}
                     </div>
                   </article>
                 );

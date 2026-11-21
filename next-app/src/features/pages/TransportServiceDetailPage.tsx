@@ -6,16 +6,13 @@ import Image from "next/image";
 import {
   ArrowLeft,
   Briefcase,
-  Building2,
   CalendarCheck2,
   Car,
   CheckCircle2,
   Loader2,
   Mail,
-  MessageCircle,
   Phone,
   ShieldCheck,
-  UserCheck,
   Users,
   XCircle,
 } from "lucide-react";
@@ -363,53 +360,6 @@ export default function TransportServiceDetailPage({ id }: Props) {
             </section>
           ) : null}
         </main>
-
-        <aside className={styles.aside}>
-          <div className={styles.bookingCard}>
-            <span className={styles.asideKicker}>Starting price</span>
-            <p className={styles.asidePrice}>
-              ${service.price}
-              <span>/ {pricingLabel}</span>
-            </p>
-            {vehicle ? (
-              <p className={styles.asideNote}>
-                {vehicle.name} · up to {vehicle.capacity} passengers and {vehicle.luggage_capacity} bags
-              </p>
-            ) : null}
-
-            <Link href={`/booking/${service.id}/`} className={styles.bookAction}>
-              Book This Service
-            </Link>
-
-            {company?.contact_phone ? (
-              <div className={styles.contactActions}>
-                <a href={`tel:${phoneDigits(company.contact_phone)}`} className={styles.contactLink}>
-                  <Phone size={16} /> Call provider
-                </a>
-                <a
-                  href={`https://wa.me/${phoneDigits(company.contact_phone)}`}
-                  className={styles.contactLink}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <MessageCircle size={16} /> WhatsApp
-                </a>
-              </div>
-            ) : null}
-
-            {company ? (
-              <Link href={`/company/${company.slug}/`} className={styles.providerLink}>
-                <Building2 size={16} /> View provider profile
-              </Link>
-            ) : null}
-
-            {driver ? (
-              <p className={styles.driverNote}>
-                <UserCheck size={15} /> Driver: {driverName}
-              </p>
-            ) : null}
-          </div>
-        </aside>
       </div>
     </div>
   );

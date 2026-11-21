@@ -37,7 +37,6 @@ import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
 import { getImageUrl } from "@/lib/utils/image-url";
 import { tripPlaceNameForCoords } from "@/lib/trips";
 import { useToast } from "@/components/ToastProvider";
-import { PageHero } from "@/components/PageHero";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import ZanzibarAttractions from "@/components/ZanzibarAttractions";
 import type { PlaceSuggestion } from "@/lib/place-types";
@@ -636,33 +635,6 @@ export default function TripsPage() {
 
   return (
     <div id="trips-hub-root" className={`page ${styles.page}`}>
-      <PageHero
-        eyebrow="Zanzibar trip planner"
-        title="Measure trips & explore Zanzibar"
-        subtitle="Measure live driving distance and travel time between any two Zanzibar locations, browse suggested destinations, most-booked and top-rated journeys, and save your favorites."
-        backgroundImageKey="feature"
-        patternImageKey="thumb"
-        ctaPrimary={{ label: "Book private hire", href: "/transport/" }}
-        ctaSecondary={{ label: "Request custom trip", href: "/trip-request/" }}
-      >
-        <div className={styles.heroStats}>
-          <span className={styles.heroStatPill}>
-            <strong>1,096+</strong> Zanzibar places
-          </span>
-          <span className={styles.heroStatPill}>
-            <strong>
-              {loadingTrips
-                ? "—"
-                : trips.length + CURATED_TOP_RATED_TRIPS.length}
-            </strong>{" "}
-            Trips &amp; routes
-          </span>
-          <span className={styles.heroStatPill}>
-            <strong>{favorites.length}</strong> Saved favorites
-          </span>
-        </div>
-      </PageHero>
-
       <div className={styles.content}>
         {/* QUICK SECTION JUMP BAR */}
         <nav className={styles.jumpNav} aria-label="Trips sections">

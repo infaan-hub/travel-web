@@ -22,12 +22,9 @@ import {
   Navigation,
   Phone,
   RefreshCw,
-  Search,
   Shield,
   Users,
-  X,
 } from "@/components/icons";
-import { PageHero } from "@/components/PageHero";
 import { PRICING_LABELS } from "@/features/transport/private-hire-data";
 import styles from "@/features/pages/companies-page.module.css";
 
@@ -70,11 +67,9 @@ type Company = {
   services?: CompanyPrivateService[];
 };
 
-type SortMode = "name" | "services" | "trips";
 type ViewMode = "grid" | "list";
 
 const PAGE_SIZE = 12;
-const DEFAULT_REGION_SUGGESTIONS = ["Zanzibar", "Unguja", "Stone Town", "Dar es Salaam", "Arusha"];
 
 function formatLocation(company: Company): string {
   const parts = [company.locality, company.district, company.region, company.country]
@@ -140,32 +135,12 @@ export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [regionInput, setRegionInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [debouncedRegion, setDebouncedRegion] = useState("");
-  const [sortBy, setSortBy] = useState<SortMode>("name");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [knownRegions, setKnownRegions] = useState<string[]>([]);
 
   const requestSeqRef = useRef(0);
   const directoryTopRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDebouncedSearch(searchInput.trim());
-    }, 220);
-    return () => window.clearTimeout(timer);
-  }, [searchInput]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDebouncedRegion(regionInput.trim());
-    }, 220);
-    return () => window.clearTimeout(timer);
-  }, [regionInput]);
 
   const load = useCallback(async () => {
     const reqId = ++requestSeqRef.current;
@@ -173,8 +148,6 @@ export default function CompaniesPage() {
       page,
       page_size: PAGE_SIZE,
     };
-    if (debouncedSearch) params.search = debouncedSearch;
-    if (debouncedRegion) params.region = debouncedRegion;
 
     const cacheKey = `travel.companies.v2.${JSON.stringify(params)}`;
     const cached = readClientCache<{ companies: Company[]; total: number }>(cacheKey);
@@ -201,20 +174,6 @@ export default function CompaniesPage() {
       setCompanies(nextCompanies);
       setTotal(nextTotal);
       writeClientCache(cacheKey, { companies: nextCompanies, total: nextTotal });
-
-      const discoveredRegions = nextCompanies
-        .map((item) => item.region?.trim() || "")
-        .filter(Boolean);
-      if (discoveredRegions.length > 0) {
-        setKnownRegions((prev) => {
-          const merged = new Map<string, string>();
-          for (const entry of [...prev, ...discoveredRegions]) {
-            const key = entry.toLowerCase();
-            if (!merged.has(key)) merged.set(key, entry);
-          }
-          return Array.from(merged.values());
-        });
-      }
     } catch (err) {
       if (reqId !== requestSeqRef.current) return;
       console.error(err);
@@ -228,67 +187,16 @@ export default function CompaniesPage() {
         setLoading(false);
       }
     }
-  }, [debouncedSearch, debouncedRegion, page]);
+  }, [page]);
 
   useEffect(() => {
     void load(); // eslint-disable-line react-hooks/set-state-in-effect
   }, [load]);
 
-  const sortedCompanies = useMemo(() => {
-    if (sortBy === "services") {
-      return [...companies].sort(
-        (a, b) => (b.services_count ?? 0) - (a.services_count ?? 0) || a.name.localeCompare(b.name),
-      );
-    }
-    if (sortBy === "trips") {
-      return [...companies].sort(
-        (a, b) => (b.trips_count ?? 0) - (a.trips_count ?? 0) || a.name.localeCompare(b.name),
-      );
-    }
-    return companies;
-  }, [companies, sortBy]);
-
-  const quickRegionOptions = useMemo(() => {
-    const merged = new Map<string, string>();
-    for (const candidate of [...knownRegions, ...DEFAULT_REGION_SUGGESTIONS]) {
-      const cleaned = candidate.trim();
-      if (!cleaned) continue;
-      const key = cleaned.toLowerCase();
-      if (!merged.has(key)) merged.set(key, cleaned);
-      if (merged.size >= 6) break;
-    }
-    return Array.from(merged.values());
-  }, [knownRegions]);
-
-  const aggregateStats = useMemo(() => {
-    return companies.reduce(
-      (acc, item) => ({
-        services: acc.services + (item.services_count ?? 0),
-        trips: acc.trips + (item.trips_count ?? 0),
-      }),
-      { services: 0, trips: 0 },
-    );
-  }, [companies]);
+  const sortedCompanies = companies;
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers = useMemo(() => buildPageNumbers(page, totalPages), [page, totalPages]);
-  const hasFilters = Boolean(searchInput.trim() || regionInput.trim());
-
-  const handleSelectRegionChip = (selected: string) => {
-    const next = regionInput.trim().toLowerCase() === selected.toLowerCase() ? "" : selected;
-    setRegionInput(next);
-    setDebouncedRegion(next);
-    setPage(1);
-  };
-
-  const handleResetFilters = () => {
-    setSearchInput("");
-    setRegionInput("");
-    setDebouncedSearch("");
-    setDebouncedRegion("");
-    setSortBy("name");
-    setPage(1);
-  };
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
@@ -297,170 +205,7 @@ export default function CompaniesPage() {
 
   return (
     <div id="companies-directory-root" className={`page ${styles.page}`}>
-      <PageHero
-        eyebrow="Verified tourism & transport providers"
-        title="Meet the companies behind every journey"
-        subtitle="Compare vetted local operators, service areas, active vehicles, and published trips before you book."
-        backgroundImageKey="feature"
-        patternImageKey="thumb"
-        ctaPrimary={{ label: "Browse private hire", href: "/transport/" }}
-        ctaSecondary={{ label: "Measure & plan trips", href: "/trips/" }}
-      >
-        <div className={styles.heroStats}>
-          <span className={styles.heroStatPill}>
-            <strong>{loading ? "—" : total}</strong>{" "}
-            {total === 1 ? "Listed company" : "Listed companies"}
-          </span>
-          <span className={styles.heroStatPill}>
-            <strong>{loading ? "—" : aggregateStats.services}</strong>{" "}
-            {aggregateStats.services === 1 ? "Private-hire service" : "Private-hire services"}
-          </span>
-          <span className={styles.heroStatPill}>
-            <strong>{loading ? "—" : aggregateStats.trips}</strong>{" "}
-            {aggregateStats.trips === 1 ? "Published trip" : "Published trips"}
-          </span>
-        </div>
-      </PageHero>
-
       <div className={styles.content} ref={directoryTopRef}>
-        {/* ELEVATED SEARCH & FILTER COMMAND BAR */}
-        <section className={styles.toolbarCard} aria-label="Filter companies">
-          <div className={styles.toolbarFields}>
-            <div className={styles.fieldGroup}>
-              <label htmlFor="companies-search" className={styles.fieldLabel}>
-                Search operators
-              </label>
-              <div className={styles.inputShell}>
-                <span className={styles.inputIcon} aria-hidden="true">
-                  <Search size={17} />
-                </span>
-                <input
-                  id="companies-search"
-                  type="search"
-                  className={styles.textInput}
-                  value={searchInput}
-                  onChange={(event) => {
-                    setPage(1);
-                    setSearchInput(event.target.value);
-                  }}
-                  placeholder="Company name, locality, or service…"
-                />
-                {searchInput ? (
-                  <button
-                    type="button"
-                    className={styles.clearFieldBtn}
-                    aria-label="Clear search"
-                    onClick={() => {
-                      setSearchInput("");
-                      setDebouncedSearch("");
-                      setPage(1);
-                    }}
-                  >
-                    <X size={15} aria-hidden="true" />
-                  </button>
-                ) : null}
-              </div>
-            </div>
-
-            <div className={styles.fieldGroup}>
-              <label htmlFor="companies-region" className={styles.fieldLabel}>
-                Region
-              </label>
-              <div className={styles.inputShell}>
-                <span className={styles.inputIcon} aria-hidden="true">
-                  <MapPin size={17} />
-                </span>
-                <input
-                  id="companies-region"
-                  type="text"
-                  className={styles.textInput}
-                  value={regionInput}
-                  onChange={(event) => {
-                    setPage(1);
-                    setRegionInput(event.target.value);
-                  }}
-                  placeholder="e.g. Zanzibar, Unguja, Arusha"
-                />
-                {regionInput ? (
-                  <button
-                    type="button"
-                    className={styles.clearFieldBtn}
-                    aria-label="Clear region filter"
-                    onClick={() => {
-                      setRegionInput("");
-                      setDebouncedRegion("");
-                      setPage(1);
-                    }}
-                  >
-                    <X size={15} aria-hidden="true" />
-                  </button>
-                ) : null}
-              </div>
-            </div>
-
-            <div className={styles.fieldGroup}>
-              <label htmlFor="companies-sort" className={styles.fieldLabel}>
-                Sort by
-              </label>
-              <select
-                id="companies-sort"
-                className={styles.selectInput}
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value as SortMode)}
-              >
-                <option value="name">Name (A–Z)</option>
-                <option value="services">Most private-hire services</option>
-                <option value="trips">Most published trips</option>
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.toolbarBottom}>
-            <div className={styles.regionChips} role="group" aria-label="Quick region filters">
-              <span className={styles.regionChipsLabel}>Regions:</span>
-              <button
-                type="button"
-                className={`${styles.regionChip} ${
-                  !regionInput.trim() ? styles.regionChipActive : ""
-                }`}
-                aria-pressed={!regionInput.trim()}
-                onClick={() => {
-                  setRegionInput("");
-                  setDebouncedRegion("");
-                  setPage(1);
-                }}
-              >
-                All
-              </button>
-              {quickRegionOptions.map((option) => {
-                const isActive = regionInput.trim().toLowerCase() === option.toLowerCase();
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    className={`${styles.regionChip} ${isActive ? styles.regionChipActive : ""}`}
-                    aria-pressed={isActive}
-                    onClick={() => handleSelectRegionChip(option)}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
-            </div>
-
-            {hasFilters ? (
-              <button
-                type="button"
-                className={styles.resetFiltersBtn}
-                onClick={handleResetFilters}
-              >
-                <X size={14} aria-hidden="true" />
-                Reset filters
-              </button>
-            ) : null}
-          </div>
-        </section>
-
         {/* DIRECTORY SECTION HEADER */}
         <header className={styles.sectionHead}>
           <div className={styles.sectionHeadCopy}>
@@ -468,7 +213,7 @@ export default function CompaniesPage() {
               <Building2 size={13} aria-hidden="true" />
               Provider directory
             </span>
-            <h2 className={styles.sectionTitle}>Published companies</h2>
+            <h1 className={styles.sectionTitle}>Published companies</h1>
             <p className={styles.sectionLead}>
               Browse verified companies, compare all their private hire services, and select a vehicle to book directly.
             </p>
@@ -554,35 +299,18 @@ export default function CompaniesPage() {
             <span className={styles.stateIcon} aria-hidden="true">
               <Building2 size={26} />
             </span>
-            <h3 className={styles.stateTitle}>
-              {hasFilters ? "No companies match your filters" : "No companies are listed yet"}
-            </h3>
+            <h3 className={styles.stateTitle}>No companies are listed yet</h3>
             <p className={styles.stateCopy}>
-              {hasFilters
-                ? "Try broadening your search keyword or clearing the region filter to view all published providers."
-                : "Published company profiles will appear here as soon as verified local operators join the directory."}
+              Published company profiles will appear here as soon as verified local operators join the directory.
             </p>
             <div className={styles.stateActions}>
-              {hasFilters ? (
-                <button
-                  type="button"
-                  className={styles.stateBtnPrimary}
-                  onClick={handleResetFilters}
-                >
-                  <X size={15} aria-hidden="true" />
-                  Clear all filters
-                </button>
-              ) : (
-                <>
-                  <Link href="/transport/" className={styles.stateLinkPrimary}>
-                    Browse private hire
-                    <ArrowRight size={15} aria-hidden="true" />
-                  </Link>
-                  <Link href="/trips/" className={styles.stateLinkSecondary}>
-                    Explore Zanzibar trips
-                  </Link>
-                </>
-              )}
+              <Link href="/transport/" className={styles.stateLinkPrimary}>
+                Browse private hire
+                <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+              <Link href="/trips/" className={styles.stateLinkSecondary}>
+                Explore Zanzibar trips
+              </Link>
             </div>
           </div>
         ) : (

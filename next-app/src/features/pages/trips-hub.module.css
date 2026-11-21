@@ -28,6 +28,7 @@
 .content {
   width: min(100%, 1100px);
   margin-inline: auto;
+  padding-top: clamp(20px, 3vw, 32px);
   display: flex;
   flex-direction: column;
   gap: clamp(22px, 3vw, 34px);

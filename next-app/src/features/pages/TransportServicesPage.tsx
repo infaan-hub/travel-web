@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { publicPrivateHireAPI } from "@/lib/api/client";
-import { PageHero } from "@/components/PageHero";
 import { getImageUrl } from "@/lib/utils/image-url";
 import {
   ArrowRight,
@@ -28,14 +27,12 @@ const PAGE_SIZE = 12;
 export default function TransportServicesPage() {
   const [services, setServices] = useState<PrivateHireService[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
   const load = useCallback(async () => {
     try {
       const res = await publicPrivateHireAPI.getAll({
-        search: search.trim() || undefined,
         page,
         page_size: PAGE_SIZE,
       });
@@ -48,77 +45,33 @@ export default function TransportServicesPage() {
         setServices(apiResults);
         setTotal(apiTotal);
       } else {
-        const query = search.trim().toLowerCase();
-        const filtered = query
-          ? SAMPLE_PRIVATE_HIRE_SERVICES.filter(
-              (s) =>
-                s.title.toLowerCase().includes(query) ||
-                s.vehicle?.name.toLowerCase().includes(query) ||
-                s.vehicle?.plate_number.toLowerCase().includes(query) ||
-                s.driver?.name.toLowerCase().includes(query) ||
-                s.company?.name.toLowerCase().includes(query),
-            )
-          : SAMPLE_PRIVATE_HIRE_SERVICES;
-        setServices(filtered);
-        setTotal(filtered.length);
+        setServices(SAMPLE_PRIVATE_HIRE_SERVICES);
+        setTotal(SAMPLE_PRIVATE_HIRE_SERVICES.length);
       }
     } catch {
-      const query = search.trim().toLowerCase();
-      const filtered = query
-        ? SAMPLE_PRIVATE_HIRE_SERVICES.filter(
-            (s) =>
-              s.title.toLowerCase().includes(query) ||
-              s.vehicle?.name.toLowerCase().includes(query) ||
-              s.vehicle?.plate_number.toLowerCase().includes(query) ||
-              s.driver?.name.toLowerCase().includes(query) ||
-              s.company?.name.toLowerCase().includes(query),
-          )
-        : SAMPLE_PRIVATE_HIRE_SERVICES;
-      setServices(filtered);
-      setTotal(filtered.length);
+      setServices(SAMPLE_PRIVATE_HIRE_SERVICES);
+      setTotal(SAMPLE_PRIVATE_HIRE_SERVICES.length);
     } finally {
       setLoading(false);
     }
-  }, [search, page]);
+  }, [page]);
 
   useEffect(() => {
-    // Fetching the directory whenever the search or page changes is the
+    // Fetching the directory whenever the page changes is the
     // external synchronization this effect exists for.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const hasFilters = Boolean(search.trim());
 
   return (
     <div className={`page ${styles.page} ${styles.listingRoot} ${cardStyles.featuredPageFlush}`}>
-      <PageHero
-        eyebrow="Private hire transport"
-        title="Available private hire services"
-        subtitle="Verified vehicles paired with professional drivers."
-        backgroundImageKey="feature"
-        patternImageKey="thumb"
-      >
-        <div className={styles.filters}>
-          <input
-            value={search}
-            onChange={(e) => {
-              setLoading(true);
-              setPage(1);
-              setSearch(e.target.value);
-            }}
-            placeholder="Search services..."
-            aria-label="Search services"
-          />
-        </div>
-      </PageHero>
-
       <section className={cardStyles.featuredShell} aria-label="Private hire services">
         <div className={cardStyles.featuredHead}>
           <div>
             <span className={styles.listingKicker}>Transport directory</span>
-            <h2 className={styles.listingTitle}>Private hire services</h2>
+            <h1 className={styles.listingTitle}>Private hire services</h1>
           </div>
           <span className={styles.listingCount} aria-live="polite">
             {loading ? "Loading" : `${total} ${total === 1 ? "service" : "services"}`}
@@ -136,25 +89,10 @@ export default function TransportServicesPage() {
             <span className={styles.emptyIcon}>
               <Car size={28} />
             </span>
-            <h2>{hasFilters ? "No services match your search" : "No services listed yet"}</h2>
+            <h2>No services listed yet</h2>
             <p>
-              {hasFilters
-                ? "Try clearing the search to see all available private hire services."
-                : "Verified private hire service listings will appear here when providers publish them."}
+              Verified private hire service listings will appear here when providers publish them.
             </p>
-            {hasFilters && (
-              <button
-                className="btn btn-secondary"
-                type="button"
-                onClick={() => {
-                  setLoading(true);
-                  setSearch("");
-                  setPage(1);
-                }}
-              >
-                Clear search
-              </button>
-            )}
           </div>
         ) : (
           <>
