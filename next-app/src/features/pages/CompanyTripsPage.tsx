@@ -545,7 +545,10 @@ export default function CompanyTripsPage({ company }: Props) {
     <main id="driver-workspace-root" className={`page ${styles.page}`}>
       <div className={styles.shell}>
         {/* TOP COMPANY WORKSPACE NAV */}
-        <nav className={styles.topNav} aria-label="Company workspace navigation">
+        <nav
+          className={`${styles.topNav} ${styles.topNavHidePhone}`}
+          aria-label="Company workspace navigation"
+        >
           <div className={styles.topNavTabs}>
             <Link href="/company/dashboard/" className={styles.topNavLink}>
               <LayoutDashboard size={15} aria-hidden="true" />

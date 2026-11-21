@@ -1945,6 +1945,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .topNavHidePhone {
+    display: none;
+  }
+}
+
 @media (max-width: 720px) {
   .stepperBar,
   .mapRouteStrip {

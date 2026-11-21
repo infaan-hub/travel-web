@@ -25,7 +25,10 @@ export default function CompanyPricesPage({ initialData }: Props) {
   return (
     <main id="company-prices-root" className={`page ${ws.page}`}>
       <div className={ws.shell}>
-        <nav className={ws.topNav} aria-label="Company workspace navigation">
+        <nav
+          className={`${ws.topNav} ${ws.topNavHidePhone}`}
+          aria-label="Company workspace navigation"
+        >
           <div className={ws.topNavLinks}>
             <Link href="/company/dashboard/" className={ws.topNavLink}>
               <LayoutDashboard size={15} aria-hidden="true" />
