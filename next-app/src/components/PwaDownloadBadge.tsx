@@ -34,6 +34,8 @@ export default function PwaDownloadBadge() {
   } = usePwaInstall();
 
   const [dismissed, setDismissed] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+  const [manualHint, setManualHint] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
 
   useEffect(() => {
@@ -41,19 +43,25 @@ export default function PwaDownloadBadge() {
   }, []);
 
   useEffect(() => {
-    const openGuide = () => setGuideOpen(true);
+    const openGuide = () => {
+      setExpanded(false);
+      setGuideOpen(true);
+    };
     window.addEventListener(OPEN_INSTALL_GUIDE_EVENT, openGuide);
     return () => window.removeEventListener(OPEN_INSTALL_GUIDE_EVENT, openGuide);
   }, []);
 
   useEffect(() => {
-    if (!guideOpen) return;
+    if (!guideOpen && !expanded) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setGuideOpen(false);
+      if (event.key === "Escape") {
+        setGuideOpen(false);
+        setExpanded(false);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [guideOpen]);
+  }, [expanded, guideOpen]);
 
   // Web-only: never render when running as an installed app.
   if (!showWebInstallUI) return null;
@@ -62,10 +70,26 @@ export default function PwaDownloadBadge() {
 
   const handleGotIt = () => {
     dismissDownloadBadge();
+    setExpanded(false);
+    setManualHint(false);
     setDismissed(true);
   };
 
-  const handleDownloadClick = async () => {
+  const handleBadgeDownloadClick = async () => {
+    if (!canPromptNative) {
+      setManualHint(true);
+      return;
+    }
+    const result = await triggerInstall();
+    if (result === "accepted") {
+      setExpanded(false);
+      setGuideOpen(false);
+    } else if (result === "manual") {
+      setManualHint(true);
+    }
+  };
+
+  const handleModalDownloadClick = async () => {
     const result = await triggerInstall();
     if (result === "accepted") {
       setGuideOpen(false);
@@ -74,28 +98,62 @@ export default function PwaDownloadBadge() {
 
   return (
     <>
-      {/* Floating middle-right Download App badge (one-time until user taps "Got it") */}
-      {!hideFloatingBadge ? (
+      {/* Middle-right outside "Download app" pill -> taps open to full install card */}
+      {!hideFloatingBadge && !expanded ? (
+        <button
+          id="pwa-download-badge-trigger"
+          type="button"
+          className={styles.edgeTrigger}
+          aria-expanded="false"
+          aria-controls="pwa-download-badge"
+          onClick={() => {
+            setManualHint(false);
+            setExpanded(true);
+          }}
+        >
+          <span className={styles.edgeTriggerIcon} aria-hidden="true">
+            <Download size={13} />
+          </span>
+          <span>Download app</span>
+        </button>
+      ) : null}
+
+      {/* Expanded middle-right Download App tutorial card */}
+      {!hideFloatingBadge && expanded ? (
         <aside
           id="pwa-download-badge"
           className={styles.badgeContainer}
           aria-label="Download Travel. App"
         >
-          <div className={styles.header}>
-            <div className={styles.logoBox}>
-              <Image
-                src="/travel.logo.jpeg"
-                alt="Travel."
-                width={84}
-                height={72}
-                className={styles.logoImg}
-                unoptimized
-              />
+          <div className={styles.badgeHeaderRow}>
+            <div className={styles.header} style={{ marginBottom: 0 }}>
+              <div className={styles.logoBox}>
+                <Image
+                  src="/travel.logo.jpeg"
+                  alt="Travel."
+                  width={84}
+                  height={72}
+                  className={styles.logoImg}
+                  unoptimized
+                />
+              </div>
+              <div className={styles.headerCopy}>
+                <span className={styles.eyebrow}>Download app</span>
+                <h2 className={styles.title}>Install Travel. on your device</h2>
+              </div>
             </div>
-            <div className={styles.headerCopy}>
-              <span className={styles.eyebrow}>Download app</span>
-              <h2 className={styles.title}>Install Travel. on your device</h2>
-            </div>
+
+            <button
+              type="button"
+              className={styles.collapseBtn}
+              aria-label="Minimize download badge"
+              onClick={() => {
+                setExpanded(false);
+                setManualHint(false);
+              }}
+            >
+              <X size={15} aria-hidden="true" />
+            </button>
           </div>
 
           <p className={styles.intro}>
@@ -129,6 +187,16 @@ export default function PwaDownloadBadge() {
             })}
           </ul>
 
+          {manualHint ? (
+            <p className={styles.inlineHint} role="status">
+              {platform === "ios"
+                ? "Tap Safari's Share (↑) button at the bottom of your screen, then choose Add to Home Screen (not Add to Dock)."
+                : platform === "android"
+                  ? "Open Chrome's menu (⋮) in the top right corner and tap Install app."
+                  : "Click the Install icon in your browser's address bar (Chrome or Edge) to install Travel."}
+            </p>
+          ) : null}
+
           <div className={styles.actions}>
             <button
               type="button"
@@ -141,7 +209,7 @@ export default function PwaDownloadBadge() {
               type="button"
               className={styles.downloadBtn}
               disabled={installing}
-              onClick={() => void handleDownloadClick()}
+              onClick={() => void handleBadgeDownloadClick()}
             >
               <Download size={14} aria-hidden="true" />
               {installing ? "Installing…" : "Download app"}
@@ -150,7 +218,7 @@ export default function PwaDownloadBadge() {
         </aside>
       ) : null}
 
-      {/* Manual install tutorial modal (opened when browser requires manual steps, e.g. iOS Safari or Sidebar tap) */}
+      {/* Manual install tutorial modal (opened from Sidebar "Download app" when browser needs manual steps) */}
       {guideOpen ? (
         <div
           id="pwa-install-guide-modal"
@@ -177,9 +245,9 @@ export default function PwaDownloadBadge() {
                   />
                 </div>
                 <div className={styles.headerCopy}>
-                  <span className={styles.eyebrow}>Install tutorial</span>
+                  <span className={styles.eyebrow}>Download app</span>
                   <h2 id="pwa-install-guide-title" className={styles.title}>
-                    How to install Travel.
+                    Install Travel. on your device
                   </h2>
                 </div>
               </div>
@@ -195,9 +263,9 @@ export default function PwaDownloadBadge() {
 
             <p className={styles.modalNote}>
               {platform === "ios"
-                ? "On iPhone & iPad, Apple requires installing from Safari using Share → Add to Home Screen (not Add to Dock)."
+                ? "On iPhone & iPad, Apple requires installing from Safari using Share (↑) → Add to Home Screen (not Add to Dock)."
                 : canPromptNative
-                  ? "Tap Install now below to launch the app installation prompt."
+                  ? "Tap Download app below to launch the installation prompt."
                   : "Follow the steps for your device below to install Travel. directly from your browser."}
             </p>
 
@@ -248,10 +316,10 @@ export default function PwaDownloadBadge() {
                   type="button"
                   className={styles.downloadBtn}
                   disabled={installing}
-                  onClick={() => void handleDownloadClick()}
+                  onClick={() => void handleModalDownloadClick()}
                 >
                   <Download size={14} aria-hidden="true" />
-                  {installing ? "Installing…" : "Install now"}
+                  {installing ? "Installing…" : "Download app"}
                 </button>
               ) : null}
             </div>
