@@ -17,159 +17,221 @@
   width: 100%;
   max-width: var(--content-max-width, 1440px);
   margin-inline: auto;
-  padding: clamp(20px, 3vw, 32px) var(--page-padding-desktop, 28px) 76px;
+  padding: clamp(12px, 2vw, 20px) var(--page-padding-desktop, 24px) 52px;
   color: var(--bk-ink);
 }
 
 @media (max-width: 1024px) {
   .page {
-    padding-inline: var(--page-padding-tablet, 22px);
+    padding-inline: var(--page-padding-tablet, 20px);
   }
 }
 
 @media (max-width: 768px) {
   .page {
-    padding-inline: var(--page-padding-mobile, 16px);
-    padding-bottom: 60px;
+    padding: 10px var(--page-padding-mobile, 14px) 44px;
   }
 }
 
 /* -------------------------------------------------------------------------
-   Hero
+   Hero — Featured Property Card matching /transport/service/[id]/
    ------------------------------------------------------------------------- */
 
 .hero {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  row-gap: 44px;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  min-height: 288px;
   overflow: hidden;
-  border-radius: 26px;
-  background: linear-gradient(135deg, #08428c 0%, #052c5e 76%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
+  background:
+    radial-gradient(620px 300px at 84% 12%, rgba(56, 189, 248, 0.34), transparent 64%),
+    linear-gradient(150deg, #072042 0%, #0b4182 52%, #06162b 100%);
   color: #ffffff;
-  box-shadow: 0 24px 54px rgba(8, 66, 140, 0.22);
+  box-shadow:
+    0 22px 48px rgba(6, 23, 46, 0.22),
+    0 6px 16px rgba(6, 23, 46, 0.12);
+  isolation: isolate;
 }
 
 .heroMedia {
   position: absolute;
   inset: 0;
   z-index: 0;
+  overflow: hidden;
 }
 
 .heroImage {
   object-fit: cover;
+  object-position: center;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.heroScrim {
+.hero:hover .heroImage {
+  transform: scale(1.035);
+}
+
+.heroMediaFallback {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    115deg,
-    rgba(4, 30, 66, 0.94) 0%,
-    rgba(6, 46, 94, 0.87) 48%,
-    rgba(8, 66, 140, 0.62) 100%
-  );
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.28);
 }
 
-.heroInner {
-  position: relative;
+.heroTopScrim {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 92px;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(18px, 2.8vw, 30px);
-  padding: clamp(20px, 3.2vw, 36px);
+  background: linear-gradient(180deg, rgba(4, 13, 28, 0.72) 0%, rgba(4, 13, 28, 0) 100%);
+  pointer-events: none;
 }
 
 .heroTopBar {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
+  padding: 16px 18px 0;
 }
 
 .backLink {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: 36px;
+  gap: 6px;
+  min-height: 34px;
   padding: 0 13px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(6, 18, 36, 0.56);
   color: #ffffff;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 750;
   text-decoration: none;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  transition: background-color 0.16s ease, border-color 0.16s ease;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .backLink:hover {
-  border-color: rgba(255, 255, 255, 0.44);
-  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(6, 18, 36, 0.76);
 }
 
-.heroMain {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: clamp(18px, 3vw, 40px);
+/* Bottom Gradient Sheet matching /transport/service/[id]/ */
+.heroSheet {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding: 36px 20px 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 14, 29, 0) 0%,
+    rgba(5, 14, 29, 0.52) 22%,
+    rgba(5, 14, 29, 0.88) 54%,
+    rgba(4, 11, 24, 0.98) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
 }
 
-@media (max-width: 760px) {
-  .heroMain {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
-  }
+.heroBody {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 18px;
 }
 
 .heroCopy {
   min-width: 0;
-  max-width: 740px;
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #bfe0ff;
-  font-size: 0.68rem;
+.heroBody > .heroCopy {
+  flex: 1 1 280px;
+}
+
+.heroKicker {
+  display: block;
+  color: #93c5fd;
+  font-size: 0.66rem;
   font-weight: 800;
-  letter-spacing: 0.14em;
-  line-height: 1.2;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
-.heroTitle {
-  margin: 10px 0 0;
-  color: #ffffff;
+:global(#booking-trip-root) .heroTitle {
+  margin: 3px 0 0;
+  color: #ffffff !important;
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 1.2rem + 2vw, 2.9rem);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.07;
+  font-size: clamp(1.38rem, 2.5vw, 2.05rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.13;
+  text-shadow: 0 2px 12px rgba(3, 10, 24, 0.65);
   text-wrap: balance;
 }
 
-.heroCompany {
-  margin: 8px 0 0;
-  color: #d7e9ff;
-  font-size: 0.9rem;
-  font-weight: 600;
+.heroAnglePills {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
 }
 
-.heroLead {
-  max-width: 62ch;
-  margin: 10px 0 0;
-  color: rgba(236, 246, 255, 0.86);
-  font-size: clamp(0.88rem, 0.84rem + 0.18vw, 0.96rem);
-  line-height: 1.6;
+:global(#booking-trip-root) .heroAngleBtn {
+  min-height: 28px !important;
+  padding: 0 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: rgba(255, 255, 255, 0.94) !important;
+  font-size: 0.68rem !important;
+  font-weight: 750 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease !important;
+}
+
+:global(#booking-trip-root) .heroAngleBtn:hover {
+  background: rgba(255, 255, 255, 0.24) !important;
+  transform: none !important;
+}
+
+:global(#booking-trip-root) .heroAngleBtnActive {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #08428c !important;
+}
+
+.heroBottomRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .heroFacts {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 16px 0 0;
+  gap: 6px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -177,59 +239,92 @@
 .heroFacts li {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 11px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.11);
-  color: #eef6ff;
-  font-size: 0.74rem;
-  font-weight: 600;
-}
-
-.heroFacts svg {
-  color: #9fd0ff;
-}
-
-.priceCard {
-  display: grid;
-  gap: 2px;
-  min-width: 200px;
-  padding: 18px 22px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.14);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
-  backdrop-filter: blur(14px) saturate(150%);
-}
-
-.priceLabel {
-  color: #d3e9ff;
-  font-size: 0.66rem;
-  font-weight: 800;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
-.priceValue {
-  color: #ffffff;
-  font-family: var(--font-display);
-  font-size: 2.3rem;
+  background: rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 0.72rem;
   font-weight: 700;
-  line-height: 1.1;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
-.priceUnit {
-  color: #d3e9ff;
-  font-size: 0.78rem;
-  font-weight: 600;
+.heroFacts li svg {
+  flex: 0 0 auto;
+  color: #93c5fd;
 }
 
-.priceNote {
-  margin: 8px 0 0;
-  color: rgba(236, 246, 255, 0.82);
-  font-size: 0.7rem;
-  line-height: 1.45;
+.heroFacts em {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #0b2447;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.64rem;
+  font-style: normal;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 232px;
+    row-gap: 28px;
+    border-radius: 24px;
+  }
+
+  .heroTopBar {
+    padding: 12px 12px 0;
+    gap: 6px;
+  }
+
+  .backLink {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 0.68rem;
+  }
+
+  .heroSheet {
+    padding: 24px 13px 13px;
+    gap: 7px;
+  }
+
+  .heroKicker {
+    font-size: 0.58rem;
+    letter-spacing: 0.09em;
+  }
+
+  :global(#booking-trip-root) .heroTitle {
+    font-size: 1.22rem;
+    line-height: 1.15;
+  }
+
+  :global(#booking-trip-root) .heroAngleBtn {
+    min-height: 24px !important;
+    padding: 0 8px !important;
+    font-size: 0.62rem !important;
+  }
+
+  .heroBottomRow {
+    padding-top: 6px;
+  }
+
+  .heroFacts {
+    gap: 5px;
+  }
+
+  .heroFacts li {
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    gap: 4px;
+  }
+
+  .heroFacts em {
+    padding: 1px 5px;
+    font-size: 0.58rem;
+  }
 }
 
 /* -------------------------------------------------------------------------
@@ -240,14 +335,14 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
   align-items: start;
-  gap: clamp(18px, 2.4vw, 28px);
-  margin-top: clamp(20px, 2.5vw, 28px);
+  gap: clamp(14px, 2vw, 22px);
+  margin-top: clamp(14px, 2vw, 20px);
 }
 
 .main {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -255,7 +350,7 @@
   position: sticky;
   top: 90px;
   display: grid;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -276,13 +371,13 @@
 .progress {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
   margin: 0;
-  padding: 12px;
+  padding: 8px;
   border: 1px solid var(--bk-line);
-  border-radius: 18px;
+  border-radius: 16px;
   background: #ffffff;
-  box-shadow: 0 4px 16px rgba(8, 66, 140, 0.06);
+  box-shadow: 0 4px 14px rgba(8, 66, 140, 0.06);
   list-style: none;
 }
 
@@ -411,18 +506,18 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .card {
-  scroll-margin-top: 96px;
-  padding: clamp(20px, 2.5vw, 30px);
+  scroll-margin-top: 84px;
+  padding: clamp(16px, 2vw, 24px);
   border: 1.5px solid var(--bk-line);
-  border-radius: 22px;
+  border-radius: 20px;
   background: #ffffff;
   box-shadow:
     0 2px 6px rgba(18, 34, 58, 0.04),
-    0 16px 36px rgba(8, 66, 140, 0.06);
+    0 14px 32px rgba(8, 66, 140, 0.06);
   animation: booking-rise 0.28s ease-out;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -431,7 +526,7 @@
   border-color: rgba(8, 66, 140, 0.28);
   box-shadow:
     0 4px 12px rgba(8, 66, 140, 0.07),
-    0 18px 40px rgba(8, 66, 140, 0.09);
+    0 16px 36px rgba(8, 66, 140, 0.09);
 }
 
 .cardComplete {
@@ -441,9 +536,9 @@
 .cardHead {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
   border-bottom: 1px solid #edf2f9;
 }
 
@@ -1501,6 +1596,12 @@
     0 20px 42px rgba(8, 66, 140, 0.08);
 }
 
+@media (max-width: 768px) {
+  .summaryCard {
+    display: none;
+  }
+}
+
 .summaryMedia {
   position: relative;
   overflow: hidden;
@@ -1996,6 +2097,7 @@
 .primaryLink:focus-visible,
 .secondaryLink:focus-visible,
 .helpPhone:focus-visible,
+:global(#booking-trip-root) .heroAngleBtn:focus-visible,
 :global(#booking-trip-root) .progressButton:focus-visible,
 :global(#booking-trip-root) .locationButton:focus-visible,
 :global(#booking-trip-root) .swapButton:focus-visible,
@@ -2017,11 +2119,17 @@
   }
 
   .backLink,
+  .heroImage,
   .primaryLink,
+  :global(#booking-trip-root) .heroAngleBtn,
   :global(#booking-trip-root) .submitButton,
   :global(#booking-trip-root) .input,
   :global(#booking-trip-root) .textarea {
     transition: none !important;
+  }
+
+  .hero:hover .heroImage {
+    transform: none;
   }
 }
 

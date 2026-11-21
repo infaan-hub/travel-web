@@ -17,6 +17,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpDown,
+  Briefcase,
   CalendarDays,
   Car,
   Check,
@@ -92,6 +93,8 @@ type Service = {
     luggage_capacity: number;
     plate_number?: string | null;
     front_image_url: string | null;
+    side_image_url?: string | null;
+    back_image_url?: string | null;
   } | null;
   driver: { name: string; phone?: string | null } | null;
   company: {
@@ -263,6 +266,7 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
 
   const [service, setService] = useState<Service | null>(null);
   const [loadedServiceId, setLoadedServiceId] = useState<string | null>(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [profileResult, setProfileResult] = useState<{
     userId: number;
     profile: AccountProfile | null;
@@ -1174,127 +1178,144 @@ export default function BookingPage({ mode = "service" }: BookingPageProps = {})
     );
   }
 
+  const heroPhotos = service?.vehicle
+    ? [
+        { label: "Front", url: service.vehicle.front_image_url },
+        { label: "Side", url: service.vehicle.side_image_url ?? null },
+        { label: "Back", url: service.vehicle.back_image_url ?? null },
+      ].filter((photo): photo is { label: string; url: string } => Boolean(photo.url))
+    : [];
+  const activeHeroPhoto = heroPhotos[activePhotoIndex] ?? heroPhotos[0] ?? null;
+
   return (
     <div id="booking-trip-root" className={`page ${styles.page}`}>
       <header className={styles.hero}>
-        {service?.vehicle?.front_image_url ? (
-          <div className={styles.heroMedia} aria-hidden="true">
+        <div className={styles.heroMedia} aria-hidden="true">
+          {activeHeroPhoto ? (
             <Image
-              src={getImageUrl(service.vehicle.front_image_url)}
+              src={getImageUrl(activeHeroPhoto.url)}
               alt=""
               fill
-              sizes="100vw"
+              sizes="(max-width: 768px) 96vw, 1180px"
               className={styles.heroImage}
               priority
               unoptimized
             />
-            <span className={styles.heroScrim} />
-          </div>
-        ) : (
-          <span className={styles.heroScrim} aria-hidden="true" />
-        )}
+          ) : (
+            <div className={styles.heroMediaFallback}>
+              <Car size={54} />
+            </div>
+          )}
+        </div>
+        <span className={styles.heroTopScrim} aria-hidden="true" />
 
-        <div className={styles.heroInner}>
-          <div className={styles.heroTopBar}>
-            <Link href="/transport/" className={styles.backLink}>
-              <ArrowLeft size={15} aria-hidden="true" />
-              All private hire services
+        <div className={styles.heroTopBar}>
+          <Link href="/transport/" className={styles.backLink}>
+            <ArrowLeft size={15} aria-hidden="true" />
+            All private hire services
+          </Link>
+          {service ? (
+            <Link
+              href={`/transport/service/${service.id}/`}
+              className={styles.backLink}
+            >
+              View vehicle details
             </Link>
-            {service ? (
-              <Link
-                href={`/transport/service/${service.id}/`}
-                className={styles.backLink}
-              >
-                View vehicle details
-              </Link>
-            ) : null}
-          </div>
+          ) : null}
+        </div>
 
-          <div className={styles.heroMain}>
+        <div className={styles.heroSheet}>
+          <div className={styles.heroBody}>
             <div className={styles.heroCopy}>
+              <span className={styles.heroKicker}>
+                {isPublicBooking
+                  ? "Private Hire Request · Zanzibar"
+                  : service?.company?.name
+                    ? `${service.company.name} · Private Hire`
+                    : "Verified Private Hire"}
+              </span>
               <h1 className={styles.heroTitle}>
                 {isPublicBooking
                   ? "Request Private Hire Transport"
                   : service?.title || "Private Hire Request"}
               </h1>
-              {isPublicBooking ? (
-                <p className={styles.heroCompany}>Private hire request</p>
-              ) : service?.company ? (
-                <p className={styles.heroCompany}>{service.company.name}</p>
-              ) : null}
-              <ul className={styles.heroFacts}>
-                {isPublicBooking ? (
-                  <>
-                    <li>
-                      <Car size={14} aria-hidden="true" />
-                      Private hire request
-                    </li>
-                    <li>
-                      <Users size={14} aria-hidden="true" />
-                      Up to {maxPassengers} passengers
-                    </li>
-                    <li>
-                      <ShieldCheck size={14} aria-hidden="true" />
-                      Verified local drivers
-                    </li>
-                    <li>
-                      <CheckCircle2 size={14} aria-hidden="true" />
-                      No payment now
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    {service?.vehicle ? (
-                      <li>
-                        <Car size={14} aria-hidden="true" />
-                        {service.vehicle.name}
-                        {service.vehicle.plate_number
-                          ? ` · ${service.vehicle.plate_number}`
-                          : ""}
-                      </li>
-                    ) : null}
-                    {service?.vehicle ? (
-                      <li>
-                        <Users size={14} aria-hidden="true" />
-                        Up to {service.vehicle.capacity} passengers
-                      </li>
-                    ) : null}
-                    {service?.vehicle ? (
-                      <li>
-                        <ShieldCheck size={14} aria-hidden="true" />
-                        {service.vehicle.luggage_capacity} luggage bags
-                      </li>
-                    ) : null}
-                    <li>
-                      <CheckCircle2 size={14} aria-hidden="true" />
-                      Verified driver
-                    </li>
-                  </>
-                )}
-              </ul>
             </div>
 
-            <div className={styles.priceCard}>
+            {!isPublicBooking && heroPhotos.length > 1 ? (
+              <div
+                className={styles.heroAnglePills}
+                role="tablist"
+                aria-label="Vehicle photo angle"
+              >
+                {heroPhotos.map((photo, index) => (
+                  <button
+                    key={photo.label}
+                    type="button"
+                    role="tab"
+                    aria-selected={index === activePhotoIndex}
+                    className={`${styles.heroAngleBtn} ${
+                      index === activePhotoIndex ? styles.heroAngleBtnActive : ""
+                    }`}
+                    onClick={() => setActivePhotoIndex(index)}
+                  >
+                    {photo.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div className={styles.heroBottomRow}>
+            <ul className={styles.heroFacts}>
               {isPublicBooking ? (
                 <>
-                  <span className={styles.priceLabel}>Private hire request</span>
-                  <span className={styles.priceValue}>Open</span>
-                  <span className={styles.priceUnit}>per trip</span>
-                  <p className={styles.priceNote}>
-                    No payment now. An approved driver confirms your trip details.
-                  </p>
+                  <li>
+                    <Car size={14} aria-hidden="true" />
+                    <span>Private hire request</span>
+                  </li>
+                  <li>
+                    <Users size={14} aria-hidden="true" />
+                    <span>Up to {maxPassengers} passengers</span>
+                  </li>
+                  <li>
+                    <ShieldCheck size={14} aria-hidden="true" />
+                    <span>Verified local drivers</span>
+                  </li>
+                  <li>
+                    <CheckCircle2 size={14} aria-hidden="true" />
+                    <span>No payment now</span>
+                  </li>
                 </>
               ) : (
                 <>
-                  <span className={styles.priceLabel}>Starting price</span>
-                  <span className={styles.priceValue}>${service?.price}</span>
-                  <span className={styles.priceUnit}>/ {pricingLabel}</span>
-                  <p className={styles.priceNote}>
-                    No payment now. {providerName} confirms the final fare.
-                  </p>
+                  {service?.vehicle ? (
+                    <li>
+                      <Car size={14} aria-hidden="true" />
+                      <span>{service.vehicle.name}</span>
+                      {service.vehicle.plate_number ? (
+                        <em>{service.vehicle.plate_number}</em>
+                      ) : null}
+                    </li>
+                  ) : null}
+                  {service?.vehicle ? (
+                    <li>
+                      <Users size={14} aria-hidden="true" />
+                      <span>Up to {service.vehicle.capacity} passengers</span>
+                    </li>
+                  ) : null}
+                  {service?.vehicle ? (
+                    <li>
+                      <Briefcase size={14} aria-hidden="true" />
+                      <span>{service.vehicle.luggage_capacity} luggage bags</span>
+                    </li>
+                  ) : null}
+                  <li>
+                    <ShieldCheck size={14} aria-hidden="true" />
+                    <span>Verified driver</span>
+                  </li>
                 </>
               )}
-            </div>
+            </ul>
           </div>
         </div>
       </header>
