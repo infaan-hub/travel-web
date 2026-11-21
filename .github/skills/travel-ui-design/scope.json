@@ -96,6 +96,7 @@
         "public/favicon.svg",
         "public/icons.svg",
         "public/travel.logo.jpeg",
+        "public/og-image.jpg",
         "public/icons/**"
       ]
     },
