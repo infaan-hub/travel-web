@@ -1513,7 +1513,8 @@
 }
 
 @media (max-width: 768px) {
-  .viewToggle {
+  .viewToggle,
+  .partnerStrip {
     display: none;
   }
 
