@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { CheckCircle2, LoaderCircle, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, LoaderCircle, ShieldCheck } from "lucide-react";
 import { partnerRequestsAPI } from "@/lib/api/client";
 import { PageHero } from "@/components/PageHero";
 import { useToast } from "@/components/ToastProvider";
@@ -42,6 +42,10 @@ export default function DriverApplicationPage() {
     <main className={styles.page}>
       <PageHero eyebrow="Public Hire Driver" title="Apply to join the driver network" subtitle="Create your sign-in details and submit your driving credentials for review." backgroundImageKey="feature" patternImageKey="thumb" />
       <div className={styles.shell}>
+        <Link href="/contact/" className={styles.backLink}>
+          <ArrowLeft size={15} aria-hidden="true" />
+          Back to contact
+        </Link>
         {applicationSent ? (
           <section className={styles.success} role="status">
             <span><CheckCircle2 size={28} /></span>

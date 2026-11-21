@@ -1,6 +1,7 @@
 /* ==========================================================================
-   Public Support & Partner Registration Hub (/contact/)
-   Aligned with the redesigned /trips/ and /companies/ visual system
+   Public Support & Partner Onboarding Hub (/contact/)
+   + Dedicated Form Pages (/contact/support/, /request/company/)
+   Aligned with the Zanzibar Featured Property Card visual system.
    ========================================================================== */
 
 .page {
@@ -31,6 +32,7 @@
   width: 100%;
   max-width: var(--content-max-width, 1440px);
   margin-inline: auto;
+  padding-top: clamp(14px, 2.2vw, 24px);
   padding-bottom: clamp(56px, 7vw, 88px);
   color: var(--ct-ink);
 }
@@ -58,57 +60,115 @@
 }
 
 .content {
-  width: min(100%, 1100px);
+  width: min(100%, 1160px);
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  gap: clamp(22px, 3vw, 32px);
+  gap: clamp(22px, 3vw, 34px);
 }
 
 /* -------------------------------------------------------------------------
-   PageHero Trust Pills (frosted light glass for AA/AAA contrast over photo)
+   Hub Header (Compact Editorial Opening)
    ------------------------------------------------------------------------- */
 
-.heroStats {
+.hubHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: clamp(20px, 2.8vw, 30px) clamp(20px, 3vw, 32px);
+  border: 1.5px solid var(--ct-line);
+  border-radius: 26px;
+  background:
+    radial-gradient(520px 240px at 96% 0%, rgba(8, 66, 140, 0.09), transparent 65%),
+    radial-gradient(360px 200px at 78% 100%, rgba(14, 165, 233, 0.07), transparent 65%),
+    var(--ct-surface);
+  box-shadow: var(--ct-shadow-sm);
+}
+
+.hubEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 999px;
+  background: var(--ct-blue-soft);
+  color: var(--ct-blue);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hubTitle {
+  margin: 2px 0 0;
+  color: var(--ct-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.68rem, 3.4vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.024em;
+}
+
+.hubLead {
+  margin: 0;
+  max-width: 64ch;
+  color: var(--ct-muted);
+  font-size: clamp(0.9rem, 1.35vw, 0.99rem);
+  line-height: 1.58;
+}
+
+.trustPills {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  margin-top: 4px;
 }
 
-.heroStatPill {
+.trustPill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
-  padding: 6px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  min-height: 34px;
+  padding: 5px 12px;
+  border: 1px solid var(--ct-line);
   border-radius: 999px;
-  background: rgba(245, 250, 249, 0.82);
-  color: #102328;
-  font-size: 0.78rem;
-  font-weight: 650;
+  background: var(--ct-surface-soft);
+  color: var(--ct-ink-2);
+  font-size: 0.77rem;
+  font-weight: 600;
   line-height: 1.2;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 8px 20px rgba(4, 19, 22, 0.14);
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
-  backdrop-filter: blur(16px) saturate(1.15);
 }
 
-.heroStatPill strong {
-  color: #08428c;
-  font-weight: 850;
+.trustPill svg {
+  color: var(--ct-blue);
+  flex: 0 0 auto;
+}
+
+.trustPill strong {
+  color: var(--ct-ink);
+  font-weight: 800;
 }
 
 /* -------------------------------------------------------------------------
-   Top 3-Column Pathway Selector Strip
+   Dedicated Form Pathway Cards (Featured Property Card System)
    ------------------------------------------------------------------------- */
 
 .pathwaysSection {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 16px;
 }
 
 .sectionEyebrow {
@@ -122,157 +182,446 @@
   text-transform: uppercase;
 }
 
-.pathwaysGrid {
+.sectionHint {
+  margin: 0;
+  color: var(--ct-muted);
+  font-size: 0.82rem;
+  font-weight: 550;
+}
+
+.fpGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
+  align-items: stretch;
 }
 
-:global(#contact-hub-root) .pathwayCard,
-.pathwayLinkCard {
-  display: flex !important;
+.fpCard {
+  position: relative;
+  display: flex;
   flex-direction: column;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
-  gap: 12px;
+  justify-content: space-between;
+  row-gap: 44px;
+  box-sizing: border-box;
   width: 100%;
-  height: 100%;
-  padding: 20px !important;
-  border: 1.5px solid var(--ct-line) !important;
-  border-radius: 20px !important;
-  background: var(--ct-surface) !important;
-  box-shadow: var(--ct-shadow-sm) !important;
-  color: var(--ct-ink) !important;
-  text-align: left;
+  height: auto;
+  min-height: 364px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 26px;
+  color: #ffffff;
   text-decoration: none;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background-color 0.18s ease !important;
-}
-
-:global(#contact-hub-root) .pathwayCard:hover,
-.pathwayLinkCard:hover {
-  transform: translateY(-2px);
-  border-color: var(--ct-blue) !important;
-  box-shadow: var(--ct-shadow-md) !important;
-}
-
-:global(#contact-hub-root) .pathwayCardActive {
-  border-color: var(--ct-blue) !important;
-  background:
-    linear-gradient(155deg, var(--ct-blue-tint) 0%, var(--ct-surface) 62%) !important;
+  isolation: isolate;
   box-shadow:
-    0 0 0 3px rgba(8, 66, 140, 0.1),
-    var(--ct-shadow-md) !important;
+    0 20px 44px rgba(6, 23, 46, 0.17),
+    0 5px 14px rgba(6, 23, 46, 0.1);
+  transition:
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
 
-.pathwayTop {
+.fpCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.38);
+  box-shadow:
+    0 28px 56px rgba(6, 23, 46, 0.24),
+    0 8px 20px rgba(6, 23, 46, 0.14);
+}
+
+.fpCardOcean {
+  background:
+    radial-gradient(340px 210px at 88% 12%, rgba(56, 189, 248, 0.42), transparent 64%),
+    radial-gradient(240px 180px at 12% 30%, rgba(14, 165, 233, 0.24), transparent 70%),
+    linear-gradient(155deg, #072244 0%, #0b4182 54%, #06172d 100%);
+}
+
+.fpCardIndigo {
+  background:
+    radial-gradient(340px 210px at 88% 12%, rgba(96, 165, 250, 0.4), transparent 64%),
+    radial-gradient(240px 180px at 12% 30%, rgba(99, 102, 241, 0.28), transparent 70%),
+    linear-gradient(155deg, #0b193c 0%, #1d3a8a 52%, #07122a 100%);
+}
+
+.fpCardEmerald {
+  background:
+    radial-gradient(340px 210px at 88% 12%, rgba(52, 211, 153, 0.38), transparent 64%),
+    radial-gradient(240px 180px at 12% 30%, rgba(20, 184, 166, 0.26), transparent 70%),
+    linear-gradient(155deg, #062b29 0%, #0d5c55 52%, #051c1d 100%);
+}
+
+.fpTopScrim {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 92px;
+  z-index: 0;
+  background: linear-gradient(180deg, rgba(4, 13, 28, 0.46) 0%, rgba(4, 13, 28, 0) 100%);
+  pointer-events: none;
+}
+
+.fpTopBar {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  width: 100%;
+  padding: 18px 18px 0;
 }
 
-.pathwayIcon {
+.fpIconPill {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
   flex: 0 0 44px;
-  border: 1px solid var(--ct-line);
-  border-radius: 13px;
-  background: var(--ct-blue-soft);
-  color: var(--ct-blue);
-}
-
-.pathwayCardActive .pathwayIcon {
-  border-color: transparent;
-  background: var(--ct-blue);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 14px;
+  background: rgba(6, 18, 36, 0.46);
   color: #ffffff;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
-.pathwayIconEmerald {
-  border-color: var(--ct-emerald-border);
-  background: var(--ct-emerald-soft);
-  color: var(--ct-emerald);
-}
-
-.pathwayPill {
+.fpGlassBadge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 999px;
-  background: var(--ct-blue-soft);
-  color: var(--ct-blue);
-  font-size: 0.69rem;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-}
-
-.pathwayPillActive {
-  background: var(--ct-blue);
+  background: rgba(6, 18, 36, 0.5);
   color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
-.pathwayPillEmerald {
-  border: 1px solid var(--ct-emerald-border);
-  background: var(--ct-emerald-soft);
-  color: var(--ct-emerald);
+.fpSheet {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding: 36px 18px 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 14, 29, 0) 0%,
+    rgba(5, 14, 29, 0.42) 16%,
+    rgba(5, 14, 29, 0.82) 48%,
+    rgba(4, 11, 24, 0.96) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.pathwayTitle {
+.fpCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fpKicker {
+  display: block;
+  color: #bae6fd;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.fpKickerEmerald {
+  color: #a7f3d0;
+}
+
+:global(#contact-hub-root) .fpCard h2.fpTitle,
+:global(#contact-hub-root) .fpCard .fpTitle {
   margin: 0;
-  color: var(--ct-ink);
+  color: #ffffff !important;
   font-family: var(--font-display);
-  font-size: 1.14rem;
-  font-weight: 650;
-  line-height: 1.26;
+  font-size: clamp(1.22rem, 1.8vw, 1.44rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
 }
 
-.pathwayDesc {
+.fpDesc {
   margin: 0;
-  color: var(--ct-muted);
-  font-size: 0.855rem;
+  color: rgba(241, 245, 249, 0.88);
+  font-size: 0.845rem;
   font-weight: 450;
-  line-height: 1.56;
+  line-height: 1.54;
 }
 
-.pathwayAction {
+.fpFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fpFactChip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: auto;
-  padding-top: 4px;
-  color: var(--ct-blue);
-  font-size: 0.82rem;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.fpFooter {
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.fpPrimaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #08428c;
+  font-size: 0.84rem;
   font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow: 0 8px 20px rgba(4, 13, 28, 0.28);
+  transition: background-color 0.18s ease, transform 0.18s ease;
 }
 
-.pathwayAction svg {
-  transition: transform 0.16s ease;
+.fpPrimaryBtn svg {
+  transition: transform 0.18s ease;
 }
 
-:global(#contact-hub-root) .pathwayCard:hover .pathwayAction svg,
-.pathwayLinkCard:hover .pathwayAction svg {
+.fpCard:hover .fpPrimaryBtn {
+  background: #eff6ff;
+}
+
+.fpCard:hover .fpPrimaryBtn svg {
   transform: translateX(3px);
 }
 
 /* -------------------------------------------------------------------------
-   Main 2-Column Workspace (Form Panel + Support Expectations Sidebar)
+   Bottom 2-Column Editorial Info & Quick Shortcuts Bento
    ------------------------------------------------------------------------- */
 
-.workspaceGrid {
+.infoGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1.38fr) minmax(290px, 0.72fr);
-  align-items: start;
-  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.infoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(20px, 2.6vw, 28px);
+  border: 1.5px solid var(--ct-line);
+  border-radius: 24px;
+  background: var(--ct-surface);
+  box-shadow: var(--ct-shadow-sm);
+}
+
+.infoCardTinted {
+  background:
+    radial-gradient(380px 200px at 100% 0%, rgba(8, 66, 140, 0.09), transparent 65%),
+    var(--ct-surface);
+}
+
+.infoTitle {
+  margin: 0;
+  color: var(--ct-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.18rem, 1.9vw, 1.38rem);
+  font-weight: 650;
+  line-height: 1.22;
+}
+
+.infoLead {
+  margin: -4px 0 0;
+  color: var(--ct-muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.expectList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.expectItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.expectIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 1px solid var(--ct-line);
+  border-radius: 11px;
+  background: var(--ct-blue-soft);
+  color: var(--ct-blue);
+  margin-top: 1px;
+}
+
+.expectCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.expectCopy strong {
+  color: var(--ct-ink);
+  font-size: 0.87rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.expectCopy span {
+  color: var(--ct-muted);
+  font-size: 0.81rem;
+  line-height: 1.5;
+}
+
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: auto;
+}
+
+.shortcutLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 62px;
+  padding: 12px 13px;
+  border: 1px solid var(--ct-line);
+  border-radius: 15px;
+  background: var(--ct-surface-soft);
+  color: var(--ct-ink);
+  text-decoration: none;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.shortcutLink:hover {
+  transform: translateY(-1px);
+  border-color: var(--ct-blue);
+  background: var(--ct-blue-soft);
+}
+
+.shortcutLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.shortcutIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 10px;
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-line);
+  color: var(--ct-blue);
+}
+
+.shortcutCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shortcutCopy strong {
+  color: var(--ct-ink);
+  font-size: 0.83rem;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.shortcutCopy span {
+  color: var(--ct-muted);
+  font-size: 0.74rem;
+  line-height: 1.32;
+}
+
+.shortcutArrow {
+  flex: 0 0 auto;
+  color: var(--ct-blue);
+  transition: transform 0.16s ease;
+}
+
+.shortcutLink:hover .shortcutArrow {
+  transform: translateX(2px);
+}
+
+/* -------------------------------------------------------------------------
+   Dedicated Form Pages Shell (/contact/support/, /request/company/)
+   ------------------------------------------------------------------------- */
+
+.formShell {
+  width: min(100%, 840px);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 999px;
+  background: var(--ct-surface);
+  color: var(--ct-ink-2);
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-decoration: none;
+  box-shadow: var(--ct-shadow-sm);
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.backLink:hover {
+  border-color: var(--ct-blue);
+  background: var(--ct-blue-soft);
+  color: var(--ct-blue);
 }
 
 .formCard {
@@ -280,67 +629,11 @@
   display: flex;
   flex-direction: column;
   gap: 22px;
-  padding: clamp(20px, 3vw, 32px);
+  padding: clamp(20px, 3vw, 34px);
   border: 1.5px solid var(--ct-line);
-  border-radius: 24px;
+  border-radius: 26px;
   background: var(--ct-surface);
   box-shadow: var(--ct-shadow-sm);
-}
-
-/* Segmented Mode Switcher */
-.tabBar {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  padding: 5px;
-  border: 1px solid var(--ct-line-strong);
-  border-radius: 15px;
-  background: var(--ct-surface-soft);
-}
-
-:global(#contact-hub-root) .tabBtn {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 46px !important;
-  padding: 0 14px !important;
-  border: 1px solid transparent !important;
-  border-radius: 11px !important;
-  background: transparent !important;
-  color: var(--ct-ink-2) !important;
-  font-size: 0.85rem !important;
-  font-weight: 750 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    color 0.16s ease,
-    box-shadow 0.16s ease !important;
-}
-
-:global(#contact-hub-root) .tabBtn:hover {
-  background: var(--ct-blue-soft) !important;
-  color: var(--ct-blue) !important;
-  transform: none !important;
-}
-
-:global(#contact-hub-root) .tabBtnActive {
-  background: var(--ct-blue) !important;
-  color: #ffffff !important;
-  box-shadow: 0 6px 16px rgba(8, 66, 140, 0.22) !important;
-}
-
-:global(#contact-hub-root) .tabBtnActive:hover {
-  background: var(--ct-blue-deep) !important;
-  color: #ffffff !important;
-}
-
-:global(.dark) :global(#contact-hub-root) .tabBtnActive {
-  background: #2563eb !important;
-  color: #ffffff !important;
 }
 
 /* Form Header */
@@ -365,7 +658,7 @@
   margin: 0;
   color: var(--ct-ink);
   font-family: var(--font-display);
-  font-size: clamp(1.38rem, 2.5vw, 1.8rem);
+  font-size: clamp(1.42rem, 2.7vw, 1.92rem);
   font-weight: 650;
   line-height: 1.18;
   letter-spacing: -0.02em;
@@ -373,7 +666,7 @@
 
 .formSubtitle {
   margin: 2px 0 0;
-  max-width: 56ch;
+  max-width: 58ch;
   color: var(--ct-muted);
   font-size: 0.9rem;
   line-height: 1.56;
@@ -774,142 +1067,6 @@
 }
 
 /* -------------------------------------------------------------------------
-   Right Sticky Sidebar (Expectations & Quick Shortcuts)
-   ------------------------------------------------------------------------- */
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: sticky;
-  top: 88px;
-}
-
-.sideCard {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 20px;
-  border: 1.5px solid var(--ct-line);
-  border-radius: 20px;
-  background: var(--ct-surface);
-  box-shadow: var(--ct-shadow-sm);
-}
-
-.sideCardTinted {
-  background:
-    radial-gradient(380px 200px at 100% 0%, rgba(8, 66, 140, 0.1), transparent 65%),
-    var(--ct-surface);
-}
-
-.sideTitle {
-  margin: 0;
-  color: var(--ct-ink);
-  font-family: var(--font-display);
-  font-size: 1.12rem;
-  font-weight: 650;
-  line-height: 1.24;
-}
-
-.sideLead {
-  margin: 0;
-  color: var(--ct-muted);
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-
-.expectList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.expectItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 11px;
-}
-
-.expectIcon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  border-radius: 10px;
-  background: var(--ct-blue-soft);
-  color: var(--ct-blue);
-  margin-top: 1px;
-}
-
-.expectCopy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.expectCopy strong {
-  color: var(--ct-ink);
-  font-size: 0.84rem;
-  font-weight: 750;
-  line-height: 1.3;
-}
-
-.expectCopy span {
-  color: var(--ct-muted);
-  font-size: 0.79rem;
-  line-height: 1.48;
-}
-
-.shortcutList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.shortcutLink {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 46px;
-  padding: 10px 13px;
-  border: 1px solid var(--ct-line);
-  border-radius: 13px;
-  background: var(--ct-surface-soft);
-  color: var(--ct-ink);
-  font-size: 0.83rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.shortcutLink:hover {
-  border-color: var(--ct-blue);
-  background: var(--ct-blue-soft);
-  color: var(--ct-blue);
-}
-
-.shortcutLeft {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-}
-
-.shortcutLeft svg {
-  color: var(--ct-blue);
-  flex: 0 0 auto;
-}
-
-/* -------------------------------------------------------------------------
    Focus & Accessibility
    ------------------------------------------------------------------------- */
 
@@ -923,32 +1080,52 @@
 }
 
 /* -------------------------------------------------------------------------
-   Responsive Breakpoints (1024px, 768px, 640px, 390px)
+   Responsive Breakpoints (1024px, 900px, 640px)
    ------------------------------------------------------------------------- */
 
 @media (max-width: 1024px) {
-  .workspaceGrid {
+  .infoGrid {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sidebar {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 820px) {
-  .pathwaysGrid {
+@media (max-width: 920px) {
+  .fpGrid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fpCard {
+    min-height: 296px;
+    row-gap: 28px;
   }
 }
 
 @media (max-width: 640px) {
-  .sidebar {
-    grid-template-columns: minmax(0, 1fr);
+  .hubHeader {
+    padding: 18px;
+    border-radius: 22px;
   }
 
+  .fpCard {
+    min-height: 280px;
+    border-radius: 22px;
+  }
+
+  .fpTopBar {
+    padding: 15px 15px 0;
+  }
+
+  .fpSheet {
+    padding: 28px 15px 15px;
+    gap: 12px;
+  }
+
+  .infoCard {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .quickGrid,
   .fieldRow,
   .successSteps {
     grid-template-columns: minmax(0, 1fr);
@@ -972,16 +1149,14 @@
     width: 100%;
     min-width: 0;
   }
-
-  .tabBar {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :global(#contact-hub-root) .pathwayCard,
-  .pathwayLinkCard,
-  .pathwayAction svg,
+  .fpCard,
+  .fpPrimaryBtn,
+  .fpPrimaryBtn svg,
+  .shortcutLink,
+  .shortcutArrow,
   :global(#contact-hub-root) .submitBtn,
   .spin {
     animation: none !important;
