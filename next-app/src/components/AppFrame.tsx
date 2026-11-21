@@ -1,31 +1,49 @@
 ﻿"use client";
 
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
 import { useAuth } from "@/context/AuthContext";
 import { usePwa } from "@/hooks/usePwa";
-import { isOnboardingComplete } from "@/lib/onboarding";
+import {
+  getPendingRoleOnboardingPath,
+  isOnboardingRoute,
+} from "@/lib/onboarding";
 
 /**
- * Application chrome. The onboarding flow is a standalone, full-screen
- * experience, so it renders without the sidebar and the top header (which
- * would otherwise duplicate the wordmark and subtract their height from the
- * 100dvh onboarding frame).
+ * Application chrome. Customer, Company, and Driver onboarding flows render as
+ * full-screen standalone experiences without sidebar, top header, or bottom nav.
+ * When launched inside an installed PWA (iPhone Add to Home Screen, Android
+ * Install App, or Desktop PWA), first-time users are automatically guided into
+ * their role's onboarding walkthrough.
  */
 export default function AppFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
-  const { isStandalone, isAppLike } = usePwa();
-  const isBare = pathname === "/onboarding" || pathname === "/onboarding/";
+  const { user, loading } = useAuth();
+  const { isStandalone, isAppLike, isReady } = usePwa();
+  const isBare = isOnboardingRoute(pathname);
 
   useEffect(() => {
-    if (pathname !== "/" || loading || isAuthenticated || isOnboardingComplete() || !isStandalone) return;
-    router.replace("/onboarding/?from=%2F");
-  }, [isAuthenticated, loading, pathname, router]);
+    if (!isReady || loading || !isStandalone) return;
+    const redirectTarget = getPendingRoleOnboardingPath(
+      user
+        ? {
+            id: user.id,
+            is_staff: user.is_staff,
+            account_type: user.account_type,
+          }
+        : null,
+      {
+        isInstalledApp: isStandalone,
+        currentPath: pathname,
+      },
+    );
+    if (redirectTarget) {
+      router.replace(redirectTarget);
+    }
+  }, [isReady, isStandalone, loading, pathname, router, user]);
 
   if (isBare) {
     return (
@@ -40,12 +58,18 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="app-shell">
         <TopHeader />
-<main className="main-content" id="main-content" style={isAppLike ? { paddingBottom: "calc(108px + env(safe-area-inset-bottom))" } : undefined}>
+        <main
+          className="main-content"
+          id="main-content"
+          style={
+            isAppLike
+              ? { paddingBottom: "calc(108px + env(safe-area-inset-bottom))" }
+              : undefined
+          }
+        >
           {children}
         </main>
       </div>
     </div>
   );
 }
-
-

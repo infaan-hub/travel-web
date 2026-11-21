@@ -459,6 +459,12 @@
   color: #9f1239;
 }
 
+.status_expired {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #475569;
+}
+
 .priceDisplay {
   display: flex;
   align-items: baseline;
@@ -1121,6 +1127,58 @@
   box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.13) !important;
 }
 
+.modalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+:global(#my-transport-root) .modalInput {
+  width: 100%;
+  min-height: 46px !important;
+  padding: 0 13px !important;
+  border: 1.5px solid #cbd9ea !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-family: inherit;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:global(#my-transport-root) .modalInput:focus,
+:global(#my-transport-root) .modalInput:focus-visible {
+  outline: none !important;
+  border-color: var(--mt-blue) !important;
+  box-shadow: 0 0 0 4px rgba(8, 66, 140, 0.13) !important;
+}
+
+.modalNote {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #d6e4f6;
+  border-radius: 12px;
+  background: #f4f8fe;
+  color: #334763;
+  font-size: 0.78rem;
+  line-height: 1.48;
+}
+
+.modalError {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #9f1239;
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
 .modalActions {
   display: flex;
   justify-content: flex-end;
@@ -1615,6 +1673,30 @@
   cursor: pointer;
 }
 
+:global(#my-transport-root) .featuredActionReschedule {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 38px !important;
+  padding: 0 13px !important;
+  border: 1px solid rgba(186, 230, 253, 0.55) !important;
+  border-radius: 999px !important;
+  background: rgba(14, 116, 144, 0.42) !important;
+  color: #ffffff !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+:global(#my-transport-root) .featuredActionReschedule:hover {
+  background: rgba(14, 116, 144, 0.65) !important;
+  border-color: rgba(224, 242, 254, 0.8) !important;
+}
+
 :global(#my-transport-root) .featuredActionDanger {
   display: inline-flex !important;
   align-items: center;
@@ -1848,6 +1930,7 @@
 
   .featuredActionLink,
   :global(#my-transport-root) .featuredActionPrimary,
+  :global(#my-transport-root) .featuredActionReschedule,
   :global(#my-transport-root) .featuredActionDanger,
   :global(#my-transport-root) .featuredActionKeep {
     flex: 1 1 auto;
@@ -1855,5 +1938,9 @@
     padding: 0 10px !important;
     font-size: 0.7rem !important;
     gap: 4px;
+  }
+
+  .modalGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

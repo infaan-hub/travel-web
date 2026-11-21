@@ -7,6 +7,7 @@ import {
   buildDriverBookingsWhere,
   isUnclaimedPublicBookingOffer,
 } from "@/lib/driver-workflow";
+import { expireOverdueTransportBookings } from "@/lib/services/booking-expiration";
 
 const DRIVER_BOOKING_INCLUDE = {
   service: { include: { vehicle: true, driver: true, company: true } },
@@ -38,6 +39,7 @@ const DRIVER_BOOKING_INCLUDE = {
 export async function GET(request: NextRequest) {
   try {
     const { driver } = await requirePrivateHireDriver(request);
+    await expireOverdueTransportBookings({ driverId: driver.id });
     const bookings = await prisma.transportBooking.findMany({
       where: buildDriverBookingsWhere(driver.id),
       include: DRIVER_BOOKING_INCLUDE,

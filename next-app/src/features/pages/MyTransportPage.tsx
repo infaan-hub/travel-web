@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
+  CalendarClock,
   CalendarDays,
   Car,
   CheckCircle2,
@@ -35,6 +36,15 @@ import {
 } from "@/lib/api/client";
 import { useToast } from "@/components/ToastProvider";
 import { useAuth } from "@/context/AuthContext";
+import {
+  RESCHEDULE_CUTOFF_HOURS,
+  canRescheduleBooking,
+  extractIsoDatePart,
+  normalizePickupTime,
+  resolveEffectiveBookingStatus,
+  todayIsoInZanzibar,
+  validateRescheduleTarget,
+} from "@/lib/booking-lifecycle";
 import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import styles from "@/features/pages/my-transport.module.css";
 
@@ -97,7 +107,7 @@ type TransportBookingItem = {
   } | null;
 };
 
-type StatusFilter = "all" | "active" | "completed" | "cancelled";
+type StatusFilter = "all" | "active" | "completed" | "cancelled" | "expired";
 
 const STATUS_META: Record<
   string,
@@ -122,6 +132,10 @@ const STATUS_META: Record<
   cancelled: {
     label: "Cancelled",
     hint: "This booking request has been cancelled.",
+  },
+  expired: {
+    label: "Expired",
+    hint: "Booking date and time passed without confirmation.",
   },
   requested: {
     label: "Open request",
@@ -179,6 +193,7 @@ export default function MyTransportPage() {
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [confirmCancelId, setConfirmCancelId] = useState<number | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewBooking, setReviewBooking] = useState<TransportBookingItem | null>(
@@ -187,6 +202,21 @@ export default function MyTransportPage() {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewContent, setReviewContent] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [rescheduleBooking, setRescheduleBooking] =
+    useState<TransportBookingItem | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
+  const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const fetchTransportData = useCallback(async () => {
     const bRes = await transportBookingsAPI.getAll().catch(() => ({ data: [] }));
@@ -224,19 +254,23 @@ export default function MyTransportPage() {
   }, [authLoading, fetchTransportData, isAuthenticated, router, toast]);
 
   useEffect(() => {
-    if (!reviewOpen) return;
+    if (!reviewOpen && !rescheduleOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setReviewOpen(false);
+      if (event.key === "Escape") {
+        setReviewOpen(false);
+        setRescheduleOpen(false);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [reviewOpen]);
+  }, [reviewOpen, rescheduleOpen]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
       const nextBookings = await fetchTransportData();
       setBookings(nextBookings);
+      setNowMs(Date.now());
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Could not refresh transport trips";
       toast.error(msg);
@@ -257,12 +291,116 @@ export default function MyTransportPage() {
       setConfirmCancelId(null);
       toast.success("Booking request cancelled.");
     } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: { message?: string } } };
       const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Could not cancel this booking request.";
+        axiosErr?.response?.data?.message || "Could not cancel this booking request.";
       toast.error(message);
+      if (axiosErr?.response?.status === 409) {
+        void fetchTransportData().then((nextBookings) => {
+          setBookings(nextBookings);
+          setNowMs(Date.now());
+        });
+      }
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const openReschedule = (booking: TransportBookingItem) => {
+    const currentDate = extractIsoDatePart(booking.travel_date) || todayIsoInZanzibar();
+    const currentTime =
+      normalizePickupTime(booking.trip?.pickup_time ?? booking.pickup_time) || "09:00";
+    setRescheduleBooking(booking);
+    setRescheduleDate(currentDate);
+    setRescheduleTime(currentTime);
+    setRescheduleError(null);
+    setRescheduleOpen(true);
+  };
+
+  const submitReschedule = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!rescheduleBooking) return;
+
+    const now = new Date();
+    const currentPickup =
+      rescheduleBooking.trip?.pickup_time ?? rescheduleBooking.pickup_time;
+    if (
+      !canRescheduleBooking(
+        {
+          status: rescheduleBooking.status,
+          travel_date: rescheduleBooking.travel_date,
+          pickup_time: currentPickup,
+        },
+        now,
+      )
+    ) {
+      setRescheduleError(
+        `Bookings can only be rescheduled at least ${RESCHEDULE_CUTOFF_HOURS} hours before the scheduled pickup time.`,
+      );
+      setNowMs(now.getTime());
+      return;
+    }
+
+    const validation = validateRescheduleTarget(rescheduleDate, rescheduleTime, now);
+    if (!validation.ok) {
+      setRescheduleError(validation.reason);
+      return;
+    }
+
+    const existingDate = extractIsoDatePart(rescheduleBooking.travel_date);
+    const existingTime = normalizePickupTime(currentPickup);
+    if (
+      existingDate === extractIsoDatePart(validation.travelDate) &&
+      existingTime === validation.pickupTime
+    ) {
+      setRescheduleError("Choose a different booking date or pickup time.");
+      return;
+    }
+
+    setRescheduleError(null);
+    setRescheduleSubmitting(true);
+    try {
+      const response = await transportBookingsAPI.reschedule(rescheduleBooking.id, {
+        travel_date: rescheduleDate,
+        pickup_time: validation.pickupTime,
+      });
+      const updated = response.data as Partial<TransportBookingItem> | undefined;
+      setBookings((current) =>
+        current.map((item) =>
+          item.id === rescheduleBooking.id
+            ? {
+                ...item,
+                ...(updated ?? {}),
+                travel_date: updated?.travel_date ?? rescheduleDate,
+                pickup_time: updated?.pickup_time ?? validation.pickupTime,
+                trip: updated?.trip
+                  ? updated.trip
+                  : item.trip
+                    ? { ...item.trip, pickup_time: validation.pickupTime }
+                    : item.trip,
+              }
+            : item,
+        ),
+      );
+      setNowMs(Date.now());
+      setRescheduleOpen(false);
+      setRescheduleBooking(null);
+      toast.success("Booking rescheduled successfully.");
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: { message?: string } } };
+      const message =
+        axiosErr?.response?.data?.message ||
+        (err instanceof Error ? err.message : "Could not reschedule this booking.");
+      setRescheduleError(message);
+      toast.error(message);
+      if (axiosErr?.response?.status === 409) {
+        void fetchTransportData().then((nextBookings) => {
+          setBookings(nextBookings);
+          setNowMs(Date.now());
+        });
+      }
+    } finally {
+      setRescheduleSubmitting(false);
     }
   };
 
@@ -296,34 +434,56 @@ export default function MyTransportPage() {
     }
   };
 
+  const nowDate = useMemo(() => new Date(nowMs), [nowMs]);
+
+  const getEffectiveStatus = useCallback(
+    (booking: TransportBookingItem) =>
+      resolveEffectiveBookingStatus(
+        {
+          status: booking.status,
+          travel_date: booking.travel_date,
+          pickup_time: booking.trip?.pickup_time ?? booking.pickup_time,
+        },
+        nowDate,
+      ),
+    [nowDate],
+  );
+
   const activeBookingsCount = useMemo(
     () =>
       bookings.filter((b) =>
-        ["pending", "confirmed", "in_progress"].includes(b.status),
+        ["pending", "confirmed", "in_progress"].includes(getEffectiveStatus(b)),
       ).length,
-    [bookings],
+    [bookings, getEffectiveStatus],
   );
   const completedBookingsCount = useMemo(
-    () => bookings.filter((b) => b.status === "completed").length,
-    [bookings],
+    () => bookings.filter((b) => getEffectiveStatus(b) === "completed").length,
+    [bookings, getEffectiveStatus],
   );
   const cancelledBookingsCount = useMemo(
-    () => bookings.filter((b) => b.status === "cancelled").length,
-    [bookings],
+    () => bookings.filter((b) => getEffectiveStatus(b) === "cancelled").length,
+    [bookings, getEffectiveStatus],
+  );
+  const expiredBookingsCount = useMemo(
+    () => bookings.filter((b) => getEffectiveStatus(b) === "expired").length,
+    [bookings, getEffectiveStatus],
   );
 
   const filteredBookings = useMemo(() => {
     if (filter === "all") return bookings;
     if (filter === "active") {
       return bookings.filter((b) =>
-        ["pending", "confirmed", "in_progress"].includes(b.status),
+        ["pending", "confirmed", "in_progress"].includes(getEffectiveStatus(b)),
       );
     }
     if (filter === "completed") {
-      return bookings.filter((b) => b.status === "completed");
+      return bookings.filter((b) => getEffectiveStatus(b) === "completed");
     }
-    return bookings.filter((b) => b.status === "cancelled");
-  }, [bookings, filter]);
+    if (filter === "expired") {
+      return bookings.filter((b) => getEffectiveStatus(b) === "expired");
+    }
+    return bookings.filter((b) => getEffectiveStatus(b) === "cancelled");
+  }, [bookings, filter, getEffectiveStatus]);
 
   return (
     <div id="my-transport-root" className={`page ${styles.page}`}>
@@ -361,6 +521,9 @@ export default function MyTransportPage() {
                         : []),
                       ...(cancelledBookingsCount > 0
                         ? [{ id: "cancelled" as const, label: `Cancelled (${cancelledBookingsCount})` }]
+                        : []),
+                      ...(expiredBookingsCount > 0
+                        ? [{ id: "expired" as const, label: `Expired (${expiredBookingsCount})` }]
                         : []),
                     ] as const
                   ).map((item) => (
@@ -452,8 +615,17 @@ export default function MyTransportPage() {
                 const driver = booking.driver ?? booking.service?.driver;
                 const company = booking.service?.company ?? booking.company;
                 const tripId = booking.trip?.id ?? booking.trip_request_id;
-                const meta = STATUS_META[booking.status] ?? {
-                  label: booking.status.replaceAll("_", " "),
+                const effectiveStatus = getEffectiveStatus(booking);
+                const canReschedule = canRescheduleBooking(
+                  {
+                    status: effectiveStatus,
+                    travel_date: booking.travel_date,
+                    pickup_time: pickupTime,
+                  },
+                  nowDate,
+                );
+                const meta = STATUS_META[effectiveStatus] ?? {
+                  label: effectiveStatus.replaceAll("_", " "),
                   hint: "Status updated by provider.",
                 };
                 const isConfirmingCancel = confirmCancelId === booking.id;
@@ -466,7 +638,7 @@ export default function MyTransportPage() {
                   <article
                     key={booking.id}
                     className={`${styles.featuredCard} ${
-                      booking.status === "cancelled"
+                      effectiveStatus === "cancelled" || effectiveStatus === "expired"
                         ? styles.featuredCardCancelled
                         : ""
                     }`}
@@ -507,7 +679,7 @@ export default function MyTransportPage() {
                       <div className={styles.featuredTopRight}>
                         <span
                           className={`${styles.statusBadge} ${statusClassName(
-                            booking.status,
+                            effectiveStatus,
                           )}`}
                         >
                           <span className={styles.statusDot} aria-hidden="true" />
@@ -586,7 +758,7 @@ export default function MyTransportPage() {
                       </div>
 
                       {driver &&
-                      ["confirmed", "in_progress"].includes(booking.status) ? (
+                      ["confirmed", "in_progress"].includes(effectiveStatus) ? (
                         <div className={styles.featuredDriverStrip}>
                           <span className={styles.badgeRow}>
                             <UserCheck size={14} aria-hidden="true" />
@@ -623,7 +795,8 @@ export default function MyTransportPage() {
                           ) : null}
 
                           {company?.contact_phone &&
-                          booking.status !== "cancelled" ? (
+                          effectiveStatus !== "cancelled" &&
+                          effectiveStatus !== "expired" ? (
                             <a
                               href={`tel:${company.contact_phone.replace(/\D/g, "")}`}
                               className={styles.featuredActionLink}
@@ -633,7 +806,18 @@ export default function MyTransportPage() {
                             </a>
                           ) : null}
 
-                          {booking.status === "pending" ? (
+                          {canReschedule ? (
+                            <button
+                              type="button"
+                              className={styles.featuredActionReschedule}
+                              onClick={() => openReschedule(booking)}
+                            >
+                              <CalendarClock size={13} aria-hidden="true" />
+                              Reschedule
+                            </button>
+                          ) : null}
+
+                          {effectiveStatus === "pending" ? (
                             isConfirmingCancel ? (
                               <>
                                 <button
@@ -679,7 +863,7 @@ export default function MyTransportPage() {
                             )
                           ) : null}
 
-                          {booking.status === "completed" ? (
+                          {effectiveStatus === "completed" ? (
                             <button
                               type="button"
                               className={styles.featuredActionPrimary}
@@ -799,6 +983,126 @@ export default function MyTransportPage() {
                     </>
                   ) : (
                     "Submit review"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Reschedule Booking Modal */}
+      {rescheduleOpen && rescheduleBooking ? (
+        <div
+          className={styles.modalBackdrop}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reschedule-modal-title"
+          onClick={() => {
+            if (!rescheduleSubmitting) setRescheduleOpen(false);
+          }}
+        >
+          <div
+            className={styles.modalCard}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.modalHead}>
+              <div>
+                <h2 id="reschedule-modal-title" className={styles.modalTitle}>
+                  Reschedule booking
+                </h2>
+                <p className={styles.modalSub}>
+                  {rescheduleBooking.service?.title || "Private hire trip"}
+                  {rescheduleBooking.reference
+                    ? ` · ${rescheduleBooking.reference}`
+                    : ""}
+                </p>
+              </div>
+              <button
+                type="button"
+                className={styles.modalClose}
+                aria-label="Close reschedule modal"
+                disabled={rescheduleSubmitting}
+                onClick={() => setRescheduleOpen(false)}
+              >
+                <X size={16} aria-hidden="true" />
+              </button>
+            </header>
+
+            <form onSubmit={submitReschedule} className={styles.modalForm}>
+              <div className={styles.modalGrid}>
+                <div className={styles.modalField}>
+                  <label className={styles.modalLabel} htmlFor="reschedule-date">
+                    New booking date
+                  </label>
+                  <input
+                    id="reschedule-date"
+                    type="date"
+                    required
+                    min={todayIsoInZanzibar(nowDate)}
+                    value={rescheduleDate}
+                    onChange={(event) => {
+                      setRescheduleDate(event.target.value);
+                      setRescheduleError(null);
+                    }}
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.modalField}>
+                  <label className={styles.modalLabel} htmlFor="reschedule-time">
+                    New pickup time
+                  </label>
+                  <input
+                    id="reschedule-time"
+                    type="time"
+                    required
+                    value={rescheduleTime}
+                    onChange={(event) => {
+                      setRescheduleTime(event.target.value);
+                      setRescheduleError(null);
+                    }}
+                    className={styles.modalInput}
+                  />
+                </div>
+              </div>
+
+              <p className={styles.modalNote}>
+                You can change the booking date and pickup time up to{" "}
+                {RESCHEDULE_CUTOFF_HOURS} hours before the scheduled pickup.
+              </p>
+
+              {rescheduleError ? (
+                <p className={styles.modalError} role="alert">
+                  {rescheduleError}
+                </p>
+              ) : null}
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.keepButton}
+                  disabled={rescheduleSubmitting}
+                  onClick={() => setRescheduleOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={rescheduleSubmitting}
+                  className={styles.modalSubmit}
+                >
+                  {rescheduleSubmitting ? (
+                    <>
+                      <Loader2
+                        size={15}
+                        className={styles.spin}
+                        aria-hidden="true"
+                      />
+                      Saving…
+                    </>
+                  ) : (
+                    "Save new schedule"
                   )}
                 </button>
               </div>

@@ -8,6 +8,8 @@ import {
   isPastTravelDate,
   journeyMetrics,
 } from "@/lib/services/journey";
+import { resolveBookingScheduledAt } from "@/lib/booking-lifecycle";
+import { expireOverdueTransportBookings } from "@/lib/services/booking-expiration";
 import { createInAppNotification, sendPushToUsers } from "@/lib/push";
 import { sendEmail } from "@/lib/email";
 import { broadcastRealtime } from "@/lib/realtime/connections";
@@ -124,6 +126,7 @@ function isUniqueConstraintError(error: unknown): boolean {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
+    await expireOverdueTransportBookings({ userId: user.id });
     const bookings = await prisma.transportBooking.findMany({
       where: { userId: user.id },
       include: BOOKING_INCLUDE,
@@ -275,6 +278,10 @@ export async function POST(request: NextRequest) {
     }
     if (isPastTravelDate(travelDate)) {
       throw new ApiError(400, "Travel date cannot be in the past.");
+    }
+    const scheduledAt = resolveBookingScheduledAt(body.travel_date, body.pickup_time);
+    if (!scheduledAt || scheduledAt.getTime() <= Date.now()) {
+      throw new ApiError(400, "Booking date and pickup time must be in the future.");
     }
 
     const isPublicRequest = body.service_id == null && body.is_public === true;

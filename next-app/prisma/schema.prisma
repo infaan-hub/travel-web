@@ -848,6 +848,7 @@ enum TransportBookingStatus {
   in_progress
   completed
   cancelled
+  expired
 }
 
 model TransportBooking {
@@ -916,6 +917,7 @@ enum TransportTripRequestStatus {
   quoted
   accepted
   cancelled
+  expired
 }
 
 model TransportTripRequest {

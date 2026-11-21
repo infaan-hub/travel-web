@@ -3,7 +3,8 @@ export type BookingStatusValue =
   | "confirmed"
   | "in_progress"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "expired";
 
 export type DriverTripStage =
   | "pending"
@@ -13,7 +14,8 @@ export type DriverTripStage =
   | "in_trip"
   | "reached_destination"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "expired";
 
 export type DriverTripAction =
   | "confirm"
@@ -35,6 +37,7 @@ export const DRIVER_STAGE_LABELS: Record<DriverTripStage, string> = {
   reached_destination: "Reached destination",
   completed: "Completed",
   cancelled: "Cancelled",
+  expired: "Expired",
 };
 
 export const DRIVER_STAGE_ORDER: ReadonlyArray<{
@@ -83,6 +86,7 @@ const VALID_STAGES = new Set<string>([
   "reached_destination",
   "completed",
   "cancelled",
+  "expired",
 ]);
 
 /**
@@ -95,6 +99,7 @@ export function resolveDriverStage(input: {
   driverStage?: string | null;
 }): DriverTripStage {
   const status = (input.status || "pending").toLowerCase();
+  if (status === "expired") return "expired";
   if (status === "cancelled") return "cancelled";
   if (status === "completed") return "completed";
   if (status === "pending") return "pending";

@@ -291,6 +291,14 @@ export const transportBookingsAPI = {
   getAll: () => api.get("/transport-bookings/"),
   create: (data: Record<string, unknown>) => api.post("/transport-bookings/", data),
   cancel: (id: string | number) => api.patch("/transport-bookings/" + id + "/", { status: "cancelled" }),
+  reschedule: (
+    id: string | number,
+    data: { travel_date: string; pickup_time: string },
+  ) =>
+    api.patch(`/transport-bookings/${id}/`, {
+      action: "reschedule",
+      ...data,
+    }),
 };
 export const driverAPI = {
   getBookings: () => api.get("/driver/bookings/"),

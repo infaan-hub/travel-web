@@ -23,6 +23,7 @@ import {
 } from "@/components/icons";
 import styles from "./auth-page.module.css";
 import {
+  detectInstalledApp,
   isOnboardingComplete,
   postLoginPath,
   safeInternalPath,
@@ -79,8 +80,8 @@ export default function LoginPage() {
       router.replace(postLoginPath(user, from));
       return;
     }
-    if (!onboardingComplete && !isOnboardingComplete()) {
-      router.replace(`/onboarding/?from=${encodeURIComponent(from)}`);
+    if (detectInstalledApp() && !onboardingComplete && !isOnboardingComplete()) {
+      router.replace(`/onboarding/?from=${encodeURIComponent(from)}&next=login`);
       return;
     }
   }, [authLoading, from, isAuthenticated, onboardingComplete, router, user]);
@@ -112,10 +113,16 @@ export default function LoginPage() {
     }
   };
 
+  const isInstalledApp = useSyncExternalStore(
+    subscribeToOnboarding,
+    detectInstalledApp,
+    onboardingServerSnapshot,
+  );
+
   if (
     authLoading ||
     isAuthenticated ||
-    (!onboardingComplete && !savedOnboardingComplete)
+    (isInstalledApp && !onboardingComplete && !savedOnboardingComplete)
   ) {
     return (
       <div id="auth-page-root" className={styles.page}>

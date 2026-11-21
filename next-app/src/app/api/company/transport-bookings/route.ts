@@ -3,10 +3,12 @@ import { handleApiError, ok } from "@/lib/api/http";
 import { requireCompanyAccount } from "@/lib/auth/company-account";
 import prisma from "@/lib/db/prisma";
 import { transportBookingSerializer } from "@/lib/serializers/private-hire";
+import { expireOverdueTransportBookings } from "@/lib/services/booking-expiration";
 
 export async function GET(request: NextRequest) {
   try {
     const context = await requireCompanyAccount(request, { permission: "bookings:read" });
+    await expireOverdueTransportBookings({ companyId: context.company.id });
     const bookings = await prisma.transportBooking.findMany({
       where: { companyId: context.company.id },
       include: {

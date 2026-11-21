@@ -26,7 +26,7 @@ type DispatchBooking = {
   driver?: { id: number; name: string; phone?: string } | null;
 };
 
-type FilterTab = "all" | "verified" | "pending" | "completed";
+type FilterTab = "all" | "verified" | "pending" | "completed" | "expired";
 
 export default function CompanyPublicDispatchPanel() {
   const toast = useToast();
@@ -78,7 +78,8 @@ export default function CompanyPublicDispatchPanel() {
     ).length;
     const pending = bookings.filter((b) => b.status === "pending").length;
     const completed = bookings.filter((b) => b.status === "completed").length;
-    return { all: bookings.length, verified, pending, completed };
+    const expired = bookings.filter((b) => b.status === "expired").length;
+    return { all: bookings.length, verified, pending, completed, expired };
   }, [bookings]);
 
   const visibleBookings = useMemo(() => {
@@ -90,6 +91,9 @@ export default function CompanyPublicDispatchPanel() {
     }
     if (tab === "completed") {
       return bookings.filter((b) => b.status === "completed");
+    }
+    if (tab === "expired") {
+      return bookings.filter((b) => b.status === "expired");
     }
     return bookings.filter((b) => b.status !== "cancelled");
   }, [bookings, tab]);
@@ -122,6 +126,9 @@ export default function CompanyPublicDispatchPanel() {
             { id: "verified", label: `Verified & live (${counts.verified})` },
             { id: "pending", label: `Pending (${counts.pending})` },
             { id: "completed", label: `Completed (${counts.completed})` },
+            ...(counts.expired > 0
+              ? [{ id: "expired" as const, label: `Expired (${counts.expired})` }]
+              : []),
           ] as const
         ).map((item) => (
           <button
@@ -171,6 +178,8 @@ export default function CompanyPublicDispatchPanel() {
                         <CheckCircle2 size={12} aria-hidden="true" />
                         {DRIVER_STAGE_LABELS[stage]}
                       </span>
+                    ) : booking.status === "expired" ? (
+                      <span className={styles.publicDispatchExpired}>Expired</span>
                     ) : (
                       <span className={styles.publicDispatchPending}>Awaiting driver</span>
                     )}

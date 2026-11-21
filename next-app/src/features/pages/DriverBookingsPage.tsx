@@ -48,7 +48,7 @@ import {
 import { useToast } from "@/components/ToastProvider";
 import styles from "@/features/pages/driver-workspace.module.css";
 
-type FilterMode = "all" | "pending" | "public" | "confirmed" | "active" | "completed";
+type FilterMode = "all" | "pending" | "public" | "confirmed" | "active" | "completed" | "expired";
 
 type Props = {
   driverName: string;
@@ -65,6 +65,7 @@ const STAGE_SORT_RANK: Record<string, number> = {
   confirmed: 2,
   completed: 3,
   cancelled: 4,
+  expired: 5,
 };
 
 export default function DriverBookingsPage({
@@ -115,6 +116,7 @@ export default function DriverBookingsPage({
     let confirmed = 0;
     let active = 0;
     let completed = 0;
+    let expired = 0;
     for (const b of bookings) {
       const st = resolveDriverStage(b);
       if (st === "pending") {
@@ -123,8 +125,9 @@ export default function DriverBookingsPage({
       } else if (st === "confirmed") confirmed += 1;
       else if (isActiveExecutionStage(st)) active += 1;
       else if (st === "completed") completed += 1;
+      else if (st === "expired") expired += 1;
     }
-    return { all: bookings.length, pending, publicPending, confirmed, active, completed };
+    return { all: bookings.length, pending, publicPending, confirmed, active, completed, expired };
   }, [bookings]);
 
   const filteredBookings = useMemo(() => {
@@ -137,6 +140,7 @@ export default function DriverBookingsPage({
         if (filter === "confirmed" && st !== "confirmed") return false;
         if (filter === "active" && !isActiveExecutionStage(st)) return false;
         if (filter === "completed" && st !== "completed") return false;
+        if (filter === "expired" && st !== "expired") return false;
         if (!q) return true;
         const haystack = [
           b.reference,
@@ -310,6 +314,9 @@ export default function DriverBookingsPage({
                 { id: "confirmed", label: `Confirmed (${counts.confirmed})` },
                 { id: "active", label: `In progress (${counts.active})` },
                 { id: "completed", label: `Completed (${counts.completed})` },
+                ...(counts.expired > 0
+                  ? [{ id: "expired" as const, label: `Expired (${counts.expired})` }]
+                  : []),
               ] as const
             ).map((item) => (
               <button
@@ -425,7 +432,9 @@ export default function DriverBookingsPage({
                               ? styles.statusConfirmed
                               : isLive
                                 ? styles.statusLive
-                                : styles.statusCompleted
+                                : stage === "expired" || stage === "cancelled"
+                                  ? styles.statusExpired
+                                  : styles.statusCompleted
                         }`}
                       >
                         {DRIVER_STAGE_LABELS[stage]}
@@ -625,6 +634,11 @@ export default function DriverBookingsPage({
                               booking.completed_at,
                             )}`
                           : ""}
+                      </span>
+                    ) : stage === "expired" ? (
+                      <span className={styles.footerHint}>
+                        <Clock3 size={15} aria-hidden="true" />
+                        Expired — booking date and time passed without confirmation.
                       </span>
                     ) : null}
                   </footer>

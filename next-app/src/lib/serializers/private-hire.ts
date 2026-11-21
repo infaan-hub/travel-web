@@ -10,6 +10,11 @@ import type {
   User,
 } from "@prisma/client";
 import { resolveDriverStage } from "@/lib/driver-workflow";
+import {
+  canRescheduleBooking,
+  getRescheduleDeadline,
+  resolveEffectiveBookingStatus,
+} from "@/lib/booking-lifecycle";
 import { usdToTzs } from "@/lib/zanzibar-route-pricing";
 
 export type PrivateHireVehicleSerializable = Omit<
@@ -149,9 +154,24 @@ export function transportBookingSerializer(
     }) | null;
   },
 ) {
-  const effectiveStage = resolveDriverStage({
+  const effectiveStatus = resolveEffectiveBookingStatus({
     status: booking.status,
+    travelDate: booking.travelDate,
+    pickupTime: booking.pickupTime,
+  });
+  const effectiveStage = resolveDriverStage({
+    status: effectiveStatus,
     driverStage: booking.driverStage,
+  });
+  const canReschedule = canRescheduleBooking({
+    status: effectiveStatus,
+    travelDate: booking.travelDate,
+    pickupTime: booking.pickupTime,
+  });
+  const rescheduleDeadline = getRescheduleDeadline({
+    status: effectiveStatus,
+    travelDate: booking.travelDate,
+    pickupTime: booking.pickupTime,
   });
 
   const accountFullName =
@@ -215,7 +235,9 @@ export function transportBookingSerializer(
     total_price_tzs:
       booking.totalPrice != null ? usdToTzs(Number(booking.totalPrice)) : null,
     trip_option: booking.tripOption ?? "one_way",
-    status: booking.status,
+    status: effectiveStatus,
+    can_reschedule: canReschedule,
+    reschedule_deadline: rescheduleDeadline?.toISOString() ?? null,
     driver_stage: effectiveStage,
     confirmed_at: booking.confirmedAt?.toISOString() ?? null,
     started_at: booking.startedAt?.toISOString() ?? null,

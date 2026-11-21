@@ -160,7 +160,10 @@ export default function VerifyEmailPage() {
           const userRes = await authAPI.getUser();
           const u = userRes.data;
           router.replace(
-            postLoginPath({ is_staff: u.is_staff, account_type: u.account_type }, from),
+            postLoginPath(
+              { id: u.id, is_staff: u.is_staff, account_type: u.account_type },
+              from,
+            ),
           );
         } catch {
           router.replace(postLoginPath(null, from));

@@ -4,6 +4,8 @@ import { requirePrivateHireDriver } from "@/lib/auth/private-hire-driver";
 import prisma from "@/lib/db/prisma";
 import { createInAppNotification, sendPushToUsers } from "@/lib/push";
 import { sendEmail } from "@/lib/email";
+import { isBookingExpired } from "@/lib/booking-lifecycle";
+import { expireOverdueTripRequests } from "@/lib/services/booking-expiration";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -54,6 +56,18 @@ export async function PATCH(request: NextRequest, context: Context) {
     const id = parseId((await context.params).id, "trip request id");
     const body = await request.json().catch(() => null) as { action?: unknown } | null;
     if (body?.action !== "accept") throw new ApiError(400, "Choose accept to claim this trip request.");
+    await expireOverdueTripRequests();
+    const existing = await prisma.transportTripRequest.findUnique({
+      where: { id },
+      select: { id: true, status: true, travelDate: true, pickupTime: true },
+    });
+    if (!existing) throw new ApiError(404, "Trip request not found.");
+    if (isBookingExpired(existing)) {
+      throw new ApiError(
+        409,
+        "This trip request has expired because its scheduled date and time passed without confirmation.",
+      );
+    }
     const result = await prisma.transportTripRequest.updateMany({
       where: { id, driverId: null, status: "requested", bookings: { none: {} } },
       data: { driverId: driver.id, status: "accepted" },

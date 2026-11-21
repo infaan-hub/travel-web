@@ -210,7 +210,7 @@
 }
 
 /* Leaflet Custom DivIcon Markers */
-:global(.driver-live-marker) {
+.mapCanvas :global(.driver-live-marker) {
   position: relative;
   display: grid;
   place-items: center;
@@ -218,7 +218,7 @@
   height: 44px;
 }
 
-:global(.driver-live-marker__pulse) {
+.mapCanvas :global(.driver-live-marker__pulse) {
   position: absolute;
   inset: 0;
   border-radius: 50%;
@@ -226,7 +226,7 @@
   animation: driver-marker-radar 1.8s ease-out infinite;
 }
 
-:global(.driver-live-marker__core) {
+.mapCanvas :global(.driver-live-marker__core) {
   position: relative;
   z-index: 2;
   display: grid;
@@ -240,7 +240,7 @@
   box-shadow: 0 4px 14px rgba(8, 66, 140, 0.48);
 }
 
-:global(.driver-live-marker__arrow) {
+.mapCanvas :global(.driver-live-marker__arrow) {
   display: grid;
   place-items: center;
   width: 16px;
@@ -249,14 +249,14 @@
   will-change: transform;
 }
 
-:global(.driver-live-marker__dot) {
+.mapCanvas :global(.driver-live-marker__dot) {
   width: 9px;
   height: 9px;
   border-radius: 50%;
   background: #ffffff;
 }
 
-:global(.driver-stop-pin) {
+.mapCanvas :global(.driver-stop-pin) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -268,7 +268,7 @@
   box-shadow: 0 6px 14px rgba(12, 27, 46, 0.32);
 }
 
-:global(.driver-stop-pin > span) {
+.mapCanvas :global(.driver-stop-pin > span) {
   transform: rotate(45deg);
   color: #ffffff;
   font-family: Inter, system-ui, sans-serif;
@@ -277,11 +277,11 @@
   line-height: 1;
 }
 
-:global(.driver-stop-pin--origin) {
+.mapCanvas :global(.driver-stop-pin--origin) {
   background: #15803d;
 }
 
-:global(.driver-stop-pin--dest) {
+.mapCanvas :global(.driver-stop-pin--dest) {
   background: #08428c;
 }
 
@@ -323,7 +323,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .gpsDot,
-  :global(.driver-live-marker__pulse) {
+  .mapCanvas :global(.driver-live-marker__pulse) {
     animation: none !important;
   }
 }

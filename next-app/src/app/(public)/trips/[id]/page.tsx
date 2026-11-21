@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getServerUser } from "@/lib/auth/server-guard";
 import prisma from "@/lib/db/prisma";
 import { publicImageUrl } from "@/lib/storage/images";
 import TripDetailPage from "@/features/pages/TripDetailPage";
@@ -31,6 +32,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function Page({ params }: Params) {
   const { id } = await params;
+  const user = await getServerUser();
+  if (!user) {
+    redirect(`/login/?from=${encodeURIComponent(`/trips/${id}/`)}`);
+  }
   const trip = await prisma.companyTrip.findUnique({
     where: { id: Number(id) },
     include: { company: { select: { name: true, slug: true, status: true, isPublic: true } } },

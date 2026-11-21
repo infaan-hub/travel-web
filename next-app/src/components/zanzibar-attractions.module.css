@@ -1385,7 +1385,7 @@
 }
 
 /* Focus rings */
-:global(#zanzibar-attractions) button:focus-visible,
+.section button:focus-visible,
 .mapsLink:focus-visible,
 .popupLink:focus-visible {
   outline: 2.5px solid rgba(8, 66, 140, 0.45) !important;

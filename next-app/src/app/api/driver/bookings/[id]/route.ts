@@ -15,6 +15,8 @@ import {
   validateDriverTransition,
   type DriverTripAction,
 } from "@/lib/driver-workflow";
+import { isBookingExpired } from "@/lib/booking-lifecycle";
+import { expireOverdueTransportBookings } from "@/lib/services/booking-expiration";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -233,6 +235,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { driver } = await requirePrivateHireDriver(request);
     const id = parseId((await context.params).id, "booking id");
+    await expireOverdueTransportBookings({ bookingId: id });
     const booking = await prisma.transportBooking.findFirst({
       where: {
         id,
@@ -322,10 +325,21 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         driverId: true,
         vehicleId: true,
         companyId: true,
+        travelDate: true,
+        pickupTime: true,
       },
     });
     if (!existing) {
       throw new ApiError(404, "Assigned trip not found.");
+    }
+
+    const now = new Date();
+    if (isBookingExpired(existing, now)) {
+      await expireOverdueTransportBookings({ bookingId: id }, now);
+      throw new ApiError(
+        409,
+        "This booking has expired because its scheduled date and time passed without confirmation.",
+      );
     }
 
     const transition = validateDriverTransition(existing.status, existing.driverStage, action);
@@ -335,7 +349,6 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const lat = parseValidCoord(body?.lat, -90, 90);
     const lng = parseValidCoord(body?.lng, -180, 180);
-    const now = new Date();
 
     if (action === "location") {
       if (lat == null || lng == null) {

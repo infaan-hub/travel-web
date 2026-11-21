@@ -9,6 +9,7 @@ import {
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   ArrowRight,
@@ -37,6 +38,7 @@ import { readClientCache, writeClientCache } from "@/lib/cache/client-cache";
 import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import { tripPlaceNameForCoords } from "@/lib/trips";
 import { useToast } from "@/components/ToastProvider";
+import { useAuth } from "@/context/AuthContext";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import ZanzibarAttractions from "@/components/ZanzibarAttractions";
 import type { PlaceSuggestion } from "@/lib/place-types";
@@ -131,6 +133,8 @@ function favoriteKindLabel(kind: FavoriteTripRecord["kind"]): string {
 
 export default function TripsPage() {
   const toast = useToast();
+  const router = useRouter();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   // Live company trips + popular route aggregates
   const [trips, setTrips] = useState<CompanyTrip[]>(
@@ -183,6 +187,14 @@ export default function TripsPage() {
   }, []);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      router.replace("/login/?from=%2Ftrips%2F");
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
     let active = true;
     tripsAPI
       .getAll()
@@ -221,7 +233,7 @@ export default function TripsPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [authLoading, isAuthenticated]);
 
   // Auto-calculate route whenever both coordinates are set
   const routeKey =
@@ -632,6 +644,10 @@ export default function TripsPage() {
       : "";
   const isCurrentMeasuredFav =
     Boolean(currentMeasuredFavId) && favoriteIds.has(currentMeasuredFavId);
+
+  if (authLoading || !isAuthenticated) {
+    return null;
+  }
 
   return (
     <div id="trips-hub-root" className={`page ${styles.page}`}>

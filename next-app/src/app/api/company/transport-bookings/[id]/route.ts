@@ -5,6 +5,8 @@ import prisma from "@/lib/db/prisma";
 import { transportBookingSerializer } from "@/lib/serializers/private-hire";
 import { broadcastRealtime } from "@/lib/realtime/connections";
 import { buildCompanyPublicToggleData } from "@/lib/driver-workflow";
+import { isBookingExpired } from "@/lib/booking-lifecycle";
+import { expireOverdueTransportBookings } from "@/lib/services/booking-expiration";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -19,10 +21,19 @@ export async function PATCH(request: NextRequest, context: Context) {
       select: {
         id: true,
         status: true,
+        travelDate: true,
+        pickupTime: true,
         service: { select: { driverId: true, vehicleId: true } },
       },
     });
     if (!booking) throw new ApiError(404, "Company transport booking not found.");
+    if (isBookingExpired(booking)) {
+      await expireOverdueTransportBookings({ bookingId: id, companyId: company.company.id });
+      throw new ApiError(
+        409,
+        "This booking has expired because its scheduled date and time passed without confirmation.",
+      );
+    }
     if (booking.status !== "pending") {
       throw new ApiError(409, "Only pending trips can change public driver visibility.");
     }
