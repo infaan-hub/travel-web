@@ -1,10 +1,10 @@
 "use client";
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { toursAPI, homeSettingsAPI, publicCompaniesAPI, publicPrivateHireAPI, publicDriversAPI } from '@/lib/api/client';
-import { ArrowRight, Star, Car, Users, Briefcase, Compass, Navigation, Building2, CheckCircle, ChevronRight, MapPin } from '@/components/icons';
+import { ArrowRight, Star, Car, Users, Briefcase, Compass, Navigation, Building2, CheckCircle, ChevronLeft, ChevronRight, MapPin } from '@/components/icons';
 import { CalendarCheck2, ShieldCheck } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils/image-url';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
@@ -89,8 +89,9 @@ function HomePrivateHireFeaturedCard({ svc }: { svc: any }) {
 
       <div className={styles.fpTopBar}>
         <span className={styles.fpGlassBadge}>
-          <ShieldCheck size={13} aria-hidden="true" />
-          Verified private hire
+          <ShieldCheck size={12} aria-hidden="true" />
+          <span className={styles.fpLabelFull}>Verified private hire</span>
+          <span className={styles.fpLabelShort}>Verified</span>
         </span>
 
         <div className={styles.fpPriceBox}>
@@ -138,16 +139,16 @@ function HomePrivateHireFeaturedCard({ svc }: { svc: any }) {
         <div className={styles.fpBottomRow}>
           <ul className={styles.fpFacts} aria-label="Vehicle specifications">
             <li>
-              <Car size={14} aria-hidden="true" />
+              <Car size={12} aria-hidden="true" />
               <span>{vehicleName}</span>
               {plateNumber ? <em>{plateNumber}</em> : null}
             </li>
             <li>
-              <Users size={14} aria-hidden="true" />
+              <Users size={12} aria-hidden="true" />
               <span>{capacityPax} pax</span>
             </li>
             <li>
-              <Briefcase size={14} aria-hidden="true" />
+              <Briefcase size={12} aria-hidden="true" />
               <span>{luggageBags} bags</span>
             </li>
           </ul>
@@ -157,8 +158,9 @@ function HomePrivateHireFeaturedCard({ svc }: { svc: any }) {
               Details
             </Link>
             <Link href={`/booking/${svc.id}/`} className={styles.fpPrimaryBtn}>
-              <CalendarCheck2 size={16} aria-hidden="true" />
-              Book This Service
+              <CalendarCheck2 size={14} aria-hidden="true" />
+              <span className={styles.fpLabelFull}>Book This Service</span>
+              <span className={styles.fpLabelShort}>Book now</span>
             </Link>
           </div>
         </div>
@@ -219,6 +221,17 @@ export default function HomePage() {
     readClientCache<HomeSettings>("travel.homeSettings") ||
     readClientCache<FeaturedCompany[]>("travel.homeCompanies")
   ));
+  const providersTrackRef = useRef<HTMLUListElement | null>(null);
+
+  const scrollProvidersTrack = (direction: "left" | "right") => {
+    const el = providersTrackRef.current;
+    if (!el) return;
+    const step = Math.max(280, Math.round(el.clientWidth * 0.85));
+    el.scrollBy({
+      left: direction === "right" ? step : -step,
+      behavior: "smooth",
+    });
+  };
 
   const companyServiceOptions = livePrivateServices.filter((svc) => svc && typeof svc.id === "number");
 
@@ -335,7 +348,6 @@ export default function HomePage() {
         const tripCompanyBg = homeSettings?.trip_company_card_image_url
           ? getImageUrl(homeSettings.trip_company_card_image_url)
           : null;
-        const companyHasBg = Boolean(tripCompanyBg);
 
         return (
           <section className={styles.tripsSection} aria-labelledby="home-trips-heading">
@@ -350,123 +362,109 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className={styles.tripsGrid}>
+            <div className={styles.fpGrid}>
               {/* Card 1: Open Public Private Hire Request -> /booking/create/ */}
-              <article
-                className={`${styles.tripOptionCard} ${styles.tripOptionCardPublic} ${
-                  tripPublicBg ? styles.tripOptionHasBg : ""
-                }`}
-              >
-                {tripPublicBg ? (
-                  <>
+              <article className={`${styles.fpCard} ${styles.fpCardTrip}`}>
+                <div className={styles.fpMedia} aria-hidden="true">
+                  {tripPublicBg ? (
                     <Image
                       src={tripPublicBg}
                       alt=""
                       fill
-                      sizes="(max-width: 640px) 48vw, 460px"
-                      className={styles.tripOptionBgImage}
+                      sizes="(max-width: 640px) 48vw, 440px"
+                      className={styles.fpImage}
                       unoptimized
                     />
-                    <span className={styles.tripOptionBgScrim} aria-hidden="true" />
-                  </>
-                ) : null}
+                  ) : (
+                    <div className={styles.fpFallback}>
+                      <Navigation size={44} />
+                    </div>
+                  )}
+                </div>
+                <span className={styles.fpTopScrim} aria-hidden="true" />
 
-                <div className={styles.tripOptionContent}>
-                  <div className={styles.tripOptionTop}>
-                    <span className={styles.tripOptionIconLight} aria-hidden="true">
-                      <Navigation size={18} />
-                    </span>
-                    <span className={styles.tripOptionBadgeLight}>Open private hire</span>
-                  </div>
+                <div className={styles.fpTopBar}>
+                  <span className={styles.fpGlassBadge}>
+                    <ShieldCheck size={12} aria-hidden="true" />
+                    <span className={styles.fpLabelFull}>Open private hire</span>
+                    <span className={styles.fpLabelShort}>Open trip</span>
+                  </span>
+                  <span className={styles.fpIconPill} aria-hidden="true">
+                    <Navigation size={15} />
+                  </span>
+                </div>
 
-                  <div className={styles.tripOptionCopy}>
-                    <h3 className={styles.tripOptionTitleLight}>Request Private hire Transport</h3>
-                    <p className={styles.tripOptionDescLight}>
-                      Set pickup, drop-off &amp; schedule — nearby drivers confirm your private hire
-                      trip directly.
+                <div className={styles.fpSheet}>
+                  <div className={styles.fpCopy}>
+                    <span className={styles.fpKicker}>Instant Dispatch · Zanzibar</span>
+                    <h3 className={styles.fpTitle}>Request Private hire Transport</h3>
+                    <p className={styles.fpDesc}>
+                      Set pickup, drop-off &amp; schedule — nearby drivers confirm directly.
                     </p>
                   </div>
 
-                  <div className={styles.tripOptionFooter}>
-                    <Link href="/booking/create/" className={styles.tripActionLight}>
-                      <span className={styles.tripActionLabelFull}>
-                        Request Private hire Transport
-                      </span>
-                      <span className={styles.tripActionLabelShort}>Request now</span>
-                      <ArrowRight size={15} aria-hidden="true" />
-                    </Link>
+                  <div className={styles.fpBottomRow}>
+                    <div className={styles.fpActionsRow}>
+                      <Link href="/booking/create/" className={styles.fpPrimaryBtn}>
+                        <span className={styles.fpLabelFull}>Request Private hire Transport</span>
+                        <span className={styles.fpLabelShort}>Request now</span>
+                        <ArrowRight size={14} aria-hidden="true" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </article>
 
               {/* Card 2: Specific Company Private Hire Request -> /companies/ */}
-              <article
-                className={`${styles.tripOptionCard} ${
-                  companyHasBg ? styles.tripOptionCardPublic : styles.tripOptionCardCompany
-                } ${companyHasBg ? styles.tripOptionHasBg : ""}`}
-              >
-                {tripCompanyBg ? (
-                  <>
+              <article className={`${styles.fpCard} ${styles.fpCardTrip}`}>
+                <div className={styles.fpMedia} aria-hidden="true">
+                  {tripCompanyBg ? (
                     <Image
                       src={tripCompanyBg}
                       alt=""
                       fill
-                      sizes="(max-width: 640px) 48vw, 460px"
-                      className={styles.tripOptionBgImage}
+                      sizes="(max-width: 640px) 48vw, 440px"
+                      className={styles.fpImage}
                       unoptimized
                     />
-                    <span className={styles.tripOptionBgScrim} aria-hidden="true" />
-                  </>
-                ) : null}
+                  ) : (
+                    <div className={`${styles.fpFallback} ${styles.fpFallbackAlt}`}>
+                      <Building2 size={44} />
+                    </div>
+                  )}
+                </div>
+                <span className={styles.fpTopScrim} aria-hidden="true" />
 
-                <div className={styles.tripOptionContent}>
-                  <div className={styles.tripOptionTop}>
-                    <span
-                      className={
-                        companyHasBg ? styles.tripOptionIconLight : styles.tripOptionIconDark
-                      }
-                      aria-hidden="true"
-                    >
-                      <Building2 size={18} />
-                    </span>
-                    <span
-                      className={
-                        companyHasBg ? styles.tripOptionBadgeLight : styles.tripOptionBadgeDark
-                      }
-                    >
-                      Specific company
-                    </span>
-                  </div>
+                <div className={styles.fpTopBar}>
+                  <span className={styles.fpGlassBadge}>
+                    <ShieldCheck size={12} aria-hidden="true" />
+                    <span className={styles.fpLabelFull}>Specific company</span>
+                    <span className={styles.fpLabelShort}>Company</span>
+                  </span>
+                  <span className={styles.fpIconPill} aria-hidden="true">
+                    <Building2 size={15} />
+                  </span>
+                </div>
 
-                  <div className={styles.tripOptionCopy}>
-                    <h3
-                      className={
-                        companyHasBg ? styles.tripOptionTitleLight : styles.tripOptionTitleDark
-                      }
-                    >
+                <div className={styles.fpSheet}>
+                  <div className={styles.fpCopy}>
+                    <span className={styles.fpKicker}>Verified Local Operators</span>
+                    <h3 className={styles.fpTitle}>
                       Request Private hire Transport by specific company
                     </h3>
-                    <p
-                      className={
-                        companyHasBg ? styles.tripOptionDescLight : styles.tripOptionDescDark
-                      }
-                    >
-                      Browse verified local companies, view all their private hire services, and
-                      book directly.
+                    <p className={styles.fpDesc}>
+                      Browse verified local companies and book their private hire vehicles.
                     </p>
                   </div>
 
-                  <div className={styles.tripOptionFooter}>
-                    <Link
-                      href="/companies/"
-                      className={companyHasBg ? styles.tripActionLight : styles.tripActionDark}
-                    >
-                      <span className={styles.tripActionLabelFull}>
-                        Request by specific company
-                      </span>
-                      <span className={styles.tripActionLabelShort}>By company</span>
-                      <ArrowRight size={15} aria-hidden="true" />
-                    </Link>
+                  <div className={styles.fpBottomRow}>
+                    <div className={styles.fpActionsRow}>
+                      <Link href="/companies/" className={styles.fpPrimaryBtn}>
+                        <span className={styles.fpLabelFull}>Request by specific company</span>
+                        <span className={styles.fpLabelShort}>By company</span>
+                        <ArrowRight size={14} aria-hidden="true" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -494,11 +492,7 @@ export default function HomePage() {
         {privateServices.length > 0 ? (
           <ul
             className={`${styles.fpGrid} ${
-              privateServices.length === 1
-                ? styles.fpGridSingle
-                : privateServices.length === 2
-                  ? styles.fpGridDouble
-                  : ""
+              privateServices.length === 1 ? styles.fpGridSingle : ""
             }`}
           >
             {privateServices.slice(0, 4).map((svc) => (
@@ -534,14 +528,8 @@ export default function HomePage() {
           </div>
 
           <ul
-            className={`${styles.fpGrid} ${styles.fpGridDrivers} ${
-              topDrivers.length === 1
-                ? styles.fpGridDriversSingle
-                : topDrivers.length === 2
-                  ? styles.fpGridDriversDouble
-                  : topDrivers.length === 3
-                    ? styles.fpGridDriversTriple
-                    : ""
+            className={`${styles.fpGrid} ${
+              topDrivers.length === 1 ? styles.fpGridSingle : ""
             }`}
           >
             {topDrivers.slice(0, 4).map((driver) => {
@@ -553,17 +541,18 @@ export default function HomePage() {
               const bookHref = driver.service_id
                 ? `/booking/${driver.service_id}/`
                 : "/booking/create/";
-              const bookLabel = driver.service_id ? "Book This Driver" : "Request Trip";
+              const bookLabelFull = driver.service_id ? "Book This Driver" : "Request Trip";
+              const bookLabelShort = driver.service_id ? "Book driver" : "Request";
 
               return (
-                <li key={driver.id} className={`${styles.fpCard} ${styles.fpCardCompact}`}>
+                <li key={driver.id} className={`${styles.fpCard} ${styles.fpCardDriver}`}>
                   <div className={styles.fpMedia} aria-hidden="true">
                     {bgUrl ? (
                       <Image
                         src={bgUrl}
                         alt=""
                         fill
-                        sizes="(max-width: 640px) 92vw, (max-width: 1180px) 46vw, 25vw"
+                        sizes="(max-width: 640px) 48vw, 440px"
                         className={`${styles.fpImage} ${avatarUrl ? styles.fpImagePortrait : ""}`}
                         unoptimized
                       />
@@ -579,8 +568,9 @@ export default function HomePage() {
 
                   <div className={styles.fpTopBar}>
                     <span className={styles.fpGlassBadge}>
-                      <ShieldCheck size={13} aria-hidden="true" />
-                      Verified driver
+                      <ShieldCheck size={12} aria-hidden="true" />
+                      <span className={styles.fpLabelFull}>Verified driver</span>
+                      <span className={styles.fpLabelShort}>Verified</span>
                     </span>
 
                     {driver.average_rating != null ? (
@@ -588,7 +578,7 @@ export default function HomePage() {
                         className={styles.fpRatingPill}
                         aria-label={`Rated ${driver.average_rating.toFixed(1)} out of 5`}
                       >
-                        <Star size={12} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
+                        <Star size={11} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
                         {driver.average_rating.toFixed(1)}
                       </span>
                     ) : (
@@ -614,26 +604,26 @@ export default function HomePage() {
                       <ul className={styles.fpFacts} aria-label="Driver highlights">
                         {driver.vehicle ? (
                           <li>
-                            <Car size={13} aria-hidden="true" />
+                            <Car size={12} aria-hidden="true" />
                             <span>{driver.vehicle.name}</span>
                           </li>
                         ) : null}
                         {driver.vehicle && driver.vehicle.capacity > 0 ? (
                           <li>
-                            <Users size={13} aria-hidden="true" />
+                            <Users size={12} aria-hidden="true" />
                             <span>{driver.vehicle.capacity} pax</span>
                           </li>
                         ) : null}
                         {driver.trips_count > 0 ? (
                           <li>
-                            <CheckCircle size={13} aria-hidden="true" />
+                            <CheckCircle size={12} aria-hidden="true" />
                             <span>
                               {driver.trips_count} {driver.trips_count === 1 ? "trip" : "trips"}
                             </span>
                           </li>
                         ) : (
                           <li>
-                            <Navigation size={13} aria-hidden="true" />
+                            <Navigation size={12} aria-hidden="true" />
                             <span>Ready now</span>
                           </li>
                         )}
@@ -641,8 +631,9 @@ export default function HomePage() {
 
                       <div className={styles.fpActionsRow}>
                         <Link href={bookHref} className={styles.fpPrimaryBtn}>
-                          <CalendarCheck2 size={15} aria-hidden="true" />
-                          {bookLabel}
+                          <CalendarCheck2 size={14} aria-hidden="true" />
+                          <span className={styles.fpLabelFull}>{bookLabelFull}</span>
+                          <span className={styles.fpLabelShort}>{bookLabelShort}</span>
                         </Link>
                       </div>
                     </div>
@@ -666,17 +657,40 @@ export default function HomePage() {
                 Travel with people who know the place
               </h2>
             </div>
-            <Link href="/companies/" className={styles.providersBrowse}>
-              All companies <ArrowRight size={15} aria-hidden="true" />
-            </Link>
+            <div className={styles.fpProvidersControls}>
+              {companies.length > 1 ? (
+                <div className={styles.fpSwipeNavGroup} aria-label="Scroll providers">
+                  <button
+                    type="button"
+                    className={styles.fpSwipeNavBtn}
+                    aria-label="Previous companies"
+                    onClick={() => scrollProvidersTrack("left")}
+                  >
+                    <ChevronLeft size={16} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.fpSwipeNavBtn}
+                    aria-label="Next companies"
+                    onClick={() => scrollProvidersTrack("right")}
+                  >
+                    <ChevronRight size={16} aria-hidden="true" />
+                  </button>
+                </div>
+              ) : null}
+              <Link href="/companies/" className={styles.providersBrowse}>
+                All companies <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            </div>
           </div>
 
           <ul
-            className={`${styles.fpGrid} ${styles.fpGridProviders} ${
+            ref={providersTrackRef}
+            className={`${styles.fpSwipeTrack} ${
               companies.length === 1
-                ? styles.fpGridProvidersSingle
+                ? styles.fpSwipeTrackSingle
                 : companies.length === 2
-                  ? styles.fpGridProvidersDouble
+                  ? styles.fpSwipeTrackDouble
                   : ""
             }`}
           >
@@ -700,14 +714,17 @@ export default function HomePage() {
               const tripsCount = Number(company.trips_count ?? 0);
 
               return (
-                <li key={company.id} className={styles.fpCard}>
+                <li
+                  key={company.id}
+                  className={`${styles.fpSwipeItem} ${styles.fpCard} ${styles.fpCardProvider}`}
+                >
                   <div className={styles.fpMedia} aria-hidden="true">
                     {coverUrl ? (
                       <Image
                         src={coverUrl}
                         alt=""
                         fill
-                        sizes="(max-width: 640px) 92vw, (max-width: 1180px) 46vw, 33vw"
+                        sizes="(max-width: 640px) 84vw, (max-width: 1024px) 48vw, 33vw"
                         className={styles.fpImage}
                         unoptimized
                       />
@@ -729,7 +746,7 @@ export default function HomePage() {
                             src={logoUrl}
                             alt=""
                             fill
-                            sizes="36px"
+                            sizes="32px"
                             className={styles.fpLogoImg}
                             unoptimized
                           />
@@ -738,13 +755,13 @@ export default function HomePage() {
                         )}
                       </span>
                       <span className={styles.fpGlassBadge}>
-                        <ShieldCheck size={13} aria-hidden="true" />
+                        <ShieldCheck size={12} aria-hidden="true" />
                         Verified company
                       </span>
                     </div>
 
                     <span className={styles.fpRatingPill}>
-                      <Car size={12} aria-hidden="true" />
+                      <Car size={11} aria-hidden="true" />
                       {servicesCount > 0
                         ? `${servicesCount} ${servicesCount === 1 ? "vehicle" : "vehicles"}`
                         : "Private hire"}
@@ -765,11 +782,11 @@ export default function HomePage() {
                     <div className={styles.fpBottomRow}>
                       <ul className={styles.fpFacts} aria-label="Company highlights">
                         <li>
-                          <MapPin size={13} aria-hidden="true" />
+                          <MapPin size={12} aria-hidden="true" />
                           <span>{locationLabel}</span>
                         </li>
                         <li>
-                          <Car size={13} aria-hidden="true" />
+                          <Car size={12} aria-hidden="true" />
                           <span>
                             {servicesCount > 0
                               ? `${servicesCount} ${servicesCount === 1 ? "service" : "services"}`
@@ -778,7 +795,7 @@ export default function HomePage() {
                         </li>
                         {tripsCount > 0 ? (
                           <li>
-                            <Compass size={13} aria-hidden="true" />
+                            <Compass size={12} aria-hidden="true" />
                             <span>
                               {tripsCount} {tripsCount === 1 ? "trip" : "trips"}
                             </span>
@@ -796,13 +813,13 @@ export default function HomePage() {
                               href={`/booking/${directService.id}/`}
                               className={styles.fpPrimaryBtn}
                             >
-                              <CalendarCheck2 size={15} aria-hidden="true" />
+                              <CalendarCheck2 size={14} aria-hidden="true" />
                               Book This Service
                             </Link>
                           </>
                         ) : (
                           <Link href={company.public_path} className={styles.fpPrimaryBtn}>
-                            Explore Company <ArrowRight size={15} aria-hidden="true" />
+                            Explore Company <ArrowRight size={14} aria-hidden="true" />
                           </Link>
                         )}
                       </div>
