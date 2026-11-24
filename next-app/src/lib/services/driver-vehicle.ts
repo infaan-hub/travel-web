@@ -2,6 +2,7 @@ import "server-only";
 import prisma from "@/lib/db/prisma";
 import { privateHireVehicleSerializer } from "@/lib/serializers/private-hire";
 import { canDriverManageVehicle, MAX_PUBLIC_DRIVER_VEHICLES } from "@/lib/driver-vehicle";
+import { publicImageUrl } from "@/lib/storage/images";
 
 export type SerializedDriverVehicle = ReturnType<typeof privateHireVehicleSerializer>;
 
@@ -32,6 +33,7 @@ export type DriverVehiclePortalData = {
     name: string;
     phone: string;
     email: string;
+    image_url: string | null;
     license_number: string;
     is_public: boolean;
     can_manage: boolean;
@@ -57,6 +59,15 @@ export async function loadDriverVehiclePortalData(
           contactPhone: true,
           contactEmail: true,
           address: true,
+        },
+      },
+      user: {
+        select: {
+          profile: {
+            select: {
+              image: true,
+            },
+          },
         },
       },
       ownVehicle: true,
@@ -141,6 +152,7 @@ export async function loadDriverVehiclePortalData(
       name: driver.name,
       phone: driver.phone,
       email: driver.email,
+      image_url: publicImageUrl(driver.image || driver.user?.profile?.image) ?? null,
       license_number: driver.licenseNumber,
       is_public: canManage,
       can_manage: canManage,

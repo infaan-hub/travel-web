@@ -52,6 +52,7 @@ import type {
   SerializedDriverVehicle,
 } from "@/lib/services/driver-vehicle";
 import { useToast } from "@/components/ToastProvider";
+import DriverBusinessCard from "@/features/driver/DriverBusinessCard";
 import ws from "@/features/pages/driver-workspace.module.css";
 import styles from "@/features/pages/driver-vehicle.module.css";
 
@@ -1276,6 +1277,12 @@ export default function DriverVehiclePage({ initialData }: Props) {
                 </section>
               )
             ) : null}
+
+            {/* BOARDING-PASS DRIVER & VEHICLE BUSINESS CARD */}
+            <DriverBusinessCard
+              driver={data.driver}
+              vehicles={isPublicDriver ? (ownVehicle ? [ownVehicle] : []) : assignedVehicles}
+            />
           </div>
 
           {/* RIGHT SIDEBAR: DRIVER PROFILE + COMPANY CONTACT / RULES */}
