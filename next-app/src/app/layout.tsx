@@ -5,6 +5,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import AppFrame from "@/components/AppFrame";
 import { ToastProvider } from "@/components/ToastProvider";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { LanguageProvider } from "@/context/LanguageContext";
+import AutoTranslate from "@/components/AutoTranslate";
 import { RealtimeProvider } from "@/context/RealtimeContext";
 import { PushPrompt } from "@/components/PushPrompt";
 import PwaSplash from "@/components/PwaSplash";
@@ -80,10 +82,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a className="skip-link" href="#main-content">
           Skip to main content
         </a>
+        <LanguageProvider>
         <AuthProvider>
           <CurrencyProvider>
           <RealtimeProvider>
           <ToastProvider>
+            <AutoTranslate />
             <VisitorTracker />
             <AppFrame>{children}</AppFrame>
             <PushPrompt />
@@ -98,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           </CurrencyProvider>
         </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useAuth } from "@/context/AuthContext";
 import { usePwa } from "@/hooks/usePwa";
 import { isOnboardingComplete } from "@/lib/onboarding";
@@ -30,6 +31,9 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
   if (isBare) {
     return (
       <div id="main-content" className="app-bare">
+        <div className="language-floating">
+          <LanguageSwitcher />
+        </div>
         {children}
       </div>
     );

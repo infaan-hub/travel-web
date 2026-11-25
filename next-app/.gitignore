@@ -11,3 +11,4 @@ coverage
 tsconfig.tsbuildinfo
 
 scripts/.shots/
+scripts/i18n/.cache/

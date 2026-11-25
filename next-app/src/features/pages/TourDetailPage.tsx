@@ -2,10 +2,11 @@
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toursAPI, reviewsAPI, api } from '@/lib/api/client';
 import { readClientCache, writeClientCache } from '@/lib/cache/client-cache';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { ArrowLeft, Building2, MapPin, Clock, Star, Check, XCircle, ChevronLeft, ChevronRight, X, Send, User } from '@/components/icons';
 import { getImageUrl } from '@/lib/utils/image-url';
 
@@ -17,6 +18,7 @@ export default function TourDetailPage() {
   const { id } = useParams<Record<string, string>>();
   const router = useRouter();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { locale: uiLocale } = useLanguage();
   const [tour, setTour] = useState<Tour | null>(null);
   const [loading, setLoading] = useState(true);
   const [allImages, setAllImages] = useState<string[]>([]);
@@ -30,6 +32,24 @@ export default function TourDetailPage() {
   const [tourReviews, setTourReviews] = useState<Review[]>([]);
   const [translations, setTranslations] = useState<TourTranslation[]>([]);
   const [locale, setLocale] = useState('en');
+  const appliedUiLocale = useRef<string | null>(null);
+
+  // Follow the site language when the provider has a translation for it. The
+  // ref makes this a one-time sync per language so a visitor can still preview
+  // another tour translation without it being overwritten on the next render.
+  useEffect(() => {
+    if (uiLocale === appliedUiLocale.current) return;
+    if (uiLocale === 'en') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the tour content follows the global language
+      setLocale('en');
+      appliedUiLocale.current = uiLocale;
+      return;
+    }
+    if (translations.some((item) => item.locale === uiLocale)) {
+      setLocale(uiLocale);
+      appliedUiLocale.current = uiLocale;
+    }
+  }, [translations, uiLocale]);
 
   useEffect(() => {
     loadTour();
@@ -170,7 +190,7 @@ export default function TourDetailPage() {
       </div>
 
       {translations.length > 0 && (
-        <div className={`language-switcher ${styles.tourLanguageSwitcher}`} role="group" aria-label="Language">
+        <div className={`language-switcher ${styles.tourLanguageSwitcher}`} role="group" aria-label="Language" data-no-translate>
           <button
             type="button"
             className={`btn btn-sm ${locale === 'en' ? 'btn-primary' : 'btn-outline'}`}

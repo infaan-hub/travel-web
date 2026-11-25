@@ -32,6 +32,7 @@ import {
 import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { profileAPI } from "@/lib/api/client";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import styles from "./sidebar.module.css";
 
 type NavItem = {
@@ -345,6 +346,9 @@ const profileHref = isAdmin
               </Link>
             </div>
           )}
+          <div className={styles.language}>
+            <LanguageSwitcher />
+          </div>
         </div>
       </aside>
 

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "@/components/icons";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function TopHeader() {
   const pathname = usePathname();
@@ -49,6 +50,10 @@ export default function TopHeader() {
           />
           <span className="top-header-wordmark brand-wordmark">Travel.</span>
         </Link>
+
+        <div className="top-header-actions">
+          <LanguageSwitcher />
+        </div>
       </div>
     </header>
   );

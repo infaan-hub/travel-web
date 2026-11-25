@@ -33,7 +33,10 @@
     "audit:theme": "node scripts/theme-audit.mjs",
     "design:scope": "node scripts/design-gate.mjs",
     "design:scope:changed": "node scripts/design-gate.mjs --changed",
-    "design:scope:strict": "node scripts/design-gate.mjs --changed --strict"
+    "design:scope:strict": "node scripts/design-gate.mjs --changed --strict",
+    "i18n:extract": "node scripts/i18n/extract.mjs",
+    "i18n:build": "node scripts/i18n/build-dictionaries.mjs",
+    "i18n": "npm run i18n:extract && npm run i18n:build"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
