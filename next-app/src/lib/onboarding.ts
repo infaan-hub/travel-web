@@ -178,7 +178,7 @@ export function loginPath(from: string): string {
 }
 
 export function isCompanyAccountType(accountType: string | null | undefined): boolean {
-  return accountType === "TOUR_COMPANY" || accountType === "PRIVATE_HIRE_COMPANY";
+  return accountType === "PRIVATE_HIRE_COMPANY";
 }
 
 /**

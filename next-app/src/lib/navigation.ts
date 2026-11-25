@@ -63,7 +63,7 @@ export function isNavItemActive(
 export function resolveNavRole(user: AuthUser | null | undefined): NavRole {
   if (!user) return "guest";
   if (user.is_staff) return "admin";
-  if (user.account_type === "TOUR_COMPANY" || user.account_type === "PRIVATE_HIRE_COMPANY") {
+  if (user.account_type === "PRIVATE_HIRE_COMPANY") {
     return "company";
   }
   if (user.account_type === "DRIVER") return "driver";

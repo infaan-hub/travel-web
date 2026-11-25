@@ -59,7 +59,6 @@ enum JoinRequestStatus {
 
 enum UserAccountType {
   CUSTOMER
-  TOUR_COMPANY
   DRIVER
   PRIVATE_HIRE_COMPANY
 }

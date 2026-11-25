@@ -48,7 +48,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.requireStaff.mockResolvedValue({ id: 3 });
   mocks.requireUser.mockResolvedValue({ id: 17 });
-  mocks.userFindUnique.mockResolvedValue({ accountType: "TOUR_COMPANY" });
+  mocks.userFindUnique.mockResolvedValue({ accountType: "PRIVATE_HIRE_COMPANY" });
   mocks.createOwner.mockResolvedValue({
     id: 22,
     username: "islandowner",

@@ -204,7 +204,7 @@ export default function CompanyProfilePage() {
   const [removeLogo, setRemoveLogo] = useState(false);
   const [removeCover, setRemoveCover] = useState(false);
 
-  const canUpdate = Boolean(user && ["TOUR_COMPANY", "PRIVATE_HIRE_COMPANY"].includes(user.account_type));
+  const canUpdate = Boolean(user && ["PRIVATE_HIRE_COMPANY"].includes(user.account_type));
 
   const load = useCallback(() => {
     companyAPI

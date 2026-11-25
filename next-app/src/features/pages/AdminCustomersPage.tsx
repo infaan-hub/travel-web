@@ -129,7 +129,7 @@ export default function AdminCustomersPage() {
                   <td>
                     {u.is_staff ? (
                       <span className="role-badge admin-role"><Shield size={12} /> Admin</span>
-                    ) : u.account_type === "TOUR_COMPANY" || u.account_type === "PRIVATE_HIRE_COMPANY" ? (
+                    ) : u.account_type === "PRIVATE_HIRE_COMPANY" ? (
                       <span className="role-badge customer-role">Company account</span>
                     ) : (
                       <span className="role-badge customer-role"><User size={12} /> Customer</span>

@@ -85,7 +85,7 @@ export async function getCompanyForAccount(userId: number): Promise<CompanyAccou
   });
   if (
     !account ||
-    !["PRIVATE_HIRE_COMPANY", "TOUR_COMPANY"].includes(account.accountType) ||
+    !["PRIVATE_HIRE_COMPANY"].includes(account.accountType) ||
     !account.companyAccount
   ) {
     return null;

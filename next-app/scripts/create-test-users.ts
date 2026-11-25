@@ -12,8 +12,8 @@ async function main() {
 
   const companyUser = await prisma.user.upsert({
     where: { username: "company" },
-    update: { password: await hashPassword("CompanyPass123!"), accountType: "TOUR_COMPANY", isActive: true },
-    create: { username: "company", email: "company@example.com", password: await hashPassword("CompanyPass123!"), accountType: "TOUR_COMPANY", profile: { create: {} } },
+    update: { password: await hashPassword("CompanyPass123!"), accountType: "PRIVATE_HIRE_COMPANY", isActive: true },
+    create: { username: "company", email: "company@example.com", password: await hashPassword("CompanyPass123!"), accountType: "PRIVATE_HIRE_COMPANY", profile: { create: {} } },
   });
   console.log("company user", companyUser.id);
 

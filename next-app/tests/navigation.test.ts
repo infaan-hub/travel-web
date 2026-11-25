@@ -28,7 +28,6 @@ describe("role-based navigation", () => {
     expect(resolveNavRole(null)).toBe("guest");
     expect(resolveNavRole(makeUser())).toBe("customer");
     expect(resolveNavRole(makeUser({ account_type: "DRIVER" }))).toBe("driver");
-    expect(resolveNavRole(makeUser({ account_type: "TOUR_COMPANY" }))).toBe("company");
     expect(resolveNavRole(makeUser({ account_type: "PRIVATE_HIRE_COMPANY" }))).toBe("company");
     expect(resolveNavRole(makeUser({ is_staff: true, account_type: "DRIVER" }))).toBe("admin");
   });
@@ -101,10 +100,10 @@ describe("role-based navigation", () => {
 
   it("maps role home and profile hrefs cleanly", () => {
     const companyWithOrg = makeUser({
-      account_type: "TOUR_COMPANY",
+      account_type: "PRIVATE_HIRE_COMPANY",
       company: { id: 1, name: "Zanzibar Co", slug: "zanzibar-co" },
     });
-    const companyUnassigned = makeUser({ account_type: "TOUR_COMPANY", company: null });
+    const companyUnassigned = makeUser({ account_type: "PRIVATE_HIRE_COMPANY", company: null });
 
     expect(getRoleHomeHref(null)).toBe("/");
     expect(getRoleHomeHref(makeUser())).toBe("/");
