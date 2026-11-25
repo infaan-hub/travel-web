@@ -19,12 +19,29 @@ export default function LanguageSwitcher({ className = "" }: LanguageSwitcherPro
   return (
     <div className={`locale-switcher ${className}`.trim()} data-no-translate>
       <Globe size={16} aria-hidden="true" />
+      <span className="locale-switcher__label" aria-hidden="true">
+        {t("Language")}
+      </span>
       <span className="locale-switcher__value" aria-hidden="true">
         {LOCALE_SHORT_LABELS[locale]}
       </span>
       <span className="locale-switcher__full" aria-hidden="true">
         {LOCALE_LABELS[locale]}
       </span>
+      <svg
+        className="locale-switcher__chevron"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
       <select
         className="locale-switcher__select"
         aria-label={t("Language")}

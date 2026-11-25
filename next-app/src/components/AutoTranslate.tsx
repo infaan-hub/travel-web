@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
 /**
@@ -9,11 +10,12 @@ import { useLanguage } from "@/context/LanguageContext";
  * changes from extra wrapper elements), this client component walks the
  * rendered DOM and replaces known English strings with the active language.
  *
- * Only strings that exist in the generated dictionaries are touched, so user
- * content, names, prices and free-form text are left alone. A MutationObserver
- * keeps dynamically loaded content, toasts and route transitions translated.
+ * Only strings that exist in the generated dictionaries (or match safe UI
+ * patterns) are touched, so user content, names, prices and free-form text are
+ * left alone. A MutationObserver + pathname rescan keeps dynamically loaded
+ * content, portals, toasts, and route transitions translated.
  */
-const SKIP_TAGS = new Set([
+const SKIP_TEXT_TAGS = new Set([
   "CANVAS",
   "CODE",
   "EMBED",
@@ -26,6 +28,7 @@ const SKIP_TAGS = new Set([
   "STYLE",
   "SVG",
   "TEMPLATE",
+  "TEXTAREA",
 ]);
 
 const TRANSLATED_ATTRIBUTES = [
@@ -37,10 +40,23 @@ const TRANSLATED_ATTRIBUTES = [
   "title",
 ];
 
-function isSkipped(element: Element, includeTextOnlyTags: boolean): boolean {
+const BUTTON_INPUT_TYPES = new Set(["button", "reset", "submit"]);
+
+function isNoTranslateElement(element: Element): boolean {
   let node: Element | null = element;
   while (node) {
-    if (includeTextOnlyTags && SKIP_TAGS.has(node.tagName)) return true;
+    if (node.hasAttribute("data-no-translate")) return true;
+    if (node.classList?.contains("no-translate")) return true;
+    if ((node as HTMLElement).isContentEditable) return true;
+    node = node.parentElement;
+  }
+  return false;
+}
+
+function isSkippedTextContainer(element: Element): boolean {
+  let node: Element | null = element;
+  while (node) {
+    if (SKIP_TEXT_TAGS.has(node.tagName)) return true;
     if (node.hasAttribute("data-no-translate")) return true;
     if (node.classList?.contains("no-translate")) return true;
     if ((node as HTMLElement).isContentEditable) return true;
@@ -54,6 +70,7 @@ type StoredAttribute = { source: string; translated: string };
 
 export default function AutoTranslate() {
   const { ready, t } = useLanguage();
+  const pathname = usePathname();
   const textSources = useRef(new WeakMap<Text, StoredText>());
   const attributeSources = useRef(new WeakMap<Element, Map<string, StoredAttribute>>());
   const titleState = useRef<{ source: string; translated: string } | null>(null);
@@ -67,7 +84,7 @@ export default function AutoTranslate() {
 
     const translateTextNode = (node: Text) => {
       const parent = node.parentElement;
-      if (!parent || isSkipped(parent, true)) return;
+      if (!parent || isSkippedTextContainer(parent)) return;
 
       const raw = node.data;
       if (!raw || !raw.trim()) return;
@@ -91,7 +108,12 @@ export default function AutoTranslate() {
     };
 
     const translateAttribute = (element: Element, attribute: string) => {
-      if (isSkipped(element, false)) return;
+      if (isNoTranslateElement(element)) return;
+      if (attribute === "value") {
+        if (element.tagName !== "INPUT") return;
+        const inputType = (element.getAttribute("type") || "text").toLowerCase();
+        if (!BUTTON_INPUT_TYPES.has(inputType)) return;
+      }
       const raw = element.getAttribute(attribute);
       if (raw == null || !raw.trim()) return;
 
@@ -119,8 +141,15 @@ export default function AutoTranslate() {
     };
 
     const translateElementAttributes = (element: Element) => {
+      if (isNoTranslateElement(element)) return;
       for (const attribute of TRANSLATED_ATTRIBUTES) {
         if (element.hasAttribute(attribute)) translateAttribute(element, attribute);
+      }
+      if (element.tagName === "INPUT") {
+        const inputType = (element.getAttribute("type") || "text").toLowerCase();
+        if (BUTTON_INPUT_TYPES.has(inputType) && element.hasAttribute("value")) {
+          translateAttribute(element, "value");
+        }
       }
     };
 
@@ -135,8 +164,9 @@ export default function AutoTranslate() {
 
       if (root.nodeType === Node.ELEMENT_NODE) {
         const element = root as Element;
-        if (isSkipped(element, true)) return;
+        if (isNoTranslateElement(element)) return;
         translateElementAttributes(element);
+        if (SKIP_TEXT_TAGS.has(element.tagName)) return;
       }
 
       const walker = document.createTreeWalker(
@@ -144,8 +174,13 @@ export default function AutoTranslate() {
         NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
         {
           acceptNode(node) {
-            if (node.nodeType === Node.ELEMENT_NODE && isSkipped(node as Element, true)) {
-              return NodeFilter.FILTER_REJECT;
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const el = node as Element;
+              if (isNoTranslateElement(el)) return NodeFilter.FILTER_REJECT;
+              if (SKIP_TEXT_TAGS.has(el.tagName)) {
+                translateElementAttributes(el);
+                return NodeFilter.FILTER_REJECT;
+              }
             }
             return NodeFilter.FILTER_ACCEPT;
           },
@@ -163,11 +198,18 @@ export default function AutoTranslate() {
       }
     };
 
-    translateSubtree(document.body);
+    const runSweep = () => {
+      if (document.body) translateSubtree(document.body);
+    };
+
+    runSweep();
+
+    // Follow-up sweeps catch Suspense streams, dynamic chunks, and route paints.
+    const rafId = window.requestAnimationFrame(runSweep);
+    const timer1 = window.setTimeout(runSweep, 140);
+    const timer2 = window.setTimeout(runSweep, 480);
 
     // Keep the browser tab title in the selected language as routes change.
-    // The effect re-runs whenever the language changes, so remember the
-    // English source instead of treating our own translation as the source.
     const savedTitle = titleState.current;
     const currentTitle = document.title;
     let titleSource =
@@ -214,7 +256,7 @@ export default function AutoTranslate() {
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: TRANSLATED_ATTRIBUTES,
+      attributeFilter: [...TRANSLATED_ATTRIBUTES, "value"],
     });
 
     // Native dialogs bypass the React tree, so translate their messages while
@@ -228,13 +270,16 @@ export default function AutoTranslate() {
       originalPrompt(translate(String(message ?? "")), defaultValue);
 
     return () => {
+      window.cancelAnimationFrame(rafId);
+      window.clearTimeout(timer1);
+      window.clearTimeout(timer2);
       observer.disconnect();
       titleObserver.disconnect();
       window.confirm = originalConfirm;
       window.alert = originalAlert;
       window.prompt = originalPrompt;
     };
-  }, [ready, t]);
+  }, [pathname, ready, t]);
 
   return null;
 }

@@ -6869,6 +6869,7 @@ html body .app-layout .app-shell .top-header .top-header-menu-btn svg {
 .locale-switcher__select {
   position: absolute;
   inset: 0;
+  z-index: 1;
   width: 100%;
   height: 100%;
   margin: 0;
@@ -6878,6 +6879,11 @@ html body .app-layout .app-shell .top-header .top-header-menu-btn svg {
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
+}
+
+.locale-switcher__label,
+.locale-switcher__chevron {
+  display: none;
 }
 
 .locale-switcher__select option {
@@ -6922,5 +6928,11 @@ html body .app-layout .app-shell .top-header .top-header-menu-btn svg {
 
   .locale-switcher__full {
     display: inline;
+  }
+
+  .locale-switcher__chevron {
+    display: inline-flex;
+    flex-shrink: 0;
+    opacity: 0.85;
   }
 }

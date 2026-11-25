@@ -205,6 +205,10 @@ export default function Sidebar() {
         </nav>
 
         <div className={styles.footer}>
+          <div className={styles.language}>
+            <LanguageSwitcher />
+          </div>
+
           {isAuthenticated ? (
             <>
               <Link href={profileHref} className={styles.userCard} onClick={closeAll}>
@@ -279,10 +283,6 @@ export default function Sidebar() {
               <span>{installing ? "Installing…" : "Download app"}</span>
             </button>
           ) : null}
-
-          <div className={styles.language}>
-            <LanguageSwitcher />
-          </div>
         </div>
       </aside>
 

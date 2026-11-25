@@ -19,6 +19,7 @@ const root = path.resolve(__dirname, "../..");
 
 const LOCALES = ["sw", "fr", "es", "de"];
 const ENDPOINT = "https://translate.googleapis.com/translate_a/t";
+const SINGLE_ENDPOINT = "https://translate.googleapis.com/translate_a/single";
 const BRAND = "Travel.";
 const BRAND_TOKEN = "{{I18N}}";
 // Bump when brand handling changes so previously cached brand strings refresh.
@@ -31,6 +32,8 @@ const GLOSSARY = {
   sw: [
     [/\bKiendeshi\b/g, "Dereva"],
     [/\bkiendeshi\b/g, "dereva"],
+    [/\bViendeshi\b/g, "Madereva"],
+    [/\bviendeshi\b/g, "madereva"],
     [/\bVidhibiti\b/g, "Madereva"],
     [/\bvidhibiti\b/g, "madereva"],
   ],
@@ -40,7 +43,12 @@ const GLOSSARY = {
     [/\bPilotes\b/g, "Chauffeurs"],
     [/\bpilotes\b/g, "chauffeurs"],
   ],
-  es: [],
+  es: [
+    [/\bControlador\b/g, "Conductor"],
+    [/\bcontrolador\b/g, "conductor"],
+    [/\bControladores\b/g, "Conductores"],
+    [/\bcontroladores\b/g, "conductores"],
+  ],
   de: [
     [/\bTreiber\b/g, "Fahrer"],
     [/\btreiber\b/g, "Fahrer"],
@@ -168,6 +176,42 @@ function buildBatches(items, maxLength = 6500) {
   return batches;
 }
 
+async function translateSingle(source, locale) {
+  const params = new URLSearchParams({
+    client: "gtx",
+    sl: "en",
+    tl: locale,
+    dt: "t",
+    q: source.split(BRAND).join(BRAND_TOKEN),
+  });
+  const response = await fetch(`${SINGLE_ENDPOINT}?${params.toString()}`, {
+    headers: {
+      "User-Agent": "Travel-i18n-builder/1.0",
+      Accept: "application/json",
+    },
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status} ${response.statusText}`);
+  }
+  const payload = await response.json();
+  if (!Array.isArray(payload) || !Array.isArray(payload[0])) return "";
+  const joined = payload[0]
+    .map((part) => (Array.isArray(part) && typeof part[0] === "string" ? part[0] : ""))
+    .join("");
+  return joined
+    .replace(/\{\{I18N\}\}\./gi, BRAND)
+    .replace(/\{\{I18N\}\}/gi, BRAND)
+    .trim();
+}
+
+function looksUntranslatedSentence(source, translated) {
+  if (!translated) return true;
+  if (source.trim().toLowerCase() !== translated.trim().toLowerCase()) return false;
+  // Multi-word English UI phrase with real lowercase words should not echo back unchanged.
+  return /[a-z]{3,}/.test(source) && /\s/.test(source) && !/(Hotel|Resort|Villas|Maps|Twitter|TZS|USD|iPhone|iPad|Safari Cruiser|SUV 4x4|Kilimanjaro|Zanzibar · TZ)/i.test(source);
+}
+
 async function translateWithRetry(sources, locale) {
   let lastError;
   for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -199,10 +243,28 @@ async function main() {
   for (const locale of LOCALES) {
     console.log(`\n[${locale}] ${sources.length} strings`);
     const cacheFile = path.join(CACHE_DIR, `${locale}.json`);
+    const outputFile = path.join(OUTPUT_DIR, `${locale}.json`);
     const cache = readJson(cacheFile, {});
+
+    // Seed cache from already-committed dictionary so incremental runs only
+    // fetch newly added strings.
+    const existingDict = readJson(outputFile, {});
+    for (const { key, source } of sourcePairs) {
+      if (!cache[source] && typeof existingDict[key] === "string" && existingDict[key].trim()) {
+        // Skip seeding if a multi-word English sentence was left untouched earlier.
+        const same = existingDict[key].trim().toLowerCase() === source.trim().toLowerCase();
+        if (!same || !/\s/.test(source)) {
+          cache[source] = existingDict[key];
+        }
+      }
+    }
+
+    const localeOverrides = overrides[locale] || {};
     const needsBrandRefresh = cache.__version !== CACHE_VERSION;
     const missing = sources.filter(
-      (source) => !cache[source] || (needsBrandRefresh && source.includes(BRAND)),
+      (source) =>
+        !localeOverrides[source] &&
+        (!cache[source] || (needsBrandRefresh && source.includes(BRAND))),
     );
 
     if (missing.length) {
@@ -218,8 +280,28 @@ async function main() {
         if (index % 10 === 0 || index === batches.length - 1) {
           console.log(`  ${Math.min((index + 1) * 24, missing.length)}/${missing.length} translated`);
         }
-        await sleep(250);
+        await sleep(220);
       }
+    }
+
+    // Repair any multi-word English strings that the batch endpoint echoed verbatim.
+    const echoed = sources.filter(
+      (source) =>
+        !localeOverrides[source] &&
+        looksUntranslatedSentence(source, cache[source] || ""),
+    );
+    if (echoed.length) {
+      console.log(`  [${locale}] repairing ${echoed.length} echoed strings via single-string endpoint...`);
+      for (const source of echoed) {
+        try {
+          const repaired = await translateSingle(source, locale);
+          if (repaired) cache[source] = repaired;
+        } catch (error) {
+          console.warn(`  [${locale}] single retry failed for "${source.slice(0, 40)}": ${error.message}`);
+        }
+        await sleep(140);
+      }
+      writeJson(cacheFile, cache);
     }
 
     if (cache.__version !== CACHE_VERSION) {
@@ -231,14 +313,17 @@ async function main() {
     for (const { key, source } of sourcePairs) {
       dictionary[key] = applyGlossary(cache[source] || source, locale);
     }
-    for (const [key, value] of Object.entries(overrides[locale] || {})) {
-      if (key in dictionary) dictionary[key] = value;
+    // Always include every curated override so dynamic glue words and common UI
+    // actions (Save, Close, Search, Step, Showing, etc.) are never dropped.
+    for (const [key, value] of Object.entries(localeOverrides)) {
+      if (typeof value === "string" && value.trim()) {
+        dictionary[key] = value;
+      }
     }
 
     const sorted = Object.fromEntries(
       Object.entries(dictionary).sort(([a], [b]) => a.localeCompare(b, "en")),
     );
-    const outputFile = path.join(OUTPUT_DIR, `${locale}.json`);
     writeJson(outputFile, sorted);
     console.log(`[${locale}] wrote ${Object.keys(sorted).length} entries to ${path.relative(root, outputFile)}`);
   }
