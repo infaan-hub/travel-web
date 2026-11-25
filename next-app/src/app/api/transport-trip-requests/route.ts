@@ -6,6 +6,8 @@ import {
   isPastTravelDate,
   journeyMetrics,
 } from "@/lib/services/journey";
+import { resolveEffectiveBookingStatus } from "@/lib/booking-lifecycle";
+import { expireOverdueTripRequests } from "@/lib/services/booking-expiration";
 import { z } from "zod";
 
 const isoDate = z
@@ -63,6 +65,7 @@ const createSchema = z
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
+    await expireOverdueTripRequests();
     const requests = await prisma.transportTripRequest.findMany({
       where: { userId: user.id },
       include: {
@@ -73,7 +76,12 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { createdAt: "desc" },
     });
-    return ok(requests);
+    return ok(
+      requests.map((item) => ({
+        ...item,
+        status: resolveEffectiveBookingStatus(item),
+      })),
+    );
   } catch (error) {
     return handleApiError(error);
   }

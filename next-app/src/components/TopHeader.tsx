@@ -5,11 +5,25 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "@/components/icons";
+import { useAuth } from "@/context/AuthContext";
+import { getRoleHomeHref, resolveNavRole } from "@/lib/navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function TopHeader() {
   const pathname = usePathname();
+  const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const role = resolveNavRole(user);
+  const homeHref = getRoleHomeHref(user);
+  const brandLabel =
+    role === "admin"
+      ? "Travel. admin dashboard"
+      : role === "company"
+        ? "Travel. company workspace"
+        : role === "driver"
+          ? "Travel. driver dashboard"
+          : "Travel. home";
 
   useEffect(() => {
     const sync = (event: Event) => {
@@ -39,7 +53,7 @@ export default function TopHeader() {
           {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
         </button>
 
-        <Link href="/" className="top-header-brand" aria-label="Travel. home">
+        <Link href={homeHref} className="top-header-brand" aria-label={brandLabel}>
           <Image
             src="/travel.logo.jpeg"
             alt="Travel."

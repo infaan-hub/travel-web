@@ -8,6 +8,46 @@ import { ApiError } from "@/lib/api/http";
 import prisma from "@/lib/db/prisma";
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 1920;
+const MIN_OPTIMIZE_BYTES = 2048;
+
+async function optimizeImageBuffer(buffer: Buffer, mimeType: string): Promise<Buffer> {
+  if (buffer.length <= MIN_OPTIMIZE_BYTES) return buffer;
+  try {
+    const { default: sharp } = await import("sharp");
+    const meta = await sharp(buffer).metadata();
+    const exceedsBounds =
+      (meta.width ?? 0) > MAX_IMAGE_DIMENSION || (meta.height ?? 0) > MAX_IMAGE_DIMENSION;
+
+    let pipeline = sharp(buffer).rotate().resize(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION, {
+      fit: "inside",
+      withoutEnlargement: true,
+    });
+
+    if (mimeType === "image/jpeg") {
+      pipeline = pipeline.jpeg({ quality: 80, progressive: true, mozjpeg: true });
+    } else if (mimeType === "image/png") {
+      pipeline = pipeline.png({
+        compressionLevel: 9,
+        palette: buffer.length > 100 * 1024,
+        quality: 85,
+        effort: 8,
+      });
+    } else if (mimeType === "image/webp") {
+      pipeline = pipeline.webp({ quality: 80, effort: 5 });
+    } else {
+      return buffer;
+    }
+
+    const optimized = await pipeline.toBuffer();
+    if (exceedsBounds || optimized.length < buffer.length) {
+      return optimized;
+    }
+    return buffer;
+  } catch {
+    return buffer;
+  }
+}
 
 const ALLOWED = new Map<string, string>([
   ["image/jpeg", "jpg"],
@@ -105,7 +145,8 @@ export async function validatedImage(file: File): Promise<{
     throw new ApiError(400, "Invalid image type. Allowed formats: JPG, PNG, WEBP.");
   }
 
-  return { buffer, mimeType: detected!.mime, extension };
+  const optimizedBuffer = await optimizeImageBuffer(buffer, detected!.mime);
+  return { buffer: optimizedBuffer, mimeType: detected!.mime, extension };
 }
 
 export async function readStoredImage(key: string): Promise<{ buffer: Buffer; mimeType: string } | null> {

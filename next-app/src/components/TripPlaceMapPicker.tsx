@@ -114,6 +114,7 @@ const ROAD_ATTRIBUTION =
 
 const ROUTE_START_COLOR = "#15803d";
 const ROUTE_END_COLOR = "#0f172a";
+const ROUTE_ONLY_END_COLOR = "#08428c";
 const ROUTE_GREEN = "#16a34a";
 const ROUTE_CASING = "#064e3b";
 
@@ -403,6 +404,10 @@ type TripPlaceMapPickerProps = {
   singleLocation?: boolean;
   /** Read-only customer view: no pin dropping, routing controls or editing actions. */
   readOnly?: boolean;
+  /** Focused trip route view: show only origin pin, road line, and destination pin (no POI markers or side list). */
+  routeOnly?: boolean;
+  /** When true, origin A represents a live moving GPS position rather than a fixed static pin. */
+  liveOrigin?: boolean;
   /** Fixed trip route to draw automatically in read-only mode. */
   viewerRoute?: TripMapViewerRoute | null;
 };
@@ -416,6 +421,8 @@ export default function TripPlaceMapPicker({
   onClearPoint,
   singleLocation = false,
   readOnly = false,
+  routeOnly = false,
+  liveOrigin = false,
   viewerRoute = null,
 }: TripPlaceMapPickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -428,6 +435,7 @@ export default function TripPlaceMapPicker({
   const lastPointRef = useRef<[number, number] | null>(null);
   const routeLayerRef = useRef<Leaflet.LayerGroup | null>(null);
   const initialFitRef = useRef(false);
+  const lastLiveFittedDestKeyRef = useRef<string | null>(null);
   const disabledRef = useRef(disabled);
   const routeModeRef = useRef(false);
   const onSelectRef = useRef<(place: TripPlace) => void>(() => {});
@@ -440,7 +448,7 @@ export default function TripPlaceMapPicker({
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"islands" | "places">("islands");
   const [routeMode, setRouteMode] = useState(() => Boolean(readOnly && viewerRoute));
-  const [routeStops, setRouteStops] = useState<RouteEndpoint[]>(() =>
+  const [manualRouteStops, setRouteStops] = useState<RouteEndpoint[]>(() =>
     readOnly && viewerRoute ? viewerRouteStops(viewerRoute) : [],
   );
   const [route, setRoute] = useState<RouteResult | null>(null);
@@ -448,6 +456,43 @@ export default function TripPlaceMapPicker({
   const [routeAttempt, setRouteAttempt] = useState(0);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+
+  const hasViewerRoute = Boolean(readOnly && viewerRoute);
+  const viewerOriginLat = viewerRoute?.originLat;
+  const viewerOriginLng = viewerRoute?.originLng;
+  const viewerDestLat = viewerRoute?.destinationLat;
+  const viewerDestLng = viewerRoute?.destinationLng;
+  const viewerOriginLabel = viewerRoute?.originLabel;
+  const viewerDestLabel = viewerRoute?.destinationLabel;
+
+  const viewerStops = useMemo(
+    () =>
+      hasViewerRoute &&
+      viewerOriginLat != null &&
+      viewerOriginLng != null &&
+      viewerDestLat != null &&
+      viewerDestLng != null
+        ? viewerRouteStops({
+            originLat: viewerOriginLat,
+            originLng: viewerOriginLng,
+            destinationLat: viewerDestLat,
+            destinationLng: viewerDestLng,
+            originLabel: viewerOriginLabel,
+            destinationLabel: viewerDestLabel,
+          })
+        : [],
+    [
+      hasViewerRoute,
+      viewerOriginLat,
+      viewerOriginLng,
+      viewerDestLat,
+      viewerDestLng,
+      viewerOriginLabel,
+      viewerDestLabel,
+    ],
+  );
+  const routeStops: RouteEndpoint[] =
+    readOnly && viewerRoute ? viewerStops : manualRouteStops;
 
   const routeLoading =
     routeMode &&
@@ -461,8 +506,6 @@ export default function TripPlaceMapPicker({
     if (!hasPoint) return null;
     return placeAtCoords(latitude as number, longitude as number);
   }, [hasPoint, latitude, longitude]);
-
-  const viewerStops = readOnly && viewerRoute ? viewerRouteStops(viewerRoute) : [];
 
   const pointContext = useMemo(
     () =>
@@ -563,10 +606,12 @@ export default function TripPlaceMapPicker({
         const map = leaflet.map(containerRef.current, {
           center: ZANZIBAR_CENTER,
           zoom: 9,
-          minZoom: 8,
+          minZoom: routeOnly ? 6 : 8,
           maxZoom: 18,
           zoomSnap: 0.25,
-        ...(singleLocation ? {} : { maxBounds: ZANZIBAR_BOUNDS, maxBoundsViscosity: 1 }),
+          ...(singleLocation || routeOnly
+            ? {}
+            : { maxBounds: ZANZIBAR_BOUNDS, maxBoundsViscosity: 1 }),
           scrollWheelZoom: false,
         });
 
@@ -594,48 +639,51 @@ export default function TripPlaceMapPicker({
         routeRendererRef.current = routeRenderer;
 
         // Full Zanzibar land overlay above the OSM tiles and below the place
-        // markers, so the whole archipelago reads as one map.
-        const islandLayer = leaflet.layerGroup().addTo(map);
-        for (const island of ZANZIBAR_ISLANDS) {
-          leaflet
-            .polygon(island.coordinates, {
-              color: "#0b5f63",
-              weight: island.name === "Islet" ? 1 : 1.8,
-              opacity: 0.85,
-              fillColor: "#0f766e",
-              fillOpacity: 0.16,
-              interactive: false,
-              className: styles.islandShape,
-            })
-            .addTo(islandLayer);
-        }
-        const islandLabels: Leaflet.Marker[] = [];
-        for (const label of ZANZIBAR_ISLAND_LABELS) {
-          islandLabels.push(
+        // markers, so the whole archipelago reads as one map (omitted in routeOnly
+        // mode so only origin, road line, and destination stand out).
+        if (!routeOnly) {
+          const islandLayer = leaflet.layerGroup().addTo(map);
+          for (const island of ZANZIBAR_ISLANDS) {
             leaflet
-              .marker(label.at, {
+              .polygon(island.coordinates, {
+                color: "#0b5f63",
+                weight: island.name === "Islet" ? 1 : 1.8,
+                opacity: 0.85,
+                fillColor: "#0f766e",
+                fillOpacity: 0.16,
                 interactive: false,
-                keyboard: false,
-                icon: leaflet.divIcon({
-                  className: styles.islandLabel,
-                  html: `<span>${label.name}</span>`,
-                  iconSize: [120, 18],
-                  iconAnchor: [60, 9],
-                }),
+                className: styles.islandShape,
               })
-              .addTo(islandLayer),
-          );
-        }
+              .addTo(islandLayer);
+          }
+          const islandLabels: Leaflet.Marker[] = [];
+          for (const label of ZANZIBAR_ISLAND_LABELS) {
+            islandLabels.push(
+              leaflet
+                .marker(label.at, {
+                  interactive: false,
+                  keyboard: false,
+                  icon: leaflet.divIcon({
+                    className: styles.islandLabel,
+                    html: `<span>${label.name}</span>`,
+                    iconSize: [120, 18],
+                    iconAnchor: [60, 9],
+                  }),
+                })
+                .addTo(islandLayer),
+            );
+          }
 
-        // Only the archipelago overview needs the big island names; once
-        // zoomed in, OSM labels name the districts and the text crowds the
-        // place markers.
-        const syncIslandLabels = () => {
-          const opacity = map.getZoom() < 9.5 ? 1 : 0;
-          for (const label of islandLabels) label.setOpacity(opacity);
-        };
-        map.on("zoomend", syncIslandLabels);
-        syncIslandLabels();
+          // Only the archipelago overview needs the big island names; once
+          // zoomed in, OSM labels name the districts and the text crowds the
+          // place markers.
+          const syncIslandLabels = () => {
+            const opacity = map.getZoom() < 9.5 ? 1 : 0;
+            for (const label of islandLabels) label.setOpacity(opacity);
+          };
+          map.on("zoomend", syncIslandLabels);
+          syncIslandLabels();
+        }
 
         // Main roads are always drawn. Minor streets load lazily and only
         // appear at neighbourhood zoom levels so the overview stays legible.
@@ -715,7 +763,7 @@ export default function TripPlaceMapPicker({
             });
         };
 
-        if (!singleLocation) {
+        if (!singleLocation && !routeOnly) {
           void addMainRoads();
           map.on("zoomend", syncMinorRoads);
           syncMinorRoads();
@@ -760,7 +808,7 @@ export default function TripPlaceMapPicker({
       mapRef.current = null;
       leafletRef.current = null;
     };
-  }, [readOnly, singleLocation]);
+  }, [readOnly, routeOnly, singleLocation]);
 
   const fitGroup = useCallback(
     (animate: boolean) => {
@@ -803,16 +851,19 @@ export default function TripPlaceMapPicker({
     const map = mapRef.current;
     const leaflet = leafletRef.current;
     if (!map || !leaflet) return;
+    const stopPoints = viewerStops.map(
+      (stop) => [stop.lat, stop.lng] as [number, number],
+    );
     const points: [number, number][] =
       route && route.geometry.length > 1
-        ? route.geometry
-        : viewerStops.map((stop) => [stop.lat, stop.lng] as [number, number]);
+        ? [...route.geometry, ...stopPoints]
+        : stopPoints;
     if (points.length === 0) return;
     map.invalidateSize();
     map.fitBounds(leaflet.latLngBounds(points), {
-      paddingTopLeft: [28, 64],
-      paddingBottomRight: [28, 84],
-      maxZoom: 14,
+      paddingTopLeft: routeOnly ? [48, 60] : [28, 64],
+      paddingBottomRight: routeOnly ? [48, 64] : [28, 84],
+      maxZoom: routeOnly ? 15 : 14,
       animate,
     });
     setView("places");
@@ -825,6 +876,8 @@ export default function TripPlaceMapPicker({
 
     layerRef.current?.remove();
     markersRef.current.clear();
+
+    if (routeOnly) return;
 
     const layer = leaflet.layerGroup().addTo(map);
 
@@ -899,17 +952,37 @@ export default function TripPlaceMapPicker({
     }
 
     layerRef.current = layer;
-  }, [filteredPlaces, readOnly, ready, routeMode]);
+  }, [filteredPlaces, readOnly, ready, routeMode, routeOnly]);
 
   useEffect(() => {
     if (!ready) return;
+    if (routeOnly) {
+      if (!initialFitRef.current) {
+        initialFitRef.current = true;
+        const map = mapRef.current;
+        const leaflet = leafletRef.current;
+        if (map && leaflet && routeStops.length > 0) {
+          const points = routeStops.map(
+            (stop) => [stop.lat, stop.lng] as [number, number],
+          );
+          map.invalidateSize();
+          map.fitBounds(leaflet.latLngBounds(points), {
+            paddingTopLeft: [48, 60],
+            paddingBottomRight: [48, 64],
+            maxZoom: 15,
+            animate: false,
+          });
+        }
+      }
+      return;
+    }
     if (!initialFitRef.current) {
       initialFitRef.current = true;
       fitIslands(false);
       return;
     }
     fitGroup(false);
-  }, [fitGroup, fitIslands, ready]);
+  }, [fitGroup, fitIslands, ready, routeOnly, routeStops]);
 
   useEffect(() => {
     if (!ready) return;
@@ -1072,11 +1145,60 @@ export default function TripPlaceMapPicker({
     routeLayerRef.current = layer;
 
     routeStops.forEach((stop, index) => {
+      const stopKey = index === 0 ? "A" : "B";
+      if (routeOnly) {
+        const otherStop = routeStops[index === 0 ? 1 : 0];
+        const shortLabel =
+          stop.label.split(",")[0]?.trim() ||
+          (stopKey === "A" ? "Origin" : "Destination");
+        const trimmedLabel =
+          shortLabel.length > 28 ? `${shortLabel.slice(0, 27)}…` : shortLabel;
+        const badgeColor =
+          stopKey === "A" ? (liveOrigin ? "#08428c" : ROUTE_START_COLOR) : ROUTE_ONLY_END_COLOR;
+        const rolePrefix =
+          stopKey === "A" ? (liveOrigin ? "Live GPS" : "Origin") : "Destination";
+        const isNorthOfOther = otherStop
+          ? stop.lat > otherStop.lat ||
+            (stop.lat === otherStop.lat && stopKey === "A")
+          : stopKey === "A";
+        const tooltipDirection = isNorthOfOther ? "top" : "bottom";
+        const tooltipOffset: [number, number] = isNorthOfOther
+          ? [0, -16]
+          : [0, 16];
+        const liveBadgeClass =
+          stopKey === "A" && liveOrigin ? ` ${styles.routeBadgeLive}` : "";
+
+        leaflet
+          .marker([stop.lat, stop.lng], {
+            icon: leaflet.divIcon({
+              className: styles.routeMarker,
+              html: `<span class="${styles.routeBadge} ${styles.routeBadgeLarge}${liveBadgeClass}" style="--route-badge:${badgeColor}">${stopKey}</span>`,
+              iconSize: [28, 28],
+              iconAnchor: [14, 14],
+            }),
+            title: `${rolePrefix}: ${stop.label}`,
+            alt: `${rolePrefix}: ${stop.label}`,
+            zIndexOffset: 1500 + index,
+          })
+          .bindTooltip(`${rolePrefix}: ${trimmedLabel}`, {
+            permanent: true,
+            direction: tooltipDirection,
+            offset: tooltipOffset,
+            className: styles.routeStopTooltip,
+          })
+          .bindPopup(
+            `<div class="${styles.routeStopPopup}"><strong>${rolePrefix} (${stopKey})</strong><span>${escapeHtml(stop.label)}</span></div>`,
+            { offset: [0, -12] },
+          )
+          .addTo(layer);
+        return;
+      }
+
       leaflet
         .marker([stop.lat, stop.lng], {
           icon: leaflet.divIcon({
             className: styles.routeMarker,
-            html: routeBadgeHtml(index === 0 ? "A" : "B"),
+            html: routeBadgeHtml(stopKey),
             iconSize: [20, 20],
             iconAnchor: [10, 10],
           }),
@@ -1089,13 +1211,13 @@ export default function TripPlaceMapPicker({
 
     if (!route || route.geometry.length < 2) return;
 
-    if (route.source === "osrm") {
+    if (route.source === "osrm" || routeOnly) {
       leaflet
         .polyline(route.geometry, {
           pane: "trip-route",
           renderer: routeRendererRef.current ?? undefined,
-          color: ROUTE_CASING,
-          weight: 10,
+          color: route.source === "osrm" ? ROUTE_CASING : "#ffffff",
+          weight: routeOnly ? 9 : 10,
           opacity: 0.9,
           lineCap: "round",
           lineJoin: "round",
@@ -1108,7 +1230,7 @@ export default function TripPlaceMapPicker({
       pane: "trip-route",
       renderer: routeRendererRef.current ?? undefined,
       color: ROUTE_GREEN,
-      weight: 7,
+      weight: routeOnly ? 5.5 : 7,
       opacity: 1,
       dashArray: route.source === "osrm" ? undefined : "8 10",
       lineCap: "round",
@@ -1117,14 +1239,32 @@ export default function TripPlaceMapPicker({
     });
     routeLine.addTo(layer);
 
-    map.fitBounds(routeLine.getBounds(), {
-      // Keep the A/B badges clear of the top view switch and bottom legend.
-      paddingTopLeft: [28, 64],
-      paddingBottomRight: [28, 84],
-      maxZoom: 14,
-      animate: true,
-    });
-  }, [ready, route, routeMode, routeStops]);
+    const fitPoints: [number, number][] = routeOnly
+      ? [
+          ...route.geometry,
+          ...routeStops.map((stop) => [stop.lat, stop.lng] as [number, number]),
+        ]
+      : route.geometry;
+
+    map.invalidateSize();
+    const destStop = routeStops[1];
+    const destKey = destStop ? `${destStop.lat}:${destStop.lng}` : "";
+    if (liveOrigin && lastLiveFittedDestKeyRef.current === destKey) {
+      const originStop = routeStops[0];
+      if (originStop && !map.getBounds().contains([originStop.lat, originStop.lng])) {
+        map.panTo([originStop.lat, originStop.lng], { animate: true });
+      }
+    } else {
+      lastLiveFittedDestKeyRef.current = liveOrigin ? destKey : null;
+      map.fitBounds(leaflet.latLngBounds(fitPoints), {
+        // Keep the A/B badges clear of the top view switch and bottom legend.
+        paddingTopLeft: routeOnly ? [48, 60] : [28, 64],
+        paddingBottomRight: routeOnly ? [48, 64] : [28, 84],
+        maxZoom: routeOnly ? 15 : 14,
+        animate: true,
+      });
+    }
+  }, [liveOrigin, ready, route, routeMode, routeOnly, routeStops]);
 
   const toggleRouteMode = useCallback(() => {
     if (routeMode) {
@@ -1171,30 +1311,43 @@ export default function TripPlaceMapPicker({
     }
 
     setLocating(true);
+    const onSuccess = (position: GeolocationPosition) => {
+      const lat = roundCoordinate(position.coords.latitude);
+      const lng = roundCoordinate(position.coords.longitude);
+      if (!singleLocation && !isInZanzibar(lat, lng)) {
+        setLocationError("Your current location is outside Zanzibar.");
+        setLocating(false);
+        return;
+      }
+      onPickPoint(lat, lng, "current");
+      mapRef.current?.flyTo([lat, lng], 13, { animate: true, duration: 0.8 });
+      setLocating(false);
+    };
+    const onFail = (error: GeolocationPositionError) => {
+      setLocationError(
+        error.code === error.PERMISSION_DENIED
+          ? "Allow location access in your browser and try again."
+          : error.code === error.POSITION_UNAVAILABLE
+            ? "Your current location could not be determined."
+            : "Location request timed out. Please try again.",
+      );
+      setLocating(false);
+    };
+
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = roundCoordinate(position.coords.latitude);
-        const lng = roundCoordinate(position.coords.longitude);
-        if (!singleLocation && !isInZanzibar(lat, lng)) {
-          setLocationError("Your current location is outside Zanzibar.");
-          setLocating(false);
+      onSuccess,
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          onFail(error);
           return;
         }
-        onPickPoint(lat, lng, "current");
-        mapRef.current?.flyTo([lat, lng], 13, { animate: true, duration: 0.8 });
-        setLocating(false);
+        navigator.geolocation.getCurrentPosition(onSuccess, onFail, {
+          enableHighAccuracy: false,
+          timeout: 12000,
+          maximumAge: 0,
+        });
       },
-      (error) => {
-        setLocationError(
-          error.code === error.PERMISSION_DENIED
-            ? "Allow location access in your browser and try again."
-            : error.code === error.POSITION_UNAVAILABLE
-              ? "Your current location could not be determined."
-              : "Location request timed out. Please try again.",
-        );
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }, [disabled, locating, onPickPoint, singleLocation]);
 
@@ -1215,145 +1368,173 @@ export default function TripPlaceMapPicker({
   if (routeLoading) routeInstruction = "Calculating the road route…";
 
   return (
-    <div className={`${styles.picker} ${readOnly ? styles.pickerReadOnly : ""}`}>
-      <div className={styles.toolbar}>
-        <div className={styles.searchWrap}>
-          <span className={styles.searchIcon} aria-hidden="true">
-            <Search size={15} />
-          </span>
-          <label className={styles.srOnly} htmlFor="trip-map-search">
-            Search Zanzibar places
-          </label>
-          <input
-            id="trip-map-search"
-            className={styles.searchInput}
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              // Searching must never submit the trip form.
-              if (event.key === "Enter") event.preventDefault();
-            }}
-            placeholder={`Search all ${ZANZIBAR_TRIP_PLACES.length} places by name, area or category…`}
-            autoComplete="off"
-            disabled={disabled}
-          />
-          {query ? (
-            <button
-              className={styles.searchClear}
-              type="button"
-              onClick={() => setQuery("")}
-              aria-label="Clear place search"
+    <div
+      className={`${styles.picker} ${readOnly ? styles.pickerReadOnly : ""} ${
+        routeOnly ? styles.pickerRouteOnly : ""
+      }`}
+    >
+      {!routeOnly ? (
+        <div className={styles.toolbar}>
+          <div className={styles.searchWrap}>
+            <span className={styles.searchIcon} aria-hidden="true">
+              <Search size={15} />
+            </span>
+            <label className={styles.srOnly} htmlFor="trip-map-search">
+              Search Zanzibar places
+            </label>
+            <input
+              id="trip-map-search"
+              className={styles.searchInput}
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                // Searching must never submit the trip form.
+                if (event.key === "Enter") event.preventDefault();
+              }}
+              placeholder={`Search all ${ZANZIBAR_TRIP_PLACES.length} places by name, area or category…`}
+              autoComplete="off"
+              disabled={disabled}
+            />
+            {query ? (
+              <button
+                className={styles.searchClear}
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear place search"
+              >
+                <X size={14} />
+              </button>
+            ) : null}
+          </div>
+
+          <label className={styles.groupSelect}>
+            <span className={styles.groupLabel}>Show</span>
+            <select
+              className={styles.select}
+              value={group}
+              onChange={(event) =>
+                setGroup(event.target.value as TripPlaceGroupId)
+              }
+              disabled={disabled}
             >
-              <X size={14} />
+              {TRIP_PLACE_GROUPS.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label} ({GROUP_COUNTS.get(item.id) ?? 0})
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <span className={styles.count}>
+            <MapPin size={13} aria-hidden="true" />
+            {filteredPlaces.length} mapped
+          </span>
+
+          {!singleLocation && !readOnly ? (
+            <button
+              className={`${styles.routeToggle} ${
+                routeMode ? styles.routeToggleActive : ""
+              }`}
+              type="button"
+              onClick={toggleRouteMode}
+              disabled={disabled}
+              aria-pressed={routeMode}
+              title="Measure a road route between two points"
+            >
+              <Navigation size={13} aria-hidden="true" />
+              {routeMode ? "Routing on" : "Route"}
+            </button>
+          ) : null}
+          {!readOnly ? (
+            <button
+              className={styles.currentLocation}
+              type="button"
+              onClick={locateCurrentPosition}
+              disabled={disabled || locating}
+              title="Use your current location"
+            >
+              <Locate size={13} aria-hidden="true" />
+              {locating ? "Locating…" : "My location"}
             </button>
           ) : null}
         </div>
-
-        <label className={styles.groupSelect}>
-          <span className={styles.groupLabel}>Show</span>
-          <select
-            className={styles.select}
-            value={group}
-            onChange={(event) =>
-              setGroup(event.target.value as TripPlaceGroupId)
-            }
-            disabled={disabled}
-          >
-            {TRIP_PLACE_GROUPS.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label} ({GROUP_COUNTS.get(item.id) ?? 0})
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <span className={styles.count}>
-          <MapPin size={13} aria-hidden="true" />
-          {filteredPlaces.length} mapped
-        </span>
-
-        {!singleLocation && !readOnly ? (
-          <button
-            className={`${styles.routeToggle} ${
-              routeMode ? styles.routeToggleActive : ""
-            }`}
-            type="button"
-            onClick={toggleRouteMode}
-            disabled={disabled}
-            aria-pressed={routeMode}
-            title="Measure a road route between two points"
-          >
-            <Navigation size={13} aria-hidden="true" />
-            {routeMode ? "Routing on" : "Route"}
-          </button>
-        ) : null}
-        {!readOnly ? (
-          <button
-            className={styles.currentLocation}
-            type="button"
-            onClick={locateCurrentPosition}
-            disabled={disabled || locating}
-            title="Use your current location"
-          >
-            <Locate size={13} aria-hidden="true" />
-            {locating ? "Locating…" : "My location"}
-          </button>
-        ) : null}
-      </div>
-      {locationError ? (
+      ) : null}
+      {!routeOnly && locationError ? (
         <p className={styles.locationError} role="alert">
           {locationError}
         </p>
       ) : null}
 
-      <div className={styles.body}>
+      <div className={`${styles.body} ${routeOnly ? styles.bodyRouteOnly : ""}`}>
         <div className={styles.mapWrap}>
           <div
             ref={containerRef}
             className={styles.map}
             role="region"
-            aria-label="Map of Zanzibar places with their coordinates"
+            aria-label={
+              routeOnly
+                ? "Trip route map showing pickup origin, driving road line, and destination"
+                : "Map of Zanzibar places with their coordinates"
+            }
           />
           {!ready && !mapError ? (
-            <div className={styles.mapStatus}>Loading Zanzibar map…</div>
+            <div className={styles.mapStatus}>
+              {routeOnly ? "Loading trip route map…" : "Loading Zanzibar map…"}
+            </div>
           ) : null}
           {mapError ? (
             <div className={styles.mapStatus} role="status">
-              The map could not load. Pick a place from the list instead.
+              {routeOnly
+                ? "The map could not load right now."
+                : "The map could not load. Pick a place from the list instead."}
             </div>
           ) : null}
           {ready ? (
             <div className={styles.mapTop}>
-              <span className={styles.mapTopKicker}>Zanzibar</span>
-              <div
-                className={styles.mapTopActions}
-                role="group"
-                aria-label="Map view"
-              >
+              {routeOnly ? (
                 <button
-                  className={`${styles.mapViewButton} ${
-                    view === "islands" ? styles.mapViewButtonActive : ""
-                  }`}
+                  className={`${styles.mapViewButton} ${styles.mapViewButtonActive}`}
                   type="button"
-                  onClick={() => fitIslands(true)}
+                  onClick={() => fitViewerRoute(true)}
                   disabled={disabled}
-                  aria-pressed={view === "islands"}
                 >
-                  Full Zanzibar
+                  <Locate size={12} aria-hidden="true" />
+                  Fit route
                 </button>
-                <button
-                  className={`${styles.mapViewButton} ${
-                    view === "places" ? styles.mapViewButtonActive : ""
-                  }`}
-                  type="button"
-                  onClick={() => fitGroup(true)}
-                  disabled={disabled}
-                  aria-pressed={view === "places"}
-                >
-                  Places
-                </button>
-              </div>
+              ) : (
+                <>
+                  <span className={styles.mapTopKicker}>Zanzibar</span>
+                  <div
+                    className={styles.mapTopActions}
+                    role="group"
+                    aria-label="Map view"
+                  >
+                    <button
+                      className={`${styles.mapViewButton} ${
+                        view === "islands" ? styles.mapViewButtonActive : ""
+                      }`}
+                      type="button"
+                      onClick={() => fitIslands(true)}
+                      disabled={disabled}
+                      aria-pressed={view === "islands"}
+                    >
+                      Full Zanzibar
+                    </button>
+                    <button
+                      className={`${styles.mapViewButton} ${
+                        view === "places" ? styles.mapViewButtonActive : ""
+                      }`}
+                      type="button"
+                      onClick={() => fitGroup(true)}
+                      disabled={disabled}
+                      aria-pressed={view === "places"}
+                    >
+                      Places
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ) : null}
 
@@ -1361,7 +1542,8 @@ export default function TripPlaceMapPicker({
             <div className={styles.routePanel} role="status" aria-live="polite">
               <div className={styles.routePanelHead}>
                 <span className={styles.routePanelTitle}>
-                  <Navigation size={13} aria-hidden="true" /> Road route
+                  <Navigation size={13} aria-hidden="true" />{" "}
+                  {routeOnly ? "Trip route" : "Road route"}
                 </span>
                 {!readOnly ? (
                   <button
@@ -1400,7 +1582,17 @@ export default function TripPlaceMapPicker({
                   <div className={styles.routeStops}>
                     {routeStops.map((stop, index) => (
                       <span key={`${index}-${stop.lat}-${stop.lng}`}>
-                        <b>{index === 0 ? "A" : "B"}</b>
+                        <b
+                          className={
+                            routeOnly
+                              ? index === 0
+                                ? styles.routeStopDotA
+                                : styles.routeStopDotB
+                              : undefined
+                          }
+                        >
+                          {index === 0 ? "A" : "B"}
+                        </b>
                         {stop.label}
                       </span>
                     ))}
@@ -1444,58 +1636,91 @@ export default function TripPlaceMapPicker({
           ) : null}
 
           {ready ? (
-            <div className={styles.legend} role="group" aria-label="Map key">
-              {legendGroups.map((item) => (
-                <span key={item.id} className={styles.legendItem}>
-                  <HugeiconsIcon
-                    icon={(GROUP_ICON[item.id as PlaceGroupId] ?? LandmarkIcon) as never}
-                    size={10}
-                    color={GROUP_COLORS[item.id as PlaceGroupId]}
-                    aria-hidden="true"
-                  />
-                  {item.label}
-                </span>
-              ))}
-              {hasPoint && !selectedPlace ? (
-                <span className={styles.legendItem}>
-                  <i
-                    className={`${styles.legendDot} ${styles.legendPin}`}
-                    aria-hidden="true"
-                  />
-                  Trip pin
-                </span>
-              ) : null}
-              {!singleLocation && routeMode ? (
+            <div
+              className={`${styles.legend} ${
+                routeOnly ? styles.legendRouteOnly : ""
+              }`}
+              role="group"
+              aria-label="Map key"
+            >
+              {routeOnly ? (
                 <>
                   <span className={styles.legendItem}>
                     <i className={styles.legendRouteStart} aria-hidden="true">
                       A
                     </i>
-                    Start
+                    Origin
                   </span>
                   <span className={styles.legendItem}>
-                    <i className={styles.legendRouteEnd} aria-hidden="true">
+                    <i className={styles.legendRouteLine} aria-hidden="true" />
+                    Road route
+                  </span>
+                  <span className={styles.legendItem}>
+                    <i
+                      className={`${styles.legendRouteEnd} ${styles.legendRouteEndBlue}`}
+                      aria-hidden="true"
+                    >
                       B
                     </i>
                     Destination
                   </span>
                 </>
-              ) : null}
-              <span className={styles.legendItem}>
-                <i
-                  className={`${styles.legendLine} ${styles.legendLineMain}`}
-                />
-                Main road
-              </span>
-              <span className={styles.legendItem}>
-                <i className={styles.legendLine} />
-                Minor road
-              </span>
+              ) : (
+                <>
+                  {legendGroups.map((item) => (
+                    <span key={item.id} className={styles.legendItem}>
+                      <HugeiconsIcon
+                        icon={(GROUP_ICON[item.id as PlaceGroupId] ?? LandmarkIcon) as never}
+                        size={10}
+                        color={GROUP_COLORS[item.id as PlaceGroupId]}
+                        aria-hidden="true"
+                      />
+                      {item.label}
+                    </span>
+                  ))}
+                  {hasPoint && !selectedPlace ? (
+                    <span className={styles.legendItem}>
+                      <i
+                        className={`${styles.legendDot} ${styles.legendPin}`}
+                        aria-hidden="true"
+                      />
+                      Trip pin
+                    </span>
+                  ) : null}
+                  {!singleLocation && routeMode ? (
+                    <>
+                      <span className={styles.legendItem}>
+                        <i className={styles.legendRouteStart} aria-hidden="true">
+                          A
+                        </i>
+                        Start
+                      </span>
+                      <span className={styles.legendItem}>
+                        <i className={styles.legendRouteEnd} aria-hidden="true">
+                          B
+                        </i>
+                        Destination
+                      </span>
+                    </>
+                  ) : null}
+                  <span className={styles.legendItem}>
+                    <i
+                      className={`${styles.legendLine} ${styles.legendLineMain}`}
+                    />
+                    Main road
+                  </span>
+                  <span className={styles.legendItem}>
+                    <i className={styles.legendLine} />
+                    Minor road
+                  </span>
+                </>
+              )}
             </div>
           ) : null}
         </div>
 
-        <aside className={styles.side} aria-label="Zanzibar place list">
+        {!routeOnly ? (
+          <aside className={styles.side} aria-label="Zanzibar place list">
           <div className={styles.selection}>
             {selectedPlace ? (
               <>
@@ -1796,7 +2021,8 @@ export default function TripPlaceMapPicker({
               </div>
             </>
           )}
-        </aside>
+          </aside>
+        ) : null}
       </div>
     </div>
   );

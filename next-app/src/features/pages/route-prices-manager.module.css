@@ -1,0 +1,453 @@
+.manager {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.readOnlyBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid rgba(8, 66, 140, 0.22);
+  border-radius: 14px;
+  background: rgba(8, 66, 140, 0.06);
+  color: #08428c;
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(10, 10, 42, 0.1);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(10, 10, 42, 0.04);
+}
+
+.toolbarLeft {
+  display: flex;
+  flex: 1 1 320px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.searchWrap {
+  position: relative;
+  display: flex;
+  flex: 1 1 240px;
+  align-items: center;
+  min-width: 0;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 34px 8px 36px;
+  border: 1px solid rgba(10, 10, 42, 0.16);
+  border-radius: 11px;
+  background: #f8fafc;
+  color: #0a0a2a;
+  font: inherit;
+  font-size: 0.86rem;
+}
+
+.clearBtn {
+  position: absolute;
+  right: 8px;
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+}
+
+.rateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border: 1px solid rgba(8, 66, 140, 0.18);
+  border-radius: 999px;
+  background: rgba(8, 66, 140, 0.06);
+  color: #08428c;
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.toolbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+:global(#route-prices-manager) .btnPrimary,
+:global(#route-prices-manager) .btnGhost {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 11px;
+  font-size: 0.83rem;
+  font-weight: 750;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+:global(#route-prices-manager) .btnPrimary {
+  border: 1px solid #08428c !important;
+  background: #08428c !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 14px rgba(8, 66, 140, 0.2) !important;
+}
+
+:global(#route-prices-manager) .btnPrimary:hover:not(:disabled) {
+  background: #06336d !important;
+}
+
+:global(#route-prices-manager) .btnGhost {
+  border: 1px solid rgba(10, 10, 42, 0.16) !important;
+  background: #ffffff !important;
+  color: #0a0a2a !important;
+  box-shadow: none !important;
+}
+
+:global(#route-prices-manager) .btnGhost:hover:not(:disabled) {
+  border-color: #08428c !important;
+  color: #08428c !important;
+}
+
+.createCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1.5px solid rgba(8, 66, 140, 0.22);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(8, 66, 140, 0.08);
+}
+
+.createTitle {
+  margin: 0;
+  color: #0a0a2a;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.createGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid rgba(10, 10, 42, 0.16);
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #0a0a2a;
+  font: inherit;
+  font-size: 0.86rem;
+}
+
+.tierDraftGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tierDraftBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(10, 10, 42, 0.1);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.tierDraftLabel {
+  color: #08428c;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.dualInputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.currencyField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #5b6475;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.originChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+:global(#route-prices-manager) .originChip {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(10, 10, 42, 0.14) !important;
+  border-radius: 999px;
+  background: #ffffff !important;
+  color: #334155 !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+:global(#route-prices-manager) .originChipActive {
+  border-color: #08428c !important;
+  background: #08428c !important;
+  color: #ffffff !important;
+}
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid rgba(10, 10, 42, 0.1);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(10, 10, 42, 0.04);
+}
+
+.table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.table thead th {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(10, 10, 42, 0.1);
+  background: #f4f7fc;
+  color: #0a0a2a;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(10, 10, 42, 0.06);
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover {
+  background: #f9fbff;
+}
+
+.numCell {
+  width: 44px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.routeCell {
+  white-space: nowrap;
+}
+
+.routeSep {
+  margin: 0 6px;
+  color: #08428c;
+  font-weight: 800;
+}
+
+.priceCell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.priceCell strong {
+  color: #0a0a2a;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.priceCell span {
+  color: #08428c;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.actionsCol {
+  width: 165px;
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+:global(#route-prices-manager) .iconBtn,
+:global(#route-prices-manager) .iconBtnDanger,
+:global(#route-prices-manager) .btnSaveSmall,
+:global(#route-prices-manager) .btnCancelSmall {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+:global(#route-prices-manager) .iconBtn {
+  border: 1px solid rgba(8, 66, 140, 0.2) !important;
+  background: #f4f7fc !important;
+  color: #08428c !important;
+}
+
+:global(#route-prices-manager) .iconBtnDanger {
+  border: 1px solid rgba(220, 38, 38, 0.24) !important;
+  background: #fff5f5 !important;
+  color: #b91c1c !important;
+}
+
+:global(#route-prices-manager) .btnSaveSmall {
+  border: 1px solid #08428c !important;
+  background: #08428c !important;
+  color: #ffffff !important;
+}
+
+:global(#route-prices-manager) .btnCancelSmall {
+  border: 1px solid rgba(10, 10, 42, 0.16) !important;
+  background: #ffffff !important;
+  color: #334155 !important;
+}
+
+.editingRow {
+  background: #eef5ff !important;
+}
+
+.inlineRouteEdit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inlineInput {
+  width: 118px;
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 1px solid rgba(8, 66, 140, 0.3);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.82rem;
+}
+
+.inlinePriceEdit {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inlineNum {
+  width: 82px;
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 1px solid rgba(8, 66, 140, 0.3);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.tzsPreview {
+  color: #08428c;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.emptyBox {
+  padding: 36px 16px;
+  border: 1.5px dashed rgba(10, 10, 42, 0.16);
+  border-radius: 16px;
+  background: #ffffff;
+  color: #64748b;
+  text-align: center;
+}
+
+.spin {
+  animation: rp-spin 0.9s linear infinite;
+}
+
+@keyframes rp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 820px) {
+  .createGrid,
+  .tierDraftGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -3,6 +3,10 @@ import { handleApiError, ok } from "@/lib/api/http";
 import { env } from "@/lib/env";
 import prisma from "@/lib/db/prisma";
 import { logger } from "@/lib/logging";
+import {
+  expireOverdueTransportBookings,
+  expireOverdueTripRequests,
+} from "@/lib/services/booking-expiration";
 
 /**
  * Scheduled maintenance endpoint (see vercel.json). Removes stale push
@@ -18,6 +22,9 @@ async function run(request: NextRequest) {
     });
   }
 
+  const expiredBookings = await expireOverdueTransportBookings();
+  const expiredTripRequests = await expireOverdueTripRequests();
+
   const removedSubscriptions = await prisma.pushSubscription.deleteMany({
     where: { updatedAt: { lt: new Date(Date.now() - 90 * 86400000) } },
   });
@@ -29,6 +36,8 @@ async function run(request: NextRequest) {
   });
 
   logger.info("cron cleanup finished", {
+    expiredBookings,
+    expiredTripRequests,
     removedSubscriptions: removedSubscriptions.count,
     removedNotifications: removedNotifications.count,
     removedVisits: removedVisits.count,
@@ -36,6 +45,8 @@ async function run(request: NextRequest) {
 
   return ok({
     success: true,
+    expired_bookings: expiredBookings,
+    expired_trip_requests: expiredTripRequests,
     removed_subscriptions: removedSubscriptions.count,
     removed_notifications: removedNotifications.count,
     removed_visits: removedVisits.count,

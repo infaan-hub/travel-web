@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import styles from "./MoreExperiencesEmptyState.module.css";
 
 type MoreExperiencesEmptyStateProps = {
@@ -92,7 +94,14 @@ export default function MoreExperiencesEmptyState({
                 }
               >
                 {image ? (
-                  <img className={styles.cardImage} src={image} alt="" loading="lazy" />
+                  <Image
+                    className={styles.cardImage}
+                    src={getImageUrl(image)}
+                    alt=""
+                    fill
+                    sizes="(max-width: 720px) 68vw, 320px"
+                    unoptimized={isUnoptimizableImage(getImageUrl(image))}
+                  />
                 ) : (
                   <PhotoGlyph />
                 )}

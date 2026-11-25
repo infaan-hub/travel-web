@@ -57,6 +57,8 @@ async function updateSettings(request: NextRequest) {
       ["hero_secondary_image", "heroSecondaryImage", "heroSecondaryImageData", "heroSecondaryImageMime"],
       ["hero_feature_image", "heroFeatureImage", "heroFeatureImageData", "heroFeatureImageMime"],
       ["hero_thumb_image", "heroThumbImage", "heroThumbImageData", "heroThumbImageMime"],
+      ["trip_public_card_image", "tripPublicCardImage", "tripPublicCardImageData", "tripPublicCardImageMime"],
+      ["trip_company_card_image", "tripCompanyCardImage", "tripCompanyCardImageData", "tripCompanyCardImageMime"],
     ] as const;
     for (const [inputKey, pathKey, dataKey, mimeKey] of heroFields) {
       const file = fileFrom(payload, inputKey);

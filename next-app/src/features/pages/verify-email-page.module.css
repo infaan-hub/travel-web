@@ -1,0 +1,804 @@
+/* ==========================================================================
+   Email Verification (/verify-email/)
+   Compact, responsive OTP verification sized to fit desktop, iOS & Android
+   without oversizing, with individually bordered digit cells & fill motion.
+   ========================================================================== */
+
+.page {
+  --ve-blue: #08428c;
+  --ve-blue-deep: #063570;
+  --ve-blue-soft: #edf4fc;
+  --ve-blue-tint: #f6faff;
+  --ve-emerald: #15803d;
+  --ve-emerald-soft: #ecfdf3;
+  --ve-emerald-border: #86efac;
+  --ve-rose: #be123c;
+  --ve-rose-soft: #fff1f2;
+  --ve-rose-border: #fda4af;
+  --ve-ink: #12223a;
+  --ve-ink-2: #334763;
+  --ve-muted: #526580;
+  --ve-line: rgba(8, 66, 140, 0.14);
+  --ve-line-strong: rgba(8, 66, 140, 0.28);
+  --ve-surface: #ffffff;
+  --ve-cell-bg: #f8fbff;
+  --ve-cell-border: #94b4dc;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100dvh - 68px);
+  padding: clamp(12px, 3vh, 28px) clamp(12px, 3.5vw, 24px);
+  padding-bottom: max(clamp(16px, 3vh, 28px), env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow-x: clip;
+  background:
+    radial-gradient(680px 420px at 8% -4%, rgba(8, 66, 140, 0.11), transparent 62%),
+    radial-gradient(560px 380px at 94% 100%, rgba(21, 128, 61, 0.08), transparent 60%),
+    linear-gradient(160deg, #f7f9fc 0%, #eef4fb 52%, #f6f8fb 100%);
+  color: var(--ve-ink);
+}
+
+:global(.dark) .page {
+  --ve-blue: #6ea8fe;
+  --ve-blue-deep: #93c5fd;
+  --ve-blue-soft: rgba(59, 130, 246, 0.18);
+  --ve-blue-tint: rgba(30, 58, 138, 0.24);
+  --ve-emerald: #4ade80;
+  --ve-emerald-soft: rgba(21, 128, 61, 0.22);
+  --ve-emerald-border: rgba(74, 222, 128, 0.48);
+  --ve-rose: #fda4af;
+  --ve-rose-soft: rgba(190, 18, 60, 0.22);
+  --ve-rose-border: rgba(253, 164, 175, 0.5);
+  --ve-ink: #f1f5f9;
+  --ve-ink-2: #cbd5e1;
+  --ve-muted: #94a3b8;
+  --ve-line: rgba(148, 163, 184, 0.22);
+  --ve-line-strong: rgba(148, 163, 184, 0.42);
+  --ve-surface: #0f172a;
+  --ve-cell-bg: #17233a;
+  --ve-cell-border: rgba(148, 163, 184, 0.56);
+  background:
+    radial-gradient(640px 420px at 10% 0%, rgba(37, 99, 235, 0.18), transparent 60%),
+    linear-gradient(160deg, #0b1120 0%, #0f172a 100%);
+}
+
+/* -------------------------------------------------------------------------
+   Compact Focal Card — sized to fit desktop, iOS & Android viewports cleanly
+   ------------------------------------------------------------------------- */
+
+.card {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.4vh, 20px);
+  padding: clamp(18px, 3.8vw, 28px) clamp(16px, 4vw, 26px);
+  border: 1.5px solid var(--ve-line);
+  border-radius: clamp(18px, 4vw, 24px);
+  background: var(--ve-surface);
+  box-shadow:
+    0 2px 8px rgba(18, 34, 58, 0.04),
+    0 18px 44px rgba(8, 66, 140, 0.09);
+  box-sizing: border-box;
+  animation: ve-card-in 0.34s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.brandLink {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.brandLogo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.secureBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid var(--ve-line);
+  border-radius: 999px;
+  background: var(--ve-blue-tint);
+  color: var(--ve-blue);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.mailBadge {
+  display: grid;
+  place-items: center;
+  width: clamp(44px, 11vw, 52px);
+  height: clamp(44px, 11vw, 52px);
+  border: 1.5px solid var(--ve-line);
+  border-radius: 16px;
+  background: linear-gradient(145deg, var(--ve-blue-soft), var(--ve-blue-tint));
+  color: var(--ve-blue);
+  box-shadow: 0 8px 18px rgba(8, 66, 140, 0.08);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.mailBadgeSuccess {
+  border-color: var(--ve-emerald-border);
+  background: var(--ve-emerald-soft);
+  color: var(--ve-emerald);
+}
+
+.title {
+  margin: 0;
+  color: var(--ve-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.38rem, 5.2vw, 1.72rem);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--ve-muted);
+  font-size: clamp(0.84rem, 3.2vw, 0.91rem);
+  line-height: 1.5;
+}
+
+.emailChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 5px 12px;
+  border: 1px solid var(--ve-line);
+  border-radius: 999px;
+  background: var(--ve-blue-tint);
+  color: var(--ve-ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* -------------------------------------------------------------------------
+   6 Individually Bordered OTP Digit Boxes with Per-Digit Fill Motion
+   ------------------------------------------------------------------------- */
+
+.otpSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.otpLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.otpLabel {
+  color: var(--ve-ink-2);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.otpProgressText {
+  color: var(--ve-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.otpGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(6px, 1.8vw, 10px);
+  width: 100%;
+  min-width: 0;
+}
+
+.otpGridShake {
+  animation: ve-shake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.otpCell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: clamp(46px, 12.5vw, 58px);
+  border: 2px solid var(--ve-cell-border);
+  border-radius: clamp(10px, 2.8vw, 14px);
+  background: var(--ve-cell-bg);
+  box-shadow: 0 2px 6px rgba(8, 66, 140, 0.05);
+  box-sizing: border-box;
+  overflow: hidden;
+  cursor: text;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.otpCell:hover:not(.otpCellVerifying):not(.otpCellSuccess):not(.otpCellError) {
+  border-color: var(--ve-blue);
+}
+
+.otpCellFocused,
+.otpCell:focus-within:not(.otpCellVerifying):not(.otpCellSuccess):not(.otpCellError) {
+  border-color: var(--ve-blue);
+  background: var(--ve-surface);
+  box-shadow:
+    0 0 0 3.5px rgba(8, 66, 140, 0.15),
+    0 6px 14px rgba(8, 66, 140, 0.1);
+  transform: translateY(-2px);
+}
+
+.otpCellFilled {
+  border-color: var(--ve-blue);
+  background: var(--ve-surface);
+  box-shadow: 0 4px 12px rgba(8, 66, 140, 0.09);
+}
+
+.otpCellFilledPulse {
+  animation: ve-cell-pop 0.26s cubic-bezier(0.22, 1.25, 0.36, 1);
+}
+
+.otpCellVerifying {
+  border-color: var(--ve-blue);
+  background: var(--ve-blue-soft);
+  animation: ve-verifying-wave 0.9s ease-in-out infinite;
+  animation-delay: calc(var(--cell-index, 0) * 85ms);
+}
+
+.otpCell.otpCellSuccess {
+  border-color: var(--ve-emerald);
+  background: var(--ve-emerald-soft);
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.14);
+}
+
+.otpCell.otpCellError {
+  border-color: var(--ve-rose);
+  background: var(--ve-rose-soft);
+  box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.1);
+}
+
+.otpCell.otpCellError.otpCellFocused,
+.otpCell.otpCellError:focus-within {
+  border-color: var(--ve-rose);
+  background: var(--ve-surface);
+  box-shadow:
+    0 0 0 3.5px rgba(190, 18, 60, 0.2),
+    0 6px 14px rgba(190, 18, 60, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Native accessible input beneath the crisp visual layer (no backdrop blur, >=16px to prevent iOS zoom) */
+:global(#verify-email-root) input.otpInput,
+:global(.app-layout .main-content #verify-email-root) input.otpInput {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-radius: inherit !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  caret-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  box-sizing: border-box !important;
+  text-align: center;
+  font-size: 16px !important;
+  font-weight: 700;
+  cursor: text;
+}
+
+:global(#verify-email-root) input.otpInput:focus,
+:global(#verify-email-root) input.otpInput:focus-visible,
+:global(#verify-email-root) input.otpInput:hover,
+:global(#verify-email-root) input.otpInput[aria-invalid="true"],
+:global(.app-layout .main-content #verify-email-root) input.otpInput:focus,
+:global(.app-layout .main-content #verify-email-root) input.otpInput:focus-visible,
+:global(.app-layout .main-content #verify-email-root) input.otpInput:hover,
+:global(.app-layout .main-content #verify-email-root) input.otpInput[aria-invalid="true"] {
+  border: 0 !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:global(#verify-email-root) input.otpInput::selection {
+  background: transparent !important;
+  color: transparent !important;
+}
+
+:global(#verify-email-root) input.otpInput:disabled {
+  cursor: default;
+}
+
+.otpVisual {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.otpDigit {
+  display: inline-block;
+  color: var(--ve-ink);
+  font-family: var(--font-body);
+  font-size: clamp(1.3rem, 5.4vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: ve-digit-in 0.25s cubic-bezier(0.22, 1.32, 0.36, 1) both;
+}
+
+.otpCellSuccess .otpDigit {
+  color: var(--ve-emerald);
+}
+
+.otpCellError .otpDigit {
+  color: var(--ve-rose);
+}
+
+.otpCaret {
+  width: 2px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--ve-blue);
+  animation: ve-caret-blink 1s steps(2, start) infinite;
+}
+
+.otpEmptyDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ve-line-strong);
+  opacity: 0.55;
+}
+
+/* Smooth Progress Meter */
+.progressTrack {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ve-blue-soft);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ve-blue);
+  transition: width 0.22s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease;
+}
+
+.progressFillSuccess {
+  background: var(--ve-emerald);
+}
+
+.progressFillError {
+  background: var(--ve-rose);
+}
+
+/* -------------------------------------------------------------------------
+   Auto-Verify Live Status Banner (replaces Submit Button)
+   ------------------------------------------------------------------------- */
+
+.statusBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid var(--ve-line);
+  border-radius: 13px;
+  background: var(--ve-blue-tint);
+  color: var(--ve-ink-2);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.statusBannerMain {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.statusBannerMain svg {
+  flex: 0 0 auto;
+  color: var(--ve-blue);
+}
+
+.statusBannerVerifying {
+  border-color: rgba(8, 66, 140, 0.3);
+  background: var(--ve-blue-soft);
+  color: var(--ve-blue);
+}
+
+.statusBannerSuccess {
+  border-color: var(--ve-emerald-border);
+  background: var(--ve-emerald-soft);
+  color: var(--ve-emerald);
+}
+
+.statusBannerSuccess .statusBannerMain svg {
+  color: var(--ve-emerald);
+}
+
+.statusBannerError {
+  border-color: var(--ve-rose-border);
+  background: var(--ve-rose-soft);
+  color: var(--ve-rose);
+}
+
+.statusBannerError .statusBannerMain svg {
+  color: var(--ve-rose);
+}
+
+:global(#verify-email-root) .clearCodeBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 32px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--ve-rose-border) !important;
+  border-radius: 999px !important;
+  background: var(--ve-surface) !important;
+  color: var(--ve-rose) !important;
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  cursor: pointer;
+}
+
+:global(#verify-email-root) .clearCodeBtn:hover {
+  background: #ffe4e6 !important;
+  transform: none !important;
+}
+
+.spin {
+  animation: ve-spin 0.85s linear infinite;
+}
+
+/* -------------------------------------------------------------------------
+   Footer Controls (Resend Code + Back to Login)
+   ------------------------------------------------------------------------- */
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ve-line);
+}
+
+.actionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+:global(#verify-email-root) .resendBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px !important;
+  padding: 0 14px !important;
+  border: 1.5px solid var(--ve-line-strong) !important;
+  border-radius: 12px !important;
+  background: var(--ve-surface) !important;
+  color: var(--ve-blue) !important;
+  font-size: 0.82rem !important;
+  font-weight: 750 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease !important;
+}
+
+:global(#verify-email-root) .resendBtn:hover:not(:disabled) {
+  border-color: var(--ve-blue) !important;
+  background: var(--ve-blue-soft) !important;
+  transform: none !important;
+}
+
+:global(#verify-email-root) .resendBtn:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 10px;
+  color: var(--ve-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.backLink:hover {
+  color: var(--ve-blue);
+  background: var(--ve-blue-tint);
+}
+
+.expiryNote {
+  margin: 0;
+  text-align: center;
+  color: var(--ve-muted);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+/* Loading Preparation Card */
+.loadingCard {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px;
+  gap: 12px;
+}
+
+.loadingText {
+  margin: 0;
+  color: var(--ve-muted);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+/* Focus outline for keyboard users */
+.page a:focus-visible,
+.page button:focus-visible {
+  outline: 3px solid rgba(8, 66, 140, 0.42);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
+   Keyframes
+   ------------------------------------------------------------------------- */
+
+@keyframes ve-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ve-digit-in {
+  0% {
+    opacity: 0;
+    transform: translateY(9px) scale(0.62);
+  }
+  68% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ve-cell-pop {
+  0% {
+    transform: scale(0.95);
+  }
+  55% {
+    transform: scale(1.045) translateY(-2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes ve-verifying-wave {
+  0%,
+  100% {
+    transform: translateY(0);
+    border-color: var(--ve-blue);
+  }
+  50% {
+    transform: translateY(-3px);
+    border-color: var(--ve-blue-deep);
+  }
+}
+
+@keyframes ve-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes ve-caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes ve-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Responsive Fit Guards (iOS SE, compact Android, mobile keyboard, desktop)
+   ------------------------------------------------------------------------- */
+
+@media (max-height: 700px) {
+  .page {
+    align-items: flex-start;
+    padding-top: 12px;
+    padding-bottom: 16px;
+  }
+
+  .card {
+    gap: 12px;
+    padding: 16px 16px;
+  }
+
+  .mailBadge {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .page {
+    padding-inline: 10px;
+  }
+
+  .card {
+    padding: 16px 13px;
+    border-radius: 18px;
+  }
+
+  .otpGrid {
+    gap: 5px;
+  }
+
+  .otpCell {
+    height: 46px;
+    border-radius: 10px;
+  }
+
+  .actionsRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  :global(#verify-email-root) .resendBtn,
+  .backLink {
+    width: 100%;
+  }
+}
+
+@media (max-width: 340px) {
+  .page {
+    padding-inline: 8px;
+  }
+
+  .card {
+    padding: 14px 10px;
+  }
+
+  .otpGrid {
+    gap: 4px;
+  }
+
+  .otpCell {
+    height: 44px;
+    border-radius: 9px;
+  }
+
+  .otpDigit {
+    font-size: 1.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .otpCell,
+  .otpCellFilledPulse,
+  .otpCellVerifying,
+  .otpDigit,
+  .otpGridShake,
+  .otpCaret,
+  .progressFill,
+  .spin {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

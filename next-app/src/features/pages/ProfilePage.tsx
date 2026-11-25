@@ -284,28 +284,91 @@ const persistPreference = (key: string, value: string) => {
     persistPreference("profile:location", String(checked));
   };
 
+  // Keep currentLocation moving live whenever "Allow location" is enabled
+  useEffect(() => {
+    if (!allowLocation) return;
+    if (typeof window === "undefined" || !("geolocation" in navigator)) return;
+
+    let disposed = false;
+    let watchId: number | null = null;
+    let highAccuracy = true;
+
+    const clearWatch = () => {
+      if (watchId != null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+    };
+
+    const startWatch = (useHighAccuracy: boolean) => {
+      if (disposed) return;
+      clearWatch();
+      highAccuracy = useHighAccuracy;
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          if (disposed) return;
+          const location = {
+            lat: Number(position.coords.latitude.toFixed(6)),
+            lng: Number(position.coords.longitude.toFixed(6)),
+          };
+          setCurrentLocation(location);
+          persistPreference("profile:currentLocation", JSON.stringify(location));
+        },
+        (err) => {
+          if (disposed) return;
+          if (err.code !== err.PERMISSION_DENIED && highAccuracy) {
+            startWatch(false);
+          }
+        },
+        {
+          enableHighAccuracy: useHighAccuracy,
+          maximumAge: 0,
+          timeout: useHighAccuracy ? 12_000 : 18_000,
+        },
+      );
+    };
+
+    startWatch(true);
+    return () => {
+      disposed = true;
+      clearWatch();
+    };
+  }, [allowLocation]);
+
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
       showMessage("Geolocation is not supported by your browser", "error");
       return;
     }
     setLocating(true);
+    const onSuccess = (position: GeolocationPosition) => {
+      const location = {
+        lat: Number(position.coords.latitude.toFixed(6)),
+        lng: Number(position.coords.longitude.toFixed(6)),
+      };
+      setCurrentLocation(location);
+      persistPreference("profile:currentLocation", JSON.stringify(location));
+      setLocating(false);
+      showMessage("Current location updated");
+    };
+    const onFail = () => {
+      setLocating(false);
+      showMessage("Unable to get your current location", "error");
+    };
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        setCurrentLocation(location);
-        persistPreference("profile:currentLocation", JSON.stringify(location));
-        setLocating(false);
-        showMessage("Current location updated");
+      onSuccess,
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          onFail();
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(onSuccess, onFail, {
+          enableHighAccuracy: false,
+          maximumAge: 0,
+          timeout: 12000,
+        });
       },
-      () => {
-        setLocating(false);
-        showMessage("Unable to get your current location", "error");
-      },
-      { timeout: 10000 },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
     );
   };
 
@@ -406,11 +469,6 @@ const persistPreference = (key: string, value: string) => {
           </nav>
           <p className={styles.settingsEyebrow}>Your Travel account</p>
           <h1 className={styles.settingsTitle}>Account settings</h1>
-          <p className={styles.settingsLead}>
-            Keep your personal details and profile photo current, and manage the
-            credentials used to sign in. Your contact information stays private
-            and is shared only as part of the bookings you make.
-          </p>
         </div>
         <div className={styles.settingsActions}>
           <span className={styles.settingsPill}>

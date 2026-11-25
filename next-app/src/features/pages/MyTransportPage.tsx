@@ -12,10 +12,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
+  CalendarClock,
   CalendarDays,
   Car,
   CheckCircle2,
-  ClipboardList,
   Clock,
   ExternalLink,
   Loader2,
@@ -33,12 +33,19 @@ import {
 import {
   transportBookingsAPI,
   transportReviewsAPI,
-  transportTripRequestsAPI,
 } from "@/lib/api/client";
 import { useToast } from "@/components/ToastProvider";
 import { useAuth } from "@/context/AuthContext";
-import { PageHero } from "@/components/PageHero";
-import { getImageUrl } from "@/lib/utils/image-url";
+import {
+  RESCHEDULE_CUTOFF_HOURS,
+  canRescheduleBooking,
+  extractIsoDatePart,
+  normalizePickupTime,
+  resolveEffectiveBookingStatus,
+  todayIsoInZanzibar,
+  validateRescheduleTarget,
+} from "@/lib/booking-lifecycle";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import styles from "@/features/pages/my-transport.module.css";
 
 type TransportBookingItem = {
@@ -100,30 +107,7 @@ type TransportBookingItem = {
   } | null;
 };
 
-type CustomTripRequestItem = {
-  id: number;
-  origin: string;
-  destination: string;
-  travel_date?: string | null;
-  travelDate?: string | null;
-  pickup_time?: string | null;
-  pickupTime?: string | null;
-  passengers: number;
-  luggage?: number;
-  distance_km?: number | null;
-  distanceKm?: number | null;
-  duration_mins?: number | null;
-  durationMins?: number | null;
-  notes?: string | null;
-  status: string;
-  bookings?: { id: number }[];
-  driver?: {
-    name: string;
-    phone?: string | null;
-  } | null;
-};
-
-type StatusFilter = "all" | "active" | "completed" | "cancelled";
+type StatusFilter = "all" | "active" | "completed" | "cancelled" | "expired";
 
 const STATUS_META: Record<
   string,
@@ -148,6 +132,10 @@ const STATUS_META: Record<
   cancelled: {
     label: "Cancelled",
     hint: "This booking request has been cancelled.",
+  },
+  expired: {
+    label: "Expired",
+    hint: "Booking date and time passed without confirmation.",
   },
   requested: {
     label: "Open request",
@@ -200,12 +188,12 @@ export default function MyTransportPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
 
   const [bookings, setBookings] = useState<TransportBookingItem[]>([]);
-  const [requests, setRequests] = useState<CustomTripRequestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [confirmCancelId, setConfirmCancelId] = useState<number | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewBooking, setReviewBooking] = useState<TransportBookingItem | null>(
@@ -215,26 +203,27 @@ export default function MyTransportPage() {
   const [reviewContent, setReviewContent] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
-  const fetchTransportData = useCallback(async () => {
-    const [bRes, rRes] = await Promise.all([
-      transportBookingsAPI.getAll().catch(() => ({ data: [] })),
-      transportTripRequestsAPI.getAll().catch(() => ({ data: [] })),
-    ]);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [rescheduleBooking, setRescheduleBooking] =
+    useState<TransportBookingItem | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
+  const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const fetchTransportData = useCallback(async () => {
+    const bRes = await transportBookingsAPI.getAll().catch(() => ({ data: [] }));
     const nextBookings: TransportBookingItem[] = Array.isArray(bRes.data)
       ? bRes.data
       : bRes.data?.results || [];
-    const rawRequests: CustomTripRequestItem[] = Array.isArray(rRes.data)
-      ? rRes.data
-      : rRes.data?.results || [];
-
-    // Trip-first bookings create a linked trip request. Keep the booking as
-    // the single visible record instead of showing the same journey twice.
-    const standaloneRequests = rawRequests.filter(
-      (request) => !Array.isArray(request.bookings) || request.bookings.length === 0,
-    );
-
-    return { nextBookings, standaloneRequests };
+    return nextBookings;
   }, []);
 
   useEffect(() => {
@@ -246,10 +235,9 @@ export default function MyTransportPage() {
 
     let active = true;
     fetchTransportData()
-      .then(({ nextBookings, standaloneRequests }) => {
+      .then((nextBookings) => {
         if (!active) return;
         setBookings(nextBookings);
-        setRequests(standaloneRequests);
       })
       .catch((err: unknown) => {
         if (!active) return;
@@ -266,20 +254,23 @@ export default function MyTransportPage() {
   }, [authLoading, fetchTransportData, isAuthenticated, router, toast]);
 
   useEffect(() => {
-    if (!reviewOpen) return;
+    if (!reviewOpen && !rescheduleOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setReviewOpen(false);
+      if (event.key === "Escape") {
+        setReviewOpen(false);
+        setRescheduleOpen(false);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [reviewOpen]);
+  }, [reviewOpen, rescheduleOpen]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      const { nextBookings, standaloneRequests } = await fetchTransportData();
+      const nextBookings = await fetchTransportData();
       setBookings(nextBookings);
-      setRequests(standaloneRequests);
+      setNowMs(Date.now());
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Could not refresh transport trips";
       toast.error(msg);
@@ -300,12 +291,116 @@ export default function MyTransportPage() {
       setConfirmCancelId(null);
       toast.success("Booking request cancelled.");
     } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: { message?: string } } };
       const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Could not cancel this booking request.";
+        axiosErr?.response?.data?.message || "Could not cancel this booking request.";
       toast.error(message);
+      if (axiosErr?.response?.status === 409) {
+        void fetchTransportData().then((nextBookings) => {
+          setBookings(nextBookings);
+          setNowMs(Date.now());
+        });
+      }
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const openReschedule = (booking: TransportBookingItem) => {
+    const currentDate = extractIsoDatePart(booking.travel_date) || todayIsoInZanzibar();
+    const currentTime =
+      normalizePickupTime(booking.trip?.pickup_time ?? booking.pickup_time) || "09:00";
+    setRescheduleBooking(booking);
+    setRescheduleDate(currentDate);
+    setRescheduleTime(currentTime);
+    setRescheduleError(null);
+    setRescheduleOpen(true);
+  };
+
+  const submitReschedule = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!rescheduleBooking) return;
+
+    const now = new Date();
+    const currentPickup =
+      rescheduleBooking.trip?.pickup_time ?? rescheduleBooking.pickup_time;
+    if (
+      !canRescheduleBooking(
+        {
+          status: rescheduleBooking.status,
+          travel_date: rescheduleBooking.travel_date,
+          pickup_time: currentPickup,
+        },
+        now,
+      )
+    ) {
+      setRescheduleError(
+        `Bookings can only be rescheduled at least ${RESCHEDULE_CUTOFF_HOURS} hours before the scheduled pickup time.`,
+      );
+      setNowMs(now.getTime());
+      return;
+    }
+
+    const validation = validateRescheduleTarget(rescheduleDate, rescheduleTime, now);
+    if (!validation.ok) {
+      setRescheduleError(validation.reason);
+      return;
+    }
+
+    const existingDate = extractIsoDatePart(rescheduleBooking.travel_date);
+    const existingTime = normalizePickupTime(currentPickup);
+    if (
+      existingDate === extractIsoDatePart(validation.travelDate) &&
+      existingTime === validation.pickupTime
+    ) {
+      setRescheduleError("Choose a different booking date or pickup time.");
+      return;
+    }
+
+    setRescheduleError(null);
+    setRescheduleSubmitting(true);
+    try {
+      const response = await transportBookingsAPI.reschedule(rescheduleBooking.id, {
+        travel_date: rescheduleDate,
+        pickup_time: validation.pickupTime,
+      });
+      const updated = response.data as Partial<TransportBookingItem> | undefined;
+      setBookings((current) =>
+        current.map((item) =>
+          item.id === rescheduleBooking.id
+            ? {
+                ...item,
+                ...(updated ?? {}),
+                travel_date: updated?.travel_date ?? rescheduleDate,
+                pickup_time: updated?.pickup_time ?? validation.pickupTime,
+                trip: updated?.trip
+                  ? updated.trip
+                  : item.trip
+                    ? { ...item.trip, pickup_time: validation.pickupTime }
+                    : item.trip,
+              }
+            : item,
+        ),
+      );
+      setNowMs(Date.now());
+      setRescheduleOpen(false);
+      setRescheduleBooking(null);
+      toast.success("Booking rescheduled successfully.");
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: { message?: string } } };
+      const message =
+        axiosErr?.response?.data?.message ||
+        (err instanceof Error ? err.message : "Could not reschedule this booking.");
+      setRescheduleError(message);
+      toast.error(message);
+      if (axiosErr?.response?.status === 409) {
+        void fetchTransportData().then((nextBookings) => {
+          setBookings(nextBookings);
+          setNowMs(Date.now());
+        });
+      }
+    } finally {
+      setRescheduleSubmitting(false);
     }
   };
 
@@ -339,99 +434,61 @@ export default function MyTransportPage() {
     }
   };
 
+  const nowDate = useMemo(() => new Date(nowMs), [nowMs]);
+
+  const getEffectiveStatus = useCallback(
+    (booking: TransportBookingItem) =>
+      resolveEffectiveBookingStatus(
+        {
+          status: booking.status,
+          travel_date: booking.travel_date,
+          pickup_time: booking.trip?.pickup_time ?? booking.pickup_time,
+        },
+        nowDate,
+      ),
+    [nowDate],
+  );
+
   const activeBookingsCount = useMemo(
     () =>
       bookings.filter((b) =>
-        ["pending", "confirmed", "in_progress"].includes(b.status),
+        ["pending", "confirmed", "in_progress"].includes(getEffectiveStatus(b)),
       ).length,
-    [bookings],
+    [bookings, getEffectiveStatus],
   );
   const completedBookingsCount = useMemo(
-    () => bookings.filter((b) => b.status === "completed").length,
-    [bookings],
+    () => bookings.filter((b) => getEffectiveStatus(b) === "completed").length,
+    [bookings, getEffectiveStatus],
   );
   const cancelledBookingsCount = useMemo(
-    () => bookings.filter((b) => b.status === "cancelled").length,
-    [bookings],
+    () => bookings.filter((b) => getEffectiveStatus(b) === "cancelled").length,
+    [bookings, getEffectiveStatus],
+  );
+  const expiredBookingsCount = useMemo(
+    () => bookings.filter((b) => getEffectiveStatus(b) === "expired").length,
+    [bookings, getEffectiveStatus],
   );
 
   const filteredBookings = useMemo(() => {
     if (filter === "all") return bookings;
     if (filter === "active") {
       return bookings.filter((b) =>
-        ["pending", "confirmed", "in_progress"].includes(b.status),
+        ["pending", "confirmed", "in_progress"].includes(getEffectiveStatus(b)),
       );
     }
     if (filter === "completed") {
-      return bookings.filter((b) => b.status === "completed");
+      return bookings.filter((b) => getEffectiveStatus(b) === "completed");
     }
-    return bookings.filter((b) => b.status === "cancelled");
-  }, [bookings, filter]);
+    if (filter === "expired") {
+      return bookings.filter((b) => getEffectiveStatus(b) === "expired");
+    }
+    return bookings.filter((b) => getEffectiveStatus(b) === "cancelled");
+  }, [bookings, filter, getEffectiveStatus]);
 
   return (
     <div id="my-transport-root" className={`page ${styles.page}`}>
-      <PageHero
-        eyebrow="My Transport"
-        title="Track your bookings and trip requests"
-        subtitle="Review routes, schedules, assigned vehicles, and live status updates for your private hire trips."
-        backgroundImageKey="feature"
-        patternImageKey="thumb"
-        ctaPrimary={{ label: "Book private hire", href: "/transport/" }}
-        ctaSecondary={{ label: "Request custom trip", href: "/trip-request/" }}
-      />
-
       <div className={styles.content}>
-        {/* KPI Summary Strip */}
-        <section className={styles.statsGrid} aria-label="Transport summary">
-          <article className={styles.statCard}>
-            <span className={styles.statIcon} aria-hidden="true">
-              <Car size={20} />
-            </span>
-            <div className={styles.statCopy}>
-              <span className={styles.statLabel}>Private hire bookings</span>
-              <strong className={styles.statValue}>
-                {loading ? "—" : bookings.length}
-              </strong>
-              <span className={styles.statSub}>
-                {bookings.length === 1 ? "Booked vehicle trip" : "Booked vehicle trips"}
-              </span>
-            </div>
-          </article>
-
-          <article className={styles.statCard}>
-            <span
-              className={`${styles.statIcon} ${styles.statIconAmber}`}
-              aria-hidden="true"
-            >
-              <Clock size={20} />
-            </span>
-            <div className={styles.statCopy}>
-              <span className={styles.statLabel}>Active &amp; pending</span>
-              <strong className={styles.statValue}>
-                {loading ? "—" : activeBookingsCount}
-              </strong>
-              <span className={styles.statSub}>Awaiting or upcoming journeys</span>
-            </div>
-          </article>
-
-          <article className={styles.statCard}>
-            <span
-              className={`${styles.statIcon} ${styles.statIconEmerald}`}
-              aria-hidden="true"
-            >
-              <ClipboardList size={20} />
-            </span>
-            <div className={styles.statCopy}>
-              <span className={styles.statLabel}>Custom trip requests</span>
-              <strong className={styles.statValue}>
-                {loading ? "—" : requests.length}
-              </strong>
-              <span className={styles.statSub}>Open public driver requests</span>
-            </div>
-          </article>
-        </section>
-
-        {/* SECTION 1: Private Hire Bookings */}
+        {/* Private Hire Bookings */}
         <section className={styles.section} aria-labelledby="private-hire-heading">
           <header className={styles.sectionHead}>
             <div className={styles.sectionTitleGroup}>
@@ -440,9 +497,9 @@ export default function MyTransportPage() {
                 Booked vehicles
               </span>
               <div className={styles.sectionTitleRow}>
-                <h2 id="private-hire-heading" className={styles.sectionTitle}>
+                <h1 id="private-hire-heading" className={styles.sectionTitle}>
                   Private Hire Bookings
-                </h2>
+                </h1>
                 {!loading ? (
                   <span className={styles.countBadge}>
                     {filteredBookings.length}{" "}
@@ -464,6 +521,9 @@ export default function MyTransportPage() {
                         : []),
                       ...(cancelledBookingsCount > 0
                         ? [{ id: "cancelled" as const, label: `Cancelled (${cancelledBookingsCount})` }]
+                        : []),
+                      ...(expiredBookingsCount > 0
+                        ? [{ id: "expired" as const, label: `Expired (${expiredBookingsCount})` }]
                         : []),
                     ] as const
                   ).map((item) => (
@@ -499,13 +559,9 @@ export default function MyTransportPage() {
           </header>
 
           {loading ? (
-            <div className={styles.cardList} aria-busy="true" aria-label="Loading bookings">
+            <div className={styles.featuredGrid} aria-busy="true" aria-label="Loading bookings">
               {[0, 1].map((index) => (
-                <div key={index} className={styles.skeletonCard}>
-                  <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
-                  <div className={`${styles.skeletonLine} ${styles.skeletonRoute}`} />
-                  <div className={`${styles.skeletonLine} ${styles.skeletonMeta}`} />
-                </div>
+                <div key={index} className={styles.featuredSkeleton} />
               ))}
             </div>
           ) : bookings.length === 0 ? (
@@ -542,7 +598,7 @@ export default function MyTransportPage() {
               </button>
             </div>
           ) : (
-            <div className={styles.cardList}>
+            <div className={styles.featuredGrid}>
               {filteredBookings.map((booking) => {
                 const trip = booking.trip ?? booking;
                 const origin = trip.origin ?? booking.origin;
@@ -555,492 +611,271 @@ export default function MyTransportPage() {
                   trip.duration_mins ?? booking.duration_mins,
                 );
                 const journey = [distance, duration].filter(Boolean).join(" · ");
-                const vehicle = booking.service?.vehicle ?? booking.vehicle;
-                const driver = booking.service?.driver ?? booking.driver;
+                const vehicle = booking.vehicle ?? booking.service?.vehicle;
+                const driver = booking.driver ?? booking.service?.driver;
                 const company = booking.service?.company ?? booking.company;
                 const tripId = booking.trip?.id ?? booking.trip_request_id;
-                const meta = STATUS_META[booking.status] ?? {
-                  label: booking.status.replaceAll("_", " "),
+                const effectiveStatus = getEffectiveStatus(booking);
+                const canReschedule = canRescheduleBooking(
+                  {
+                    status: effectiveStatus,
+                    travel_date: booking.travel_date,
+                    pickup_time: pickupTime,
+                  },
+                  nowDate,
+                );
+                const meta = STATUS_META[effectiveStatus] ?? {
+                  label: effectiveStatus.replaceAll("_", " "),
                   hint: "Status updated by provider.",
                 };
                 const isConfirmingCancel = confirmCancelId === booking.id;
                 const isCancelling = cancellingId === booking.id;
+                const bgImage = vehicle?.front_image_url
+                  ? getImageUrl(vehicle.front_image_url)
+                  : null;
 
                 return (
                   <article
                     key={booking.id}
-                    className={`${styles.bookingCard} ${
-                      booking.status === "cancelled"
-                        ? styles.bookingCardCancelled
+                    className={`${styles.featuredCard} ${
+                      effectiveStatus === "cancelled" || effectiveStatus === "expired"
+                        ? styles.featuredCardCancelled
                         : ""
                     }`}
                   >
-                    {/* Top Row: Identity + Status & Price */}
-                    <div className={styles.cardTop}>
-                      <div className={styles.cardIdentity}>
-                        <div className={styles.vehicleThumb}>
-                          {vehicle?.front_image_url ? (
-                            <Image
-                              src={getImageUrl(vehicle.front_image_url)}
-                              alt={vehicle.name}
-                              fill
-                              sizes="60px"
-                              className={styles.vehicleThumbImg}
-                              unoptimized
-                            />
-                          ) : (
-                            <Car size={24} aria-hidden="true" />
-                          )}
+                    {/* Full-bleed background image */}
+                    <div className={styles.featuredBgMedia}>
+                      {bgImage ? (
+                        <Image
+                          src={bgImage}
+                          alt={vehicle?.name || "Private hire vehicle"}
+                          fill
+                          sizes="(max-width: 960px) 92vw, 46vw"
+                          className={styles.featuredBgImg}
+                          unoptimized={isUnoptimizableImage(bgImage)}
+                        />
+                      ) : (
+                        <div className={styles.featuredBgFallback}>
+                          <Car size={54} aria-hidden="true" />
                         </div>
-                        <div className={styles.identityCopy}>
-                          <div className={styles.badgeRow}>
-                            {booking.reference ? (
-                              <span className={styles.refBadge}>
-                                {booking.reference}
-                              </span>
-                            ) : (
-                              <span className={styles.refBadge}>
-                                #{booking.id}
-                              </span>
-                            )}
-                            {tripId ? (
-                              <span className={styles.tripTag}>
-                                <RouteIcon size={11} aria-hidden="true" />
-                                TRIP-{tripId}
-                              </span>
-                            ) : null}
-                          </div>
-                          <h3 className={styles.serviceTitle}>
-                            {booking.service?.title || "Private hire trip"}
-                          </h3>
-                          {company?.name ? (
-                            <p className={styles.companyMeta}>{company.name}</p>
-                          ) : null}
-                        </div>
+                      )}
+                    </div>
+                    <span className={styles.featuredTopScrim} aria-hidden="true" />
+
+                    {/* Top frosted bar */}
+                    <div className={styles.featuredTopBar}>
+                      <div className={styles.featuredTopLeft}>
+                        <span className={styles.featuredRefPill}>
+                          {booking.reference || `#${booking.id}`}
+                        </span>
+                        {tripId ? (
+                          <span className={styles.featuredTripPill}>
+                            <RouteIcon size={11} aria-hidden="true" />
+                            TRIP-{tripId}
+                          </span>
+                        ) : null}
                       </div>
 
-                      <div className={styles.cardPriceStatus}>
+                      <div className={styles.featuredTopRight}>
                         <span
                           className={`${styles.statusBadge} ${statusClassName(
-                            booking.status,
+                            effectiveStatus,
                           )}`}
                         >
                           <span className={styles.statusDot} aria-hidden="true" />
                           {meta.label}
                         </span>
                         {booking.total_price ? (
-                          <div className={styles.priceDisplay}>
-                            <span className={styles.priceAmount}>
-                              ${booking.total_price}
-                            </span>
+                          <span className={styles.featuredPriceBadge}>
+                            ${booking.total_price}
                             {booking.service?.pricing_type ? (
-                              <span className={styles.priceUnit}>
-                                /{" "}
-                                {booking.service.pricing_type.replaceAll(
-                                  "_",
-                                  " ",
-                                )}
+                              <span className={styles.featuredPriceUnit}>
+                                /{booking.service.pricing_type.replaceAll("_", " ")}
                               </span>
                             ) : null}
-                          </div>
+                          </span>
                         ) : null}
                       </div>
                     </div>
 
-                    {/* Trip Route Strip (A -> B) */}
-                    {origin || destination ? (
-                      <div className={styles.routePanel}>
-                        <div className={styles.routeStops}>
-                          <div className={styles.routeStop}>
-                            <span
-                              className={`${styles.stopPin} ${styles.stopPinOrigin}`}
-                              aria-hidden="true"
-                            >
-                              A
-                            </span>
-                            <div className={styles.stopText}>
-                              <span className={styles.stopKind}>Origin</span>
-                              <span className={styles.stopAddress}>
-                                {origin || "Pickup point"}
-                              </span>
-                            </div>
-                          </div>
-                          <span className={styles.stopRail} aria-hidden="true" />
-                          <div className={styles.routeStop}>
-                            <span
-                              className={`${styles.stopPin} ${styles.stopPinDest}`}
-                              aria-hidden="true"
-                            >
-                              B
-                            </span>
-                            <div className={styles.stopText}>
-                              <span className={styles.stopKind}>Destination</span>
-                              <span className={styles.stopAddress}>
-                                {destination || "Drop-off point"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {journey ? (
-                          <div className={styles.routeMetricsPill}>
-                            <Navigation size={14} aria-hidden="true" />
-                            <span>{journey}</span>
-                          </div>
+                    {/* Bottom gradient sheet with transport details */}
+                    <div className={styles.featuredSheet}>
+                      <div className={styles.featuredTitleGroup}>
+                        {company?.name ? (
+                          <span className={styles.featuredCompanyLabel}>{company.name}</span>
                         ) : null}
-                      </div>
-                    ) : null}
-
-                    {/* Structured Schedule & Vehicle Details */}
-                    <div className={styles.metaGrid}>
-                      <div className={styles.metaCell}>
-                        <CalendarDays size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Travel date</span>
-                          <span className={styles.metaValue}>
-                            {formatTravelDate(booking.travel_date)}
-                          </span>
-                        </div>
+                        <h3 className={styles.featuredTitle}>
+                          {booking.service?.title || vehicle?.name || "Private hire request"}
+                        </h3>
                       </div>
 
-                      <div className={styles.metaCell}>
-                        <Clock size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Pickup time</span>
-                          <span className={styles.metaValue}>
-                            {pickupTime || "To be arranged"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <Users size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Passengers</span>
-                          <span className={styles.metaValue}>
-                            {booking.passengers}{" "}
-                            {booking.passengers === 1 ? "passenger" : "passengers"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <Car size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Vehicle</span>
-                          <span className={styles.metaValue}>
-                            {vehicle?.name || "Assigned vehicle"}
-                          </span>
-                          {vehicle?.plate_number ? (
-                            <span className={styles.plateChip}>
-                              {vehicle.plate_number}
+                      {origin || destination ? (
+                        <div className={styles.featuredRouteBox}>
+                          <div className={styles.featuredRouteFlow}>
+                            <span className={styles.featuredPinA} aria-hidden="true">A</span>
+                            <span className={styles.featuredStopName}>
+                              {origin || "Pickup point"}
+                            </span>
+                            <span className={styles.featuredRouteArrow} aria-hidden="true">→</span>
+                            <span className={styles.featuredPinB} aria-hidden="true">B</span>
+                            <span className={styles.featuredStopName}>
+                              {destination || "Drop-off point"}
+                            </span>
+                          </div>
+                          {journey ? (
+                            <span className={styles.featuredJourneyPill}>
+                              <Navigation size={12} aria-hidden="true" />
+                              {journey}
                             </span>
                           ) : null}
                         </div>
-                      </div>
-                    </div>
+                      ) : null}
 
-                    {driver &&
-                    ["confirmed", "in_progress"].includes(booking.status) ? (
-                      <div className={styles.driverBar}>
-                        <span className={styles.badgeRow}>
-                          <UserCheck size={15} aria-hidden="true" />
-                          Driver: <strong>{driver.name}</strong>
+                      <div className={styles.featuredSpecsRow}>
+                        <span className={styles.featuredChip}>
+                          <CalendarDays size={13} aria-hidden="true" />
+                          {formatTravelDate(booking.travel_date)}
                         </span>
-                        {driver.phone ? (
-                          <a href={`tel:${driver.phone.replace(/\D/g, "")}`}>
-                            <Phone size={14} aria-hidden="true" />
-                            {driver.phone}
-                          </a>
-                        ) : null}
-                      </div>
-                    ) : null}
-
-                    {booking.notes?.trim() ? (
-                      <p className={styles.notesBox}>{booking.notes}</p>
-                    ) : null}
-
-                    {/* Footer Actions */}
-                    <footer className={styles.cardFooter}>
-                      <span className={styles.footerHint}>
-                        <ShieldCheck size={15} aria-hidden="true" />
-                        {meta.hint}
-                      </span>
-
-                      <div className={styles.footerActions}>
-                        {booking.service?.id ? (
-                          <Link
-                            href={`/transport/service/${booking.service.id}/`}
-                            className={styles.actionLink}
-                          >
-                            <ExternalLink size={14} aria-hidden="true" />
-                            View vehicle
-                          </Link>
-                        ) : null}
-
-                        {company?.contact_phone &&
-                        booking.status !== "cancelled" ? (
-                          <a
-                            href={`tel:${company.contact_phone.replace(/\D/g, "")}`}
-                            className={styles.actionLink}
-                          >
-                            <Phone size={14} aria-hidden="true" />
-                            Call provider
-                          </a>
-                        ) : null}
-
-                        {booking.status === "pending" ? (
-                          isConfirmingCancel ? (
-                            <>
-                              <button
-                                type="button"
-                                className={styles.keepButton}
-                                disabled={isCancelling}
-                                onClick={() => setConfirmCancelId(null)}
-                              >
-                                Keep booking
-                              </button>
-                              <button
-                                type="button"
-                                className={styles.confirmCancelButton}
-                                disabled={isCancelling}
-                                onClick={() => void cancelBooking(booking.id)}
-                              >
-                                {isCancelling ? (
-                                  <>
-                                    <Loader2
-                                      size={14}
-                                      className={styles.spin}
-                                      aria-hidden="true"
-                                    />
-                                    Cancelling…
-                                  </>
-                                ) : (
-                                  <>
-                                    <XCircle size={14} aria-hidden="true" />
-                                    Confirm cancel
-                                  </>
-                                )}
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              type="button"
-                              className={styles.cancelButton}
-                              onClick={() => setConfirmCancelId(booking.id)}
-                            >
-                              <XCircle size={14} aria-hidden="true" />
-                              Cancel request
-                            </button>
-                          )
-                        ) : null}
-
-                        {booking.status === "completed" ? (
-                          <button
-                            type="button"
-                            className={styles.reviewButton}
-                            onClick={() => openReview(booking)}
-                          >
-                            <Star size={14} aria-hidden="true" />
-                            Leave review
-                          </button>
-                        ) : null}
-                      </div>
-                    </footer>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* SECTION 2: Custom Trip Requests */}
-        <section className={styles.section} aria-labelledby="custom-requests-heading">
-          <header className={styles.sectionHead}>
-            <div className={styles.sectionTitleGroup}>
-              <span className={styles.sectionEyebrow}>
-                <ClipboardList size={13} aria-hidden="true" />
-                Open driver network
-              </span>
-              <div className={styles.sectionTitleRow}>
-                <h2 id="custom-requests-heading" className={styles.sectionTitle}>
-                  Custom Trip Requests
-                </h2>
-                {!loading ? (
-                  <span className={styles.countBadge}>
-                    {requests.length}{" "}
-                    {requests.length === 1 ? "request" : "requests"}
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          </header>
-
-          {loading ? null : requests.length === 0 ? (
-            <div className={styles.emptyCard}>
-              <span className={styles.emptyIcon} aria-hidden="true">
-                <ClipboardList size={24} />
-              </span>
-              <h3 className={styles.emptyTitle}>No custom trip requests yet</h3>
-              <p className={styles.emptyCopy}>
-                Want approved independent drivers across Zanzibar to respond to
-                a custom itinerary? Post a custom trip request anytime.
-              </p>
-              <Link href="/trip-request/" className={styles.emptyCta}>
-                Create a custom trip request
-                <ArrowRight size={15} aria-hidden="true" />
-              </Link>
-            </div>
-          ) : (
-            <div className={styles.cardList}>
-              {requests.map((request) => {
-                const travelDate = request.travel_date ?? request.travelDate;
-                const pickupTime = request.pickup_time ?? request.pickupTime;
-                const journey = [
-                  formatDistance(request.distance_km ?? request.distanceKm),
-                  formatDuration(request.duration_mins ?? request.durationMins),
-                ]
-                  .filter(Boolean)
-                  .join(" · ");
-                const meta = STATUS_META[request.status] ?? {
-                  label: request.status.replaceAll("_", " "),
-                  hint: "Custom trip request.",
-                };
-
-                return (
-                  <article key={request.id} className={styles.bookingCard}>
-                    <div className={styles.cardTop}>
-                      <div className={styles.cardIdentity}>
-                        <div className={styles.vehicleThumb}>
-                          <Navigation size={22} aria-hidden="true" />
-                        </div>
-                        <div className={styles.identityCopy}>
-                          <div className={styles.badgeRow}>
-                            <span className={styles.refBadge}>
-                              REQ-{request.id}
-                            </span>
-                          </div>
-                          <h3 className={styles.serviceTitle}>
-                            {request.origin} → {request.destination}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className={styles.cardPriceStatus}>
-                        <span
-                          className={`${styles.statusBadge} ${statusClassName(
-                            request.status,
-                          )}`}
-                        >
-                          <span className={styles.statusDot} aria-hidden="true" />
-                          {meta.label}
+                        <span className={styles.featuredChip}>
+                          <Clock size={13} aria-hidden="true" />
+                          {pickupTime || "Time TBD"}
                         </span>
-                      </div>
-                    </div>
-
-                    <div className={styles.routePanel}>
-                      <div className={styles.routeStops}>
-                        <div className={styles.routeStop}>
-                          <span
-                            className={`${styles.stopPin} ${styles.stopPinOrigin}`}
-                            aria-hidden="true"
-                          >
-                            A
+                        <span className={styles.featuredChip}>
+                          <Users size={13} aria-hidden="true" />
+                          {booking.passengers} pax
+                        </span>
+                        {vehicle ? (
+                          <span className={styles.featuredChip}>
+                            <Car size={13} aria-hidden="true" />
+                            {vehicle.name}
+                            {vehicle.plate_number ? (
+                              <span className={styles.featuredChipPlate}>
+                                {vehicle.plate_number}
+                              </span>
+                            ) : null}
                           </span>
-                          <div className={styles.stopText}>
-                            <span className={styles.stopKind}>Origin</span>
-                            <span className={styles.stopAddress}>
-                              {request.origin}
-                            </span>
-                          </div>
-                        </div>
-                        <span className={styles.stopRail} aria-hidden="true" />
-                        <div className={styles.routeStop}>
-                          <span
-                            className={`${styles.stopPin} ${styles.stopPinDest}`}
-                            aria-hidden="true"
-                          >
-                            B
-                          </span>
-                          <div className={styles.stopText}>
-                            <span className={styles.stopKind}>Destination</span>
-                            <span className={styles.stopAddress}>
-                              {request.destination}
-                            </span>
-                          </div>
-                        </div>
+                        ) : null}
                       </div>
 
-                      {journey ? (
-                        <div className={styles.routeMetricsPill}>
-                          <Navigation size={14} aria-hidden="true" />
-                          <span>{journey}</span>
+                      {driver &&
+                      ["confirmed", "in_progress"].includes(effectiveStatus) ? (
+                        <div className={styles.featuredDriverStrip}>
+                          <span className={styles.badgeRow}>
+                            <UserCheck size={14} aria-hidden="true" />
+                            Driver: <strong>{driver.name}</strong>
+                          </span>
+                          {driver.phone ? (
+                            <a href={`tel:${driver.phone.replace(/\D/g, "")}`}>
+                              <Phone size={13} aria-hidden="true" />
+                              {driver.phone}
+                            </a>
+                          ) : null}
                         </div>
                       ) : null}
-                    </div>
 
-                    <div className={styles.metaGrid}>
-                      <div className={styles.metaCell}>
-                        <CalendarDays size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Travel date</span>
-                          <span className={styles.metaValue}>
-                            {formatTravelDate(travelDate)}
-                          </span>
-                        </div>
-                      </div>
+                      {booking.notes?.trim() ? (
+                        <p className={styles.featuredNotes}>{booking.notes}</p>
+                      ) : null}
 
-                      <div className={styles.metaCell}>
-                        <Clock size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Pickup time</span>
-                          <span className={styles.metaValue}>
-                            {pickupTime || "Flexible"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <Users size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Passengers</span>
-                          <span className={styles.metaValue}>
-                            {request.passengers}{" "}
-                            {request.passengers === 1 ? "passenger" : "passengers"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.metaCell}>
-                        <ClipboardList size={16} aria-hidden="true" />
-                        <div className={styles.metaText}>
-                          <span className={styles.metaLabel}>Luggage</span>
-                          <span className={styles.metaValue}>
-                            {request.luggage ?? 0}{" "}
-                            {(request.luggage ?? 0) === 1 ? "bag" : "bags"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {request.notes?.trim() ? (
-                      <p className={styles.notesBox}>{request.notes}</p>
-                    ) : null}
-
-                    {request.driver ? (
-                      <div className={styles.driverBar}>
-                        <span className={styles.badgeRow}>
-                          <UserCheck size={15} aria-hidden="true" />
-                          Accepted by <strong>{request.driver.name}</strong>
+                      <footer className={styles.featuredFooter}>
+                        <span className={styles.featuredHint}>
+                          <ShieldCheck size={14} aria-hidden="true" />
+                          {meta.hint}
                         </span>
-                        {request.driver.phone ? (
-                          <a href={`tel:${request.driver.phone.replace(/\D/g, "")}`}>
-                            <Phone size={14} aria-hidden="true" />
-                            {request.driver.phone}
-                          </a>
-                        ) : null}
-                      </div>
-                    ) : null}
+
+                        <div className={styles.featuredActions}>
+                          {booking.service?.id ? (
+                            <Link
+                              href={`/transport/service/${booking.service.id}/`}
+                              className={styles.featuredActionLink}
+                            >
+                              <ExternalLink size={13} aria-hidden="true" />
+                              Vehicle
+                            </Link>
+                          ) : null}
+
+                          {company?.contact_phone &&
+                          effectiveStatus !== "cancelled" &&
+                          effectiveStatus !== "expired" ? (
+                            <a
+                              href={`tel:${company.contact_phone.replace(/\D/g, "")}`}
+                              className={styles.featuredActionLink}
+                            >
+                              <Phone size={13} aria-hidden="true" />
+                              Call
+                            </a>
+                          ) : null}
+
+                          {canReschedule ? (
+                            <button
+                              type="button"
+                              className={styles.featuredActionReschedule}
+                              onClick={() => openReschedule(booking)}
+                            >
+                              <CalendarClock size={13} aria-hidden="true" />
+                              Reschedule
+                            </button>
+                          ) : null}
+
+                          {effectiveStatus === "pending" ? (
+                            isConfirmingCancel ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className={styles.featuredActionKeep}
+                                  disabled={isCancelling}
+                                  onClick={() => setConfirmCancelId(null)}
+                                >
+                                  Keep
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.featuredActionDanger}
+                                  disabled={isCancelling}
+                                  onClick={() => void cancelBooking(booking.id)}
+                                >
+                                  {isCancelling ? (
+                                    <>
+                                      <Loader2
+                                        size={13}
+                                        className={styles.spin}
+                                        aria-hidden="true"
+                                      />
+                                      Cancelling…
+                                    </>
+                                  ) : (
+                                    <>
+                                      <XCircle size={13} aria-hidden="true" />
+                                      Confirm cancel
+                                    </>
+                                  )}
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                className={styles.featuredActionDanger}
+                                onClick={() => setConfirmCancelId(booking.id)}
+                              >
+                                <XCircle size={13} aria-hidden="true" />
+                                Cancel
+                              </button>
+                            )
+                          ) : null}
+
+                          {effectiveStatus === "completed" ? (
+                            <button
+                              type="button"
+                              className={styles.featuredActionPrimary}
+                              onClick={() => openReview(booking)}
+                            >
+                              <Star size={13} aria-hidden="true" />
+                              Review
+                            </button>
+                          ) : null}
+                        </div>
+                      </footer>
+                    </div>
                   </article>
                 );
               })}
@@ -1148,6 +983,126 @@ export default function MyTransportPage() {
                     </>
                   ) : (
                     "Submit review"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Reschedule Booking Modal */}
+      {rescheduleOpen && rescheduleBooking ? (
+        <div
+          className={styles.modalBackdrop}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reschedule-modal-title"
+          onClick={() => {
+            if (!rescheduleSubmitting) setRescheduleOpen(false);
+          }}
+        >
+          <div
+            className={styles.modalCard}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.modalHead}>
+              <div>
+                <h2 id="reschedule-modal-title" className={styles.modalTitle}>
+                  Reschedule booking
+                </h2>
+                <p className={styles.modalSub}>
+                  {rescheduleBooking.service?.title || "Private hire trip"}
+                  {rescheduleBooking.reference
+                    ? ` · ${rescheduleBooking.reference}`
+                    : ""}
+                </p>
+              </div>
+              <button
+                type="button"
+                className={styles.modalClose}
+                aria-label="Close reschedule modal"
+                disabled={rescheduleSubmitting}
+                onClick={() => setRescheduleOpen(false)}
+              >
+                <X size={16} aria-hidden="true" />
+              </button>
+            </header>
+
+            <form onSubmit={submitReschedule} className={styles.modalForm}>
+              <div className={styles.modalGrid}>
+                <div className={styles.modalField}>
+                  <label className={styles.modalLabel} htmlFor="reschedule-date">
+                    New booking date
+                  </label>
+                  <input
+                    id="reschedule-date"
+                    type="date"
+                    required
+                    min={todayIsoInZanzibar(nowDate)}
+                    value={rescheduleDate}
+                    onChange={(event) => {
+                      setRescheduleDate(event.target.value);
+                      setRescheduleError(null);
+                    }}
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.modalField}>
+                  <label className={styles.modalLabel} htmlFor="reschedule-time">
+                    New pickup time
+                  </label>
+                  <input
+                    id="reschedule-time"
+                    type="time"
+                    required
+                    value={rescheduleTime}
+                    onChange={(event) => {
+                      setRescheduleTime(event.target.value);
+                      setRescheduleError(null);
+                    }}
+                    className={styles.modalInput}
+                  />
+                </div>
+              </div>
+
+              <p className={styles.modalNote}>
+                You can change the booking date and pickup time up to{" "}
+                {RESCHEDULE_CUTOFF_HOURS} hours before the scheduled pickup.
+              </p>
+
+              {rescheduleError ? (
+                <p className={styles.modalError} role="alert">
+                  {rescheduleError}
+                </p>
+              ) : null}
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.keepButton}
+                  disabled={rescheduleSubmitting}
+                  onClick={() => setRescheduleOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={rescheduleSubmitting}
+                  className={styles.modalSubmit}
+                >
+                  {rescheduleSubmitting ? (
+                    <>
+                      <Loader2
+                        size={15}
+                        className={styles.spin}
+                        aria-hidden="true"
+                      />
+                      Saving…
+                    </>
+                  ) : (
+                    "Save new schedule"
                   )}
                 </button>
               </div>

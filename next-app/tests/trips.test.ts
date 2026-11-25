@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isInZanzibar } from "@/lib/zanzibar";
+import { ZANZIBAR_ISLANDS } from "@/lib/zanzibar-outline";
 import {
   TRIP_PLACE_GROUPS,
   ZANZIBAR_TOURIST_ATTRACTIONS,
@@ -9,6 +10,19 @@ import {
   tripPlacesForGroup,
   type TripPlaceCategory,
 } from "@/lib/trips";
+
+function pointInRing(lat: number, lng: number, ring: [number, number][]) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    const intersect =
+      yi > lng !== yj > lng &&
+      lat < ((xj - xi) * (lng - yi)) / (yj - yi) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
 
 const CATEGORIES: TripPlaceCategory[] = [
   "Attraction",
@@ -106,5 +120,35 @@ describe("Zanzibar trip places", () => {
       rock && tripPlaceMapsUrl(rock),
     ).toBe("https://www.google.com/maps/search/?api=1&query=-6.152066,39.519409");
     expect(findTripPlace("not-a-place")).toBeUndefined();
+  });
+
+  it("places every mapped spot, ward, street, and town on real Unguja or Pemba land", () => {
+    const ungujaRing = ZANZIBAR_ISLANDS.find((i) => i.id === "unguja")!.coordinates;
+    const pembaRing = ZANZIBAR_ISLANDS.find((i) => i.id === "pemba")!.coordinates;
+
+    for (const place of ZANZIBAR_TRIP_PLACES) {
+      if (place.id <= 326) continue; // Curated POIs include genuine offshore islands/sandbanks
+      const expectedRing = place.area === "Pemba" ? pembaRing : ungujaRing;
+      expect(
+        pointInRing(place.latitude, place.longitude, expectedRing),
+        `${place.name} (${place.area}) @ ${place.latitude},${place.longitude} should be inside ${place.area === "Pemba" ? "Pemba" : "Unguja"} land`,
+      ).toBe(true);
+    }
+
+    // Verify previously misplaced named locations now sit at their real Unguja spots
+    const jambiani = findTripPlace("Jambiani #845");
+    expect(jambiani).toBeDefined();
+    expect(jambiani!.latitude).toBeLessThan(-6.28);
+    expect(jambiani!.longitude).toBeGreaterThan(39.51);
+
+    const fumba = findTripPlace("Fumba #848");
+    expect(fumba).toBeDefined();
+    expect(fumba!.latitude).toBeLessThan(-6.27);
+    expect(fumba!.longitude).toBeLessThan(39.31);
+
+    const shangani = findTripPlace("Shangani St 131 #914");
+    expect(shangani).toBeDefined();
+    expect(shangani!.latitude).toBeCloseTo(-6.163, 1);
+    expect(shangani!.longitude).toBeCloseTo(39.188, 1);
   });
 });

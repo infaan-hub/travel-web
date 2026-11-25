@@ -1,648 +1,293 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import api, { partnerRequestsAPI } from "@/lib/api/client";
-import { Building2, ClipboardList, CheckCircle, Car, User, Mail, Phone, Shield } from "@/components/icons";
-import { UserCheck, ShieldCheck } from "lucide-react";
-import { useToast } from "@/components/ToastProvider";
-import { PageHero } from "@/components/PageHero";
+import { useRouter } from "next/navigation";
+import { UserCheck } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  Car,
+  Clock,
+  Compass,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Navigation,
+  Shield,
+} from "@/components/icons";
 import styles from "@/features/pages/contact-page.module.css";
 
-type TabMode = "inquiry" | "company" | "driver" | null;
+interface PathwayItem {
+  id: string;
+  href: string;
+  variant: "ocean" | "indigo" | "emerald";
+  badge: string;
+  kicker: string;
+  title: string;
+  description: string;
+  facts: readonly string[];
+  cta: string;
+}
+
+const PATHWAYS: readonly PathwayItem[] = [
+  {
+    id: "support",
+    href: "/support/",
+    variant: "ocean",
+    badge: "Travelers · 24h",
+    kicker: "General Support",
+    title: "General Support & Inquiries",
+    description:
+      "Ask about Zanzibar airport transfers, private hire availability, custom island routes, or updates to an existing booking.",
+    facts: ["Booking help", "Route advice", "Reply within 24h"],
+    cta: "Message support",
+  },
+  {
+    id: "company",
+    href: "/request/company/",
+    variant: "indigo",
+    badge: "Fleet owners",
+    kicker: "Company Onboarding",
+    title: "Register Transport Company",
+    description:
+      "List your Zanzibar private hire fleet, publish vehicles and curated trips, and manage bookings in a dedicated company workspace.",
+    facts: ["Verified profile", "Fleet workspace", "Admin review"],
+    cta: "Register company",
+  },
+  {
+    id: "driver",
+    href: "/request/driver/",
+    variant: "emerald",
+    badge: "Licensed drivers",
+    kicker: "Driver Network",
+    title: "Join as Public Hire Driver",
+    description:
+      "Licensed driver with ZanID, NIDA, or Passport? Submit your driving credentials and set up your driver login for admin approval.",
+    facts: ["ZanID / NIDA", "Direct dispatch", "Admin approval"],
+    cta: "Apply as driver",
+  },
+];
+
+const QUICK_LINKS = [
+  {
+    href: "/transport/",
+    label: "Private Hire Fleet",
+    caption: "Compare Zanzibar vehicles & rates",
+    icon: Car,
+  },
+  {
+    href: "/companies/",
+    label: "Zanzibar Companies",
+    caption: "Browse verified local providers",
+    icon: Building2,
+  },
+  {
+    href: "/trips/",
+    label: "Plan & Measure Trips",
+    caption: "Routes, distances & highlights",
+    icon: Compass,
+  },
+  {
+    href: "/booking/create/",
+    label: "Book Custom Transfer",
+    caption: "Request pickup anywhere on the island",
+    icon: Navigation,
+  },
+] as const;
+
+function renderPathwayIcon(id: string) {
+  if (id === "company") return <Building2 size={21} aria-hidden="true" />;
+  if (id === "driver") return <UserCheck size={21} aria-hidden="true" />;
+  return <Mail size={21} aria-hidden="true" />;
+}
 
 export default function ContactPage() {
-  const toast = useToast();
-  const [activeTab, setActiveTab] = useState<TabMode>(null);
+  const router = useRouter();
 
-  // General Inquiry form
-  const [inquiryForm, setInquiryForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
-  });
+  // Preserve legacy deep links such as /contact/?tab=company or /contact/#company
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get("tab")?.toLowerCase();
+    const hash = window.location.hash.replace(/^#/, "").toLowerCase();
 
-  // Company Registration request form
-  const [companyForm, setCompanyForm] = useState({
-    company_name: "",
-    full_name: "",
-    phone: "",
-    email: "",
-    business_type: "Private Hire Services",
-    registration_reference: "",
-    depot_location: "",
-    fleet_size: "1-5 Vehicles",
-    notes: "",
-  });
-
-  // Public Hire Driver request form
-  const [driverForm, setDriverForm] = useState({
-    full_name: "",
-    phone: "",
-    email: "",
-    license_number: "",
-    id_type: "ZAN_ID",
-    id_number: "",
-    experience: "3-5 years",
-    languages: "English, Swahili",
-    vehicle_info: "",
-    notes: "",
-  });
-
-  const [sentMessage, setSentMessage] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleInquiryChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setInquiryForm({ ...inquiryForm, [e.target.name]: e.target.value });
-  };
-
-  const handleCompanyChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    setCompanyForm({ ...companyForm, [e.target.name]: e.target.value });
-  };
-
-  const handleDriverChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    setDriverForm({ ...driverForm, [e.target.name]: e.target.value });
-  };
-
-  const handleInquirySubmit = async (e: FormEvent<HTMLElement>) => {
-    e.preventDefault();
-    try {
-      setSubmitting(true);
-      await api.post("/contact/", inquiryForm);
-      setSentMessage("Your message has been sent to our support inbox. We will get back to you shortly.");
-      setInquiryForm({ name: "", email: "", phone: "", subject: "", message: "" });
-    } catch {
-      toast.error("Failed to send message. Please try again.");
-    } finally {
-      setSubmitting(false);
+    if (tabParam === "company" || hash === "company" || hash === "company-registration") {
+      router.replace("/request/company/");
+    } else if (tabParam === "driver" || hash === "driver") {
+      router.replace("/request/driver/");
+    } else if (tabParam === "inquiry" || tabParam === "support" || hash === "support") {
+      router.replace("/support/");
     }
-  };
-
-  const handleCompanySubmit = async (e: FormEvent<HTMLElement>) => {
-    e.preventDefault();
-    try {
-      setSubmitting(true);
-      const res = await partnerRequestsAPI.submit({
-        type: "COMPANY_REGISTRATION",
-        ...companyForm,
-      });
-      setSentMessage(
-        res.data?.message ||
-          "Company registration request submitted! The administration team has received your information and will register your company.",
-      );
-      setCompanyForm({
-        company_name: "",
-        full_name: "",
-        phone: "",
-        email: "",
-        business_type: "Private Hire Services",
-        registration_reference: "",
-        depot_location: "",
-        fleet_size: "1-5 Vehicles",
-        notes: "",
-      });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to submit company request";
-      toast.error(msg);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDriverSubmit = async (e: FormEvent<HTMLElement>) => {
-    e.preventDefault();
-    try {
-      setSubmitting(true);
-      const res = await partnerRequestsAPI.submit({
-        type: "PUBLIC_DRIVER_REGISTRATION",
-        ...driverForm,
-      });
-      setSentMessage(
-        res.data?.message ||
-          "Driver application submitted! The administration team will verify your driving license and ID to register you as a Public Hire Driver.",
-      );
-      setDriverForm({
-        full_name: "",
-        phone: "",
-        email: "",
-        license_number: "",
-        id_type: "ZAN_ID",
-        id_number: "",
-        experience: "3-5 years",
-        languages: "English, Swahili",
-        vehicle_info: "",
-        notes: "",
-      });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to submit driver application";
-      toast.error(msg);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  }, [router]);
 
   return (
-    <div className={`page contact-page ${styles.contactPageRoot}`}>
-      <PageHero
-        eyebrow="Private Hire Transport Platform"
-        title="Partner Registration & Support"
-        subtitle="Register your transport company fleet, apply as a verified Public Hire Driver, or contact platform support."
-        backgroundImageKey="thumb"
-        patternImageKey="zanzibar"
-        ctaPrimary={{ label: "View Transport Fleets", href: "/companies/" }}
-        ctaSecondary={{ label: "Plan a Trip Transfer", href: "/trips/" }}
-      />
-
+    <div id="contact-hub-root" className={`page ${styles.page}`}>
       <div className={styles.content}>
-        <div className={`contact-content ${styles.contactContent}`}>
-          {/* Left Cards */}
-          <div className={`contact-info ${styles.contactInfo}`}>
-            <div
-              className={`contact-info-card ${styles.infoCard}`}
-              style={{ cursor: "pointer" }}
-              onClick={() => {
-                setActiveTab("company");
-                setSentMessage(null);
-              }}
-            >
-              <h3>
-                <span className={styles.infoIcon}>
-                  <Building2 size={18} />
-                </span>
-                Transport & Car Rental Companies
-              </h3>
-              <p>
-                Want to register your vehicle fleet, manage Private Hire vehicles, and dispatch trips to drivers? Submit a company request to join.
-              </p>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setActiveTab("company");
-                  setSentMessage(null);
-                }}
-              >
-                Register Company
-              </button>
-            </div>
+        {/* COMPACT EDITORIAL HUB HEADER */}
+        <header className={styles.hubHeader}>
+          <span className={styles.hubEyebrow}>
+            <MessageSquare size={13} aria-hidden="true" />
+            Support &amp; partner onboarding
+          </span>
+          <h1 className={styles.hubTitle}>How can we help you today?</h1>
+          <p className={styles.hubLead}>
+            Every request has its own dedicated page. Choose whether you want to message our
+            Zanzibar support desk, register a transport company, or apply as a Public Hire Driver.
+          </p>
+          <div className={styles.trustPills}>
+            <span className={styles.trustPill}>
+              <Clock size={14} aria-hidden="true" />
+              <strong>24h</strong> typical reply
+            </span>
+            <span className={styles.trustPill}>
+              <Shield size={14} aria-hidden="true" />
+              <strong>Verified</strong> fleet &amp; driver onboarding
+            </span>
+            <span className={styles.trustPill}>
+              <MapPin size={14} aria-hidden="true" />
+              <strong>Zanzibar</strong> island-wide coverage
+            </span>
+          </div>
+        </header>
 
-            <Link href="/request/driver/" className={`contact-info-card ${styles.infoCard}`}>
-              <h3>
-                <span className={styles.infoIcon}>
-                  <UserCheck size={18} />
-                </span>
-                Join as Public Hire Driver
-              </h3>
-              <p>
-                Are you a licensed driver with ZanID, NIDA or Passport? After admin approval, receive direct customer requests and trips companies choose to share.
-              </p>
-              <span className="btn btn-secondary">
-                Apply as Driver
-              </span>
-            </Link>
-
-            <div
-              className={`contact-info-card ${styles.infoCard}`}
-              style={{ cursor: "pointer" }}
-              onClick={() => {
-                setActiveTab("inquiry");
-                setSentMessage(null);
-              }}
-            >
-              <h3>
-                <span className={styles.infoIcon}>
-                  <Mail size={18} />
-                </span>
-                General Support & Inquiries
-              </h3>
-              <p>Questions about booking transfers, vehicle availability, or platform assistance.</p>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setActiveTab("inquiry");
-                  setSentMessage(null);
-                }}
-              >
-                Contact Support
-              </button>
-            </div>
+        {/* DEDICATED FORM PATHWAY CARDS */}
+        <section className={styles.pathwaysSection} aria-labelledby="contact-pathways-heading">
+          <div className={styles.sectionHead}>
+            <span id="contact-pathways-heading" className={styles.sectionEyebrow}>
+              Choose a dedicated form
+            </span>
+            <p className={styles.sectionHint}>Each option opens its own focused form page.</p>
           </div>
 
-          {/* Right Form Container */}
-          <div className={`contact-form-container ${styles.formCard}`}>
-            {/* Tab Selector */}
-            <div className={styles.requestTabs}>
-              <button
-                type="button"
-                className={`${styles.tabBtn} ${activeTab === "company" ? styles.tabBtnActive : ""}`}
-                onClick={() => {
-                  setActiveTab("company");
-                  setSentMessage(null);
-                }}
-              >
-                <Building2 size={15} /> Company Registration
-              </button>
+          <div className={styles.fpGrid}>
+            {PATHWAYS.map((pathway) => {
+              const variantClass =
+                pathway.variant === "indigo"
+                  ? styles.fpCardIndigo
+                  : pathway.variant === "emerald"
+                    ? styles.fpCardEmerald
+                    : styles.fpCardOcean;
 
-              <button
-                type="button"
-                className={`${styles.tabBtn} ${activeTab === "inquiry" ? styles.tabBtnActive : ""}`}
-                onClick={() => {
-                  setActiveTab("inquiry");
-                  setSentMessage(null);
-                }}
-              >
-                <Mail size={15} /> General Support
-              </button>
-            </div>
-
-            {sentMessage ? (
-              <div className={`success-message ${styles.successMessage}`}>
-                <span className={`success-icon ${styles.successIcon}`}>
-                  <CheckCircle size={36} color="#0e7c5a" />
-                </span>
-                <h3>Request Sent Successfully!</h3>
-                <p>{sentMessage}</p>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => setSentMessage(null)}
+              return (
+                <Link
+                  key={pathway.id}
+                  href={pathway.href}
+                  className={`${styles.fpCard} ${variantClass}`}
                 >
-                  Submit Another Request
-                </button>
-              </div>
-            ) : activeTab === "company" ? (
-              /* ================= 1. Company Registration Form ================= */
-              <>
-                <div className={styles.formHead}>
-                  <span className={styles.kicker}>Company Registration</span>
-                  <h2>Register Your Transport Company</h2>
-                  <p>
-                    Fill in your company and fleet information. This details will be sent directly to the administration team to review and register your company account.
-                  </p>
-                </div>
-
-                <form onSubmit={handleCompanySubmit} className="contact-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Company Name *</label>
-                      <input
-                        type="text"
-                        name="company_name"
-                        value={companyForm.company_name}
-                        onChange={handleCompanyChange}
-                        required
-                        placeholder="e.g. Zanzibar Executive Fleets Ltd"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Contact Person Full Name *</label>
-                      <input
-                        type="text"
-                        name="full_name"
-                        value={companyForm.full_name}
-                        onChange={handleCompanyChange}
-                        required
-                        placeholder="e.g. Salim Rashid"
-                      />
-                    </div>
+                  <div className={styles.fpTopScrim} aria-hidden="true" />
+                  <div className={styles.fpTopBar}>
+                    <span className={styles.fpIconPill}>{renderPathwayIcon(pathway.id)}</span>
+                    <span className={styles.fpGlassBadge}>{pathway.badge}</span>
                   </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Phone / WhatsApp Number *</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={companyForm.phone}
-                        onChange={handleCompanyChange}
-                        required
-                        placeholder="+255 777 000 111"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Official Email *</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={companyForm.email}
-                        onChange={handleCompanyChange}
-                        required
-                        placeholder="info@company.co.tz"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Business Type</label>
-                      <select
-                        name="business_type"
-                        className={styles.selectInput}
-                        value={companyForm.business_type}
-                        onChange={handleCompanyChange}
+                  <div className={styles.fpSheet}>
+                    <div className={styles.fpCopy}>
+                      <span
+                        className={`${styles.fpKicker} ${
+                          pathway.variant === "emerald" ? styles.fpKickerEmerald : ""
+                        }`}
                       >
-                        <option value="Private Hire Services">Private Hire Services</option>
-                        <option value="Airport Transfer & VIP Chauffeur">Airport Transfer & VIP Chauffeur</option>
-                        <option value="Private Hire Fleet Operator">Private Hire Fleet Operator</option>
-                        <option value="Bus & Minivan Hire">Coaster Bus & Group Transit</option>
-                      </select>
+                        {pathway.kicker}
+                      </span>
+                      <h2 className={styles.fpTitle}>{pathway.title}</h2>
+                      <p className={styles.fpDesc}>{pathway.description}</p>
                     </div>
 
-                    <div className="form-group">
-                      <label>Estimated Fleet Size</label>
-                      <select
-                        name="fleet_size"
-                        className={styles.selectInput}
-                        value={companyForm.fleet_size}
-                        onChange={handleCompanyChange}
-                      >
-                        <option value="1-3 Vehicles">1 – 3 Vehicles</option>
-                        <option value="4-10 Vehicles">4 – 10 Vehicles</option>
-                        <option value="11-25 Vehicles">11 – 25 Vehicles</option>
-                        <option value="25+ Vehicles">25+ Vehicles</option>
-                      </select>
+                    <div className={styles.fpFacts} aria-label={`${pathway.title} highlights`}>
+                      {pathway.facts.map((fact) => (
+                        <span key={fact} className={styles.fpFactChip}>
+                          {fact}
+                        </span>
+                      ))}
                     </div>
-                  </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Base / Depot Location</label>
-                      <input
-                        type="text"
-                        name="depot_location"
-                        value={companyForm.depot_location}
-                        onChange={handleCompanyChange}
-                        placeholder="e.g. Stone Town / Airport Road / Nungwi"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Registration / License Ref (Optional)</label>
-                      <input
-                        type="text"
-                        name="registration_reference"
-                        value={companyForm.registration_reference}
-                        onChange={handleCompanyChange}
-                        placeholder="e.g. BRELA / TIC # 104822"
-                      />
+                    <div className={styles.fpFooter}>
+                      <span className={styles.fpPrimaryBtn}>
+                        {pathway.cta}
+                        <ArrowRight size={15} aria-hidden="true" />
+                      </span>
                     </div>
                   </div>
-
-                  <div className="form-group">
-                    <label>Additional Notes & Vehicles to Register</label>
-                    <textarea
-                      name="notes"
-                      value={companyForm.notes}
-                      onChange={handleCompanyChange}
-                      placeholder="Mention the types of vehicles you operate (Toyota Alphard, Prado 4x4, Coaster, etc.) and your preferred service regions..."
-                      rows={4}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="btn btn-primary btn-block"
-                  >
-                    {submitting ? "Sending to Admin..." : "Submit Company Request to Admin"}
-                  </button>
-                </form>
-              </>
-            ) : activeTab === "driver" ? (
-              /* ================= 2. Driver Application Form ================= */
-              <>
-                <div className={styles.formHead}>
-                  <span className={styles.kicker}>Driver Application</span>
-                  <h2>Join as Public Hire Driver</h2>
-                  <p>
-                    Licensed drivers can apply here. Your credentials will be sent to the administrator to verify and register you as a Public Hire Driver, enabling you to take public transport requests.
-                  </p>
-                </div>
-
-                <form onSubmit={handleDriverSubmit} className="contact-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Driver Full Name *</label>
-                      <input
-                        type="text"
-                        name="full_name"
-                        value={driverForm.full_name}
-                        onChange={handleDriverChange}
-                        required
-                        placeholder="e.g. Hamisi Bakari Juma"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Phone / WhatsApp Number *</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={driverForm.phone}
-                        onChange={handleDriverChange}
-                        required
-                        placeholder="+255 777 888 999"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Email Address</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={driverForm.email}
-                        onChange={handleDriverChange}
-                        placeholder="driver@example.com"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Driving License Number *</label>
-                      <input
-                        type="text"
-                        name="license_number"
-                        value={driverForm.license_number}
-                        onChange={handleDriverChange}
-                        required
-                        placeholder="e.g. DL-ZN-49120"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>ID Document Type *</label>
-                      <select
-                        name="id_type"
-                        className={styles.selectInput}
-                        value={driverForm.id_type}
-                        onChange={handleDriverChange}
-                      >
-                        <option value="ZAN_ID">ZanID (Zanzibar Resident ID)</option>
-                        <option value="NIDA">NIDA (National Identification Number)</option>
-                        <option value="PASSPORT">Passport</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label>ID / Passport Number *</label>
-                      <input
-                        type="text"
-                        name="id_number"
-                        value={driverForm.id_number}
-                        onChange={handleDriverChange}
-                        required
-                        placeholder="e.g. 19850312-32100-00001-18"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Driving Experience</label>
-                      <select
-                        name="experience"
-                        className={styles.selectInput}
-                        value={driverForm.experience}
-                        onChange={handleDriverChange}
-                      >
-                        <option value="1-2 years">1 – 2 years</option>
-                        <option value="3-5 years">3 – 5 years</option>
-                        <option value="5-10 years">5 – 10 years</option>
-                        <option value="10+ years">10+ years</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Spoken Languages</label>
-                      <input
-                        type="text"
-                        name="languages"
-                        value={driverForm.languages}
-                        onChange={handleDriverChange}
-                        placeholder="e.g. English, Swahili, Italian"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Own Vehicle Information (If applicable)</label>
-                    <input
-                      type="text"
-                      name="vehicle_info"
-                      value={driverForm.vehicle_info}
-                      onChange={handleDriverChange}
-                      placeholder="e.g. Toyota Noah (Plate Z 441 AB) or leave blank if freelance driver"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Experience & Route Expertise Notes</label>
-                    <textarea
-                      name="notes"
-                      value={driverForm.notes}
-                      onChange={handleDriverChange}
-                      placeholder="Tell us about your driving experience with airport transfers, private journeys, or long-distance routes..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="btn btn-primary btn-block"
-                  >
-                    {submitting ? "Sending Application..." : "Submit Driver Application to Admin"}
-                  </button>
-                </form>
-              </>
-            ) : activeTab === "inquiry" ? (
-              <>
-                <div className={styles.formHead}>
-                  <span className={styles.kicker}>Support & Inquiries</span>
-                  <h2>We&apos;re here to help</h2>
-                  <p>Send a question about vehicle transport, booking transfers, or platform help.</p>
-                </div>
-
-                <form onSubmit={handleInquirySubmit} className="contact-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Your Name *</label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={inquiryForm.name}
-                        onChange={handleInquiryChange}
-                        required
-                        placeholder="John Doe"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Your Email *</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={inquiryForm.email}
-                        onChange={handleInquiryChange}
-                        required
-                        placeholder="john@email.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Phone</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={inquiryForm.phone}
-                        onChange={handleInquiryChange}
-                        placeholder="Country code and phone number"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Subject *</label>
-                      <input
-                        type="text"
-                        name="subject"
-                        value={inquiryForm.subject}
-                        onChange={handleInquiryChange}
-                        required
-                        placeholder="How can we help?"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Message *</label>
-                    <textarea
-                      name="message"
-                      value={inquiryForm.message}
-                      onChange={handleInquiryChange}
-                      required
-                      placeholder="Tell us about your questions or travel transport plans..."
-                      rows={5}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="btn btn-primary btn-block"
-                  >
-                    {submitting ? "Sending..." : "Send Message"}
-                  </button>
-                </form>
-              </>
-            ) : null}
+                </Link>
+              );
+            })}
           </div>
-        </div>
+        </section>
+
+        {/* EXPECTATIONS & DIRECT BOOKING SHORTCUTS */}
+        <section className={styles.infoGrid} aria-label="Support expectations and quick shortcuts">
+          <article className={`${styles.infoCard} ${styles.infoCardTinted}`}>
+            <span className={styles.sectionEyebrow}>What to expect</span>
+            <h2 className={styles.infoTitle}>How requests are handled</h2>
+            <ul className={styles.expectList}>
+              <li className={styles.expectItem}>
+                <span className={styles.expectIcon} aria-hidden="true">
+                  <Clock size={16} />
+                </span>
+                <div className={styles.expectCopy}>
+                  <strong>Fast traveler support</strong>
+                  <span>
+                    General inquiries go straight to our Zanzibar support desk and are typically
+                    answered within 24 hours.
+                  </span>
+                </div>
+              </li>
+              <li className={styles.expectItem}>
+                <span className={styles.expectIcon} aria-hidden="true">
+                  <Building2 size={16} />
+                </span>
+                <div className={styles.expectCopy}>
+                  <strong>Company account verification</strong>
+                  <span>
+                    Our admin team reviews your Zanzibar fleet and contact details before
+                    activating your public directory profile.
+                  </span>
+                </div>
+              </li>
+              <li className={styles.expectItem}>
+                <span className={styles.expectIcon} aria-hidden="true">
+                  <UserCheck size={16} />
+                </span>
+                <div className={styles.expectCopy}>
+                  <strong>Licensed driver onboarding</strong>
+                  <span>
+                    Drivers submit ZanID, NIDA, or Passport credentials on the driver application
+                    page so admins can verify and activate their login.
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </article>
+
+          <article className={styles.infoCard}>
+            <span className={styles.sectionEyebrow}>Quick links</span>
+            <h2 className={styles.infoTitle}>Looking to book right away?</h2>
+            <p className={styles.infoLead}>
+              Jump straight to live private hire vehicles, verified Zanzibar transport companies,
+              or route planning tools.
+            </p>
+            <div className={styles.quickGrid}>
+              {QUICK_LINKS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.href} href={item.href} className={styles.shortcutLink}>
+                    <span className={styles.shortcutLeft}>
+                      <span className={styles.shortcutIcon} aria-hidden="true">
+                        <Icon size={17} />
+                      </span>
+                      <span className={styles.shortcutCopy}>
+                        <strong>{item.label}</strong>
+                        <span>{item.caption}</span>
+                      </span>
+                    </span>
+                    <ArrowRight size={15} className={styles.shortcutArrow} aria-hidden="true" />
+                  </Link>
+                );
+              })}
+            </div>
+          </article>
+        </section>
       </div>
     </div>
   );

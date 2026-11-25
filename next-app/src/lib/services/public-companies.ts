@@ -20,7 +20,7 @@ const PUBLIC_COMPANY_WHERE = {
 
 export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
   const page = Math.max(1, filters.page ?? 1);
-  const pageSize = Math.min(50, Math.max(1, filters.page_size ?? 12));
+  const pageSize = Math.min(200, Math.max(1, filters.page_size ?? 12));
   const search = filters.search?.trim();
 
   const where: any = { ...PUBLIC_COMPANY_WHERE };
@@ -43,6 +43,24 @@ export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
+        privateHireServices: {
+          where: { isActive: true },
+          orderBy: [{ createdAt: "desc" }],
+          include: {
+            vehicle: true,
+            driver: true,
+            company: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                contactPhone: true,
+                contactEmail: true,
+                logoImageKey: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             privateHireServices: { where: { isActive: true } },
@@ -62,9 +80,15 @@ export async function listPublicCompanies(filters: PublicCompanyFilters = {}) {
   };
 }
 
-export async function getPublicCompany(slug: string) {
+export async function getPublicCompany(slugOrId: string) {
+  const numericId = /^\d+$/.test(slugOrId) ? Number(slugOrId) : null;
   const company = await prisma.company.findFirst({
-    where: { ...PUBLIC_COMPANY_WHERE, slug },
+    where: {
+      ...PUBLIC_COMPANY_WHERE,
+      ...(numericId != null
+        ? { OR: [{ slug: slugOrId }, { id: numericId }] }
+        : { slug: slugOrId }),
+    },
     include: {
       privateHireServices: {
         where: { isActive: true },

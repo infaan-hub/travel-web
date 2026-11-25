@@ -3,11 +3,14 @@ import {
   CURATED_DESTINATIONS,
   CURATED_MOST_BOOKED_TRIPS,
   CURATED_TOP_RATED_TRIPS,
+  DEFAULT_TRIP_BOOKING_SERVICE_ID,
   MEASURE_PRESETS,
+  buildBookingDestinationHref,
   formatTripDistance,
   formatTripDuration,
   googleMapsDirectionsUrl,
   measuredTripFavoriteId,
+  parseBookingDestinationParams,
   toggleFavoriteTrip,
   type FavoriteTripRecord,
 } from "@/lib/trip-discovery";
@@ -70,5 +73,64 @@ describe("trip discovery datasets", () => {
     const second = toggleFavoriteTrip(first.next, sample);
     expect(second.added).toBe(false);
     expect(second.next).toHaveLength(0);
+  });
+
+  it("builds /booking/2/ destination URLs with coordinates and falls back cleanly", () => {
+    expect(DEFAULT_TRIP_BOOKING_SERVICE_ID).toBe(2);
+
+    const withCoords = buildBookingDestinationHref({
+      label: "Nungwi Beach, North Coast",
+      lat: -5.727227,
+      lng: 39.299202,
+    });
+    expect(withCoords).toMatch(/^\/booking\/2\/\?/);
+    const parsedWithCoords = new URL(withCoords, "https://example.test").searchParams;
+    expect(parsedWithCoords.get("destination")).toBe("Nungwi Beach, North Coast");
+    expect(parsedWithCoords.get("dest_lat")).toBe("-5.727227");
+    expect(parsedWithCoords.get("dest_lng")).toBe("39.299202");
+
+    const labelOnly = buildBookingDestinationHref(null, "Kendwa Beach");
+    expect(labelOnly).toBe("/booking/2/?destination=Kendwa+Beach");
+
+    const customService = buildBookingDestinationHref(null, "Paje Beach", 7);
+    expect(customService).toBe("/booking/7/?destination=Paje+Beach");
+
+    expect(buildBookingDestinationHref(null, "   ")).toBe("/booking/2/");
+  });
+
+  it("parses and validates booking destination query params", () => {
+    const withCoords = parseBookingDestinationParams(
+      new URLSearchParams(
+        "destination=Paje+Beach%2C+South-East+Coast&dest_lat=-6.266586&dest_lng=39.534901",
+      ),
+    );
+    expect(withCoords).toEqual({
+      destination: "Paje Beach, South-East Coast",
+      destLat: -6.266586,
+      destLng: 39.534901,
+    });
+
+    const labelOnly = parseBookingDestinationParams(
+      new URLSearchParams("destination=Stone+Town"),
+    );
+    expect(labelOnly).toEqual({
+      destination: "Stone Town",
+      destLat: null,
+      destLng: null,
+    });
+
+    const outOfRange = parseBookingDestinationParams(
+      new URLSearchParams("destination=Nungwi&dest_lat=120&dest_lng=39.3"),
+    );
+    expect(outOfRange).toEqual({
+      destination: "Nungwi",
+      destLat: null,
+      destLng: null,
+    });
+
+    expect(parseBookingDestinationParams(new URLSearchParams(""))).toBeNull();
+    expect(
+      parseBookingDestinationParams(new URLSearchParams("destination=A")),
+    ).toBeNull();
   });
 });

@@ -6,23 +6,19 @@ import Image from "next/image";
 import {
   ArrowLeft,
   Briefcase,
-  Building2,
   CalendarCheck2,
   Car,
   CheckCircle2,
   Loader2,
   Mail,
-  MessageCircle,
   Phone,
   ShieldCheck,
-  UserCheck,
   Users,
   XCircle,
 } from "lucide-react";
 import { publicPrivateHireAPI } from "@/lib/api/client";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import {
-  PRICING_LABELS,
   SAMPLE_PRIVATE_HIRE_SERVICES,
   type PrivateHireService,
 } from "@/features/transport/private-hire-data";
@@ -44,6 +40,7 @@ export default function TransportServiceDetailPage({ id }: Props) {
   const sample = SAMPLE_PRIVATE_HIRE_SERVICES.find((item) => String(item.id) === id) ?? null;
   const [service, setService] = useState<PrivateHireService | null>(sample);
   const [loading, setLoading] = useState(true);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,81 +89,109 @@ export default function TransportServiceDetailPage({ id }: Props) {
   }
 
   const { vehicle, driver, company } = service;
-  const pricingType = service.pricing_type || "";
-  const pricingLabel =
-    PRICING_LABELS[pricingType] ?? (pricingType ? pricingType.replaceAll("_", " ") : "per trip");
   const includes = vehicle?.includes ?? [];
   const excludes = vehicle?.excludes ?? [];
   const driverName = driver?.name?.trim() || "Assigned driver";
   const photos = vehicle
     ? [
-        { label: "Front view", url: vehicle.front_image_url, main: true },
-        { label: "Side view", url: vehicle.side_image_url, main: false },
-        { label: "Back view", url: vehicle.back_image_url, main: false },
+        { label: "Front", fullLabel: "Front view", url: vehicle.front_image_url, main: true },
+        { label: "Side", fullLabel: "Side view", url: vehicle.side_image_url, main: false },
+        { label: "Back", fullLabel: "Back view", url: vehicle.back_image_url, main: false },
       ]
     : [];
+  const availablePhotos = photos.filter((p) => Boolean(p.url));
+  const activeHeroPhoto =
+    availablePhotos[activePhotoIndex] ?? availablePhotos[0] ?? null;
 
   return (
     <div className={styles.page}>
       <header className={styles.hero}>
-        {vehicle?.front_image_url ? (
-          <div className={styles.heroMedia} aria-hidden="true">
+        <div className={styles.heroMedia} aria-hidden="true">
+          {activeHeroPhoto?.url ? (
             <Image
-              src={getImageUrl(vehicle.front_image_url)}
+              src={getImageUrl(activeHeroPhoto.url)}
               alt=""
               fill
-              sizes="100vw"
+              sizes="(max-width: 768px) 92vw, 1180px"
               className={styles.heroImage}
               priority
-              unoptimized
+              unoptimized={isUnoptimizableImage(getImageUrl(activeHeroPhoto.url))}
             />
-            <span className={styles.heroScrim} />
-          </div>
-        ) : null}
+          ) : (
+            <div className={styles.heroMediaFallback}>
+              <Car size={62} />
+            </div>
+          )}
+        </div>
+        <span className={styles.heroTopScrim} aria-hidden="true" />
 
         <div className={styles.heroTop}>
           <Link href="/transport/" className={styles.backLink}>
-            <ArrowLeft size={16} /> Back to transport
+            <ArrowLeft size={15} /> Back to transport
           </Link>
-          <span className={styles.heroBadge}>
-            <ShieldCheck size={14} /> Verified private hire
-          </span>
-        </div>
-
-        <div className={styles.heroBody}>
-          <div className={styles.heroCopy}>
-            <span className={styles.kicker}>Tourist Booking View</span>
-            <h1 className={styles.title}>{service.title}</h1>
-            {company ? <p className={styles.company}>{company.name}</p> : null}
-            {service.description ? <p className={styles.description}>{service.description}</p> : null}
-          </div>
-          <div className={styles.heroPrice}>
-            <span className={styles.priceValue}>${service.price}</span>
-            <span className={styles.priceUnit}>/ {pricingLabel}</span>
+          <div className={styles.heroTopRight}>
+            <span className={styles.heroBadge}>
+              <ShieldCheck size={13} /> Verified private hire
+            </span>
           </div>
         </div>
 
-        {vehicle ? (
-          <ul className={styles.heroFacts}>
-            <li>
-              <Car size={16} />
-              <span>{vehicle.name}</span>
-              {vehicle.plate_number ? <em>{vehicle.plate_number}</em> : null}
-            </li>
-            <li>
-              <Users size={16} />
-              <span>{vehicle.capacity} passengers</span>
-            </li>
-            <li>
-              <Briefcase size={16} />
-              <span>{vehicle.luggage_capacity} luggage bags</span>
-            </li>
-          </ul>
-        ) : null}
+        <div className={styles.heroSheet}>
+          <div className={styles.heroBody}>
+            <div className={styles.heroCopy}>
+              <span className={styles.kicker}>
+                {company?.name ? `${company.name} · Private Hire` : "Verified Private Hire"}
+              </span>
+              <h1 className={styles.title}>{service.title}</h1>
+              {service.description ? <p className={styles.description}>{service.description}</p> : null}
+            </div>
 
-        <Link href={`/booking/${service.id}/`} className={styles.heroBookAction}>
-          <CalendarCheck2 size={18} /> Book This Service
-        </Link>
+            {availablePhotos.length > 1 ? (
+              <div className={styles.heroAnglePills} role="tablist" aria-label="Vehicle photo angle">
+                {availablePhotos.map((photo, index) => (
+                  <button
+                    key={photo.label}
+                    type="button"
+                    role="tab"
+                    aria-selected={index === activePhotoIndex}
+                    className={`${styles.heroAngleBtn} ${
+                      index === activePhotoIndex ? styles.heroAngleBtnActive : ""
+                    }`}
+                    onClick={() => setActivePhotoIndex(index)}
+                  >
+                    {photo.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div className={styles.heroBottomRow}>
+            {vehicle ? (
+              <ul className={styles.heroFacts}>
+                <li>
+                  <Car size={15} />
+                  <span>{vehicle.name}</span>
+                  {vehicle.plate_number ? <em>{vehicle.plate_number}</em> : null}
+                </li>
+                <li>
+                  <Users size={15} />
+                  <span>{vehicle.capacity} pax</span>
+                </li>
+                <li>
+                  <Briefcase size={15} />
+                  <span>{vehicle.luggage_capacity} bags</span>
+                </li>
+              </ul>
+            ) : (
+              <div />
+            )}
+
+            <Link href={`/booking/${service.id}/`} className={styles.heroBookAction}>
+              <CalendarCheck2 size={17} /> Book This Service
+            </Link>
+          </div>
+        </div>
       </header>
 
       <div className={styles.layout}>
@@ -186,30 +211,40 @@ export default function TransportServiceDetailPage({ id }: Props) {
               </div>
 
               <div className={styles.photoGrid}>
-                {photos.map((photo) => (
-                  <figure key={photo.label} className={styles.photo}>
-                    <div className={styles.photoFrame}>
-                      {photo.url ? (
-                        <Image
-                          src={getImageUrl(photo.url)}
-                          alt={`${vehicle.name} — ${photo.label}`}
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 340px"
-                          className={styles.photoImage}
-                          loading={photo.main ? "eager" : "lazy"}
-                          unoptimized
-                        />
-                      ) : (
-                        <div className={styles.photoEmpty}>
-                          <Car size={22} />
-                          <span>No photo</span>
-                        </div>
-                      )}
-                      {photo.main ? <span className={styles.photoTag}>Main</span> : null}
-                    </div>
-                    <figcaption>{photo.label}</figcaption>
-                  </figure>
-                ))}
+                {photos.map((photo) => {
+                  const availIdx = availablePhotos.findIndex((p) => p.label === photo.label);
+                  return (
+                    <figure
+                      key={photo.fullLabel}
+                      className={styles.photo}
+                      onClick={() => {
+                        if (availIdx >= 0) setActivePhotoIndex(availIdx);
+                      }}
+                      style={availIdx >= 0 ? { cursor: "pointer" } : undefined}
+                    >
+                      <div className={styles.photoFrame}>
+                        {photo.url ? (
+                          <Image
+                            src={getImageUrl(photo.url)}
+                            alt={`${vehicle.name} — ${photo.fullLabel}`}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 340px"
+                            className={styles.photoImage}
+                            loading={photo.main ? "eager" : "lazy"}
+                            unoptimized={isUnoptimizableImage(getImageUrl(photo.url))}
+                          />
+                        ) : (
+                          <div className={styles.photoEmpty}>
+                            <Car size={22} />
+                            <span>No photo</span>
+                          </div>
+                        )}
+                        {photo.main ? <span className={styles.photoTag}>Main</span> : null}
+                      </div>
+                      <figcaption>{photo.fullLabel}</figcaption>
+                    </figure>
+                  );
+                })}
               </div>
 
               <dl className={styles.specs}>
@@ -290,7 +325,7 @@ export default function TransportServiceDetailPage({ id }: Props) {
                     width={76}
                     height={76}
                     className={styles.driverAvatar}
-                    unoptimized
+                    unoptimized={isUnoptimizableImage(getImageUrl(driver.image_url))}
                   />
                 ) : (
                   <div className={styles.driverAvatarFallback} aria-hidden="true">
@@ -317,53 +352,6 @@ export default function TransportServiceDetailPage({ id }: Props) {
             </section>
           ) : null}
         </main>
-
-        <aside className={styles.aside}>
-          <div className={styles.bookingCard}>
-            <span className={styles.asideKicker}>Starting price</span>
-            <p className={styles.asidePrice}>
-              ${service.price}
-              <span>/ {pricingLabel}</span>
-            </p>
-            {vehicle ? (
-              <p className={styles.asideNote}>
-                {vehicle.name} · up to {vehicle.capacity} passengers and {vehicle.luggage_capacity} bags
-              </p>
-            ) : null}
-
-            <Link href={`/booking/${service.id}/`} className={styles.bookAction}>
-              Book This Service
-            </Link>
-
-            {company?.contact_phone ? (
-              <div className={styles.contactActions}>
-                <a href={`tel:${phoneDigits(company.contact_phone)}`} className={styles.contactLink}>
-                  <Phone size={16} /> Call provider
-                </a>
-                <a
-                  href={`https://wa.me/${phoneDigits(company.contact_phone)}`}
-                  className={styles.contactLink}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <MessageCircle size={16} /> WhatsApp
-                </a>
-              </div>
-            ) : null}
-
-            {company ? (
-              <Link href={`/company/${company.slug}/`} className={styles.providerLink}>
-                <Building2 size={16} /> View provider profile
-              </Link>
-            ) : null}
-
-            {driver ? (
-              <p className={styles.driverNote}>
-                <UserCheck size={15} /> Driver: {driverName}
-              </p>
-            ) : null}
-          </div>
-        </aside>
       </div>
     </div>
   );

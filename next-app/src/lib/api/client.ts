@@ -284,22 +284,82 @@ export const publicPrivateHireAPI = {
   getAll: (params?: Params) => api.get("/private-services/", { params }),
   getById: (id: string | number) => api.get(`/private-services/${id}/`),
 };
+export const publicDriversAPI = {
+  getAll: (params?: Params) => api.get("/drivers/", { params }),
+};
 export const transportBookingsAPI = {
   getAll: () => api.get("/transport-bookings/"),
   create: (data: Record<string, unknown>) => api.post("/transport-bookings/", data),
   cancel: (id: string | number) => api.patch("/transport-bookings/" + id + "/", { status: "cancelled" }),
+  reschedule: (
+    id: string | number,
+    data: { travel_date: string; pickup_time: string },
+  ) =>
+    api.patch(`/transport-bookings/${id}/`, {
+      action: "reschedule",
+      ...data,
+    }),
 };
 export const driverAPI = {
   getBookings: () => api.get("/driver/bookings/"),
+  getBooking: (id: string | number) => api.get(`/driver/bookings/${id}/`),
+  getInsights: (month?: string) =>
+    api.get("/driver/insight/", { params: month ? { month } : undefined }),
+  getVehicle: () => api.get("/driver/vehicle/"),
+  createVehicle: (data: FormData | Record<string, unknown>) =>
+    api.post("/driver/vehicle/", data, formDataConfig(data)),
+  updateVehicle: (data: FormData | Record<string, unknown>) =>
+    api.put("/driver/vehicle/", data, formDataConfig(data)),
+  deleteVehicle: () => api.delete("/driver/vehicle/"),
+  updateBusinessCard: (data: FormData | Record<string, unknown>) =>
+    api.patch("/driver/business-card/", data, formDataConfig(data)),
+  getPrices: () => api.get("/driver/prices/"),
+  createPrice: (data: Record<string, unknown>) => api.post("/driver/prices/", data),
+  updatePrice: (id: string | number, data: Record<string, unknown>) =>
+    api.patch(`/driver/prices/${id}/`, data),
+  deletePrice: (id: string | number) => api.delete(`/driver/prices/${id}/`),
+  resetDefaultPrices: () => api.post("/driver/prices/", { action: "reset_defaults" }),
   getTripRequests: () => api.get("/driver/trip-requests/"),
   updateBooking: (id: string | number, status: "confirmed" | "in_progress" | "completed") =>
     api.patch(`/driver/bookings/${id}/`, { status }),
+  transitionBooking: (
+    id: string | number,
+    payload: {
+      action:
+        | "confirm"
+        | "start"
+        | "arrived"
+        | "picked_up"
+        | "reached_destination"
+        | "finalize"
+        | "location";
+      lat?: number;
+      lng?: number;
+      notes?: string;
+    },
+  ) => api.patch(`/driver/bookings/${id}/`, payload),
   acceptTripRequest: (id: string | number) => api.patch(`/driver/trip-requests/${id}/`, { action: "accept" }),
 };
 export const companyTransportBookingsAPI = {
   getAll: () => api.get("/company/transport-bookings/"),
   setPublic: (id: string | number, isPublic: boolean) =>
     api.patch(`/company/transport-bookings/${id}/`, { is_public: isPublic }),
+};
+export const companyPricesAPI = {
+  getAll: () => api.get("/company/prices/"),
+  create: (data: Record<string, unknown>) => api.post("/company/prices/", data),
+  update: (id: string | number, data: Record<string, unknown>) =>
+    api.patch(`/company/prices/${id}/`, data),
+  delete: (id: string | number) => api.delete(`/company/prices/${id}/`),
+  resetDefaults: () => api.post("/company/prices/", { action: "reset_defaults" }),
+};
+export const routePricesAPI = {
+  quote: (params: {
+    origin: string;
+    destination: string;
+    service_id?: number;
+    distance_km?: number;
+  }) => api.get("/route-prices/quote/", { params }),
 };
 export const transportTripRequestsAPI = {
   getAll: () => api.get("/transport-trip-requests/"),

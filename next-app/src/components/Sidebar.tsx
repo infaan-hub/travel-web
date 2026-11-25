@@ -3,48 +3,70 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import NextImage from "next/image";
+import { Download } from "lucide-react";
 import type { AppIcon } from "@/components/icons";
 import {
-  Home,
-  Globe,
-  Palmtree,
-  Map,
-  ClipboardList,
-  Mail,
-  Lock,
-  Settings,
-  Users,
-  LogOut,
-  UserPlus,
-  BookOpen,
-  TrendingUp,
-  LayoutDashboard,
-  Image,
-  Star,
-  MessageSquare,
-  Building2,
-  X,
-  Car,
   Briefcase,
-  Truck,
+  Building2,
+  Car,
+  ClipboardList,
+  DollarSign,
+  Home,
+  Image,
+  LayoutDashboard,
+  Lock,
+  LogOut,
+  Mail,
+  Map,
+  MessageSquare,
+  Settings,
+  Star,
+  TrendingUp,
   User,
+  UserPlus,
+  Users,
+  X,
 } from "@/components/icons";
-import NextImage from "next/image";
 import { useAuth } from "@/context/AuthContext";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { profileAPI } from "@/lib/api/client";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import {
+  getRoleHomeHref,
+  getRoleProfileHref,
+  getRoleSectionTitle,
+  getSidebarNavItems,
+  isNavItemActive,
+  resolveNavRole,
+  type NavIconKey,
+} from "@/lib/navigation";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import styles from "./sidebar.module.css";
 
-type NavItem = {
-  to: string;
-  label: string;
-  icon: AppIcon;
-  exact?: boolean;
-  permission?: string;
+const ICON_MAP: Record<NavIconKey, AppIcon> = {
+  home: Home,
+  dashboard: LayoutDashboard,
+  car: Car,
+  building: Building2,
+  map: Map,
+  bookings: ClipboardList,
+  user: User,
+  users: Users,
+  briefcase: Briefcase,
+  dollar: DollarSign,
+  trending: TrendingUp,
+  mail: Mail,
+  lock: Lock,
+  settings: Settings,
+  image: Image,
+  star: Star,
+  message: MessageSquare,
 };
 
-function NavIcon({ icon: Icon }: { icon: AppIcon }) {
-  return <Icon size={20} />;
+function NavIcon({ iconKey }: { iconKey: NavIconKey }) {
+  const Icon = ICON_MAP[iconKey];
+  return <Icon size={20} aria-hidden="true" />;
 }
 
 export default function Sidebar() {
@@ -54,6 +76,7 @@ export default function Sidebar() {
   const mobileOpenRef = useRef(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { showWebInstallUI, installing, triggerInstall } = usePwaInstall();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -86,7 +109,7 @@ export default function Sidebar() {
     await logout();
     setProfileImage(null);
     applyMobileOpen(false);
-    router.push("/login");
+    router.push("/login/");
   };
 
   // The top header owns the mobile menu button, so the sidebar listens for it
@@ -99,7 +122,7 @@ export default function Sidebar() {
       applyMobileOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
+      if (event.key === "Escape") applyMobileOpen(false);
     };
     window.addEventListener("travel:toggle-nav", toggle);
     window.addEventListener("travel:close-nav", close);
@@ -111,142 +134,20 @@ export default function Sidebar() {
     };
   }, [applyMobileOpen]);
 
-  const closeAll = () => {
-    applyMobileOpen(false);
-  };
+  const closeAll = () => applyMobileOpen(false);
 
-  // Lock the page behind the drawer while it is open.
   useEffect(() => {
     document.body.classList.toggle("nav-drawer-open", mobileOpen);
     return () => document.body.classList.remove("nav-drawer-open");
   }, [mobileOpen]);
 
-  const adminNavItems: NavItem[] = [
-    { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { to: "/admin/home-editor", label: "Home Editor", icon: Image },
-    { to: "/admin/users", label: "Users", icon: Users },
-    { to: "/admin/companies", label: "Companies", icon: Building2 },
-    { to: "/admin/driver", label: "Public Drivers", icon: Users },
-    { to: "/admin/bookings", label: "Bookings", icon: ClipboardList },
-
-    { to: "/admin/reviews", label: "Reviews", icon: Star },
-    { to: "/admin/messages", label: "Messages", icon: MessageSquare },
-    { to: "/admin/settings", label: "Settings", icon: Settings },
-  ];
-
-  const customerNavItems: NavItem[] = [
-    { to: "/", label: "Home", icon: Home, exact: true },
-    { to: "/companies", label: "Companies", icon: Building2 },
-    { to: "/trips", label: "Trip", icon: Map },
-    { to: "/bookings", label: "Bookings", icon: ClipboardList },
-    { to: "/contact", label: "Support", icon: Mail },
-  ];
-
-  const driverNavItems: NavItem[] = [
-    { to: "/driver/dashboard/", label: "Driver dashboard", icon: LayoutDashboard, exact: true },
-    { to: "/driver/dashboard/trips/", label: "Trips", icon: Truck },
-    { to: "/profile/", label: "Account profile", icon: User },
-  ];
-
+  const role = resolveNavRole(user);
   const activeCompany = user?.company ?? null;
-  const isTourCompany = user?.account_type === "TOUR_COMPANY" || user?.account_type === "PRIVATE_HIRE_COMPANY";
-  const isDriver = user?.account_type === "DRIVER";
-  const companyPermissions = new Set(["dashboard:read", "profile:read", "profile:update", "tours:read", "tours:write", "bookings:read", "bookings:update", "analytics:read"]);
-  const companyNavItems: NavItem[] = activeCompany
-    ? [
-        {
-          to: "/company/dashboard/",
-          label: "Company overview",
-          icon: LayoutDashboard,
-          exact: true,
-          permission: "dashboard:read",
-        },
-        {
-          to: "/company/private-hire/",
-          label: "Private Hire",
-          icon: Car,
-        },
-        {
-          to: "/company/private-driver/",
-          label: "Private Drivers",
-          icon: User,
-        },
-        {
-          to: "/company/private-service/",
-          label: "Private Services",
-          icon: Briefcase,
-        },
-        {
-          to: "/company/trips/",
-          label: "Trips",
-          icon: Map,
-          permission: "tours:read",
-        },
-        {
-          to: "/company/bookings/",
-          label: "Booking requests",
-          icon: ClipboardList,
-          permission: "bookings:read",
-        },
-        {
-          to: "/company/profile/",
-          label: "Company profile",
-          icon: Building2,
-          permission: "profile:read",
-        },
-        {
-          to: "/company/analytics/",
-          label: "Insights",
-          icon: TrendingUp,
-          permission: "analytics:read",
-        },
-      ].filter((item) => !item.permission || companyPermissions.has(item.permission))
-    : [];
-
-const profileHref = isAdmin
-    ? "/admin/settings/"
-    : isTourCompany
-      ? "/company/profile/"
-      : "/profile/";
-  const navItems = isAdmin ? adminNavItems : isTourCompany ? [] : isDriver ? driverNavItems : customerNavItems;
-  const isActive = (item: NavItem) => {
-    if (item.exact) return pathname === item.to;
-    return pathname === item.to || pathname.startsWith(item.to + "/");
-  };
-
-  const companySection = isTourCompany ? (
-    <>
-      {activeCompany ? (
-        <>
-          {companyNavItems.map((item) => (
-            <Link
-              key={item.to}
-              href={item.to}
-              className={`${styles.item} ${isActive(item) ? styles.itemActive : ""}`}
-              onClick={closeAll}
-            >
-              <span className={styles.icon}>
-                <NavIcon icon={item.icon} />
-              </span>
-              <span className={styles.label}>{item.label}</span>
-            </Link>
-          ))}
-        </>
-      ) : (
-        <span className={styles.item}>Company account is not assigned</span>
-      )}
-      <Link
-        href="/settings/"
-        className={`${styles.item} ${pathname === "/settings" ? styles.itemActive : ""}`}
-        onClick={closeAll}
-      >
-        <span className={styles.icon}>
-          <NavIcon icon={Settings} />
-        </span>
-        <span className={styles.label}>Account profile</span>
-      </Link>
-    </>
-  ) : null;
+  const homeHref = getRoleHomeHref(user);
+  const profileHref = getRoleProfileHref(user);
+  const sectionTitle = getRoleSectionTitle(user);
+  const navItems = getSidebarNavItems(user);
+  const resolvedAvatar = profileImage ? getImageUrl(profileImage) : null;
 
   return (
     <>
@@ -256,7 +157,7 @@ const profileHref = isAdmin
         inert={!mobileOpen}
       >
         <div className={styles.header}>
-          <Link href="/" className={styles.brand} onClick={closeAll}>
+          <Link href={homeHref} className={styles.brand} onClick={closeAll}>
             <NextImage
               src="/travel.logo.jpeg"
               alt="Travel."
@@ -278,40 +179,45 @@ const profileHref = isAdmin
         </div>
 
         <nav className={styles.nav} aria-label="Primary navigation">
-          <div className={styles.sectionTitle}>
-            {isAdmin
-              ? "Platform workspace"
-              : isTourCompany
-                ? activeCompany
-                  ? "Company workspace"
-                  : "Company workspace"
-                : isDriver
-                  ? "Driver workspace"
-                  : "Discover"}
-          </div>
-          {!isAdmin && isTourCompany && companySection}
-          {navItems.map((item) => (
-            <Link
-              key={item.to}
-              href={item.to}
-              className={`${styles.item} ${isActive(item) ? styles.itemActive : ""}`}
-              onClick={closeAll}
-            >
-              <span className={styles.icon}>
-                <NavIcon icon={item.icon} />
-              </span>
-              <span className={styles.label}>{item.label}</span>
-            </Link>
-          ))}
+          <div className={styles.sectionTitle}>{sectionTitle}</div>
+
+          {role === "company" && !activeCompany ? (
+            <span className={styles.item}>Company account is not assigned</span>
+          ) : null}
+
+          {navItems.map((item) => {
+            const active = isNavItemActive(pathname, item);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.item} ${active ? styles.itemActive : ""}`}
+                aria-current={active ? "page" : undefined}
+                onClick={closeAll}
+              >
+                <span className={styles.icon}>
+                  <NavIcon iconKey={item.icon} />
+                </span>
+                <span className={styles.label}>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         <div className={styles.footer}>
           {isAuthenticated ? (
             <>
-<Link href={profileHref} className={styles.userCard} onClick={closeAll}>
+              <Link href={profileHref} className={styles.userCard} onClick={closeAll}>
                 <div className={styles.avatar}>
-                  {profileImage ? (
-                    <NextImage src={profileImage} alt="" width={42} height={42} className="avatar-img" />
+                  {resolvedAvatar ? (
+                    <NextImage
+                      src={resolvedAvatar}
+                      alt=""
+                      width={42}
+                      height={42}
+                      className="avatar-img"
+                      unoptimized={isUnoptimizableImage(resolvedAvatar)}
+                    />
                   ) : (
                     user?.username?.[0]?.toUpperCase() || "U"
                   )}
@@ -320,32 +226,60 @@ const profileHref = isAdmin
                   <span className={styles.userName}>{user?.username}</span>
                   <span className={styles.userEmail}>{user?.email}</span>
                   <span className={styles.badges}>
-                    {isAdmin && <span className={styles.badge}>Admin</span>}
-                    {activeCompany && (
-                      <span className={styles.badge}>
-                        "Company account"
-                      </span>
-                    )}
+                    {isAdmin ? <span className={styles.badge}>Admin</span> : null}
+                    {role === "company" && activeCompany ? (
+                      <span className={styles.badge}>Company account</span>
+                    ) : null}
+                    {role === "driver" ? <span className={styles.badge}>Driver</span> : null}
                   </span>
                 </div>
               </Link>
-              <button type="button" className={styles.logout} onClick={handleLogout} title="Signout">
+              <button
+                type="button"
+                className={styles.logout}
+                onClick={handleLogout}
+                title="Signout"
+              >
                 <LogOut size={16} />
                 <span>Signout</span>
               </button>
             </>
           ) : (
             <div className={styles.accessActions}>
-              <Link href="/login" className={`${styles.accessAction} ${styles.login}`} onClick={closeAll}>
+              <Link
+                href="/login/"
+                className={`${styles.accessAction} ${styles.login}`}
+                onClick={closeAll}
+              >
                 <Lock size={15} />
                 <span>Signin</span>
               </Link>
-              <Link href="/register" className={`${styles.accessAction} ${styles.register}`} onClick={closeAll}>
+              <Link
+                href="/register/"
+                className={`${styles.accessAction} ${styles.register}`}
+                onClick={closeAll}
+              >
                 <UserPlus size={15} />
                 <span>Create account</span>
               </Link>
             </div>
           )}
+
+          {showWebInstallUI ? (
+            <button
+              type="button"
+              className={styles.downloadApp}
+              disabled={installing}
+              onClick={() => {
+                closeAll();
+                void triggerInstall();
+              }}
+            >
+              <Download size={16} aria-hidden="true" />
+              <span>{installing ? "Installing…" : "Download app"}</span>
+            </button>
+          ) : null}
+
           <div className={styles.language}>
             <LanguageSwitcher />
           </div>

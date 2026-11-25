@@ -1,12 +1,14 @@
 ﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { publicEnv } from "@/lib/env-public";
 import { usePwa } from "@/hooks/usePwa";
 import {
   NOTIFICATION_PERMISSION_KEY,
   NOTIFICATION_PROMPT_DISMISSED_KEY,
+  isOnboardingRoute,
   readOnboardingValue,
   writeOnboardingValue,
 } from "@/lib/onboarding";
@@ -22,8 +24,10 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 }
 
 export default function PwaPermissionPopups() {
+  const pathname = usePathname();
   const { isStandalone } = usePwa();
   const { user, isAuthenticated } = useAuth();
+  const onOnboardingScreen = isOnboardingRoute(pathname);
   const [current, setCurrent] = useState<"notif" | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -66,12 +70,12 @@ export default function PwaPermissionPopups() {
   }, [isAuthenticated, registeredKey, user]);
 
   useEffect(() => {
-    if (!isStandalone) return;
+    if (!isStandalone || onOnboardingScreen) return;
     const timer = window.setTimeout(() => {
       tryShowNotifications();
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [isStandalone, tryShowNotifications]);
+  }, [isStandalone, onOnboardingScreen, tryShowNotifications]);
 
   const enableNotifications = useCallback(async () => {
     if (typeof window === "undefined" || !("Notification" in window)) return;

@@ -69,12 +69,6 @@ type PrivateHireService = {
   created_at: string;
 };
 
-const PRICING_TYPE_LABELS: Record<string, string> = {
-  per_trip: "per trip",
-  per_day: "per day",
-  per_hour: "per hour",
-};
-
 export default function CompanyPrivateServicePage() {
   const toast = useToast();
   const [services, setServices] = useState<PrivateHireService[]>([]);
@@ -92,8 +86,6 @@ export default function CompanyPrivateServicePage() {
   const [title, setTitle] = useState("");
   const [vehicleId, setVehicleId] = useState<number | "">("");
   const [driverId, setDriverId] = useState<number | "">("");
-  const [price, setPrice] = useState("45.00");
-  const [pricingType, setPricingType] = useState("per_trip");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
 
@@ -125,8 +117,6 @@ export default function CompanyPrivateServicePage() {
     setTitle("");
     setVehicleId(vehicles.length > 0 ? vehicles[0].id : "");
     setDriverId(drivers.length > 0 ? drivers[0].id : "");
-    setPrice("45.00");
-    setPricingType("per_trip");
     setDescription("");
     setIsActive(true);
     setModalOpen(true);
@@ -137,8 +127,6 @@ export default function CompanyPrivateServicePage() {
     setTitle(s.title);
     setVehicleId(s.vehicle_id);
     setDriverId(s.driver_id);
-    setPrice(s.price);
-    setPricingType(s.pricing_type || "per_trip");
     setDescription(s.description || "");
     setIsActive(s.is_active);
     setModalOpen(true);
@@ -165,8 +153,6 @@ export default function CompanyPrivateServicePage() {
         title: title.trim(),
         vehicle_id: vehicleId,
         driver_id: driverId,
-        price,
-        pricing_type: pricingType,
         description: description.trim(),
         is_active: isActive,
       };
@@ -287,10 +273,6 @@ export default function CompanyPrivateServicePage() {
                   <span className="text-xs text-slate-500">
                     Service #{svc.id} • {svc.is_active ? "Active" : "Paused"}
                   </span>
-                </div>
-                <div className={styles.priceTag}>
-                  ${svc.price}
-                  <span className={styles.pricingUnit}>/{PRICING_TYPE_LABELS[svc.pricing_type] || svc.pricing_type}</span>
                 </div>
               </div>
 
@@ -467,37 +449,6 @@ export default function CompanyPrivateServicePage() {
                       ))}
                     </select>
                   </div>
-
-                  {/* Price */}
-                  <div className={styles.formField}>
-                    <label>
-                      Price (USD $) <span className={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      className={styles.inputControl}
-                      placeholder="45.00"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {/* Pricing Type */}
-                  <div className={styles.formField}>
-                    <label>Pricing Rate Type</label>
-                    <select
-                      className={styles.selectControl}
-                      value={pricingType}
-                      onChange={(e) => setPricingType(e.target.value)}
-                    >
-                      <option value="per_trip">Per Trip (One-way / Transfer)</option>
-                      <option value="per_day">Per Day (Full Day Chauffeur)</option>
-                      <option value="per_hour">Per Hour</option>
-                    </select>
-                  </div>
                 </div>
 
                 <div className={styles.formField}>
@@ -566,12 +517,6 @@ export default function CompanyPrivateServicePage() {
                 <h2 className={styles.previewHeaderTitle}>{previewService.title}</h2>
               </div>
               <div className="flex items-center gap-3">
-                <span className={styles.previewPriceBadge}>
-                  ${previewService.price}
-                  <span className="text-xs font-normal opacity-85">
-                    /{PRICING_TYPE_LABELS[previewService.pricing_type] || previewService.pricing_type}
-                  </span>
-                </span>
                 <button
                   className="text-white hover:opacity-75 p-1"
                   onClick={() => setPreviewService(null)}

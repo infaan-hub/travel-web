@@ -150,6 +150,12 @@
   min-width: 0;
 }
 
+/* Focused route-only mode: full-width map canvas with no place list sidebar. */
+.bodyRouteOnly {
+  grid-template-columns: minmax(0, 1fr);
+  height: 440px;
+}
+
 .mapWrap {
   position: relative;
   min-width: 0;
@@ -476,6 +482,83 @@
   line-height: 1;
 }
 
+.routeBadgeLarge {
+  width: 28px;
+  height: 28px;
+  border-width: 2.5px;
+  box-shadow:
+    0 0 0 2px rgba(15, 23, 42, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.32);
+  font-size: 0.72rem;
+}
+
+.routeBadgeLive {
+  background: #08428c;
+  box-shadow:
+    0 0 0 6px rgba(8, 66, 140, 0.24),
+    0 4px 14px rgba(8, 66, 140, 0.42);
+  animation: route-badge-live-pulse 1.8s ease-out infinite;
+}
+
+@keyframes route-badge-live-pulse {
+  0% {
+    box-shadow:
+      0 0 0 2px rgba(8, 66, 140, 0.34),
+      0 4px 14px rgba(8, 66, 140, 0.42);
+  }
+  70% {
+    box-shadow:
+      0 0 0 11px rgba(8, 66, 140, 0),
+      0 4px 14px rgba(8, 66, 140, 0.42);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(8, 66, 140, 0),
+      0 4px 14px rgba(8, 66, 140, 0.42);
+  }
+}
+
+.map :global(.leaflet-tooltip).routeStopTooltip {
+  max-width: 220px;
+  padding: 4px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+}
+
+.routeStopPopup {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 170px;
+  max-width: 240px;
+  padding: 10px 12px;
+  background: #ffffff;
+}
+
+.routeStopPopup strong {
+  color: #0f172a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.routeStopPopup span {
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 /* Floating map-view switch over the top-right of the tiles. */
 .mapTop {
   position: absolute;
@@ -508,6 +591,9 @@
 }
 
 .mapViewButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 9px;
   color: #44546c;
   background: transparent;
@@ -722,6 +808,14 @@
   white-space: nowrap;
 }
 
+.pickerRouteOnly .mapTop {
+  padding: 4px;
+}
+
+.pickerRouteOnly .routePanel {
+  top: 52px;
+}
+
 .routeStops b {
   display: grid;
   width: 15px;
@@ -732,6 +826,14 @@
   background: #334155;
   border-radius: 50%;
   font-size: 0.52rem;
+}
+
+.routeStops b.routeStopDotA {
+  background: #15803d;
+}
+
+.routeStops b.routeStopDotB {
+  background: #08428c;
 }
 
 .routeInstruction {
@@ -849,6 +951,27 @@
 
 .legendRouteEnd {
   background: #0f172a;
+}
+
+.legendRouteEndBlue {
+  background: #08428c;
+}
+
+.legendRouteOnly {
+  right: auto;
+  width: fit-content;
+  max-width: calc(100% - 20px);
+  max-height: none;
+  padding: 6px 11px;
+  gap: 8px 12px;
+}
+
+.legendRouteLine {
+  width: 20px;
+  height: 5px;
+  background: #16a34a;
+  border: 1px solid #064e3b;
+  border-radius: 999px;
 }
 
 .legendLine {
@@ -1289,6 +1412,10 @@
     height: auto;
   }
 
+  .bodyRouteOnly {
+    grid-template-rows: 360px;
+  }
+
   .mapWrap {
     height: 360px;
   }
@@ -1348,6 +1475,10 @@
 
   .body {
     grid-template-rows: 320px minmax(0, 1fr);
+  }
+
+  .bodyRouteOnly {
+    grid-template-rows: 320px;
   }
 
   .mapWrap {

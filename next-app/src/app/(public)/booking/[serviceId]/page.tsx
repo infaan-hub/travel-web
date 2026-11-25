@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import BookingPage from "@/features/pages/BookingPage";
 
@@ -6,5 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <BookingPage />;
+  return (
+    <Suspense fallback={null}>
+      <BookingPage />
+    </Suspense>
+  );
 }

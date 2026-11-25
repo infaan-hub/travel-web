@@ -16,6 +16,8 @@ const heroImageFields = {
   secondary: ["heroSecondaryImageData", "heroSecondaryImageMime", "heroSecondaryImage"] as const,
   feature: ["heroFeatureImageData", "heroFeatureImageMime", "heroFeatureImage"] as const,
   thumb: ["heroThumbImageData", "heroThumbImageMime", "heroThumbImage"] as const,
+  "trip-public": ["tripPublicCardImageData", "tripPublicCardImageMime", "tripPublicCardImage"] as const,
+  "trip-company": ["tripCompanyCardImageData", "tripCompanyCardImageMime", "tripCompanyCardImage"] as const,
 } as const;
 
 export async function GET(

@@ -4,12 +4,26 @@ import type {
   PrivateHireDriver,
   PrivateHireService,
   Company,
+  Profile,
   TransportBooking,
   TransportTripRequest,
   User,
 } from "@prisma/client";
+import { resolveDriverStage } from "@/lib/driver-workflow";
+import {
+  canRescheduleBooking,
+  getRescheduleDeadline,
+  resolveEffectiveBookingStatus,
+} from "@/lib/booking-lifecycle";
+import { usdToTzs } from "@/lib/zanzibar-route-pricing";
 
-export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
+export type PrivateHireVehicleSerializable = Omit<
+  PrivateHireVehicle,
+  "oneWayPriceUsd" | "waitReturnPriceUsd" | "fullDayPriceUsd"
+> &
+  Partial<Pick<PrivateHireVehicle, "oneWayPriceUsd" | "waitReturnPriceUsd" | "fullDayPriceUsd">>;
+
+export function privateHireVehicleSerializer(vehicle: PrivateHireVehicleSerializable) {
   let includes: string[] = [];
   let excludes: string[] = [];
 
@@ -35,9 +49,17 @@ export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
     }
   }
 
+  const oneWayUsd =
+    vehicle.oneWayPriceUsd != null ? Number(vehicle.oneWayPriceUsd) : null;
+  const waitReturnUsd =
+    vehicle.waitReturnPriceUsd != null ? Number(vehicle.waitReturnPriceUsd) : null;
+  const fullDayUsd =
+    vehicle.fullDayPriceUsd != null ? Number(vehicle.fullDayPriceUsd) : null;
+
   return {
     id: vehicle.id,
     company_id: vehicle.companyId,
+    driver_id: vehicle.driverId ?? null,
     name: vehicle.name,
     plate_number: vehicle.plateNumber,
     category: vehicle.category,
@@ -46,6 +68,12 @@ export function privateHireVehicleSerializer(vehicle: PrivateHireVehicle) {
     description: vehicle.description,
     includes,
     excludes,
+    one_way_price_usd: oneWayUsd,
+    wait_return_price_usd: waitReturnUsd,
+    full_day_price_usd: fullDayUsd,
+    one_way_price_tzs: oneWayUsd != null ? usdToTzs(oneWayUsd) : null,
+    wait_return_price_tzs: waitReturnUsd != null ? usdToTzs(waitReturnUsd) : null,
+    full_day_price_tzs: fullDayUsd != null ? usdToTzs(fullDayUsd) : null,
     front_image: vehicle.frontImage,
     front_image_url: publicImageUrl(vehicle.frontImage),
     side_image: vehicle.sideImage,
@@ -83,7 +111,7 @@ export type SerializedPrivateHireService = ReturnType<typeof privateHireServiceS
 
 export function privateHireServiceSerializer(
   service: PrivateHireService & {
-    vehicle?: PrivateHireVehicle;
+    vehicle?: PrivateHireVehicleSerializable;
     driver?: PrivateHireDriver;
     company?: Pick<Company, "id" | "name" | "slug" | "contactPhone" | "contactEmail" | "logoImageKey"> | null;
   },
@@ -114,14 +142,82 @@ export function privateHireServiceSerializer(
 }
 
 export function transportBookingSerializer(
-  booking: TransportBooking & {
-    service?: (PrivateHireService & { vehicle?: PrivateHireVehicle; driver?: PrivateHireDriver; company?: Company | null }) | null;
-    vehicle?: PrivateHireVehicle | null;
+  booking: Omit<TransportBooking, "tripOption"> &
+    Partial<Pick<TransportBooking, "tripOption">> & {
+    service?: (PrivateHireService & { vehicle?: PrivateHireVehicleSerializable; driver?: PrivateHireDriver; company?: Company | null }) | null;
+    vehicle?: PrivateHireVehicleSerializable | null;
     driver?: PrivateHireDriver | null;
     company?: Company | null;
     tripRequest?: TransportTripRequest | null;
+    user?: (Pick<User, "id" | "username" | "email" | "firstName" | "lastName" | "emailVerified" | "dateJoined"> & {
+      profile?: Pick<Profile, "fullName" | "phone" | "address" | "image"> | null;
+    }) | null;
   },
 ) {
+  const effectiveStatus = resolveEffectiveBookingStatus({
+    status: booking.status,
+    travelDate: booking.travelDate,
+    pickupTime: booking.pickupTime,
+  });
+  const effectiveStage = resolveDriverStage({
+    status: effectiveStatus,
+    driverStage: booking.driverStage,
+  });
+  const canReschedule = canRescheduleBooking({
+    status: effectiveStatus,
+    travelDate: booking.travelDate,
+    pickupTime: booking.pickupTime,
+  });
+  const rescheduleDeadline = getRescheduleDeadline({
+    status: effectiveStatus,
+    travelDate: booking.travelDate,
+    pickupTime: booking.pickupTime,
+  });
+
+  const accountFullName =
+    booking.user?.profile?.fullName?.trim() ||
+    [booking.user?.firstName, booking.user?.lastName].filter(Boolean).join(" ").trim() ||
+    booking.fullName;
+
+  const isUnassignedPublicPending = Boolean(
+    booking.isPublic && booking.status === "pending" && !booking.driverId,
+  );
+  const serializedDriver =
+    !isUnassignedPublicPending && booking.driver
+      ? privateHireDriverSerializer(booking.driver)
+      : null;
+  const serializedVehicle =
+    !isUnassignedPublicPending && booking.vehicle
+      ? privateHireVehicleSerializer(booking.vehicle)
+      : null;
+  const isReassignedDriver = Boolean(
+    booking.driverId && booking.service && booking.service.driverId !== booking.driverId,
+  );
+  const rawSerializedService = booking.service
+    ? privateHireServiceSerializer(booking.service)
+    : null;
+  const serializedService = rawSerializedService
+    ? isUnassignedPublicPending
+      ? {
+          ...rawSerializedService,
+          driver: null,
+          vehicle: null,
+        }
+      : isReassignedDriver
+        ? {
+            ...rawSerializedService,
+            driver_id: booking.driverId ?? rawSerializedService.driver_id,
+            vehicle_id: booking.vehicleId ?? rawSerializedService.vehicle_id,
+            driver: serializedDriver,
+            vehicle: serializedVehicle,
+          }
+        : {
+            ...rawSerializedService,
+            driver: serializedDriver ?? rawSerializedService.driver,
+            vehicle: serializedVehicle ?? rawSerializedService.vehicle,
+          }
+    : null;
+
   return {
     id: booking.id,
     reference: booking.reference,
@@ -136,18 +232,61 @@ export function transportBookingSerializer(
     end_date: booking.endDate?.toISOString() ?? null,
     pickup_time: booking.pickupTime,
     total_price: booking.totalPrice?.toString() ?? null,
-    status: booking.status,
+    total_price_tzs:
+      booking.totalPrice != null ? usdToTzs(Number(booking.totalPrice)) : null,
+    trip_option: booking.tripOption ?? "one_way",
+    status: effectiveStatus,
+    can_reschedule: canReschedule,
+    reschedule_deadline: rescheduleDeadline?.toISOString() ?? null,
+    driver_stage: effectiveStage,
+    confirmed_at: booking.confirmedAt?.toISOString() ?? null,
+    started_at: booking.startedAt?.toISOString() ?? null,
+    arrived_at: booking.arrivedAt?.toISOString() ?? null,
+    picked_up_at: booking.pickedUpAt?.toISOString() ?? null,
+    reached_dest_at: booking.reachedDestAt?.toISOString() ?? null,
+    completed_at: booking.completedAt?.toISOString() ?? null,
+    driver_lat: booking.driverLat ?? null,
+    driver_lng: booking.driverLng ?? null,
+    driver_location_updated_at: booking.driverLocationUpdatedAt?.toISOString() ?? null,
+    driver_notes: booking.driverNotes ?? "",
     is_public: booking.isPublic,
     notes: booking.notes,
-    origin: booking.origin,
-    origin_lat: booking.originLat,
-    origin_lng: booking.originLng,
-    destination: booking.destination,
-    dest_lat: booking.destLat,
-    dest_lng: booking.destLng,
-    distance_km: booking.distanceKm,
-    duration_mins: booking.durationMins,
+    origin: booking.origin ?? booking.tripRequest?.origin ?? null,
+    origin_lat: booking.originLat ?? booking.tripRequest?.originLat ?? null,
+    origin_lng: booking.originLng ?? booking.tripRequest?.originLng ?? null,
+    destination: booking.destination ?? booking.tripRequest?.destination ?? null,
+    dest_lat: booking.destLat ?? booking.tripRequest?.destLat ?? null,
+    dest_lng: booking.destLng ?? booking.tripRequest?.destLng ?? null,
+    distance_km: booking.distanceKm ?? booking.tripRequest?.distanceKm ?? null,
+    duration_mins: booking.durationMins ?? booking.tripRequest?.durationMins ?? null,
     trip_request_id: booking.tripRequestId,
+    customer_account: booking.user
+      ? {
+          id: booking.user.id,
+          username: booking.user.username,
+          full_name: accountFullName,
+          first_name: booking.user.firstName,
+          last_name: booking.user.lastName,
+          email: booking.user.email || booking.email,
+          email_verified: booking.user.emailVerified,
+          phone: booking.user.profile?.phone?.trim() || booking.phone,
+          address: booking.user.profile?.address?.trim() || "",
+          avatar_url: publicImageUrl(booking.user.profile?.image),
+          date_joined: booking.user.dateJoined.toISOString(),
+        }
+      : {
+          id: null,
+          username: null,
+          full_name: booking.fullName,
+          first_name: "",
+          last_name: "",
+          email: booking.email,
+          email_verified: false,
+          phone: booking.phone,
+          address: "",
+          avatar_url: null,
+          date_joined: null,
+        },
     trip: booking.tripRequest
       ? {
           id: booking.tripRequest.id,
@@ -168,9 +307,9 @@ export function transportBookingSerializer(
       : null,
     created_at: booking.createdAt.toISOString(),
     updated_at: booking.updatedAt.toISOString(),
-    service: booking.service ? privateHireServiceSerializer(booking.service) : null,
-    vehicle: booking.vehicle ? privateHireVehicleSerializer(booking.vehicle) : null,
-    driver: booking.driver ? privateHireDriverSerializer(booking.driver) : null,
+    service: serializedService,
+    vehicle: serializedVehicle,
+    driver: serializedDriver,
     company: booking.company ? {
       id: booking.company.id,
       name: booking.company.name,

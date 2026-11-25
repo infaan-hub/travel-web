@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   // The legacy clients call every API path with a trailing slash.
   trailingSlash: true,
   poweredByHeader: false,
-  serverExternalPackages: ["@node-rs/argon2", "nodemailer"],
+  serverExternalPackages: ["@node-rs/argon2", "nodemailer", "sharp"],
   experimental: {
     serverActions: {
       bodySizeLimit: "6mb",
@@ -18,6 +18,15 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 31536000,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [32, 48, 64, 96, 128, 256, 384],
+    localPatterns: [
+      { pathname: "/uploads/**" },
+      { pathname: "/icons/**" },
+      { pathname: "/api/images/**" },
+      { pathname: "/api/home-settings/images/**" },
+      { pathname: "/*" },
+    ],
     remotePatterns: [
       { protocol: "https", hostname: "**" },
     ],

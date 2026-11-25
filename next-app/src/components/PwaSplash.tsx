@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePwa } from "@/hooks/usePwa";
 
@@ -36,17 +37,15 @@ export default function PwaSplash() {
       aria-label="Travel is loading"
     >
       <div className="pwa-splash__card">
-        <img
+        <Image
           src="/travel.logo.jpeg"
           alt="Travel."
           className="pwa-splash__logo"
-          width={96}
-          height={96}
+          width={1081}
+          height={937}
+          sizes="(max-width: 768px) 76vw, 300px"
+          priority
         />
-        <p className="pwa-splash__wordmark">
-          Travel<span>.</span>
-        </p>
-        <p className="pwa-splash__caption">Discover places. Meet local providers.</p>
       </div>
     </div>
   );

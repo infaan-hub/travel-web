@@ -8,7 +8,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,6 +17,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpDown,
+  Briefcase,
   CalendarDays,
   Car,
   Check,
@@ -24,6 +25,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  DollarSign,
   FileText,
   Loader2,
   LocateFixed,
@@ -44,12 +46,25 @@ import {
   profileAPI,
   publicPrivateHireAPI,
   routeAPI,
+  routePricesAPI,
   transportBookingsAPI,
 } from "@/lib/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import type { PlaceSuggestion } from "@/lib/place-types";
+import { parseBookingDestinationParams } from "@/lib/trip-discovery";
+import {
+  formatTzs,
+  formatUsd,
+  getOptionPriceUsd,
+  resolveRoutePriceQuote,
+  TRIP_PRICING_OPTIONS,
+  USD_TO_TZS_RATE,
+  usdToTzs,
+  type RoutePriceQuote,
+  type TripPricingOption,
+} from "@/lib/zanzibar-route-pricing";
 import styles from "@/features/pages/booking-trip.module.css";
 
 const TripRouteOverlayMap = dynamic(
@@ -78,6 +93,8 @@ type Service = {
     luggage_capacity: number;
     plate_number?: string | null;
     front_image_url: string | null;
+    side_image_url?: string | null;
+    back_image_url?: string | null;
   } | null;
   driver: { name: string; phone?: string | null } | null;
   company: {
@@ -104,6 +121,8 @@ type BookingResult = {
   destination: string | null;
   distance_km: number | null;
   duration_mins: number | null;
+  total_price_tzs?: number | null;
+  trip_option?: TripPricingOption | null;
   trip_request_id: number | null;
   trip: { id: number; status: string } | null;
   service: { title: string } | null;
@@ -228,14 +247,26 @@ function scrollSectionIntoView(sectionId: string, force = false) {
   element.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-export default function BookingPage() {
+type BookingPageProps = {
+  /** "service" = specific company/service booking (/booking/:id); "public" = open private hire request (/booking/create). */
+  mode?: "service" | "public";
+};
+
+export default function BookingPage({ mode = "service" }: BookingPageProps = {}) {
+  const isPublicBooking = mode === "public";
   const params = useParams<Record<string, string>>();
-  const serviceId = params.serviceId;
+  const serviceId = isPublicBooking ? undefined : params.serviceId;
+  const searchParams = useSearchParams();
+  const initialPrefill = useMemo(
+    () => parseBookingDestinationParams(searchParams),
+    [searchParams],
+  );
   const { user, loading: authLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
   const [service, setService] = useState<Service | null>(null);
   const [loadedServiceId, setLoadedServiceId] = useState<string | null>(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [profileResult, setProfileResult] = useState<{
     userId: number;
     profile: AccountProfile | null;
@@ -249,14 +280,25 @@ export default function BookingPage() {
   const [locationError, setLocationError] = useState("");
   const [locating, setLocating] = useState(false);
   const [showRouteMap, setShowRouteMap] = useState(false);
+  const bgLocationCheckedRef = useRef(false);
+  const [backgroundLocation, setBackgroundLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [routeResult, setRouteResult] = useState<{
     key: string;
     route: RouteEstimate | null;
     error: string;
   } | null>(null);
+  const [tripOption, setTripOption] = useState<TripPricingOption>("one_way");
+  const [serverQuoteResult, setServerQuoteResult] = useState<{
+    key: string;
+    quote: RoutePriceQuote;
+  } | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [destinationEditedByUser, setDestinationEditedByUser] = useState(false);
 
-  const [form, setForm] = useState<FormState>({
+  const [form, setForm] = useState<FormState>(() => ({
     full_name: "",
     phone: "",
     passengers: "1",
@@ -266,18 +308,58 @@ export default function BookingPage() {
     originLat: null,
     originLng: null,
     originSource: "none",
-    destination: "",
-    destLat: null,
-    destLng: null,
-    destSource: "none",
+    destination: initialPrefill?.destination ?? "",
+    destLat: initialPrefill?.destLat ?? null,
+    destLng: initialPrefill?.destLng ?? null,
+    destSource: initialPrefill
+      ? initialPrefill.destLat != null && initialPrefill.destLng != null
+        ? "suggestion"
+        : "custom"
+      : "none",
     notes: "",
-  });
-
-  const today = useMemo(() => localDateIso(), []);
-  const loading = Boolean(serviceId) && loadedServiceId !== serviceId;
+  }));
 
   useEffect(() => {
-    if (!serviceId) return;
+    if (
+      !initialPrefill ||
+      (initialPrefill.destLat != null && initialPrefill.destLng != null)
+    ) {
+      return;
+    }
+    let active = true;
+    const targetName = initialPrefill.destination;
+    geocodeAPI
+      .search(targetName)
+      .then((response) => {
+        if (!active) return;
+        const lat = Number(response.data?.lat);
+        const lng = Number(response.data?.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        setForm((current) => {
+          if (current.destination.trim() !== targetName || current.destLat != null) {
+            return current;
+          }
+          return {
+            ...current,
+            destLat: lat,
+            destLng: lng,
+            destSource: "suggestion",
+          };
+        });
+      })
+      .catch(() => {
+        // Pre-filled destination name stays valid even without geocoded coordinates.
+      });
+    return () => {
+      active = false;
+    };
+  }, [initialPrefill]);
+
+  const today = useMemo(() => localDateIso(), []);
+  const loading = !isPublicBooking && Boolean(serviceId) && loadedServiceId !== serviceId;
+
+  useEffect(() => {
+    if (isPublicBooking || !serviceId) return;
     let active = true;
     publicPrivateHireAPI
       .getById(serviceId)
@@ -293,7 +375,7 @@ export default function BookingPage() {
     return () => {
       active = false;
     };
-  }, [serviceId]);
+  }, [isPublicBooking, serviceId]);
 
   useEffect(() => {
     if (!user) return;
@@ -340,8 +422,9 @@ export default function BookingPage() {
     ((Boolean(savedProfileName) && !form.full_name.trim()) ||
       (Boolean(savedProfilePhone) && !form.phone.trim()));
 
-  const maxPassengers =
-    service?.vehicle?.capacity && service.vehicle.capacity > 0
+  const maxPassengers = isPublicBooking
+    ? 50
+    : service?.vehicle?.capacity && service.vehicle.capacity > 0
       ? service.vehicle.capacity
       : 100;
 
@@ -377,11 +460,16 @@ export default function BookingPage() {
   // Progressive partition visibility: each partition appears automatically below
   // once the prior partition is complete, and stays mounted if already started
   // so editing an earlier typo never collapses the form.
+  const destinationPrefilledActive =
+    Boolean(initialPrefill) &&
+    !destinationEditedByUser &&
+    form.destination.trim().length >= 2;
+
   const hasJourneyProgress = Boolean(
     form.travel_date || form.pickup_time || form.passengers !== "1",
   );
   const hasRouteProgress = Boolean(
-    form.origin.trim() || form.destination.trim(),
+    form.origin.trim() || (form.destination.trim() && destinationEditedByUser),
   );
   const hasNotesProgress = Boolean(form.notes.trim());
 
@@ -426,6 +514,36 @@ export default function BookingPage() {
     }, delay);
     return () => window.clearTimeout(timer);
   }, [visibleStepCount]);
+
+  // Background current-location check when Section 3 of 4 (Origin & destination)
+  // opens on /booking/create/. Used on submit to notify nearby drivers only when
+  // the customer is in Unguja or near a known system place.
+  useEffect(() => {
+    if (!isPublicBooking || !showRoutePartition || bgLocationCheckedRef.current) {
+      return;
+    }
+    bgLocationCheckedRef.current = true;
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+
+    let active = true;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (!active) return;
+        const lat = Number(position.coords.latitude.toFixed(6));
+        const lng = Number(position.coords.longitude.toFixed(6));
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          setBackgroundLocation({ lat, lng });
+        }
+      },
+      () => {
+        // Silent fallback: request stays public without nearby driver notification.
+      },
+      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 120_000 },
+    );
+    return () => {
+      active = false;
+    };
+  }, [isPublicBooking, showRoutePartition]);
 
   const { originLat, originLng, destLat, destLng } = form;
   const hasRouteCoords =
@@ -495,6 +613,82 @@ export default function BookingPage() {
     };
   }, [routeKey, originLat, originLng, destLat, destLng]);
 
+  const quoteKey = routeComplete
+    ? `${form.origin.trim().toLowerCase()}|${form.destination.trim().toLowerCase()}|${
+        service?.id ?? "public"
+      }|${visibleRoute?.distanceKm != null ? Math.round(visibleRoute.distanceKm) : ""}`
+    : "";
+
+  const fallbackRouteQuote = useMemo<RoutePriceQuote | null>(() => {
+    if (!routeComplete) return null;
+    return resolveRoutePriceQuote({
+      origin: form.origin,
+      destination: form.destination,
+      distanceKm: visibleRoute?.distanceKm ?? null,
+      fallbackServicePriceUsd:
+        !isPublicBooking && service?.price != null ? Number(service.price) : null,
+    });
+  }, [routeComplete, form.origin, form.destination, visibleRoute?.distanceKm, isPublicBooking, service?.price]);
+
+  useEffect(() => {
+    if (!quoteKey || !routeComplete) return;
+    let active = true;
+    const requestKey = quoteKey;
+
+    routePricesAPI
+      .quote({
+        origin: form.origin.trim(),
+        destination: form.destination.trim(),
+        service_id: !isPublicBooking && service?.id ? service.id : undefined,
+        distance_km: visibleRoute?.distanceKm ?? undefined,
+      })
+      .then((response) => {
+        if (!active) return;
+        const d = response.data ?? {};
+        const oneWayUsd = Number(d.one_way_usd);
+        const waitReturnUsd = Number(d.wait_return_usd);
+        const fullDayUsd = Number(d.full_day_usd);
+        if (!Number.isFinite(oneWayUsd) || !Number.isFinite(waitReturnUsd) || !Number.isFinite(fullDayUsd)) {
+          return;
+        }
+        setServerQuoteResult({
+          key: requestKey,
+          quote: {
+            matched: Boolean(d.matched),
+            source: d.source || "standard",
+            matchedLabel: String(d.matched_label || `${form.origin} – ${form.destination}`),
+            origin: String(d.origin || form.origin),
+            destination: String(d.destination || form.destination),
+            exchangeRate: Number(d.exchange_rate) || USD_TO_TZS_RATE,
+            oneWayUsd,
+            waitReturnUsd,
+            fullDayUsd,
+            oneWayTzs: Number(d.one_way_tzs) || usdToTzs(oneWayUsd),
+            waitReturnTzs: Number(d.wait_return_tzs) || usdToTzs(waitReturnUsd),
+            fullDayTzs: Number(d.full_day_tzs) || usdToTzs(fullDayUsd),
+          },
+        });
+      })
+      .catch(() => {
+        // Keep instant local fallbackRouteQuote cleanly when quote lookup fails.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [quoteKey, routeComplete, form.origin, form.destination, isPublicBooking, service?.id, visibleRoute?.distanceKm]);
+
+  const activeRouteQuote =
+    quoteKey && serverQuoteResult?.key === quoteKey
+      ? serverQuoteResult.quote
+      : fallbackRouteQuote;
+  const selectedFareUsd = activeRouteQuote
+    ? getOptionPriceUsd(activeRouteQuote, tripOption)
+    : null;
+  const selectedFareTzs = selectedFareUsd != null ? usdToTzs(selectedFareUsd) : null;
+  const selectedOptionMeta =
+    TRIP_PRICING_OPTIONS.find((opt) => opt.key === tripOption) ?? TRIP_PRICING_OPTIONS[0];
+
   const touch = useCallback((field: string) => {
     setTouched((current) =>
       current[field] ? current : { ...current, [field]: true },
@@ -536,13 +730,18 @@ export default function BookingPage() {
           : "",
   };
 
-  const pricingLabel = service
-    ? service.pricing_type.replaceAll("_", " ")
-    : "";
-  const providerName = service?.company?.name?.trim() || "The provider";
-  const driverName = service?.driver?.name?.trim() || "Assigned driver";
+  const providerName = isPublicBooking
+    ? "Available drivers"
+    : service?.company?.name?.trim() || "The provider";
+  const driverName = isPublicBooking
+    ? "Assigned on confirmation"
+    : service?.driver?.name?.trim() || "Assigned driver";
+  const bookingSearch = searchParams.toString();
+  const bookingBasePath = isPublicBooking
+    ? "/booking/create/"
+    : `/booking/${serviceId ?? ""}/`;
   const loginReturnUrl = `/login/?from=${encodeURIComponent(
-    `/booking/${serviceId ?? ""}/`,
+    `${bookingBasePath}${bookingSearch ? `?${bookingSearch}` : ""}`,
   )}`;
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -671,6 +870,7 @@ export default function BookingPage() {
           // Keep the coordinate label when reverse geocoding is unavailable.
         }
 
+        setBackgroundLocation({ lat, lng });
         setForm((current) => ({
           ...current,
           origin: label,
@@ -693,6 +893,7 @@ export default function BookingPage() {
   }
 
   function swapRoute() {
+    setDestinationEditedByUser(true);
     setForm((current) => ({
       ...current,
       origin: current.destination,
@@ -708,7 +909,7 @@ export default function BookingPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!service) return;
+    if (!isPublicBooking && !service) return;
 
     setTouched({
       full_name: true,
@@ -739,7 +940,13 @@ export default function BookingPage() {
 
     try {
       const response = await transportBookingsAPI.create({
-        service_id: service.id,
+        ...(isPublicBooking
+          ? {
+              is_public: true,
+              customer_lat: backgroundLocation?.lat,
+              customer_lng: backgroundLocation?.lng,
+            }
+          : { service_id: service!.id }),
         full_name: form.full_name.trim(),
         email: effectiveEmail.trim(),
         phone: form.phone.trim(),
@@ -755,6 +962,7 @@ export default function BookingPage() {
         dest_lng: form.destLng ?? undefined,
         distance_km: visibleRoute?.distanceKm ?? undefined,
         duration_mins: visibleRoute?.durationMins ?? undefined,
+        trip_option: tripOption,
       });
       setBooking(response.data as BookingResult);
       if (typeof window !== "undefined") {
@@ -780,10 +988,7 @@ export default function BookingPage() {
             in or create an account, then return to this page to complete your
             booking.
           </p>
-          <Link
-            href={`/login/?from=${encodeURIComponent(`/booking/${serviceId ?? ""}/`)}`}
-            className={styles.stateLink}
-          >
+          <Link href={loginReturnUrl} className={styles.stateLink}>
             Sign in
           </Link>
         </div>
@@ -798,7 +1003,7 @@ export default function BookingPage() {
           <span className={styles.stateIcon}>
             <Loader2 className={styles.spin} size={26} aria-hidden="true" />
           </span>
-          <h1 className={styles.stateTitle}>Loading private hire serviceâ€¦</h1>
+          <h1 className={styles.stateTitle}>Loading private hire service…</h1>
           <p className={styles.stateText}>
             Preparing your vehicle details and trip booking form.
           </p>
@@ -807,7 +1012,7 @@ export default function BookingPage() {
     );
   }
 
-  if (!service) {
+  if (!isPublicBooking && !service) {
     return (
       <div id="booking-trip-root" className={`page ${styles.page}`}>
         <div className={styles.stateCard}>
@@ -841,8 +1046,9 @@ export default function BookingPage() {
               Your private hire trip is on its way
             </h1>
             <p className={styles.successLead}>
-              We generated your trip and sent it to {providerName}. They will
-              review availability and confirm your pickup details and final fare.
+              {isPublicBooking
+                ? "We generated your private hire request and shared it with available drivers. Once a driver confirms, you will receive your driver, vehicle, and pickup details."
+                : `We generated your trip and sent it to ${providerName}. They will review availability and confirm your pickup details and final fare.`}
             </p>
 
             <div className={styles.referenceRow}>
@@ -864,7 +1070,7 @@ export default function BookingPage() {
               <div className={styles.successSummaryRow}>
                 <dt className={styles.successSummaryLabel}>Trip route</dt>
                 <dd className={styles.successSummaryValue}>
-                  {booking.origin || form.origin} â†’{" "}
+                  {booking.origin || form.origin} →{" "}
                   {booking.destination || form.destination}
                 </dd>
               </div>
@@ -883,12 +1089,17 @@ export default function BookingPage() {
                 </dd>
               </div>
               <div className={styles.successSummaryRow}>
-                <dt className={styles.successSummaryLabel}>Vehicle</dt>
+                <dt className={styles.successSummaryLabel}>
+                  {isPublicBooking ? "Request type" : "Vehicle"}
+                </dt>
                 <dd className={styles.successSummaryValue}>
-                  {service.vehicle?.name || service.title}
-                  {service.vehicle?.plate_number
-                    ? ` Â· ${service.vehicle.plate_number}`
-                    : ""}
+                  {isPublicBooking
+                    ? "Private hire request"
+                    : `${service?.vehicle?.name || service?.title || "Private hire"}${
+                        service?.vehicle?.plate_number
+                          ? ` · ${service.vehicle.plate_number}`
+                          : ""
+                      }`}
                 </dd>
               </div>
               {booking.distance_km != null || booking.duration_mins != null ? (
@@ -900,30 +1111,45 @@ export default function BookingPage() {
                       formatDuration(booking.duration_mins),
                     ]
                       .filter(Boolean)
-                      .join(" Â· ")}
+                      .join(" · ")}
                   </dd>
                 </div>
               ) : null}
-              <div className={styles.successSummaryRow}>
-                <dt className={styles.successSummaryLabel}>Provider</dt>
-                <dd className={styles.successSummaryValue}>{providerName}</dd>
-              </div>
+              {booking.total_price != null ? (
+                <div className={styles.successSummaryRow}>
+                  <dt className={styles.successSummaryLabel}>Estimated fare</dt>
+                  <dd className={styles.successSummaryValue}>
+                    {formatUsd(Number(booking.total_price))} ·{" "}
+                    {formatTzs(
+                      booking.total_price_tzs ?? usdToTzs(Number(booking.total_price)),
+                    )}{" "}
+                    ({selectedOptionMeta.label})
+                  </dd>
+                </div>
+              ) : null}
+              {!isPublicBooking ? (
+                <div className={styles.successSummaryRow}>
+                  <dt className={styles.successSummaryLabel}>Provider</dt>
+                  <dd className={styles.successSummaryValue}>{providerName}</dd>
+                </div>
+              ) : null}
             </dl>
 
             <div className={styles.nextSteps}>
               <div className={styles.nextStep}>
                 <span className={styles.nextStepNumber}>1</span>
-                <strong>Provider review</strong>
+                <strong>{isPublicBooking ? "Driver review" : "Provider review"}</strong>
                 <p>
-                  {providerName} verifies vehicle availability for your trip
-                  date and route.
+                  {isPublicBooking
+                    ? "Approved private hire drivers review your trip route, schedule, and passenger count."
+                    : `${providerName} verifies vehicle availability for your trip date and route.`}
                 </p>
               </div>
               <div className={styles.nextStep}>
                 <span className={styles.nextStepNumber}>2</span>
                 <strong>Confirmation</strong>
                 <p>
-                  You receive confirmed pickup details and final fare at{" "}
+                  You receive confirmed pickup details and driver info at{" "}
                   {effectiveEmail}.
                 </p>
               </div>
@@ -949,83 +1175,144 @@ export default function BookingPage() {
     );
   }
 
+  const heroPhotos = service?.vehicle
+    ? [
+        { label: "Front", url: service.vehicle.front_image_url },
+        { label: "Side", url: service.vehicle.side_image_url ?? null },
+        { label: "Back", url: service.vehicle.back_image_url ?? null },
+      ].filter((photo): photo is { label: string; url: string } => Boolean(photo.url))
+    : [];
+  const activeHeroPhoto = heroPhotos[activePhotoIndex] ?? heroPhotos[0] ?? null;
+
   return (
     <div id="booking-trip-root" className={`page ${styles.page}`}>
       <header className={styles.hero}>
-        {service.vehicle?.front_image_url ? (
-          <div className={styles.heroMedia} aria-hidden="true">
+        <div className={styles.heroMedia} aria-hidden="true">
+          {activeHeroPhoto ? (
             <Image
-              src={getImageUrl(service.vehicle.front_image_url)}
+              src={getImageUrl(activeHeroPhoto.url)}
               alt=""
               fill
-              sizes="100vw"
+              sizes="(max-width: 768px) 96vw, 1180px"
               className={styles.heroImage}
               priority
-              unoptimized
+              unoptimized={isUnoptimizableImage(getImageUrl(activeHeroPhoto.url))}
             />
-            <span className={styles.heroScrim} />
-          </div>
-        ) : (
-          <span className={styles.heroScrim} aria-hidden="true" />
-        )}
+          ) : (
+            <div className={styles.heroMediaFallback}>
+              <Car size={54} />
+            </div>
+          )}
+        </div>
+        <span className={styles.heroTopScrim} aria-hidden="true" />
 
-        <div className={styles.heroInner}>
-          <div className={styles.heroTopBar}>
-            <Link href="/transport/" className={styles.backLink}>
-              <ArrowLeft size={15} aria-hidden="true" />
-              All private hire services
-            </Link>
+        <div className={styles.heroTopBar}>
+          <Link href="/transport/" className={styles.backLink}>
+            <ArrowLeft size={15} aria-hidden="true" />
+            All private hire services
+          </Link>
+          {service ? (
             <Link
               href={`/transport/service/${service.id}/`}
               className={styles.backLink}
             >
               View vehicle details
             </Link>
+          ) : null}
+        </div>
+
+        <div className={styles.heroSheet}>
+          <div className={styles.heroBody}>
+            <div className={styles.heroCopy}>
+              <span className={styles.heroKicker}>
+                {isPublicBooking
+                  ? "Private Hire Request · Zanzibar"
+                  : service?.company?.name
+                    ? `${service.company.name} · Private Hire`
+                    : "Verified Private Hire"}
+              </span>
+              <h1 className={styles.heroTitle}>
+                {isPublicBooking
+                  ? "Request Private Hire Transport"
+                  : service?.title || "Private Hire Request"}
+              </h1>
+            </div>
+
+            {!isPublicBooking && heroPhotos.length > 1 ? (
+              <div
+                className={styles.heroAnglePills}
+                role="tablist"
+                aria-label="Vehicle photo angle"
+              >
+                {heroPhotos.map((photo, index) => (
+                  <button
+                    key={photo.label}
+                    type="button"
+                    role="tab"
+                    aria-selected={index === activePhotoIndex}
+                    className={`${styles.heroAngleBtn} ${
+                      index === activePhotoIndex ? styles.heroAngleBtnActive : ""
+                    }`}
+                    onClick={() => setActivePhotoIndex(index)}
+                  >
+                    {photo.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
 
-          <div className={styles.heroMain}>
-            <div className={styles.heroCopy}>
-              <h1 className={styles.heroTitle}>{service.title}</h1>
-              {service.company ? (
-                <p className={styles.heroCompany}>{service.company.name}</p>
-              ) : null}
-              <ul className={styles.heroFacts}>
-                {service.vehicle ? (
+          <div className={styles.heroBottomRow}>
+            <ul className={styles.heroFacts}>
+              {isPublicBooking ? (
+                <>
                   <li>
                     <Car size={14} aria-hidden="true" />
-                    {service.vehicle.name}
-                    {service.vehicle.plate_number
-                      ? ` Â· ${service.vehicle.plate_number}`
-                      : ""}
+                    <span>Private hire request</span>
                   </li>
-                ) : null}
-                {service.vehicle ? (
                   <li>
                     <Users size={14} aria-hidden="true" />
-                    Up to {service.vehicle.capacity} passengers
+                    <span>Up to {maxPassengers} passengers</span>
                   </li>
-                ) : null}
-                {service.vehicle ? (
                   <li>
                     <ShieldCheck size={14} aria-hidden="true" />
-                    {service.vehicle.luggage_capacity} luggage bags
+                    <span>Verified local drivers</span>
                   </li>
-                ) : null}
-                <li>
-                  <CheckCircle2 size={14} aria-hidden="true" />
-                  Verified driver
-                </li>
-              </ul>
-            </div>
-
-            <div className={styles.priceCard}>
-              <span className={styles.priceLabel}>Starting price</span>
-              <span className={styles.priceValue}>${service.price}</span>
-              <span className={styles.priceUnit}>/ {pricingLabel}</span>
-              <p className={styles.priceNote}>
-                No payment now. {providerName} confirms the final fare.
-              </p>
-            </div>
+                  <li>
+                    <CheckCircle2 size={14} aria-hidden="true" />
+                    <span>No payment now</span>
+                  </li>
+                </>
+              ) : (
+                <>
+                  {service?.vehicle ? (
+                    <li>
+                      <Car size={14} aria-hidden="true" />
+                      <span>{service.vehicle.name}</span>
+                      {service.vehicle.plate_number ? (
+                        <em>{service.vehicle.plate_number}</em>
+                      ) : null}
+                    </li>
+                  ) : null}
+                  {service?.vehicle ? (
+                    <li>
+                      <Users size={14} aria-hidden="true" />
+                      <span>Up to {service.vehicle.capacity} passengers</span>
+                    </li>
+                  ) : null}
+                  {service?.vehicle ? (
+                    <li>
+                      <Briefcase size={14} aria-hidden="true" />
+                      <span>{service.vehicle.luggage_capacity} luggage bags</span>
+                    </li>
+                  ) : null}
+                  <li>
+                    <ShieldCheck size={14} aria-hidden="true" />
+                    <span>Verified driver</span>
+                  </li>
+                </>
+              )}
+            </ul>
           </div>
         </div>
       </header>
@@ -1422,7 +1709,9 @@ export default function BookingPage() {
                       </p>
                     ) : (
                       <p className={styles.hintText}>
-                        Max {maxPassengers} seats for this vehicle.
+                        {isPublicBooking
+                          ? `Up to ${maxPassengers} passengers.`
+                          : `Max ${maxPassengers} seats for this vehicle.`}
                       </p>
                     )}
                   </div>
@@ -1499,9 +1788,21 @@ export default function BookingPage() {
                   <div className={styles.nextPartitionCue}>
                     <ArrowRight size={14} aria-hidden="true" />
                     <span>
-                      Select your travel date and time to unlock{" "}
-                      <strong>Origin &amp; Destination (Trip Generator)</strong>{" "}
-                      below.
+                      {destinationPrefilledActive ? (
+                        <>
+                          Select your travel date and time to unlock{" "}
+                          <strong>Origin &amp; Destination</strong> — your
+                          destination (<strong>{form.destination}</strong>) is
+                          already filled in, so you only need to choose your
+                          pickup origin.
+                        </>
+                      ) : (
+                        <>
+                          Select your travel date and time to unlock{" "}
+                          <strong>Origin &amp; Destination (Trip Generator)</strong>{" "}
+                          below.
+                        </>
+                      )}
                     </span>
                   </div>
                 ) : null}
@@ -1630,32 +1931,43 @@ export default function BookingPage() {
                     maxLength={255}
                     pinned={form.destSource !== "none" && !sameRoute}
                     pinnedLabel={
-                      form.destSource === "custom" ? "Custom" : "Selected"
+                      destinationPrefilledActive
+                        ? "From trip"
+                        : form.destSource === "custom"
+                          ? "Custom"
+                          : "Selected"
                     }
                     placeholder="Start typing or pick e.g. Nungwi, Kendwa, Paje"
-                    hint="Choose a suggested Zanzibar destination to compute distance & travel time."
+                    hint={
+                      destinationPrefilledActive
+                        ? "Auto-filled from your selected trip — just fill your pickup origin above (or change this destination anytime)."
+                        : "Choose a suggested Zanzibar destination to compute distance & travel time."
+                    }
                     error={errors.destination}
-                    onChange={(value) =>
+                    onChange={(value) => {
+                      setDestinationEditedByUser(true);
                       setForm((current) => ({
                         ...current,
                         destination: value,
                         destLat: null,
                         destLng: null,
                         destSource: "none",
-                      }))
-                    }
-                    onSelect={(place) =>
+                      }));
+                    }}
+                    onSelect={(place) => {
+                      setDestinationEditedByUser(true);
                       setForm((current) => ({
                         ...current,
                         destination: placeLabel(place),
                         destLat: place.latitude,
                         destLng: place.longitude,
                         destSource: "suggestion",
-                      }))
-                    }
-                    onCustomConfirm={(value) =>
-                      confirmCustomLocation("destination", value)
-                    }
+                      }));
+                    }}
+                    onCustomConfirm={(value) => {
+                      setDestinationEditedByUser(true);
+                      confirmCustomLocation("destination", value);
+                    }}
                     onBlur={() => handlePlaceBlur("destination")}
                   />
                 </div>
@@ -1676,7 +1988,9 @@ export default function BookingPage() {
                         Trip generated
                       </div>
                       <span className={styles.generatedTripSub}>
-                        Connected to {service.title}
+                        {isPublicBooking
+                          ? "Connected to Private hire request"
+                          : `Connected to ${service?.title || "Private hire"}`}
                       </span>
                     </div>
 
@@ -1825,9 +2139,53 @@ export default function BookingPage() {
                               destinationLng={destLng}
                               originLabel={form.origin}
                               destinationLabel={form.destination}
+                              routeOnly={isPublicBooking}
                             />
                           </div>
                         ) : null}
+                      </div>
+                    ) : null}
+
+                    {/* LIVE ROUTE FARE PREVIEW & OPTION SELECTOR ($ & TSh) */}
+                    {activeRouteQuote ? (
+                      <div className={styles.fareQuoteCard}>
+                        <div className={styles.fareQuoteHead}>
+                          <span className={styles.fareQuoteTitle}>
+                            <DollarSign size={14} aria-hidden="true" />
+                            Trip price ($ &amp; TSh)
+                          </span>
+                          <span className={styles.fareQuoteSub}>
+                            {activeRouteQuote.matchedLabel} · $1 = {formatTzs(activeRouteQuote.exchangeRate)}
+                          </span>
+                        </div>
+
+                        <div
+                          className={styles.fareOptionsGrid}
+                          role="radiogroup"
+                          aria-label="Choose trip pricing option"
+                        >
+                          {TRIP_PRICING_OPTIONS.map((opt) => {
+                            const usd = getOptionPriceUsd(activeRouteQuote, opt.key);
+                            const tzs = usdToTzs(usd);
+                            const active = tripOption === opt.key;
+                            return (
+                              <button
+                                key={opt.key}
+                                type="button"
+                                role="radio"
+                                aria-checked={active}
+                                className={`${styles.fareOptionCard} ${
+                                  active ? styles.fareOptionCardActive : ""
+                                }`}
+                                onClick={() => setTripOption(opt.key)}
+                              >
+                                <span className={styles.fareOptionName}>{opt.label}</span>
+                                <strong className={styles.fareOptionUsd}>{formatUsd(usd)}</strong>
+                                <span className={styles.fareOptionTzs}>{formatTzs(tzs)}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     ) : null}
                   </div>
@@ -1835,8 +2193,19 @@ export default function BookingPage() {
                   <div className={styles.nextPartitionCue}>
                     <ArrowRight size={14} aria-hidden="true" />
                     <span>
-                      Pick both an origin and destination to generate your trip
-                      and reveal <strong>Description &amp; Submit</strong> below.
+                      {destConfirmed && !originConfirmed ? (
+                        <>
+                          Choose or enter your pickup <strong>Origin</strong>{" "}
+                          above to generate your trip and reveal{" "}
+                          <strong>Description &amp; Submit</strong> below.
+                        </>
+                      ) : (
+                        <>
+                          Pick both an origin and destination to generate your
+                          trip and reveal{" "}
+                          <strong>Description &amp; Submit</strong> below.
+                        </>
+                      )}
                     </span>
                   </div>
                 )}
@@ -1917,10 +2286,20 @@ export default function BookingPage() {
                     <div>
                       <span className={styles.recapLabel}>Contact</span>
                       <strong className={styles.recapValue}>
-                        {form.full_name.trim() || "â€”"} Â·{" "}
-                        {form.phone.trim() || "â€”"}
+                        {form.full_name.trim() || "—"} ·{" "}
+                        {form.phone.trim() || "—"}
                       </strong>
                     </div>
+                    {selectedFareUsd != null && selectedFareTzs != null ? (
+                      <div className={styles.recapPriceSpan}>
+                        <span className={styles.recapLabel}>
+                          Trip price ({selectedOptionMeta.label})
+                        </span>
+                        <strong className={styles.recapPriceValue}>
+                          {formatUsd(selectedFareUsd)} · {formatTzs(selectedFareTzs)}
+                        </strong>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -1935,8 +2314,9 @@ export default function BookingPage() {
                   <p className={styles.submitNote}>
                     <ShieldCheck size={16} aria-hidden="true" />
                     <span>
-                      No payment is taken now. {providerName} reviews your
-                      generated trip and confirms availability &amp; final fare.
+                      {isPublicBooking
+                        ? "No payment is taken now. Your private hire request is published for verified drivers to confirm availability and pickup details."
+                        : `No payment is taken now. ${providerName} reviews your generated trip and confirms availability & final fare.`}
                     </span>
                   </p>
                   <button
@@ -1970,14 +2350,14 @@ export default function BookingPage() {
         <aside className={styles.aside}>
           <div className={styles.summaryCard}>
             <div className={styles.summaryMedia}>
-              {service.vehicle?.front_image_url ? (
+              {service?.vehicle?.front_image_url ? (
                 <Image
                   src={getImageUrl(service.vehicle.front_image_url)}
                   alt={service.vehicle.name}
                   fill
                   sizes="360px"
                   className={styles.summaryImage}
-                  unoptimized
+                  unoptimized={isUnoptimizableImage(getImageUrl(service.vehicle.front_image_url))}
                 />
               ) : (
                 <span className={styles.summaryMediaEmpty}>
@@ -1993,16 +2373,26 @@ export default function BookingPage() {
               </span>
             </div>
 
-            <span className={styles.summaryKicker}>Private hire trip</span>
-            <h2 className={styles.summaryTitle}>{service.title}</h2>
-            {service.company ? (
+            <span className={styles.summaryKicker}>
+              {isPublicBooking ? "Private hire request" : "Private hire trip"}
+            </span>
+            <h2 className={styles.summaryTitle}>
+              {isPublicBooking
+                ? "Request Private Hire Transport"
+                : service?.title || "Private hire request"}
+            </h2>
+            {!isPublicBooking && service?.company ? (
               <p className={styles.summaryCompany}>{service.company.name}</p>
             ) : null}
 
-            <div className={styles.summaryPriceRow}>
-              <span className={styles.summaryPrice}>${service.price}</span>
-              <span className={styles.summaryUnit}>/ {pricingLabel}</span>
-            </div>
+            {selectedFareUsd != null && selectedFareTzs != null ? (
+              <div className={styles.summaryPriceRow}>
+                <span className={styles.summaryPrice}>{formatUsd(selectedFareUsd)}</span>
+                <span className={styles.summaryUnit}>
+                  {formatTzs(selectedFareTzs)} · {selectedOptionMeta.shortLabel}
+                </span>
+              </div>
+            ) : null}
 
             <div className={styles.summaryList}>
               <div className={styles.summaryRow}>
@@ -2061,10 +2451,12 @@ export default function BookingPage() {
                   <span className={styles.summaryRowLabel}>Trip route</span>
                   <span className={styles.summaryRowValue}>
                     {routeComplete
-                      ? `${form.origin} â†’ ${form.destination}`
+                      ? `${form.origin} → ${form.destination}`
                       : form.origin.trim()
-                        ? `${form.origin} â†’ Choose destination`
-                        : "Origin & destination"}
+                        ? `${form.origin} → ${form.destination.trim() || "Choose destination"}`
+                        : form.destination.trim()
+                          ? `Choose origin → ${form.destination}`
+                          : "Origin & destination"}
                   </span>
                 </span>
               </div>
@@ -2087,53 +2479,69 @@ export default function BookingPage() {
                 <span className={styles.summaryRowText}>
                   <span className={styles.summaryRowLabel}>Vehicle &amp; driver</span>
                   <span className={styles.summaryRowValue}>
-                    {service.vehicle
-                      ? `${service.vehicle.name} Â· ${driverName}`
-                      : driverName}
+                    {isPublicBooking
+                      ? "Private hire · assigned on confirmation"
+                      : service?.vehicle
+                        ? `${service.vehicle.name} · ${driverName}`
+                        : driverName}
                   </span>
                 </span>
               </div>
             </div>
 
             <p className={styles.summaryNote}>
-              Submitting creates a linked trip record and sends your request to{" "}
-              {providerName} for confirmation.
+              {isPublicBooking
+                ? "Submitting creates a linked trip record and sends your private hire request for confirmation."
+                : `Submitting creates a linked trip record and sends your request to ${providerName} for confirmation.`}
             </p>
           </div>
 
-          <div className={styles.helpCard}>
-            <h2 className={styles.helpTitle}>Need help?</h2>
-            <p className={styles.helpText}>
-              {service.company?.contact_phone || service.driver?.phone
-                ? "Call the provider directly if you have questions about this vehicle or route."
-                : "Questions about this vehicle? Contact the provider through their profile."}
-            </p>
-            {service.company?.contact_phone ? (
-              <a
-                href={`tel:${service.company.contact_phone.replace(/\D/g, "")}`}
-                className={styles.helpPhone}
-              >
-                <Phone size={14} aria-hidden="true" />
-                {service.company.contact_phone}
-              </a>
-            ) : service.driver?.phone ? (
-              <a
-                href={`tel:${service.driver.phone.replace(/\D/g, "")}`}
-                className={styles.helpPhone}
-              >
-                <Phone size={14} aria-hidden="true" />
-                {service.driver.phone}
-              </a>
-            ) : service.company ? (
-              <Link
-                href={`/company/${service.company.slug}/`}
-                className={styles.helpPhone}
-              >
-                View provider profile
+          {!isPublicBooking && service ? (
+            <div className={styles.helpCard}>
+              <h2 className={styles.helpTitle}>Need help?</h2>
+              <p className={styles.helpText}>
+                {service.company?.contact_phone || service.driver?.phone
+                  ? "Call the provider directly if you have questions about this vehicle or route."
+                  : "Questions about this vehicle? Contact the provider through their profile."}
+              </p>
+              {service.company?.contact_phone ? (
+                <a
+                  href={`tel:${service.company.contact_phone.replace(/\D/g, "")}`}
+                  className={styles.helpPhone}
+                >
+                  <Phone size={14} aria-hidden="true" />
+                  {service.company.contact_phone}
+                </a>
+              ) : service.driver?.phone ? (
+                <a
+                  href={`tel:${service.driver.phone.replace(/\D/g, "")}`}
+                  className={styles.helpPhone}
+                >
+                  <Phone size={14} aria-hidden="true" />
+                  {service.driver.phone}
+                </a>
+              ) : service.company ? (
+                <Link
+                  href={`/company/${service.company.slug}/`}
+                  className={styles.helpPhone}
+                >
+                  View provider profile
+                  <ArrowRight size={14} aria-hidden="true" />
+                </Link>
+              ) : null}
+            </div>
+          ) : (
+            <div className={styles.helpCard}>
+              <h2 className={styles.helpTitle}>Prefer a specific company?</h2>
+              <p className={styles.helpText}>
+                Browse verified transport providers to choose a specific vehicle and company directly.
+              </p>
+              <Link href="/transport/" className={styles.helpPhone}>
+                Browse vehicles
                 <ArrowRight size={14} aria-hidden="true" />
               </Link>
-            ) : null}
-          </div>
+            </div>
+          )}
         </aside>
       </div>
     </div>

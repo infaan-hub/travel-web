@@ -388,6 +388,16 @@ export function homeSettingSerializer(setting: HomeSetting): Json {
     hero_secondary_image_url: heroImage(setting.heroSecondaryImageData, setting.heroSecondaryImage, "secondary"),
     hero_feature_image_url: heroImage(setting.heroFeatureImageData, setting.heroFeatureImage, "feature"),
     hero_thumb_image_url: heroImage(setting.heroThumbImageData, setting.heroThumbImage, "thumb"),
+    trip_public_card_image_url: heroImage(
+      setting.tripPublicCardImageData,
+      setting.tripPublicCardImage,
+      "trip-public",
+    ),
+    trip_company_card_image_url: heroImage(
+      setting.tripCompanyCardImageData,
+      setting.tripCompanyCardImage,
+      "trip-company",
+    ),
     zanzibar_image_url: publicImageUrl(setting.zanzibarImage),
     tanzania_image_url: publicImageUrl(setting.tanzaniaImage),
     more_experiences_image_url: publicImageUrl(setting.moreExperiencesImage),
@@ -660,8 +670,14 @@ export function companyWorkspaceProfileSerializer(company: Company): Json {
 }
 
 export function companyPublicSerializer(
-  company: Company & { _count?: { privateHireServices?: number; trips?: number } },
+  company: Company & {
+    _count?: { privateHireServices?: number; trips?: number };
+    privateHireServices?: Array<Parameters<typeof privateHireServiceSerializer>[0]>;
+  },
 ): Json {
+  const services = Array.isArray(company.privateHireServices)
+    ? company.privateHireServices.map(privateHireServiceSerializer)
+    : undefined;
   return {
     id: company.id,
     name: company.name,
@@ -685,8 +701,10 @@ export function companyPublicSerializer(
       company.latitude !== null && company.longitude !== null
         ? `https://www.openstreetmap.org/?mlat=${company.latitude}&mlon=${company.longitude}#map=15/${company.latitude}/${company.longitude}`
         : null,
-    services_count: company._count?.privateHireServices ?? 0,
+    services_count:
+      company._count?.privateHireServices ?? company.privateHireServices?.length ?? 0,
     trips_count: company._count?.trips ?? 0,
+    ...(services ? { services } : {}),
   };
 }
 

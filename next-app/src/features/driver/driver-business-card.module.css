@@ -1,0 +1,907 @@
+/* ==========================================================================
+   Driver Small Boarding-Pass Business Card (/driver/vehicle/)
+   ========================================================================== */
+
+.sectionCard {
+  --pass-stage-bg: #eef4fb;
+  --pass-surface: #ffffff;
+  --pass-stub-bg: #f4f8ff;
+  --pass-border: #c6d8ef;
+  --pass-perf: #b5cbe6;
+  --pass-ink: #12223a;
+  --pass-ink-soft: #334763;
+  --pass-muted: #5a6f8c;
+  --pass-divider: #dce7f5;
+  --pass-phone-bg: #edf4fc;
+  --pass-phone-border: #c8dcf4;
+  --pass-phone-ink: #08428c;
+  --pass-plate-bg: #fef9c3;
+  --pass-plate-border: #eab308;
+  --pass-plate-ink: #1e293b;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(16px, 2.2vw, 22px);
+  border: 1.5px solid var(--dw-line, rgba(8, 66, 140, 0.14));
+  border-radius: 22px;
+  background: var(--dw-surface, #ffffff);
+  box-shadow: var(--dw-shadow-sm, 0 8px 24px rgba(8, 66, 140, 0.06));
+}
+
+:global(.dark) .sectionCard {
+  --pass-stage-bg: #0b1324;
+  --pass-surface: #132038;
+  --pass-stub-bg: #101b30;
+  --pass-border: rgba(148, 163, 184, 0.3);
+  --pass-perf: rgba(148, 163, 184, 0.34);
+  --pass-ink: #f1f5f9;
+  --pass-ink-soft: #cbd5e1;
+  --pass-muted: #94a3b8;
+  --pass-divider: rgba(148, 163, 184, 0.2);
+  --pass-phone-bg: rgba(59, 130, 246, 0.18);
+  --pass-phone-border: rgba(96, 165, 250, 0.35);
+  --pass-phone-ink: #93c5fd;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+}
+
+.headingCluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.headingIcon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--dw-blue-soft, #edf4fc);
+  color: var(--dw-blue, #08428c);
+  border: 1px solid var(--dw-line, rgba(8, 66, 140, 0.14));
+}
+
+.headingText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--dw-ink, #12223a);
+}
+
+.sectionSub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--dw-muted, #526580);
+}
+
+/* Header Controls: Optional Vehicle Switcher + Edit Card Button */
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.vehiclePicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.vehiclePill {
+  appearance: none;
+  border: 1px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-surface-soft, #f7faff);
+  color: var(--dw-ink-2, #334763);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.vehiclePill:hover {
+  border-color: var(--dw-blue, #08428c);
+}
+
+.vehiclePillActive {
+  background: var(--dw-blue, #08428c);
+  border-color: var(--dw-blue, #08428c);
+  color: #ffffff;
+}
+
+.editToggleBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-surface-soft, #f7faff);
+  color: var(--dw-blue, #08428c);
+  font-size: 0.77rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.editToggleBtn:hover {
+  border-color: var(--dw-blue, #08428c);
+  background: var(--dw-blue-soft, #edf4fc);
+}
+
+.editToggleBtnActive {
+  background: var(--dw-blue, #08428c);
+  border-color: var(--dw-blue, #08428c);
+  color: #ffffff;
+}
+
+/* Ticket Backdrop Stage (gives semi-circular punch notches true cutout contrast) */
+.passStage {
+  display: flex;
+  justify-content: center;
+  padding: clamp(12px, 2vw, 20px);
+  border-radius: 18px;
+  background: var(--pass-stage-bg);
+  border: 1px solid var(--dw-line, rgba(8, 66, 140, 0.1));
+}
+
+/* Small Boarding Pass Silhouette */
+.boardingPass {
+  --stub-w: 184px;
+  --notch-size: 24px;
+
+  position: relative;
+  width: 100%;
+  max-width: 650px;
+  display: grid;
+  grid-template-columns: var(--stub-w) minmax(0, 1fr);
+  border-radius: 20px;
+  border: 1.5px solid var(--pass-border);
+  background: var(--pass-surface);
+  color: var(--pass-ink);
+  box-shadow:
+    0 4px 12px rgba(8, 42, 92, 0.06),
+    0 14px 30px rgba(8, 42, 92, 0.08);
+  overflow: hidden;
+}
+
+/* Top & Bottom Semi-Circular Boarding-Pass Punch Notches */
+.notchTop,
+.notchBottom {
+  position: absolute;
+  left: var(--stub-w);
+  width: var(--notch-size);
+  height: var(--notch-size);
+  border-radius: 999px;
+  background: var(--pass-stage-bg);
+  border: 1.5px solid var(--pass-border);
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.notchTop {
+  top: calc(var(--notch-size) * -0.52);
+}
+
+.notchBottom {
+  bottom: calc(var(--notch-size) * -0.52);
+}
+
+/* Vertical Dashed Perforation Line */
+.perforationLine {
+  position: absolute;
+  top: calc(var(--notch-size) * 0.65);
+  bottom: calc(var(--notch-size) * 0.65);
+  left: var(--stub-w);
+  width: 0;
+  border-left: 2px dashed var(--pass-perf);
+  transform: translateX(-1px);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* LEFT STUB — QR CODE ONLY (NO URL TEXT) */
+.qrStub {
+  display: flex;
+  flex-direction: column;
+  background: var(--pass-stub-bg);
+  min-width: 0;
+}
+
+.stubHeader {
+  height: 40px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #062f66 0%, #073b7e 100%);
+  border-bottom: 3px solid #15803d;
+  color: #cfe2fb;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.qrStubBody {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 14px 14px 12px;
+}
+
+.qrFrame {
+  display: grid;
+  place-items: center;
+  padding: 7px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #d5e3f5;
+  box-shadow: 0 2px 8px rgba(8, 42, 92, 0.06);
+}
+
+.qrSvg {
+  display: block;
+  width: 122px;
+  height: 122px;
+}
+
+.scanTag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pass-muted);
+}
+
+/* RIGHT MAIN BOARDING-PASS BODY */
+.passMain {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--pass-surface);
+}
+
+.mainHeader {
+  height: 40px;
+  padding: 0 18px 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: linear-gradient(90deg, #08428c 0%, #0d57b2 100%);
+  border-bottom: 3px solid #15803d;
+}
+
+.brandMark {
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.passBadge {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.17);
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mainBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 18px 15px 20px;
+  min-width: 0;
+}
+
+/* Driver Row */
+.driverRow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.driverAvatarWrap {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  padding: 2px;
+  background: linear-gradient(135deg, #08428c 0%, #0d57b2 100%);
+  box-shadow: 0 3px 10px rgba(8, 66, 140, 0.18);
+}
+
+.driverAvatarImg {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  object-fit: cover;
+  display: block;
+  background: #ffffff;
+}
+
+.driverAvatarFallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #08428c 0%, #0d57b2 100%);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.driverMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.driverEyebrowRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 7px;
+  min-width: 0;
+}
+
+.driverEyebrow {
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--pass-muted);
+  white-space: nowrap;
+}
+
+.companyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--pass-phone-bg);
+  border: 1px solid var(--pass-phone-border);
+  color: var(--pass-phone-ink);
+  font-size: 0.64rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.driverName {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--pass-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.driverPhonePill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 3px 9px;
+  border-radius: 8px;
+  background: var(--pass-phone-bg);
+  border: 1px solid var(--pass-phone-border);
+  color: var(--pass-phone-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.passDivider {
+  height: 1px;
+  width: 100%;
+  background: var(--pass-divider);
+}
+
+/* Vehicle Row (Front Image + Specs) */
+.vehicleRow {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.vehiclePhotoBox {
+  position: relative;
+  width: 112px;
+  height: 74px;
+  border-radius: 11px;
+  overflow: hidden;
+  border: 1px solid var(--pass-border);
+  background: var(--pass-stub-bg);
+}
+
+.vehiclePhotoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vehiclePhotoFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--pass-muted);
+}
+
+.frontBadge {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(11, 34, 57, 0.78);
+  color: #ffffff;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.vehicleSpecsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 8px 10px;
+  min-width: 0;
+}
+
+.specField {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.specLabel {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--pass-muted);
+}
+
+.specValue {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--pass-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.specValueSoft {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--pass-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plateTag {
+  align-self: flex-start;
+  display: inline-block;
+  max-width: 100%;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: var(--pass-plate-bg);
+  border: 1px solid var(--pass-plate-border);
+  color: var(--pass-plate-ink);
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Inline Business Card Editor (Driver Info + Vehicle Info) */
+.editorPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(14px, 2vw, 18px);
+  border-radius: 16px;
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.22));
+  background: var(--dw-surface-soft, #f7faff);
+}
+
+.editorGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.editorGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--dw-line, rgba(8, 66, 140, 0.13));
+  background: var(--dw-surface, #ffffff);
+  min-width: 0;
+}
+
+.editorGroupTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--dw-blue, #08428c);
+}
+
+.photoUploadRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.photoThumbCircle {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-blue-soft, #edf4fc);
+  display: grid;
+  place-items: center;
+  color: var(--dw-blue, #08428c);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.photoThumbRect {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 44px;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-blue-soft, #edf4fc);
+  display: grid;
+  place-items: center;
+  color: var(--dw-blue, #08428c);
+}
+
+.photoThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.uploadBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-surface-soft, #f7faff);
+  color: var(--dw-ink, #12223a);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.uploadBtn:hover {
+  border-color: var(--dw-blue, #08428c);
+  background: var(--dw-blue-soft, #edf4fc);
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--dw-ink-2, #334763);
+  min-width: 0;
+}
+
+.fieldInput {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-surface, #ffffff);
+  color: var(--dw-ink, #12223a);
+  font-size: 0.83rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fieldInput:focus {
+  border-color: var(--dw-blue, #08428c);
+  box-shadow: 0 0 0 3px rgba(8, 66, 140, 0.12);
+}
+
+.fieldRow2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.editorFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.editorFooterRight {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.resetBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--dw-line-strong, rgba(8, 66, 140, 0.22));
+  background: transparent;
+  color: var(--dw-muted, #526580);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.resetBtn:hover:not(:disabled) {
+  color: var(--dw-ink, #12223a);
+  border-color: var(--dw-ink-2, #334763);
+}
+
+@media (max-width: 720px) {
+  .editorGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Action Bar: Share, Download as Image, Download as PDF */
+.actionsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.actionBtn,
+.actionBtnPrimary {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.16s ease, border-color 0.16s ease, opacity 0.16s ease;
+}
+
+.actionBtn {
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.22));
+  background: var(--dw-surface-soft, #f7faff);
+  color: var(--dw-ink, #12223a);
+}
+
+.actionBtn:hover:not(:disabled) {
+  border-color: var(--dw-blue, #08428c);
+  background: var(--dw-blue-soft, #edf4fc);
+}
+
+.actionBtnPrimary {
+  border: 1.5px solid var(--dw-blue, #08428c);
+  background: var(--dw-blue, #08428c);
+  color: #ffffff;
+}
+
+.actionBtnPrimary:hover:not(:disabled) {
+  background: var(--dw-blue-deep, #063570);
+  border-color: var(--dw-blue-deep, #063570);
+}
+
+.actionBtn:disabled,
+.actionBtnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinIcon {
+  animation: passSpin 0.85s linear infinite;
+}
+
+@keyframes passSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Compact Mobile Adjustments — keeps QR code on the left & boarding-pass shape intact */
+@media (max-width: 580px) {
+  .passStage {
+    padding: 10px 8px;
+  }
+
+  .boardingPass {
+    --stub-w: 118px;
+    --notch-size: 20px;
+    border-radius: 16px;
+  }
+
+  .stubHeader {
+    height: 34px;
+    padding: 0 8px;
+    font-size: 0.54rem;
+    letter-spacing: 0.06em;
+  }
+
+  .mainHeader {
+    height: 34px;
+    padding: 0 12px 0 13px;
+  }
+
+  .brandMark {
+    font-size: 0.86rem;
+  }
+
+  .passBadge {
+    font-size: 0.54rem;
+    padding: 2px 7px;
+  }
+
+  .qrStubBody {
+    padding: 10px 8px;
+    gap: 5px;
+  }
+
+  .qrFrame {
+    padding: 5px;
+    border-radius: 10px;
+  }
+
+  .qrSvg {
+    width: 84px;
+    height: 84px;
+  }
+
+  .scanTag {
+    font-size: 0.54rem;
+  }
+
+  .mainBody {
+    padding: 10px 12px 12px 13px;
+    gap: 9px;
+  }
+
+  .driverRow {
+    gap: 9px;
+  }
+
+  .driverAvatarWrap {
+    width: 44px;
+    height: 44px;
+  }
+
+  .driverAvatarFallback {
+    font-size: 0.86rem;
+  }
+
+  .driverName {
+    font-size: 0.9rem;
+  }
+
+  .driverPhonePill {
+    font-size: 0.7rem;
+    padding: 2px 7px;
+  }
+
+  .vehicleRow {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .vehiclePhotoBox {
+    width: 76px;
+    height: 56px;
+    border-radius: 9px;
+  }
+
+  .frontBadge {
+    font-size: 0.48rem;
+    padding: 1px 4px;
+  }
+
+  .vehicleSpecsGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .actionsBar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .actionBtn,
+  .actionBtnPrimary {
+    width: 100%;
+  }
+}

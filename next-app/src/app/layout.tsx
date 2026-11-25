@@ -10,6 +10,7 @@ import AutoTranslate from "@/components/AutoTranslate";
 import { RealtimeProvider } from "@/context/RealtimeContext";
 import { PushPrompt } from "@/components/PushPrompt";
 import PwaSplash from "@/components/PwaSplash";
+import PwaDownloadBadge from "@/components/PwaDownloadBadge";
 import PwaPermissionPopups from "@/components/PwaPermissionPopups";
 import PwaBottomNav from "@/components/PwaBottomNav";
 import PwaUpdatePrompt from "@/components/PwaUpdatePrompt";
@@ -18,38 +19,49 @@ import { ModalA11y } from "@/components/ModalA11y";
 import { VisitorTracker } from "@/components/VisitorTracker";
 import { Geist, Inter, Playfair_Display } from "next/font/google";
 import { cn } from "@/lib/utils";
+import {
+  DEFAULT_OG_DESCRIPTION,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_TITLE,
+  DEFAULT_TITLE,
+  SITE_NAME,
+  resolveMetadataBase,
+} from "@/lib/seo";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.APP_URL || "http://localhost:3000"),
+  metadataBase: resolveMetadataBase(),
   title: {
-    default: "Travel. | Tours, safaris & local experiences",
+    default: DEFAULT_TITLE,
     template: "%s | Travel.",
   },
-  description:
-    "Discover tours, safaris and local experiences from independent tourism companies. Compare providers and send booking requests through Travel.",
+  description: DEFAULT_OG_DESCRIPTION,
   keywords: [
+    "Zanzibar private hire",
+    "Zanzibar airport transfer",
+    "Zanzibar verified drivers",
     "Zanzibar tours",
-    "Tanzania safari",
-    "Zanzibar travel",
-    "Tanzania holiday",
+    "Tanzania travel",
     "Travel.",
   ],
-  applicationName: "Travel.",
+  applicationName: SITE_NAME,
   openGraph: {
-    title: "Travel.",
-    description:
-      "Discover tours, safaris and local experiences from independent tourism companies.",
     type: "website",
-    siteName: "Travel.",
+    locale: "en_US",
+    url: "/",
+    siteName: SITE_NAME,
+    title: DEFAULT_OG_TITLE,
+    description: DEFAULT_OG_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Travel.",
-    description: "Explore experiences from tourism companies across multiple destinations.",
+    title: DEFAULT_OG_TITLE,
+    description: DEFAULT_OG_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
   },
   icons: {
     icon: [
@@ -92,6 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AppFrame>{children}</AppFrame>
             <PushPrompt />
             <PwaSplash />
+            <PwaDownloadBadge />
             <PwaPermissionPopups />
             <PwaBottomNav />
             <PwaUpdatePrompt />

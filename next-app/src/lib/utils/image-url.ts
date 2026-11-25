@@ -40,4 +40,17 @@ export function getImageUrl(url: string | null | undefined): string {
   return `/uploads/${url.replace(/^\/+/, "")}`;
 }
 
+/**
+ * Returns true for image URLs that Next.js `/_next/image` cannot optimize
+ * (inline data URIs, client-side blob previews, SVGs, or empty values).
+ */
+export function isUnoptimizableImage(url: string | null | undefined): boolean {
+  if (!url) return true;
+  return (
+    url.startsWith("data:") ||
+    url.startsWith("blob:") ||
+    /\.svg(\?|$)/i.test(url)
+  );
+}
+
 export { PLACEHOLDER };

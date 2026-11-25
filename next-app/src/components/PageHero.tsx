@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { homeSettingsAPI } from "@/lib/api/client";
-import { getImageUrl } from "@/lib/utils/image-url";
+import { getImageUrl, isUnoptimizableImage } from "@/lib/utils/image-url";
 import type { HomeSettings } from "@/features/pages/types";
 import styles from "./PageHero.module.css";
 
@@ -150,24 +151,30 @@ export function PageHero({
     <header className={styles.hero}>
       <div className={`${styles.card} ${hasBackgroundImage ? styles.hasBackground : ""}`}>
         {backgroundUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             className={styles.media}
             src={backgroundUrl}
             alt={media?.alt ?? ""}
+            fill
+            priority
+            sizes="(max-width: 1100px) 100vw, 1100px"
             aria-hidden="true"
+            unoptimized={isUnoptimizableImage(backgroundUrl)}
           />
         ) : null}
 
         <span className={styles.scrim} aria-hidden="true" />
         {patternUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            className={styles.patternImage}
-            src={patternUrl}
-            alt=""
-            aria-hidden="true"
-          />
+          <span className={styles.patternImage} aria-hidden="true">
+            <Image
+              src={patternUrl}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 100vw, 550px"
+              className={styles.patternImageInner}
+              unoptimized={isUnoptimizableImage(patternUrl)}
+            />
+          </span>
         ) : null}
 
         <div className={styles.inner}>
