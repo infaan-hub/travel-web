@@ -16,10 +16,94 @@ export type DriverBusinessCardData = {
   driverName: string;
   driverPhone: string;
   driverImageUrl: string | null;
-  operatorLabel: string;
+  companyName?: string | null;
   licenseNumber?: string;
   vehicle: BusinessCardVehicleInfo | null;
 };
+
+export type BusinessCardVehicleOverride = {
+  name?: string;
+  plateNumber?: string;
+  category?: string;
+  capacity?: number;
+  luggageCapacity?: number;
+  frontImageUrl?: string | null;
+};
+
+export type BusinessCardCustomOverrides = {
+  driverName?: string;
+  driverPhone?: string;
+  driverImageUrl?: string | null;
+  companyName?: string;
+  vehiclesByKey?: Record<string, BusinessCardVehicleOverride>;
+};
+
+const OVERRIDE_KEY_PREFIX = "travel:driver-business-card:v1:";
+const OVERRIDE_CHANGE_EVENT = "travel:driver-business-card-change";
+
+export function getBusinessCardOverridesSnapshot(driverId: number): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(`${OVERRIDE_KEY_PREFIX}${driverId}`);
+  } catch {
+    return null;
+  }
+}
+
+export function subscribeBusinessCardOverrides(onChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", onChange);
+  window.addEventListener(OVERRIDE_CHANGE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(OVERRIDE_CHANGE_EVENT, onChange);
+  };
+}
+
+export function parseBusinessCardOverrides(
+  raw: string | null,
+): BusinessCardCustomOverrides | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed as BusinessCardCustomOverrides;
+  } catch {
+    return null;
+  }
+}
+
+export function readBusinessCardOverrides(
+  driverId: number,
+): BusinessCardCustomOverrides | null {
+  return parseBusinessCardOverrides(getBusinessCardOverridesSnapshot(driverId));
+}
+
+export function writeBusinessCardOverrides(
+  driverId: number,
+  overrides: BusinessCardCustomOverrides,
+): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      `${OVERRIDE_KEY_PREFIX}${driverId}`,
+      JSON.stringify(overrides),
+    );
+    window.dispatchEvent(new Event(OVERRIDE_CHANGE_EVENT));
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
+export function clearBusinessCardOverrides(driverId: number): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(`${OVERRIDE_KEY_PREFIX}${driverId}`);
+    window.dispatchEvent(new Event(OVERRIDE_CHANGE_EVENT));
+  } catch {
+    // Ignore storage errors
+  }
+}
 
 export function getDriverInitials(name: string): string {
   const parts = name
@@ -545,14 +629,32 @@ export async function renderBusinessCardCanvas(
   const driverTextX = avatarX + avatarSize + 28;
   const driverMaxW = contentRightEdge - driverTextX;
 
+  const roleEyebrow = "DRIVER  ·  PRIVATE HIRE";
   ctx.fillStyle = "#526580";
   ctx.font = `800 14px ${fontSans}`;
+  ctx.textBaseline = "middle";
+  ctx.fillText(roleEyebrow, driverTextX, avatarY + 20);
+
+  const cleanCompany = data.companyName?.trim() || "";
+  if (cleanCompany) {
+    const eyebrowW = ctx.measureText(roleEyebrow).width;
+    const compPillX = driverTextX + eyebrowW + 14;
+    const availCompW = contentRightEdge - compPillX;
+    if (availCompW > 80) {
+      ctx.font = `700 14px ${fontSans}`;
+      const fittedComp = fitText(ctx, cleanCompany, availCompW - 24);
+      const compPillW = Math.min(availCompW, ctx.measureText(fittedComp).width + 24);
+      drawRoundedRect(ctx, compPillX, avatarY + 6, compPillW, 28, 999);
+      ctx.fillStyle = "#e8f2ff";
+      ctx.fill();
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = "#b8d3f4";
+      ctx.stroke();
+      ctx.fillStyle = "#08428c";
+      ctx.fillText(fittedComp, compPillX + 12, avatarY + 20);
+    }
+  }
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(
-    fitText(ctx, `DRIVER  ·  ${data.operatorLabel.toUpperCase()}`, driverMaxW),
-    driverTextX,
-    avatarY + 26,
-  );
 
   ctx.fillStyle = "#12223a";
   ctx.font = `800 34px ${fontSans}`;

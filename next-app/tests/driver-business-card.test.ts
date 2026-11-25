@@ -5,6 +5,7 @@ import {
   BUSINESS_CARD_QR_URL,
   buildBusinessCardPdfFromJpeg,
   getDriverInitials,
+  parseBusinessCardOverrides,
   slugifyBusinessCardFilename,
 } from "@/lib/driver-business-card";
 import { generateQrMatrix } from "@/lib/qr-code";
@@ -166,7 +167,23 @@ describe("driver boarding-pass business card utilities", () => {
     expect(() => buildBusinessCardPdfFromJpeg(new Uint8Array(0), 100, 100)).toThrow();
   });
 
-  it("renders QR code without displaying the URL text and exposes share/image/pdf actions", () => {
+  it("parses saved business card overrides safely", () => {
+    expect(parseBusinessCardOverrides(null)).toBeNull();
+    expect(parseBusinessCardOverrides("not-json")).toBeNull();
+
+    const parsed = parseBusinessCardOverrides(
+      JSON.stringify({
+        companyName: "Zanzibar Coastal Transfers",
+        vehiclesByKey: {
+          "12": { name: "Toyota Alphard VIP", plateNumber: "Z 441 AB", capacity: 7 },
+        },
+      }),
+    );
+    expect(parsed?.companyName).toBe("Zanzibar Coastal Transfers");
+    expect(parsed?.vehiclesByKey?.["12"]?.name).toBe("Toyota Alphard VIP");
+  });
+
+  it("renders Private Hire + company badge, inline driver/vehicle editor, and QR without URL text", () => {
     const componentSrc = readFileSync(
       path.resolve(__dirname, "../src/features/driver/DriverBusinessCard.tsx"),
       "utf8",
@@ -178,6 +195,14 @@ describe("driver boarding-pass business card utilities", () => {
 
     expect(componentSrc).not.toContain("travelisland.vercel.app");
     expect(builderSrc).not.toContain("travelisland.vercel.app");
+    expect(componentSrc).not.toContain("Public Hire");
+    expect(builderSrc).not.toContain("PUBLIC HIRE");
+    expect(componentSrc).toContain("Driver · Private Hire");
+    expect(builderSrc).toContain("DRIVER  ·  PRIVATE HIRE");
+    expect(componentSrc).toContain("displayCompanyName");
+    expect(componentSrc).toContain("Edit card");
+    expect(componentSrc).toContain("Driver information");
+    expect(componentSrc).toContain("Vehicle information");
     expect(componentSrc).toContain("Business card");
     expect(componentSrc).toContain("Share");
     expect(componentSrc).toContain("Download as image");

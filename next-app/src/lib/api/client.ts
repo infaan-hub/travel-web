@@ -311,6 +311,8 @@ export const driverAPI = {
   updateVehicle: (data: FormData | Record<string, unknown>) =>
     api.put("/driver/vehicle/", data, formDataConfig(data)),
   deleteVehicle: () => api.delete("/driver/vehicle/"),
+  updateBusinessCard: (data: FormData | Record<string, unknown>) =>
+    api.patch("/driver/business-card/", data, formDataConfig(data)),
   getPrices: () => api.get("/driver/prices/"),
   createPrice: (data: Record<string, unknown>) => api.post("/driver/prices/", data),
   updatePrice: (id: string | number, data: Record<string, unknown>) =>

@@ -92,7 +92,14 @@
   color: var(--dw-muted, #526580);
 }
 
-/* Optional vehicle switcher when a company driver has multiple assigned vehicles */
+/* Header Controls: Optional Vehicle Switcher + Edit Card Button */
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .vehiclePicker {
   display: flex;
   flex-wrap: wrap;
@@ -118,6 +125,33 @@
 }
 
 .vehiclePillActive {
+  background: var(--dw-blue, #08428c);
+  border-color: var(--dw-blue, #08428c);
+  color: #ffffff;
+}
+
+.editToggleBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-surface-soft, #f7faff);
+  color: var(--dw-blue, #08428c);
+  font-size: 0.77rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.editToggleBtn:hover {
+  border-color: var(--dw-blue, #08428c);
+  background: var(--dw-blue-soft, #edf4fc);
+}
+
+.editToggleBtnActive {
   background: var(--dw-blue, #08428c);
   border-color: var(--dw-blue, #08428c);
   color: #ffffff;
@@ -341,12 +375,35 @@
   flex: 1 1 auto;
 }
 
+.driverEyebrowRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 7px;
+  min-width: 0;
+}
+
 .driverEyebrow {
   font-size: 0.63rem;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--pass-muted);
+  white-space: nowrap;
+}
+
+.companyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--pass-phone-bg);
+  border: 1px solid var(--pass-phone-border);
+  color: var(--pass-phone-ink);
+  font-size: 0.64rem;
+  font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -491,6 +548,188 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Inline Business Card Editor (Driver Info + Vehicle Info) */
+.editorPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(14px, 2vw, 18px);
+  border-radius: 16px;
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.22));
+  background: var(--dw-surface-soft, #f7faff);
+}
+
+.editorGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.editorGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--dw-line, rgba(8, 66, 140, 0.13));
+  background: var(--dw-surface, #ffffff);
+  min-width: 0;
+}
+
+.editorGroupTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--dw-blue, #08428c);
+}
+
+.photoUploadRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.photoThumbCircle {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-blue-soft, #edf4fc);
+  display: grid;
+  place-items: center;
+  color: var(--dw-blue, #08428c);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.photoThumbRect {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 44px;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 1.5px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-blue-soft, #edf4fc);
+  display: grid;
+  place-items: center;
+  color: var(--dw-blue, #08428c);
+}
+
+.photoThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.uploadBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-surface-soft, #f7faff);
+  color: var(--dw-ink, #12223a);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.uploadBtn:hover {
+  border-color: var(--dw-blue, #08428c);
+  background: var(--dw-blue-soft, #edf4fc);
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--dw-ink-2, #334763);
+  min-width: 0;
+}
+
+.fieldInput {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--dw-line-strong, rgba(8, 66, 140, 0.24));
+  background: var(--dw-surface, #ffffff);
+  color: var(--dw-ink, #12223a);
+  font-size: 0.83rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fieldInput:focus {
+  border-color: var(--dw-blue, #08428c);
+  box-shadow: 0 0 0 3px rgba(8, 66, 140, 0.12);
+}
+
+.fieldRow2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.editorFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.editorFooterRight {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.resetBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--dw-line-strong, rgba(8, 66, 140, 0.22));
+  background: transparent;
+  color: var(--dw-muted, #526580);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.resetBtn:hover:not(:disabled) {
+  color: var(--dw-ink, #12223a);
+  border-color: var(--dw-ink-2, #334763);
+}
+
+@media (max-width: 720px) {
+  .editorGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Action Bar: Share, Download as Image, Download as PDF */

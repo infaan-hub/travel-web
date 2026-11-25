@@ -1282,6 +1282,7 @@ export default function DriverVehiclePage({ initialData }: Props) {
             <DriverBusinessCard
               driver={data.driver}
               vehicles={isPublicDriver ? (ownVehicle ? [ownVehicle] : []) : assignedVehicles}
+              onPortalDataUpdated={setData}
             />
           </div>
 
